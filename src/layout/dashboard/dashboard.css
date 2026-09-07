@@ -1,0 +1,469 @@
+.dashboard {
+  min-height: 100vh;
+  background: #000;
+  color: #fff;
+}
+
+.dashboard-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(0, 0, 0, 0.94);
+  backdrop-filter: blur(16px);
+}
+
+.dashboard-header__inner {
+  display: flex;
+  align-items: center;
+  width: var(--content-width);
+  min-height: 98px;
+  margin: 0 auto;
+  gap: 24px;
+}
+
+.dashboard-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(26px, 4vw, 62px);
+  margin-inline: auto;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: clamp(0.98rem, 1.45vw, 1.2rem);
+  font-weight: 500;
+}
+
+.dashboard-nav__link {
+  padding: 8px 17px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  line-height: 1.15;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 160ms ease, background-color 160ms ease, transform 160ms ease;
+}
+
+.dashboard-nav__link:hover {
+  color: #c8a994;
+  transform: translateY(-1px);
+}
+
+.dashboard-nav__link--active {
+  background: #b99a86;
+  color: #fff;
+}
+
+.dashboard-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.dashboard-header__time {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 150px;
+  padding: 9px 15px;
+  border: 0;
+  border-radius: 16px;
+  background: #132943;
+  box-shadow: inset 3px 0 #285584;
+  color: #5b91cb;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.dashboard-header__time svg {
+  width: 29px;
+  height: 29px;
+  stroke-width: 1.7;
+}
+
+.dashboard-header__icon-btn {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  place-items: center;
+  cursor: pointer;
+  transition: transform 160ms ease, opacity 160ms ease;
+}
+
+.dashboard-header__icon-btn:hover,
+.user-profile-card__chat-btn:hover,
+.dashboard-action-card:hover {
+  transform: translateY(-3px);
+}
+
+.dashboard-header__icon-btn img {
+  width: 31px;
+  height: 31px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+.dashboard__main {
+  display: grid;
+  grid-template-columns: minmax(315px, 1fr) minmax(0, 1.95fr);
+  align-items: start;
+  width: min(96.5%, 1720px);
+  margin: 0 auto;
+  padding: 32px 0 64px;
+  gap: 34px;
+}
+
+.dashboard__profile {
+  min-width: 0;
+}
+
+.dashboard__tools {
+  min-width: 0;
+  padding-top: 0;
+}
+
+.user-profile-card,
+.dashboard-action-card {
+  background: #282828;
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.025);
+}
+
+.user-profile-card {
+  min-height: 630px;
+  padding: 31px 38px 37px;
+  border-radius: 64px;
+}
+
+.user-profile-card__header {
+  display: flex;
+  justify-content: flex-start;
+  min-height: 46px;
+}
+
+.user-profile-card__chat-btn {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  place-items: center;
+  cursor: pointer;
+  transition: transform 160ms ease;
+}
+
+.user-profile-card__chat-btn img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  filter: sepia(0.34) saturate(0.75) hue-rotate(335deg) brightness(1.44);
+  opacity: 0.92;
+}
+
+.user-profile-card__avatar {
+  position: relative;
+  display: grid;
+  margin: -2px auto 31px;
+  place-items: center;
+}
+
+.user-profile-card__avatar-circle {
+  display: grid;
+  width: clamp(186px, 14.5vw, 272px);
+  aspect-ratio: 1;
+  padding: 21px;
+  border: 5px solid #b99a86;
+  border-radius: 50%;
+  place-items: center;
+}
+
+.user-profile-card__avatar-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border: 2px solid #b99a86;
+  border-radius: 50%;
+}
+
+.user-profile-card__avatar-head,
+.user-profile-card__avatar-body {
+  position: absolute;
+  display: block;
+  right: 50%;
+  background: #b99a86;
+  transform: translateX(50%);
+}
+
+.user-profile-card__avatar-head {
+  top: 20%;
+  width: 27%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+}
+
+.user-profile-card__avatar-body {
+  bottom: -18%;
+  width: 72%;
+  height: 56%;
+  border-radius: 50% 50% 18% 18%;
+}
+
+.user-profile-card__level {
+  position: absolute;
+  bottom: -20px;
+  min-width: 198px;
+  padding: 10px 20px 12px;
+  border-radius: 999px;
+  background: #654f40;
+  color: #fff;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.user-profile-card__info {
+  margin-bottom: 29px;
+  text-align: center;
+}
+
+.user-profile-card__name {
+  margin: 0 0 7px;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: clamp(1.45rem, 2vw, 2.15rem);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.user-profile-card__username {
+  margin: 0;
+  color: #aaa;
+  font-family: Georgia, serif;
+  font-size: 1.22rem;
+  text-align: center;
+}
+
+.user-profile-card__stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  margin-bottom: 25px;
+}
+
+.user-profile-card__stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.user-profile-card__stat + .user-profile-card__stat {
+  border-right: 1px solid rgba(255, 255, 255, 0.23);
+}
+
+.user-profile-card__stat-value {
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 1.55rem;
+  font-weight: 600;
+}
+
+.user-profile-card__stat-label {
+  color: #f3f3f3;
+  font-size: 0.95rem;
+}
+
+.user-profile-card__progress {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.user-profile-card__progress-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: #f3f3f3;
+  font-size: 0.86rem;
+  white-space: nowrap;
+}
+
+.user-profile-card__progress-icon {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  border-radius: 3px;
+  font-family: Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 900;
+  line-height: 1;
+  place-items: center;
+}
+
+.user-profile-card__progress-icon--tests {
+  background: #67ba85;
+  color: #172d20;
+}
+
+.user-profile-card__progress-icon--courses {
+  background: #285782;
+  color: #102b47;
+}
+
+.dashboard-action-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 34px;
+}
+
+.dashboard-action-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 318px;
+  padding: 39px 20px 31px;
+  border: 0;
+  border-radius: 64px;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 180ms ease, background-color 180ms ease;
+}
+
+.dashboard-action-card:hover {
+  background: #303030;
+}
+
+.dashboard-action-card__icon {
+  width: min(59%, 146px);
+  aspect-ratio: 1;
+  object-fit: contain;
+  filter: sepia(0.5) saturate(0.7) hue-rotate(330deg) brightness(1.32);
+  opacity: 0.96;
+}
+
+.dashboard-action-card__title {
+  margin-top: 25px;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: clamp(1.25rem, 1.8vw, 2rem);
+  font-weight: 600;
+}
+
+@media (max-width: 1100px) {
+  .dashboard-header__inner {
+    min-height: 104px;
+    gap: 18px;
+  }
+
+  .dashboard-nav {
+    gap: 10px;
+  }
+
+  .dashboard-nav__link {
+    padding-inline: 12px;
+  }
+
+  .dashboard-header__time {
+    min-width: auto;
+    padding: 10px 13px;
+  }
+
+  .dashboard-header__time span {
+    display: none;
+  }
+
+  .dashboard__main {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard__profile {
+    order: -1;
+  }
+
+  .user-profile-card {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 700px) {
+  .dashboard-header__inner {
+    flex-wrap: wrap;
+    min-height: 0;
+    padding: 17px 0 15px;
+  }
+
+  .dashboard-header__actions {
+    gap: 7px;
+  }
+
+  .dashboard-header__icon-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  .dashboard-header__icon-btn img {
+    width: 29px;
+    height: 29px;
+  }
+
+  .dashboard-header__time svg {
+    width: 31px;
+    height: 31px;
+  }
+
+  .dashboard-nav {
+    order: 3;
+    width: 100%;
+    justify-content: flex-start;
+    gap: 5px;
+    overflow-x: auto;
+    padding-bottom: 3px;
+    font-size: 0.84rem;
+  }
+
+  .dashboard-nav__link {
+    padding: 9px 12px;
+  }
+
+  .dashboard__main {
+    width: min(92%, 540px);
+    padding-top: 18px;
+    gap: 19px;
+  }
+
+  .user-profile-card,
+  .dashboard-action-card {
+    border-radius: 36px;
+  }
+
+  .user-profile-card {
+    padding: 22px 19px 27px;
+  }
+
+  .user-profile-card__avatar-circle {
+    width: 178px;
+  }
+
+  .user-profile-card__progress {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-action-cards {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .dashboard-action-card {
+    min-height: 220px;
+  }
+
+  .dashboard-action-card__icon {
+    width: 108px;
+  }
+}

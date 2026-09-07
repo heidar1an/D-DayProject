@@ -17,6 +17,9 @@ import checklistIcon from '../images/icons/checklist.png';
 import distanceIcon from '../images/icons/distance.png';
 import OfflinePage from './layout/OfflinePage';
 import SecondaryRegistrationLayout from './layout/SecondaryRegistrationLayout';
+import DashboardLayout from './layout/dashboard/DashboardLayout';
+import { getStoredUser, loginUser, saveUserRecord } from './services/userStorage';
+import './layout/dashboard/dashboard.css';
 
 const productCards = [
   {
@@ -165,6 +168,39 @@ const tapeshFeatures = [
     title: 'با مسیر سبز یادبگیر',
     icon: distanceIcon,
     accent: 'purple',
+  },
+];
+
+const aboutStats = [
+  {
+    value: '۴ مسیر',
+    label: 'برای یادگیری، مرور، آزمون و رشد',
+  },
+  {
+    value: '۳۰٪',
+    label: 'تخفیف برای مطالعه گروهی',
+  },
+  {
+    value: '۲۴/۷',
+    label: 'همراهی دستیار هوشمند با دانشجو',
+  },
+];
+
+const aboutPrinciples = [
+  {
+    title: 'یادگیری قابل اعتماد',
+    description: 'محتوا باید دقیق، مرحله‌به‌مرحله و قابل اتکا باشد؛ نه فقط زیاد و پراکنده.',
+    accent: 'blue',
+  },
+  {
+    title: 'تمرین هدفمند',
+    description: 'تست و مرور وقتی ارزش دارد که به دانشجو نشان بدهد کجا ایستاده و قدم بعدی چیست.',
+    accent: 'green',
+  },
+  {
+    title: 'مسیر انسانی‌تر',
+    description: 'درس پزشکی سنگین است؛ تپش تلاش می‌کند این مسیر را روشن‌تر، آرام‌تر و همراه‌تر کند.',
+    accent: 'brown',
   },
 ];
 
@@ -427,7 +463,7 @@ function useAuthTypewriter(phrases, enabled) {
   return { displayedPhrase, phraseIndex };
 }
 
-function AuthPage({ onBack, onRegisterSuccess }) {
+function AuthPage({ onBack, onLoginSuccess, onRegisterSuccess }) {
   const [mode, setMode] = useState('login');
   const [isEntered, setIsEntered] = useState(false);
   const [isFormSwitching, setIsFormSwitching] = useState(false);
@@ -449,7 +485,7 @@ function AuthPage({ onBack, onRegisterSuccess }) {
     });
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     const form = event.currentTarget;
@@ -484,8 +520,6 @@ function AuthPage({ onBack, onRegisterSuccess }) {
       return;
     }
 
-    if (!isRegistering) return;
-
     const normalizeDigits = (value) =>
       value
         .replace(/[۰-۹]/g, (digit) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit)))
@@ -494,25 +528,26 @@ function AuthPage({ onBack, onRegisterSuccess }) {
     const password = String(formData.get('password') || '');
     const confirmation = String(formData.get('password-confirm') || '');
 
-    if (phone !== '3148') {
-      phoneInput?.setCustomValidity('برای ورود به نسخه‌ی آزمایشی، شماره تلفن را 3148 وارد کنید.');
-      phoneInput?.reportValidity();
-      return;
-    }
-
-    if (password !== '3148') {
-      passwordInput?.setCustomValidity('برای ورود به نسخه‌ی آزمایشی، رمز عبور را 3148 وارد کنید.');
-      passwordInput?.reportValidity();
-      return;
-    }
-
-    if (password !== confirmation) {
+    if (isRegistering && password !== confirmation) {
       confirmationInput?.setCustomValidity('رمز عبور و تکرار آن یکسان نیستند.');
       confirmationInput?.reportValidity();
       return;
     }
 
-    onRegisterSuccess?.();
+    if (isRegistering) {
+      const user = await saveUserRecord({ phone, password });
+      onRegisterSuccess?.(user);
+      return;
+    }
+
+    const user = await loginUser({ phone, password });
+    if (!user) {
+      setFieldErrors({ password: 'شماره تلفن یا رمز عبور نادرست است.' });
+      passwordInput?.focus({ preventScroll: true });
+      return;
+    }
+
+    onLoginSuccess?.(user);
   };
 
   const switchMode = () => {
@@ -704,6 +739,14 @@ function getAppRoute() {
   if (typeof window === 'undefined') return 'home';
 
   if (
+    window.location.hash === '#dashboard' ||
+    window.history.state?.tapeshRoute === 'dashboard' ||
+    window.history.state?.tapeshDashboard === true
+  ) {
+    return 'dashboard';
+  }
+
+  if (
     window.location.hash === '#onboarding' ||
     window.history.state?.tapeshRoute === 'onboarding' ||
     window.history.state?.tapeshOnboarding === true
@@ -738,6 +781,7 @@ function getRouteState(route, previousState = {}) {
     tapeshRoute: route,
     tapeshAuth: route === 'auth',
     tapeshOnboarding: route === 'onboarding',
+    tapeshDashboard: route === 'dashboard',
   };
 }
 
@@ -771,6 +815,10 @@ function App() {
   const [onboardingOpen, setOnboardingOpen] = useState(
     () => getAppRoute() === 'onboarding',
   );
+  const [dashboardOpen, setDashboardOpen] = useState(
+    () => getAppRoute() === 'dashboard',
+  );
+  const [userData, setUserData] = useState(() => getStoredUser());
   const isOnline = useOnlineStatus();
 
   const closeMenu = () => setMenuOpen(false);
@@ -784,6 +832,7 @@ function App() {
     );
     setAuthOpen(true);
     setOnboardingOpen(false);
+    setDashboardOpen(false);
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
@@ -800,6 +849,7 @@ function App() {
     );
     setAuthOpen(false);
     setOnboardingOpen(false);
+    setDashboardOpen(false);
   };
 
   useEffect(() => {
@@ -807,6 +857,7 @@ function App() {
       const route = getAppRoute();
       setAuthOpen(route === 'auth');
       setOnboardingOpen(route === 'onboarding');
+      setDashboardOpen(route === 'dashboard');
     };
 
     const initialRoute = getAppRoute();
@@ -814,7 +865,8 @@ function App() {
     const hasManagedRoute =
       currentState.tapeshRoute ||
       currentState.tapeshAuth === true ||
-      currentState.tapeshOnboarding === true;
+      currentState.tapeshOnboarding === true ||
+      currentState.tapeshDashboard === true;
 
     if (!hasManagedRoute && initialRoute !== 'home') {
       window.history.replaceState(getRouteState('home', currentState), '', getRouteUrl('home'));
@@ -922,6 +974,7 @@ function App() {
     );
     setAuthOpen(false);
     setOnboardingOpen(true);
+    setDashboardOpen(false);
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
@@ -938,16 +991,28 @@ function App() {
     );
     setOnboardingOpen(false);
     setAuthOpen(false);
+    setDashboardOpen(false);
   };
 
-  const finishOnboarding = () => {
+  const openDashboard = (user) => {
+    setUserData(user);
     window.history.replaceState(
-      getRouteState('home'),
+      getRouteState('dashboard'),
       '',
-      getRouteUrl('home'),
+      getRouteUrl('dashboard'),
     );
     setOnboardingOpen(false);
     setAuthOpen(false);
+    setDashboardOpen(true);
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+
+  const finishOnboarding = async (profile) => {
+    const updatedUser = await saveUserRecord({
+      phone: userData?.phone,
+      profile,
+    });
+    openDashboard(updatedUser);
   };
 
   if (!isOnline) {
@@ -959,12 +1024,26 @@ function App() {
       <SecondaryRegistrationLayout
         onBack={closeOnboarding}
         onComplete={finishOnboarding}
+        userData={userData}
       />
     );
   }
 
+  if (dashboardOpen && userData) {
+    return <DashboardLayout userData={userData} />;
+  }
+
   if (authOpen) {
-    return <AuthPage onBack={closeAuth} onRegisterSuccess={openOnboarding} />;
+    return (
+      <AuthPage
+        onBack={closeAuth}
+        onLoginSuccess={openDashboard}
+        onRegisterSuccess={(user) => {
+          setUserData(user);
+          openOnboarding();
+        }}
+      />
+    );
   }
 
   return (
@@ -991,7 +1070,7 @@ function App() {
           <a className="site-nav__link site-nav__link--pricing" href="#benefits" onClick={closeMenu}>
             تعرفه‌ها
           </a>
-          <a className="site-nav__link site-nav__link--about" href="#quote" onClick={closeMenu}>
+          <a className="site-nav__link site-nav__link--about" href="#about" onClick={closeMenu}>
             درباره ما
           </a>
         </nav>
@@ -1093,6 +1172,72 @@ function App() {
               <strong>پروفسور علیرضا یلدا</strong>
               <span>پدر بیماری‌های عفونی ایران</span>
             </div>
+          </div>
+        </section>
+
+        <section
+          className="about section-shell"
+          id="about"
+          data-reveal
+          aria-labelledby="about-title"
+        >
+          <div className="about__content">
+            <div className="about__copy">
+              <span className="about__eyebrow">درباره تپش</span>
+              <h2 id="about-title">
+                برای روزهایی که درس زیاد است، اما مسیر نباید مبهم باشد
+              </h2>
+              <p>
+                تپش برای دانشجویانی ساخته شده که می‌خواهند پزشکی را عمیق‌تر،
+                منظم‌تر و با اضطراب کمتر بخوانند. ما درسنامه، تست، جمع‌بندی،
+                رقابت و ابزار هوشمند را کنار هم می‌گذاریم تا مطالعه از یک کار
+                فرسایشی به یک مسیر قابل پیگیری تبدیل شود.
+              </p>
+              <p>
+                ایده ساده است: هر دانشجو باید بداند امروز چه بخواند، چطور تمرین
+                کند و از کجا بفهمد که واقعاً جلو رفته است.
+              </p>
+              <div className="about__actions">
+                <a className="button button--light" href="#green-path">
+                  مسیر یادگیری
+                </a>
+                <a className="about__text-link" href="#products">
+                  مشاهده محصولات
+                  <ArrowLeftIcon />
+                </a>
+              </div>
+            </div>
+
+            <div className="about__visual">
+              <div className="about__image-frame">
+                <img src={tapeshCollage} alt="فضای یادگیری تپش برای دانشجویان پزشکی" />
+              </div>
+              <div className="about__pulse-card" aria-hidden="true">
+                <img src={heartbeatMark} alt="" />
+                <span>تپش</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="about__stats" aria-label="خلاصه ویژگی‌های تپش">
+            {aboutStats.map((stat) => (
+              <div className="about-stat" key={stat.value}>
+                <strong>{stat.value}</strong>
+                <span>{stat.label}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="about__principles" aria-label="اصول طراحی تپش">
+            {aboutPrinciples.map((principle) => (
+              <article
+                className={`about-principle about-principle--${principle.accent}`}
+                key={principle.title}
+              >
+                <h3>{principle.title}</h3>
+                <p>{principle.description}</p>
+              </article>
+            ))}
           </div>
         </section>
 

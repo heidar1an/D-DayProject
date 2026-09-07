@@ -1,0 +1,26 @@
+{
+  "users": [
+    {
+      "id": "9608da84-567e-4cbb-9702-13678dc5389b",
+      "phone": "3148",
+      "passwordHash": "03625cd1150b4452a5d8b7358e7a16bec81a923207f500e033f2883c58cccacd",
+      "profile": {
+        "firstName": "امیرحسین",
+        "lastName": "حیدریان",
+        "username": "heidar1an",
+        "university": "دانشگاه علوم پزشکی ایران",
+        "term": "۵",
+        "motivations": [
+          "income",
+          "no-goal"
+        ],
+        "referralSources": [
+          "telegram",
+          "internet"
+        ]
+      },
+      "createdAt": "2026-09-07T12:12:18.070Z",
+      "updatedAt": "2026-09-07T12:12:44.789Z"
+    }
+  ]
+}

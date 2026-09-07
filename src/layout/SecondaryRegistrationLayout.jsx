@@ -77,7 +77,7 @@ const referralOptions = [
 
 const termOptions = ['۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹', '۱۰', '۱۱', '۱۲'];
 
-export default function SecondaryRegistrationLayout({ onBack, onComplete }) {
+export default function SecondaryRegistrationLayout({ onBack, onComplete, userData }) {
   const [step, setStep] = useState(0);
   const [isEntered, setIsEntered] = useState(false);
   const [isStepSwitching, setIsStepSwitching] = useState(false);
@@ -87,6 +87,11 @@ export default function SecondaryRegistrationLayout({ onBack, onComplete }) {
     term: '',
     motivations: [],
   });
+  const [identity, setIdentity] = useState(() => ({
+    firstName: userData?.profile?.firstName || '',
+    lastName: userData?.profile?.lastName || '',
+    username: userData?.profile?.username || '',
+  }));
   const [selectionError, setSelectionError] = useState('');
   const [referralSources, setReferralSources] = useState([]);
   const stepSwitchTimerRef = useRef(null);
@@ -134,6 +139,11 @@ export default function SecondaryRegistrationLayout({ onBack, onComplete }) {
       [name]: value,
     }));
     setSelectionError('');
+  };
+
+  const handleIdentityChange = (event) => {
+    const { name, value } = event.target;
+    setIdentity((current) => ({ ...current, [name]: value }));
   };
 
   const toggleMotivation = (motivationId) => {
@@ -212,7 +222,9 @@ export default function SecondaryRegistrationLayout({ onBack, onComplete }) {
             <button
               className="onboarding-button onboarding-button--primary"
               type="button"
-              onClick={onComplete}
+              onClick={() =>
+                onComplete?.({ ...identity, ...profileData, referralSources })
+              }
             >
               ورود به تپش
             </button>
@@ -346,6 +358,8 @@ export default function SecondaryRegistrationLayout({ onBack, onComplete }) {
                           name={field.name}
                           type={field.type}
                           placeholder={field.placeholder}
+                          value={identity[field.name]}
+                          onChange={handleIdentityChange}
                           required
                         />
                         {field.prefix && (
