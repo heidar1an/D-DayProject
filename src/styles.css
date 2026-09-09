@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 @font-face {
   font-family: 'Doran';
   src: url('../fonts/doran/Doran-Regular.woff2') format('woff2');

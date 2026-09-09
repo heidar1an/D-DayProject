@@ -1,4 +1,8 @@
 import bubbleChatIcon from '../../../images/icons/bubble-chat.png';
+export default function UserProfileCard({ userData, totalTests = ۰, completedCourses = ۰ }) {
+  const profile = userData?.profile || {};
+  const name = getProfileName(userData);
+  const username = profile.username || userData?.phone || 'tapesh-user';
 
 function getProfileName(userData) {
   const profile = userData?.profile || {};
@@ -49,11 +53,11 @@ export default function UserProfileCard({ userData }) {
       <div className="user-profile-card__progress">
         <div className="user-profile-card__progress-item">
           <span className="user-profile-card__progress-icon user-profile-card__progress-icon--tests">✓</span>
-          <span>۱۲۳ تست زده شده</span>
+          <span>{totalTests} تست زده شده</span>
         </div>
         <div className="user-profile-card__progress-item">
           <span className="user-profile-card__progress-icon user-profile-card__progress-icon--courses">−</span>
-          <span>۱۲۳ دوره تکمیل شده</span>
+          <span>{completedCourses} دوره تکمیل شده</span>
         </div>
       </div>
     </article>

@@ -1,3 +1,4 @@
 export default function OtherSections() {
-  return null;
+return null;
 }
+
