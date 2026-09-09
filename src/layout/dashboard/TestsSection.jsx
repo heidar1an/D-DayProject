@@ -1,6 +1,12 @@
 //export default function TestsSection() {
 ///  return null;
 //}
+import searchImage from "../../../images/pictures/character-search.png";
+import personalExam from "../../../images/pictures/personalExam.png";
+import groupExam from "../../../images/pictures/groupExam.png";
+import universalExam from "../../../images/pictures/universalExam.png";
+import testBank from "../../../images/pictures/testBank.jpg";
+
 
 export default function TestsSection() {
   const examCards = [
@@ -9,28 +15,28 @@ export default function TestsSection() {
       title: 'آنالیز وضعیت',
       description: 'بررسی، تحلیل و آنالیز وضعیت آزمون ها و تست ها',
       // TODO: آدرس عکس کاراکتر با ذره‌بین
-      imageSrc: " ", 
+      imageSrc: searchImage , 
     },
     {
       id: 2,
       title: 'آزمون های شخصی',
       description: 'ساخت آزمون اختصاصی خودتان',
       // TODO: آدرس عکس کاراکتر در حال فکر کردن
-      imageSrc: '/assets/images/character-personal.png',
+      imageSrc: personalExam ,
     },
     {
       id: 3,
       title: 'آزمون های هماهنگ',
       description: 'شامل آزمون های جامع و آزمون های درس به درس',
       // TODO: آدرس عکس کاراکترهای سر کلاس
-      imageSrc: '/assets/images/character-coordinated.png',
+      imageSrc: groupExam,
     },
     {
       id: 4,
       title: 'آزمون های بین الملل',
       description: 'آزمون های USMLE ، PLAB و MCCQE',
       // TODO: آدرس عکس کاراکتر با کره زمین
-      imageSrc: '/assets/images/character-international.png',
+      imageSrc: universalExam,
     },
   ];
 
@@ -52,7 +58,7 @@ export default function TestsSection() {
                 <p className="text-gray-300 text-sm">{card.description}</p>
               </div>
               
-              <div className="w-24 h-24 flex-shrink-0 flex items-center justify-center">
+              <div className="w-24 h-24 shrink-0 flex items-center justify-center">
                 <img 
                   src={card.imageSrc} 
                   alt={card.title} 
@@ -64,16 +70,16 @@ export default function TestsSection() {
         </div>
 
         {/* ستون چپ (کارت بزرگ) */}
-        <div className="lg:col-span-7 relative w-full h-[600px] lg:h-auto rounded-[2.5rem] overflow-hidden group cursor-pointer">
+        <div className="lg:col-span-7 relative w-full h-150 lg:h-auto rounded-[2.5rem] overflow-hidden group cursor-pointer">
           
           {/* TODO: عکس پس‌زمینه فرم و گوشی پزشکی */}
           <img 
-            src="/assets/images/medical-background.jpg" 
+            src="../../../images/pictures/testBank.jpg" 
             alt="بانک تست علوم پایه" 
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
           
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent"></div>
+          <div className="absolute inset-0 bg-linear-to-t from-black via-black/60 to-transparent"></div>
           
           <div className="absolute bottom-10 left-0 right-0 flex flex-col items-center text-center px-4">
             <h2 className="text-[#61D192] text-3xl md:text-4xl font-extrabold mb-8 leading-tight">

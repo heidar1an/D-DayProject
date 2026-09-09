@@ -75,7 +75,7 @@ const referralOptions = [
   { id: 'artificial-intelligence', label: 'هوش مصنوعی', icon: sparklesIcon },
 ];
 
-const termOptions = ['۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹', '۱۰', '۱۱', '۱۲'];
+const termOptions = ['۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹', '۱۰', '۱۱', '۱۲' , '۱۳' , '۱۴'];
 
 export default function SecondaryRegistrationLayout({ onBack, onComplete, userData }) {
   const [step, setStep] = useState(0);

@@ -1,8 +1,5 @@
+import { useEffect, useState } from 'react';
 import bubbleChatIcon from '../../../images/icons/bubble-chat.png';
-export default function UserProfileCard({ userData, totalTests = ۰, completedCourses = ۰ }) {
-  const profile = userData?.profile || {};
-  const name = getProfileName(userData);
-  const username = profile.username || userData?.phone || 'tapesh-user';
 
 function getProfileName(userData) {
   const profile = userData?.profile || {};
@@ -11,10 +8,33 @@ function getProfileName(userData) {
   return name || profile.username || 'کاربر تپش';
 }
 
+function getTimeGreeting(hour) {
+  if (hour >= 8 && hour < 12) return 'صبح بخیر دکتر';
+  if (hour >= 12 && hour < 15) return 'ظهر بخیر دکتر';
+  if (hour >= 15 && hour < 19) return 'عصر بخیر دکتر';
+  if (hour >= 19 && hour < 24) return 'شبت بخیر دکتر';
+  return 'نیمه‌شب بخیر دکتر'; // بازه ۲۴ (۰) الی ۸ صبح
+}
+
+function useTimeGreeting() {
+  const [greeting, setGreeting] = useState(() => getTimeGreeting(new Date().getHours()));
+
+  useEffect(() => {
+    const timerId = window.setInterval(() => {
+      setGreeting(getTimeGreeting(new Date().getHours()));
+    }, 60 * 1000);
+
+    return () => window.clearInterval(timerId);
+  }, []);
+
+  return greeting;
+}
+
 export default function UserProfileCard({ userData }) {
   const profile = userData?.profile || {};
   const name = getProfileName(userData);
   const username = profile.username || userData?.phone || 'tapesh-user';
+  const greeting = useTimeGreeting();
 
   return (
     <article className="user-profile-card" aria-label="پروفایل کاربر">
@@ -35,6 +55,7 @@ export default function UserProfileCard({ userData }) {
       </div>
 
       <div className="user-profile-card__info">
+        <p className="user-profile-card__greeting">{greeting}</p>
         <h1 className="user-profile-card__name">{name}</h1>
         <p className="user-profile-card__username" dir="ltr">@{username.replace(/^@/, '')}</p>
       </div>
@@ -53,11 +74,11 @@ export default function UserProfileCard({ userData }) {
       <div className="user-profile-card__progress">
         <div className="user-profile-card__progress-item">
           <span className="user-profile-card__progress-icon user-profile-card__progress-icon--tests">✓</span>
-          <span>{totalTests} تست زده شده</span>
+          <span> ۱۲۳ تست زده شده</span>
         </div>
         <div className="user-profile-card__progress-item">
           <span className="user-profile-card__progress-icon user-profile-card__progress-icon--courses">−</span>
-          <span>{completedCourses} دوره تکمیل شده</span>
+          <span> ۱۲۳ دوره تکمیل شده</span>
         </div>
       </div>
     </article>
