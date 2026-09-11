@@ -16,25 +16,37 @@ const indicatorColors = {
   other: '#937fcd',
 };
 
-export default function DashboardHeader({ activeSection, onSectionChange, isSettingsOpen, onSettingsToggle }) {
+export default function DashboardHeader({
+  activeSection,
+  onSectionChange,
+  isSettingsOpen,
+  onSettingsToggle,
+  areNotificationsOpen,
+  onNotificationsToggle,
+  headerTime,
+  isPomodoroActive,
+  isPomodoroRunning,
+  onPomodoroOpen,
+}) {
   const [indicator, setIndicator] = useState(null);
   const [indicatorKey, setIndicatorKey] = useState(0);
   const linkRefs = useRef([]);
-  const wasSettingsOpenRef = useRef(false);
+  const wasOverlayOpenRef = useRef(false);
+  const isOverlayOpen = isSettingsOpen || areNotificationsOpen;
 
   useLayoutEffect(() => {
-    if (isSettingsOpen) {
-      // هدر تنظیمات باز است؛ پس‌زمینه پشت سرتیترهای اصلی پنهان می‌شود
-      wasSettingsOpenRef.current = true;
+    if (isOverlayOpen) {
+      // یکی از لایه‌ها (تنظیمات/اعلان‌ها) باز است؛ پس‌زمینه پشت سرتیترهای اصلی پنهان می‌شود
+      wasOverlayOpenRef.current = true;
       setIndicator((current) => (current ? { ...current, opacity: 0 } : current));
       return undefined;
     }
 
-    const returningFromSettings = wasSettingsOpenRef.current;
-    wasSettingsOpenRef.current = false;
+    const returningFromOverlay = wasOverlayOpenRef.current;
+    wasOverlayOpenRef.current = false;
 
-    if (returningFromSettings) {
-      // بعد از خروج از تنظیمات، نشانگر باید همان‌جا که هست ظاهر شود نه با انیمیشن از ناکجاآباد
+    if (returningFromOverlay) {
+      // بعد از خروج از لایه، نشانگر باید همان‌جا که هست ظاهر شود نه با انیمیشن از ناکجاآباد
       setIndicatorKey((key) => key + 1);
     }
 
@@ -48,6 +60,9 @@ export default function DashboardHeader({ activeSection, onSectionChange, isSett
           width: activeElement.offsetWidth,
           opacity: 1,
         });
+      } else {
+        // بخش پومودو در ناوبری نیست؛ نشانگر باید کاملاً برداشته شود
+        setIndicator(null);
       }
     };
 
@@ -56,7 +71,7 @@ export default function DashboardHeader({ activeSection, onSectionChange, isSett
     window.addEventListener('resize', measureIndicator);
 
     return () => window.removeEventListener('resize', measureIndicator);
-  }, [activeSection, isSettingsOpen]);
+  }, [activeSection, isOverlayOpen]);
 
   return (
     <header className="dashboard-header">
@@ -95,15 +110,29 @@ export default function DashboardHeader({ activeSection, onSectionChange, isSett
         </nav>
 
         <div className="dashboard-header__actions">
-          <button className="dashboard-header__time" aria-label="زمان فعلی">
+          <button
+            className={`dashboard-header__time ${
+              isPomodoroActive ? 'dashboard-header__time--active' : ''
+            } ${isPomodoroRunning ? 'is-running' : ''}`}
+            aria-label="بخش پومودو"
+            aria-pressed={isPomodoroActive}
+            onClick={onPomodoroOpen}
+          >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10"/>
               <path d="M12 6v6l4 2"/>
             </svg>
-            <span>۲۵:۰۰</span>
+            <span>{headerTime}</span>
           </button>
 
-          <button className="dashboard-header__icon-btn" aria-label="اعلان‌ها">
+          <button
+            className={`dashboard-header__icon-btn ${
+              areNotificationsOpen ? 'dashboard-header__icon-btn--active' : ''
+            }`}
+            aria-label="اعلان‌ها"
+            aria-pressed={areNotificationsOpen}
+            onClick={onNotificationsToggle}
+          >
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
               <path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
               <path d="M10 21h4" />

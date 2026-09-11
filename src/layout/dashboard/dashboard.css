@@ -119,6 +119,51 @@
   filter: brightness(0) invert(1);
 }
 
+/* حالت فعال زنگوله: مثل طرح، آیکون بژ روشن می‌شود */
+.dashboard-header__icon-btn--active {
+  color: #d5bba9;
+}
+
+/* ── لایه اعلان‌ها ── */
+.notifications {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  width: var(--content-width);
+  min-height: 0;
+  margin: 0 auto;
+  padding: 14px 0 clamp(14px, 2.5vh, 26px);
+}
+
+.notifications__panel {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: calc(100dvh - 9.5rem);
+  overflow-y: auto;
+  padding: clamp(26px, 4.5vh, 52px) clamp(22px, 3vw, 56px) clamp(20px, 3vh, 40px);
+  border-radius: 48px;
+  background: #282828;
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.025);
+  scrollbar-width: thin;
+  scrollbar-color: #3a3a3a transparent;
+}
+
+.notifications__title {
+  margin: 0;
+  color: #fff;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: clamp(1.5rem, 2.2vw, 2.3rem);
+  font-weight: 600;
+  text-align: center;
+}
+
+.notifications__list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
 .dashboard__main {
   display: flex;
   flex-direction: column;
@@ -687,6 +732,11 @@
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
+    min-height: 0;
+  }
+
+  /* لایه اعلان‌ها: پنل دقیقاً فضای زیر هدر را پر می‌کند */
+  .notifications__panel {
     min-height: 0;
   }
 

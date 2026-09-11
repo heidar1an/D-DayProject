@@ -1,0 +1,302 @@
+.pomodoro {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  width: var(--content-width);
+  margin: 0 auto;
+  padding: clamp(16px, 3vh, 40px) 0 clamp(16px, 4vh, 56px);
+  gap: clamp(18px, 3.4vh, 34px);
+}
+
+.pomodoro__hero {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(18px, 3vh, 30px);
+  min-height: 0;
+  padding: 10px 0 4px;
+}
+
+/* دایره اصلی تایمر؛ سطح آب داخلش با ارتفاع کنترل می‌شود */
+.pomodoro__circle {
+  position: relative;
+  display: grid;
+  width: clamp(238px, 10vw + 16vh, 378px);
+  aspect-ratio: 1;
+  border: 5px solid #5b8cc7;
+  border-radius: 50%;
+  background: #132943;
+  box-shadow: inset 0 0 44px rgba(0, 0, 0, 0.42), 0 18px 46px rgba(15, 42, 74, 0.45);
+  overflow: hidden;
+  place-items: center;
+  transition: box-shadow 620ms ease;
+}
+
+.pomodoro__circle.is-running {
+  box-shadow: inset 0 0 44px rgba(0, 0, 0, 0.42), 0 18px 52px rgba(52, 118, 187, 0.5);
+  animation: pomodoro-glow 3.2s ease-in-out infinite;
+}
+
+@keyframes pomodoro-glow {
+  0%,
+  100% {
+    box-shadow: inset 0 0 44px rgba(0, 0, 0, 0.42), 0 18px 46px rgba(52, 118, 187, 0.35);
+  }
+  50% {
+    box-shadow: inset 0 0 44px rgba(0, 0, 0, 0.42), 0 18px 60px rgba(52, 118, 187, 0.62);
+  }
+}
+
+.pomodoro__water {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transition: height 1s linear;
+}
+
+.pomodoro__water::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(52, 118, 187, 0.92), rgba(23, 58, 96, 0.97));
+}
+
+.pomodoro__wave {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 205%;
+  aspect-ratio: 1;
+  border: 0;
+  border-radius: 43%;
+  background: rgba(70, 130, 195, 0.5);
+  animation: pomodoro-wave 6.4s linear infinite;
+  will-change: transform;
+}
+
+.pomodoro__wave--back {
+  width: 215%;
+  border-radius: 45%;
+  background: rgba(43, 95, 148, 0.38);
+  animation-duration: 9.6s;
+  animation-direction: reverse;
+}
+
+@keyframes pomodoro-wave {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+.pomodoro__time {
+  position: relative;
+  z-index: 2;
+  color: #fff;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: clamp(3.1rem, 4.6vw + 2vh, 5.1rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-shadow: 0 4px 22px rgba(0, 0, 0, 0.45);
+  font-variant-numeric: tabular-nums;
+}
+
+.pomodoro__mini-time {
+  padding: 8px 18px;
+  border-radius: 14px;
+  background: #132943;
+  box-shadow: inset 3px 0 #285584;
+  color: #5b91cb;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 0.98rem;
+  font-weight: 500;
+}
+
+.pomodoro__start-btn {
+  padding: 15px 58px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #3576b4, #1d4470);
+  box-shadow: 0 14px 34px rgba(46, 106, 172, 0.38);
+  color: #fff;
+  cursor: pointer;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: clamp(1.05rem, 1.2vw + 0.5vh, 1.3rem);
+  font-weight: 600;
+  min-width: 210px;
+  min-height: 58px;
+  transition: transform 180ms ease, box-shadow 260ms ease, filter 180ms ease;
+}
+
+.pomodoro__start-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.07);
+}
+
+.pomodoro__start-btn:active {
+  transform: translateY(0);
+}
+
+.pomodoro__cards {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+  gap: clamp(16px, 2.2vw, 34px);
+}
+
+.pomodoro-card {
+  display: flex;
+  min-height: 292px;
+  flex-direction: column;
+  padding: clamp(22px, 3vh, 32px) clamp(22px, 2.6vw, 38px);
+  border-radius: 64px;
+  background: #282828;
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.025);
+}
+
+.pomodoro-card__title {
+  margin: 0;
+  color: #fff;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: clamp(1.05rem, 1.5vw, 1.3rem);
+  font-weight: 600;
+}
+
+/* فقط پس‌زمینه‌ی نمودار؛ خود نمودار بعداً اضافه می‌شود */
+.pomodoro-card__chart-body {
+  flex: 1 1 auto;
+  min-height: 180px;
+  margin-top: 20px;
+  border-radius: 30px;
+  background:
+    linear-gradient(rgba(91, 140, 199, 0.08) 1px, transparent 1px) 0 0 / 100% 25%,
+    linear-gradient(90deg, rgba(91, 140, 199, 0.08) 1px, transparent 1px) 0 0 / 12.5% 100%,
+    #232323;
+}
+
+.pomodoro-card--today {
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.pomodoro-card__clock-icon {
+  display: grid;
+  width: 74px;
+  height: 74px;
+  margin-bottom: 6px;
+  border-radius: 50%;
+  background: #132943;
+  box-shadow: inset 3px 0 #285584;
+  color: #5b91cb;
+  place-items: center;
+}
+
+.pomodoro-card__clock-icon svg {
+  width: 40px;
+  height: 40px;
+}
+
+.pomodoro-card__today-label {
+  color: #cdcdcd;
+  font-family: 'Pinar', Tahoma, sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.pomodoro-card__today-value {
+  color: #5b91cb;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: clamp(2.6rem, 3.6vw, 3.6rem);
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+/* کادر زمان هدر: وضعیت‌های پومودو */
+.dashboard-header__time {
+  position: relative;
+  cursor: pointer;
+  transition: box-shadow 260ms ease, color 260ms ease, transform 160ms ease;
+}
+
+.dashboard-header__time:hover {
+  transform: translateY(-1px);
+}
+
+.dashboard-header__time--active {
+  box-shadow: inset 3px 0 #5b91cb, 0 0 0 2px rgba(91, 145, 203, 0.35);
+}
+
+.dashboard-header__time.is-running {
+  color: #7fb2e0;
+}
+
+.dashboard-header__time.is-running::after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  inset-inline-end: 9px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #5fae7c;
+  animation: pomodoro-header-dot 1.6s ease-in-out infinite;
+}
+
+@keyframes pomodoro-header-dot {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(95, 174, 124, 0.55);
+  }
+  50% {
+    opacity: 0.55;
+    box-shadow: 0 0 0 5px rgba(95, 174, 124, 0);
+  }
+}
+
+@media (max-width: 900px) {
+  .pomodoro__cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .pomodoro {
+    padding-top: 20px;
+  }
+
+  .pomodoro__circle {
+    width: min(78vw, 260px);
+    border-width: 4px;
+  }
+
+  .pomodoro__time {
+    font-size: 3rem;
+  }
+
+  .pomodoro__start-btn {
+    min-width: 180px;
+    padding: 13px 44px;
+  }
+
+  .pomodoro-card {
+    min-height: 0;
+    padding: 22px 20px 26px;
+    border-radius: 36px;
+  }
+
+  .pomodoro-card__chart-body {
+    min-height: 150px;
+    border-radius: 22px;
+  }
+}

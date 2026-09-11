@@ -6,6 +6,8 @@ import DashboardHome from './DashboardHome';
 import CoursesSection from './CoursesSection';
 import TestsSection from './TestsSection';
 import OtherSections from './OtherSections';
+import NotificationsSection from './NotificationsSection';
+import Pomodoro, { usePomodoro, formatTimer } from './Pomodoro';
 
 const settingsTabLabels = {
   profile: 'ویرایش پروفایل',
@@ -19,10 +21,13 @@ export default function DashboardLayout({ userData }) {
   const [activeSection, setActiveSection] = useState('dashboard');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState('profile');
+  const [areNotificationsOpen, setAreNotificationsOpen] = useState(false);
+  const { secondsLeft, isRunning, todayCount, toggle: togglePomodoro } = usePomodoro();
 
   const handleSectionChange = (sectionId) => {
     setActiveSection(sectionId);
     setIsSettingsOpen(false);
+    setAreNotificationsOpen(false);
   };
 
   const handleSettingsToggle = () => {
@@ -33,6 +38,17 @@ export default function DashboardLayout({ userData }) {
 
     setSettingsTab('profile');
     setIsSettingsOpen(true);
+    setAreNotificationsOpen(false);
+  };
+
+  const handleNotificationsToggle = () => {
+    if (areNotificationsOpen) {
+      setAreNotificationsOpen(false);
+      return;
+    }
+
+    setIsSettingsOpen(false);
+    setAreNotificationsOpen(true);
   };
 
   const sections = {
@@ -40,7 +56,17 @@ export default function DashboardLayout({ userData }) {
     courses: <CoursesSection />,
     tests: <TestsSection />,
     other: <OtherSections />,
+    pomodoro: (
+      <Pomodoro
+        secondsLeft={secondsLeft}
+        isRunning={isRunning}
+        todayCount={todayCount}
+        onToggle={togglePomodoro}
+      />
+    ),
   };
+
+  const handlePomodoroOpen = () => handleSectionChange('pomodoro');
 
   return (
     <div className="dashboard">
@@ -49,6 +75,12 @@ export default function DashboardLayout({ userData }) {
         onSectionChange={handleSectionChange}
         isSettingsOpen={isSettingsOpen}
         onSettingsToggle={handleSettingsToggle}
+        areNotificationsOpen={areNotificationsOpen}
+        onNotificationsToggle={handleNotificationsToggle}
+        headerTime={formatTimer(secondsLeft)}
+        isPomodoroActive={activeSection === 'pomodoro'}
+        isPomodoroRunning={isRunning}
+        onPomodoroOpen={handlePomodoroOpen}
       />
 
       {isSettingsOpen ? (
@@ -76,6 +108,8 @@ export default function DashboardLayout({ userData }) {
             )}
           </div>
         </div>
+      ) : areNotificationsOpen ? (
+        <NotificationsSection />
       ) : (
         <div className="dashboard__section">{sections[activeSection]}</div>
       )}
