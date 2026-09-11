@@ -41,7 +41,7 @@ export default function TestsSection() {
   ];
 
   return (
-    <div className="bg-black text-white p-6 md:p-10 w-full" dir="rtl">
+    <div className="mx-auto w-[var(--content-width)] bg-black py-6 text-white md:py-10" dir="rtl">
       
       {/* ---------- Main Content (Grid) ---------- */}
       <main className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">

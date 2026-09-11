@@ -22,6 +22,7 @@
 }
 
 .dashboard-nav {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -32,7 +33,18 @@
   font-weight: 500;
 }
 
+.dashboard-nav__indicator {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 14px;
+  transition: left 320ms ease-in-out, width 320ms ease-in-out,
+    opacity 320ms ease-in-out, background-color 320ms ease-in-out;
+}
+
 .dashboard-nav__link {
+  position: relative;
+  z-index: 1;
   padding: 8px 17px;
   border: 0;
   border-radius: 14px;
@@ -42,16 +54,14 @@
   line-height: 1.15;
   white-space: nowrap;
   cursor: pointer;
-  transition: color 160ms ease, background-color 160ms ease, transform 160ms ease;
+  transition: transform 160ms ease;
 }
 
 .dashboard-nav__link:hover {
-  color: #c8a994;
   transform: translateY(-1px);
 }
 
 .dashboard-nav__link--active {
-  background: #b99a86;
   color: #fff;
 }
 
@@ -112,7 +122,7 @@
 .dashboard__main {
   display: flex;
   flex-direction: column;
-  width: min(96.5%, 1720px);
+  width: var(--content-width);
   margin: 0 auto;
   padding: 32px 0 64px;
   gap: 34px;
@@ -243,9 +253,14 @@
 }
 
 .user-profile-card__avatar {
-  position: relative;
   display: grid;
   margin: -2px auto 31px;
+  place-items: center;
+}
+
+.user-profile-card__avatar-figure {
+  position: relative;
+  display: grid;
   place-items: center;
 }
 
@@ -312,10 +327,10 @@
 
 .user-profile-card__greeting {
   margin: 0 0 6px;
-  color: #b99a86;
+  color: #fff;
   font-family: 'Pinar', Tahoma, sans-serif;
-  font-size: 0.95rem;
-  font-weight: 500;
+  font-size: 1.15rem;
+  font-weight: 600;
   text-align: center;
 }
 
@@ -505,8 +520,15 @@
   font-weight: 600;
 }
 
+.dashboard-settings-header {
+  flex: 0 0 auto;
+  width: var(--content-width);
+  margin: 14px auto 0;
+}
+
 @media (max-width: 1100px) {
   .dashboard-header__inner {
+    flex-wrap: wrap;
     min-height: 104px;
     gap: 18px;
   }
@@ -526,22 +548,6 @@
 
   .dashboard-header__time span {
     display: none;
-  }
-
-    .dashboard__top-row {
-    grid-template-columns: 1fr;
-  }
-
-  .dashboard__profile {
-    order: -1;
-  }
-
-  .dashboard__chart {
-    min-height: 380px;
-  }
-
-  .user-profile-card {
-    min-height: auto;
   }
 }
 
@@ -586,7 +592,7 @@
   }
 
     .dashboard__main {
-    width: min(92%, 540px);
+    width: var(--content-width);
     padding-top: 18px;
     gap: 19px;
   }
@@ -639,5 +645,180 @@
 
   .dashboard-action-card__icon {
     width: 108px;
+  }
+}
+
+/* چیدمان اپ‌مانند: کل داشبورد داخل ارتفاع صفحه جا می‌شود (دسکتاپ و تبلت) */
+@media (min-width: 701px) {
+  .dashboard {
+    display: flex;
+    height: 100vh;
+    height: 100dvh;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .dashboard-header {
+    flex: 0 0 auto;
+  }
+
+  .dashboard-header__inner {
+    min-height: clamp(66px, 10vh, 98px);
+  }
+
+  /* لایه‌ی اسکرول‌پذیر بخش‌ها: محتوای بلند (مثل دوره‌ها) داخل همین اسکرول می‌شود */
+  .dashboard__section {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: #3a3a3a transparent;
+  }
+
+  .dashboard__section > * {
+    flex-shrink: 0;
+  }
+
+  /* حالت تنظیمات: هدر تب‌ها ثابت می‌ماند و پنل زیرش اسکرول می‌شود */
+  .dashboard__settings {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .dashboard__settings-panel {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-bottom: clamp(14px, 3vh, 64px);
+    scrollbar-width: thin;
+    scrollbar-color: #3a3a3a transparent;
+  }
+
+  .dashboard__main {
+    min-height: 0;
+    flex: 1 1 auto;
+    gap: clamp(14px, 2.4vh, 34px);
+    padding: clamp(12px, 2vh, 32px) 0 clamp(14px, 3vh, 64px);
+  }
+
+  .dashboard__top-row {
+    flex: 1.9 1 0;
+    grid-template-columns: minmax(255px, 1fr) minmax(0, 1.9fr);
+    gap: clamp(14px, 2.2vw, 34px);
+  }
+
+  .dashboard__profile {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .dashboard__cards-row {
+    min-height: 0;
+    flex: 1 1 0;
+    gap: clamp(14px, 2.2vw, 34px);
+  }
+
+  .dashboard__chart {
+    min-height: 0;
+    padding: clamp(18px, 3.4vh, 34px) clamp(22px, 2.6vw, 38px);
+  }
+
+  .dashboard__chart-body {
+    min-height: 0;
+  }
+
+  .user-profile-card {
+    position: relative;
+    display: flex;
+    min-height: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+    padding: clamp(12px, 2.8vh, 31px) clamp(20px, 2.6vw, 38px) clamp(12px, 3vh, 37px);
+  }
+
+  .user-profile-card__header {
+    position: absolute;
+    top: clamp(10px, 1.8vh, 22px);
+    inset-inline-start: clamp(14px, 2vw, 26px);
+    min-height: 0;
+  }
+
+  .user-profile-card__chat-btn {
+    width: clamp(40px, 5vh, 52px);
+    height: clamp(40px, 5vh, 52px);
+  }
+
+  .user-profile-card__chat-btn img {
+    width: 88%;
+    height: 88%;
+  }
+
+  .user-profile-card__avatar {
+    flex: 1 1 auto;
+    min-height: 0;
+    margin: 0 auto clamp(24px, 3vh, 31px);
+    container-type: size;
+  }
+
+  .user-profile-card__avatar-circle {
+    width: min(clamp(130px, 20vh, 272px), 92cqh, 60vw);
+    padding: clamp(12px, 1.8vh, 21px);
+    border-width: clamp(3px, 0.6vh, 5px);
+  }
+
+  .user-profile-card__level {
+    min-width: clamp(150px, 15vw, 198px);
+    font-size: clamp(1rem, 1.6vh, 1.15rem);
+  }
+
+  .user-profile-card__info {
+    margin-bottom: clamp(10px, 2.4vh, 29px);
+  }
+
+  .user-profile-card__name {
+    margin-bottom: 5px;
+    font-size: clamp(1.35rem, 1.2vw + 1vh, 2.15rem);
+    line-height: 1.3;
+  }
+
+  .user-profile-card__username {
+    font-size: clamp(1.05rem, 0.8vw + 0.8vh, 1.22rem);
+  }
+
+  .user-profile-card__stats {
+    margin-bottom: clamp(8px, 2vh, 25px);
+  }
+
+  .user-profile-card__stat-value {
+    font-size: clamp(1.25rem, 2vh, 1.55rem);
+  }
+
+  .user-profile-card__progress-item {
+    font-size: clamp(0.8rem, 1.4vh, 0.86rem);
+  }
+
+  .peers-section {
+    min-height: 0;
+    padding: clamp(18px, 3vh, 30px) clamp(18px, 2.4vw, 30px) clamp(14px, 2.6vh, 26px);
+  }
+
+  .dashboard-action-card {
+    min-height: 0;
+    padding: clamp(18px, 4vh, 39px) 20px clamp(16px, 3.2vh, 31px);
+  }
+
+  .dashboard-action-card__icon {
+    width: min(59%, clamp(84px, 13vh, 146px));
+  }
+
+  .dashboard-action-card__title {
+    margin-top: clamp(12px, 2.8vh, 25px);
+    font-size: clamp(1.15rem, 1.2vw + 1vh, 2rem);
   }
 }

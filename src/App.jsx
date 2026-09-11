@@ -895,7 +895,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (authOpen) return undefined;
+    if (authOpen || onboardingOpen || dashboardOpen) return undefined;
 
     const revealElements = Array.from(document.querySelectorAll('[data-reveal]'));
     const pendingFrames = new Set();
@@ -964,7 +964,7 @@ function App() {
       observer.disconnect();
       pendingFrames.forEach((frame) => cancelAnimationFrame(frame));
     };
-  }, [authOpen]);
+  }, [authOpen, onboardingOpen, dashboardOpen]);
 
   const openOnboarding = () => {
     window.history.pushState(
@@ -1082,8 +1082,6 @@ function App() {
 
       <main>
         <section className="hero" data-reveal="hero" aria-labelledby="hero-title">
-          <div className="hero__glow hero__glow--one" />
-          <div className="hero__glow hero__glow--two" />
           <div className="hero__content">
             <h1 id="hero-title">
               <span>یادگیری پزشکی</span>

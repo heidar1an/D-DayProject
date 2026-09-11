@@ -13,7 +13,7 @@ export default function OtherSections() {
   return (
     <main
       dir="rtl"
-      className="w-full bg-black px-4 py-8 text-white md:px-8 md:py-10 lg:px-12 [font-family:'Pinar',Tahoma,sans-serif]"
+      className="mx-auto w-[var(--content-width)] bg-black py-8 text-white md:py-10 [font-family:'Pinar',Tahoma,sans-serif]"
     >
       <button
         type="button"

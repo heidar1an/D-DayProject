@@ -30,7 +30,7 @@ export default function CoursesSection() {
     <section
       dir="rtl"
       aria-label="دوره ها"
-      className="w-full min-h-[calc(100vh-7rem)] bg-black px-4 py-8 text-white md:px-8 md:py-10 lg:px-12 [font-family:'Pinar',Tahoma,sans-serif]"
+      className="mx-auto w-[var(--content-width)] min-h-[calc(100vh-7rem)] bg-black py-8 text-white md:py-10 [font-family:'Pinar',Tahoma,sans-serif]"
     >
       <h1 className="mb-16 text-right text-3xl text-[#5b8cc7] md:mb-24 md:text-4xl [font-family:'Doran',Tahoma,sans-serif]">
         دوره های من

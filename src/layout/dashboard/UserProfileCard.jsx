@@ -45,13 +45,15 @@ export default function UserProfileCard({ userData }) {
       </div>
 
       <div className="user-profile-card__avatar" aria-hidden="true">
-        <div className="user-profile-card__avatar-circle">
-          <div className="user-profile-card__avatar-inner">
-            <span className="user-profile-card__avatar-head" />
-            <span className="user-profile-card__avatar-body" />
+        <div className="user-profile-card__avatar-figure">
+          <div className="user-profile-card__avatar-circle">
+            <div className="user-profile-card__avatar-inner">
+              <span className="user-profile-card__avatar-head" />
+              <span className="user-profile-card__avatar-body" />
+            </div>
           </div>
+          <span className="user-profile-card__level">سطح اول</span>
         </div>
-        <span className="user-profile-card__level">سطح اول</span>
       </div>
 
       <div className="user-profile-card__info">
