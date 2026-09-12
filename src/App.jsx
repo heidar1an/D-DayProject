@@ -18,7 +18,7 @@ import distanceIcon from '../images/icons/distance.png';
 import OfflinePage from './layout/OfflinePage';
 import SecondaryRegistrationLayout from './layout/SecondaryRegistrationLayout';
 import DashboardLayout from './layout/dashboard/DashboardLayout';
-import { getStoredUser, loginUser, saveUserRecord } from './services/userStorage';
+import { clearStoredUser, getDisplayName, getStoredUser, loginUser, saveUserRecord } from './services/userStorage';
 import './layout/dashboard/dashboard.css';
 
 const productCards = [
@@ -125,7 +125,7 @@ const courseCards = [
     tags: ['درسنامه جامع', 'تست', 'خلاصه نکات', 'یادگیری با پوشش مفهومی'],
   },
   {
-    title: 'جمع بندی میکروب شناسی',
+    title: 'میکرو درسنامه بیوشیمی',
     image: microbiology,
     accent: 'copper',
     tags: ['میکرو درسنامه', 'تست هدفمند', 'متن روان', 'یادگیری با پوشش مفهومی'],
@@ -243,6 +243,25 @@ function ArrowIcon() {
 
 function ArrowLeftIcon() {
   return <span aria-hidden="true">←</span>;
+}
+
+function HeaderUserIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="20"
+      height="20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="8" r="4" />
+      <path d="M6 21v-1a6 6 0 0 1 12 0v1" />
+    </svg>
+  );
 }
 
 function GoogleIcon() {
@@ -961,13 +980,18 @@ function App() {
     setDashboardOpen(false);
   };
 
-  const openDashboard = (user) => {
+  const openDashboard = (user, { replaceHistory = true } = {}) => {
     setUserData(user);
-    window.history.replaceState(
-      getRouteState('dashboard'),
-      '',
-      getRouteUrl('dashboard'),
-    );
+    const routeState = getRouteState('dashboard');
+    const routeUrl = getRouteUrl('dashboard');
+
+    /* ورود از هدر صفحه اصلی با pushState انجام می‌شود تا دکمه Back کاربر را به صفحه اصلی برگرداند */
+    if (replaceHistory) {
+      window.history.replaceState(routeState, '', routeUrl);
+    } else {
+      window.history.pushState(routeState, '', routeUrl);
+    }
+
     setOnboardingOpen(false);
     setAuthOpen(false);
     setDashboardOpen(true);
@@ -980,6 +1004,17 @@ function App() {
       profile,
     });
     openDashboard(updatedUser);
+  };
+
+  /* خروج از حساب: فقط سشن پاک می‌شود تا حساب کاربر برای ورود بعدی باقی بماند */
+  const handleLogout = () => {
+    clearStoredUser();
+    setUserData(null);
+    window.history.replaceState(getRouteState('home'), '', getRouteUrl('home'));
+    setDashboardOpen(false);
+    setAuthOpen(false);
+    setOnboardingOpen(false);
+    window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
   if (!isOnline) {
@@ -997,7 +1032,13 @@ function App() {
   }
 
   if (dashboardOpen && userData) {
-    return <DashboardLayout userData={userData} />;
+    return (
+      <DashboardLayout
+        userData={userData}
+        onUserDataChange={setUserData}
+        onLogout={handleLogout}
+      />
+    );
   }
 
   if (authOpen) {
@@ -1042,9 +1083,27 @@ function App() {
           </a>
         </nav>
 
-        <a className="auth-link auth-link--login" href="#auth" onClick={openAuth}>
-          ورود / ثبت نام
-        </a>
+        {userData ? (
+          <button
+            className="auth-link auth-link--user"
+            type="button"
+            aria-label={`ورود به داشبورد ${getDisplayName(userData)}`}
+            onClick={() => openDashboard(userData, { replaceHistory: false })}
+          >
+            <span className="auth-link__avatar">
+              {userData.profile?.avatar ? (
+                <img src={userData.profile.avatar} alt="" />
+              ) : (
+                <HeaderUserIcon />
+              )}
+            </span>
+            <span className="auth-link__name">{getDisplayName(userData)}</span>
+          </button>
+        ) : (
+          <a className="auth-link auth-link--login" href="#auth" onClick={openAuth}>
+            ورود / ثبت نام
+          </a>
+        )}
       </header>
 
       <main>

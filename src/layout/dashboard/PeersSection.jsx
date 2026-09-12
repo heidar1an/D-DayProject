@@ -13,7 +13,13 @@ export default function PeersSection() {
         {peers.map((peer) => (
           <button key={peer.id} className="peers-section__peer">
             <div className="peers-section__avatar">
-              <svg width="32" height="32" viewBox="0 0 32 32" fill="currentColor">
+              <svg
+                className="peers-section__person"
+                width="40"
+                height="40"
+                viewBox="0 0 32 32"
+                fill="currentColor"
+              >
                 <circle cx="16" cy="11" r="5"/>
                 <path d="M16 18c-5 0-9 3-9 7h18c0-4-4-7-9-7z"/>
               </svg>
