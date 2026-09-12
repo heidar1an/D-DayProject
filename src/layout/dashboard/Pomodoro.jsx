@@ -2,6 +2,31 @@ import { useEffect, useRef, useState } from 'react';
 import './pomodoro.css';
 
 const POMODORO_DURATION = 25 * 60;
+const BREAK_DURATION = 5 * 60;
+const STATS_STORAGE_KEY = 'tapesh:pomodoro-stats';
+
+/* آمار پومودوی امروز با کلید تاریخ ذخیره می‌شود تا با رفرش صفحه از بین نرود */
+function loadTodayStats() {
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(STATS_STORAGE_KEY) || 'null');
+    if (parsed && parsed.date === new Date().toDateString()) {
+      return {
+        count: Number(parsed.count) || 0,
+        seconds: Number(parsed.seconds) || 0,
+      };
+    }
+  } catch {
+    // داده خراب؛ مثل روز جدید از صفر شروع می‌شود
+  }
+  return { count: 0, seconds: 0 };
+}
+
+function saveTodayStats(stats) {
+  window.localStorage.setItem(
+    STATS_STORAGE_KEY,
+    JSON.stringify({ date: new Date().toDateString(), ...stats }),
+  );
+}
 
 export const toPersianDigits = (value) =>
   String(value).replace(/[0-9]/g, (digit) => '۰۱۲۳۴۵۶۷۸۹'[Number(digit)]);
@@ -17,38 +42,118 @@ export const formatTimer = (totalSeconds) => {
 export function usePomodoro() {
   const [secondsLeft, setSecondsLeft] = useState(POMODORO_DURATION);
   const [isRunning, setIsRunning] = useState(false);
-  const [todayCount, setTodayCount] = useState(0);
+  const [isBreak, setIsBreak] = useState(false);
+  const [isFinished, setIsFinished] = useState(false);
+  const [todayStats, setTodayStats] = useState(loadTodayStats);
+  const isBreakRef = useRef(false);
+  const studiedSecondsRef = useRef(0);
+
+  useEffect(() => {
+    isBreakRef.current = isBreak;
+  }, [isBreak]);
+
+  useEffect(() => {
+    saveTodayStats(todayStats);
+  }, [todayStats]);
 
   useEffect(() => {
     if (!isRunning) return undefined;
 
     const timer = window.setInterval(() => {
-      setSecondsLeft((current) => {
-        if (current <= 1) {
-          window.clearInterval(timer);
-          setIsRunning(false);
-          setTodayCount((count) => count + 1);
-          return 0;
-        }
-        return current - 1;
-      });
+      // زمان استراحت جزو دقایق مطالعه حساب نمی‌شود
+      if (!isBreakRef.current) {
+        studiedSecondsRef.current += 1;
+      }
+      setSecondsLeft((current) => Math.max(0, current - 1));
     }, 1000);
 
     return () => window.clearInterval(timer);
   }, [isRunning]);
 
+  // رسیدن شمارش معکوس به صفر: پایان پومودو یا پایان استراحت
+  useEffect(() => {
+    if (!isRunning || secondsLeft > 0) return undefined;
+
+    setIsRunning(false);
+
+    if (isBreak) {
+      setIsBreak(false);
+      setSecondsLeft(POMODORO_DURATION);
+      return;
+    }
+
+    studiedSecondsRef.current = 0;
+    setTodayStats((stats) => ({
+      count: stats.count + 1,
+      seconds: stats.seconds + POMODORO_DURATION,
+    }));
+    setIsFinished(true);
+  }, [isBreak, isRunning, secondsLeft]);
+
   const toggle = () => {
+    if (isBreak || isFinished) return;
+
     if (isRunning) {
       setIsRunning(false);
       return;
     }
-    if (secondsLeft === 0) {
+
+    if (secondsLeft <= 0 || secondsLeft === POMODORO_DURATION) {
+      studiedSecondsRef.current = 0;
+    }
+    if (secondsLeft <= 0) {
       setSecondsLeft(POMODORO_DURATION);
     }
     setIsRunning(true);
   };
 
-  return { secondsLeft, isRunning, todayCount, toggle };
+  /* دکمه «پایان پومودو»: یک پومودو و دقایق خوانده‌شده جلسه را ثبت می‌کند؛
+     در حالت پایان/استراحت فقط به حالت اولیه برمی‌گرداند */
+  const finish = () => {
+    if (isBreak) {
+      setIsRunning(false);
+      setIsBreak(false);
+      setIsFinished(false);
+      setSecondsLeft(POMODORO_DURATION);
+      return;
+    }
+
+    if (isFinished) {
+      setIsFinished(false);
+      setSecondsLeft(POMODORO_DURATION);
+      return;
+    }
+
+    const studiedSeconds = studiedSecondsRef.current;
+    studiedSecondsRef.current = 0;
+    setTodayStats((stats) => ({
+      count: stats.count + 1,
+      seconds: stats.seconds + studiedSeconds,
+    }));
+    setIsRunning(false);
+    setSecondsLeft(0);
+    setIsFinished(true);
+  };
+
+  const startBreak = () => {
+    studiedSecondsRef.current = 0;
+    setIsFinished(false);
+    setIsBreak(true);
+    setSecondsLeft(BREAK_DURATION);
+    setIsRunning(true);
+  };
+
+  return {
+    secondsLeft,
+    isRunning: isRunning && !isBreak,
+    isBreak,
+    isFinished,
+    todayCount: todayStats.count,
+    todayMinutes: Math.floor(todayStats.seconds / 60),
+    toggle,
+    finish,
+    startBreak,
+  };
 }
 
 /* نوشتن نرم برچسب دکمه هنگام تغییر بین «شروع پومودورو» و «توقف» */
@@ -79,14 +184,33 @@ function useAnimatedLabel(label) {
   return displayed;
 }
 
-export default function Pomodoro({ secondsLeft, isRunning, todayCount, onToggle }) {
-  const elapsedRatio = 1 - secondsLeft / POMODORO_DURATION;
+export default function Pomodoro({
+  secondsLeft,
+  isRunning,
+  isBreak,
+  isFinished,
+  todayCount,
+  todayMinutes,
+  onToggle,
+  onFinish,
+  onStartBreak,
+}) {
+  const duration = isBreak ? BREAK_DURATION : POMODORO_DURATION;
+  const elapsedRatio = 1 - secondsLeft / duration;
   const buttonLabel = useAnimatedLabel(isRunning ? 'توقف' : 'شروع پومودورو');
+  const circleClassName = [
+    'pomodoro__circle',
+    isRunning && !isBreak ? 'is-running' : '',
+    isBreak ? 'is-break' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+  const showFinishButton = isBreak || isRunning || secondsLeft < duration;
 
   return (
     <div className="pomodoro" dir="rtl">
       <div className="pomodoro__hero">
-        <div className={`pomodoro__circle ${isRunning ? 'is-running' : ''}`}>
+        <div className={circleClassName}>
           <div
             className="pomodoro__water"
             style={{ height: `${elapsedRatio * 100}%` }}
@@ -98,12 +222,35 @@ export default function Pomodoro({ secondsLeft, isRunning, todayCount, onToggle 
           <span className="pomodoro__time">{formatTimer(secondsLeft)}</span>
         </div>
 
-        <span className="pomodoro__mini-time">{formatTimer(secondsLeft)}</span>
-
-        <button className="pomodoro__start-btn" type="button" onClick={onToggle}>
-          {buttonLabel}
-          <span className="sr-only" aria-live="polite" />
-        </button>
+        {isFinished && !isBreak ? (
+          <>
+            <p className="pomodoro__finish-message" role="status">
+              پایان پومودو
+            </p>
+            <div className="pomodoro__actions">
+              <button className="pomodoro__break-btn" type="button" onClick={onStartBreak}>
+                استراحت کنید
+              </button>
+              <button className="pomodoro__finish-btn" type="button" onClick={onFinish}>
+                پایان پومودو
+              </button>
+            </div>
+          </>
+        ) : (
+          <div className="pomodoro__actions">
+            {!isBreak && (
+              <button className="pomodoro__start-btn" type="button" onClick={onToggle}>
+                {buttonLabel}
+                <span className="sr-only" aria-live="polite" />
+              </button>
+            )}
+            {showFinishButton && (
+              <button className="pomodoro__finish-btn" type="button" onClick={onFinish}>
+                پایان پومودو
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="pomodoro__cards">
@@ -121,6 +268,10 @@ export default function Pomodoro({ secondsLeft, isRunning, todayCount, onToggle 
           </span>
           <span className="pomodoro-card__today-label">تعداد پومودو امروز</span>
           <strong className="pomodoro-card__today-value">{toPersianDigits(todayCount)}</strong>
+          <span className="pomodoro-card__today-minutes">
+            مجموع دقایق مطالعه امروز:{' '}
+            <strong>{toPersianDigits(todayMinutes)} دقیقه</strong>
+          </span>
         </section>
       </div>
     </div>

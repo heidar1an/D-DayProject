@@ -31,7 +31,7 @@
         "lastName": "رحمان زاده",
         "username": "heidarian",
         "university": "دانشگاه علوم پزشکی تهران",
-        "term": "۶",
+        "term": "۱۴",
         "motivations": [
           "learning",
           "experience"
@@ -39,10 +39,14 @@
         "referralSources": [
           "instagram",
           "friends"
-        ]
+        ],
+        "email": "",
+        "birthDate": "",
+        "grade": "دوره علوم پایه",
+        "favoriteCourses": []
       },
       "createdAt": "2026-09-11T10:58:07.985Z",
-      "updatedAt": "2026-09-11T10:58:51.215Z"
+      "updatedAt": "2026-09-11T18:53:49.489Z"
     }
   ]
 }

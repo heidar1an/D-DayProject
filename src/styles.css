@@ -275,6 +275,56 @@ img {
   background: #77b787;
 }
 
+/* چیپ کاربر لاگین‌شده در هدر صفحه اصلی: آواتار + نام به‌جای «ورود / ثبت نام» */
+.auth-link--user {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 6px 5px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: color 180ms ease, border-color 180ms ease, background-color 180ms ease;
+}
+
+.auth-link--user::after {
+  display: none;
+}
+
+.auth-link__avatar {
+  display: flex;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid rgba(185, 154, 134, 0.5);
+  border-radius: 50%;
+  background: rgba(185, 154, 134, 0.15);
+  color: #b99a86;
+}
+
+.auth-link__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.auth-link__name {
+  max-width: clamp(90px, 18vw, 180px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.auth-link--user:hover {
+  color: #77b787;
+  border-color: rgba(119, 183, 135, 0.55);
+  background: rgba(119, 183, 135, 0.08);
+}
+
 .site-nav a:hover::after,
 .auth-link:hover::after {
   transform: scaleX(1);
@@ -352,7 +402,7 @@ img {
   gap: 8px;
   margin: 0;
   font-size: clamp(2.9rem, 5.7vw, 4.8rem);
-  letter-spacing: -0.06em;
+  letter-spacing: 0;
   line-height: 1.08;
 }
 
@@ -1092,7 +1142,7 @@ img {
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.24);
   border-radius: 38px;
-  background: #f9f9f9;
+  background: #ffffff;
   color: var(--black);
   transition: transform 220ms ease, box-shadow 220ms ease;
 }
@@ -1127,13 +1177,13 @@ img {
 
 .course-card__tags span,
 .green-path-card__tags span {
-  padding: 4px 8px;
+  padding: 5px 11px;
   border: 1px solid var(--course-accent, var(--green-bright));
   border-radius: 4px;
   background: #090909;
   color: var(--white);
-  font-size: 0.66rem;
-  font-weight: 600;
+  font-size: 0.88rem;
+  font-weight: 500;
   line-height: 1.3;
   white-space: nowrap;
 }
@@ -1207,7 +1257,7 @@ img {
   overflow: hidden;
   border: 2px solid var(--blue-bright);
   border-radius: 38px;
-  background: #fbfbfb;
+  background: #ffffff;
   color: #111111;
   direction: ltr;
   transition: transform 220ms ease, box-shadow 220ms ease;
@@ -1239,12 +1289,10 @@ img {
 .green-path-card__tags {
   position: static;
   justify-content: flex-start;
-  margin-right: auto;
 }
 
 .green-path-card__tags span {
   --course-accent: var(--green-bright);
-  font-size: 0.61rem;
 }
 
 .green-path-card ul {
@@ -1257,7 +1305,7 @@ img {
   list-style: none;
   font-family: 'Pinar', Tahoma, sans-serif;
   font-size: clamp(0.96rem, 1.55vw, 1.25rem);
-  font-weight: 700;
+  font-weight: 500;
   line-height: 1.65;
 }
 
@@ -3627,4 +3675,35 @@ img {
   .offline-page__retry.is-checking {
     animation: none;
   }
+}
+
+/* ── تم رنگی دکمه «پایان پومودو» ── */
+:root {
+  --pomodoro-end: #465c4d;
+  --pomodoro-end-bright: #77b787;
+  --pomodoro-end-deep: #2b3d31;
+}
+
+.pomodoro__finish-btn {
+  padding: 15px 46px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--pomodoro-end-bright), var(--pomodoro-end));
+  box-shadow: 0 14px 34px rgba(95, 174, 124, 0.38);
+  color: #fff;
+  cursor: pointer;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: clamp(1.05rem, 1.2vw + 0.5vh, 1.3rem);
+  font-weight: 600;
+  min-height: 58px;
+  transition: transform 180ms ease, box-shadow 260ms ease, filter 180ms ease;
+}
+
+.pomodoro__finish-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.07);
+}
+
+.pomodoro__finish-btn:active {
+  transform: translateY(0);
 }

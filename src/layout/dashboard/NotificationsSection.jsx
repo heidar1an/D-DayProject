@@ -3,7 +3,7 @@ export default function NotificationsSection() {
     <section
       dir="rtl"
       aria-label="اعلان ها"
-      className="notifications"
+      className="notifications dashboard-layer-reveal"
     >
       <div className="notifications__panel">
         <h1 className="notifications__title">اعلان ها</h1>

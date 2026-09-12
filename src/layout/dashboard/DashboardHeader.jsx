@@ -7,13 +7,15 @@ const navigationItems = [
   { id: 'courses', label: 'دوره‌ها' },
   { id: 'tests', label: 'تست' },
   { id: 'other', label: 'سایر بخش‌ها' },
+  { id: 'league', label: 'لیگ' },
 ];
 
 const indicatorColors = {
-  dashboard: '#b99a86',
-  courses: '#5b8cc7',
-  tests: '#77b787',
-  other: '#937fcd',
+  dashboard: 'var(--brown)',
+  courses: 'var(--brown)',
+  tests: 'var(--brown)',
+  other: 'var(--brown)',
+  league: 'var(--purple)',
 };
 
 export default function DashboardHeader({
@@ -26,6 +28,8 @@ export default function DashboardHeader({
   headerTime,
   isPomodoroActive,
   isPomodoroRunning,
+  isPomodoroBreak,
+  isPomodoroFinished,
   onPomodoroOpen,
 }) {
   const [indicator, setIndicator] = useState(null);
@@ -74,7 +78,8 @@ export default function DashboardHeader({
   }, [activeSection, isOverlayOpen]);
 
   return (
-    <header className="dashboard-header">
+    /* هدر داشبورد اولین بار که پنل باز می‌شود، با همان انیمیشن نرم لایه‌ها از بالا ظاهر می‌شود */
+    <header className="dashboard-header dashboard-layer-reveal--down">
       <div className="dashboard-header__inner">
         <Brand />
 
@@ -113,7 +118,9 @@ export default function DashboardHeader({
           <button
             className={`dashboard-header__time ${
               isPomodoroActive ? 'dashboard-header__time--active' : ''
-            } ${isPomodoroRunning ? 'is-running' : ''}`}
+            } ${isPomodoroBreak ? 'is-break' : isPomodoroRunning ? 'is-running' : ''} ${
+              isPomodoroFinished ? 'is-finished' : ''
+            }`}
             aria-label="بخش پومودو"
             aria-pressed={isPomodoroActive}
             onClick={onPomodoroOpen}
