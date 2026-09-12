@@ -123,7 +123,7 @@ export default function Pays({ transactions = [] }) {
     <section
       dir="rtl"
       aria-label="تراکنش ها"
-      className="mx-auto w-[var(--content-width)] py-8 text-white md:py-10 [font-family:'Pinar',Tahoma,sans-serif]"
+      className="dash-stagger mx-auto w-[var(--content-width)] py-8 text-white md:py-10 [font-family:'Pinar',Tahoma,sans-serif]"
     >
       <div className="grid gap-5 md:grid-cols-3 md:gap-6">
         {transactionGroups.map((group) => {

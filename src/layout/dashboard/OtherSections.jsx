@@ -13,7 +13,7 @@ export default function OtherSections() {
   return (
     <main
       dir="rtl"
-      className="mx-auto w-[var(--content-width)] bg-black py-8 text-white md:py-10 [font-family:'Pinar',Tahoma,sans-serif]"
+      className="dash-stagger mx-auto w-[var(--content-width)] bg-black py-8 text-white md:py-10 [font-family:'Pinar',Tahoma,sans-serif]"
     >
       <button
         type="button"
@@ -22,7 +22,7 @@ export default function OtherSections() {
       >
         هوش مصنوعی
       </button>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
+      <div className="dash-stagger grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
         {secondaryCards.map((card) => (
           <button
             key={card.id}

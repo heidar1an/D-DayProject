@@ -30,23 +30,48 @@
         "firstName": "فاطمه",
         "lastName": "رحمان زاده",
         "username": "heidarian",
-        "university": "دانشگاه علوم پزشکی تهران",
-        "term": "۱۴",
+        "university": "سایر دانشگاه‌ها",
+        "term": "۴",
         "motivations": [
-          "learning",
-          "experience"
+          "experience",
+          "helping-people"
         ],
         "referralSources": [
-          "instagram",
+          "rubika",
           "friends"
         ],
         "email": "",
         "birthDate": "",
         "grade": "دوره علوم پایه",
-        "favoriteCourses": []
+        "favoriteCourses": [],
+        "gender": "",
+        "avatar": "",
+        "avatarConfig": {
+          "skin": "t2",
+          "face": "round",
+          "hairColor": "gray",
+          "eyes": "happy",
+          "eyeColor": "honey",
+          "brows": "thin",
+          "mouth": "smile",
+          "nose": "line",
+          "facialHair": "mustache",
+          "body": "medium",
+          "covering": "cap",
+          "coveringColor": "olive",
+          "accessories": [
+            "glasses-square",
+            "stethoscope"
+          ],
+          "bg": "mint",
+          "gender": "male",
+          "hair": "sidepart",
+          "cloth": "tshirt",
+          "clothColor": "navy"
+        }
       },
       "createdAt": "2026-09-11T10:58:07.985Z",
-      "updatedAt": "2026-09-11T18:53:49.489Z"
+      "updatedAt": "2026-09-12T07:08:26.636Z"
     }
   ]
 }

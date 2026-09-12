@@ -208,7 +208,7 @@ export default function Pomodoro({
   const showFinishButton = isBreak || isRunning || secondsLeft < duration;
 
   return (
-    <div className="pomodoro" dir="rtl">
+    <div className="pomodoro dash-stagger" dir="rtl">
       <div className="pomodoro__hero">
         <div className={circleClassName}>
           <div

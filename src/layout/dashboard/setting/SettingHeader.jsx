@@ -31,12 +31,19 @@ const SettingHeader = ({ activeTab, onTabChange }) => {
 
   return (
     <div dir="rtl" className="w-full">
-      {/* کانتینر اصلی هدر - رنگ پس زمینه حدودی از روی عکس انتخاب شده */}
-      <div className="flex items-center justify-between bg-[#2d2d2d] rounded-full px-6 py-2 shadow-lg">
-        
-        {/* بخش تب‌ها (لینک‌های سمت چپ) */}
-        <div className="relative flex items-center">
-          
+      {/* کانتینر اصلی هدر - عنوان سمت راست، تب‌ها دقیقاً وسط (ستون‌های 1fr دو طرف قرینه‌اند) */}
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 bg-[#2d2d2d] rounded-full px-6 py-2 shadow-lg">
+
+        {/* عنوان تنظیمات (سمت راست) */}
+        <div className="min-w-0 justify-self-start">
+          <h2 className="m-0 text-2xl leading-none tracking-wide text-white font-extrabold md:text-3xl [font-family:'Doran',Tahoma,sans-serif]">
+            تنظیمات
+          </h2>
+        </div>
+
+        {/* بخش تب‌ها (وسط) */}
+        <div className="relative flex min-w-0 items-center">
+
           {/* پس‌زمینه متحرک (انیمیشن حرکت رنگ #ab8e7c) */}
           <div
             className="absolute top-0 bottom-0 my-auto h-full bg-[#ab8e7c] rounded-full transition-all duration-300 ease-in-out"
@@ -48,13 +55,13 @@ const SettingHeader = ({ activeTab, onTabChange }) => {
           />
 
           {/* دکمه‌های تب */}
-          <div className="flex items-center gap-1 relative z-10">
+          <div className="relative z-10 flex items-center gap-1">
             {tabs.map((tab, index) => (
               <button
                 key={tab.id}
                 ref={(el) => (tabRefs.current[index] = el)}
                 onClick={() => onTabChange(tab.id)}
-                className={`px-5 py-2.5 rounded-full text-sm md:text-base transition-colors duration-300 ${
+                className={`px-5 py-2.5 rounded-full text-sm whitespace-nowrap transition-colors duration-300 md:text-base ${
                   activeTab === tab.id
                     ? 'text-white font-medium' // متن تب فعال
                     : 'text-gray-300 hover:text-white' // متن تب‌های غیرفعال
@@ -66,12 +73,8 @@ const SettingHeader = ({ activeTab, onTabChange }) => {
           </div>
         </div>
 
-        {/* عنوان تنظیمات (سمت راست) */}
-        <div className="pl-4">
-          <h2 className="text-white text-3xl font-doran m-0 leading-none tracking-wide">
-            تنظیمات
-          </h2>
-        </div>
+        {/* ستون سوم خالی تا تب‌ها نسبت به کل نوار وسط‌چین بمانند */}
+        <div aria-hidden="true" />
       </div>
     </div>
   );

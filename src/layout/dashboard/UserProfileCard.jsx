@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import bubbleChatIcon from '../../../images/icons/bubble-chat.png';
+import AvatarSvg from './setting/avatar/AvatarSvg';
 
 function getProfileName(userData) {
   const profile = userData?.profile || {};
@@ -48,8 +49,16 @@ export default function UserProfileCard({ userData }) {
         <div className="user-profile-card__avatar-figure">
           <div className="user-profile-card__avatar-circle">
             <div className="user-profile-card__avatar-inner">
-              <span className="user-profile-card__avatar-head" />
-              <span className="user-profile-card__avatar-body" />
+              {profile.avatarConfig ? (
+                <div className="user-profile-card__avatar-custom">
+                  <AvatarSvg config={profile.avatarConfig} title="آواتار کاربر" />
+                </div>
+              ) : (
+                <>
+                  <span className="user-profile-card__avatar-head" />
+                  <span className="user-profile-card__avatar-body" />
+                </>
+              )}
             </div>
           </div>
           <span className="user-profile-card__level">سطح اول</span>

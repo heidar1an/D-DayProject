@@ -4,8 +4,8 @@ import PeersSection from './PeersSection';
 
 export default function DashboardHome({ userData }) {
   return (
-    <main className="dashboard__main">
-      <div className="dashboard__top-row">
+    <main className="dashboard__main dash-stagger">
+      <div className="dashboard__top-row dash-stagger">
         <aside className="dashboard__profile">
           <UserProfileCard userData={userData} />
         </aside>
@@ -37,7 +37,7 @@ export default function DashboardHome({ userData }) {
         </section>
       </div>
 
-      <div className="dashboard__cards-row" aria-label="ابزارهای مطالعه و همخوان‌ها">
+      <div className="dashboard__cards-row dash-stagger" aria-label="ابزارهای مطالعه و همخوان‌ها">
         <PeersSection />
         <DashboardActionCards />
       </div>

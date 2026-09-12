@@ -351,6 +351,18 @@
   border-radius: 50% 50% 18% 18%;
 }
 
+/* آواتار ساخته‌شده در آواتارساز */
+.user-profile-card__avatar-custom {
+  width: 100%;
+  height: 100%;
+}
+
+.user-profile-card__avatar-custom svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .user-profile-card__level {
   position: absolute;
   bottom: -20px;
@@ -577,7 +589,18 @@
   margin: 14px auto 0;
 }
 
-/* ── انیمیشن نرم ورود لایه‌های داشبورد (هم‌حس با reveal صفحه اصلی) ── */
+/* ── انیمیشن نرم ورود لایه‌های داشبورد (هم‌حس با reveal صفحه اصلی) ──
+   خود لایه فقط یک فید کوتاه می‌شود؛ حرکت اصلی را بلوک‌های داخلی
+   با کلاس dash-stagger به‌صورت پله‌ای انجام می‌دهند. */
+@keyframes dashboard-layer-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @keyframes dashboard-layer-reveal {
   from {
     opacity: 0;
@@ -601,7 +624,7 @@
 }
 
 .dashboard-layer-reveal {
-  animation: dashboard-layer-reveal 620ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation: dashboard-layer-fade 280ms ease-out backwards;
 }
 
 /* هدر تنظیمات مثل هدر صفحه اصلی از بالا وارد می‌شود */
@@ -609,16 +632,32 @@
   animation: dashboard-layer-reveal-down 720ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
+/* ورود پله‌ای بلوک‌های داخلی هر لایه — هم‌حس با data-reveal صفحه اصلی */
+.dash-stagger > * {
+  animation: dashboard-block-reveal 760ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.dash-stagger > *:nth-child(1) { animation-delay: 70ms; }
+.dash-stagger > *:nth-child(2) { animation-delay: 160ms; }
+.dash-stagger > *:nth-child(3) { animation-delay: 250ms; }
+.dash-stagger > *:nth-child(4) { animation-delay: 340ms; }
+.dash-stagger > *:nth-child(5) { animation-delay: 430ms; }
+.dash-stagger > *:nth-child(n + 6) { animation-delay: 500ms; }
+
+@keyframes dashboard-block-reveal {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 30px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
 /* پنل تنظیمات با تاخیر کوتاه بعد از هدر ظاهر می‌شود */
 .dashboard__settings-panel.dashboard-layer-reveal {
   animation-delay: 110ms;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .dashboard-layer-reveal,
-  .dashboard-layer-reveal--down {
-    animation: none;
-  }
 }
 
 @media (max-width: 1100px) {

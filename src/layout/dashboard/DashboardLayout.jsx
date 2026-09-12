@@ -4,6 +4,7 @@ import SettingHeader from './setting/SettingHeader';
 import EditProfile from './setting/EditProfile';
 import Pays from './setting/Pays';
 import Security from './setting/Security';
+import Soppurt from './setting/Soppurt';
 import DashboardHome from './DashboardHome';
 import CoursesSection from './CoursesSection';
 import TestsSection from './TestsSection';
@@ -74,7 +75,7 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
         aria-label="لیگ"
         className="mx-auto w-[var(--content-width)] py-8 text-white md:py-10 [font-family:'Pinar',Tahoma,sans-serif]"
       >
-        <div className="rounded-[2.5rem] bg-[#282828] p-10 text-center md:rounded-[3rem] md:p-14">
+        <div className="dash-stagger rounded-[2.5rem] bg-[#282828] p-10 text-center md:rounded-[3rem] md:p-14">
           <h2 className="text-2xl text-[#937fcd] md:text-3xl [font-family:'Doran',Tahoma,sans-serif]">
             لیگ
           </h2>
@@ -137,13 +138,15 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
               <Pays transactions={userData?.transactions} />
             ) : settingsTab === 'security' ? (
               <Security />
+            ) : settingsTab === 'support' ? (
+              <Soppurt />
             ) : (
               <section
                 dir="rtl"
                 aria-label={settingsTabLabels[settingsTab]}
                 className="mx-auto w-[var(--content-width)] py-8 text-white md:py-10 [font-family:'Pinar',Tahoma,sans-serif]"
               >
-                <div className="rounded-[2.5rem] bg-[#282828] p-10 text-center md:rounded-[3rem] md:p-14">
+                <div className="dash-stagger rounded-[2.5rem] bg-[#282828] p-10 text-center md:rounded-[3rem] md:p-14">
                   <h2 className="text-2xl text-[#b99a86] md:text-3xl [font-family:'Doran',Tahoma,sans-serif]">
                     {settingsTabLabels[settingsTab]}
                   </h2>

@@ -5,7 +5,7 @@ export default function NotificationsSection() {
       aria-label="اعلان ها"
       className="notifications dashboard-layer-reveal"
     >
-      <div className="notifications__panel">
+      <div className="notifications__panel dash-stagger">
         <h1 className="notifications__title">اعلان ها</h1>
 
         {/* آیتم‌های اعلان‌ها بعداً اینجا رندر می‌شوند */}

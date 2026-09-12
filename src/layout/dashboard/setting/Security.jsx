@@ -91,7 +91,7 @@ export default function Security() {
     <section
       dir="rtl"
       aria-label="امنیت"
-      className="mx-auto w-[var(--content-width)] py-8 text-white md:py-10 [font-family:'Pinar',Tahoma,sans-serif]"
+      className="dash-stagger mx-auto w-[var(--content-width)] py-8 text-white md:py-10 [font-family:'Pinar',Tahoma,sans-serif]"
     >
       <h2 className={sectionTitleClass}>اشتراک گذاری اطلاعات</h2>
 

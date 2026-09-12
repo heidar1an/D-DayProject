@@ -48,7 +48,7 @@ export default function TestsSection() {
     >
 
       {/* ---------- Main Content (Grid) ---------- */}
-      <main className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
+      <main className="dash-stagger grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
 
         {/* کارت بزرگ بانک تست (نیمی از عرض محتوا) */}
         <div className="lg:col-span-6 lg:min-h-0 relative w-full h-150 lg:h-auto rounded-[2.5rem] overflow-hidden group cursor-pointer">

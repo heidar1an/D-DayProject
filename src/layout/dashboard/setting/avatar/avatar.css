@@ -1,0 +1,39 @@
+/* استایل‌های لایه آواتارساز — هماهنگ با تم تیره تپش */
+
+.avatar-builder {
+  animation: avatar-builder-pop 0.28s ease-out both;
+}
+
+@keyframes avatar-builder-pop {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* اسکرول‌بار نازک برای ناحیه گزینه‌ها */
+.avatar-builder__scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(185, 154, 134, 0.45) transparent;
+}
+
+.avatar-builder__scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.avatar-builder__scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.avatar-builder__scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(185, 154, 134, 0.45);
+}
+
+.avatar-builder__scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(185, 154, 134, 0.7);
+}

@@ -1,6 +1,9 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 
 import { saveUserRecord } from '../../../services/userStorage';
+import AvatarBuilder from './avatar/AvatarBuilder';
+import AvatarSvg from './avatar/AvatarSvg';
+import { defaultAvatarConfig } from './avatar/avatarOptions';
 
 const inputClass =
   'w-full rounded-2xl border border-transparent bg-[#1d1d1d] py-3.5 pl-5 pr-12 text-white outline-none transition-colors duration-200 placeholder:text-[#777] focus:border-[#b99a86] [font-family:\'Pinar\',Tahoma,sans-serif]';
@@ -29,9 +32,6 @@ const gradeOptions = [
 ];
 
 const genderOptions = ['مرد', 'زن'];
-
-/* آواتار به‌صورت مربعی برش خورده و کوک‌شده ذخیره می‌شود تا حجم localStorage کنترل بماند */
-const AVATAR_SIZE = 256;
 
 function SvgIcon({ children, className = 'h-5 w-5' }) {
   return (
@@ -129,10 +129,11 @@ const AtIcon = ({ className }) => (
   </SvgIcon>
 );
 
-const CameraIcon = ({ className }) => (
+const PaletteIcon = ({ className }) => (
   <SvgIcon className={className}>
-    <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
-    <circle cx="12" cy="13" r="3" />
+    <path d="M12 22a1 1 0 0 1-1-1v-3H8a2 2 0 0 1-2-2v-2h10.5a2.5 2.5 0 0 0 2.45-2.9A2.5 2.5 0 0 0 16.5 7H13V4a1 1 0 0 1 1-1h2.5A5.5 5.5 0 0 1 22 8.66c0 2.34-1.5 4.4-3.34 5.98-1.55 1.33-3.32 2.3-4.66 2.86V21a1 1 0 0 1-2 0Z" />
+    <path d="M4 21v-3" />
+    <path d="M8 12a3 3 0 1 1 0-6" />
   </SvgIcon>
 );
 
@@ -219,10 +220,11 @@ export default function EditProfile({ userData, onUserDataChange, onLogout }) {
     gender: profile.gender ?? '',
     birthDate: profile.birthDate ?? '',
     avatar: profile.avatar ?? '',
+    avatarConfig: profile.avatarConfig ?? null,
   };
   const [form, setForm] = useState(initialForm);
   const [isSaved, setIsSaved] = useState(false);
-  const avatarInputRef = useRef(null);
+  const [isBuilderOpen, setIsBuilderOpen] = useState(false);
 
   const handleChange = (field) => (event) => {
     setForm((current) => ({ ...current, [field]: event.target.value }));
@@ -234,49 +236,14 @@ export default function EditProfile({ userData, onUserDataChange, onLogout }) {
     setIsSaved(false);
   };
 
-  /* تصویر انتخابی از وسط به مربع تبدیل و کوچک می‌شود تا آواتار همیشه بدون کشیدگی نمایش داده شود */
-  const handleAvatarChange = (event) => {
-    const file = event.target.files?.[0];
-    event.target.value = '';
+  /* کانفیگ پیش‌فرض آواتارساز بر اساس جنسیت ثبت‌شده در فرم */
+  const getBuilderInitialConfig = () =>
+    form.avatarConfig ?? defaultAvatarConfig(form.gender === 'زن' ? 'female' : 'male');
 
-    if (!file) return;
-
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      const image = new Image();
-
-      image.onload = () => {
-        const minSide = Math.min(image.width, image.height);
-        const sourceX = (image.width - minSide) / 2;
-        const sourceY = (image.height - minSide) / 2;
-        const canvas = document.createElement('canvas');
-
-        canvas.width = AVATAR_SIZE;
-        canvas.height = AVATAR_SIZE;
-
-        canvas
-          .getContext('2d')
-          .drawImage(
-            image,
-            sourceX,
-            sourceY,
-            minSide,
-            minSide,
-            0,
-            0,
-            AVATAR_SIZE,
-            AVATAR_SIZE,
-          );
-
-        setForm((current) => ({ ...current, avatar: canvas.toDataURL('image/jpeg', 0.85) }));
-        setIsSaved(false);
-      };
-
-      image.src = reader.result;
-    };
-
-    reader.readAsDataURL(file);
+  const handleAvatarSave = (config) => {
+    setForm((current) => ({ ...current, avatarConfig: config, avatar: '' }));
+    setIsBuilderOpen(false);
+    setIsSaved(false);
   };
 
   const handleSubmit = async (event) => {
@@ -296,14 +263,16 @@ export default function EditProfile({ userData, onUserDataChange, onLogout }) {
     <section
       dir="rtl"
       aria-label="ویرایش پروفایل"
-      className="mx-auto w-[var(--content-width)] py-8 text-white md:py-10 [font-family:'Pinar',Tahoma,sans-serif]"
+      className="dash-stagger mx-auto w-[var(--content-width)] py-8 text-white md:py-10 [font-family:'Pinar',Tahoma,sans-serif]"
     >
       <form onSubmit={handleSubmit} className="rounded-[2.5rem] bg-[#282828] p-8 md:rounded-[3rem] md:p-12">
         <header className="flex items-center gap-5">
-          {/* جای آواتار: اندازه بزرگ و دایره‌ای تا تصویر بعدا دقیق دیده شود */}
+          {/* جای آواتار: پیش‌نمایش زنده آواتار ساخته‌شده یا نمای پیش‌فرض */}
           <div className="relative shrink-0">
             <span className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-[#b99a86]/30 bg-[#b99a86]/15 text-[#b99a86] md:h-28 md:w-28">
-              {form.avatar ? (
+              {form.avatarConfig ? (
+                <AvatarSvg config={form.avatarConfig} className="h-full w-full" />
+              ) : form.avatar ? (
                 <img src={form.avatar} alt="آواتار کاربر" className="h-full w-full object-cover" />
               ) : (
                 <UserIcon className="h-12 w-12 md:h-14 md:w-14" />
@@ -311,22 +280,13 @@ export default function EditProfile({ userData, onUserDataChange, onLogout }) {
             </span>
             <button
               type="button"
-              onClick={() => avatarInputRef.current?.click()}
+              onClick={() => setIsBuilderOpen(true)}
               aria-label="ویرایش آواتار"
               title="ویرایش آواتار"
               className="absolute bottom-0 left-0 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-[#b99a86] text-white shadow-[0_4px_12px_rgba(0,0,0,0.4)] transition-colors duration-200 hover:bg-[#a3826e]"
             >
-              <CameraIcon className="h-4 w-4" />
+              <PaletteIcon className="h-4 w-4" />
             </button>
-            <input
-              ref={avatarInputRef}
-              type="file"
-              accept="image/*"
-              className="sr-only"
-              tabIndex={-1}
-              aria-hidden="true"
-              onChange={handleAvatarChange}
-            />
           </div>
           <div>
             <h2 className="text-2xl text-white md:text-3xl [font-family:'Doran',Tahoma,sans-serif]">
@@ -335,6 +295,14 @@ export default function EditProfile({ userData, onUserDataChange, onLogout }) {
             <p className="mt-1 text-sm text-[#999]">مشخصات کاربری</p>
           </div>
         </header>
+
+        {isBuilderOpen && (
+          <AvatarBuilder
+            initialConfig={getBuilderInitialConfig()}
+            onSave={handleAvatarSave}
+            onClose={() => setIsBuilderOpen(false)}
+          />
+        )}
 
         <div className="mt-10 grid gap-10 lg:grid-cols-2 lg:gap-12">
           {/* اطلاعات شخصی */}
