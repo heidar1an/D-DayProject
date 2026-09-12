@@ -171,39 +171,6 @@ const tapeshFeatures = [
   },
 ];
 
-const aboutStats = [
-  {
-    value: '۴ مسیر',
-    label: 'برای یادگیری، مرور، آزمون و رشد',
-  },
-  {
-    value: '۳۰٪',
-    label: 'تخفیف برای مطالعه گروهی',
-  },
-  {
-    value: '۲۴/۷',
-    label: 'همراهی دستیار هوشمند با دانشجو',
-  },
-];
-
-const aboutPrinciples = [
-  {
-    title: 'یادگیری قابل اعتماد',
-    description: 'محتوا باید دقیق، مرحله‌به‌مرحله و قابل اتکا باشد؛ نه فقط زیاد و پراکنده.',
-    accent: 'blue',
-  },
-  {
-    title: 'تمرین هدفمند',
-    description: 'تست و مرور وقتی ارزش دارد که به دانشجو نشان بدهد کجا ایستاده و قدم بعدی چیست.',
-    accent: 'green',
-  },
-  {
-    title: 'مسیر انسانی‌تر',
-    description: 'درس پزشکی سنگین است؛ تپش تلاش می‌کند این مسیر را روشن‌تر، آرام‌تر و همراه‌تر کند.',
-    accent: 'brown',
-  },
-];
-
 const articles = [
   {
     title: 'مقاله اول',
@@ -1070,7 +1037,7 @@ function App() {
           <a className="site-nav__link site-nav__link--pricing" href="#benefits" onClick={closeMenu}>
             تعرفه‌ها
           </a>
-          <a className="site-nav__link site-nav__link--about" href="#about" onClick={closeMenu}>
+          <a className="site-nav__link site-nav__link--about" href="#quote" onClick={closeMenu}>
             درباره ما
           </a>
         </nav>
@@ -1170,72 +1137,6 @@ function App() {
               <strong>پروفسور علیرضا یلدا</strong>
               <span>پدر بیماری‌های عفونی ایران</span>
             </div>
-          </div>
-        </section>
-
-        <section
-          className="about section-shell"
-          id="about"
-          data-reveal
-          aria-labelledby="about-title"
-        >
-          <div className="about__content">
-            <div className="about__copy">
-              <span className="about__eyebrow">درباره تپش</span>
-              <h2 id="about-title">
-                برای روزهایی که درس زیاد است، اما مسیر نباید مبهم باشد
-              </h2>
-              <p>
-                تپش برای دانشجویانی ساخته شده که می‌خواهند پزشکی را عمیق‌تر،
-                منظم‌تر و با اضطراب کمتر بخوانند. ما درسنامه، تست، جمع‌بندی،
-                رقابت و ابزار هوشمند را کنار هم می‌گذاریم تا مطالعه از یک کار
-                فرسایشی به یک مسیر قابل پیگیری تبدیل شود.
-              </p>
-              <p>
-                ایده ساده است: هر دانشجو باید بداند امروز چه بخواند، چطور تمرین
-                کند و از کجا بفهمد که واقعاً جلو رفته است.
-              </p>
-              <div className="about__actions">
-                <a className="button button--light" href="#green-path">
-                  مسیر یادگیری
-                </a>
-                <a className="about__text-link" href="#products">
-                  مشاهده محصولات
-                  <ArrowLeftIcon />
-                </a>
-              </div>
-            </div>
-
-            <div className="about__visual">
-              <div className="about__image-frame">
-                <img src={tapeshCollage} alt="فضای یادگیری تپش برای دانشجویان پزشکی" />
-              </div>
-              <div className="about__pulse-card" aria-hidden="true">
-                <img src={heartbeatMark} alt="" />
-                <span>تپش</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="about__stats" aria-label="خلاصه ویژگی‌های تپش">
-            {aboutStats.map((stat) => (
-              <div className="about-stat" key={stat.value}>
-                <strong>{stat.value}</strong>
-                <span>{stat.label}</span>
-              </div>
-            ))}
-          </div>
-
-          <div className="about__principles" aria-label="اصول طراحی تپش">
-            {aboutPrinciples.map((principle) => (
-              <article
-                className={`about-principle about-principle--${principle.accent}`}
-                key={principle.title}
-              >
-                <h3>{principle.title}</h3>
-                <p>{principle.description}</p>
-              </article>
-            ))}
           </div>
         </section>
 
