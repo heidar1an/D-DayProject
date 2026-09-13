@@ -7,6 +7,7 @@ import Security from './setting/Security';
 import Soppurt from './setting/Soppurt';
 import DashboardHome from './DashboardHome';
 import CoursesSection from './CoursesSection';
+import ComprehensiveCourseLayer from './courses/ComprehensiveCourseLayer';
 import TestsSection from './TestsSection';
 import OtherSections from './OtherSections';
 import NotificationsSection from './NotificationsSection';
@@ -25,6 +26,7 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState('profile');
   const [areNotificationsOpen, setAreNotificationsOpen] = useState(false);
+  const [openCourseLayer, setOpenCourseLayer] = useState(null);
   const {
     secondsLeft,
     isRunning,
@@ -41,6 +43,7 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
     setActiveSection(sectionId);
     setIsSettingsOpen(false);
     setAreNotificationsOpen(false);
+    setOpenCourseLayer(null);
   };
 
   const handleSettingsToggle = () => {
@@ -52,6 +55,7 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
     setSettingsTab('profile');
     setIsSettingsOpen(true);
     setAreNotificationsOpen(false);
+    setOpenCourseLayer(null);
   };
 
   const handleNotificationsToggle = () => {
@@ -62,11 +66,20 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
 
     setIsSettingsOpen(false);
     setAreNotificationsOpen(true);
+    setOpenCourseLayer(null);
+  };
+
+  /* فعلاً فقط «درسنامه جامع علوم پایه» لایه دارد؛ بقیه دوره‌ها به‌زودی */
+  const handleOpenCourse = (courseId) => {
+    if (courseId !== 'comprehensive') return;
+
+    setOpenCourseLayer(courseId);
+    window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
   const sections = {
     dashboard: <DashboardHome userData={userData} />,
-    courses: <CoursesSection />,
+    courses: <CoursesSection onOpenCourse={handleOpenCourse} />,
     tests: <TestsSection />,
     other: <OtherSections />,
     league: (
@@ -158,6 +171,10 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
         </div>
       ) : areNotificationsOpen ? (
         <NotificationsSection />
+      ) : openCourseLayer ? (
+        <div className="dashboard__section dashboard-layer-reveal" key={openCourseLayer}>
+          <ComprehensiveCourseLayer onBack={() => setOpenCourseLayer(null)} />
+        </div>
       ) : (
         <div className="dashboard__section dashboard-layer-reveal" key={activeSection}>
           {sections[activeSection]}

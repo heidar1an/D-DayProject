@@ -19,7 +19,14 @@ const MINI_LESSONS = [
   { id: "mini-4" },
 ];
 
-export default function CoursesSection() {
+/* اطلاعات «ادامه یادگیری» — فعلاً ثابت؛ بعداً از پیشرفت واقعی کاربر پر می‌شود */
+const RESUME_LESSON = {
+  subject: "آناتومی",
+  lesson: "فصل ۵: سیستم عضلانی",
+  progress: 35,
+};
+
+export default function CoursesSection({ onOpenCourse }) {
   const scrollToCatalog = () => {
     document
       .getElementById("courses-catalog")
@@ -35,6 +42,35 @@ export default function CoursesSection() {
       <h1 className="mb-16 text-right text-3xl text-[#5b8cc7] md:mb-24 md:text-4xl [font-family:'Doran',Tahoma,sans-serif]">
         دوره های من
       </h1>
+
+      {/* ── کادر ادامه یادگیری: درس آخر کاربر همان بالا دیده می‌شود ── */}
+      <aside className="mb-14 flex flex-wrap items-center gap-4 rounded-[2rem] border border-white/10 bg-[#1d2b3d]/45 p-5 backdrop-blur-sm md:mb-16 md:rounded-[2.5rem] md:p-6">
+        <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-[#5b8cc7]/45 bg-[#5b8cc7]/15 text-[#9cc0e8]">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M8 5.5v13l11-6.5z" fill="currentColor" stroke="none" />
+          </svg>
+        </span>
+
+        <div className="min-w-[220px] flex-1">
+          <p className="text-xs text-[#8a8a8a]">ادامه از جایی که رها کردی</p>
+          <strong className="mt-1 block truncate text-[#9cc0e8] [font-family:'Doran',Tahoma,sans-serif]">
+            {RESUME_LESSON.subject} · {RESUME_LESSON.lesson}
+          </strong>
+          <span className="mt-2 block h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+            <span
+              className="block h-full rounded-full bg-gradient-to-l from-[#5b8cc7] to-[#937fcd]"
+              style={{ width: `${RESUME_LESSON.progress}%` }}
+            />
+          </span>
+        </div>
+
+        <button
+          type="button"
+          className="cursor-pointer rounded-2xl bg-gradient-to-l from-[#3c6ea5] to-[#2e4b75] px-6 py-3 text-sm text-white transition-transform duration-200 hover:-translate-y-0.5 [font-family:'Doran',Tahoma,sans-serif]"
+        >
+          ادامه یادگیری
+        </button>
+      </aside>
 
       <div className="mb-16 flex flex-col items-center gap-3 text-center md:mb-24">
         <h2 className="text-xl text-white md:text-2xl [font-family:'Doran',Tahoma,sans-serif]">
@@ -57,9 +93,23 @@ export default function CoursesSection() {
           <button
             key={course.id}
             type="button"
-            className="flex min-h-[180px] cursor-pointer flex-col justify-end rounded-[2rem] bg-[#2a2a2a] px-4 py-6 text-center shadow-none transition duration-200 hover:-translate-y-0.5 hover:bg-[#333333] hover:ring-1 hover:ring-[#2e4b75] md:min-h-[210px] md:rounded-[2.5rem] md:px-5 md:py-7"
+            onClick={() => onOpenCourse?.(course.id)}
+            className={`relative flex min-h-[180px] cursor-pointer flex-col justify-end rounded-[2rem] bg-[#2a2a2a] px-4 py-6 text-center transition duration-200 hover:-translate-y-0.5 hover:bg-[#333333] hover:ring-1 md:min-h-[210px] md:rounded-[2.5rem] md:px-5 md:py-7 ${
+              course.id === "comprehensive"
+                ? "ring-1 ring-[#5b8cc7]/60 bg-[#1d2b3d] hover:ring-[#5b8cc7]"
+                : "hover:ring-[#2e4b75]"
+            }`}
           >
-            <span className="text-sm leading-7 text-[#5b8cc7] md:text-base [font-family:'Doran',Tahoma,sans-serif]">
+            {course.id === "comprehensive" && (
+              <span className="absolute top-4 right-4 rounded-full bg-[#5b8cc7] px-3 py-1 text-xs text-white [font-family:'Doran',Tahoma,sans-serif]">
+                فعال شد
+              </span>
+            )}
+            <span
+              className={`text-sm leading-7 md:text-base [font-family:'Doran',Tahoma,sans-serif] ${
+                course.id === "comprehensive" ? "text-white" : "text-[#5b8cc7]"
+              }`}
+            >
               {course.title}
             </span>
           </button>
