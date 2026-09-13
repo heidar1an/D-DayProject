@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import './comprehensiveCourse.css';
+import AnatomyLearningLayer from './learning/AnatomyLearningLayer';
 
 import anatomyImg from '../../../../images/courses/ChatGPT Image ۲۰ شهریور ۱۴۰۵، ۱۶_۴۴_۱۳.png';
 import physiologyImg from '../../../../images/courses/ChatGPT Image ۲۰ شهریور ۱۴۰۵، ۱۶_۴۵_۱۹.png';
@@ -99,13 +100,14 @@ function getSubjectStatus(subject) {
   return 'fresh';
 }
 
-function SubjectCard({ subject, index }) {
+function SubjectCard({ subject, index, onOpen }) {
   const status = getSubjectStatus(subject);
 
   return (
     <button
       type="button"
       className={`dars-card dars-card--${status}`}
+      onClick={() => onOpen?.(subject.id)}
       style={{
         '--accent': subject.accent,
         '--p': `${subject.progress}%`,
@@ -159,15 +161,16 @@ function SubjectCard({ subject, index }) {
 
 export default function ComprehensiveCourseLayer({ onBack }) {
   const [filter, setFilter] = useState('all');
+  const [openSubject, setOpenSubject] = useState(null);
   const gridRef = useRef(null);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if (event.key === 'Escape') onBack?.();
+      if (event.key === 'Escape' && !openSubject) onBack?.();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onBack]);
+  }, [onBack, openSubject]);
 
   /* نقطه نور کارت‌ها با حرکت اشاره‌گر جابه‌جا می‌شود تا حس زنده بودن بدهد */
   const handleGridPointerMove = (event) => {
@@ -199,6 +202,10 @@ export default function ComprehensiveCourseLayer({ onBack }) {
     SUBJECTS.reduce((total, subject) => total + subject.progress, 0) / SUBJECTS.length,
   );
   const startedCount = SUBJECTS.filter((subject) => subject.progress > 0).length;
+
+  if (openSubject === 'anatomy') {
+    return <AnatomyLearningLayer onBack={() => setOpenSubject(null)} />;
+  }
 
   return (
     <section className="dars-layer" dir="rtl" aria-label="درسنامه جامع علوم پایه">
@@ -281,7 +288,12 @@ export default function ComprehensiveCourseLayer({ onBack }) {
 
         <div className="dars-grid dash-stagger" key={filter} ref={gridRef} onPointerMove={handleGridPointerMove}>
           {visibleSubjects.map((subject, index) => (
-            <SubjectCard key={subject.id} subject={subject} index={index} />
+            <SubjectCard
+              key={subject.id}
+              subject={subject}
+              index={index}
+              onOpen={(subjectId) => subjectId === 'anatomy' && setOpenSubject(subjectId)}
+            />
           ))}
         </div>
 

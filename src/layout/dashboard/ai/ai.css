@@ -1,0 +1,1101 @@
+/*
+ * استایل AI Card و پاپ‌آپ تپش هوشمند — کاملاً در زبان بصری داشبورد:
+ * سطوح #242426/#1d1d1f، شعاع‌های بزرگ، بنفش #937fcd فقط به‌عنوان نشان AI،
+ * بدون گرادیان سنگین و بدون گلو. انیمیشن‌ها محدود و GPU-friendly اند.
+ */
+
+/* ── کارت Idle در داشبورد ────────────────────────────────────────────────── */
+
+.ai-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 34px 36px 30px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 40px;
+  background: #242426;
+  color: #fff;
+  font-family: 'Pinar', Tahoma, sans-serif;
+  transition: border-color 240ms ease, background-color 240ms ease;
+}
+
+.ai-card:hover {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.ai-card__head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ai-card__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  background: rgba(147, 127, 205, 0.14);
+  color: #937fcd;
+}
+
+.ai-card__titles {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.ai-card__title {
+  margin: 0;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 1.22rem;
+  font-weight: 700;
+}
+
+.ai-card__subtitle {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #9a9aa0;
+}
+
+.ai-card__suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 18px 2px 16px;
+}
+
+/* دکمهٔ «کادر پیام» کارت — کلیک روی آن پاپ‌آپ را باز می‌کند */
+.ai-card__composer-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 22px;
+  background: #1d1d1f;
+  padding: 15px 18px;
+  color: #8a8a90;
+  font: inherit;
+  font-size: 0.92rem;
+  text-align: start;
+  cursor: text;
+  transition: border-color 200ms ease, background-color 200ms ease, box-shadow 200ms ease;
+}
+
+.ai-card__composer-btn:hover {
+  border-color: rgba(147, 127, 205, 0.45);
+  background: #1f1f22;
+  box-shadow: 0 0 0 3px rgba(147, 127, 205, 0.06);
+}
+
+.ai-card__composer-send {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 11px;
+  background: #38383c;
+  color: #b9b9bf;
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+.ai-card__composer-btn:hover .ai-card__composer-send {
+  background: #937fcd;
+  color: #fff;
+}
+
+/* نوار «ادامهٔ گفت‌وگو» وقتی مکالمه‌ای در جریان است */
+.ai-card__resume {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  margin-top: 16px;
+  border: 1px solid rgba(147, 127, 205, 0.25);
+  border-radius: 18px;
+  background: rgba(147, 127, 205, 0.06);
+  padding: 12px 16px;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition: background-color 200ms ease, border-color 200ms ease;
+}
+
+.ai-card__resume:hover {
+  border-color: rgba(147, 127, 205, 0.5);
+  background: rgba(147, 127, 205, 0.1);
+}
+
+.ai-card__resume-label {
+  flex: none;
+  border-radius: 999px;
+  background: rgba(147, 127, 205, 0.16);
+  padding: 4px 12px;
+  color: #b3a3e0;
+  font-size: 0.72rem;
+}
+
+.ai-card__resume-snippet {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #c9c9ce;
+  font-size: 0.82rem;
+}
+
+.ai-card__resume-cta {
+  flex: none;
+  color: #b3a3e0;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+/* ── Chip مشترک ─────────────────────────────────────────────────────────── */
+
+.ai-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 7px 14px;
+  color: #c2c2c7;
+  font: inherit;
+  font-size: 0.8rem;
+  line-height: 1.7;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.ai-chip:hover {
+  border-color: rgba(147, 127, 205, 0.45);
+  background: rgba(147, 127, 205, 0.08);
+  color: #e6e1f2;
+}
+
+.ai-chip--static {
+  cursor: default;
+  padding: 4px 10px;
+  font-size: 0.72rem;
+  color: #9a9aa0;
+}
+
+/* دکمهٔ شیشه‌ای مشترک (کارت/پاپ‌آپ) */
+.ai-card__ghost-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: transparent;
+  padding: 7px 14px;
+  color: #c9c9ce;
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+
+.ai-card__ghost-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.ai-card__ghost-btn--flash {
+  border-color: rgba(119, 183, 135, 0.5);
+  color: #9ed3ad;
+}
+
+/* ── پاپ‌آپ گفت‌وگو ──────────────────────────────────────────────────────── */
+
+.ai-popup-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 10, 12, 0.62);
+  padding: 24px;
+  animation: ai-backdrop-in 180ms ease;
+}
+
+@keyframes ai-backdrop-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.ai-popup {
+  display: flex;
+  flex-direction: column;
+  width: min(760px, 100%);
+  max-height: min(84vh, 780px);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 32px;
+  background: #202022;
+  color: #fff;
+  font-family: 'Pinar', Tahoma, sans-serif;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+  animation: ai-popup-in 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes ai-popup-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+}
+
+.ai-popup__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: none;
+  padding: 18px 22px 12px;
+}
+
+.ai-popup__title {
+  margin: 0;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.ai-popup__actions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-inline-start: auto;
+}
+
+/* پیام خوش‌آمد وقتی گفت‌وگو خالی است */
+.ai-popup__welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: 1;
+  padding: 40px 24px;
+  text-align: center;
+}
+
+.ai-popup__welcome-title {
+  margin: 0;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 1.15rem;
+  color: #e6e6ea;
+}
+
+.ai-popup__welcome-sub {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #8a8a90;
+}
+
+/* Composer همیشه در پایین پاپ‌آپ */
+.ai-popup__composer {
+  flex: none;
+  padding: 10px 22px 20px;
+}
+
+/* ── پنل گفت‌وگوهای ذخیره‌شده ────────────────────────────────────────────── */
+
+.ai-popup__saved {
+  flex: none;
+  margin: 0 22px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  background: #262629;
+  padding: 14px 16px;
+  animation: ai-popover-in 180ms ease;
+}
+
+.ai-popup__saved-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.ai-popup__saved-head h3 {
+  margin: 0;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 0.92rem;
+}
+
+.ai-popup__saved-empty {
+  margin: 6px 0 2px;
+  color: #8a8a90;
+  font-size: 0.8rem;
+}
+
+.ai-popup__saved-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 220px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  scrollbar-width: thin;
+  scrollbar-color: #3a3a3e transparent;
+}
+
+.ai-saved-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-saved-item__main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  padding: 8px 12px;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition: background-color 160ms ease;
+}
+
+.ai-saved-item__main:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.ai-saved-item__title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #e6e6ea;
+  font-size: 0.84rem;
+}
+
+.ai-saved-item__meta {
+  color: #8a8a90;
+  font-size: 0.7rem;
+}
+
+/* ── Composer ───────────────────────────────────────────────────────────── */
+
+.ai-composer__box {
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 26px;
+  background: #1d1d1f;
+  padding: 14px 18px 10px;
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+
+.ai-composer__box:focus-within {
+  border-color: rgba(147, 127, 205, 0.4);
+  box-shadow: 0 0 0 3px rgba(147, 127, 205, 0.07);
+}
+
+.ai-composer__input {
+  display: block;
+  width: 100%;
+  max-height: 180px;
+  border: 0;
+  background: transparent;
+  resize: none;
+  color: #f2f2f2;
+  font: inherit;
+  font-size: 0.95rem;
+  line-height: 1.9;
+  outline: none;
+}
+
+.ai-composer__input::placeholder {
+  color: #8a8a90;
+}
+
+.ai-composer__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 6px;
+}
+
+.ai-composer__tools {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.ai-composer__tools::-webkit-scrollbar {
+  display: none;
+}
+
+.ai-tool-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: none;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  padding: 6px 12px;
+  color: #b9b9bf;
+  font: inherit;
+  font-size: 0.78rem;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.ai-tool-btn:hover,
+.ai-tool-btn--active {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.ai-composer__side {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+}
+
+.ai-composer__counter {
+  font-size: 0.7rem;
+  color: #8a8a90;
+  white-space: nowrap;
+}
+
+.ai-mode-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  background: transparent;
+  padding: 6px 12px;
+  color: #b9b9bf;
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.ai-mode-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+/* دکمهٔ ارسال — بنفش کم‌حجم؛ در حالت توقف، خاکستری */
+.ai-send-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 14px;
+  background: #937fcd;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 160ms ease, transform 160ms ease;
+}
+
+.ai-send-btn:hover:not(:disabled) {
+  background: #a390dd;
+}
+
+.ai-send-btn:disabled {
+  background: #38383c;
+  color: #7c7c82;
+  cursor: default;
+}
+
+.ai-send-btn--stop {
+  background: #3a3a40;
+  color: #e6e6ea;
+}
+
+.ai-send-btn--stop:hover {
+  background: #45454b;
+}
+
+/* ── پیوست‌ها ────────────────────────────────────────────────────────────── */
+
+.ai-composer__attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-bottom: 10px;
+}
+
+.ai-attachment {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 220px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: #262629;
+  padding: 6px 10px;
+  color: #c2c2c7;
+  font-size: 0.75rem;
+}
+
+.ai-attachment--uploading {
+  opacity: 0.55;
+}
+
+.ai-attachment__thumb {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  object-fit: cover;
+}
+
+.ai-attachment__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ai-attachment__remove {
+  display: inline-flex;
+  border: 0;
+  background: transparent;
+  padding: 2px;
+  color: #8a8a90;
+  cursor: pointer;
+}
+
+.ai-attachment__remove:hover {
+  color: #fff;
+}
+
+/* ── پاپ‌اور (ابزارها/حالت‌ها) — رو به بالا ──────────────────────────────── */
+
+.ai-popover-anchor {
+  position: relative;
+  display: inline-flex;
+}
+
+.ai-popover {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  inset-inline-end: 0;
+  z-index: 30;
+  min-width: 180px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  background: #2b2b2e;
+  padding: 6px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  animation: ai-popover-in 160ms ease;
+}
+
+.ai-popover--start {
+  inset-inline-end: auto;
+  inset-inline-start: 0;
+}
+
+@keyframes ai-popover-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+.ai-popover__item {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 11px;
+  background: transparent;
+  padding: 8px 12px;
+  color: #c9c9ce;
+  font: inherit;
+  font-size: 0.8rem;
+  text-align: start;
+  cursor: pointer;
+}
+
+.ai-popover__item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.ai-popover__item--selected {
+  color: #b3a3e0;
+}
+
+/* ── مکالمه ─────────────────────────────────────────────────────────────── */
+
+.ai-conversation {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  flex: 1;
+  min-height: 120px;
+  overflow-y: auto;
+  margin-top: 4px;
+  padding: 8px 22px 14px;
+  scrollbar-width: thin;
+  scrollbar-color: #3a3a3e transparent;
+}
+
+.ai-conversation::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ai-conversation::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: #3a3a3e;
+}
+
+.ai-message {
+  font-size: 0.92rem;
+  line-height: 2;
+}
+
+/* پیام کاربر: حباب کوچک سمت چپ (قرارداد چت فارسی) */
+.ai-message--user {
+  align-self: flex-start;
+  max-width: min(78%, 34rem);
+  border-radius: 20px 20px 20px 6px;
+  background: #303034;
+  padding: 10px 16px;
+  white-space: pre-wrap;
+}
+
+.ai-message__attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+/* پیام AI: متن باز با نشان کوچک — خوانایی طولانی مثل یک مقاله */
+.ai-message--ai {
+  display: flex;
+  gap: 10px;
+  max-width: none;
+}
+
+.ai-message__avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  margin-top: 4px;
+  border-radius: 9px;
+  background: rgba(147, 127, 205, 0.14);
+  color: #937fcd;
+}
+
+.ai-message__body {
+  min-width: 0;
+  flex: 1;
+}
+
+.ai-message__stopped {
+  margin: 6px 0 0;
+  font-size: 0.75rem;
+  color: #8a8a90;
+}
+
+/* نشانگر استریم — کرسر چشمک‌زن ظریف در انتهای متن */
+.ai-md--streaming > :last-child::after {
+  content: '▍';
+  margin-inline-start: 2px;
+  color: #937fcd;
+  animation: ai-caret-blink 900ms steps(1) infinite;
+}
+
+@keyframes ai-caret-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* اکشن‌های پیام AI */
+.ai-message__actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: 8px;
+}
+
+.ai-icon-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  padding: 0 6px;
+  color: #8a8a90;
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.ai-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #e6e6ea;
+}
+
+.ai-icon-btn--active {
+  color: #b3a3e0;
+}
+
+.ai-icon-btn__hint {
+  position: absolute;
+  top: -24px;
+  inset-inline-start: 50%;
+  transform: translateX(50%);
+  border-radius: 8px;
+  background: #3a3a40;
+  padding: 2px 8px;
+  font-size: 0.68rem;
+  color: #e6e6ea;
+  white-space: nowrap;
+}
+
+.ai-message__follow-ups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* ── حالت Thinking — سه نقطهٔ ظریف ──────────────────────────────────────── */
+
+.ai-thinking {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 0;
+}
+
+.ai-thinking i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #8d7fbc;
+  animation: ai-thinking-pulse 1.2s ease-in-out infinite;
+}
+
+.ai-thinking i:nth-child(2) {
+  animation-delay: 150ms;
+}
+
+.ai-thinking i:nth-child(3) {
+  animation-delay: 300ms;
+}
+
+@keyframes ai-thinking-pulse {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ── خطا — آرام و بدون قرمز پررنگ ───────────────────────────────────────── */
+
+.ai-message--error .ai-error {
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 12px 16px;
+}
+
+.ai-error p {
+  margin: 0;
+  color: #b9b9bf;
+  font-size: 0.85rem;
+}
+
+.ai-error__retry {
+  border: 0;
+  background: transparent;
+  padding: 6px 0 0;
+  color: #b3a3e0;
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.ai-error__retry:hover {
+  text-decoration: underline;
+}
+
+/* ── Markdown داخل پیام AI ──────────────────────────────────────────────── */
+
+.ai-md {
+  color: #e8e8ea;
+}
+
+.ai-md__p {
+  margin: 0 0 10px;
+}
+
+.ai-md__p:last-child {
+  margin-bottom: 0;
+}
+
+.ai-md__h {
+  margin: 16px 0 8px;
+  color: #fff;
+  font-family: 'Doran', Tahoma, sans-serif;
+  line-height: 1.7;
+}
+
+.ai-md__h--1 {
+  font-size: 1.15rem;
+}
+
+.ai-md__h--2 {
+  font-size: 1.05rem;
+}
+
+.ai-md__h--3 {
+  font-size: 0.95rem;
+  color: #d6d0ea;
+}
+
+.ai-md__list {
+  margin: 0 0 10px;
+  padding-inline-start: 22px;
+}
+
+.ai-md__list--ol {
+  padding-inline-start: 24px;
+}
+
+.ai-md__list li {
+  margin-bottom: 4px;
+}
+
+.ai-md__quote {
+  margin: 10px 0;
+  border-inline-start: 3px solid rgba(147, 127, 205, 0.5);
+  border-radius: 6px;
+  background: rgba(147, 127, 205, 0.07);
+  padding: 8px 14px;
+  color: #d9d9de;
+}
+
+.ai-md__pre {
+  margin: 10px 0;
+  border-radius: 14px;
+  background: #17171a;
+  padding: 12px 16px;
+  overflow-x: auto;
+  text-align: left;
+  scrollbar-width: thin;
+}
+
+.ai-md__pre code {
+  color: #cdd7a3;
+  font-family: 'Vazirmatn', 'SF Mono', Menlo, monospace;
+  font-size: 0.8rem;
+  line-height: 1.9;
+}
+
+.ai-md__code {
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.07);
+  padding: 1px 7px;
+  color: #cdd7a3;
+  font-size: 0.82em;
+}
+
+.ai-md__table-wrap {
+  margin: 10px 0;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.ai-md__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.ai-md__table th,
+.ai-md__table td {
+  padding: 9px 14px;
+  text-align: start;
+}
+
+.ai-md__table th {
+  background: rgba(255, 255, 255, 0.045);
+  color: #fff;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.ai-md__table td {
+  border-top: 1px solid rgba(255, 255, 255, 0.055);
+  color: #d9d9de;
+}
+
+.ai-md__hr {
+  margin: 14px 0;
+  border: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ai-md__link {
+  color: #9db8dd;
+  text-decoration: none;
+}
+
+.ai-md__link:hover {
+  text-decoration: underline;
+}
+
+/* ── فوکوس‌رینگ یکدست برای دسترس‌پذیری ──────────────────────────────────── */
+
+.ai-card :is(button, textarea):focus-visible,
+.ai-popup :is(button, textarea):focus-visible {
+  outline: 2px solid rgba(147, 127, 205, 0.75);
+  outline-offset: 2px;
+  border-radius: 12px;
+}
+
+/* ── ریسپانسیو ──────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .ai-card {
+    padding: 24px 18px 20px;
+    border-radius: 28px;
+  }
+
+  .ai-card__badge {
+    width: 34px;
+    height: 34px;
+  }
+
+  .ai-card__title {
+    font-size: 1.05rem;
+  }
+
+  .ai-card__subtitle {
+    font-size: 0.78rem;
+  }
+
+  .ai-card__resume {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .ai-card__resume-snippet {
+    width: 100%;
+    flex-basis: 100%;
+    order: 3;
+  }
+
+  /* پاپ‌آپ در موبایل: شیت تمام‌عرض چسبیده به پایین */
+  .ai-popup-backdrop {
+    align-items: flex-end;
+    padding: 10px;
+  }
+
+  .ai-popup {
+    width: 100%;
+    max-height: 92dvh;
+    border-radius: 26px;
+  }
+
+  .ai-popup__head {
+    flex-wrap: wrap;
+    padding: 14px 16px 10px;
+  }
+
+  .ai-popup__actions {
+    width: 100%;
+    margin-inline-start: 0;
+    justify-content: flex-start;
+    order: 3;
+  }
+
+  .ai-popup__composer {
+    padding: 8px 12px 14px;
+  }
+
+  .ai-conversation {
+    padding: 6px 14px 12px;
+  }
+
+  .ai-message--user {
+    max-width: 88%;
+  }
+
+  .ai-popover {
+    min-width: 156px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* روی موبایل تیتر جمع‌وجورتر و ابزارها اسکرول افقی می‌شوند */
+  .ai-card__head {
+    flex-wrap: wrap;
+  }
+
+  .ai-composer__toolbar {
+    flex-wrap: wrap;
+  }
+
+  .ai-composer__side {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .ai-send-btn {
+    margin-inline-start: auto;
+  }
+}
+
+/* ── احترام به reduced-motion — هم‌راستا با بقیهٔ داشبورد ───────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-card *,
+  .ai-popup * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

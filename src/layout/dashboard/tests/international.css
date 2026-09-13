@@ -1,0 +1,190 @@
+/*
+ * استایل‌های اختصاصی «آزمون‌های بین‌الملل» — چیدمان عمده با Tailwind انجام می‌شود؛
+ * اینجا فقط افکت‌ها و اجزایی قرار دارند که با utility قابل بیان نیستند.
+ * پالت و فونت‌ها دقیقاً همان سیستم فعلی داشبورد است؛ رنگ جدیدی اضافه نشده.
+ */
+
+/* ── اسکلت لودینگ ── */
+.intl-sk {
+  border-radius: 0.75rem;
+  background: linear-gradient(100deg, rgba(255, 255, 255, 0.05) 40%, rgba(255, 255, 255, 0.11) 50%, rgba(255, 255, 255, 0.05) 60%);
+  background-size: 200% 100%;
+  animation: intl-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes intl-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+/* ── ترنسیشن ورود سؤال — کوتاه و نرم، بدون پرش ── */
+.intl-question-in {
+  animation: intl-question-in 340ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+@keyframes intl-question-in {
+  from { opacity: 0; transform: translate3d(0, 14px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+/* ── میکرو-تعامل انتخاب گزینه ── */
+.intl-option {
+  transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease;
+}
+
+.intl-option:active {
+  transform: scale(0.995);
+}
+
+/* حلقهٔ ظریف پاسخ صحیح پس از submit — بدون افکت تنبیهی یا انفجار */
+.intl-reveal {
+  animation: intl-reveal 460ms ease-out backwards;
+}
+
+@keyframes intl-reveal {
+  from { opacity: 0; transform: translate3d(0, 6px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+/* ── نوار پیشرفت حل سؤال ── */
+.intl-progress-fill {
+  transition: width 480ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── Hero: مدارهای انتزاعی «یادگیری جهانی» — بدون کره سه‌بعدی ── */
+.intl-hero-orbits {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.intl-hero-orbits span {
+  position: absolute;
+  border-radius: 999px;
+  border: 1px solid rgba(147, 127, 205, 0.16);
+}
+
+.intl-hero-orbits span:nth-child(1) {
+  width: 420px;
+  height: 420px;
+  left: -120px;
+  top: -180px;
+}
+
+.intl-hero-orbits span:nth-child(2) {
+  width: 300px;
+  height: 300px;
+  left: -60px;
+  top: -120px;
+  border-color: rgba(147, 127, 205, 0.24);
+}
+
+.intl-hero-orbits span:nth-child(3) {
+  width: 160px;
+  height: 160px;
+  right: 12%;
+  bottom: -70px;
+  border-color: rgba(119, 183, 135, 0.2);
+}
+
+.intl-hero-orbits i {
+  position: absolute;
+  border-radius: 999px;
+  background: rgba(147, 127, 205, 0.55);
+  width: 5px;
+  height: 5px;
+  left: 260px;
+  top: 60px;
+}
+
+.intl-hero-orbits i:last-child {
+  background: rgba(119, 183, 135, 0.5);
+  left: auto;
+  right: 22%;
+  bottom: 44px;
+}
+
+/* ── حالت دو زبانه: اسپلیت در دسکتاپ، پشت‌سرهم در موبایل ── */
+.itl-dual-wrap {
+  display: block;
+}
+
+.itl-dual {
+  display: block;
+}
+
+.itl-dual + .itl-dual {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed rgba(255, 255, 255, 0.12);
+}
+
+@media (min-width: 1024px) {
+  .itl-dual-split.itl-dual-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  .itl-dual-split .itl-dual + .itl-dual {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+    padding-left: 1.5rem;
+    border-left: 1px dashed rgba(255, 255, 255, 0.12);
+  }
+}
+
+/* پنل پایین‌شیت موبایل (نویگیتور/فیلتر) */
+.intl-sheet {
+  animation: intl-sheet-up 300ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+@keyframes intl-sheet-up {
+  from { opacity: 0; transform: translate3d(0, 100%, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+.intl-fade {
+  animation: intl-fade 200ms ease-out backwards;
+}
+
+@keyframes intl-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* پاپ‌اور افزودن به مجموعه / ریپورت */
+.intl-pop {
+  animation: intl-pop 220ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  transform-origin: top left;
+}
+
+@keyframes intl-pop {
+  from { opacity: 0; transform: translate3d(0, -8px, 0) scale(0.97); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+/* ── فوکوس واضح برای کیبورد (دسترس‌پذیری) ── */
+.intl-layer :is(button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid rgba(147, 127, 205, 0.8);
+  outline-offset: 2px;
+}
+
+/* ── احترام به تنظیم کاهش حرکت ── */
+@media (prefers-reduced-motion: reduce) {
+  .intl-sk,
+  .intl-question-in,
+  .intl-reveal,
+  .intl-sheet,
+  .intl-fade,
+  .intl-pop {
+    animation: none;
+  }
+
+  .intl-option,
+  .intl-progress-fill {
+    transition: none;
+  }
+}

@@ -9,7 +9,7 @@ import testBank from "../../../images/pictures/testBank.jpg";
 
 const doranFont = "[font-family:'Doran',Tahoma,sans-serif]";
 
-export default function TestsSection() {
+export default function TestsSection({ onOpenAnalytics, onOpenInternational, onOpenCoordinated, onOpenTestBank }) {
   const examCards = [
     {
       id: 1,
@@ -17,13 +17,15 @@ export default function TestsSection() {
       description: 'بررسی، تحلیل و آنالیز وضعیت آزمون ها و تست ها',
       // TODO: آدرس عکس کاراکتر با ذره‌بین
       imageSrc: searchImage ,
+      onClick: () => onOpenAnalytics?.(),
     },
     {
       id: 2,
       title: 'آزمون های شخصی',
-      description: 'ساخت آزمون اختصاصی خودتان',
+      description: 'با آزمون‌ساز شخصی، آزمونی دقیقاً به‌اندازهٔ نیازت بساز',
       // TODO: آدرس عکس کاراکتر در حال فکر کردن
       imageSrc: personalExam ,
+      onClick: () => onOpenTestBank?.('builder'),
     },
     {
       id: 3,
@@ -31,6 +33,7 @@ export default function TestsSection() {
       description: 'شامل آزمون های جامع و آزمون های درس به درس',
       // TODO: آدرس عکس کاراکترهای سر کلاس
       imageSrc: groupExam,
+      onClick: () => onOpenCoordinated?.(),
     },
     {
       id: 4,
@@ -38,6 +41,7 @@ export default function TestsSection() {
       description: 'آزمون های USMLE ، PLAB و MCCQE',
       // TODO: آدرس عکس کاراکتر با کره زمین
       imageSrc: universalExam,
+      onClick: () => onOpenInternational?.(),
     },
   ];
 
@@ -51,7 +55,19 @@ export default function TestsSection() {
       <main className="dash-stagger grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
 
         {/* کارت بزرگ بانک تست (نیمی از عرض محتوا) */}
-        <div className="lg:col-span-6 lg:min-h-0 relative w-full h-150 lg:h-auto rounded-[2.5rem] overflow-hidden group cursor-pointer">
+        <div
+          role="button"
+          tabIndex={0}
+          aria-label="ورود به بانک تست علوم پایه"
+          onClick={() => onOpenTestBank?.()}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              onOpenTestBank?.();
+            }
+          }}
+          className="lg:col-span-6 lg:min-h-0 relative w-full h-150 lg:h-auto rounded-[2.5rem] overflow-hidden group cursor-pointer focus-visible:outline-2 focus-visible:outline-[#61D192]"
+        >
 
           {/* TODO: عکس پس‌زمینه فرم و گوشی پزشکی */}
           <img
@@ -68,9 +84,9 @@ export default function TestsSection() {
               تست های تالیفی اختصاصی
             </h2>
 
-            <button className="bg-[#2F3034] text-[#61D192] px-10 py-3 rounded-2xl text-lg font-bold hover:bg-[#3f4045] transition-colors">
+            <span className="bg-[#2F3034] text-[#61D192] px-10 py-3 rounded-2xl text-lg font-bold transition-colors group-hover:bg-[#3f4045]">
               بزن بریم
-            </button>
+            </span>
           </div>
 
         </div>
@@ -80,6 +96,20 @@ export default function TestsSection() {
           {examCards.map((card) => (
             <div
               key={card.id}
+              role={card.onClick ? 'button' : undefined}
+              tabIndex={card.onClick ? 0 : undefined}
+              aria-label={card.onClick ? `ورود به ${card.title}` : undefined}
+              onClick={card.onClick}
+              onKeyDown={
+                card.onClick
+                  ? (event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        card.onClick();
+                      }
+                    }
+                  : undefined
+              }
               className="bg-[#242426] rounded-[2.5rem] p-6 flex items-center justify-between gap-4 cursor-pointer hover:bg-[#2e2e30] transition-colors duration-300 h-40 lg:h-auto lg:min-h-0 lg:flex-1 overflow-hidden"
             >
               <div className="flex-1">

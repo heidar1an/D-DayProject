@@ -105,6 +105,11 @@ export default function CoursesSection({ onOpenCourse }) {
                 فعال شد
               </span>
             )}
+            {course.id === "micro" && (
+              <span className="absolute top-4 right-4 rounded-full bg-[#937fcd] px-3 py-1 text-xs text-white [font-family:'Doran',Tahoma,sans-serif]">
+                جدید
+              </span>
+            )}
             <span
               className={`text-sm leading-7 md:text-base [font-family:'Doran',Tahoma,sans-serif] ${
                 course.id === "comprehensive" ? "text-white" : "text-[#5b8cc7]"

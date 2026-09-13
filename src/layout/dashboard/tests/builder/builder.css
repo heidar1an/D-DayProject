@@ -1,0 +1,294 @@
+/*
+ * استایل‌های اختصاصی «آزمون‌ساز شخصی» — ساختار کلی با Tailwind و سیستم فعلی داشبورد؛
+ * اینجا فقط قطعاتی که به CSS خالص نیاز دارند: استپر، درخت مبحث، اسلایدر توزیع،
+ * نمودار روند تلاش‌ها. Performance مهم است — انیمیشن‌ها کوچک و سریع‌اند و زیر
+ * reduced-motion همه خاموش می‌شوند (سیاست کل داشبورد).
+ */
+
+/* ─────────────── استپر مراحل ویزارد ─────────────── */
+.ex-stepper {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.25rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 0.25rem;
+}
+
+.ex-stepper::-webkit-scrollbar {
+  display: none;
+}
+
+.ex-step {
+  position: relative;
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 5.6rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 1rem;
+  cursor: pointer;
+  color: #8a8a8a;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.ex-step:hover {
+  color: #ddd;
+}
+
+.ex-step:focus-visible {
+  outline: 2px solid #61d192;
+  outline-offset: 2px;
+}
+
+.ex-step__dot {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  border: 1.5px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  transition: inherit;
+}
+
+.ex-step__label {
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.ex-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 1.35rem;
+  inset-inline-start: calc(50% + 1.4rem);
+  width: calc(100% - 2.8rem);
+  height: 1.5px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.ex-step.is-done {
+  color: #9a9a9a;
+}
+
+.ex-step.is-done .ex-step__dot {
+  border-color: rgba(97, 209, 146, 0.5);
+  background: rgba(97, 209, 146, 0.12);
+  color: #61d192;
+}
+
+.ex-step.is-active {
+  color: #fff;
+}
+
+.ex-step.is-active .ex-step__dot {
+  border-color: #61d192;
+  background: rgba(97, 209, 146, 0.16);
+  color: #7ee0ac;
+  box-shadow: 0 0 0 4px rgba(97, 209, 146, 0.1);
+}
+
+/* ─────────────── درخت مبحث ─────────────── */
+.ex-tree {
+  position: relative;
+}
+
+.ex-tree__branch {
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 1.1rem;
+  background: rgba(255, 255, 255, 0.02);
+  transition: border-color 0.15s ease;
+}
+
+.ex-tree__branch.is-partial {
+  border-color: rgba(147, 127, 205, 0.35);
+}
+
+.ex-tree__branch.is-full {
+  border-color: rgba(97, 209, 146, 0.4);
+  background: rgba(97, 209, 146, 0.04);
+}
+
+.ex-tree__childgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: 0.4rem;
+}
+
+.ex-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 0.45rem 0.7rem;
+  font-size: 12px;
+  color: #c5c5c5;
+  cursor: pointer;
+  text-align: right;
+  transition: border-color 0.14s ease, background 0.14s ease, color 0.14s ease;
+}
+
+.ex-check:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+
+.ex-check:focus-visible {
+  outline: 2px solid #61d192;
+  outline-offset: 2px;
+}
+
+.ex-check[aria-pressed='true'] {
+  border-color: rgba(97, 209, 146, 0.5);
+  background: rgba(97, 209, 146, 0.1);
+  color: #7ee0ac;
+}
+
+.ex-check__box {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 0.4rem;
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  background: transparent;
+  transition: inherit;
+}
+
+.ex-check[aria-pressed='true'] .ex-check__box {
+  border-color: #61d192;
+  background: #61d192;
+  color: #12271a;
+}
+
+.ex-check__count {
+  margin-inline-start: auto;
+  flex-shrink: 0;
+  font-size: 10px;
+  color: #777;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─────────────── اسلایدر توزیع سختی ─────────────── */
+.ex-dial__row {
+  display: grid;
+  grid-template-columns: 5.4rem minmax(0, 1fr) 3rem;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.ex-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  outline: none;
+  cursor: pointer;
+}
+
+.ex-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 3px solid #1b1b1e;
+  background: var(--ex-accent, #61d192);
+  box-shadow: 0 0 0 1.5px var(--ex-accent, #61d192);
+  cursor: grab;
+  transition: transform 0.12s ease;
+}
+
+.ex-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+.ex-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 3px solid #1b1b1e;
+  background: var(--ex-accent, #61d192);
+  box-shadow: 0 0 0 1.5px var(--ex-accent, #61d192);
+  cursor: grab;
+}
+
+.ex-slider:focus-visible {
+  outline: 2px solid #61d192;
+  outline-offset: 4px;
+}
+
+.ex-dial__track {
+  height: 1rem;
+  border-radius: 999px;
+  overflow: hidden;
+  display: flex;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.ex-dial__seg {
+  height: 100%;
+  min-width: 0;
+  transition: width 0.35s cubic-bezier(0.22, 0.8, 0.3, 1);
+}
+
+/* ─────────────── روند تلاش‌های آزمون ─────────────── */
+.ex-trend {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 2.2rem;
+}
+
+.ex-trend__bar {
+  width: 7px;
+  min-height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: rgba(97, 209, 146, 0.75);
+}
+
+.ex-trend__bar.is-first {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* ─────────────── ورود نرم محتوا ─────────────── */
+.ex-enter {
+  animation: ex-enter-in 0.24s ease;
+}
+
+@keyframes ex-enter-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─────────────── Reduced motion — مطابق سیاست کل داشبورد ─────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .ex-enter {
+    animation: none;
+  }
+
+  .ex-step,
+  .ex-step__dot,
+  .ex-tree__branch,
+  .ex-check,
+  .ex-slider::-webkit-slider-thumb,
+  .ex-dial__seg {
+    transition: none;
+  }
+}

@@ -1,8 +1,30 @@
+import { Suspense, lazy } from 'react';
 
-export default function OtherSections() {
+/* AI Card با lazy load بارگذاری می‌شود تا به سنگین‌شدن بخش «سایر بخش‌ها» دامن نزند */
+const AICard = lazy(() => import('./ai/AICard'));
+
+function AICardSkeleton() {
+  return <div className="h-72 w-full rounded-[2.5rem] bg-[#242426]" aria-hidden="true" />;
+}
+
+export default function OtherSections({ onOpenWiki, onOpenKnowledge }) {
   const handleSectionClick = (sectionId) => {
+    /* مقالات به بخش عمومی سایت وصل است؛ دکمه Back کاربر را به داشبورد برمی‌گرداند */
+    if (sectionId === 'articles') {
+      window.location.hash = 'articles';
+      return;
+    }
+    if (sectionId === 'tapesh-wiki') {
+      onOpenWiki?.();
+      return;
+    }
+    if (sectionId === 'knowledge-network') {
+      onOpenKnowledge?.();
+      return;
+    }
     console.log(`بخش انتخاب شد: ${sectionId}`);
   };
+
   const secondaryCards = [
     { id: 'knowledge-network', title: 'شبکه دانش' },
     { id: 'tapesh-wiki', title: 'ویکی تپش' },
@@ -15,13 +37,12 @@ export default function OtherSections() {
       dir="rtl"
       className="dash-stagger mx-auto w-[var(--content-width)] bg-black py-8 text-white md:py-10 [font-family:'Pinar',Tahoma,sans-serif]"
     >
-      <button
-        type="button"
-        onClick={() => handleSectionClick('ai-assistant')}
-        className="mb-6 flex h-[26rem] w-full cursor-pointer items-center justify-center rounded-[2.5rem] bg-[#242426] text-2xl font-bold text-white transition-colors duration-300 hover:bg-[#2e2e30] md:mb-8 md:h-[32rem] md:rounded-[3rem] md:text-3xl [font-family:'Doran',Tahoma,sans-serif]"
-      >
-        هوش مصنوعی
-      </button>
+      {/* تپش هوشمند — کارت مینیمال که با تعامل باز می‌شود؛ لایهٔ جداگانه ندارد */}
+      <div className="mb-6 md:mb-8">
+        <Suspense fallback={<AICardSkeleton />}>
+          <AICard />
+        </Suspense>
+      </div>
       <div className="dash-stagger grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
         {secondaryCards.map((card) => (
           <button

@@ -1,0 +1,116 @@
+/*
+ * استایل‌های اختصاصی لیگ تپش — چیدمان عمده با Tailwind انجام می‌شود؛
+ * اینجا فقط افکت‌ها و اجزایی قرار دارند که با utility قابل بیان نیستند.
+ * رنگ «قلب» تنها رنگ اضافه‌شده به پالت است و در کل لایه ثابت استفاده می‌شود.
+ */
+
+:root {
+  --league-heart: #e26d6d;
+}
+
+/* ── اسکلت لودینگ: بدون Layout Shift، هم‌اندازهٔ محتوای واقعی ── */
+.lg-sk {
+  border-radius: 0.75rem;
+  background: linear-gradient(100deg, rgba(255, 255, 255, 0.05) 40%, rgba(255, 255, 255, 0.11) 50%, rgba(255, 255, 255, 0.05) 60%);
+  background-size: 200% 100%;
+  animation: lg-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes lg-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+/* ── پاپ قلب هنگام کسب امتیاز ── */
+.lg-heart-pop {
+  animation: lg-heart-pop 620ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes lg-heart-pop {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.22); }
+  100% { transform: scale(1); }
+}
+
+/* ── توست +۱۰۰ قلب ── */
+.lg-toast {
+  animation: lg-toast-in 320ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+@keyframes lg-toast-in {
+  from { opacity: 0; transform: translate3d(0, 18px, 0) scale(0.94); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+/* ── پادیوم سه نفر اول ── */
+.lg-podium__step {
+  animation: lg-podium-rise 760ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+@keyframes lg-podium-rise {
+  from { opacity: 0; transform: translate3d(0, 22px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+/* ── درخشش دستاورد افسانه‌ای: محدود، آرام و بدون چرخش ── */
+.lg-glow-legendary {
+  box-shadow:
+    inset 0 0 0 1px rgba(224, 180, 92, 0.55),
+    0 0 26px -6px rgba(224, 180, 92, 0.4);
+  animation: lg-breathe 3.2s ease-in-out infinite;
+}
+
+@keyframes lg-breathe {
+  0%, 100% { box-shadow: inset 0 0 0 1px rgba(224, 180, 92, 0.55), 0 0 18px -8px rgba(224, 180, 92, 0.35); }
+  50% { box-shadow: inset 0 0 0 1px rgba(224, 180, 92, 0.75), 0 0 30px -6px rgba(224, 180, 92, 0.5); }
+}
+
+/* ── نقطهٔ «زنده» رویدادها ── */
+.lg-live-dot {
+  animation: lg-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes lg-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(0.8); }
+}
+
+/* ── خانه‌های تقویم استریک ── */
+.lg-heat {
+  animation: lg-heat-in 420ms cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  animation-delay: calc(var(--i, 0) * 14ms);
+}
+
+@keyframes lg-heat-in {
+  from { opacity: 0; transform: scale(0.6); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ── پنل اعلان‌ها ── */
+.lg-notif-panel {
+  animation: lg-notif-in 260ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+@keyframes lg-notif-in {
+  from { opacity: 0; transform: translate3d(0, -10px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+/* ── شمارش معکوس فصل ── */
+.lg-countdown {
+  font-variant-numeric: tabular-nums;
+}
+
+/* احترام به تنظیم کاهش حرکت — هم‌حس با بقیهٔ داشبورد */
+@media (prefers-reduced-motion: reduce) {
+  .lg-sk,
+  .lg-heart-pop,
+  .lg-toast,
+  .lg-podium__step,
+  .lg-glow-legendary,
+  .lg-live-dot,
+  .lg-heat,
+  .lg-notif-panel {
+    animation: none;
+  }
+}

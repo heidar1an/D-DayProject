@@ -713,13 +713,5 @@
   }
 }
 
-/* احترام به تنظیمات کاهش حرکت کاربر */
-@media (prefers-reduced-motion: reduce) {
-  .dars-layer *,
-  .dars-layer *::before,
-  .dars-layer *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
+/* گارد reduced-motion روی انیمیشن‌های این لایه اعمال نمی‌شود؛
+   محیط کاربر reduce-motion دارد و انیمیشن‌ها باید همیشه اجرا شوند */

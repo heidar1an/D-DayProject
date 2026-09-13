@@ -18,6 +18,24 @@ import distanceIcon from '../images/icons/distance.png';
 import OfflinePage from './layout/OfflinePage';
 import SecondaryRegistrationLayout from './layout/SecondaryRegistrationLayout';
 import DashboardLayout from './layout/dashboard/DashboardLayout';
+import ArticlesPage from './layout/articles/ArticlesPage';
+import ArticlePage from './layout/articles/ArticlePage';
+import ReadingListPage from './layout/articles/ReadingListPage';
+import { ArticleCover } from './layout/articles/articlesShared';
+
+/* صفحه‌ای که برای مسیر داخلی مقالات رندر می‌شود؛ خود hash کاملاً پایدار می‌ماند */
+function ArticlesRoute({ articleSlug }) {
+  if (!articleSlug) return <ArticlesPage />;
+
+  if (articleSlug === 'saved') return <ReadingListPage />;
+
+  if (articleSlug.startsWith('category/')) {
+    return <ArticlesPage key={articleSlug} initialCategory={articleSlug.slice('category/'.length)} />;
+  }
+
+  return <ArticlePage key={articleSlug} slug={articleSlug} />;
+}
+import { getLatestArticles } from './services/articles/articlesService';
 import { clearStoredUser, getDisplayName, getStoredUser, loginUser, saveUserRecord } from './services/userStorage';
 import './layout/dashboard/dashboard.css';
 
@@ -171,20 +189,8 @@ const tapeshFeatures = [
   },
 ];
 
-const articles = [
-  {
-    title: 'مقاله اول',
-    description: 'متن خلاصه‌ای درباره مقاله که اینجا قرار می‌گیرد. لطفاً منتظر باشید.',
-  },
-  {
-    title: 'مقاله دوم',
-    description: 'متن خلاصه‌ای درباره مقاله که اینجا قرار می‌گیرد. لطفاً منتظر باشید.',
-  },
-  {
-    title: 'مقاله سوم',
-    description: 'متن خلاصه‌ای درباره مقاله که اینجا قرار می‌گیرد. لطفاً منتظر باشید.',
-  },
-];
+/* سه مقالهٔ آخر، مستقیم از لایه دادهٔ مقالات — همان منبع صفحهٔ مقالات */
+const homeArticles = getLatestArticles(3);
 
 const faqItems = [
   {
@@ -393,6 +399,105 @@ function MotionStrip() {
         ))}
       </div>
     </div>
+  );
+}
+
+/* هدر سایت — یک نسخه واحد برای صفحه اصلی و صفحه مقالات */
+function SiteHeader({ menuOpen, onMenuOpenChange, userData, onOpenDashboard, onOpenAuth }) {
+  const closeMenu = () => onMenuOpenChange(false);
+
+  return (
+    <header className="site-header" data-reveal="header">
+      <Brand />
+
+      <button
+        className={`menu-toggle ${menuOpen ? 'is-open' : ''}`}
+        type="button"
+        aria-label={menuOpen ? 'بستن منو' : 'باز کردن منو'}
+        aria-expanded={menuOpen}
+        onClick={() => onMenuOpenChange(!menuOpen)}
+      >
+        <span />
+        <span />
+        <span />
+      </button>
+
+      <nav className={`site-nav ${menuOpen ? 'is-open' : ''}`} aria-label="ناوبری اصلی">
+        <a className="site-nav__link site-nav__link--products" href="#products" onClick={closeMenu}>
+          محصولات
+        </a>
+        <a className="site-nav__link site-nav__link--pricing" href="#benefits" onClick={closeMenu}>
+          تعرفه‌ها
+        </a>
+        <a className="site-nav__link site-nav__link--about" href="#quote" onClick={closeMenu}>
+          درباره ما
+        </a>
+      </nav>
+
+      {userData ? (
+        <button
+          className="auth-link auth-link--user"
+          type="button"
+          aria-label={`ورود به داشبورد ${getDisplayName(userData)}`}
+          onClick={onOpenDashboard}
+        >
+          <span className="auth-link__avatar">
+            {userData.profile?.avatar ? (
+              <img src={userData.profile.avatar} alt="" />
+            ) : (
+              <HeaderUserIcon />
+            )}
+          </span>
+          <span className="auth-link__name">{getDisplayName(userData)}</span>
+        </button>
+      ) : (
+        <a className="auth-link auth-link--login" href="#auth" onClick={onOpenAuth}>
+          ورود / ثبت نام
+        </a>
+      )}
+    </header>
+  );
+}
+
+/* فوتر سایت — مشترک بین صفحه اصلی و صفحه مقالات */
+function SiteFooter({ onOpenArticles }) {
+  return (
+    <footer className="site-footer" id="footer" data-reveal>
+      <div className="site-footer__inner section-shell">
+        <div className="site-footer__brand">
+          <Brand />
+          <small>نسخه ۱.۵.۵.۲۷</small>
+        </div>
+
+        <nav className="site-footer__column" aria-label="محصولات">
+          <h2>محصولات</h2>
+          <a href="#courses">درسنامه جامع</a>
+          <a href="#courses">میکرو درسنامه</a>
+          <a href="#courses">بانک تست</a>
+          <a href="#tapesh-intro">دستیار هوشمند</a>
+          <a href="#green-path">مسیر سبز</a>
+        </nav>
+
+        <nav className="site-footer__column" aria-label="بخش‌ها">
+          <h2>بخش‌ها</h2>
+          <a href="#products">علوم پایه</a>
+          <a href="#articles" onClick={onOpenArticles}>
+            پره انترنی
+          </a>
+          <a href="#faq">المپیاد</a>
+          <a href="#faq">کمک و راهنمایی</a>
+        </nav>
+
+        <div className="site-footer__about">
+          <p>
+            ما می‌خواهیم دانش پزشکی را از حالت پراکنده و فرسایشی خارج کنیم و
+            آن را به یک مسیر منسجم، قابل‌فهم و قابل‌اعتماد تبدیل کنیم؛ مسیری
+            که دانشجو بداند امروز چه بخواند، چرا بخواند، چطور تمرین کند و کجا
+            باید بهتر شود
+          </p>
+        </div>
+      </div>
+    </footer>
   );
 }
 
@@ -724,31 +829,44 @@ function AuthPage({ onBack, onLoginSuccess, onRegisterSuccess }) {
 function getAppRoute() {
   if (typeof window === 'undefined') return 'home';
 
-  if (
-    window.location.hash === '#dashboard' ||
-    window.history.state?.tapeshRoute === 'dashboard' ||
-    window.history.state?.tapeshDashboard === true
-  ) {
+  const { hash } = window.location;
+
+  /* اولویت با hash است تا ناوبری داخل سشن (مثل داشبورد → مقالات)، state قدیمی را باطل کند */
+  if (hash === '#dashboard') return 'dashboard';
+  if (hash === '#onboarding') return 'onboarding';
+  if (hash === '#auth') return 'auth';
+  if (hash === '#articles' || hash.startsWith('#articles/')) return 'articles';
+
+  const state = window.history.state ?? {};
+
+  if (state.tapeshRoute === 'dashboard' || state.tapeshDashboard === true) {
     return 'dashboard';
   }
 
-  if (
-    window.location.hash === '#onboarding' ||
-    window.history.state?.tapeshRoute === 'onboarding' ||
-    window.history.state?.tapeshOnboarding === true
-  ) {
+  if (state.tapeshRoute === 'onboarding' || state.tapeshOnboarding === true) {
     return 'onboarding';
   }
 
-  if (
-    window.location.hash === '#auth' ||
-    window.history.state?.tapeshRoute === 'auth' ||
-    window.history.state?.tapeshAuth === true
-  ) {
+  if (state.tapeshRoute === 'auth' || state.tapeshAuth === true) {
     return 'auth';
   }
 
+  if (state.tapeshRoute === 'articles' || state.tapeshArticles === true) {
+    return 'articles';
+  }
+
   return 'home';
+}
+
+/* مسیر داخلی مقالات از hash؛ مثلا:
+   #articles/stress-heart-rate → stress-heart-rate
+   #articles/saved             → لیست مطالعه
+   #articles/category/physiology → دسته‌بندی */
+function getArticleSlug() {
+  if (typeof window === 'undefined') return null;
+
+  const match = window.location.hash.match(/^#articles\/([a-z0-9-]+(?:\/[a-z0-9-]+)*)$/);
+  return match ? match[1] : null;
 }
 
 function getRouteUrl(route) {
@@ -756,6 +874,11 @@ function getRouteUrl(route) {
     return typeof window === 'undefined'
       ? ''
       : `${window.location.pathname}${window.location.search}`;
+  }
+
+  /* هنگام نرمال‌سازی لینک مستقیم، اسلاگ مقاله در hash حفظ شود */
+  if (route === 'articles' && window.location.hash.startsWith('#articles')) {
+    return `${window.location.pathname}${window.location.search}${window.location.hash}`;
   }
 
   return `${window.location.pathname}${window.location.search}#${route}`;
@@ -768,6 +891,7 @@ function getRouteState(route, previousState = {}) {
     tapeshAuth: route === 'auth',
     tapeshOnboarding: route === 'onboarding',
     tapeshDashboard: route === 'dashboard',
+    tapeshArticles: route === 'articles',
   };
 }
 
@@ -804,6 +928,13 @@ function App() {
   const [dashboardOpen, setDashboardOpen] = useState(
     () => getAppRoute() === 'dashboard',
   );
+  const [articlesOpen, setArticlesOpen] = useState(
+    () => getAppRoute() === 'articles',
+  );
+  const [articleSlug, setArticleSlug] = useState(() =>
+    getAppRoute() === 'articles' ? getArticleSlug() : null,
+  );
+  const wasOnArticlesRef = useRef(false);
   const [userData, setUserData] = useState(() => getStoredUser());
   const isOnline = useOnlineStatus();
 
@@ -819,6 +950,25 @@ function App() {
     setAuthOpen(true);
     setOnboardingOpen(false);
     setDashboardOpen(false);
+    setArticlesOpen(false);
+    setArticleSlug(null);
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+
+  /* ورود به بخش مقالات (فهرست) با pushState تا دکمه Back به صفحه اصلی برگردد */
+  const openArticles = (event) => {
+    event?.preventDefault();
+    closeMenu();
+    window.history.pushState(
+      getRouteState('articles'),
+      '',
+      getRouteUrl('articles'),
+    );
+    setAuthOpen(false);
+    setOnboardingOpen(false);
+    setDashboardOpen(false);
+    setArticlesOpen(true);
+    setArticleSlug(null);
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
@@ -836,6 +986,8 @@ function App() {
     setAuthOpen(false);
     setOnboardingOpen(false);
     setDashboardOpen(false);
+    setArticlesOpen(false);
+    setArticleSlug(null);
   };
 
   useEffect(() => {
@@ -844,6 +996,13 @@ function App() {
       setAuthOpen(route === 'auth');
       setOnboardingOpen(route === 'onboarding');
       setDashboardOpen(route === 'dashboard');
+      setArticlesOpen(route === 'articles');
+      setArticleSlug(route === 'articles' ? getArticleSlug() : null);
+
+      /* ورود به مقالات (فهرست یا مقاله) همیشه از بالای صفحه شروع شود */
+      if (route === 'articles') {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      }
     };
 
     const initialRoute = getAppRoute();
@@ -855,13 +1014,16 @@ function App() {
       currentState.tapeshDashboard === true;
 
     if (!hasManagedRoute && initialRoute !== 'home') {
+      /* آدرس مقصد قبل از نرمال‌سازی محاسبه شود تا اسلاگ مقاله در لینک مستقیم حفظ شود */
+      const targetUrl = getRouteUrl(initialRoute);
+
       window.history.replaceState(getRouteState('home', currentState), '', getRouteUrl('home'));
 
       if (initialRoute === 'onboarding') {
         window.history.pushState(getRouteState('auth'), '', getRouteUrl('auth'));
       }
 
-      window.history.pushState(getRouteState(initialRoute), '', getRouteUrl(initialRoute));
+      window.history.pushState(getRouteState(initialRoute), '', targetUrl);
     } else if (!currentState.tapeshRoute) {
       window.history.replaceState(
         getRouteState(initialRoute, currentState),
@@ -882,7 +1044,6 @@ function App() {
 
   useEffect(() => {
     if (authOpen || onboardingOpen || dashboardOpen) return undefined;
-
     const revealElements = Array.from(document.querySelectorAll('[data-reveal]'));
     const pendingFrames = new Set();
 
@@ -950,7 +1111,28 @@ function App() {
       observer.disconnect();
       pendingFrames.forEach((frame) => cancelAnimationFrame(frame));
     };
-  }, [authOpen, onboardingOpen, dashboardOpen]);
+  }, [authOpen, onboardingOpen, dashboardOpen, articlesOpen, articleSlug]);
+
+  /* بازگشت از مقالات به صفحه اصلی: اگر مقصد یک لنگر بود (مثلا فوتر)، به همان بخش اسکرول شود */
+  useEffect(() => {
+    if (wasOnArticlesRef.current && !articlesOpen) {
+      const hash = window.location.hash;
+
+      if (hash && hash !== '#top') {
+        const target = document.getElementById(decodeURIComponent(hash.slice(1)));
+
+        if (target) {
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+          });
+        }
+      }
+    }
+
+    wasOnArticlesRef.current = articlesOpen;
+  }, [articlesOpen]);
 
   const openOnboarding = () => {
     window.history.pushState(
@@ -961,6 +1143,8 @@ function App() {
     setAuthOpen(false);
     setOnboardingOpen(true);
     setDashboardOpen(false);
+    setArticlesOpen(false);
+    setArticleSlug(null);
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
@@ -978,6 +1162,8 @@ function App() {
     setOnboardingOpen(false);
     setAuthOpen(false);
     setDashboardOpen(false);
+    setArticlesOpen(false);
+    setArticleSlug(null);
   };
 
   const openDashboard = (user, { replaceHistory = true } = {}) => {
@@ -995,6 +1181,8 @@ function App() {
     setOnboardingOpen(false);
     setAuthOpen(false);
     setDashboardOpen(true);
+    setArticlesOpen(false);
+    setArticleSlug(null);
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
@@ -1014,6 +1202,8 @@ function App() {
     setDashboardOpen(false);
     setAuthOpen(false);
     setOnboardingOpen(false);
+    setArticlesOpen(false);
+    setArticleSlug(null);
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
@@ -1054,57 +1244,33 @@ function App() {
     );
   }
 
+  if (articlesOpen) {
+    return (
+      <div className="app" id="top">
+        <SiteHeader
+          menuOpen={menuOpen}
+          onMenuOpenChange={setMenuOpen}
+          userData={userData}
+          onOpenDashboard={() => openDashboard(userData, { replaceHistory: false })}
+          onOpenAuth={openAuth}
+        />
+
+        {articleSlug ? <ArticlesRoute articleSlug={articleSlug} /> : <ArticlesPage />}
+
+        <SiteFooter onOpenArticles={openArticles} />
+      </div>
+    );
+  }
+
   return (
     <div className="app" id="top">
-      <header className="site-header" data-reveal="header">
-        <Brand />
-
-        <button
-          className={`menu-toggle ${menuOpen ? 'is-open' : ''}`}
-          type="button"
-          aria-label={menuOpen ? 'بستن منو' : 'باز کردن منو'}
-          aria-expanded={menuOpen}
-          onClick={() => setMenuOpen((current) => !current)}
-        >
-          <span />
-          <span />
-          <span />
-        </button>
-
-        <nav className={`site-nav ${menuOpen ? 'is-open' : ''}`} aria-label="ناوبری اصلی">
-          <a className="site-nav__link site-nav__link--products" href="#products" onClick={closeMenu}>
-            محصولات
-          </a>
-          <a className="site-nav__link site-nav__link--pricing" href="#benefits" onClick={closeMenu}>
-            تعرفه‌ها
-          </a>
-          <a className="site-nav__link site-nav__link--about" href="#quote" onClick={closeMenu}>
-            درباره ما
-          </a>
-        </nav>
-
-        {userData ? (
-          <button
-            className="auth-link auth-link--user"
-            type="button"
-            aria-label={`ورود به داشبورد ${getDisplayName(userData)}`}
-            onClick={() => openDashboard(userData, { replaceHistory: false })}
-          >
-            <span className="auth-link__avatar">
-              {userData.profile?.avatar ? (
-                <img src={userData.profile.avatar} alt="" />
-              ) : (
-                <HeaderUserIcon />
-              )}
-            </span>
-            <span className="auth-link__name">{getDisplayName(userData)}</span>
-          </button>
-        ) : (
-          <a className="auth-link auth-link--login" href="#auth" onClick={openAuth}>
-            ورود / ثبت نام
-          </a>
-        )}
-      </header>
+      <SiteHeader
+        menuOpen={menuOpen}
+        onMenuOpenChange={setMenuOpen}
+        userData={userData}
+        onOpenDashboard={() => openDashboard(userData, { replaceHistory: false })}
+        onOpenAuth={openAuth}
+      />
 
       <main>
         <section className="hero" data-reveal="hero" aria-labelledby="hero-title">
@@ -1302,18 +1468,30 @@ function App() {
             مقالات
           </h2>
           <div className="article-grid">
-            {articles.map((article) => (
-              <article className="article-card" key={article.title}>
-                <div className="article-card__image" aria-hidden="true" />
+            {homeArticles.map((article) => (
+              <article className="article-card" key={article.slug}>
+                <div className="article-card__image" aria-hidden="true">
+                  <ArticleCover article={article} />
+                </div>
                 <div className="article-card__content">
-                  <h3>{article.title}</h3>
-                  <p>{article.description}</p>
-                  <a href="#articles" aria-label={`مطالعه ${article.title}`}>
+                  <h3>
+                    <a className="article-card__title-link" href={`#articles/${article.slug}`} aria-label={`مطالعه مقاله ${article.title}`}>
+                      {article.title}
+                    </a>
+                  </h3>
+                  <p>{article.excerpt}</p>
+                  <span className="article-card__go" aria-hidden="true">
                     <ArrowLeftIcon />
-                  </a>
+                  </span>
                 </div>
               </article>
             ))}
+          </div>
+          <div className="articles__all">
+            <a className="articles-all-link" href="#articles" onClick={openArticles}>
+              مشاهده همه مقالات
+              <span aria-hidden="true">←</span>
+            </a>
           </div>
         </section>
 
@@ -1352,40 +1530,7 @@ function App() {
         </section>
       </main>
 
-      <footer className="site-footer" id="footer" data-reveal>
-        <div className="site-footer__inner section-shell">
-          <div className="site-footer__brand">
-            <Brand />
-            <small>نسخه ۱.۵.۵.۲۷</small>
-          </div>
-
-          <nav className="site-footer__column" aria-label="محصولات">
-            <h2>محصولات</h2>
-            <a href="#courses">درسنامه جامع</a>
-            <a href="#courses">میکرو درسنامه</a>
-            <a href="#courses">بانک تست</a>
-            <a href="#tapesh-intro">دستیار هوشمند</a>
-            <a href="#green-path">مسیر سبز</a>
-          </nav>
-
-          <nav className="site-footer__column" aria-label="بخش‌ها">
-            <h2>بخش‌ها</h2>
-            <a href="#products">علوم پایه</a>
-            <a href="#articles">پره انترنی</a>
-            <a href="#faq">المپیاد</a>
-            <a href="#faq">کمک و راهنمایی</a>
-          </nav>
-
-          <div className="site-footer__about">
-            <p>
-              ما می‌خواهیم دانش پزشکی را از حالت پراکنده و فرسایشی خارج کنیم و
-              آن را به یک مسیر منسجم، قابل‌فهم و قابل‌اعتماد تبدیل کنیم؛ مسیری
-              که دانشجو بداند امروز چه بخواند، چرا بخواند، چطور تمرین کند و کجا
-              باید بهتر شود
-            </p>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter onOpenArticles={openArticles} />
 
       <MotionStrip />
     </div>

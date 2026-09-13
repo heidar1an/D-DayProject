@@ -2,7 +2,7 @@ import UserProfileCard from './UserProfileCard';
 import DashboardActionCards from './DashboardActionCards';
 import PeersSection from './PeersSection';
 
-export default function DashboardHome({ userData }) {
+export default function DashboardHome({ userData, onOpenFlashcards, onOpenNotes }) {
   return (
     <main className="dashboard__main dash-stagger">
       <div className="dashboard__top-row dash-stagger">
@@ -39,7 +39,7 @@ export default function DashboardHome({ userData }) {
 
       <div className="dashboard__cards-row dash-stagger" aria-label="ابزارهای مطالعه و همخوان‌ها">
         <PeersSection />
-        <DashboardActionCards />
+        <DashboardActionCards onOpenFlashcards={onOpenFlashcards} onOpenNotes={onOpenNotes} />
       </div>
     </main>
   );

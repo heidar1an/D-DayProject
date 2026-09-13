@@ -1,0 +1,836 @@
+/*
+ * سرویس «بانک تست علوم پایه تپش» — قرارداد API به شکل واقعی طراحی شده؛ پیاده‌سازی فعلی
+ * Mock است و وضعیت کاربر (پاسخ‌ها، گلچین، نیاز به مرور، گزارش‌ها، فیلترهای ذخیره و
+ * تاریخچهٔ سشن) در localStorage (کلید tapesh:testbank:v1:<userId>) ذخیره می‌شود.
+ * با اتصال Backend فقط بدنهٔ توابع به fetch تبدیل می‌شود؛ امضا و شکل Entityها عوض نمی‌شود.
+ *
+ * قراردادهای آینده:
+ *   GET  /api/bank/overview                     → fetchBankOverview()
+ *   POST /api/bank/questions/search             → searchQuestions()          (فیلتر + صفحه‌بندی)
+ *   GET  /api/bank/questions/:id                → fetchQuestion()
+ *   POST /api/bank/sessions                     → createSession()            (blueprint سمت سرور به سؤال تبدیل می‌شود)
+ *   GET  /api/sessions/:id                      → fetchSession()
+ *   PUT  /api/sessions/:id/progress             → saveSessionProgress()      (autosave)
+ *   POST /api/sessions/:id/submit               → submitSession()            (تصحیح سمت سرور)
+ *   POST /api/bank/bookmarks/:questionId/toggle → toggleBookmark()
+ *   POST /api/bank/review/:questionId/toggle    → toggleNeedReview()
+ *   POST /api/bank/questions/:id/report         → reportQuestion()
+ *   GET/POST/DELETE /api/bank/filters           → فیلترهای ذخیره‌شده («آزمون من»)
+ *   GET  /api/bank/history                      → fetchHistory()
+ *
+ * اصول طراحی:
+ *  - حلّهٔ سؤال (questionIds) همیشه در سشن سمت سرویس ساخته می‌شود؛ UI هرگز blueprint
+ *    را به لیست سؤال تبدیل نمی‌کند تا بعداً منطق پیشنهاد هوشمند همین‌جا جایگزین شود.
+ *  - در حالت Exam، fetchSessionQuestions فیلد پاسخ و تحلیل را حذف می‌کند (sanitize)؛
+ *    کلید پاسخ فقط بعد از submit از طریق fetchReviewSession برمی‌گردد.
+ *  - وضعیت «حل‌شده/غلط/نیاز به مرور» هر سؤال از خود سشن‌ها مشتق می‌شود، نه فیلد دستی.
+ */
+
+import {
+  BANK_YEARS,
+  BANK_STATS,
+  DIFFICULTIES,
+  QUESTION_TYPES,
+  QUESTIONS,
+  SOURCES,
+  SUBJECTS,
+  TOPIC_TREE,
+  questionById,
+} from './mockData';
+
+const STATE_KEY_PREFIX = 'tapesh:testbank:v1:';
+const LATENCY_MS = 280;
+
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const respond = async (build) => {
+  await delay(LATENCY_MS + Math.random() * 160);
+  return build();
+};
+
+export function trackEvent(name, payload = {}) {
+  if (typeof console !== 'undefined' && console.debug) {
+    console.debug(`[testbank:track] ${name}`, payload);
+  }
+}
+
+/* ────────────────────────── وضعیت کاربر ────────────────────────── */
+
+const EMPTY_STATE = {
+  sessions: [], //Attempt-like: {id, mode, title, subtitle, blueprint, questionIds, answers, marked, ...}
+  bookmarks: [], // qid[] — نشان‌شده‌ها
+  review: [], // qid[] — نیاز به مرور
+  reports: [], // {questionId, reason, note, at}
+  savedFilters: [], // {id, name, createdAt, blueprint}
+  seeded: false,
+};
+
+function resolveUserKey(userRef) {
+  if (typeof userRef === 'string') return userRef || 'guest';
+  const identity = userRef?.id ?? userRef?.phone;
+  return identity ? String(identity) : 'guest';
+}
+
+const stateKey = (userId) => `${STATE_KEY_PREFIX}${resolveUserKey(userId)}`;
+
+function loadState(userId) {
+  if (typeof window === 'undefined') return { ...EMPTY_STATE };
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(stateKey(userId)) || 'null');
+    return parsed && typeof parsed === 'object' ? { ...EMPTY_STATE, ...parsed } : { ...EMPTY_STATE };
+  } catch {
+    return { ...EMPTY_STATE };
+  }
+}
+
+function saveState(userId, state) {
+  if (typeof window === 'undefined') return state;
+  try {
+    window.localStorage.setItem(stateKey(userId), JSON.stringify(state));
+  } catch {
+    /* محدودیت فضای localStorage وضعیت بانک را نمی‌شکند */
+  }
+  return state;
+}
+
+function mutateState(userId, mutator) {
+  const state = loadState(userId);
+  mutator(state);
+  return saveState(userId, state);
+}
+
+/* ────────────────────────── موتور فیلتر ────────────────────────── */
+
+/* فیلتر استاندارد بانک — UI و Blueprint سشن هر دو از همین شکل استفاده می‌کنند */
+export const EMPTY_FILTERS = {
+  subjectIds: [],
+  topicPaths: [], // ['قلب و عروق'] یا ['قلب و عروق', 'ECG']
+  yearFrom: null,
+  yearTo: null,
+  sources: [],
+  types: [],
+  difficulties: [],
+  tags: [],
+  status: null, // unsolved | solved | wrong | weak | bookmarked | review
+  search: '',
+};
+
+export function normalizeFilters(filters = {}) {
+  const merged = { ...EMPTY_FILTERS, ...filters };
+  return {
+    subjectIds: [...(merged.subjectIds ?? [])],
+    topicPaths: [...(merged.topicPaths ?? [])],
+    yearFrom: merged.yearFrom ?? null,
+    yearTo: merged.yearTo ?? null,
+    sources: [...(merged.sources ?? [])],
+    types: [...(merged.types ?? [])],
+    difficulties: [...(merged.difficulties ?? [])],
+    tags: [...(merged.tags ?? [])],
+    status: merged.status ?? null,
+    search: (merged.search ?? '').trim(),
+  };
+}
+
+export const activeFilterCount = (filters) => {
+  const f = normalizeFilters(filters);
+  return (
+    f.subjectIds.length +
+    f.topicPaths.length +
+    (f.yearFrom ? 1 : 0) +
+    (f.yearTo ? 1 : 0) +
+    f.sources.length +
+    f.types.length +
+    f.difficulties.length +
+    f.tags.length +
+    (f.status ? 1 : 0) +
+    (f.search ? 1 : 0)
+  );
+};
+
+/* نمای کاربر از هر سؤال — از سشن‌ها مشتق می‌شود */
+function userQuestionStats(state) {
+  const map = new Map(); // qid → {attempts, correct, wrong, lastCorrect, lastAnsweredAt}
+  for (const session of state.sessions) {
+    if (session.status === 'in_progress') continue;
+    for (const [qid, answer] of Object.entries(session.answers ?? {})) {
+      const entry = map.get(qid) ?? { attempts: 0, correct: 0, wrong: 0, lastCorrect: null, lastAnsweredAt: 0 };
+      entry.attempts += 1;
+      if (answer.isCorrect) entry.correct += 1;
+      else entry.wrong += 1;
+      entry.lastCorrect = Boolean(answer.isCorrect);
+      entry.lastAnsweredAt = Math.max(entry.lastAnsweredAt, answer.answeredAt ?? session.submittedAt ?? 0);
+      map.set(qid, entry);
+    }
+  }
+  return map;
+}
+
+function filterQuestions(filters, state) {
+  const f = normalizeFilters(filters);
+  const stats = userQuestionStats(state);
+  const query = f.search.toLowerCase();
+
+  return QUESTIONS.filter((question) => {
+    if (f.subjectIds.length && !f.subjectIds.includes(question.subject)) return false;
+    if (f.topicPaths.length) {
+      const match = f.topicPaths.some((topic) => question.topicPath.includes(topic));
+      if (!match) return false;
+    }
+    if (f.yearFrom && question.year < f.yearFrom) return false;
+    if (f.yearTo && question.year > f.yearTo) return false;
+    if (f.sources.length && !f.sources.includes(question.source)) return false;
+    if (f.types.length && !f.types.includes(question.type)) return false;
+    if (f.difficulties.length && !f.difficulties.includes(question.difficulty)) return false;
+    if (f.tags.length && !f.tags.some((tag) => question.tags.includes(tag))) return false;
+    if (query) {
+      const haystack = `${question.stem} ${question.topicPath.join(' ')} ${subjectById(question.subject)?.name ?? ''}`.toLowerCase();
+      if (!haystack.includes(query)) return false;
+    }
+    if (f.status) {
+      const userStat = stats.get(question.id);
+      const bookmarked = state.bookmarks.includes(question.id);
+      const inReview = state.review.includes(question.id);
+      switch (f.status) {
+        case 'unsolved':
+          if (userStat) return false;
+          break;
+        case 'solved':
+          if (!userStat) return false;
+          break;
+        case 'wrong':
+          if (!userStat || userStat.wrong === 0) return false;
+          break;
+        case 'weak':
+          if (!userStat || userStat.correct / userStat.attempts >= 0.5) return false;
+          break;
+        case 'bookmarked':
+          if (!bookmarked) return false;
+          break;
+        case 'review':
+          if (!inReview) return false;
+          break;
+        default:
+          break;
+      }
+    }
+    return true;
+  }).map((question) => ({
+    question,
+    userStat: stats.get(question.id) ?? null,
+    bookmarked: state.bookmarks.includes(question.id),
+    inReview: state.review.includes(question.id),
+  }));
+}
+
+const subjectById = (id) => SUBJECTS.find((subject) => subject.id === id) ?? null;
+
+/* ────────────────────────── API: نمای کلی بانک ────────────────────────── */
+
+/*
+ * GET /api/bank/overview — آمار بانک + شمارنده‌های کاربر؛ همهٔ اعداد UI از همین
+ * پاسخ می‌آید تا هیچ جایی به شمارش مستقیم دادهٔ Mock وابسته نباشد.
+ */
+export function fetchBankOverview(userId) {
+  return respond(() => {
+    const state = loadState(userId);
+    const stats = userQuestionStats(state);
+
+    const subjectCounts = SUBJECTS.map((subject) => ({
+      ...subject,
+      questionCount: QUESTIONS.filter((question) => question.subject === subject.id).length,
+    }));
+
+    const yearCounts = BANK_YEARS.map((year) => {
+      const items = QUESTIONS.filter((question) => question.year === year);
+      const community = items.length
+        ? Math.round(items.reduce((sum, question) => sum + question.stats.correctPercent, 0) / items.length)
+        : 0;
+      return {
+        year,
+        questionCount: items.length,
+        communityCorrectPercent: community,
+        durationMinutes: items.length * 2,
+        userBestPercent: bestPercentForYear(state, items.map((question) => question.id)),
+      };
+    }).filter((entry) => entry.questionCount > 0);
+
+    const answeredAll = [...stats.values()];
+    const attemptsTotal = answeredAll.reduce((sum, entry) => sum + entry.attempts, 0);
+    const correctTotal = answeredAll.reduce((sum, entry) => sum + entry.correct, 0);
+
+    const topicCounts = {};
+    for (const question of QUESTIONS) {
+      const topic = question.topicPath[0];
+      topicCounts[topic] = (topicCounts[topic] ?? 0) + 1;
+    }
+
+    return {
+      bank: BANK_STATS,
+      subjects: subjectCounts,
+      years: yearCounts,
+      topics: topicCounts,
+      tags: {
+        featured: QUESTIONS.filter((question) => question.tags.includes('منتخب')).length,
+        frequent: QUESTIONS.filter((question) => question.tags.includes('پرتکرار')).length,
+        challenging: QUESTIONS.filter((question) => ['hard', 'very_hard'].includes(question.difficulty)).length,
+      },
+      user: {
+        solvedCount: stats.size,
+        wrongCount: [...stats.values()].filter((entry) => entry.wrong > 0).length,
+        bookmarkCount: state.bookmarks.length,
+        reviewCount: state.review.length,
+        sessionCount: state.sessions.filter((session) => session.status !== 'in_progress').length,
+        attemptsTotal,
+        accuracy: attemptsTotal ? Math.round((correctTotal / attemptsTotal) * 100) : null,
+        history: latestHistory(state, 5),
+      },
+    };
+  });
+}
+
+function bestPercentForYear(state, yearQuestionIds) {
+  const graded = state.sessions.filter(
+    (session) => session.status === 'submitted' && session.mode === 'exam' &&
+      session.questionIds.every((id) => yearQuestionIds.includes(id)) &&
+      session.questionIds.length === yearQuestionIds.length,
+  );
+  if (!graded.length) return null;
+  return Math.max(...graded.map((session) => session.result?.percentage ?? 0));
+}
+
+function latestHistory(state, limit) {
+  return state.sessions
+    .filter((session) => session.status === 'submitted')
+    .sort((a, b) => (b.submittedAt ?? 0) - (a.submittedAt ?? 0))
+    .slice(0, limit)
+    .map((session) => ({
+      id: session.id,
+      mode: session.mode,
+      title: session.title,
+      subtitle: session.subtitle,
+      percentage: session.result?.percentage ?? null,
+      correct: session.result?.correct ?? 0,
+      total: session.questionIds.length,
+      submittedAt: session.submittedAt,
+    }));
+}
+
+/* ────────────────────────── API: جستجو و فیلتر ────────────────────────── */
+
+/*
+ * POST /api/bank/questions/search — فیلتر + صفحه‌بندی.
+ * هر آیتم حاوی خود سؤال + نمای کاربر (وضعیت حل، گلچین، نیاز به مرور) است.
+ */
+export function searchQuestions(userId, filters, { page = 1, pageSize = 8 } = {}) {
+  return respond(() => {
+    const state = loadState(userId);
+    const matches = filterQuestions(filters, state);
+    const start = (page - 1) * pageSize;
+    return {
+      items: matches.slice(start, start + pageSize),
+      total: matches.length,
+      page,
+      pageSize,
+      pageCount: Math.max(1, Math.ceil(matches.length / pageSize)),
+      hasMore: start + pageSize < matches.length,
+    };
+  });
+}
+
+export function fetchQuestion(questionId) {
+  return respond(() => {
+    const question = questionById(questionId);
+    if (!question) throw new Error('question-not-found');
+    return question;
+  });
+}
+
+/*
+ * POST /api/bank/questions/stats — آمار مخزن یک فیلتر برای «آزمون‌ساز شخصی»:
+ * همهٔ عددهایی که UI سازنده دربارهٔ در دسترس بودن نشان می‌دهد از همین‌جا می‌آید
+ * (کل، تفکیک وضعیت کاربر، تفکیک سختی، تفکیک درس) — هیچ عددی تزئینی نیست.
+ */
+export function fetchPoolStats(userId, filters) {
+  return respond(() => {
+    const state = loadState(userId);
+    const matches = filterQuestions(filters, state);
+    const stats = {
+      total: matches.length,
+      byStatus: { unsolved: 0, solved: 0, wrong: 0, bookmarked: 0, review: 0 },
+      byDifficulty: { easy: 0, medium: 0, hard: 0, very_hard: 0 },
+      bySubject: {},
+    };
+    let timeSum = 0;
+    let timeCount = 0;
+    for (const { question, userStat, bookmarked, inReview } of matches) {
+      stats.byDifficulty[question.difficulty] = (stats.byDifficulty[question.difficulty] ?? 0) + 1;
+      if (question.stats?.avgTimeSec) {
+        timeSum += question.stats.avgTimeSec;
+        timeCount += 1;
+      }
+      const subjectEntry = (stats.bySubject[question.subject] ??= { total: 0, unsolved: 0, wrong: 0 });
+      subjectEntry.total += 1;
+      if (!userStat) {
+        stats.byStatus.unsolved += 1;
+        subjectEntry.unsolved += 1;
+      } else {
+        stats.byStatus.solved += 1;
+        if (userStat.wrong > 0) {
+          stats.byStatus.wrong += 1;
+          subjectEntry.wrong += 1;
+        }
+      }
+      if (bookmarked) stats.byStatus.bookmarked += 1;
+      if (inReview) stats.byStatus.review += 1;
+    }
+    stats.avgTimeSec = timeCount ? Math.round(timeSum / timeCount) : null;
+    return stats;
+  });
+}
+
+/*
+ * GET /api/bank/performance — پروفایل عملکرد کاربر (پایهٔ «آزمون نقاط ضعف من»):
+ * دقت و تسلط در سطح درس و مبحث، مشتق‌شده از سشن‌های ثبت‌شده — نه فیلد دستی.
+ * تسلط = دقت وزن‌خورده با حجم تلاش‌ها؛ درس‌های کم‌تلاش هنوز «نسنجیده» محسوب می‌شوند.
+ */
+export function fetchPerformanceProfile(userId) {
+  return respond(() => {
+    const state = loadState(userId);
+    const stats = userQuestionStats(state);
+
+    const subjects = new Map(); // subjectId → {attempts, correct, questions}
+    const topics = new Map(); // topicPath.join(' › ') → {subjectId, topic, subtopic, attempts, correct, questions}
+
+    for (const question of QUESTIONS) {
+      const userStat = stats.get(question.id);
+      if (!userStat) continue;
+
+      const subjectEntry = subjects.get(question.subject) ?? {
+        subjectId: question.subject,
+        name: subjectById(question.subject)?.name ?? question.subject,
+        accent: subjectById(question.subject)?.accent ?? '#9aa5b1',
+        attempts: 0,
+        correct: 0,
+        questions: 0,
+      };
+      subjectEntry.attempts += userStat.attempts;
+      subjectEntry.correct += userStat.correct;
+      subjectEntry.questions += 1;
+      subjects.set(question.subject, subjectEntry);
+
+      const topicKey = question.topicPath.join(' › ');
+      const topicEntry = topics.get(topicKey) ?? {
+        subjectId: question.subject,
+        topic: question.topicPath[0],
+        subtopic: question.topicPath[1] ?? null,
+        path: topicKey,
+        attempts: 0,
+        correct: 0,
+        questions: 0,
+      };
+      topicEntry.attempts += userStat.attempts;
+      topicEntry.correct += userStat.correct;
+      topicEntry.questions += 1;
+      topics.set(topicKey, topicEntry);
+    }
+
+    const shape = (entry) => ({
+      ...entry,
+      accuracy: entry.attempts ? Math.round((entry.correct / entry.attempts) * 100) : null,
+    });
+
+    return {
+      subjects: [...subjects.values()].map(shape),
+      topics: [...topics.values()].map(shape),
+      attemptedCount: stats.size,
+    };
+  });
+}
+
+/* ────────────────────────── API: سشن (Attempt) ────────────────────────── */
+
+/*
+ * POST /api/bank/sessions — حلّهٔ سؤال از blueprint ساخته می‌شود:
+ *   questionIds فوری | {count, shuffle} | فیلترهای استاندارد بانک
+ * mode: 'practice' (بازخورد فوری) یا 'exam' (کارنامه در پایان؛ endsAt از سرویس)
+ */
+export function createSession(userId, config = {}) {
+  return respond(() => {
+    const {
+      mode = 'practice',
+      title = 'تمرین بانک تست',
+      subtitle = '',
+      blueprint = {},
+      durationMinutes = null,
+      negativeMarking = 0,
+      count = null,
+      shuffle = false,
+      questionIds = null,
+      filters = null,
+      reviewMode = false,
+      explainDepth = 'full', // full | answer-only — «فقط گزینهٔ صحیح» بدون تحلیل تشریحی
+    } = config;
+
+    let pool;
+    let resolvedBlueprint = { ...blueprint };
+
+    if (Array.isArray(questionIds) && questionIds.length) {
+      pool = questionIds.map((id) => questionById(id)).filter(Boolean);
+      /* blueprint منبع (مثل آزمون شخصی با examId) حفظ می‌شود تا Attemptها به آزمون وصل بمانند */
+      resolvedBlueprint = { kind: 'explicit', ...blueprint, count: pool.length };
+    } else if (filters) {
+      const state = loadState(userId);
+      pool = filterQuestions(filters, state).map((entry) => entry.question);
+      resolvedBlueprint = { kind: 'filters', filters: normalizeFilters(filters) };
+    } else {
+      pool = [...QUESTIONS];
+      resolvedBlueprint = { kind: 'all' };
+    }
+
+    let selected = pool;
+    if (count && count < pool.length) {
+      const shuffled = [...pool];
+      for (let i = shuffled.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      selected = shuffled.slice(0, count);
+      resolvedBlueprint = { ...resolvedBlueprint, requested: count, resolved: selected.length };
+    } else if (shuffle) {
+      selected = [...pool].sort(() => Math.random() - 0.5);
+    }
+
+    if (!selected.length) throw new Error('no-questions-matched');
+
+    const now = Date.now();
+    const session = {
+      id: `tb-${now.toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
+      userId: resolveUserKey(userId),
+      mode: reviewMode ? 'review' : mode,
+      reviewOf: reviewMode ? config.reviewOf ?? null : null,
+      title,
+      subtitle,
+      blueprint: resolvedBlueprint,
+      explainDepth,
+      negativeMarking,
+      questionIds: selected.map((question) => question.id),
+      currentIndex: 0,
+      answers: {}, // qid → {selected, isCorrect?, timeSpent, answeredAt}
+      marked: [],
+      startedAt: now,
+      endsAt: mode === 'exam' && durationMinutes ? now + durationMinutes * 60000 : null,
+      submittedAt: null,
+      status: 'in_progress',
+      reason: null,
+      result: null,
+    };
+
+    mutateState(userId, (draft) => {
+      draft.sessions.push(session);
+    });
+    trackEvent('bank_session_started', { sessionId: session.id, mode: session.mode, count: selected.length });
+    return session;
+  });
+}
+
+/* GET /api/sessions/:id — برای Resume و ورود دوباره */
+export function fetchSession(userId, sessionId) {
+  return respond(() => {
+    const session = loadState(userId).sessions.find((item) => item.id === sessionId);
+    if (!session) throw new Error('session-not-found');
+    return session;
+  });
+}
+
+/*
+ * سؤال‌های سشن — در حالت exam بدون کلید پاسخ و تحلیل (sanitize)؛
+ * در practice/review کامل تا بازخورد فوری و تحلیل ممکن باشد.
+ */
+export function fetchSessionQuestions(session) {
+  return respond(() => {
+    const items = session.questionIds.map((id) => questionById(id)).filter(Boolean);
+    if (session.mode === 'exam') {
+      return items.map((question) => ({
+        id: question.id,
+        subject: question.subject,
+        topicPath: question.topicPath,
+        type: question.type,
+        difficulty: question.difficulty,
+        year: question.year,
+        source: question.source,
+        sourceLabel: SOURCES[question.source]?.label,
+        stem: question.stem,
+        figure: question.figure,
+        options: question.options,
+      }));
+    }
+    return items;
+  });
+}
+
+/* PUT /api/sessions/:id/progress — ادغام به‌جای جایگزینی (رفع race دو کلیک پشت‌سرهم) */
+export function saveSessionProgress(userId, session) {
+  const state = mutateState(userId, (draft) => {
+    const index = draft.sessions.findIndex((item) => item.id === session.id);
+    if (index === -1) return;
+    const stored = draft.sessions[index];
+    draft.sessions[index] = {
+      ...stored,
+      ...session,
+      answers: { ...(stored.answers ?? {}), ...(session.answers ?? {}) },
+      marked: Array.isArray(session.marked) ? session.marked : (stored.marked ?? []),
+    };
+  });
+  return state.sessions.find((item) => item.id === session.id) ?? session;
+}
+
+/* POST /api/sessions/:id/submit — تصحیح و صدور کارنامه (منطق نمره در سرویس) */
+export function submitSession(userId, sessionId, { reason = 'user' } = {}) {
+  return respond(() => {
+    const state = loadState(userId);
+    const index = state.sessions.findIndex((item) => item.id === sessionId);
+    if (index === -1) throw new Error('session-not-found');
+    const session = state.sessions[index];
+    if (session.status !== 'in_progress') return session;
+
+    const now = Date.now();
+    const timedOut = reason === 'timeout' || (session.endsAt && now > session.endsAt);
+
+    let correct = 0;
+    let wrong = 0;
+    let timeSum = 0;
+    const subjectMap = new Map();
+    const topicMap = new Map();
+    const wrongIds = [];
+    const unansweredIds = [];
+
+    for (const questionId of session.questionIds) {
+      const question = questionById(questionId);
+      const answer = session.answers?.[questionId];
+      if (!question) continue;
+
+      const isCorrect = answer ? answer.selected === question.correctAnswer : null;
+      if (!answer) unansweredIds.push(questionId);
+
+      const subjectEntry = subjectMap.get(question.subject) ?? {
+        subjectId: question.subject,
+        subjectName: subjectById(question.subject)?.name ?? question.subject,
+        correct: 0,
+        wrong: 0,
+        unanswered: 0,
+        total: 0,
+      };
+      subjectEntry.total += 1;
+      if (isCorrect === true) subjectEntry.correct += 1;
+      else if (isCorrect === false) subjectEntry.wrong += 1;
+      else subjectEntry.unanswered += 1;
+      subjectMap.set(question.subject, subjectEntry);
+
+      const topicKey = question.topicPath.join(' › ');
+      const topicEntry = topicMap.get(topicKey) ?? {
+        topic: question.topicPath[0],
+        subtopic: question.topicPath[1] ?? null,
+        subjectId: question.subject,
+        correct: 0,
+        wrong: 0,
+        unanswered: 0,
+        total: 0,
+      };
+      topicEntry.total += 1;
+      if (isCorrect === true) topicEntry.correct += 1;
+      else if (isCorrect === false) topicEntry.wrong += 1;
+      else topicEntry.unanswered += 1;
+      topicMap.set(topicKey, topicEntry);
+
+      if (isCorrect === true) correct += 1;
+      else if (isCorrect === false) {
+        wrong += 1;
+        wrongIds.push(questionId);
+      }
+      timeSum += answer?.timeSpent ?? 0;
+    }
+
+    const total = session.questionIds.length;
+    const answered = correct + wrong;
+    const negative = session.negativeMarking ?? 0;
+    const score = Math.max(0, correct + wrong * negative);
+    const percentage = Math.max(0, Math.min(100, Math.round((score / Math.max(total, 1)) * 1000) / 10));
+    const totalSeconds = Math.round((now - session.startedAt) / 1000);
+    const timeSpent = session.endsAt
+      ? Math.min(totalSeconds, Math.round((session.endsAt - session.startedAt) / 1000))
+      : totalSeconds;
+
+    const subjects = [...subjectMap.values()]
+      .map((entry) => ({ ...entry, percent: entry.total ? Math.round((entry.correct / entry.total) * 100) : 0 }))
+      .sort((a, b) => b.percent - a.percent);
+    const topics = [...topicMap.values()]
+      .map((entry) => ({ ...entry, percent: entry.total ? Math.round((entry.correct / entry.total) * 100) : 0 }))
+      .sort((a, b) => b.percent - a.percent);
+
+    const result = {
+      reason: timedOut ? 'timeout' : reason,
+      submittedAt: now,
+      total,
+      answered,
+      correct,
+      wrong,
+      unanswered: total - answered,
+      score: Math.round(score * 100) / 100,
+      maxScore: total,
+      negativeMarking: negative,
+      percentage,
+      timeSpent,
+      avgTimeSec: answered ? Math.round(timeSum / answered) : 0,
+      subjects,
+      topics,
+      wrongIds,
+      unansweredIds,
+      strongest: subjects[0] ?? null,
+      weakest: subjects.length > 1 ? subjects[subjects.length - 1] : null,
+    };
+
+    const submitted = {
+      ...session,
+      status: 'submitted',
+      submittedAt: now,
+      reason: result.reason,
+      result,
+    };
+
+    mutateState(userId, (draft) => {
+      const storedIndex = draft.sessions.findIndex((item) => item.id === sessionId);
+      if (storedIndex !== -1) draft.sessions[storedIndex] = submitted;
+    });
+
+    trackEvent('bank_session_submitted', {
+      sessionId,
+      mode: session.mode,
+      percentage,
+      answered,
+      total,
+    });
+    return submitted;
+  });
+}
+
+/* سؤال‌های سشن همراه کلید پاسخ — فقط بعد از submit (مرور کارنامه) */
+export function fetchReviewSession(userId, sessionId) {
+  return respond(() => {
+    const state = loadState(userId);
+    const session = state.sessions.find((item) => item.id === sessionId);
+    if (!session) throw new Error('session-not-found');
+    if (session.status === 'in_progress') throw new Error('review-not-allowed');
+
+    const questions = session.questionIds.map((id) => {
+      const question = questionById(id);
+      return { ...question, userAnswer: session.answers?.[id] ?? null, marked: session.marked?.includes(id) ?? false };
+    });
+    return { session, questions };
+  });
+}
+
+/* ────────────────────────── API: نشان‌ها، مرور، گزارش ────────────────────────── */
+
+/* POST /api/bank/bookmarks/:questionId/toggle */
+export function toggleBookmark(userId, questionId, forceOn = null) {
+  return respond(() => {
+    let isOn = false;
+    mutateState(userId, (state) => {
+      const has = state.bookmarks.includes(questionId);
+      if (forceOn === true || (forceOn === null && !has)) {
+        state.bookmarks = [...new Set([...state.bookmarks, questionId])];
+        isOn = true;
+      } else {
+        state.bookmarks = state.bookmarks.filter((id) => id !== questionId);
+        isOn = false;
+      }
+    });
+    trackEvent(isOn ? 'bank_bookmark_added' : 'bank_bookmark_removed', { questionId });
+    return isOn;
+  });
+}
+
+/* POST /api/bank/review/:questionId/toggle */
+export function toggleNeedReview(userId, questionId, forceOn = null) {
+  return respond(() => {
+    let isOn = false;
+    mutateState(userId, (state) => {
+      const has = state.review.includes(questionId);
+      if (forceOn === true || (forceOn === null && !has)) {
+        state.review = [...new Set([...state.review, questionId])];
+        isOn = true;
+      } else {
+        state.review = state.review.filter((id) => id !== questionId);
+        isOn = false;
+      }
+    });
+    trackEvent(isOn ? 'bank_review_added' : 'bank_review_removed', { questionId });
+    return isOn;
+  });
+}
+
+/* POST /api/bank/questions/:id/report */
+export function reportQuestion(userId, questionId, { reason, note = '' }) {
+  return respond(() => {
+    mutateState(userId, (state) => {
+      state.reports.push({ questionId, reason, note, at: Date.now() });
+    });
+    trackEvent('bank_question_reported', { questionId, reason });
+    return { ok: true };
+  });
+}
+
+/* ────────────────────────── API: فیلترهای ذخیره («آزمون من») ────────────────────────── */
+
+export function fetchSavedFilters(userId) {
+  return respond(() => loadState(userId).savedFilters);
+}
+
+/* POST /api/bank/filters */
+export function saveFilterPreset(userId, { name, blueprint }) {
+  return respond(() => {
+    const preset = {
+      id: `f-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 5)}`,
+      name: name.trim() || 'آزمون من',
+      blueprint: normalizeFilters(blueprint),
+      createdAt: Date.now(),
+    };
+    mutateState(userId, (state) => {
+      state.savedFilters.push(preset);
+    });
+    trackEvent('bank_filter_saved', { presetId: preset.id });
+    return preset;
+  });
+}
+
+/* DELETE /api/bank/filters/:id */
+export function deleteFilterPreset(userId, presetId) {
+  return respond(() => {
+    mutateState(userId, (state) => {
+      state.savedFilters = state.savedFilters.filter((preset) => preset.id !== presetId);
+    });
+    trackEvent('bank_filter_deleted', { presetId });
+    return { ok: true };
+  });
+}
+
+/* ────────────────────────── API: تاریخچه ────────────────────────── */
+
+export function fetchHistory(userId) {
+  return respond(() => ({
+    items: latestHistory(loadState(userId), 50),
+    bookmarks: loadState(userId).bookmarks.map((id) => questionById(id)).filter(Boolean),
+    review: loadState(userId).review.map((id) => questionById(id)).filter(Boolean),
+  }));
+}
+
+/*
+ * GET /api/bank/sessions?status=submitted — همهٔ سشن‌های ثبت‌شدهٔ کاربر (همگام).
+ * مصرف‌کنندهٔ اصلی: سرویس تحلیل عملکرد که سشن‌های واقعی را با تاریخچهٔ تحلیل ادغام می‌کند.
+ */
+export function fetchSubmittedSessions(userId) {
+  return loadState(userId).sessions.filter((session) => session.status === 'submitted');
+}
+
+/* ────────────────────────── خروجی‌های ثابت برای UI ────────────────────────── */
+
+export { BANK_YEARS, BANK_STATS, DIFFICULTIES, QUESTION_TYPES, QUESTIONS, SOURCES, SUBJECTS, TOPIC_TREE };

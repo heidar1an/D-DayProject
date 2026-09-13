@@ -8,9 +8,20 @@ import Soppurt from './setting/Soppurt';
 import DashboardHome from './DashboardHome';
 import CoursesSection from './CoursesSection';
 import ComprehensiveCourseLayer from './courses/ComprehensiveCourseLayer';
+import MicroCourseLayer from './courses/MicroCourseLayer';
+import ReferenceLayer from './courses/ReferenceLayer';
 import TestsSection from './TestsSection';
+import InternationalExamsLayer from './tests/InternationalExamsLayer';
+import CoordinatedExamsLayer from './tests/coordinated/CoordinatedExamsLayer';
+import TestBankLayer from './tests/bank/TestBankLayer';
+import AnalyticsLayer from './analytics/AnalyticsLayer';
 import OtherSections from './OtherSections';
+import WikiLayer from './wiki/WikiLayer';
+import KnowledgeLayer from './knowledge/KnowledgeLayer';
 import NotificationsSection from './NotificationsSection';
+import LeagueSection from './league/LeagueSection';
+import FlashcardSection from './flashcards/FlashcardSection';
+import NotesSection from './notes/NotesSection';
 import Pomodoro, { usePomodoro, formatTimer } from './Pomodoro';
 
 const settingsTabLabels = {
@@ -27,6 +38,12 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
   const [settingsTab, setSettingsTab] = useState('profile');
   const [areNotificationsOpen, setAreNotificationsOpen] = useState(false);
   const [openCourseLayer, setOpenCourseLayer] = useState(null);
+  const [openInternationalLayer, setOpenInternationalLayer] = useState(false);
+  const [openCoordinatedLayer, setOpenCoordinatedLayer] = useState(false);
+  const [openTestBankLayer, setOpenTestBankLayer] = useState(null); // null | {initialView}
+  const [openAnalyticsLayer, setOpenAnalyticsLayer] = useState(false);
+  const [openWikiLayer, setOpenWikiLayer] = useState(false);
+  const [openKnowledgeLayer, setOpenKnowledgeLayer] = useState(false);
   const {
     secondsLeft,
     isRunning,
@@ -44,6 +61,12 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
     setIsSettingsOpen(false);
     setAreNotificationsOpen(false);
     setOpenCourseLayer(null);
+    setOpenInternationalLayer(false);
+    setOpenCoordinatedLayer(false);
+    setOpenTestBankLayer(null);
+    setOpenAnalyticsLayer(false);
+    setOpenWikiLayer(false);
+    setOpenKnowledgeLayer(false);
   };
 
   const handleSettingsToggle = () => {
@@ -56,6 +79,11 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
     setIsSettingsOpen(true);
     setAreNotificationsOpen(false);
     setOpenCourseLayer(null);
+    setOpenInternationalLayer(false);
+    setOpenCoordinatedLayer(false);
+    setOpenTestBankLayer(null);
+    setOpenAnalyticsLayer(false);
+    setOpenWikiLayer(false);
   };
 
   const handleNotificationsToggle = () => {
@@ -67,35 +95,55 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
     setIsSettingsOpen(false);
     setAreNotificationsOpen(true);
     setOpenCourseLayer(null);
+    setOpenInternationalLayer(false);
+    setOpenCoordinatedLayer(false);
+    setOpenTestBankLayer(null);
+    setOpenAnalyticsLayer(false);
+    setOpenWikiLayer(false);
+    setOpenKnowledgeLayer(false);
   };
 
-  /* فعلاً فقط «درسنامه جامع علوم پایه» لایه دارد؛ بقیه دوره‌ها به‌زودی */
+  /* «درسنامه جامع»، «میکرو درسنامه» و «رفرنس» لایه دارند؛ بقیه دوره‌ها به‌زودی */
   const handleOpenCourse = (courseId) => {
-    if (courseId !== 'comprehensive') return;
+    if (courseId !== 'comprehensive' && courseId !== 'micro' && courseId !== 'reference') return;
 
     setOpenCourseLayer(courseId);
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
   const sections = {
-    dashboard: <DashboardHome userData={userData} />,
-    courses: <CoursesSection onOpenCourse={handleOpenCourse} />,
-    tests: <TestsSection />,
-    other: <OtherSections />,
-    league: (
-      <section
-        dir="rtl"
-        aria-label="لیگ"
-        className="mx-auto w-[var(--content-width)] py-8 text-white md:py-10 [font-family:'Pinar',Tahoma,sans-serif]"
-      >
-        <div className="dash-stagger rounded-[2.5rem] bg-[#282828] p-10 text-center md:rounded-[3rem] md:p-14">
-          <h2 className="text-2xl text-[#937fcd] md:text-3xl [font-family:'Doran',Tahoma,sans-serif]">
-            لیگ
-          </h2>
-          <p className="mt-4 text-[#aaa]">این بخش به‌زودی اضافه می‌شود.</p>
-        </div>
-      </section>
+    dashboard: (
+      <DashboardHome
+        userData={userData}
+        onOpenFlashcards={() => handleSectionChange('flashcards')}
+        onOpenNotes={() => handleSectionChange('notes')}
+      />
     ),
+    courses: <CoursesSection onOpenCourse={handleOpenCourse} />,
+    tests: (
+      <TestsSection
+        onOpenAnalytics={() => {
+          setOpenAnalyticsLayer(true);
+          window.scrollTo({ top: 0, behavior: 'instant' });
+        }}
+        onOpenInternational={() => setOpenInternationalLayer(true)}
+        onOpenCoordinated={() => setOpenCoordinatedLayer(true)}
+        onOpenTestBank={(initialView) => {
+          setOpenTestBankLayer({ initialView: initialView ?? null });
+          window.scrollTo({ top: 0, behavior: 'instant' });
+        }}
+      />
+    ),
+    flashcards: <FlashcardSection userData={userData} />,
+    notes: <NotesSection userData={userData} />,
+    other: <OtherSections onOpenWiki={() => {
+      setOpenWikiLayer(true);
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }} onOpenKnowledge={() => {
+      setOpenKnowledgeLayer(true);
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }} />,
+    league: <LeagueSection userData={userData} />,
     pomodoro: (
       <Pomodoro
         secondsLeft={secondsLeft}
@@ -173,7 +221,56 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
         <NotificationsSection />
       ) : openCourseLayer ? (
         <div className="dashboard__section dashboard-layer-reveal" key={openCourseLayer}>
-          <ComprehensiveCourseLayer onBack={() => setOpenCourseLayer(null)} />
+          {openCourseLayer === 'micro' ? (
+            <MicroCourseLayer
+              onBack={() => setOpenCourseLayer(null)}
+              onOpenComprehensive={() => setOpenCourseLayer('comprehensive')}
+            />
+          ) : openCourseLayer === 'reference' ? (
+            <ReferenceLayer onBack={() => setOpenCourseLayer(null)} />
+          ) : (
+            <ComprehensiveCourseLayer onBack={() => setOpenCourseLayer(null)} />
+          )}
+        </div>
+      ) : openInternationalLayer ? (
+        <div className="dashboard__section dashboard-layer-reveal" key="international-exams">
+          <InternationalExamsLayer
+            userData={userData}
+            onBack={() => setOpenInternationalLayer(false)}
+          />
+        </div>
+      ) : openCoordinatedLayer ? (
+        <div className="dashboard__section dashboard-layer-reveal" key="coordinated-exams">
+          <CoordinatedExamsLayer
+            userData={userData}
+            onBack={() => setOpenCoordinatedLayer(false)}
+          />
+        </div>
+      ) : openTestBankLayer ? (
+        <div className="dashboard__section dashboard-layer-reveal" key="test-bank">
+          <TestBankLayer
+            userData={userData}
+            initialView={openTestBankLayer.initialView}
+            onBack={() => setOpenTestBankLayer(null)}
+          />
+        </div>
+      ) : openAnalyticsLayer ? (
+        <div className="dashboard__section dashboard-layer-reveal" key="analytics">
+          <AnalyticsLayer
+            userData={userData}
+            onBack={() => setOpenAnalyticsLayer(false)}
+          />
+        </div>
+      ) : openWikiLayer ? (
+        <div className="dashboard__section dashboard-layer-reveal" key="tapesh-wiki">
+          <WikiLayer onBack={() => setOpenWikiLayer(false)} />
+        </div>
+      ) : openKnowledgeLayer ? (
+        <div className="dashboard__section dashboard-layer-reveal" key="knowledge-network">
+          <KnowledgeLayer
+            userData={userData}
+            onBack={() => setOpenKnowledgeLayer(false)}
+          />
         </div>
       ) : (
         <div className="dashboard__section dashboard-layer-reveal" key={activeSection}>

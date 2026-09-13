@@ -1,0 +1,816 @@
+/*
+ * BankSession — محیط حل سؤال بانک تست. یک Room واحد با سه حالت:
+ *   practice → بازخورد فوری + تحلیل + گلچین/نیاز به مرور/گزارش
+ *   exam     → تایمر (endsAt از سرویس)، پاسخ مخفی، علامت‌گذاری، ثبت نهایی و تایم‌اوت
+ *   review   → مرور سشن ثبت‌شده با نمایش پاسخ و تحلیل
+ * Desktop: نویگیتور سایدبار چسبان | Mobile: نویگیتور در Bottom Sheet.
+ */
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  fetchHistory,
+  reportQuestion,
+  saveSessionProgress,
+  submitSession,
+  toggleBookmark,
+  toggleNeedReview,
+  DIFFICULTIES,
+  QUESTION_TYPES,
+  SOURCES,
+  SUBJECTS,
+} from '../../../../services/testBank/testBankService';
+import {
+  DifficultyBadge,
+  EmptyState,
+  Icon,
+  Modal,
+  OptionButton,
+  QuestionFigure,
+  SourceBadge,
+  TypeBadge,
+  faNum,
+  formatClock,
+  toFa,
+} from './bankShared';
+
+const REPORT_REASONS = ['ایراد علمی', 'ایراد نگارشی', 'گزینه‌های مبهم', 'تصویر مشکل دارد', 'پاسخ اشتباه', 'سایر'];
+
+const OPTION_KEYS = ['A', 'B', 'C', 'D'];
+
+/* ── پنل تحلیل سؤال — از متن سؤال جدا ولی یکپارچه ── */
+function ExplanationPanel({ question, userAnswer, myAttempts }) {
+  const stats = question.stats ?? {};
+  const explanation = question.explanation ?? {};
+
+  return (
+    <section className="tb-reveal overflow-hidden rounded-[2rem] border border-[#61D192]/20 bg-[#20241f] p-5 md:p-6" aria-label="پاسخ تشریحی">
+      <header className="flex flex-wrap items-center gap-2 border-b border-white/8 pb-3">
+        <span className="grid h-7 w-7 place-items-center rounded-xl bg-[#61D192]/15 text-[#61D192]">
+          <Icon name="book" className="h-4 w-4" />
+        </span>
+        <h3 className="text-sm font-bold [font-family:'Doran',Tahoma,sans-serif]">تحلیل و پاسخ تشریحی</h3>
+      </header>
+
+      <div className="mt-4 space-y-4 text-[13.5px] leading-7 text-[#d5d5d5]">
+        {explanation.summary && (
+          <p>
+            <strong className="text-[#61D192]">چرا؟ </strong>
+            {explanation.summary}
+          </p>
+        )}
+        {explanation.deep && <p className="text-[#c5c5c5]">{explanation.deep}</p>}
+
+        {explanation.keyPoint && (
+          <div className="rounded-2xl border border-[#937fcd]/25 bg-[#937fcd]/[0.08] p-4">
+            <strong className="flex items-center gap-1.5 text-[13px] text-[#c9bdf0]">
+              <Icon name="spark" className="h-3.5 w-3.5" />
+              نکتهٔ مهم
+            </strong>
+            <p className="mt-1.5">{explanation.keyPoint}</p>
+          </div>
+        )}
+
+        {explanation.trap && (
+          <div className="rounded-2xl border border-[#e0b45c]/25 bg-[#e0b45c]/[0.07] p-4">
+            <strong className="flex items-center gap-1.5 text-[13px] text-[#e0b45c]">
+              <Icon name="alert" className="h-3.5 w-3.5" />
+              دام تستی
+            </strong>
+            <p className="mt-1.5">{explanation.trap}</p>
+          </div>
+        )}
+
+        {explanation.whyWrong?.length > 0 && (
+          <div>
+            <strong className="text-[13px] text-[#bbb]">چرا گزینه‌های دیگر غلط‌اند؟</strong>
+            <ul className="mt-2 space-y-2">
+              {explanation.whyWrong.map((item) => (
+                <li key={item.index} className="flex gap-2.5 rounded-xl bg-white/[0.04] px-3.5 py-2.5">
+                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-lg bg-[#e26d6d]/15 text-[11px] font-bold text-[#ef9196]">
+                    {OPTION_KEYS[item.index] ?? toFa(item.index + 1)}
+                  </span>
+                  <span className="min-w-0">{item.text}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+
+      {/* آمار سؤال — جامعه + خود کاربر */}
+      {stats.solves != null && (
+        <footer className="mt-5 border-t border-white/8 pt-4">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[11.5px] text-[#9a9a9a]">
+            <span className="flex items-center gap-1.5">
+              <Icon name="users" className="h-3.5 w-3.5" />
+              {faNum(stats.solves)} نفر حل کرده‌اند
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Icon name="check" className="h-3.5 w-3.5 text-[#61D192]" />
+              {toFa(stats.correctPercent)}٪ پاسخ صحیح
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Icon name="clock" className="h-3.5 w-3.5" />
+              میانگین زمان: {toFa(stats.avgTimeSec ?? '—')} ثانیه
+            </span>
+            {myAttempts > 0 && (
+              <span className="flex items-center gap-1.5">
+                <Icon name="history" className="h-3.5 w-3.5" />
+                تو {toFa(myAttempts)} بار حل کرده‌ای
+              </span>
+            )}
+          </div>
+
+          {/* توزیع گزینه‌ها در جامعه */}
+          <div className="mt-3.5 space-y-1.5" aria-label="درصد انتخاب هر گزینه">
+            {(stats.optionPercents ?? []).map((percent, index) => {
+              const isCorrect = index === question.correctAnswer;
+              return (
+                <div key={index} className="flex items-center gap-2.5">
+                  <span className={`w-5 shrink-0 text-center text-[11px] font-bold [font-family:'Doran',Tahoma,sans-serif] ${isCorrect ? 'text-[#61D192]' : 'text-[#888]'}`}>
+                    {OPTION_KEYS[index]}
+                  </span>
+                  <span className="tb-bar flex-1" style={{ height: '7px' }}>
+                    <span
+                      className="tb-bar__fill block"
+                      style={{ width: `${percent}%`, background: isCorrect ? '#61D192' : 'rgba(255,255,255,0.22)' }}
+                    />
+                  </span>
+                  <span className="w-10 shrink-0 text-left text-[11px] text-[#9a9a9a]">{toFa(percent)}٪</span>
+                  {userAnswer?.selected === index && (
+                    <span className="rounded-full bg-white/8 px-2 py-0.5 text-[9.5px] text-[#bbb]">انتخاب تو</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <p className="mt-3.5 text-[11px] text-[#777]">
+            منبع: {SOURCES[question.source]?.label ?? '—'} · سال {toFa(question.year)}
+          </p>
+        </footer>
+      )}
+    </section>
+  );
+}
+
+/* ── مودال گزارش سؤال ── */
+function ReportDialog({ userId, questionId, onClose }) {
+  const [reason, setReason] = useState(REPORT_REASONS[0]);
+  const [note, setNote] = useState('');
+  const [sent, setSent] = useState(false);
+
+  const submit = async () => {
+    await reportQuestion(userId, questionId, { reason, note });
+    setSent(true);
+  };
+
+  return (
+    <Modal open onClose={sent ? onClose : () => {}} title="گزارش مشکل سؤال" width="min(26rem, 100%)">
+      {sent ? (
+        <div className="py-4 text-center">
+          <span className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-full bg-[#61D192]/15 text-[#61D192]">
+            <Icon name="check" className="h-6 w-6" />
+          </span>
+          <strong className="block [font-family:'Doran',Tahoma,sans-serif]">گزارشت ثبت شد</strong>
+          <p className="mt-1.5 text-sm leading-6 text-[#8a8a8a]">تیم محتوای تپش بررسی می‌کند؛ ممنون که کمک می‌کنی بانک سؤال بهتر شود.</p>
+          <button
+            type="button"
+            onClick={onClose}
+            className="mt-5 cursor-pointer rounded-xl bg-white/8 px-5 py-2 text-sm transition-colors hover:bg-white/12"
+          >
+            بستن
+          </button>
+        </div>
+      ) : (
+        <>
+          <h3 className="flex items-center gap-2 text-base [font-family:'Doran',Tahoma,sans-serif]">
+            <Icon name="flag" className="h-4.5 w-4.5 text-[#e0b45c]" />
+            گزارش مشکل سؤال
+          </h3>
+          <p className="mt-1.5 text-xs text-[#8a8a8a]">شناسه سؤال: {questionId}</p>
+          <fieldset className="mt-4 grid grid-cols-2 gap-1.5">
+            <legend className="sr-only">دلیل گزارش</legend>
+            {REPORT_REASONS.map((item) => (
+              <button
+                key={item}
+                type="button"
+                onClick={() => setReason(item)}
+                aria-pressed={reason === item}
+                className={`cursor-pointer rounded-xl border px-3 py-2.5 text-[12.5px] transition-colors ${
+                  reason === item ? 'border-[#937fcd]/60 bg-[#937fcd]/10 text-white' : 'border-white/8 text-[#bbb] hover:border-white/20'
+                }`}
+              >
+                {item}
+              </button>
+            ))}
+          </fieldset>
+          <textarea
+            value={note}
+            onChange={(event) => setNote(event.target.value)}
+            placeholder="توضیح اختیاری…"
+            rows={2}
+            className="mt-3 w-full resize-none rounded-xl border border-white/10 bg-[#2a2a2a] px-3.5 py-2.5 text-sm text-white placeholder:text-[#666] focus:border-[#61D192]/50 focus:outline-none"
+          />
+          <div className="mt-4 flex gap-2">
+            <button
+              type="button"
+              onClick={submit}
+              className="flex-1 cursor-pointer rounded-xl bg-[#937fcd] px-4 py-2.5 text-sm font-bold transition-transform hover:-translate-y-0.5"
+            >
+              ارسال گزارش
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="cursor-pointer rounded-xl bg-white/8 px-4 py-2.5 text-sm transition-colors hover:bg-white/12"
+            >
+              انصراف
+            </button>
+          </div>
+        </>
+      )}
+    </Modal>
+  );
+}
+
+/* ── نویگیتور سؤال‌ها ── */
+function QuestionNavigator({ questions, answers, marked, currentIndex, reviewMode, onJump }) {
+  const stateOf = (question, index) => {
+    const answer = answers[question.id];
+    if (index === currentIndex) return 'current';
+    if (answer && reviewMode) return 'answered';
+    if (answer && answer.isCorrect === true) return 'answered';
+    if (answer && answer.isCorrect === false) return 'wrong';
+    if (answer) return 'answered';
+    return 'idle';
+  };
+
+  return (
+    <div>
+      <div className="tb-navgrid" role="list" aria-label="ناوبری سؤال‌ها">
+        {questions.map((question, index) => {
+          const state = stateOf(question, index);
+          const isMarked = marked.includes(question.id);
+          return (
+            <button
+              key={question.id}
+              type="button"
+              role="listitem"
+              onClick={() => onJump(index)}
+              aria-label={`سؤال ${toFa(index + 1)}${state === 'answered' ? '، پاسخ داده شده' : state === 'wrong' ? '، غلط' : state === 'idle' ? '، حل‌نشده' : '، فعلی'}${isMarked ? '، علامت‌گذاری شده' : ''}`}
+              aria-current={index === currentIndex ? 'step' : undefined}
+              className={`tb-navchip ${state === 'answered' ? 'is-answered' : ''} ${state === 'wrong' ? 'is-wrong' : ''} ${state === 'current' ? 'is-current' : ''} ${isMarked ? 'is-marked' : ''}`}
+            >
+              {toFa(index + 1)}
+              {isMarked && <span className="tb-navchip__flag" aria-hidden="true" />}
+            </button>
+          );
+        })}
+      </div>
+
+      <ul className="mt-4 space-y-2 border-t border-white/8 pt-3 text-[11px] text-[#8a8a8a]">
+        <li className="flex items-center gap-2">
+          <span className="h-2.5 w-2.5 rounded-md bg-[#61D192]/60" aria-hidden="true" /> پاسخ داده‌شده
+        </li>
+        <li className="flex items-center gap-2">
+          <span className="h-2.5 w-2.5 rounded-md bg-[#e26d6d]/60" aria-hidden="true" /> غلط
+        </li>
+        <li className="flex items-center gap-2">
+          <span className="h-2.5 w-2.5 rounded-md bg-[#e0b45c]" aria-hidden="true" /> علامت‌گذاری‌شده
+        </li>
+        <li className="flex items-center gap-2">
+          <span className="h-2.5 w-2.5 rounded-md bg-white/20" aria-hidden="true" /> حل‌نشده
+        </li>
+      </ul>
+    </div>
+  );
+}
+
+/* ══════════════════════════ BankSession ══════════════════════════ */
+export default function BankSession({ userId, session, questions, onFinished, onExit }) {
+  const mode = session.mode; // practice | exam | review
+  const isExam = mode === 'exam';
+  const isReview = mode === 'review';
+
+  const [currentIndex, setCurrentIndex] = useState(session.currentIndex ?? 0);
+  const [selected, setSelected] = useState(null);
+  const [answers, setAnswers] = useState(
+    isReview
+      ? Object.fromEntries(
+          questions
+            .filter((question) => question.userAnswer)
+            .map((question) => [question.id, { selected: question.userAnswer.selected, isCorrect: question.userAnswer.isCorrect ?? question.userAnswer.selected === question.correctAnswer }]),
+        )
+      : session.answers ?? {},
+  );
+  const [marked, setMarked] = useState(session.marked ?? []);
+  const [bookmarks, setBookmarks] = useState([]); // qid[] — گلچین
+  const [reviewFlags, setReviewFlags] = useState([]); // qid[] — نیاز به مرور
+  const [navigatorOpen, setNavigatorOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [submitOpen, setSubmitOpen] = useState(false);
+  const [elapsed, setElapsed] = useState(() => Math.floor((Date.now() - session.startedAt) / 1000));
+  const [submitting, setSubmitting] = useState(false);
+  const questionStartRef = useRef(Date.now());
+  const autoSubmittedRef = useRef(false);
+
+  const question = questions[currentIndex];
+  const answer = answers[question?.id];
+  const revealed = isReview || (!isExam && Boolean(answer));
+
+  /* گلچین و نیاز به مرور فعلی کاربر — از سرویس، فقط در practice */
+  useEffect(() => {
+    if (isExam) return undefined;
+    let alive = true;
+    fetchHistory(userId)
+      .then((data) => {
+        if (!alive) return;
+        setBookmarks(data.bookmarks.map((item) => item.id));
+        setReviewFlags(data.review.map((item) => item.id));
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [userId, isExam]);
+
+  /* تایمر: exam شمارش معکوس، practice شمارش صعودی */
+  useEffect(() => {
+    const id = setInterval(() => setElapsed(Math.floor((Date.now() - session.startedAt) / 1000)), 1000);
+    return () => clearInterval(id);
+  }, [session.startedAt]);
+
+  const remaining = session.endsAt ? Math.floor((session.endsAt - Date.now()) / 1000) : null;
+
+  const finish = useCallback(
+    async (reason = 'user') => {
+      if (submitting) return;
+      setSubmitting(true);
+      const submitted = await submitSession(userId, session.id, { reason });
+      onFinished(submitted);
+    },
+    [onFinished, session.id, submitting, userId],
+  );
+
+  /* پایان خودکار در اتمام زمان */
+  useEffect(() => {
+    if (remaining !== null && remaining <= 0 && !autoSubmittedRef.current && !submitting) {
+      autoSubmittedRef.current = true;
+      finish('timeout');
+    }
+  }, [finish, remaining, submitting]);
+
+  const persist = (patch) => {
+    if (isReview) return;
+    saveSessionProgress(userId, { ...session, ...patch });
+  };
+
+  const goTo = (index) => {
+    const next = Math.max(0, Math.min(questions.length - 1, index));
+    setCurrentIndex(next);
+    setSelected(isReview ? answers[questions[next]?.id]?.selected ?? null : null);
+    questionStartRef.current = Date.now();
+    setNavigatorOpen(false);
+    if (!isReview) persist({ currentIndex: next, answers });
+  };
+
+  /* ثبت پاسخ — practice: تصحیح فوری | exam: فقط ذخیره انتخاب */
+  const handleSubmitAnswer = async () => {
+    if (selected == null || revealed || submitting) return;
+    const timeSpent = Math.round((Date.now() - questionStartRef.current) / 1000);
+    const entry = {
+      selected,
+      ...(isExam ? {} : { isCorrect: selected === question.correctAnswer }),
+      timeSpent,
+      answeredAt: Date.now(),
+    };
+    const nextAnswers = { ...answers, [question.id]: entry };
+    setAnswers(nextAnswers);
+    persist({ answers: { [question.id]: entry } });
+  };
+
+  const toggleMark = () => {
+    const isOn = !marked.includes(question.id);
+    setMarked((prev) => (isOn ? [...prev, question.id] : prev.filter((id) => id !== question.id)));
+    persist({ marked: isOn ? [...marked, question.id] : marked.filter((id) => id !== question.id) });
+  };
+
+  const handleBookmark = async () => {
+    const isOn = await toggleBookmark(userId, question.id);
+    setBookmarks((prev) => (isOn ? [...new Set([...prev, question.id])] : prev.filter((id) => id !== question.id)));
+  };
+
+  const handleReviewFlag = async () => {
+    const isOn = await toggleNeedReview(userId, question.id);
+    setReviewFlags((prev) => (isOn ? [...new Set([...prev, question.id])] : prev.filter((id) => id !== question.id)));
+  };
+
+  /* میان‌برهای کیبورد: ۱-۴ انتخاب گزینه، Enter ثبت/بعدی */
+  useEffect(() => {
+    const handleKey = (event) => {
+      if (reportOpen || submitOpen) return;
+      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement || event.target instanceof HTMLSelectElement) return;
+      const digit = Number(event.key);
+      if (digit >= 1 && digit <= question?.options.length && !revealed) {
+        setSelected(digit - 1);
+      } else if (event.key === 'Enter' && !isReview) {
+        if (!revealed && selected != null) handleSubmitAnswer();
+        else if (revealed && currentIndex < questions.length - 1) goTo(currentIndex + 1);
+      } else if (event.key === 'ArrowRight' && currentIndex > 0) {
+        goTo(currentIndex - 1);
+      } else if (event.key === 'ArrowLeft' && currentIndex < questions.length - 1) {
+        goTo(currentIndex + 1);
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  });
+
+  const answeredCount = Object.keys(answers).length;
+  const progress = questions.length ? (answeredCount / questions.length) * 100 : 0;
+  const isLast = currentIndex === questions.length - 1;
+  const subject = SUBJECTS.find((item) => item.id === question?.subject);
+  const bookmarked = bookmarks.includes(question?.id);
+  const reviewFlagged = reviewFlags.includes(question?.id);
+  const isMarked = marked.includes(question?.id);
+
+  const timerClass = useMemo(() => {
+    if (remaining === null) return '';
+    if (remaining <= 60) return 'tb-timer--danger';
+    if (remaining <= 300) return 'tb-timer--warn';
+    return 'tb-timer--ok';
+  }, [remaining]);
+
+  if (!question) {
+    return (
+      <div className="grid min-h-[60vh] place-items-center">
+        <EmptyState
+          icon="alert"
+          title="سؤالی برای نمایش نیست"
+          note="این سشن فعلاً بدون سؤال است."
+          action={
+            <button type="button" onClick={onExit} className="mt-3 cursor-pointer rounded-xl bg-[#61D192] px-5 py-2 text-sm font-bold text-[#12271a]">
+              بازگشت
+            </button>
+          }
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div dir="rtl">
+      {/* ── نوار بالای محیط حل ── */}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-[1.75rem] border border-white/8 bg-[#242426] px-4 py-3 md:px-5">
+        <div className="flex min-w-0 items-center gap-3">
+          <button
+            type="button"
+            onClick={() => (isExam ? onExit() : setSubmitOpen(true))}
+            className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-white/6 px-3 py-2 text-xs transition-colors hover:bg-white/12"
+          >
+            <Icon name="back" className="h-3.5 w-3.5" />
+            خروج
+          </button>
+          <div className="min-w-0">
+            <strong className="block truncate text-sm [font-family:'Doran',Tahoma,sans-serif]">{session.title}</strong>
+            <span className="text-[11px] text-[#8a8a8a]">
+              {isExam ? 'آزمون' : isReview ? 'مرور' : 'تمرین'} · {faNum(answeredCount)} از {faNum(questions.length)} پاسخ داده شده
+            </span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className={`tb-timer ${timerClass}`} role="timer" aria-label={remaining !== null ? 'زمان باقی‌مانده' : 'زمان سپری‌شده'}>
+            <Icon name="clock" className="h-4 w-4" />
+            {remaining !== null ? formatClock(remaining) : formatClock(elapsed)}
+          </span>
+          {!isReview && (
+            <button
+              type="button"
+              onClick={() => (isExam ? setSubmitOpen(true) : finish())}
+              disabled={submitting}
+              className="cursor-pointer rounded-xl bg-[#937fcd] px-4 py-2 text-xs font-bold transition-transform hover:-translate-y-0.5 disabled:opacity-60"
+            >
+              {isExam ? 'پایان و تحلیل' : 'پایان تمرین'}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* نوار پیشرفت */}
+      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/8" role="progressbar" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100}>
+        <div className="h-full rounded-full bg-gradient-to-l from-[#61D192] to-[#61D192]/70 transition-[width] duration-500" style={{ width: `${progress}%` }} />
+      </div>
+
+      <div className="mt-5 grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
+        {/* ── ستون سؤال ── */}
+        <div>
+          <div key={question.id} className="tb-question rounded-[2rem] border border-white/8 bg-[#242426] p-5 md:p-7">
+            {/* سربرگ سؤال */}
+            <header className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-full bg-[#61D192]/12 px-3 py-1 text-xs text-[#7ee0ac] [font-family:'Doran',Tahoma,sans-serif]">
+                  سؤال {toFa(currentIndex + 1)} از {toFa(questions.length)}
+                </span>
+                {subject && (
+                  <span className="flex items-center gap-1.5 text-xs font-bold" style={{ color: subject.accent }}>
+                    <span className="h-2 w-2 rounded-full" style={{ background: subject.accent }} aria-hidden="true" />
+                    {subject.name}
+                  </span>
+                )}
+                <span className="text-[11px] text-[#777]">{question.topicPath.join(' › ')}</span>
+                <DifficultyBadge difficulty={question.difficulty} />
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                {/* نشان‌های وضعیت کاربر روی سؤال */}
+                {!isExam && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={handleBookmark}
+                      aria-pressed={bookmarked}
+                      className={`flex cursor-pointer items-center gap-1.5 rounded-xl px-3 py-2 text-xs transition-colors ${
+                        bookmarked ? 'bg-[#e26d6d]/15 text-[#ef9196]' : 'bg-white/6 text-[#aaa] hover:text-white'
+                      }`}
+                    >
+                      <Icon name={bookmarked ? 'heartFilled' : 'heart'} className="h-4 w-4" />
+                      {bookmarked ? 'گلچین شد' : 'گلچین'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleReviewFlag}
+                      aria-pressed={reviewFlagged}
+                      className={`cursor-pointer rounded-xl p-2 transition-colors ${reviewFlagged ? 'bg-[#937fcd]/20 text-[#c9bdf0]' : 'bg-white/6 text-[#aaa] hover:text-white'}`}
+                      aria-label="علامت نیاز به مرور"
+                      title="نیاز به مرور"
+                    >
+                      <Icon name="refresh" className="h-4 w-4" />
+                    </button>
+                  </>
+                )}
+                {isExam && (
+                  <button
+                    type="button"
+                    onClick={toggleMark}
+                    aria-pressed={isMarked}
+                    className={`flex cursor-pointer items-center gap-1.5 rounded-xl px-3 py-2 text-xs transition-colors ${
+                      isMarked ? 'bg-[#e0b45c]/15 text-[#e0b45c]' : 'bg-white/6 text-[#aaa] hover:text-white'
+                    }`}
+                  >
+                    <Icon name="flag" className="h-4 w-4" />
+                    {isMarked ? 'علامت‌دار' : 'علامت'}
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setReportOpen(true)}
+                  aria-label="گزارش مشکل این سؤال"
+                  className="cursor-pointer rounded-xl bg-white/6 p-2 text-[#aaa] transition-colors hover:text-white"
+                >
+                  <Icon name="flag" className="h-4 w-4" />
+                </button>
+              </div>
+            </header>
+
+            {/* متن سؤال — تایپوگرافی مطالعهٔ طولانی */}
+            <h2 className="mt-5 text-[15.5px] leading-8 text-white md:text-base">{question.stem}</h2>
+
+            {question.figure && <QuestionFigure name={question.figure} />}
+
+            {/* گزینه‌ها */}
+            <div className="mt-5 space-y-2.5" role="group" aria-label="گزینه‌های سؤال">
+              {question.options.map((option, index) => {
+                let state = 'idle';
+                if (revealed) {
+                  if (index === question.correctAnswer) state = 'correct';
+                  else if (index === answer?.selected) state = 'wrong';
+                  else state = 'muted';
+                } else if (selected === index) {
+                  state = 'selected';
+                }
+                return (
+                  <OptionButton
+                    key={index}
+                    option={option}
+                    index={index}
+                    state={state}
+                    disabled={revealed || submitting}
+                    onSelect={() => setSelected(index)}
+                  />
+                );
+              })}
+            </div>
+
+            {/* ثبت پاسخ (فقط تا قبل از reveal) */}
+            {!revealed && (
+              <div className="mt-5 flex gap-2">
+                <button
+                  type="button"
+                  onClick={handleSubmitAnswer}
+                  disabled={selected == null || submitting}
+                  className="flex-1 cursor-pointer rounded-2xl bg-[#61D192] py-3 text-sm font-bold text-[#12271a] transition-all hover:-translate-y-0.5 hover:bg-[#7ee0ac] disabled:cursor-default disabled:translate-y-0 disabled:bg-white/8 disabled:text-[#777] disabled:hover:translate-y-0"
+                >
+                  {selected == null ? 'یک گزینه را انتخاب کن' : isExam ? 'ذخیرهٔ پاسخ' : 'ثبت پاسخ و دیدن تحلیل'}
+                </button>
+                {selected != null && !isExam && (
+                  <button
+                    type="button"
+                    onClick={() => setSelected(null)}
+                    className="cursor-pointer rounded-2xl bg-white/6 px-4 py-3 text-sm transition-colors hover:bg-white/12"
+                  >
+                    پاک کردن
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* نتیجهٔ پاسخ پس از reveal */}
+            {revealed && !isReview && answer && (
+              <div className="tb-reveal mt-4 flex flex-wrap items-center gap-2 text-[13px]">
+                <span className="rounded-full bg-white/6 px-3 py-1.5 text-[#bbb]">
+                  پاسخ تو: <strong className="text-white">{OPTION_KEYS[answer.selected]}</strong>
+                </span>
+                <span className="rounded-full bg-[#61D192]/12 px-3 py-1.5 text-[#7ee0ac]">
+                  پاسخ صحیح: <strong>{OPTION_KEYS[question.correctAnswer]}</strong>
+                </span>
+                <span
+                  className={`rounded-full px-3 py-1.5 font-bold ${
+                    answer.isCorrect ? 'bg-[#61D192]/15 text-[#61D192]' : 'bg-[#e26d6d]/12 text-[#ef9196]'
+                  }`}
+                >
+                  {answer.isCorrect ? 'صحیح' : 'نادرست'}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* پنل تحلیل — بعد از ثبت در practice و همیشه در review؛ «فقط گزینهٔ صحیح» تحلیل را مخفی می‌کند */}
+          {revealed && question.explanation && (isReview || session.explainDepth !== 'answer-only') && (
+            <div className="mt-4">
+              <ExplanationPanel
+                question={question}
+                userAnswer={answer ?? null}
+                myAttempts={null}
+              />
+            </div>
+          )}
+
+          {/* ناوبری قبلی/بعدی */}
+          <div className="mt-4 hidden items-center justify-between gap-3 lg:flex">
+            <button
+              type="button"
+              onClick={() => goTo(currentIndex - 1)}
+              disabled={currentIndex === 0}
+              className="cursor-pointer rounded-xl bg-white/6 px-4 py-2.5 text-sm transition-colors hover:bg-white/12 disabled:cursor-default disabled:opacity-40"
+            >
+              سؤال قبلی
+            </button>
+            {isLast ? (
+              <button
+                type="button"
+                onClick={() => (isExam ? setSubmitOpen(true) : finish())}
+                disabled={submitting}
+                className="cursor-pointer rounded-xl bg-[#61D192] px-5 py-2.5 text-sm font-bold text-[#12271a] transition-transform hover:-translate-y-0.5 disabled:opacity-60"
+              >
+                {isExam ? 'پایان آزمون و مشاهدهٔ کارنامه' : 'پایان تمرین و مشاهدهٔ نتیجه'}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => goTo(currentIndex + 1)}
+                className="cursor-pointer rounded-xl bg-[#937fcd] px-5 py-2.5 text-sm font-bold transition-transform hover:-translate-y-0.5"
+              >
+                سؤال بعدی
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* ── نویگیتور دسکتاپ ── */}
+        <aside className="hidden lg:block">
+          <div className="sticky top-6 rounded-[1.75rem] border border-white/8 bg-[#242426] p-4">
+            <h3 className="mb-3 flex items-center gap-2 text-sm [font-family:'Doran',Tahoma,sans-serif]">
+              <Icon name="grid" className="h-4 w-4 text-[#61D192]" />
+              نقشهٔ سؤال‌ها
+            </h3>
+            <QuestionNavigator
+              questions={questions}
+              answers={answers}
+              marked={marked}
+              currentIndex={currentIndex}
+              reviewMode={isReview}
+              onJump={goTo}
+            />
+          </div>
+        </aside>
+      </div>
+
+      {/* ── نوار پایین موبایل ── */}
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#171719]/95 px-4 py-3 backdrop-blur lg:hidden">
+        <div className="mx-auto flex max-w-xl items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setNavigatorOpen(true)}
+            className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-white/8 px-3.5 py-2.5 text-xs"
+          >
+            <Icon name="grid" className="h-4 w-4 text-[#61D192]" />
+            نقشه
+          </button>
+          <button
+            type="button"
+            onClick={() => goTo(currentIndex - 1)}
+            disabled={currentIndex === 0}
+            className="cursor-pointer rounded-xl bg-white/8 p-2.5 text-[#aaa] disabled:opacity-40"
+            aria-label="سؤال قبلی"
+          >
+            <Icon name="chevronLeft" className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => (isLast ? (isExam ? setSubmitOpen(true) : finish()) : goTo(currentIndex + 1))}
+            disabled={submitting}
+            className="shrink-0 cursor-pointer rounded-xl bg-[#61D192] px-4 py-2.5 text-xs font-bold text-[#12271a] disabled:opacity-60"
+          >
+            {isLast ? (isExam ? 'پایان' : 'نتیجه') : 'بعدی'}
+          </button>
+        </div>
+      </div>
+
+      {/* Bottom Sheet نویگیتور */}
+      {navigatorOpen && (
+        <>
+          <div className="tb-drawer__scrim" onClick={() => setNavigatorOpen(false)} aria-hidden="true" />
+          <div className="tb-drawer" role="dialog" aria-label="نقشهٔ سؤال‌ها">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-sm [font-family:'Doran',Tahoma,sans-serif]">نقشهٔ سؤال‌ها</h3>
+              <button type="button" onClick={() => setNavigatorOpen(false)} aria-label="بستن" className="cursor-pointer rounded-lg bg-white/6 p-1.5">
+                <Icon name="x" className="h-4 w-4" />
+              </button>
+            </div>
+            <QuestionNavigator
+              questions={questions}
+              answers={answers}
+              marked={marked}
+              currentIndex={currentIndex}
+              reviewMode={isReview}
+              onJump={goTo}
+            />
+          </div>
+        </>
+      )}
+
+      {/* مودال پایان آزمون/تمرین */}
+      <Modal open={submitOpen} onClose={() => setSubmitOpen(false)} title="پایان سشن">
+        <h3 className="text-base [font-family:'Doran',Tahoma,sans-serif]">
+          {isExam ? 'آزمون را تمام می‌کنی؟' : 'از تمرین خارج می‌شی؟'}
+        </h3>
+        <p className="mt-2 text-sm leading-6 text-[#9a9a9a]">
+          {isExam
+            ? answeredCount < questions.length
+              ? `${faNum(questions.length - answeredCount)} سؤال بی‌پاسخ مانده؛ بی‌پاسخ‌ها غلط حساب می‌شوند.`
+              : 'به همهٔ سؤال‌ها پاسخ دادی. آمادهٔ دیدن کارنامه‌ای.'
+            : answeredCount > 0
+              ? `پیشرفتت ذخیره می‌شود؛ نتیجهٔ ${faNum(answeredCount)} پاسخ ثبت‌شده تحلیل می‌شود.`
+              : 'فعلاً پاسخی ثبت نکردی؛ می‌توانی بعداً ادامه بدهی.'}
+        </p>
+        <div className="mt-5 flex gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              setSubmitOpen(false);
+              finish();
+            }}
+            disabled={submitting}
+            className="flex-1 cursor-pointer rounded-xl bg-[#61D192] px-4 py-2.5 text-sm font-bold text-[#12271a] transition-transform hover:-translate-y-0.5 disabled:opacity-60"
+          >
+            {isExam ? 'ثبت نهایی و کارنامه' : 'پایان و نتیجه'}
+          </button>
+          {isExam && (
+            <button
+              type="button"
+              onClick={() => {
+                setSubmitOpen(false);
+                onExit();
+              }}
+              className="cursor-pointer rounded-xl bg-white/8 px-4 py-2.5 text-sm transition-colors hover:bg-white/12"
+            >
+              ادامه بعداً
+            </button>
+          )}
+          {!isExam && (
+            <button
+              type="button"
+              onClick={() => setSubmitOpen(false)}
+              className="cursor-pointer rounded-xl bg-white/8 px-4 py-2.5 text-sm transition-colors hover:bg-white/12"
+            >
+              ادامهٔ تمرین
+            </button>
+          )}
+        </div>
+      </Modal>
+
+      {reportOpen && <ReportDialog userId={userId} questionId={question.id} onClose={() => setReportOpen(false)} />}
+    </div>
+  );
+}

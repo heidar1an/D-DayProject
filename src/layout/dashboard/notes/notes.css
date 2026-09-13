@@ -1,0 +1,131 @@
+/* ── استایل‌های اختصاصی بخش یادداشت ──
+   بخش بزرگی از رابط با Tailwind داخل کامپوننت‌هاست؛ اینجا فقط چیپ‌ها،
+   دکمهٔ حذف دومرحله‌ای و انیمیشن‌های ورود مودال/نما — با گارد reduced-motion
+   (یادداشت مثل بقیهٔ داشبورد نباید بدون اجازهٔ سیستم حرکت کند). */
+
+/* چیپ موضوع — رنگ درس از متغیر --accent */
+.nt-subject-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-size: 10px;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  white-space: nowrap;
+}
+
+/* نشان نوع یادداشت */
+.nt-kind-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #8a8a8a;
+  white-space: nowrap;
+}
+
+.nt-kind-badge--checklist {
+  background: rgba(119, 183, 135, 0.12);
+  color: #9ed3ab;
+}
+
+/* دکمهٔ حذف دومرحله‌ای */
+.nt-delete-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  color: #8a8a8a;
+  padding: 0.5rem 0.9rem;
+  font-size: 11px;
+  transition:
+    background-color 200ms ease,
+    color 200ms ease;
+}
+
+.nt-delete-btn--compact {
+  width: 2rem;
+  height: 2rem;
+  justify-content: center;
+  padding: 0;
+  border-radius: 0.5rem;
+}
+
+.nt-delete-btn:hover {
+  background: rgba(226, 109, 109, 0.12);
+  color: #ef9196;
+}
+
+.nt-delete-btn--armed {
+  background: rgba(226, 109, 109, 0.18) !important;
+  color: #ef9196 !important;
+}
+
+/* کارت یادداشت — بلند شدن ملایم روی هاور */
+.nt-card {
+  transition:
+    border-color 300ms ease,
+    transform 300ms ease;
+}
+
+.nt-card:hover {
+  transform: translateY(-3px);
+}
+
+/* مودال و نمای جزئیات — ورود نرم */
+.nt-modal {
+  animation: nt-modal-in 240ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+
+@keyframes nt-modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.nt-pop {
+  animation: nt-pop-in 320ms ease both;
+}
+
+@keyframes nt-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* دکمهٔ گلچین — چرخش کوچک هنگام پین‌شدن */
+.nt-card button[aria-pressed='true'] .nt-pin-icon,
+.nt-pop button[aria-pressed='true'] svg {
+  transition: transform 240ms ease;
+}
+
+/* کاربر سیستمش کاهش حرکت را خواسته — همه‌چیز بی‌حرکت */
+@media (prefers-reduced-motion: reduce) {
+  .nt-modal,
+  .nt-pop,
+  .nt-card {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .nt-card:hover {
+    transform: none;
+  }
+}

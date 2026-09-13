@@ -2219,6 +2219,7 @@ img {
 }
 
 .article-card {
+  position: relative;
   display: flex;
   min-height: 490px;
   flex-direction: column;
@@ -2236,7 +2237,39 @@ img {
 .article-card__image {
   min-height: 300px;
   flex: 1;
+  overflow: hidden;
   background: #f8f8f8;
+}
+
+.article-card__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.article-card__image .ap-cover-art__mark {
+  width: 42%;
+  height: auto;
+  margin: auto;
+  opacity: 0.12;
+}
+
+/* لینک عنوان، کل کارت را کلیک‌پذیر می‌کند */
+.article-card__title-link {
+  color: inherit;
+  transition: color 180ms ease;
+}
+
+.article-card:hover .article-card__title-link {
+  color: #f2f6ff;
+}
+
+.article-card__title-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
 }
 
 .article-card__content {
@@ -2264,10 +2297,11 @@ img {
   line-height: 1.8;
 }
 
-.article-card a {
+.article-card__go {
   position: absolute;
   bottom: 18px;
   left: 24px;
+  z-index: 2;
   display: grid;
   width: 38px;
   height: 38px;
@@ -2276,11 +2310,49 @@ img {
   font-family: Arial, sans-serif;
   font-size: 2.25rem;
   line-height: 0.6;
+  pointer-events: none;
   transition: transform 180ms ease, color 180ms ease;
 }
 
-.article-card a:hover {
+.article-card:hover .article-card__go {
   color: var(--blue-bright);
+  transform: translateX(-4px);
+}
+
+.articles__all {
+  display: flex;
+  justify-content: center;
+  margin-top: 36px;
+}
+
+.articles-all-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 28px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  color: var(--white);
+  font-size: 0.98rem;
+  font-weight: 500;
+  transition: background 180ms ease, transform 180ms ease, border-color 180ms ease;
+}
+
+.articles-all-link span {
+  color: var(--blue-bright);
+  font-family: Arial, sans-serif;
+  font-size: 1.2em;
+  line-height: 0;
+  transition: transform 180ms ease;
+}
+
+.articles-all-link:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.22);
+  transform: translateY(-2px);
+}
+
+.articles-all-link:hover span {
   transform: translateX(-4px);
 }
 
@@ -3214,7 +3286,7 @@ img {
     font-size: 0.84rem;
   }
 
-  .article-card a {
+  .article-card__go {
     bottom: 14px;
     left: 18px;
   }

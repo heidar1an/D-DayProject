@@ -1,0 +1,280 @@
+/* ── خانه مرجع (فهرست فصل‌ها) ──
+   ادامه زبان طراحی قفسه: رنگ اکسنت مرجع از --accent می‌آید. */
+
+.ref-home__head {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  flex-wrap: wrap;
+  margin-top: 22px;
+  padding: 26px 30px;
+  border-radius: 26px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background:
+    radial-gradient(560px 140px at 88% 0%, color-mix(in srgb, var(--accent, #5b8cc7) 14%, transparent), transparent 70%),
+    rgba(255, 255, 255, 0.022);
+}
+
+.ref-home__info {
+  flex: 1 1 320px;
+  min-width: 0;
+}
+
+.ref-home__info h2 {
+  margin: 0;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.4rem, 2.4vw, 1.8rem);
+}
+
+.ref-home__latin {
+  margin: 6px 0 0;
+  color: #9a9a9a;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+/* اسکلت ساده هنگام بارگذاری وضعیت مطالعه */
+.ref-home__loading {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.ref-home__loading span {
+  height: 74px;
+  border-radius: 20px;
+  background: linear-gradient(90deg, #1c1c1c 25%, #262626 50%, #1c1c1c 75%);
+  background-size: 200% 100%;
+  animation: ref-shimmer 1.4s ease-in-out infinite;
+}
+
+.ref-home__loading span:nth-child(2) { width: 86%; }
+.ref-home__loading span:nth-child(3) { width: 70%; }
+
+@keyframes ref-shimmer {
+  from { background-position: 0% 0; }
+  to { background-position: -200% 0; }
+}
+
+/* ── کارت ادامه مطالعه ── */
+.ref-continue {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+  padding: 18px 22px;
+  border-radius: 22px;
+  border: 1px solid color-mix(in srgb, var(--accent, #5b8cc7) 35%, transparent);
+  background:
+    radial-gradient(420px 110px at 90% 0%, color-mix(in srgb, var(--accent, #5b8cc7) 16%, transparent), transparent 70%),
+    rgba(255, 255, 255, 0.022);
+}
+
+.ref-continue__icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--accent, #5b8cc7) 40%, transparent);
+  background: color-mix(in srgb, var(--accent, #5b8cc7) 12%, transparent);
+  color: var(--accent, #5b8cc7);
+}
+
+.ref-continue__copy {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.ref-continue__copy small {
+  display: block;
+  color: #8a8a8a;
+  font-size: 0.74rem;
+}
+
+.ref-continue__copy strong {
+  display: block;
+  margin-top: 4px;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 0.98rem;
+}
+
+.ref-continue__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border: 0;
+  border-radius: 14px;
+  background: linear-gradient(120deg, color-mix(in srgb, var(--accent, #5b8cc7) 90%, #000), color-mix(in srgb, var(--accent, #5b8cc7) 55%, #1a1a1a));
+  color: #fff;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: transform 180ms ease, box-shadow 220ms ease;
+}
+
+.ref-continue__btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--accent, #5b8cc7) 35%, transparent);
+}
+
+/* ── فهرست فصل‌ها ── */
+.ref-home__chapters-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 28px;
+  padding-bottom: 4px;
+}
+
+.ref-home__chapters-head h3 {
+  margin: 0;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.ref-chapters {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.ref-chapter {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+  background: linear-gradient(165deg, #202020, #181818 70%);
+  color: #e6e6e6;
+  font-family: 'Pinar', Tahoma, sans-serif;
+  text-align: right;
+  cursor: pointer;
+  transition: border-color 200ms ease, transform 200ms ease, background 200ms ease;
+}
+
+.ref-chapter:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--accent, #5b8cc7) 45%, transparent);
+  background: linear-gradient(165deg, #242424, #1b1b1b);
+  transform: translateX(-4px);
+}
+
+.ref-chapter:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.ref-chapter__num {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  min-width: 44px;
+  height: 44px;
+  padding: 0 6px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--accent, #5b8cc7) 30%, transparent);
+  background: color-mix(in srgb, var(--accent, #5b8cc7) 12%, transparent);
+  color: var(--accent, #5b8cc7);
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.ref-chapter__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ref-chapter__body strong {
+  font-size: 0.95rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ref-chapter__body small {
+  color: #8a8a8a;
+  font-size: 0.74rem;
+}
+
+.ref-chapter__bar {
+  display: block;
+  height: 4px;
+  margin-top: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+}
+
+.ref-chapter__bar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent, #5b8cc7);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--accent, #5b8cc7) 50%, transparent);
+  transition: width 500ms ease;
+}
+
+.ref-chapter__side {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ref-chapter__pct {
+  font-style: normal;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--accent, #5b8cc7);
+  font-variant-numeric: tabular-nums;
+}
+
+.ref-chapter__go {
+  color: #8a8a8a;
+  transition: color 200ms ease, transform 200ms ease;
+}
+
+.ref-chapter:hover:not(:disabled) .ref-chapter__go {
+  color: var(--accent, #5b8cc7);
+  transform: translateX(-3px);
+}
+
+.ref-chapter__soon {
+  font-style: normal;
+  padding: 5px 11px;
+  border-radius: 999px;
+  border: 1px solid rgba(171, 142, 124, 0.4);
+  background: rgba(171, 142, 124, 0.12);
+  color: #e2c5ae;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 0.7rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .ref-home__head {
+    gap: 20px;
+    padding: 22px;
+  }
+
+  .ref-chapter {
+    gap: 12px;
+    padding: 12px 14px;
+  }
+}

@@ -1,0 +1,919 @@
+/* ── لایه «میکرو درسنامه علوم پایه» ──
+   هم‌خانواده با درسنامه جامع ولی با شخصیت خودش: «دفترچهٔ مرور سریع».
+   تم رنگی به بنفش‌مایل (#937fcd) کشیده شده تا از آبی جامع متمایز بماند.
+   توجه: مثل بقیهٔ CSS داشبورد، گارد prefers-reduced-motion اینجا گذاشته نمی‌شود —
+   محیط کاربر reduce-motion دارد و انیمیشن‌ها باید همیشه اجرا شوند. */
+
+.micr-layer {
+  position: relative;
+  overflow: hidden;
+  width: var(--content-width);
+  margin: 0 auto;
+  padding: 14px 0 72px;
+  font-family: 'Pinar', Tahoma, sans-serif;
+  color: #fff;
+}
+
+.micr-layer__inner {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── نوار بالای لایه ── */
+.micr-topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.micr-topbar__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px 10px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: border-color 200ms ease, background 200ms ease, transform 160ms ease;
+}
+
+.micr-topbar__back:hover {
+  border-color: rgba(147, 127, 205, 0.6);
+  background: rgba(147, 127, 205, 0.12);
+  transform: translateY(-1px);
+}
+
+.micr-topbar__back svg {
+  width: 18px;
+  height: 18px;
+}
+
+.micr-topbar__crumb {
+  margin-inline-start: auto;
+  color: #8a8a8a;
+  font-size: 0.88rem;
+}
+
+/* ── هیرو: متن راست، کارت آمار زنده چپ ── */
+.micr-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+  padding: clamp(30px, 5vh, 56px) 0 8px;
+}
+
+.micr-hero__content {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.micr-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border: 1px solid rgba(147, 127, 205, 0.4);
+  border-radius: 999px;
+  background: rgba(147, 127, 205, 0.1);
+  color: #c9b8e8;
+  font-size: 0.82rem;
+}
+
+.micr-chip i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #937fcd;
+  animation: micr-pulse 2.4s ease-out infinite;
+}
+
+.micr-hero__title {
+  margin: 16px 0 4px;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-weight: 800;
+  font-size: clamp(2.4rem, 5.4vw, 4rem);
+  line-height: 1.3;
+  background: linear-gradient(120deg, #937fcd 15%, #5b8cc7 85%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.micr-hero__kicker {
+  margin: 0;
+  color: #d6d6d6;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: clamp(1rem, 1.8vw, 1.25rem);
+}
+
+.micr-hero__subtitle {
+  max-width: 520px;
+  margin: 12px 0 0;
+  color: #b9b9b9;
+  font-size: clamp(0.92rem, 1.3vw, 1.05rem);
+  line-height: 2;
+}
+
+/* کارت آمار: شمارنده‌های زنده + حلقه‌های خط‌چین چرخان (موتیف سرعت) */
+.micr-stats {
+  position: relative;
+  flex: 0 0 auto;
+  min-width: 240px;
+  padding: 18px 22px;
+  border: 1px solid rgba(147, 127, 205, 0.3);
+  border-radius: 1.5rem;
+  background: linear-gradient(160deg, rgba(29, 43, 61, 0.55), rgba(147, 127, 205, 0.1));
+  display: grid;
+  gap: 0;
+}
+
+.micr-stats__orbit {
+  position: absolute;
+  border: 1.5px dashed rgba(147, 127, 205, 0.4);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.micr-stats__orbit--a {
+  top: -34px;
+  inset-inline-start: -34px;
+  width: 104px;
+  height: 104px;
+  animation: micr-spin 34s linear infinite;
+}
+
+.micr-stats__orbit--b {
+  bottom: -30px;
+  inset-inline-end: -26px;
+  width: 76px;
+  height: 76px;
+  border-color: rgba(91, 140, 199, 0.35);
+  animation: micr-spin 26s linear infinite reverse;
+}
+
+.micr-stats__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 11px 0;
+}
+
+.micr-stats__row + .micr-stats__row {
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.micr-stats__row strong {
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 1.65rem;
+  color: #c9b8e8;
+}
+
+.micr-stats__row span {
+  color: #8a8a8a;
+  font-size: 0.88rem;
+}
+
+/* ── کارت «نکتهٔ امروز» ── */
+.micr-tip {
+  margin-top: 24px;
+}
+
+.micr-tip__card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 14px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 1.25rem;
+  background: rgba(255, 255, 255, 0.035);
+  color: inherit;
+  font: inherit;
+  text-align: right;
+  cursor: default;
+}
+
+.micr-tip__badge {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: rgba(119, 183, 135, 0.12);
+  border: 1px solid rgba(119, 183, 135, 0.35);
+  color: #9ed4ad;
+  font-size: 0.82rem;
+  font-family: 'Doran', Tahoma, sans-serif;
+  white-space: nowrap;
+}
+
+.micr-tip__badge i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #77b787;
+  animation: micr-pulse 2.4s ease-out infinite;
+}
+
+.micr-tip__content {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  animation: micr-tip-in 520ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.micr-tip__subject {
+  color: var(--accent, #937fcd);
+  font-size: 0.78rem;
+  font-family: 'Doran', Tahoma, sans-serif;
+}
+
+.micr-tip__text {
+  color: #d6d6d6;
+  font-size: 0.95rem;
+  line-height: 1.9;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.micr-tip__nav {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #8a8a8a;
+}
+
+.micr-tip__counter {
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.micr-tip__nav svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ── زنجیرهٔ پیشرفت: هر قطعه یک درس ── */
+.micr-chain {
+  margin-top: 26px;
+}
+
+.micr-chain__meta {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.micr-chain__value {
+  display: block;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 1.7rem;
+  color: #c9b8e8;
+  line-height: 1.2;
+}
+
+.micr-chain__caption {
+  color: #8a8a8a;
+  font-size: 0.88rem;
+}
+
+.micr-chain__hint {
+  color: #666;
+  font-size: 0.8rem;
+}
+
+.micr-chain__strip {
+  display: flex;
+  gap: 6px;
+}
+
+.micr-chain__seg {
+  position: relative;
+  flex: 1 1 0;
+  height: 15px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.micr-chain__seg:hover {
+  transform: scaleY(1.45);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.micr-chain__seg-fill {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 0;
+  border-radius: inherit;
+  background: var(--accent);
+  animation: micr-chain-grow 900ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(var(--i) * 55ms + 350ms);
+}
+
+/* ── جستجو + فیلترها ── */
+.micr-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 28px;
+}
+
+.micr-search {
+  position: relative;
+  flex: 1 1 260px;
+  min-width: 220px;
+}
+
+.micr-search > svg {
+  position: absolute;
+  top: 50%;
+  inset-inline-start: 14px;
+  width: 17px;
+  height: 17px;
+  transform: translateY(-50%);
+  color: #8a8a8a;
+  pointer-events: none;
+}
+
+.micr-search input {
+  width: 100%;
+  padding: 12px 42px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.92rem;
+  outline: none;
+  transition: border-color 200ms ease, background 200ms ease;
+}
+
+.micr-search input::placeholder {
+  color: #6f6f6f;
+}
+
+.micr-search input:focus {
+  border-color: rgba(147, 127, 205, 0.55);
+  background: rgba(147, 127, 205, 0.06);
+}
+
+.micr-search__clear {
+  position: absolute;
+  top: 50%;
+  inset-inline-end: 10px;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: #bbb;
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.micr-search__clear:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
+.micr-search__clear svg {
+  width: 13px;
+  height: 13px;
+}
+
+.micr-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.micr-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  color: #b9b9b9;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: border-color 200ms ease, background 200ms ease, color 200ms ease, transform 160ms ease;
+}
+
+.micr-filter i {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 0.75rem;
+  font-style: normal;
+  color: #8a8a8a;
+}
+
+.micr-filter:hover {
+  border-color: rgba(147, 127, 205, 0.5);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.micr-filter.is-active {
+  border-color: rgba(147, 127, 205, 0.7);
+  background: rgba(147, 127, 205, 0.16);
+  color: #fff;
+}
+
+.micr-filter.is-active i {
+  background: rgba(147, 127, 205, 0.35);
+  color: #fff;
+}
+
+/* ── دفترچهٔ آکاردئونی درس‌ها ── */
+.micr-ledger {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.micr-row {
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 1.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  overflow: hidden;
+  transition: border-color 260ms ease, background 260ms ease;
+}
+
+.micr-row:hover {
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.micr-row.is-open {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  background: color-mix(in srgb, var(--accent) 6%, rgba(255, 255, 255, 0.03));
+}
+
+.micr-row__head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 15px 18px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: right;
+  cursor: pointer;
+}
+
+.micr-row__index {
+  flex: 0 0 auto;
+  color: #6f6f6f;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 0.9rem;
+  min-width: 24px;
+}
+
+.micr-row__idbox {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.micr-row__title {
+  color: #fff;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 1.02rem;
+}
+
+.micr-row__meta {
+  color: #8a8a8a;
+  font-size: 0.8rem;
+}
+
+.micr-row__readmark {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(119, 183, 135, 0.15);
+  border: 1px solid rgba(119, 183, 135, 0.4);
+  color: #9ed4ad;
+}
+
+.micr-row__readmark svg {
+  width: 13px;
+  height: 13px;
+}
+
+/* حلقهٔ پیشرفت کوچک هر ردیف */
+.micr-row__gauge {
+  position: relative;
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+}
+
+.micr-row__ring {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.micr-row__ring circle {
+  fill: none;
+  stroke-width: 3.4;
+}
+
+.micr-row__ring-track {
+  stroke: rgba(255, 255, 255, 0.09);
+}
+
+.micr-row__ring-fill {
+  stroke: var(--accent);
+  stroke-linecap: round;
+  animation: micr-ring-fill 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.4s backwards;
+}
+
+.micr-row__percent {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #cfcfcf;
+  font-size: 0.6rem;
+}
+
+.micr-row__chevron {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  color: #8a8a8a;
+  transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1), color 200ms ease;
+}
+
+.micr-row.is-open .micr-row__chevron {
+  transform: rotate(180deg);
+  color: var(--accent);
+}
+
+/* باز/بسته شدن نرم ردیف با ترفند grid-template-rows */
+.micr-row__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 480ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.micr-row.is-open .micr-row__panel {
+  grid-template-rows: 1fr;
+}
+
+.micr-row__panel-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.micr-row__panel-body {
+  padding: 16px 18px 18px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.micr-notes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(225px, 1fr));
+  gap: 12px;
+}
+
+.micr-note {
+  padding: 13px 15px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-inline-start: 3px solid var(--accent);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.035);
+  animation: micr-note-in 540ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(var(--i) * 90ms + 140ms);
+}
+
+.micr-note__head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 7px;
+}
+
+.micr-note__icon {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+}
+
+.micr-note__icon svg {
+  width: 13px;
+  height: 13px;
+}
+
+.micr-note__icon--key {
+  background: rgba(91, 140, 199, 0.16);
+  color: #9cc0e8;
+}
+
+.micr-note__icon--idea {
+  background: rgba(119, 183, 135, 0.16);
+  color: #9ed4ad;
+}
+
+.micr-note__icon--warn {
+  background: rgba(171, 142, 124, 0.2);
+  color: #d4b3a0;
+}
+
+.micr-note__type {
+  color: #8a8a8a;
+  font-size: 0.74rem;
+}
+
+.micr-note__text {
+  margin: 0;
+  color: #d6d6d6;
+  font-size: 0.9rem;
+  line-height: 1.95;
+}
+
+.micr-row__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.micr-row__time {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #8a8a8a;
+  font-size: 0.82rem;
+}
+
+.micr-row__time svg {
+  width: 14px;
+  height: 14px;
+}
+
+.micr-done {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 18px;
+  border: 1px solid rgba(119, 183, 135, 0.4);
+  border-radius: 999px;
+  background: rgba(119, 183, 135, 0.1);
+  color: #9ed4ad;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 200ms ease, border-color 200ms ease, color 200ms ease, transform 160ms ease;
+}
+
+.micr-done:hover {
+  transform: translateY(-1px);
+  border-color: rgba(119, 183, 135, 0.75);
+}
+
+.micr-done svg {
+  width: 14px;
+  height: 14px;
+}
+
+.micr-done.is-active {
+  background: rgba(119, 183, 135, 0.28);
+  color: #fff;
+}
+
+.micr-done.is-active svg {
+  animation: micr-pop 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.micr-empty {
+  padding: 42px 20px;
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+  border-radius: 1.5rem;
+  text-align: center;
+  color: #8a8a8a;
+}
+
+.micr-empty strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #d6d6d6;
+  font-family: 'Doran', Tahoma, sans-serif;
+}
+
+.micr-empty p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* ── CTA پایانی: خط‌چین، دعوت به جامع ── */
+.micr-cta {
+  margin-top: 34px;
+  padding: 34px 24px;
+  border: 1.5px dashed rgba(147, 127, 205, 0.4);
+  border-radius: 2rem;
+  background: rgba(147, 127, 205, 0.05);
+  text-align: center;
+}
+
+.micr-cta h2 {
+  margin: 0;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: clamp(1.2rem, 2.4vw, 1.6rem);
+  color: #fff;
+}
+
+.micr-cta p {
+  margin: 10px auto 0;
+  max-width: 480px;
+  color: #b9b9b9;
+  font-size: 0.95rem;
+  line-height: 1.95;
+}
+
+.micr-cta button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+  padding: 12px 26px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(120deg, #6f5fa8, #3c6ea5);
+  color: #fff;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.micr-cta button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(111, 95, 168, 0.35);
+}
+
+.micr-cta button svg {
+  width: 17px;
+  height: 17px;
+}
+
+/* ── انیمیشن‌های اختصاصی لایه ── */
+@keyframes micr-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes micr-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(147, 127, 205, 0.55);
+  }
+  70%, 100% {
+    box-shadow: 0 0 0 9px rgba(147, 127, 205, 0);
+  }
+}
+
+@keyframes micr-tip-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes micr-chain-grow {
+  from {
+    width: 0;
+  }
+  to {
+    width: var(--p);
+  }
+}
+
+@keyframes micr-ring-fill {
+  from {
+    stroke-dashoffset: 97.4;
+  }
+  to {
+    stroke-dashoffset: var(--off);
+  }
+}
+
+@keyframes micr-note-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes micr-pop {
+  0% {
+    transform: scale(0.4);
+  }
+  60% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ── واکنش‌گرایی ── */
+@media (max-width: 880px) {
+  .micr-hero {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 28px;
+  }
+
+  .micr-stats {
+    min-width: 0;
+  }
+
+  .micr-stats__orbit--a {
+    inset-inline-start: auto;
+    inset-inline-end: -30px;
+  }
+
+  .micr-chain__hint {
+    display: none;
+  }
+
+  .micr-tip__nav {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .micr-row__head {
+    padding: 13px 14px;
+    gap: 10px;
+  }
+
+  .micr-row__index {
+    display: none;
+  }
+
+  .micr-row__gauge {
+    width: 36px;
+    height: 36px;
+  }
+
+  .micr-notes {
+    grid-template-columns: 1fr;
+  }
+
+  .micr-tip__card {
+    flex-wrap: wrap;
+  }
+}

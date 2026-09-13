@@ -1,0 +1,149 @@
+import { useEffect, useState } from 'react';
+import { ContentService, ProgressService } from '../../../../services/learning';
+import AnatomyOverview from './AnatomyOverview';
+import AnatomyModulePage from './AnatomyModulePage';
+import UnitPage from './UnitPage';
+import { LearningStatePanel } from './LearningPrimitives';
+import './learning.css';
+
+export default function AnatomyLearningLayer({ onBack, userId = 'local-user' }) {
+  const [course, setCourse] = useState(null);
+  const [progressState, setProgressState] = useState(null);
+  const [loadState, setLoadState] = useState('loading');
+  const [error, setError] = useState('');
+  const [requestVersion, setRequestVersion] = useState(0);
+  const [route, setRoute] = useState({ name: 'overview' });
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setLoadState('loading');
+    setError('');
+
+    ContentService.getCourse('anatomy', { signal: controller.signal })
+      .then((loadedCourse) => {
+        setCourse(loadedCourse);
+        setProgressState(ProgressService.load(loadedCourse, userId));
+        setLoadState('ready');
+      })
+      .catch((loadError) => {
+        if (loadError.name === 'AbortError') return;
+        setError(loadError.message || 'بارگذاری مسیر آناتومی با مشکل روبه‌رو شد.');
+        setLoadState('error');
+      });
+
+    return () => controller.abort();
+  }, [requestVersion, userId]);
+
+  useEffect(() => {
+    const handleEscape = (event) => {
+      if (event.key !== 'Escape') return;
+      if (route.name === 'unit') setRoute({ name: 'module', moduleId: route.moduleId });
+      else if (route.name === 'module') setRoute({ name: 'overview' });
+      else onBack?.();
+    };
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [onBack, route]);
+
+  const navigate = (nextRoute) => {
+    setRoute(nextRoute);
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+
+  if (loadState === 'loading') {
+    return (
+      <section className="anatomy-learning-layer" dir="rtl">
+        <LearningStatePanel
+          state="loading"
+          title="در حال آماده‌سازی مسیر آناتومی"
+          description="واحدها، پیشرفت و آخرین نقطه مطالعه در حال بازیابی است…"
+        />
+      </section>
+    );
+  }
+
+  if (loadState === 'error') {
+    return (
+      <section className="anatomy-learning-layer" dir="rtl">
+        <LearningStatePanel
+          state="error"
+          title="مسیر آناتومی بارگذاری نشد"
+          description={error}
+          onRetry={() => setRequestVersion((version) => version + 1)}
+        />
+      </section>
+    );
+  }
+
+  if (!course || !progressState) {
+    return (
+      <section className="anatomy-learning-layer" dir="rtl">
+        <LearningStatePanel state="empty" title="محتوایی پیدا نشد" description="هنوز واحدی برای این درس تعریف نشده است." />
+      </section>
+    );
+  }
+
+  const openModule = (moduleId) => navigate({ name: 'module', moduleId });
+  const openUnit = (unitId, stepId) => {
+    const unit = ContentService.getUnit(course, unitId);
+    if (!unit) return;
+    navigate({ name: 'unit', moduleId: unit.moduleId, unitId, stepId });
+  };
+  const restartUnit = (unit) => {
+    if (!unit) return;
+    setProgressState((current) => ProgressService.save(
+      course.id,
+      ProgressService.resetUnit(current, unit),
+      userId,
+    ));
+    openUnit(unit.id, 'activate');
+  };
+
+  const activeModule = route.moduleId ? ContentService.getModule(course, route.moduleId) : null;
+  const activeUnit = route.unitId ? ContentService.getUnit(course, route.unitId) : null;
+
+  return (
+    <section className="anatomy-learning-layer" dir="rtl" aria-label="سیستم یادگیری آناتومی">
+      {route.name === 'overview' && (
+        <AnatomyOverview
+          course={course}
+          progressState={progressState}
+          onBack={onBack}
+          onOpenModule={openModule}
+          onOpenUnit={openUnit}
+          onRestartUnit={restartUnit}
+        />
+      )}
+
+      {route.name === 'module' && activeModule && (
+        <AnatomyModulePage
+          course={course}
+          module={activeModule}
+          units={ContentService.getUnits(course, activeModule.id)}
+          progressState={progressState}
+          onBack={() => navigate({ name: 'overview' })}
+          onCourseBack={onBack}
+          onOpenUnit={openUnit}
+          onRestartUnit={restartUnit}
+        />
+      )}
+
+      {route.name === 'unit' && activeModule && activeUnit && (
+        <UnitPage
+          course={course}
+          module={activeModule}
+          unit={activeUnit}
+          progressState={progressState}
+          setProgressState={setProgressState}
+          userId={userId}
+          initialStep={route.stepId}
+          onBack={() => navigate({ name: 'module', moduleId: activeModule.id })}
+          onAnatomyBack={() => navigate({ name: 'overview' })}
+          onCourseBack={onBack}
+        />
+      )}
+    </section>
+  );
+}
+
+export { AnatomyLearningLayer };

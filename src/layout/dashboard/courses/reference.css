@@ -1,0 +1,725 @@
+/* ── لایه «رفرنس» — کتابخانه مراجع علوم پایه ──
+   زبان طراحی: مشکی خالص + کتاب‌های سه‌بعدی CSS خالص روی قفسه.
+   هر مرجع یک رنگ --accent دارد که جلد، هاله، تخته قفسه و فهرست بخش‌ها از همان رنگ غذا می‌گیرند.
+   جلد هر کتاب با متغیرهای --bw / --bh ابعادپذیر است (همان جلد هم در قفسه و هم در نمای داخل کتاب استفاده می‌شود). */
+
+.ref-layer {
+  position: relative;
+  overflow: hidden;
+  width: var(--content-width);
+  margin: 0 auto;
+  padding: 14px 0 72px;
+  font-family: 'Pinar', Tahoma, sans-serif;
+  color: #fff;
+}
+
+.ref-layer__inner {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── نوار بالای لایه ── */
+.ref-topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.ref-topbar__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px 10px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: border-color 200ms ease, background 200ms ease, transform 160ms ease;
+}
+
+.ref-topbar__back:hover {
+  border-color: rgba(91, 140, 199, 0.6);
+  background: rgba(91, 140, 199, 0.12);
+  transform: translateY(-1px);
+}
+
+.ref-topbar__back svg {
+  width: 18px;
+  height: 18px;
+}
+
+.ref-topbar__crumb {
+  margin-inline-start: auto;
+  color: #8a8a8a;
+  font-size: 0.88rem;
+}
+
+/* ── هیرو ── */
+.ref-hero {
+  padding: clamp(30px, 5.5vh, 60px) 0 10px;
+  text-align: center;
+}
+
+.ref-hero__title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-family: 'Doran', Tahoma, sans-serif;
+  color: #fff;
+}
+
+.ref-hero__title-top {
+  font-weight: 500;
+  font-size: clamp(1.4rem, 2.8vw, 2.1rem);
+  color: #d6d6d6;
+}
+
+.ref-hero__title-accent {
+  font-weight: 800;
+  font-size: clamp(2.6rem, 6vw, 4.6rem);
+  line-height: 1.3;
+  background: linear-gradient(120deg, #5b8cc7 15%, #937fcd 85%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.ref-hero__subtitle {
+  max-width: 640px;
+  margin: 14px auto 0;
+  color: #b9b9b9;
+  font-size: clamp(0.95rem, 1.4vw, 1.1rem);
+  line-height: 2;
+}
+
+/* ── کارت وضعیت دیجیتال‌سازی + آمار کتابخانه ── */
+@keyframes ref-ping {
+  0% {
+    box-shadow: 0 0 0 0 rgba(171, 142, 124, 0.55);
+  }
+  70%, 100% {
+    box-shadow: 0 0 0 12px rgba(171, 142, 124, 0);
+  }
+}
+
+.ref-overview {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+  padding: 22px 28px;
+  border-radius: 26px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background:
+    radial-gradient(600px 120px at 85% 0%, rgba(91, 140, 199, 0.12), transparent 70%),
+    rgba(255, 255, 255, 0.022);
+}
+
+.ref-overview__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(171, 142, 124, 0.45);
+  background: rgba(171, 142, 124, 0.1);
+  color: #e2c5ae;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 0.78rem;
+}
+
+.ref-overview__badge i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ab8e7c;
+  animation: ref-ping 2.2s ease-out infinite;
+}
+
+.ref-overview__copy h2 {
+  margin: 10px 0 0;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.ref-overview__copy p {
+  max-width: 480px;
+  margin: 8px 0 0;
+  color: #9a9a9a;
+  font-size: 0.88rem;
+  line-height: 1.9;
+}
+
+.ref-overview__stats {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  flex-wrap: wrap;
+  margin-inline-start: auto;
+}
+
+.ref-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ref-stat__icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  border: 1px solid rgba(91, 140, 199, 0.35);
+  background: rgba(91, 140, 199, 0.1);
+  color: #9cc0e8;
+}
+
+.ref-stat__icon svg {
+  width: 21px;
+  height: 21px;
+}
+
+.ref-stat__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ref-stat__copy strong {
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 1.15rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.ref-stat__copy small {
+  color: #8a8a8a;
+  font-size: 0.76rem;
+}
+
+/* ── قفسه کتاب‌ها ── */
+.ref-shelf {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-top: 26px;
+}
+
+.ref-card {
+  --bob-delay: 0s;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 18px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 28px;
+  background: linear-gradient(165deg, #232323, #171717 62%);
+  text-align: center;
+  cursor: pointer;
+  isolation: isolate;
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), border-color 260ms ease,
+    box-shadow 260ms ease;
+}
+
+.ref-card:hover {
+  transform: translateY(-7px);
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  box-shadow:
+    0 22px 44px rgba(0, 0, 0, 0.5),
+    0 0 34px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+/* صحنه: هاله + کتاب شناور روی تخته قفسه */
+.ref-card__scene {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 252px;
+}
+
+.ref-card__halo {
+  position: absolute;
+  width: 210px;
+  height: 210px;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--accent) 24%, transparent), transparent 68%);
+  transition: transform 300ms ease;
+}
+
+.ref-card:hover .ref-card__halo {
+  transform: scale(1.16);
+}
+
+@keyframes ref-bob {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-11px);
+  }
+}
+
+.ref-float {
+  display: block;
+  animation: ref-bob 5.5s ease-in-out var(--bob-delay, 0s) infinite;
+}
+
+/* ── جلد کتاب (ابعادپذیر با --bw / --bh) ── */
+.ref-book {
+  position: relative;
+  display: block;
+  width: var(--bw, 148px);
+  height: var(--bh, 208px);
+}
+
+.ref-book__body {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--bh, 208px) * 0.05);
+  /* چون متن فارسی است، عطف کتاب سمت راست است؛ گوشه‌های راست تیزتر می‌مانند */
+  padding: calc(var(--bh, 208px) * 0.1) calc(var(--bw, 148px) * 0.17) calc(var(--bh, 208px) * 0.09) calc(var(--bw, 148px) * 0.19);
+  border-radius: 10px 4px 4px 10px;
+  background:
+    linear-gradient(to left, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.12) 9%, transparent 17%),
+    linear-gradient(155deg,
+      color-mix(in srgb, var(--accent) 92%, #101418),
+      color-mix(in srgb, var(--accent) 36%, #0b0d10) 68%,
+      color-mix(in srgb, var(--accent) 52%, #14181c));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.16),
+    inset 0 0 26px rgba(0, 0, 0, 0.35),
+    0 18px 32px rgba(0, 0, 0, 0.5);
+  transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* قاب داخلی جلد — حس جلد کلاسیک کتاب‌های پزشکی */
+.ref-book__frame {
+  position: absolute;
+  inset: calc(var(--bh, 208px) * 0.045) calc(var(--bw, 148px) * 0.1) calc(var(--bh, 208px) * 0.045) calc(var(--bw, 148px) * 0.12);
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px 3px 3px 6px;
+  pointer-events: none;
+}
+
+/* لبه صفحات — سمت چپ کتاب بیرون می‌زند */
+.ref-book__pages {
+  position: absolute;
+  left: -7px;
+  top: 2.5%;
+  bottom: 2.5%;
+  width: 8px;
+  border-radius: 3px 0 0 3px;
+  background: repeating-linear-gradient(to bottom, #f0e9d8 0 2px, #d6ccb4 2px 4px);
+  box-shadow: inset -3px 0 5px rgba(0, 0, 0, 0.3);
+}
+
+.ref-book__emblem {
+  width: calc(var(--bw, 148px) * 0.3);
+  height: auto;
+  color: rgba(255, 255, 255, 0.92);
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35));
+}
+
+.ref-book__title {
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-weight: 800;
+  font-size: calc(var(--bw, 148px) * 0.115);
+  line-height: 1.6;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.ref-book__latin {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  font-size: calc(var(--bw, 148px) * 0.072);
+  color: rgba(255, 255, 255, 0.72);
+  letter-spacing: 0.02em;
+}
+
+.ref-book__edition {
+  padding: calc(var(--bw, 148px) * 0.018) calc(var(--bw, 148px) * 0.08);
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  background: rgba(0, 0, 0, 0.2);
+  color: rgba(255, 255, 255, 0.88);
+  font-size: calc(var(--bw, 148px) * 0.066);
+  white-space: nowrap;
+}
+
+.ref-book__shadow {
+  position: absolute;
+  left: 4%;
+  right: -4%;
+  bottom: -18px;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(0, 0, 0, 0.55), transparent 70%);
+}
+
+/* کتاب هنگام هاور کمی متمایل و بلند می‌شود */
+.ref-card:hover .ref-book__body {
+  transform: translateY(-8px) rotate(-2.5deg);
+}
+
+/* ── تخته قفسه ── */
+.ref-card__board {
+  width: 82%;
+  height: 10px;
+  margin-top: 26px;
+  border-radius: 6px;
+  background: linear-gradient(to bottom,
+    color-mix(in srgb, var(--accent) 32%, #2a2320),
+    #171310 65%);
+  box-shadow:
+    0 6px 14px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 color-mix(in srgb, var(--accent) 45%, transparent);
+  transition: box-shadow 260ms ease;
+}
+
+.ref-card:hover .ref-card__board {
+  box-shadow:
+    0 6px 14px rgba(0, 0, 0, 0.45),
+    0 0 20px color-mix(in srgb, var(--accent) 32%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--accent) 65%, transparent);
+}
+
+/* ── بدنه کارت ── */
+.ref-card__title {
+  margin: 20px 0 4px;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-weight: 700;
+  font-size: 1.18rem;
+  color: #fff;
+}
+
+.ref-card__meta {
+  margin: 0;
+  color: #8a8a8a;
+  font-size: 0.78rem;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+}
+
+.ref-card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.ref-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: color-mix(in srgb, var(--accent) 60%, #fff);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.ref-chip--plain {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: #b5b5b5;
+}
+
+/* نشان «به‌زودی» گوشه کارت */
+.ref-card__soon {
+  position: absolute;
+  top: 14px;
+  inset-inline-end: 14px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(171, 142, 124, 0.45);
+  background: rgba(171, 142, 124, 0.14);
+  color: #e2c5ae;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 0.72rem;
+}
+
+/* فلش ظاهرشونده هنگام هاور */
+.ref-card__go {
+  position: absolute;
+  inset-inline-end: 16px;
+  bottom: 22px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  color: #0c0c0c;
+  background: var(--accent);
+  opacity: 0;
+  transform: translateY(8px) scale(0.7);
+  transition: opacity 220ms ease, transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ref-card__go svg {
+  width: 17px;
+  height: 17px;
+}
+
+.ref-card:hover .ref-card__go {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* ── نمای داخل هر مرجع ── */
+.ref-reader__head {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  flex-wrap: wrap;
+  margin-top: 22px;
+  padding: 26px 30px;
+  border-radius: 26px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background:
+    radial-gradient(560px 140px at 88% 0%, color-mix(in srgb, var(--accent, #5b8cc7) 14%, transparent), transparent 70%),
+    rgba(255, 255, 255, 0.022);
+}
+
+.ref-reader__book {
+  display: block;
+  flex: 0 0 auto;
+  --bw: 96px;
+  --bh: 134px;
+  margin: 6px 0 12px;
+}
+
+.ref-reader__info {
+  flex: 1 1 320px;
+  min-width: 0;
+}
+
+.ref-reader__info h2 {
+  margin: 0;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.4rem, 2.4vw, 1.8rem);
+}
+
+.ref-reader__latin {
+  margin: 6px 0 0;
+  color: #9a9a9a;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+.ref-reader__chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.ref-reader__note {
+  max-width: 560px;
+  margin: 14px 0 0;
+  color: #b9b9b9;
+  font-size: 0.9rem;
+  line-height: 2;
+}
+
+.ref-reader__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(171, 142, 124, 0.4);
+  background: rgba(171, 142, 124, 0.1);
+  color: #e2c5ae;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.ref-reader__status i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ab8e7c;
+  animation: ref-ping 2.2s ease-out infinite;
+}
+
+/* جست‌وجوی غیرفعال — تا وقتی محتوا بارگذاری شود */
+.ref-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 13px 18px;
+  border-radius: 16px;
+  border: 1px dashed rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.02);
+  color: #8a8a8a;
+  font-size: 0.9rem;
+  user-select: none;
+}
+
+.ref-search svg {
+  width: 18px;
+  height: 18px;
+  opacity: 0.7;
+  flex: 0 0 auto;
+}
+
+/* فهرست بخش‌ها */
+.ref-sections__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 26px;
+  padding-bottom: 4px;
+}
+
+.ref-sections__head h3 {
+  margin: 0;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.ref-sections__count {
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--accent, #5b8cc7) 40%, transparent);
+  background: color-mix(in srgb, var(--accent, #5b8cc7) 10%, transparent);
+  color: color-mix(in srgb, var(--accent, #5b8cc7) 65%, #fff);
+  font-size: 0.74rem;
+}
+
+.ref-sections {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ref-section {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+  background: linear-gradient(165deg, #202020, #181818 70%);
+  color: #e6e6e6;
+  font-family: 'Pinar', Tahoma, sans-serif;
+  font-size: 0.95rem;
+  text-align: right;
+  transition: border-color 200ms ease, background 200ms ease, transform 200ms ease;
+}
+
+.ref-section:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--accent, #5b8cc7) 40%, transparent);
+  background: linear-gradient(165deg, #242424, #1b1b1b);
+  transform: translateX(-4px);
+}
+
+.ref-section:disabled {
+  cursor: default;
+}
+
+.ref-section__index {
+  display: grid;
+  place-items: center;
+  min-width: 42px;
+  height: 42px;
+  padding: 0 6px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--accent, #5b8cc7) 30%, transparent);
+  background: color-mix(in srgb, var(--accent, #5b8cc7) 12%, transparent);
+  color: var(--accent, #5b8cc7);
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-weight: 700;
+  font-size: 0.92rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.ref-section__name {
+  flex: 1;
+  min-width: 0;
+}
+
+.ref-section__state {
+  padding: 5px 11px;
+  border-radius: 999px;
+  border: 1px solid rgba(171, 142, 124, 0.4);
+  background: rgba(171, 142, 124, 0.12);
+  color: #e2c5ae;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 0.7rem;
+  white-space: nowrap;
+}
+
+/* ── پانوشت ── */
+.ref-foot {
+  margin-top: 32px;
+  text-align: center;
+  color: #8a8a8a;
+  font-size: 0.8rem;
+}
+
+/* ── ریسپانسیو ── */
+@media (max-width: 960px) {
+  .ref-shelf {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .ref-overview__stats {
+    margin-inline-start: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .ref-topbar__crumb {
+    display: none;
+  }
+
+  .ref-reader__head {
+    gap: 20px;
+  }
+}
+
+@media (max-width: 640px) {
+  .ref-shelf {
+    grid-template-columns: 1fr;
+  }
+
+  .ref-reader__status {
+    margin-inline-start: auto;
+  }
+}
+
+/* گارد reduced-motion روی انیمیشن‌های این لایه اعمال نمی‌شود؛
+   محیط کاربر reduce-motion دارد و انیمیشن‌ها باید همیشه اجرا شوند */
