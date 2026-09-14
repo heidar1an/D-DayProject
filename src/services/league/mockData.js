@@ -305,3 +305,34 @@ export const ACTIVITY_FEED = [
   { id: 'f2', text: 'سارا احمدی به استریک ۳۰ روزه رسید', time: '۳ ساعت پیش', accent: '#77b787' },
   { id: 'f3', text: 'دانشگاه قم به رتبهٔ ۳ فصل رسید', time: 'دیروز', accent: '#937fcd' },
 ];
+
+/* ── Entity: Friend (همخوان‌ها) — دوستانِ کاربر در لایهٔ لیگ ──
+   سه همخوانِ اول با PeersSection داشبورد هم‌شناسه‌اند تا بعداً از یک منبع تغذیه شوند. */
+export const FRIENDS = [
+  { id: 'alireza',  name: 'علیرضا محمدی', username: 'alireza_m', hearts: 9120,  streak: 8,  tierId: 'silver',   avatar: avatarForSeed(41) },
+  { id: 'leila',    name: 'لیلا کریمی',   username: 'leila_k',   hearts: 13420, streak: 21, tierId: 'gold',     avatar: avatarForSeed(42) },
+  { id: 'mohammad', name: 'محمد رضایی',   username: 'mohammad_r',hearts: 5680,  streak: 3,  tierId: 'bronze',   avatar: avatarForSeed(43) },
+  { id: 'sahar',    name: 'سحر نیک‌نام',  username: 'sahar_n',   hearts: 18340, streak: 30, tierId: 'platinum', avatar: avatarForSeed(44) },
+  { id: 'kian',     name: 'کیان سلطانی',  username: 'kian_s',    hearts: 12700, streak: 12, tierId: 'gold',     avatar: avatarForSeed(45) },
+];
+
+/* ── Entity: FriendNotification — فعالیت، نتیجه و دستاوردِ «فقط دوستان» ──
+   همین داده‌ای است که با کلیک روی آیکون چتِ کادر پروفایل داشبورد باز می‌شود.
+   kind:
+     action       → اقدامات: چالش، تست، مطالعه، پیوستن به نبرد
+     result       → نتایج: رتبه، سکو، امتیاز نبرد، تغییر جایگاه
+     achievement  → دستاوردهای باز‌شده (با rarity)
+   ترتیب آرایه = جدید به قدیم. در نسخهٔ واقعی سرور فقط رویدادهای دوستانی را برمی‌گرداند
+   که تنظیم حریم خصوصی‌شان اجازهٔ نمایش عمومی به دوستان را داده باشد. */
+export const FRIENDS_LEAGUE_NOTIFICATIONS = [
+  { id: 'fn1',  friendId: 'sahar',    kind: 'achievement', icon: 'crown',  text: 'دستاورد «پادشاه تداوم» را باز کرد', note: 'استریک ۳۰ روزهٔ پیوسته', rarity: 'legendary', hearts: 500, time: '۱۲ دقیقه پیش', unread: true },
+  { id: 'fn2',  friendId: 'leila',    kind: 'action',      icon: 'target', text: 'چالش روزانهٔ «۲۰ سؤال حل کن» را تمام کرد', note: 'فیزیولوژی — ۲۰ از ۲۰', hearts: 100, time: '۲۵ دقیقه پیش', unread: true },
+  { id: 'fn3',  friendId: 'kian',     kind: 'result',      icon: 'swords', text: 'در نبرد فیزیولوژی به رتبهٔ ۲ رسید', note: '۴۵۵ امتیاز از ۵۰۰', hearts: 300, time: '۱ ساعت پیش', unread: true },
+  { id: 'fn4',  friendId: 'mohammad', kind: 'action',      icon: 'clock',  text: '۳۰ دقیقه مطالعهٔ متمرکز ثبت کرد', note: 'با تایمر پومودورو', hearts: 50, time: '۲ ساعت پیش', unread: true },
+  { id: 'fn5',  friendId: 'alireza',  kind: 'achievement', icon: 'book',   text: 'دستاورد «شکارچی سؤال» را باز کرد', note: '۵۰۰ سؤال حل‌شده', rarity: 'rare', hearts: 100, time: '۳ ساعت پیش', unread: false },
+  { id: 'fn6',  friendId: 'sahar',    kind: 'result',      icon: 'up',     text: 'به رتبهٔ ۹ دانشگاه رسید', note: '۷ پله صعود در یک روز', time: '۵ ساعت پیش', unread: false },
+  { id: 'fn7',  friendId: 'leila',    kind: 'action',      icon: 'brain',  text: 'فصل «کاردیو» را با میانگین ۹۰٪ تمام کرد', note: 'میکرو درسنامه + تست', hearts: 80, time: '۷ ساعت پیش', unread: false },
+  { id: 'fn8',  friendId: 'sahar',    kind: 'result',      icon: 'trophy', text: 'بهترین امتیاز هفتهٔ آزمون «آناتومی اندام‌ها» را گرفت', note: '۹۶ از ۱۰۰', hearts: 200, time: 'دیروز', unread: false },
+  { id: 'fn9',  friendId: 'kian',     kind: 'achievement', icon: 'star',   text: 'دستاورد «تک‌تیرانداز» را باز کرد', note: 'آزمون بدون حتی یک پاسخ غلط', rarity: 'epic', time: 'دیروز', unread: false },
+  { id: 'fn10', friendId: 'alireza',  kind: 'action',      icon: 'swords', text: 'به نبرد «قم در برابر تهران» پیوست', note: 'تو هم می‌تونی شرکت کنی', time: '۲ روز پیش', unread: false },
+];

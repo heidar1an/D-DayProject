@@ -22,6 +22,7 @@ import NotificationsSection from './NotificationsSection';
 import LeagueSection from './league/LeagueSection';
 import FlashcardSection from './flashcards/FlashcardSection';
 import NotesSection from './notes/NotesSection';
+import ReviewNotebook from './review/ReviewNotebook';
 import Pomodoro, { usePomodoro, formatTimer } from './Pomodoro';
 
 const settingsTabLabels = {
@@ -117,6 +118,8 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
         userData={userData}
         onOpenFlashcards={() => handleSectionChange('flashcards')}
         onOpenNotes={() => handleSectionChange('notes')}
+        onOpenReviewNotebook={() => handleSectionChange('review-notebook')}
+        onOpenLeague={() => handleSectionChange('league')}
       />
     ),
     courses: <CoursesSection onOpenCourse={handleOpenCourse} />,
@@ -136,6 +139,16 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
     ),
     flashcards: <FlashcardSection userData={userData} />,
     notes: <NotesSection userData={userData} />,
+    'review-notebook': (
+      <ReviewNotebook
+        userData={userData}
+        onOpenLearning={() => {
+          setActiveSection('courses');
+          setOpenCourseLayer('comprehensive');
+          window.scrollTo({ top: 0, behavior: 'instant' });
+        }}
+      />
+    ),
     other: <OtherSections onOpenWiki={() => {
       setOpenWikiLayer(true);
       window.scrollTo({ top: 0, behavior: 'instant' });
@@ -229,7 +242,10 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
           ) : openCourseLayer === 'reference' ? (
             <ReferenceLayer onBack={() => setOpenCourseLayer(null)} />
           ) : (
-            <ComprehensiveCourseLayer onBack={() => setOpenCourseLayer(null)} />
+            <ComprehensiveCourseLayer
+              userId={userData?.id ?? userData?.phone ?? 'guest'}
+              onBack={() => setOpenCourseLayer(null)}
+            />
           )}
         </div>
       ) : openInternationalLayer ? (

@@ -1,6 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import bubbleChatIcon from '../../../images/icons/bubble-chat.png';
+import { trackEvent } from '../../services/league/leagueService';
+import { toFa } from './league/leagueShared';
+import { fetchFriendsLeagueNotifications } from '../../services/league/leagueService';
 import AvatarSvg from './setting/avatar/AvatarSvg';
+import FriendsLeagueNotifications from './FriendsLeagueNotifications';
 
 function getProfileName(userData) {
   const profile = userData?.profile || {};
@@ -31,18 +35,106 @@ function useTimeGreeting() {
   return greeting;
 }
 
-export default function UserProfileCard({ userData }) {
+/*
+ * شمارندهٔ اعلان‌های نخواندهٔ «لیگ همخوان‌ها» — همان سرویسی که پنل آیکون چت تغذیه می‌کند.
+ * فقط تعداد نخوانده‌ها لازم است؛ پنل خودش دادهٔ کامل را جداگانه می‌گیرد.
+ */
+function useFriendsLeagueUnreadCount(isPanelOpen) {
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    let alive = true;
+    let timerId;
+
+    const poll = () => {
+      fetchFriendsLeagueNotifications()
+        .then((data) => {
+          if (alive) setUnreadCount(data.unreadCount);
+        })
+        .catch(() => {
+          /* در حالت آفلاین آخرین تعداد حفظ می‌شود */
+        });
+
+      timerId = window.setTimeout(poll, 90 * 1000);
+    };
+
+    poll();
+
+    return () => {
+      alive = false;
+      window.clearTimeout(timerId);
+    };
+  }, []);
+
+  /* وقتی پنل باز و خوانده شد، بج روی آیکون صفر می‌شود */
+  useEffect(() => {
+    if (isPanelOpen) setUnreadCount(0);
+  }, [isPanelOpen]);
+
+  return unreadCount;
+}
+
+export default function UserProfileCard({ userData, onOpenLeague }) {
   const profile = userData?.profile || {};
   const name = getProfileName(userData);
   const username = profile.username || userData?.phone || 'tapesh-user';
   const greeting = useTimeGreeting();
 
+  const [isLeaguePanelOpen, setIsLeaguePanelOpen] = useState(false);
+  const chatWrapRef = useRef(null);
+  const unreadCount = useFriendsLeagueUnreadCount(isLeaguePanelOpen);
+
+  const closeLeaguePanel = useCallback(() => setIsLeaguePanelOpen(false), []);
+
+  /* بستن پنل با کلیک بیرون — هم‌رفتار با پنل اعلان‌های لیگ */
+  useEffect(() => {
+    if (!isLeaguePanelOpen) return undefined;
+
+    const handlePointerDown = (event) => {
+      if (!chatWrapRef.current?.contains(event.target)) closeLeaguePanel();
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    return () => document.removeEventListener('pointerdown', handlePointerDown);
+  }, [isLeaguePanelOpen, closeLeaguePanel]);
+
   return (
     <article className="user-profile-card" aria-label="پروفایل کاربر">
       <div className="user-profile-card__header">
-        <button className="user-profile-card__chat-btn" type="button" aria-label="پیام‌ها">
-          <img src={bubbleChatIcon} alt="" />
-        </button>
+        <div className="user-profile-card__chat-wrap" ref={chatWrapRef}>
+          <button
+            className="user-profile-card__chat-btn"
+            type="button"
+            aria-label="اعلان‌های لیگ همخوان‌ها"
+            aria-haspopup="dialog"
+            aria-expanded={isLeaguePanelOpen}
+            onClick={() =>
+              setIsLeaguePanelOpen((prev) => {
+                if (!prev) trackEvent('friends_league_panel_open');
+                return !prev;
+              })
+            }
+          >
+            <img src={bubbleChatIcon} alt="" />
+            {unreadCount > 0 && (
+              <span className="user-profile-card__chat-badge" aria-hidden="true">
+                {toFa(unreadCount)}
+              </span>
+            )}
+          </button>
+
+          {isLeaguePanelOpen && (
+            <FriendsLeagueNotifications
+              onOpenLeague={{
+                close: closeLeaguePanel,
+                go: () => {
+                  closeLeaguePanel();
+                  onOpenLeague?.();
+                },
+              }}
+            />
+          )}
+        </div>
       </div>
 
       <div className="user-profile-card__avatar" aria-hidden="true">

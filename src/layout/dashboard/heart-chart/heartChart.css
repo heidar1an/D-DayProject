@@ -1,0 +1,473 @@
+/*
+ * استایل نمودار تعداد قلب داشبورد — میله‌ای SVG با انیمیشن رشد پله‌ای،
+ * خط میانگین، تولتیپ تحلیلی و دراپ‌داون بازه.
+ * همهٔ حرکت‌ها با گارد prefers-reduced-motion در انتهای فایل خاموش می‌شوند.
+ */
+
+.heart-chart {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  flex-direction: column;
+}
+
+/* ── ناحیهٔ نمودار ──
+   جهت LTR تا ترتیب میله‌ها (قدیم به جدید، چپ به راست) با محورهای svg یکی بماند. */
+.heart-chart__plot {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  direction: ltr;
+}
+
+.heart-chart__svg {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: visible;
+}
+
+.heart-chart__grid {
+  stroke: rgba(255, 255, 255, 0.06);
+}
+
+.heart-chart__grid--base {
+  stroke: rgba(255, 255, 255, 0.13);
+}
+
+.heart-chart__ylabel {
+  fill: #8f8f8f;
+  font-family: 'Pinar', Tahoma, sans-serif;
+  font-size: 10.5px;
+}
+
+.heart-chart__avg line {
+  stroke: #5b8cc7;
+  opacity: 0.55;
+}
+
+.heart-chart__avg-label {
+  fill: #7ba2cf;
+  font-family: 'Pinar', Tahoma, sans-serif;
+  font-size: 10.5px;
+}
+
+/* ── میله‌ها ── */
+.heart-chart__bar {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: heart-bar-rise 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--i) * 32ms);
+  transition: opacity 160ms ease;
+  cursor: default;
+}
+
+.heart-chart__bar.is-hover path {
+  filter: brightness(1.14);
+}
+
+.heart-chart__bar.is-current path {
+  filter: drop-shadow(0 2px 12px rgba(255, 105, 105, 0.35));
+}
+
+.heart-chart__bar.is-current.is-hover path {
+  filter: brightness(1.1) drop-shadow(0 2px 14px rgba(255, 105, 105, 0.45));
+}
+
+.heart-chart__plot.is-hovering .heart-chart__bar:not(.is-hover) {
+  opacity: 0.42;
+}
+
+.heart-chart__ghost {
+  fill: rgba(255, 255, 255, 0.09);
+}
+
+/* ضربان «امروز» — نقطهٔ زنده بالای میلهٔ بازهٔ جاری */
+.heart-chart__pulse-dot {
+  fill: #ff6969;
+}
+
+.heart-chart__pulse-ring {
+  fill: none;
+  stroke: #ff6969;
+  stroke-width: 1.5;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: heart-pulse 2.2s ease-out infinite;
+}
+
+/* ── برچسب‌های محور افقی ── */
+.heart-chart__xlabel {
+  fill: #8f8f8f;
+  font-family: 'Pinar', Tahoma, sans-serif;
+  font-size: 10.5px;
+  text-anchor: middle;
+  animation: heart-label-fade 420ms ease both;
+  animation-delay: calc(var(--i) * 32ms + 140ms);
+}
+
+.heart-chart__xlabel--sub {
+  font-size: 9.5px;
+  fill: #6f6f6f;
+}
+
+.heart-chart__xlabel.is-current {
+  fill: #ff8585;
+  font-weight: 600;
+}
+
+/* ── ستون‌های hover/focus ── */
+.heart-chart__overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  direction: ltr;
+}
+
+.heart-chart__column {
+  flex: 1;
+  min-width: 0;
+  outline: none;
+  border-radius: 10px;
+}
+
+.heart-chart__column.is-hover {
+  background: linear-gradient(180deg, transparent 62%, rgba(255, 105, 105, 0.06) 100%);
+}
+
+.heart-chart__column:focus-visible {
+  background: rgba(255, 255, 255, 0.045);
+}
+
+/* ── تولتیپ ── */
+.heart-chart__tooltip {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  min-width: 148px;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 14px;
+  background: #1c1c1c;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.55);
+  direction: rtl;
+  text-align: right;
+  pointer-events: none;
+  transform: translateX(-50%);
+  animation: heart-tooltip-in 150ms ease both;
+}
+
+.heart-chart__tooltip-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #a5a5a5;
+  font-family: 'Pinar', Tahoma, sans-serif;
+  font-size: 11px;
+}
+
+.heart-chart__tooltip-title em {
+  flex-shrink: 0;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(255, 105, 105, 0.12);
+  color: #ff8585;
+  font-size: 9.5px;
+  font-style: normal;
+}
+
+.heart-chart__tooltip-value {
+  color: #fff;
+  font-family: 'Pinar', Tahoma, sans-serif;
+  font-size: 15.5px;
+  font-weight: 700;
+}
+
+.heart-chart__tooltip-value i {
+  color: #b5b5b5;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 500;
+}
+
+.heart-chart__tooltip-delta {
+  color: #8d8d8d;
+  font-family: 'Pinar', Tahoma, sans-serif;
+  font-size: 10px;
+}
+
+.heart-chart__tooltip-delta.is-up {
+  color: #77b787;
+}
+
+.heart-chart__tooltip-delta.is-down {
+  color: #ff6969;
+}
+
+/* ── ردیف تحلیل پایین کادر ── */
+.heart-chart__insights {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.heart-chart__insight {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 13px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #b9b9b9;
+  font-family: 'Pinar', Tahoma, sans-serif;
+  font-size: 12px;
+}
+
+.heart-chart__insight b {
+  color: #fff;
+  font-weight: 700;
+}
+
+.heart-chart__insight--best b {
+  color: #ff8585;
+}
+
+.heart-chart__insight--muted {
+  margin-inline-start: auto;
+  border-color: transparent;
+  background: transparent;
+  color: #7d7d7d;
+  font-size: 11px;
+}
+
+.heart-chart__insights--loading {
+  height: 30px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* ── اسکلت لودینگ ── */
+.heart-chart__skeleton {
+  position: absolute;
+  inset: 0 46px 34px 10px;
+  display: flex;
+  direction: ltr;
+  align-items: flex-end;
+  gap: 4.5%;
+}
+
+.heart-chart__skeleton span {
+  flex: 1;
+  height: var(--h, 50%);
+  border-radius: 7px 7px 3px 3px;
+  background: rgba(255, 255, 255, 0.05);
+  animation: heart-skeleton 1.5s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 90ms);
+}
+
+/* ── حالت خطا ── */
+.heart-chart__error {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #a5a5a5;
+  font-family: 'Pinar', Tahoma, sans-serif;
+  font-size: 0.95rem;
+}
+
+.heart-chart__error button {
+  padding: 8px 20px;
+  border: 0;
+  border-radius: 12px;
+  background: #132943;
+  color: #5b8cc7;
+  font-family: 'Doran', Tahoma, sans-serif;
+  cursor: pointer;
+}
+
+/* ── دراپ‌داون بازه ── */
+.heart-range {
+  position: relative;
+}
+
+.heart-range__button {
+  transition: background-color 160ms ease;
+}
+
+.heart-range__button:hover {
+  background: #183158;
+}
+
+.heart-range__arrow {
+  transition: transform 180ms ease;
+}
+
+.heart-range__arrow.is-open {
+  transform: rotate(180deg);
+}
+
+.heart-range__menu {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 10px);
+  inset-inline-end: 0;
+  min-width: 152px;
+  margin: 0;
+  padding: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  background: #1d1d1d;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.55);
+  list-style: none;
+  transform-origin: top;
+  animation: heart-menu-in 160ms ease both;
+}
+
+.heart-range__item {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: 11px;
+  background: none;
+  color: #cfcfcf;
+  cursor: pointer;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 0.9rem;
+  text-align: right;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.heart-range__item:hover,
+.heart-range__item:focus-visible {
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+  outline: none;
+}
+
+.heart-range__item.is-selected {
+  color: #ff8585;
+}
+
+.heart-range__check {
+  display: inline-block;
+  min-width: 14px;
+  color: #ff6969;
+  font-size: 0.85rem;
+}
+
+/* ── انیمیشن‌ها ── */
+@keyframes heart-bar-rise {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes heart-label-fade {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes heart-tooltip-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes heart-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes heart-pulse {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.85;
+  }
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+@keyframes heart-skeleton {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* ── گارد prefers-reduced-motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .heart-chart__bar,
+  .heart-chart__xlabel,
+  .heart-chart__tooltip,
+  .heart-range__arrow,
+  .heart-range__menu,
+  .heart-chart__pulse-ring,
+  .heart-chart__skeleton span,
+  .heart-chart__insights--loading {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ── رسپانسیو ── */
+@media (max-width: 1100px) {
+  .heart-chart__insight--muted {
+    display: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .heart-chart__ylabel {
+    font-size: 9.5px;
+  }
+
+  .heart-chart__insights {
+    gap: 6px;
+    margin-top: 12px;
+  }
+
+  .heart-chart__insight {
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+
+  .heart-range__menu {
+    min-width: 132px;
+  }
+}

@@ -1,13 +1,17 @@
+import { useState } from 'react';
 import UserProfileCard from './UserProfileCard';
 import DashboardActionCards from './DashboardActionCards';
 import PeersSection from './PeersSection';
+import HeartChart from './heart-chart/HeartChart';
+import RangeDropdown from './heart-chart/RangeDropdown';
 
-export default function DashboardHome({ userData, onOpenFlashcards, onOpenNotes }) {
+export default function DashboardHome({ userData, onOpenFlashcards, onOpenNotes, onOpenReviewNotebook, onOpenLeague }) {
+  const [heartRange, setHeartRange] = useState('daily');
   return (
     <main className="dashboard__main dash-stagger">
       <div className="dashboard__top-row dash-stagger">
         <aside className="dashboard__profile">
-          <UserProfileCard userData={userData} />
+          <UserProfileCard userData={userData} onOpenLeague={onOpenLeague} />
         </aside>
 
         <section className="dashboard__chart" aria-label="نمودار تعداد قلب">
@@ -23,23 +27,22 @@ export default function DashboardHome({ userData, onOpenFlashcards, onOpenNotes 
               </span>
             </div>
 
-            <button type="button" className="dashboard__chart-period">
-              روزانه
-              <span className="dashboard__chart-period-arrow" aria-hidden="true">
-                ▾
-              </span>
-            </button>
+            <RangeDropdown value={heartRange} onChange={setHeartRange} />
           </div>
 
           <div className="dashboard__chart-body">
-            {/* TODO: نمودار تعداد قلب اینجا اضافه می‌شود */}
+            <HeartChart range={heartRange} />
           </div>
         </section>
       </div>
 
       <div className="dashboard__cards-row dash-stagger" aria-label="ابزارهای مطالعه و همخوان‌ها">
         <PeersSection />
-        <DashboardActionCards onOpenFlashcards={onOpenFlashcards} onOpenNotes={onOpenNotes} />
+        <DashboardActionCards
+          onOpenFlashcards={onOpenFlashcards}
+          onOpenNotes={onOpenNotes}
+          onOpenReviewNotebook={onOpenReviewNotebook}
+        />
       </div>
     </main>
   );

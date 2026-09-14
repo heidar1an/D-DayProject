@@ -26,6 +26,7 @@ import {
   MasteryIndicator,
 } from './LearningPrimitives';
 import { toFa } from './learningUtils';
+import { ReviewNotebookService } from '../../../../services/reviewNotebook/reviewNotebookService';
 
 const STEP_COPY = {
   activate: {
@@ -193,6 +194,18 @@ export default function LearningEngine({
         { stepId: 'review', stepLabel: 'مرور', detail: 'واحد تکمیل شد' },
       ));
       setFinished(true);
+      ReviewNotebookService.registerLearning(userId, {
+        sourceId: `${course.id}:${unit.id}`,
+        title: unit.title,
+        subject: course.title,
+        description: 'واحد تکمیل‌شده در درسنامه جامع',
+        metadata: {
+          courseId: course.id,
+          moduleId: unit.moduleId,
+          unitId: unit.id,
+          mastery: finalMastery,
+        },
+      });
       onCompleted?.(unit.id);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;

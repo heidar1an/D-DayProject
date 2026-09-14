@@ -23,6 +23,8 @@ import {
   BATTLES,
   DAILY_CHALLENGES,
   DUEL,
+  FRIENDS,
+  FRIENDS_LEAGUE_NOTIFICATIONS,
   GLOBAL_TOP,
   GLOBAL_WINDOW,
   HEART_LEDGER,
@@ -197,6 +199,28 @@ export function fetchProfileDetails(userData) {
     pastSeasons: PAST_SEASONS,
     season: SEASON,
   }));
+}
+
+/* GET /api/league/friends/notifications
+ * فعالیت‌ها، نتایج و دستاوردهای «فقط همخوان‌ها» — تغذیه‌کنندهٔ پنل آیکون چت پروفایل داشبورد.
+ * markAllRead: بعد از باز شدن پنل، unreadها را مصرف می‌کند (در نسخهٔ واقعی: PATCH روی سرور).
+ */
+export function fetchFriendsLeagueNotifications() {
+  return respond(() => ({
+    friends: FRIENDS,
+    items: FRIENDS_LEAGUE_NOTIFICATIONS,
+    unreadCount: FRIENDS_LEAGUE_NOTIFICATIONS.filter((item) => item.unread).length,
+  }));
+}
+
+export function markFriendsLeagueNotificationsRead() {
+  return respond(() => {
+    FRIENDS_LEAGUE_NOTIFICATIONS.forEach((item) => {
+      item.unread = false;
+    });
+
+    return { ok: true };
+  });
 }
 
 /*

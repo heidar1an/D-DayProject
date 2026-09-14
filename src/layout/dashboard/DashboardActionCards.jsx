@@ -20,24 +20,22 @@ const actionCards = [
   },
 ];
 
-export default function DashboardActionCards({ onOpenFlashcards, onOpenNotes }) {
-  /* «دفترچه مرور» هنوز لایه ندارد؛ بقیهٔ کارت‌ها به بخش خودشان وصل‌اند */
+export default function DashboardActionCards({ onOpenFlashcards, onOpenNotes, onOpenReviewNotebook }) {
   const handleClick = (cardId) => {
     if (cardId === 'flashcards') onOpenFlashcards?.();
     if (cardId === 'notes') onOpenNotes?.();
+    if (cardId === 'notebook') onOpenReviewNotebook?.();
   };
 
   return (
     <>
       {actionCards.map((card) => {
-        const isOpenable = card.id === 'flashcards' || card.id === 'notes';
-
         return (
           <button
             key={card.id}
             className="dashboard-action-card"
-            onClick={isOpenable ? () => handleClick(card.id) : undefined}
-            aria-label={isOpenable ? `بخش ${card.title}` : undefined}
+            onClick={() => handleClick(card.id)}
+            aria-label={`بخش ${card.title}`}
           >
             <img src={card.icon} alt="" className="dashboard-action-card__icon" />
             <span className="dashboard-action-card__title">{card.title}</span>

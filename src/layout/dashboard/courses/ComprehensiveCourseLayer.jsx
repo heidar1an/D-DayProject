@@ -159,7 +159,7 @@ function SubjectCard({ subject, index, onOpen }) {
   );
 }
 
-export default function ComprehensiveCourseLayer({ onBack }) {
+export default function ComprehensiveCourseLayer({ onBack, userId = 'local-user' }) {
   const [filter, setFilter] = useState('all');
   const [openSubject, setOpenSubject] = useState(null);
   const gridRef = useRef(null);
@@ -204,7 +204,7 @@ export default function ComprehensiveCourseLayer({ onBack }) {
   const startedCount = SUBJECTS.filter((subject) => subject.progress > 0).length;
 
   if (openSubject === 'anatomy') {
-    return <AnatomyLearningLayer onBack={() => setOpenSubject(null)} />;
+    return <AnatomyLearningLayer userId={userId} onBack={() => setOpenSubject(null)} />;
   }
 
   return (

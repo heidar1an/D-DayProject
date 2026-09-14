@@ -50,6 +50,8 @@ src/layout/dashboard/league/
 - `GET /api/league/challenges` — روزانه/هفتگی/نبرد/دوئل
 - `GET /api/league/achievements` — دستاوردها + تعداد باز‌شده
 - `GET /api/league/profile-details` — عناوین، ریواردها، دفتر قلب، تقویم استریک، تاریخچهٔ فصل‌ها
+- `GET /api/league/friends/notifications` — اقدامات، نتایج و دستاوردهای «فقط همخوان‌ها» (پنل آیکون چتِ کادر پروفایل داشبورد)
+- `PATCH /api/league/friends/notifications` — علامت‌گذاری اعلان‌های همخوان‌ها به‌عنوان خوانده‌شده
 - `POST /api/league/challenges/:id/claim` — ثبت قلب با اعتبارسنجی سرور
 - `POST /api/league/battles/:id/join` — عضویت در نبرد
 - `POST /api/league/duels` — دوئل (نسخهٔ نهایی)

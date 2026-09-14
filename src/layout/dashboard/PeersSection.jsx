@@ -1,41 +1,60 @@
+const FA_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
+const toFa = (value) => String(value).replace(/\d/g, (digit) => FA_DIGITS[Number(digit)]);
+
 const peers = [
-  { id: 'alireza', name: 'علیرضا' },
-  { id: 'leila', name: 'لیلا' },
-  { id: 'mohammad', name: 'محمد' },
+  { id: 'alireza', name: 'علیرضا', initial: 'ع', hearts: 184, tint: '#e26d6d' },
+  { id: 'leila', name: 'لیلا', initial: 'ل', hearts: 142, tint: '#5b8cc7' },
+  { id: 'mohammad', name: 'محمد', initial: 'م', hearts: 97, tint: '#937fcd' },
 ];
 
 export default function PeersSection() {
   return (
     <div className="peers-section">
-      <h3 className="peers-section__title">همخوان‌ها</h3>
-      
-      <div className="peers-section__list">
+      <header className="peers-section__header">
+        <h3 className="peers-section__title">همخوان‌ها</h3>
+        <span className="peers-section__count">{toFa(peers.length)} همخوان فعال</span>
+      </header>
+
+      <ul className="peers-section__list">
         {peers.map((peer) => (
-          <button key={peer.id} className="peers-section__peer">
-            <div className="peers-section__avatar">
+          <li key={peer.id}>
+            <button
+              type="button"
+              className="peers-section__peer"
+              style={{ '--peer-tint': peer.tint }}
+              aria-label={`پروفایل ${peer.name}`}
+            >
+              <span className="peers-section__avatar" aria-hidden="true">{peer.initial}</span>
+              <span className="peers-section__meta">
+                <span className="peers-section__name">{peer.name}</span>
+                <small className="peers-section__hearts">❤️ {toFa(peer.hearts)} قلب این هفته</small>
+              </span>
               <svg
-                className="peers-section__person"
-                width="40"
-                height="40"
-                viewBox="0 0 32 32"
-                fill="currentColor"
+                className="peers-section__chevron"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.4"
+                aria-hidden="true"
               >
-                <circle cx="16" cy="11" r="5"/>
-                <path d="M16 18c-5 0-9 3-9 7h18c0-4-4-7-9-7z"/>
+                <path d="M15 5l-7 7 7 7" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-            </div>
-            <span className="peers-section__name">{peer.name}</span>
-          </button>
+            </button>
+          </li>
         ))}
-        
-        <button className="peers-section__peer peers-section__peer--add" aria-label="افزودن همخوان">
-          <div className="peers-section__avatar peers-section__avatar--add">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 5v14M5 12h14"/>
-            </svg>
-          </div>
-        </button>
-      </div>
+
+        <li>
+          <button type="button" className="peers-section__peer peers-section__peer--add" aria-label="افزودن همخوان">
+            <span className="peers-section__avatar peers-section__avatar--add" aria-hidden="true">+</span>
+            <span className="peers-section__meta">
+              <span className="peers-section__name">افزودن همخوان تازه</span>
+              <small className="peers-section__hearts">با شناسه تپش دوستانت را دعوت کن</small>
+            </span>
+          </button>
+        </li>
+      </ul>
     </div>
   );
 }
