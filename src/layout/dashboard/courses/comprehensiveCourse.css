@@ -547,6 +547,26 @@
   filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.45)) saturate(1.12);
 }
 
+/* هایلایت لحظه‌ای وقتی از بیرون (کارت‌های «کار امروز» صفحه دوره‌ها) به یک درس لینک می‌شود */
+@keyframes dars-card-spot {
+  0% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+  18%,
+  72% {
+    box-shadow:
+      0 0 0 3px var(--accent),
+      0 0 48px color-mix(in srgb, var(--accent) 42%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+.dars-card--spot {
+  animation: dars-card-spot 3s ease 1;
+}
+
 /* ── CTA پایانی ── */
 .dars-cta {
   position: relative;

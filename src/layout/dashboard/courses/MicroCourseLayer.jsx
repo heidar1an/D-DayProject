@@ -5,8 +5,9 @@ const FA_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
 const toFa = (value) => String(value).replace(/\d/g, (digit) => FA_DIGITS[Number(digit)]);
 
 /* میکرو درسنامه: هر درس فقط ۳ نکتهٔ فشرده دارد؛ نوع نکته آیکن و برچسبش را تعیین می‌کند.
-   رنگ (accent) و پیشرفت هر درس عمداً با درسنامه جامع یکی است تا دو لایه با هم بخوانند. */
-const SUBJECTS = [
+   رنگ (accent) و پیشرفت هر درس عمداً با درسنامه جامع یکی است تا دو لایه با هم بخوانند.
+   SUBJECTS و NoteIcon در صفحه «دوره‌ها» هم برای کارت‌های «سه سوته» استفاده می‌شوند. */
+export const SUBJECTS = [
   {
     id: 'anatomy', title: 'آناتومی', accent: '#5b8cc7', progress: 35, minutes: 4,
     notes: [
@@ -150,7 +151,7 @@ const NOTE_TYPES = {
   warn: 'خطای رایج',
 };
 
-function NoteIcon({ type }) {
+export function NoteIcon({ type }) {
   const common = {
     viewBox: '0 0 24 24',
     fill: 'none',
@@ -309,8 +310,10 @@ function SubjectRow({ subject, index, isOpen, isReviewed, onToggleHead, onToggle
   );
 }
 
-export default function MicroCourseLayer({ onBack, onOpenComprehensive }) {
-  const [openId, setOpenId] = useState('anatomy');
+export default function MicroCourseLayer({ onBack, onOpenComprehensive, initialSubject = null }) {
+  const [openId, setOpenId] = useState(
+    SUBJECTS.some((subject) => subject.id === initialSubject) ? initialSubject : 'anatomy',
+  );
   const [filter, setFilter] = useState('all');
   const [query, setQuery] = useState('');
   const [reviewed, setReviewed] = useState(() => new Set());
@@ -330,6 +333,15 @@ export default function MicroCourseLayer({ onBack, onOpenComprehensive }) {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onBack]);
+
+  /* ورود از کارت‌های «سه سوته» صفحه دوره‌ها: همان درس باز و وسط صفحه می‌آید */
+  useEffect(() => {
+    if (!initialSubject || !SUBJECTS.some((subject) => subject.id === initialSubject)) return undefined;
+    const raf = requestAnimationFrame(() => {
+      rowRefs.current.get(initialSubject)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [initialSubject]);
 
   /* «نکتهٔ امروز» هر چند ثانیه خودش عوض می‌شود؛ هاور موقتاً نگهش می‌دارد */
   const tips = useMemo(

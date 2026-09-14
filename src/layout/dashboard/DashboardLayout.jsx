@@ -38,7 +38,7 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState('profile');
   const [areNotificationsOpen, setAreNotificationsOpen] = useState(false);
-  const [openCourseLayer, setOpenCourseLayer] = useState(null);
+  const [openCourseLayer, setOpenCourseLayer] = useState(null); // null | { id, target }
   const [openInternationalLayer, setOpenInternationalLayer] = useState(false);
   const [openCoordinatedLayer, setOpenCoordinatedLayer] = useState(false);
   const [openTestBankLayer, setOpenTestBankLayer] = useState(null); // null | {initialView}
@@ -104,11 +104,12 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
     setOpenKnowledgeLayer(false);
   };
 
-  /* «درسنامه جامع»، «میکرو درسنامه» و «رفرنس» لایه دارند؛ بقیه دوره‌ها به‌زودی */
-  const handleOpenCourse = (courseId) => {
+  /* «درسنامه جامع»، «میکرو درسنامه» و «رفرنس» لایه دارند؛ بقیه دوره‌ها به‌زودی.
+     target برای لینک عمیق است: { subject, moduleId?, unitId?, stepId? } */
+  const handleOpenCourse = (courseId, target = null) => {
     if (courseId !== 'comprehensive' && courseId !== 'micro' && courseId !== 'reference') return;
 
-    setOpenCourseLayer(courseId);
+    setOpenCourseLayer({ id: courseId, target });
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
@@ -144,7 +145,7 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
         userData={userData}
         onOpenLearning={() => {
           setActiveSection('courses');
-          setOpenCourseLayer('comprehensive');
+          setOpenCourseLayer({ id: 'comprehensive', target: null });
           window.scrollTo({ top: 0, behavior: 'instant' });
         }}
       />
@@ -233,18 +234,23 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
       ) : areNotificationsOpen ? (
         <NotificationsSection />
       ) : openCourseLayer ? (
-        <div className="dashboard__section dashboard-layer-reveal" key={openCourseLayer}>
-          {openCourseLayer === 'micro' ? (
+        <div
+          className="dashboard__section dashboard-layer-reveal"
+          key={`course-${openCourseLayer.id}-${openCourseLayer.target?.subject ?? ''}-${openCourseLayer.target?.unitId ?? ''}`}
+        >
+          {openCourseLayer.id === 'micro' ? (
             <MicroCourseLayer
               onBack={() => setOpenCourseLayer(null)}
-              onOpenComprehensive={() => setOpenCourseLayer('comprehensive')}
+              onOpenComprehensive={() => setOpenCourseLayer({ id: 'comprehensive', target: null })}
+              initialSubject={openCourseLayer.target?.subject}
             />
-          ) : openCourseLayer === 'reference' ? (
+          ) : openCourseLayer.id === 'reference' ? (
             <ReferenceLayer onBack={() => setOpenCourseLayer(null)} />
           ) : (
             <ComprehensiveCourseLayer
               userId={userData?.id ?? userData?.phone ?? 'guest'}
               onBack={() => setOpenCourseLayer(null)}
+              deepLink={openCourseLayer.target}
             />
           )}
         </div>

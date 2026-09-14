@@ -6,13 +6,24 @@ import UnitPage from './UnitPage';
 import { LearningStatePanel } from './LearningPrimitives';
 import './learning.css';
 
-export default function AnatomyLearningLayer({ onBack, userId = 'local-user' }) {
+/* initialRoute فقط هنگام ورود از لینک عمیق (کارت‌های «کار امروز» صفحه دوره‌ها) مقدار دارد */
+function normalizeRoute(route) {
+  if (route?.name === 'unit' && route.moduleId && route.unitId) {
+    return { name: 'unit', moduleId: route.moduleId, unitId: route.unitId, stepId: route.stepId };
+  }
+  if (route?.name === 'module' && route.moduleId) {
+    return { name: 'module', moduleId: route.moduleId };
+  }
+  return { name: 'overview' };
+}
+
+export default function AnatomyLearningLayer({ onBack, userId = 'local-user', initialRoute = null }) {
   const [course, setCourse] = useState(null);
   const [progressState, setProgressState] = useState(null);
   const [loadState, setLoadState] = useState('loading');
   const [error, setError] = useState('');
   const [requestVersion, setRequestVersion] = useState(0);
-  const [route, setRoute] = useState({ name: 'overview' });
+  const [route, setRoute] = useState(() => normalizeRoute(initialRoute));
 
   useEffect(() => {
     const controller = new AbortController();

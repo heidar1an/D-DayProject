@@ -19,7 +19,9 @@ import immunologyImg from '../../../../images/courses/immono.webp';
 const FA_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
 const toFa = (value) => String(value).replace(/\d/g, (digit) => FA_DIGITS[Number(digit)]);
 
-const SUBJECTS = [
+/* SUBJECTS در صفحه «دوره‌ها» هم برای کارت‌های «کار امروز» استفاده می‌شود تا تصویر،
+   رنگ و پیشرفت کارت‌ها با خود درسنامه یکی بماند. */
+export const SUBJECTS = [
   { id: 'anatomy', title: 'آناتومی', image: anatomyImg, accent: '#5b8cc7', progress: 35, chapters: 12, lessons: 24, tests: 940 },
   { id: 'physiology', title: 'فیزیولوژی', image: physiologyImg, accent: '#ab8e7c', progress: 25, chapters: 10, lessons: 18, tests: 760 },
   { id: 'biochemistry', title: 'بیوشیمی', image: biochemistryImg, accent: '#77b787', progress: 40, chapters: 8, lessons: 14, tests: 620 },
@@ -100,13 +102,23 @@ function getSubjectStatus(subject) {
   return 'fresh';
 }
 
-function SubjectCard({ subject, index, onOpen }) {
+/* لینک عمیق آناتومی: {subject, moduleId, unitId?, stepId?} به مسیر لایه یادگیری تبدیل می‌شود */
+function deepLinkToAnatomyRoute(deepLink) {
+  if (deepLink?.subject !== 'anatomy' || !deepLink.moduleId) return null;
+  if (deepLink.unitId) {
+    return { name: 'unit', moduleId: deepLink.moduleId, unitId: deepLink.unitId, stepId: deepLink.stepId };
+  }
+  return { name: 'module', moduleId: deepLink.moduleId };
+}
+
+function SubjectCard({ subject, index, onOpen, spot = false, registerRef }) {
   const status = getSubjectStatus(subject);
 
   return (
     <button
       type="button"
-      className={`dars-card dars-card--${status}`}
+      ref={(el) => registerRef?.(subject.id, el)}
+      className={`dars-card dars-card--${status}${spot ? ' dars-card--spot' : ''}`}
       onClick={() => onOpen?.(subject.id)}
       style={{
         '--accent': subject.accent,
@@ -159,10 +171,18 @@ function SubjectCard({ subject, index, onOpen }) {
   );
 }
 
-export default function ComprehensiveCourseLayer({ onBack, userId = 'local-user' }) {
+export default function ComprehensiveCourseLayer({ onBack, userId = 'local-user', deepLink = null }) {
   const [filter, setFilter] = useState('all');
-  const [openSubject, setOpenSubject] = useState(null);
+  const [anatomyRoute, setAnatomyRoute] = useState(() => deepLinkToAnatomyRoute(deepLink));
+  const [openSubject, setOpenSubject] = useState(() => (deepLink?.subject === 'anatomy' ? 'anatomy' : null));
+  const [spotId, setSpotId] = useState(null);
   const gridRef = useRef(null);
+  const cardRefs = useRef(new Map());
+
+  const registerCard = (id, el) => {
+    if (el) cardRefs.current.set(id, el);
+    else cardRefs.current.delete(id);
+  };
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -171,6 +191,22 @@ export default function ComprehensiveCourseLayer({ onBack, userId = 'local-user'
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onBack, openSubject]);
+
+  /* ورود از کارت‌های «کار امروز» برای درس‌های غیرآناتومی: کارت همان درس
+     وسط صفحه می‌آید و چند ثانیه با رنگ خودش هایلایت می‌شود */
+  useEffect(() => {
+    if (!deepLink?.subject || deepLink.subject === 'anatomy') return undefined;
+    const raf = requestAnimationFrame(() => {
+      cardRefs.current.get(deepLink.subject)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+    const showTimer = setTimeout(() => setSpotId(deepLink.subject), 400);
+    const hideTimer = setTimeout(() => setSpotId(null), 3400);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(showTimer);
+      clearTimeout(hideTimer);
+    };
+  }, [deepLink]);
 
   /* نقطه نور کارت‌ها با حرکت اشاره‌گر جابه‌جا می‌شود تا حس زنده بودن بدهد */
   const handleGridPointerMove = (event) => {
@@ -204,7 +240,13 @@ export default function ComprehensiveCourseLayer({ onBack, userId = 'local-user'
   const startedCount = SUBJECTS.filter((subject) => subject.progress > 0).length;
 
   if (openSubject === 'anatomy') {
-    return <AnatomyLearningLayer userId={userId} onBack={() => setOpenSubject(null)} />;
+    return (
+      <AnatomyLearningLayer
+        userId={userId}
+        onBack={() => setOpenSubject(null)}
+        initialRoute={anatomyRoute ?? undefined}
+      />
+    );
   }
 
   return (
@@ -292,7 +334,13 @@ export default function ComprehensiveCourseLayer({ onBack, userId = 'local-user'
               key={subject.id}
               subject={subject}
               index={index}
-              onOpen={(subjectId) => subjectId === 'anatomy' && setOpenSubject(subjectId)}
+              spot={spotId === subject.id}
+              registerRef={registerCard}
+              onOpen={(subjectId) => {
+                if (subjectId !== 'anatomy') return;
+                setAnatomyRoute(null);
+                setOpenSubject(subjectId);
+              }}
             />
           ))}
         </div>
