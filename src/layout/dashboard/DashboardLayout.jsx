@@ -241,7 +241,12 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
           {openCourseLayer.id === 'micro' ? (
             <MicroCourseLayer
               onBack={() => setOpenCourseLayer(null)}
-              onOpenComprehensive={() => setOpenCourseLayer({ id: 'comprehensive', target: null })}
+              onOpenComprehensive={(subjectId) =>
+                setOpenCourseLayer({
+                  id: 'comprehensive',
+                  target: subjectId ? { subject: subjectId } : null,
+                })
+              }
               initialSubject={openCourseLayer.target?.subject}
             />
           ) : openCourseLayer.id === 'reference' ? (

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import './microCourse.css';
 
 const FA_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
@@ -145,12 +145,6 @@ const FILTERS = [
   { id: 'new', label: 'شروع‌نشده' },
 ];
 
-const NOTE_TYPES = {
-  key: 'نکتهٔ کلیدی',
-  idea: 'یادسپاری',
-  warn: 'خطای رایج',
-};
-
 export function NoteIcon({ type }) {
   const common = {
     viewBox: '0 0 24 24',
@@ -184,147 +178,45 @@ export function NoteIcon({ type }) {
   );
 }
 
-/* شمارندهٔ عددی زنده برای آمار هیرو */
-function useCountUp(target, { duration = 1100, delay = 250 } = {}) {
-  const [value, setValue] = useState(0);
-  useEffect(() => {
-    let raf;
-    let start;
-    const tick = (now) => {
-      if (start === undefined) start = now;
-      const t = Math.min(1, (now - start) / duration);
-      const eased = 1 - Math.pow(1 - t, 3);
-      setValue(Math.round(target * eased));
-      if (t < 1) raf = requestAnimationFrame(tick);
-    };
-    const timer = setTimeout(() => {
-      raf = requestAnimationFrame(tick);
-    }, delay);
-    return () => {
-      clearTimeout(timer);
-      cancelAnimationFrame(raf);
-    };
-  }, [target, duration, delay]);
-  return value;
-}
-
-function SubjectRow({ subject, index, isOpen, isReviewed, onToggleHead, onToggleReview, registerRow }) {
-  const status = subject.progress >= 100 || isReviewed ? 'read' : subject.progress > 0 ? 'partial' : 'new';
+/* کارت مربعی هر درس: کلیک یعنی ورود به لایهٔ همان درس در درسنامه جامع */
+function SubjectRow({ subject, onOpenSubject }) {
   const circumference = 2 * Math.PI * 15.5;
 
   return (
-    <div
-      className={`micr-row ${isOpen ? 'is-open' : ''}`}
-      ref={(el) => registerRow(subject.id, el)}
+    <button
+      type="button"
+      className="micr-row"
       style={{ '--accent': subject.accent }}
+      onClick={() => onOpenSubject(subject.id)}
+      title={`ورود به ${subject.title}`}
     >
-      <button
-        type="button"
-        className="micr-row__head"
-        aria-expanded={isOpen}
-        onClick={onToggleHead}
-      >
-        <span className="micr-row__index">{toFa(String(index + 1).padStart(2, '0'))}</span>
-
-        <span className="micr-row__idbox">
-          <span className="micr-row__title">{subject.title}</span>
-          <span className="micr-row__meta">
-            {toFa(subject.minutes)} دقیقه · {toFa(subject.notes.length)} نکته
-            {isReviewed && subject.progress < 100 ? ' · مرور شد' : ''}
-          </span>
-        </span>
-
-        {(status === 'read' || isReviewed) && (
-          <span className="micr-row__readmark">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="m5 12.5 4.5 4.5L19 7.5" />
-            </svg>
-          </span>
-        )}
-
-        <span className="micr-row__gauge">
-          <svg className="micr-row__ring" viewBox="0 0 36 36" style={{ '--off': `${circumference * (1 - subject.progress / 100)}` }}>
-            <circle className="micr-row__ring-track" cx="18" cy="18" r="15.5" />
-            <circle
-              className="micr-row__ring-fill"
-              cx="18"
-              cy="18"
-              r="15.5"
-              strokeDasharray={`${circumference} ${circumference}`}
-            />
-          </svg>
-          <span className="micr-row__percent">{toFa(subject.progress)}٪</span>
-        </span>
-
-        <svg className="micr-row__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <path d="m6 9 6 6 6-6" />
+      <span className="micr-row__gauge">
+        <svg className="micr-row__ring" viewBox="0 0 36 36" style={{ '--off': `${circumference * (1 - subject.progress / 100)}` }}>
+          <circle className="micr-row__ring-track" cx="18" cy="18" r="15.5" />
+          <circle
+            className="micr-row__ring-fill"
+            cx="18"
+            cy="18"
+            r="15.5"
+            strokeDasharray={`${circumference} ${circumference}`}
+          />
         </svg>
-      </button>
+        <span className="micr-row__percent">{toFa(subject.progress)}٪</span>
+      </span>
 
-      <div className="micr-row__panel">
-        <div className="micr-row__panel-inner">
-          {isOpen && (
-            <div className="micr-row__panel-body">
-              <div className="micr-notes">
-                {subject.notes.map((note, noteIndex) => (
-                  <article className="micr-note" key={noteIndex} style={{ '--i': noteIndex }}>
-                    <header className="micr-note__head">
-                      <i className={`micr-note__icon micr-note__icon--${note.type}`}>
-                        <NoteIcon type={note.type} />
-                      </i>
-                      <span className="micr-note__type">{NOTE_TYPES[note.type]}</span>
-                    </header>
-                    <p className="micr-note__text">{note.text}</p>
-                  </article>
-                ))}
-              </div>
-              <footer className="micr-row__foot">
-                <span className="micr-row__time">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <circle cx="12" cy="12" r="9" />
-                    <path d="M12 7v5l3 2" />
-                  </svg>
-                  زمان مرور: {toFa(subject.minutes)} دقیقه
-                </span>
-                {onToggleReview && (
-                  <button
-                    type="button"
-                    className={`micr-done ${isReviewed ? 'is-active' : ''}`}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      onToggleReview(subject.id);
-                    }}
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <path d="m5 12.5 4.5 4.5L19 7.5" />
-                    </svg>
-                    {isReviewed ? 'مرور شد' : 'خواندم'}
-                  </button>
-                )}
-              </footer>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+      <span className="micr-row__idbox">
+        <span className="micr-row__title">{subject.title}</span>
+        <span className="micr-row__meta">
+          {toFa(subject.minutes)} دقیقه · {toFa(subject.notes.length)} نکته
+        </span>
+      </span>
+    </button>
   );
 }
 
 export default function MicroCourseLayer({ onBack, onOpenComprehensive, initialSubject = null }) {
-  const [openId, setOpenId] = useState(
-    SUBJECTS.some((subject) => subject.id === initialSubject) ? initialSubject : 'anatomy',
-  );
   const [filter, setFilter] = useState('all');
   const [query, setQuery] = useState('');
-  const [reviewed, setReviewed] = useState(() => new Set());
-  const [tipIndex, setTipIndex] = useState(0);
-  const tipPausedRef = useRef(false);
-  const rowRefs = useRef(new Map());
-
-  const registerRow = (id, el) => {
-    if (el) rowRefs.current.set(id, el);
-    else rowRefs.current.delete(id);
-  };
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -334,42 +226,8 @@ export default function MicroCourseLayer({ onBack, onOpenComprehensive, initialS
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onBack]);
 
-  /* ورود از کارت‌های «سه سوته» صفحه دوره‌ها: همان درس باز و وسط صفحه می‌آید */
-  useEffect(() => {
-    if (!initialSubject || !SUBJECTS.some((subject) => subject.id === initialSubject)) return undefined;
-    const raf = requestAnimationFrame(() => {
-      rowRefs.current.get(initialSubject)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    });
-    return () => cancelAnimationFrame(raf);
-  }, [initialSubject]);
-
-  /* «نکتهٔ امروز» هر چند ثانیه خودش عوض می‌شود؛ هاور موقتاً نگهش می‌دارد */
-  const tips = useMemo(
-    () =>
-      SUBJECTS.flatMap((subject) =>
-        subject.notes.map((note) => ({ ...note, subject: subject.title, accent: subject.accent })),
-      ),
-    [],
-  );
-
-  useEffect(() => {
-    const id = setInterval(() => {
-      if (!tipPausedRef.current) setTipIndex((i) => (i + 1) % tips.length);
-    }, 5200);
-    return () => clearInterval(id);
-  }, [tips.length]);
-
-  const handleToggleReview = (id) => {
-    setReviewed((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
-
   const getStatus = (subject) => {
-    if (subject.progress >= 100 || reviewed.has(subject.id)) return 'read';
+    if (subject.progress >= 100) return 'read';
     if (subject.progress > 0) return 'partial';
     return 'new';
   };
@@ -383,7 +241,7 @@ export default function MicroCourseLayer({ onBack, onOpenComprehensive, initialS
         subject.notes.some((note) => note.text.includes(q)),
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter, query, reviewed]);
+  }, [filter, query]);
 
   const filterCounts = useMemo(
     () =>
@@ -394,30 +252,13 @@ export default function MicroCourseLayer({ onBack, onOpenComprehensive, initialS
             : SUBJECTS.filter((subject) => getStatus(subject) === item.id).length;
         return counts;
       }, {}),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [reviewed],
+    [],
   );
 
-  const overallProgress = Math.round(
-    SUBJECTS.reduce((total, subject) => total + subject.progress, 0) / SUBJECTS.length,
-  );
-  const totalMinutes = SUBJECTS.reduce((total, subject) => total + subject.minutes, 0);
-  const totalNotes = SUBJECTS.reduce((total, subject) => total + subject.notes.length, 0);
-
-  const subjectsStat = useCountUp(SUBJECTS.length);
-  const notesStat = useCountUp(totalNotes);
-  const minutesStat = useCountUp(totalMinutes);
-  const progressStat = useCountUp(overallProgress, { duration: 1400, delay: 350 });
-
-  const handleChainClick = (id) => {
-    setOpenId(id);
-    requestAnimationFrame(() => {
-      rowRefs.current.get(id)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    });
+  /* ورود به لایهٔ درسنامه جامع؛ اگر از کارت «سه سوته» با درس مشخص آمده‌ایم، همان درس باز شود */
+  const openSubjectLayer = (subjectId) => {
+    onOpenComprehensive?.(subjectId ?? initialSubject ?? null);
   };
-
-  const openSubject = SUBJECTS.find((subject) => subject.id === openId);
-  const tip = tips[tipIndex];
 
   return (
     <section className="micr-layer" dir="rtl" aria-label="میکرو درسنامه علوم پایه">
@@ -444,79 +285,7 @@ export default function MicroCourseLayer({ onBack, onOpenComprehensive, initialS
               خلاصه‌های جمع‌وجور برای یک نگاه؛ مخصوص شب قبل از آزمون و مرورهای روزانه.
             </p>
           </div>
-
-          <div className="micr-stats">
-            <span className="micr-stats__orbit micr-stats__orbit--a" aria-hidden="true" />
-            <span className="micr-stats__orbit micr-stats__orbit--b" aria-hidden="true" />
-            <div className="micr-stats__row">
-              <strong>{toFa(subjectsStat)}</strong>
-              <span>درس</span>
-            </div>
-            <div className="micr-stats__row">
-              <strong>{toFa(notesStat)}</strong>
-              <span>نکتهٔ کلیدی</span>
-            </div>
-            <div className="micr-stats__row">
-              <strong>{toFa(minutesStat)}</strong>
-              <span>دقیقه مرور کل</span>
-            </div>
-          </div>
         </header>
-
-        <div className="micr-tip dash-stagger" key={tipIndex % 2 === 0 ? 'tip-a' : 'tip-b'}>
-          <button
-            type="button"
-            className="micr-tip__card"
-            onMouseEnter={() => {
-              tipPausedRef.current = true;
-            }}
-            onMouseLeave={() => {
-              tipPausedRef.current = false;
-            }}
-          >
-            <span className="micr-tip__badge">
-              <i aria-hidden="true" />
-              نکتهٔ امروز
-            </span>
-            <span className="micr-tip__content" style={{ '--accent': tip.accent }}>
-              <span className="micr-tip__subject">{tip.subject}</span>
-              <span className="micr-tip__text">{tip.text}</span>
-            </span>
-            <span className="micr-tip__nav" aria-hidden="true">
-              <span className="micr-tip__counter">
-                {toFa(tipIndex + 1)} / {toFa(tips.length)}
-              </span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M19 12H5m6-6-6 6 6 6" />
-              </svg>
-            </span>
-          </button>
-        </div>
-
-        <div className="micr-chain dash-stagger">
-          <div className="micr-chain__meta">
-            <div>
-              <strong className="micr-chain__value">{toFa(progressStat)}٪</strong>
-              <span className="micr-chain__caption">پیشرفت کلی خلاصه‌خوانی</span>
-            </div>
-            <span className="micr-chain__hint">روی هر قطعه بزن تا همان درس باز شود</span>
-          </div>
-          <div className="micr-chain__strip" role="group" aria-label="پیشرفت هر درس">
-            {SUBJECTS.map((subject, index) => (
-              <button
-                key={subject.id}
-                type="button"
-                className="micr-chain__seg"
-                style={{ '--accent': subject.accent, '--i': index }}
-                onClick={() => handleChainClick(subject.id)}
-                title={`${subject.title} — ${toFa(subject.progress)}٪`}
-                aria-label={`${subject.title}، پیشرفت ${toFa(subject.progress)} درصد`}
-              >
-                <span className="micr-chain__seg-fill" style={{ '--p': `${subject.progress}%` }} />
-              </button>
-            ))}
-          </div>
-        </div>
 
         <div className="micr-toolbar dash-stagger">
           <div className="micr-search">
@@ -563,16 +332,11 @@ export default function MicroCourseLayer({ onBack, onOpenComprehensive, initialS
               <p>عبارت دیگری را جستجو کن یا فیلتر را عوض کن.</p>
             </div>
           ) : (
-            visibleSubjects.map((subject, index) => (
+            visibleSubjects.map((subject) => (
               <SubjectRow
                 key={subject.id}
                 subject={subject}
-                index={index}
-                isOpen={openId === subject.id}
-                isReviewed={reviewed.has(subject.id)}
-                onToggleHead={() => setOpenId((current) => (current === subject.id ? null : subject.id))}
-                onToggleReview={handleToggleReview}
-                registerRow={registerRow}
+                onOpenSubject={openSubjectLayer}
               />
             ))
           )}
@@ -581,7 +345,7 @@ export default function MicroCourseLayer({ onBack, onOpenComprehensive, initialS
         <section className="micr-cta dash-stagger">
           <h2>میکرو فقط شروع ماجراست</h2>
           <p>خلاصه‌ها برای مرورند؛ عمق کامل هر درس با درسنامه جامع تپش جلوتر منتظرت است.</p>
-          <button type="button" onClick={onOpenComprehensive}>
+          <button type="button" onClick={() => openSubjectLayer(null)}>
             رفتن به درسنامه جامع
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M19 12H5m6-6-6 6 6 6" />

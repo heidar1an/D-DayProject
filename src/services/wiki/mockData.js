@@ -3271,7 +3271,7 @@ text:
 ],
 },
     /* ─── ۴۹. کالبدشناسی معده، بستر معده و انحناها ─── */
-  ,{
+  {
     slug: 'stomach-anatomy-and-stomach-bed',
     title: 'کالبدشناسی معده، بستر معده و لیگامان‌ها (Stomach Anatomy)',
     englishTitle: 'Stomach Anatomy, Gastric Bed Structures and Ligamentous Attachments',
@@ -4643,7 +4643,7 @@ text:
 ],
 },
     /* ─── ۳۷. کمپلکس دئودنوم، سر پانکراس و آمپول واتر ─── */
-  ,{
+  {
     slug: 'duodenum-pancreas-and-ampulla-of-vater',
     title: 'کمپلکس دئودنوم، پانکراس و آمپول واتر (Duodeno-Pancreatic Complex)',
     englishTitle: 'Duodenum, Pancreas Anatomy, Ampulla of Vater and Sphincter of Oddi',
