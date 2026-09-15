@@ -26,6 +26,11 @@ import AnalyticsHome from './AnalyticsHome';
 import { SubjectView, TopicView, QuestionAnalyticsModal } from './SubjectDrilldown';
 import { ExamListView, ExamDetailView } from './ExamsDrilldown';
 import { ErrorView, TimeView, ConfidenceView, UnansweredView, DifficultyView } from './BehaviorViews';
+import { LAYER_IDS, useLayerRoute } from '../dashboardRoute';
+
+/* نمای آغازین لایه؛ فیلترها هم روی مسیر داشبورد می‌نشینند تا رفرش همان تحلیل را برگرداند */
+const DEFAULT_FILTERS = normalizeFilters({});
+const ANALYTICS_VIEW = { name: 'home', payload: null, filters: null };
 
 const VIEW_LABELS = {
   home: 'تحلیل عملکرد',
@@ -45,8 +50,8 @@ const BEHAVIOR_VIEWS = ['errors', 'time', 'confidence', 'unanswered', 'difficult
 
 export default function AnalyticsLayer({ userData, onBack }) {
   const userId = userData?.id ?? userData?.phone ?? 'guest';
-  const [view, setView] = useState({ name: 'home', payload: null });
-  const [filters, setFilters] = useState(() => normalizeFilters({}));
+  const [view, , patchView] = useLayerRoute(LAYER_IDS.analytics, ANALYTICS_VIEW);
+  const filters = view.filters ?? DEFAULT_FILTERS;
   const [bundle, setBundle] = useState(null);
   const [questionsData, setQuestionsData] = useState(null); /* لود تنبل — فقط برای درس/سؤال‌ها */
   const [examsData, setExamsData] = useState(null);
@@ -70,10 +75,10 @@ export default function AnalyticsLayer({ userData, onBack }) {
   }, [userId, filters]);
 
   const go = useCallback((name, payload = null) => {
-    setView({ name, payload });
+    patchView({ name, payload });
     setToast(null);
     scrollToTop();
-  }, []);
+  }, [patchView]);
 
   /* اطمینان از وجود دادهٔ تنبل مورد نیاز نما */
   useEffect(() => {
@@ -117,7 +122,7 @@ export default function AnalyticsLayer({ userData, onBack }) {
   }, [view.name, view.payload, userId]);
 
   const updateFilter = (patch) => {
-    setFilters((current) => normalizeFilters({ ...current, ...patch }));
+    patchView({ filters: normalizeFilters({ ...filters, ...patch }) });
   };
 
   const handleBack = () => {

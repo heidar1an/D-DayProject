@@ -4,33 +4,16 @@
  * تا بعداً اتصال به Backend بدون تغییر UI ممکن باشد. (مستند کامل: src/layout/dashboard/league/README.md)
  */
 
-/* ── آواتار‌های ساخته‌شده برای بازیکنان Mock (دترمینیستیکی بر اساس seed) ── */
-const AVATAR_POOL = {
-  skins: ['t1', 't2', 't3', 't4', 't5', 't6'],
-  hairColors: ['black', 'brown-dark', 'brown', 'honey', 'ginger', 'burgundy', 'blond', 'blue'],
-  bgs: ['cream', 'peach', 'rose', 'mint', 'sky', 'lilac', 'sand', 'gray'],
-  femaleHair: ['long-wavy', 'bob', 'ponytail', 'bun', 'braids', 'curly-long'],
-  maleHair: ['short', 'buzz', 'sidepart', 'spiky', 'curly', 'shoulder'],
-  clothColors: ['white', 'cream', 'sky', 'blue', 'navy', 'mint', 'green', 'forest', 'yellow', 'orange', 'rose', 'gray'],
-};
+/* ── آواتار بازیکنان Mock — شناسهٔ دترمینیستیکی از کاتالوگ تصویری آواتار (۰۱ تا ۳۵) ── */
+const AVATAR_COUNT = 35;
 
 export function avatarForSeed(seed) {
   const rnd = (n) => {
     const x = Math.sin(seed * 9973 + n * 127.1) * 10000;
     return x - Math.floor(x);
   };
-  const gender = rnd(0) > 0.45 ? 'male' : 'female';
-  const hairPool = gender === 'male' ? AVATAR_POOL.maleHair : AVATAR_POOL.femaleHair;
-  const pick = (list, n) => list[Math.floor(rnd(n) * list.length)];
 
-  return {
-    gender,
-    skin: pick(AVATAR_POOL.skins, 1),
-    hair: pick(hairPool, 2),
-    hairColor: pick(AVATAR_POOL.hairColors, 3),
-    bg: pick(AVATAR_POOL.bgs, 4),
-    clothColor: pick(AVATAR_POOL.clothColors, 5),
-  };
+  return String(Math.floor(rnd(0) * AVATAR_COUNT) + 1).padStart(2, '0');
 }
 
 /* ── Entity: League (سطوح لیگ) — رنگ‌ها از پالت تپش اقتباس شده‌اند ── */

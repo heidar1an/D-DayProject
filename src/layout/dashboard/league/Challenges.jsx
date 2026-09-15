@@ -157,7 +157,7 @@ function DuelCard({ duel, me }) {
 
       <div className="flex items-center justify-between gap-3">
         <div className="flex flex-col items-center gap-2 text-center">
-          <UserAvatar config={me?.avatarConfig} size={52} />
+          <UserAvatar avatar={me?.avatar} size={52} />
           <strong className="text-sm">تو</strong>
         </div>
 
@@ -171,7 +171,7 @@ function DuelCard({ duel, me }) {
         </div>
 
         <div className="flex flex-col items-center gap-2 text-center">
-          <UserAvatar config={duel.opponent.avatar} size={52} />
+          <UserAvatar avatar={duel.opponent.avatar} size={52} />
           <strong className="text-sm">{duel.opponent.name}</strong>
         </div>
       </div>

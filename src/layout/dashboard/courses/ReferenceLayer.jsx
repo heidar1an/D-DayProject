@@ -4,6 +4,10 @@ import './referenceHome.css';
 import ReferenceReader from './reference/reader/ReferenceReader';
 import Icon from './reference/reader/icons';
 import * as api from '../../../services/referencesApi';
+import { LAYER_IDS, useLayerRoute } from '../dashboardRoute';
+
+/* نمای آغازین لایهٔ مراجع: قفسهٔ کتاب‌ها */
+const REFERENCE_VIEW = { mode: 'shelf' };
 
 const FA_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
 const toFa = (value) => String(value).replace(/\d/g, (digit) => FA_DIGITS[Number(digit)]);
@@ -339,8 +343,9 @@ function BookHomeView({ book, onBack, onOpenChapter, onContinue, refreshKey }) {
 
 /* ── لایه اصلی: قفسه → خانه مرجع → Reader ── */
 export default function ReferenceLayer({ onBack }) {
-  /* view: shelf | home:bookId | reader:{bookId, position} */
-  const [view, setView] = useState({ mode: 'shelf' });
+  /* view: shelf | home:bookId | reader:{bookId, position}
+     روی مسیر داشبورد می‌نشیند تا Back/Forward و رفرش همان صفحهٔ کتاب را نگه دارند. */
+  const [view, setView] = useLayerRoute(LAYER_IDS.reference, REFERENCE_VIEW);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {

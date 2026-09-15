@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import './internationalCourses.css';
+import { LAYER_IDS, useLayerRoute } from '../dashboardRoute';
 
 const FA_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
 const toFa = (value) => String(value).replace(/\d/g, (digit) => FA_DIGITS[Number(digit)]);
@@ -281,14 +282,20 @@ function DetailView({ course, onBack, onExit }) {
   );
 }
 
-export default function InternationalCoursesLayer({ onBack, initialCourseId = null }) {
+export default function InternationalCoursesLayer({ onBack }) {
+  /* صفحهٔ لایه (کاتالوگ ↔ جزئیات دوره) روی مسیر داشبورد می‌نشیند؛ متن کادر جست‌وجو محلی می‌ماند */
+  const [view, , patchView] = useLayerRoute(LAYER_IDS.intlCourses, INTL_COURSES_VIEW, {
+    screenOf: (current) => (current?.courseId ? 'detail' : 'catalog'),
+  });
   const [query, setQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState('all');
   /* لینک عمیق از «دوره‌های من»: مستقیم وارد جزئیات همان دوره می‌شود */
-  const [selectedCourse, setSelectedCourse] = useState(
-    () => COURSES.find((course) => course.id === initialCourseId) ?? null,
-  );
-  const [showFeaturedOnly, setShowFeaturedOnly] = useState(false);
+  const courseId = view.courseId ?? view.deep?.courseId ?? null;
+  const selectedCourse = courseId ? COURSES.find((course) => course.id === courseId) ?? null : null;
+  const activeFilter = view.filter ?? 'all';
+  const showFeaturedOnly = view.featured ?? false;
+  const setActiveFilter = (filter) => patchView({ filter });
+  const setShowFeaturedOnly = () => patchView({ featured: !showFeaturedOnly });
+  const setSelectedCourse = (course) => patchView({ courseId: course?.id ?? null });
 
   const filteredCourses = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase('fa');
@@ -325,7 +332,7 @@ export default function InternationalCoursesLayer({ onBack, initialCourseId = nu
           <p>ویدیوها و دوره‌های آموزشی منتخب از دانشگاه‌ها و رسانه‌های معتبر جهان؛ یک‌جا، دسته‌بندی‌شده و آماده برای یادگیری عمیق.</p>
           <div className="intl-courses-hero__actions">
             <button type="button" className="intl-courses-primary-button" onClick={() => document.getElementById('intl-course-catalog')?.scrollIntoView({ behavior: 'smooth' })}>کشف دوره‌ها <Icon name="arrow" className="h-4 w-4" /></button>
-            <button type="button" className="intl-courses-hero__text-button" onClick={() => setShowFeaturedOnly((value) => !value)}><Icon name="spark" className="h-4 w-4" /> {showFeaturedOnly ? 'نمایش همه دوره‌ها' : 'منتخب سردبیر'}</button>
+            <button type="button" className="intl-courses-hero__text-button" onClick={() => setShowFeaturedOnly()}><Icon name="spark" className="h-4 w-4" /> {showFeaturedOnly ? 'نمایش همه دوره‌ها' : 'منتخب سردبیر'}</button>
           </div>
         </div>
         <div className="intl-courses-hero__visual" aria-hidden="true">

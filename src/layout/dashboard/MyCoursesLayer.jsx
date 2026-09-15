@@ -12,7 +12,7 @@
  *  ۴) کارت‌های مربعی دروسِ تمام‌شده (در تهش)
  */
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import {
   buildMyCourses,
   courseStatus,
@@ -21,6 +21,10 @@ import {
   toFa,
 } from './myCoursesCatalog';
 import MyCoursesTile, { CourseKindLegend, KindIcon } from './MyCoursesTile';
+import { LAYER_IDS, useLayerRoute } from './dashboardRoute';
+
+/* فیلتر نوع دوره هم روی مسیر داشبورد می‌نشیند تا رفرش همان فهرست را برگرداند */
+const MY_COURSES_VIEW = { kind: 'all' };
 
 function BackIcon() {
   return (
@@ -68,7 +72,9 @@ function KindFilter({ value, onChange, counts, total }) {
 }
 
 export default function MyCoursesLayer({ onBack, onOpenCourse }) {
-  const [activeKind, setActiveKind] = useState('all');
+  const [view, , patchView] = useLayerRoute(LAYER_IDS.myCourses, MY_COURSES_VIEW);
+  const activeKind = view.kind ?? 'all';
+  const setActiveKind = (kind) => patchView({ kind });
 
   /* دروس سینک‌شده با سه بخش: درسنامه جامع، میکرو درسنامه و دوره‌های بین‌الملل */
   const syncedCourses = useMemo(() => buildMyCourses(), []);

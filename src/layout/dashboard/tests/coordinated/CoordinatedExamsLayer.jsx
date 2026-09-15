@@ -21,6 +21,7 @@ import {
   startAttempt,
 } from '../../../../services/coordinatedExams/coordinatedExamService';
 import { Icon, Skeleton } from './coordinatedShared';
+import { LAYER_IDS, useLayerRoute } from '../../dashboardRoute';
 import './coordinated.css';
 import ExamHub from './ExamHub';
 import ExamDetail from './ExamDetail';
@@ -28,10 +29,18 @@ import ExamRoom from './ExamRoom';
 import ExamResult from './ExamResult';
 import ExamReview from './ExamReview';
 
+/* نمای آغازین لایه و نماهای گذرا (دادهٔ زمان‌اجرا در حافظه است، نه در آدرس) */
+const COORDINATED_VIEW = { name: 'home' };
+const COORDINATED_VOLATILE = ['live', 'result', 'review'];
+
 export default function CoordinatedExamsLayer({ userData, onBack }) {
   /* شناسهٔ پایدار کاربر برای فضای دادهٔ آزمون‌ها؛ بعضی سشن‌ها id ندارند */
   const userId = userData?.id ?? userData?.phone;
-  const [view, setView] = useState({ name: 'home' });
+  /* نمای لایه روی مسیر داشبورد می‌نشیند: Back/Forward بین نماها و رفرش در همان نما.
+     محیط آزمون/کارنامه/مرور دادهٔ در حافظه دارند، پس در آدرس نمی‌نشینند. */
+  const [view, setView] = useLayerRoute(LAYER_IDS.coordinated, COORDINATED_VIEW, {
+    volatile: COORDINATED_VOLATILE,
+  });
   const [exams, setExams] = useState(null);
   const [examDetail, setExamDetail] = useState(null);
   const [room, setRoom] = useState(null); // { exam, attempt, questions }
@@ -54,10 +63,13 @@ export default function CoordinatedExamsLayer({ userData, onBack }) {
 
   useEffect(() => refreshExams(), [refreshExams]);
 
-  const go = useCallback((nextView) => {
-    setView(nextView);
-    scrollToTop();
-  }, []);
+  const go = useCallback(
+    (nextView) => {
+      setView(nextView);
+      scrollToTop();
+    },
+    [setView],
+  );
 
   /* ── کشف: باز کردن جزئیات آزمون ── */
   const openExam = async (slug) => {

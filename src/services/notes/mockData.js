@@ -7,11 +7,14 @@
  *   id: string
  *   userId: string            ← مالک یادداشت
  *   title: string
- *   kind: 'text' | 'checklist'
+ *   kind: 'text' | 'checklist' | 'qa' | 'table'
  *   body: string              ← برای kind === 'text' (چندخطی ساده)
- *   items: [{ id, text, done }]  ← برای kind === 'checklist'
+ *   items: [{ id, text, done }]              ← برای kind === 'checklist'
+ *   pairs: [{ id, question, answer }]        ← برای kind === 'qa' (بازیابی فعال)
+ *   table: { columns: [{ id, label }], rows: [{ id, cells: { [columnId]: text } }] }
+ *                                            ← برای kind === 'table' (جدول مقایسه)
  *   subjectId: string         ← یکی از SUBJECTS (همان لیست ویکی + «عمومی»)
- *   tags: string[]
+ *   tags: string[]            ← تگ‌های آزاد؛ در UI زیر عنوان دسته‌شان (TAG_GROUPS) می‌آیند
  *   color: string             ← یکی از NOTE_COLORS؛ رنگ نوار کارت
  *   pinned: boolean           ← گلچین؛ بالای فهرست می‌ماند
  *   source: { sourceType, title } | null
@@ -19,7 +22,18 @@
  *       ← پایهٔ «ساخت یادداشت از درسنامه/تست/مقاله» در نسخه‌های بعدی
  *   createdAt / updatedAt: ISO string
  * }
+ *
+ * فقط فیلد مربوط به kind خودش پر می‌شود؛ بقیه خالی می‌مانند (sanitizeDraft در سرویس).
  */
+
+/* چهار حالت یادداشت. «پرسش و پاسخ» و «جدول مقایسه» دو حالت حیاتی درس‌خواندن‌اند:
+   اولی بازیابی فعال (Active Recall) و دومی مقایسهٔ سریع چند مورد روی چند معیار. */
+export const NOTE_KINDS = [
+  { id: 'text', label: 'متنی', long: 'یادداشت متنی', icon: 'text', hint: 'نکته، توضیح و خلاصهٔ آزاد' },
+  { id: 'checklist', label: 'چک‌لیست', long: 'چک‌لیست', icon: 'list', hint: 'کارها و مراحل تیک‌خور' },
+  { id: 'qa', label: 'پرسش و پاسخ', long: 'پرسش و پاسخ', icon: 'qa', hint: 'پرسش بنویس و جواب را پنهان نگه دار تا خودت بازیابی کنی' },
+  { id: 'table', label: 'جدول مقایسه', long: 'جدول مقایسه', icon: 'table', hint: 'چند مورد را روی چند معیار کنار هم بچین' },
+];
 
 /* موضوع‌ها — همان لیست ویکی تپش با همان اکسنت‌ها + «عمومی» برای یادداشت‌های فرادرسی */
 export const SUBJECTS = [
@@ -34,6 +48,32 @@ export const SUBJECTS = [
   { id: 'immunology', label: 'ایمونولوژی', accent: '#a690d8' },
   { id: 'general', label: 'عمومی', accent: '#8a8a8a' },
 ];
+
+/* تگ‌های پیشنهادی هر درس — تگ‌ها بی‌صاحب نیستند؛ هر تگ زیر عنوان دستهٔ خودش
+   (همان موضوع‌های SUBJECTS) دسته‌بندی می‌شود تا فهرست تگ‌ها به‌هم‌ریخته نشود. */
+const TAG_MAP = {
+  physiology: ['قلب و عروق', 'تنفس', 'کلیه و مایعات', 'غدد و متابولیسم', 'گوارش و کبد', 'عصب و عضله', 'خون و انعقاد'],
+  anatomy: ['آناتومی تنه', 'سر و گردن', 'اندام‌ها', 'نوروآناتومی', 'تصویرنگاری'],
+  biochemistry: ['متابولیسم', 'آنزیم و کوآنزیم', 'ویتامین‌ها', 'بیولوژی مولکولی', 'هورمون‌ها', 'انرژی'],
+  histology: ['بافت‌های پایه', 'میکروسکوپی', 'رنگ‌آمیزی'],
+  neuroscience: ['مسیرهای عصبی', 'نوروترانسمیتر', 'سیستم حسی', 'سیستم حرکتی'],
+  pathology: ['التهاب و ترمیم', 'نئوپلازی', 'هماتوپاتولوژی', 'آسیب سلولی'],
+  microbiology: ['گرم مثبت', 'گرم منفی', 'آنتی‌بیوتیک‌ها', 'کشت و تشخیص', 'میکروب', 'طبقه‌بندی'],
+  pharmacology: ['مکانیزم دارو', 'عوارض دارویی', 'تداخل دارویی', 'دوز و تجویز', 'داروها'],
+  immunology: ['ایمنی هومورال', 'ایمنی سلولی', 'واکسن‌ها', 'اختلالات ایمنی'],
+  general: ['high-yield', 'علوم پایه', 'آزمون', 'مرور', 'حفظی', 'برنامه', 'جمع‌بندی', 'تحلیل', 'پیشرفت', 'خلاصه‌نویسی', 'ترفند حفظ'],
+};
+
+/* دسته‌های تگ — دقیقاً هم‌رنگ و هم‌نام SUBJECTS تا رنگ درس در کل اکوسیستم یکی بماند */
+export const TAG_GROUPS = SUBJECTS.map((subject) => ({
+  id: subject.id,
+  label: subject.label,
+  accent: subject.accent,
+  tags: TAG_MAP[subject.id] ?? [],
+}));
+
+/* دستهٔ تگ‌های آزاد کاربر (تگی که در هیچ دستهٔ پیش‌فرضی نیست) */
+export const CUSTOM_TAG_GROUP = { id: 'custom', label: 'تگ‌های خودت', accent: '#8a8a8a' };
 
 /* پالت رنگ کارت — از پالت فعلی تپش، بدون رنگ جدید */
 export const NOTE_COLORS = ['#e26d6d', '#5b8cc7', '#77b787', '#e0b45c', '#937fcd', '#c2a48c'];
@@ -64,6 +104,63 @@ export const SEED_NOTES = [
     pinned: true,
     source: { sourceType: 'lesson', title: 'درسنامهٔ جامع فیزیولوژی — قلب و گردش خون' },
     dayOffsets: { created: 12, updated: 2 },
+  },
+  {
+    title: 'پرسش‌های بازیابی — فیزیولوژی قلب',
+    kind: 'qa',
+    body: '',
+    pairs: [
+      {
+        id: 'seed-qa-1',
+        question: 'صد اول (S1) دقیقاً کِی تولید می‌شود؟',
+        answer: 'در آغاز سیستول، با بسته شدن دریچه‌های میترال و تریکوسپید.',
+      },
+      {
+        id: 'seed-qa-2',
+        question: 'چرا S2 در ابتدای دیاستول شنیده می‌شود؟',
+        answer: 'چون در پایان سیستول فشار بطن چپ از فشار آئورت پایین می‌آید و دریچه‌های آئورتی/پولمونر بسته می‌شوند.',
+      },
+      {
+        id: 'seed-qa-3',
+        question: 'بیشترین حجم پرشدگی بطن در کدام فاز است؟',
+        answer: 'فاز پرشدگی سریع دیاستول — بیشترین سهم پر شدن بطن از همین‌جاست، نه از انقباض دهلیزی.',
+      },
+      {
+        id: 'seed-qa-4',
+        question: 'برون‌ده قلبی با چه رابطه‌ای حساب می‌شود؟',
+        answer: 'CO = ضربان قلب × حجم ضربه‌ای (HR × SV) و SV خودش تابع EDV و ESV است.',
+      },
+    ],
+    subjectId: 'physiology',
+    tags: ['مرور', 'high-yield'],
+    color: '#5b8cc7',
+    pinned: true,
+    source: { sourceType: 'lesson', title: 'درسنامهٔ جامع فیزیولوژی — قلب و گردش خون' },
+    dayOffsets: { created: 3, updated: 1 },
+  },
+  {
+    title: 'مقایسهٔ داروهای کاهندهٔ فشار خون',
+    kind: 'table',
+    body: '',
+    table: {
+      columns: [
+        { id: 'seed-tb-c1', label: 'دارو' },
+        { id: 'seed-tb-c2', label: 'مکانیزم' },
+        { id: 'seed-tb-c3', label: 'نکتهٔ آزمونی' },
+      ],
+      rows: [
+        { id: 'seed-tb-r1', cells: { 'seed-tb-c1': 'ACEI', 'seed-tb-c2': 'مهار تبدیل آنژیوتانسین I به II', 'seed-tb-c3': 'سرفهٔ خشک؛ ممنوع در بارداری' } },
+        { id: 'seed-tb-r2', cells: { 'seed-tb-c1': 'ARB', 'seed-tb-c2': 'بلوک گیرندهٔ AT1', 'seed-tb-c3': 'همان اثر ACEI بدون سرفه' } },
+        { id: 'seed-tb-r3', cells: { 'seed-tb-c1': 'بتابلوکر', 'seed-tb-c2': 'کاهش ضربان، قدرت انقباض و ترشح رنین', 'seed-tb-c3': 'هر دو بال (CO و TPR) را کم می‌کند' } },
+        { id: 'seed-tb-r4', cells: { 'seed-tb-c1': 'دیورتیک تیازیدی', 'seed-tb-c2': 'کاهش حجم و در نتیجه CO', 'seed-tb-c3': 'هایپوناترمی و هایپراورسمی' } },
+      ],
+    },
+    subjectId: 'pharmacology',
+    tags: ['داروها', 'آزمون', 'طبقه‌بندی'],
+    color: '#c2a48c',
+    pinned: false,
+    source: { sourceType: 'question', title: 'آزمون‌های هدفمند داروشناسی — دستگاه قلب و عروق' },
+    dayOffsets: { created: 5, updated: 2 },
   },
   {
     title: 'مهارکننده‌های ACE — خلاصهٔ شخصی',

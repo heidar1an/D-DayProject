@@ -5,7 +5,7 @@
  *
  * جریان کاربر: خانه ← انتخاب آزمون ← محیط حل ← ثبت پاسخ ← تحلیل ← مرور/مجموعه/آزمون‌ساز.
  */
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   fetchAttempt,
   fetchExam,
@@ -16,6 +16,7 @@ import {
   startAttempt,
 } from '../../../services/international/internationalService';
 import { Icon, Skeleton, toFa } from './intlShared';
+import { LAYER_IDS, useLayerRoute } from '../dashboardRoute';
 import './international.css';
 import InternationalHome from './InternationalHome';
 import ExamIntro from './ExamIntro';
@@ -38,9 +39,16 @@ function orderQuestionsByAttempt(fetchedQuestions, questionIds) {
   return questionIds.map((id) => byId.get(id)).filter(Boolean);
 }
 
+/* نمای آغازین لایه و نمای گذرا (محیط حل سشن در حافظه دارد و در آدرس نمی‌نشیند) */
+const INT_EXAMS_VIEW = { name: 'home' };
+const INT_EXAMS_VOLATILE = ['lab'];
+
 export default function InternationalExamsLayer({ userData, onBack }) {
   const userId = userData?.id;
-  const [view, setView] = useState({ name: 'home' });
+  /* نمای لایه روی مسیر داشبورد می‌نشیند: Back/Forward بین نماها و رفرش در همان نما */
+  const [view, setView] = useLayerRoute(LAYER_IDS.intlExams, INT_EXAMS_VIEW, {
+    volatile: INT_EXAMS_VOLATILE,
+  });
   const [exams, setExams] = useState(null);
   const [overview, setOverview] = useState(null);
   const [dataVersion, setDataVersion] = useState(0);
@@ -74,8 +82,18 @@ export default function InternationalExamsLayer({ userData, onBack }) {
       scrollToTop();
       if (nextView.name === 'home') setDataVersion((version) => version + 1);
     },
-    [],
+    [setView],
   );
+
+  /* رفرش روی صفحهٔ تحلیل یک Attempt → همان تحلیل از سرویس بازخوانی می‌شود */
+  const restoredRef = useRef(false);
+  useEffect(() => {
+    if (restoredRef.current) return;
+    restoredRef.current = true;
+    if (view.name !== 'result' || !view.attemptId) return;
+    openResult(view.attemptId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /* ── باز کردن صفحهٔ آزمون ── */
   const openExam = async (examId) => {

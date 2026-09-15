@@ -1,10 +1,15 @@
 import { useEffect, useState } from 'react';
 import { ContentService, ProgressService } from '../../../../services/learning';
+import { LAYER_IDS, useLayerRoute } from '../../dashboardRoute';
 import AnatomyOverview from './AnatomyOverview';
 import AnatomyModulePage from './AnatomyModulePage';
 import UnitPage from './UnitPage';
 import { LearningStatePanel } from './LearningPrimitives';
 import './learning.css';
+
+/* مسیر داخلی لایهٔ یادگیری آناتومی داخل همان view لایهٔ درسنامهٔ جامع ذخیره می‌شود (slot)
+   تا رفرش و Back/Forward همان ماژول/واحد را برگردانند. */
+const ANATOMY_HOME = { name: 'overview' };
 
 /* initialRoute فقط هنگام ورود از لینک عمیق (کارت‌های «کار امروز» صفحه دوره‌ها) مقدار دارد */
 function normalizeRoute(route) {
@@ -23,7 +28,11 @@ export default function AnatomyLearningLayer({ onBack, userId = 'local-user', in
   const [loadState, setLoadState] = useState('loading');
   const [error, setError] = useState('');
   const [requestVersion, setRequestVersion] = useState(0);
-  const [route, setRoute] = useState(() => normalizeRoute(initialRoute));
+  const [route, setRoute] = useLayerRoute(
+    LAYER_IDS.comprehensive,
+    initialRoute ? normalizeRoute(initialRoute) : ANATOMY_HOME,
+    { slot: 'anatomy' },
+  );
 
   useEffect(() => {
     const controller = new AbortController();

@@ -4,7 +4,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Skeleton, toFa } from '../league/leagueShared';
-import { subjectAccent, subjectLabel } from '../../../services/notes/notesService';
+import { NOTE_AI_ACTIONS, NOTE_KINDS, runNoteAI, subjectAccent, subjectLabel } from '../../../services/notes/notesService';
 
 export { Skeleton, toFa };
 
@@ -79,6 +79,39 @@ export function Icon({ name, size = 18, className = '', style }) {
         <path d="M5 15V6a2 2 0 0 1 2-2h9" />
       </>
     ),
+    qa: (
+      <>
+        <path d="M4.5 5h15v10.5h-8.2L7.2 19v-3.5H4.5z" />
+        <path d="M10.3 8.6a1.8 1.8 0 1 1 2.5 1.7c-.6.3-.9.7-.9 1.3v.3M11.9 13.6h.01" />
+      </>
+    ),
+    table: (
+      <>
+        <rect x="3.5" y="4.5" width="17" height="15" rx="2.6" />
+        <path d="M3.5 9.4h17M9.4 4.5v15M15 4.5v15" />
+      </>
+    ),
+    wand: (
+      <>
+        <path d="M10.5 4 12 8.5l4.5 1.5L12 11.5 10.5 16 9 11.5 4.5 10 9 8.5z" />
+        <path d="M17.8 14.4l.8 2.3 2.3.8-2.3.8-.8 2.3-.8-2.3-2.3-.8 2.3-.8z" />
+      </>
+    ),
+    folder: <path d="M3.5 6.6h6l2 2.5h9v8.4a1.5 1.5 0 0 1-1.5 1.5h-14a1.5 1.5 0 0 1-1.5-1.5z" />,
+    chevron: <path d="m8.5 10 3.5 3.5 3.5-3.5" />,
+    eye: (
+      <>
+        <path d="M2.9 12S6 6.6 12 6.6 21.1 12 21.1 12 18 17.4 12 17.4 2.9 12 2.9 12z" />
+        <circle cx="12" cy="12" r="2.6" />
+      </>
+    ),
+    eyeOff: (
+      <>
+        <path d="M4.2 8.4C3.2 9.6 2.9 12 2.9 12s3.1 5.4 9.1 5.4c1.5 0 2.8-.4 3.9-1" />
+        <path d="M9.2 7c.9-.3 1.8-.4 2.8-.4 6 0 9.1 5.4 9.1 5.4s-.9 1.6-2.5 3" />
+        <path d="m4.5 4.5 15 15" />
+      </>
+    ),
   };
 
   return (
@@ -106,13 +139,158 @@ export function SubjectChip({ subjectId, className = '' }) {
   );
 }
 
-/* نشان نوع یادداشت: متنی یا چک‌لیست */
-export function KindBadge({ kind }) {
+/* متادیتای هر حالت یادداشت از سرویس خوانده می‌شود تا افزودن حالت بعدی فقط یک‌جا باشد */
+export function kindMeta(kind) {
+  return NOTE_KINDS.find((item) => item.id === kind) ?? NOTE_KINDS[0];
+}
+
+/* نشان حالت یادداشت: متنی | چک‌لیست | پرسش و پاسخ | جدول مقایسه */
+export function KindBadge({ kind, long = false }) {
+  const meta = kindMeta(kind);
   return (
-    <span className={`nt-kind-badge ${kind === 'checklist' ? 'nt-kind-badge--checklist' : ''}`}>
-      <Icon name={kind === 'checklist' ? 'list' : 'text'} size={12} />
-      {kind === 'checklist' ? 'چک‌لیست' : 'متنی'}
+    <span className={`nt-kind-badge nt-kind-badge--${meta.id}`}>
+      <Icon name={meta.icon} size={12} />
+      {long ? meta.long : meta.label}
     </span>
+  );
+}
+
+/* تگ با رنگ دسته‌اش — رنگ تنها حامل معنا نیست، متن تگ همیشه هست */
+export function TagPill({ tag, accent = '#8a8a8a', count, active = false, onClick, onRemove }) {
+  const interactive = Boolean(onClick);
+  const Wrapper = interactive ? 'button' : 'span';
+  return (
+    <Wrapper
+      {...(interactive ? { type: 'button', onClick, 'aria-pressed': active } : {})}
+      className={`nt-tag ${active ? 'is-active' : ''} ${interactive ? 'is-interactive' : ''}`}
+      style={{ '--accent': accent }}
+    >
+      {tag}
+      {count !== undefined && <i className="nt-tag__count">{toFa(count)}</i>}
+      {onRemove && (
+        <button type="button" aria-label={`حذف تگ ${tag}`} onClick={onRemove} className="nt-tag__remove">
+          <Icon name="close" size={11} />
+        </button>
+      )}
+    </Wrapper>
+  );
+}
+
+/* ── تپش هوشمند روی هر متن ──
+   دکمهٔ کوچک کنار هر فیلد؛ با باز شدن، چهار کنش بازنویسی می‌آید، متن جدید تکه‌تکه
+   (استریم) نوشته می‌شود و کاربر تصمیم می‌گیرد جایگزین کند یا نه. لغو با AbortController. */
+export function AIAssist({ text, onApply, label = 'تپش هوشمند', compact = false }) {
+  const [open, setOpen] = useState(false);
+  const [action, setAction] = useState(null);
+  const [preview, setPreview] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const controllerRef = useRef(null);
+
+  useEffect(() => () => controllerRef.current?.abort(), []);
+
+  const reset = () => {
+    controllerRef.current?.abort();
+    controllerRef.current = null;
+    setAction(null);
+    setPreview('');
+    setBusy(false);
+    setError('');
+  };
+
+  const close = () => {
+    reset();
+    setOpen(false);
+  };
+
+  const run = async (actionId) => {
+    controllerRef.current?.abort();
+    const controller = new AbortController();
+    controllerRef.current = controller;
+    setAction(actionId);
+    setPreview('');
+    setError('');
+    setBusy(true);
+    try {
+      await runNoteAI({ action: actionId, text, signal: controller.signal, onChunk: setPreview });
+    } catch (err) {
+      if (err?.name !== 'AbortError') setError('تپش هوشمند همین حالا پاسخ نمی‌دهد؛ دوباره تلاش کن.');
+    } finally {
+      if (controllerRef.current === controller) setBusy(false);
+    }
+  };
+
+  const empty = !String(text ?? '').trim();
+
+  return (
+    <div className={`nt-ai ${compact ? 'nt-ai--compact' : ''}`}>
+      <button
+        type="button"
+        className={`nt-ai__btn ${open ? 'is-open' : ''}`}
+        aria-expanded={open}
+        onClick={() => (open ? close() : setOpen(true))}
+      >
+        <Icon name="wand" size={12} />
+        {!compact && <span>{label}</span>}
+      </button>
+
+      {open && (
+        <div className="nt-ai__panel">
+          {empty ? (
+            <p className="nt-ai__hint">اول متن را بنویس، بعد تپش هوشمند مرتبش می‌کند.</p>
+          ) : (
+            <>
+              <div className="nt-ai__actions" role="group" aria-label="کنش‌های تپش هوشمند">
+                {NOTE_AI_ACTIONS.map((option) => (
+                  <button
+                    key={option.id}
+                    type="button"
+                    title={option.hint}
+                    aria-pressed={action === option.id}
+                    onClick={() => run(option.id)}
+                    className={`nt-ai__chip ${action === option.id ? 'is-active' : ''}`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+                {busy && (
+                  <span className="nt-ai__status">
+                    <span className="nt-ai__spinner" aria-hidden="true" />
+                    در حال نوشتن…
+                  </span>
+                )}
+              </div>
+
+              {error && (
+                <p role="alert" className="nt-ai__error">
+                  {error}
+                </p>
+              )}
+
+              {preview && (
+                <div className="nt-ai__preview">
+                  <p className="nt-ai__preview-text">{preview}</p>
+                  <div className="nt-ai__preview-actions">
+                    <button type="button" className="nt-ai__apply" onClick={() => { onApply?.(preview); close(); }} disabled={busy}>
+                      جایگزین کن
+                    </button>
+                    <button type="button" className="nt-ai__cancel" onClick={close}>
+                      لغو
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
+          {empty && (
+            <button type="button" className="nt-ai__cancel" onClick={close}>
+              بستن
+            </button>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 

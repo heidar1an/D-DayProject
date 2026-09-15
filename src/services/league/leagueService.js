@@ -75,7 +75,7 @@ function buildMe(userData) {
     id: userData?.id ?? 'guest',
     name: name || profile.username || 'کاربر تپش',
     university: profile.university || 'دانشگاه علوم پزشکی قم',
-    avatarConfig: profile.avatarConfig ?? null,
+    avatar: profile.avatar ?? null,
     title: ME.title,
   };
 }

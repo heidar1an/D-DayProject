@@ -70,9 +70,39 @@ services/testBank/
 
 ## ورود به لایه
 
-از `TestsSection` (کارت بزرگ «بانک تست علوم پایه» و کارت «آزمون های شخصی» با
-initialView builder) → `DashboardLayout` لایه را با state `openTestBankLayer`
-mount می‌کند. بستن/تغییر سکشن، لایه را unmount می‌کند (الگوی سایر لایه‌ها).
+از `TestsSection` (کارت بزرگ «بانک تست علوم پایه» و کارت «آزمون های شخصی») →
+`DashboardLayout` لایه را با نوشتن در **مسیر داشبورد** mount می‌کند؛ state بولی
+جداگانه‌ای وجود ندارد. بستن/تغییر سکشن، لایه را unmount می‌کند (الگوی سایر لایه‌ها).
+
+### نمای داخلی لایه روی آدرس می‌نشیند
+
+`TestBankLayer` دیگر `initialView` نمی‌گیرد؛ نما را از هوک مشترک
+`useLayerRoute` می‌خواند و می‌نویسد:
+
+```jsx
+const [view, setView] = useLayerRoute(LAYER_IDS.testBank, TEST_BANK_HOME, {
+  volatile: TEST_BANK_VOLATILE,   // ['live'] — اتاق آزمون در حال اجرا
+  screenOf: testBankScreenOf,     // topics/subject با شناسهٔ درس تفکیک می‌شوند
+});
+```
+
+`TEST_BANK_HOME` و `testBankScreenOf` در بالای همان فایل و خارج از کامپوننت
+تعریف شده‌اند (هوک انتظار `initialView` ثابت دارد). `TestsSection` برای کارت
+«آزمون شخصی» فقط `openLayer(LAYER_IDS.testBank, { name: 'builder', … })` صدا می‌زند.
+
+قرارداد نوشتن (پیاده‌سازی‌شده در `src/layout/dashboard/dashboardRoute.jsx`):
+
+- تغییر **صفحه** (home → builder → result) یک ورودی تاریخچه می‌سازد → Back/Forward
+  داخل لایه کار می‌کند.
+- تغییر **درون همان صفحه** (پیش‌نمایش تعداد، فیلترها) ورودی فعلی را به‌روز می‌کند
+  و تاریخچه را شلوغ نمی‌کند.
+- نماهای `volatile` (`live` و …) هرگز در آدرس نمی‌نشینند تا رفرش به یک آزمون
+  نیمه‌کاره نیفتد.
+- برای نمای داده‌محور `result` که مستقیماً (رفرش/لینک) باز می‌شود، یک افکت
+  `restoredRef` کارنامه را از سرویس با `sessionId` موجود در view بازمی‌خواند.
+
+مستند کامل مسیر/آدرس و باگ‌های Back-Forward و رفرش: بخش «ناوبری داشبورد» در
+`src/layout/dashboard/dashboardRoute.jsx`.
 
 ## اتصال Backend در آینده
 

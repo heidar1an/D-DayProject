@@ -9,13 +9,74 @@ import './reviewNotebook.css';
 const FA_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
 const toFa = (value) => String(value).replace(/\d/g, (digit) => FA_DIGITS[Number(digit)]);
 const PERSIAN_LOCALE = 'fa-IR-u-ca-persian';
+const PERSIAN_LATIN = 'fa-IR-u-ca-persian-nu-latn';
+const DAY = 24 * 60 * 60 * 1000;
+/* ترتیب هفتهٔ شمسی — شنبه ستون اول است و در RTL از راست شروع می‌شود */
+const WEEKDAY_LABELS = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
+
 const dateFormatter = new Intl.DateTimeFormat(PERSIAN_LOCALE, { day: 'numeric', month: 'long' });
 const fullDateFormatter = new Intl.DateTimeFormat(PERSIAN_LOCALE, {
   weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
 });
 const monthFormatter = new Intl.DateTimeFormat(PERSIAN_LOCALE, { month: 'long', year: 'numeric' });
-const weekdayFormatter = new Intl.DateTimeFormat(PERSIAN_LOCALE, { weekday: 'short' });
+const weekdayFormatter = new Intl.DateTimeFormat(PERSIAN_LOCALE, { weekday: 'long' });
 const dayFormatter = new Intl.DateTimeFormat(PERSIAN_LOCALE, { day: 'numeric' });
+/* ارقام لاتین برای محاسبهٔ ماه شمسی (نمایش همان ارقام فارسی است) */
+const persianDayNumber = new Intl.DateTimeFormat(PERSIAN_LATIN, { day: 'numeric' });
+const persianMonthNumber = new Intl.DateTimeFormat(PERSIAN_LATIN, { month: 'numeric' });
+
+/* ── آیکن‌های خطی دفترچه — هم‌زبان آیکن‌های لایهٔ بانک تست ── */
+const ICONS = {
+  clock: (
+    <>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 7.5V12l3 2" />
+    </>
+  ),
+  alert: (
+    <>
+      <path d="M10.3 4.1 2.9 17a2 2 0 0 0 1.7 3h14.8a2 2 0 0 0 1.7-3L13.7 4.1a2 2 0 0 0-3.4 0z" />
+      <path d="M12 9v4M12 17h.01" />
+    </>
+  ),
+  check: (
+    <>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="m8.4 12.4 2.5 2.5 4.7-5.2" />
+    </>
+  ),
+  timer: (
+    <>
+      <path d="M9 2.5h6" />
+      <circle cx="12" cy="13.5" r="8" />
+      <path d="M12 10v3.5l2.4 1.6" />
+    </>
+  ),
+  help: (
+    <>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M9.6 9.3a2.5 2.5 0 1 1 3.3 2.4c-.7.3-1 .8-1 1.5v.3" />
+      <path d="M12 16.8h.01" />
+    </>
+  ),
+};
+
+function ReviewIcon({ name, className }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      {ICONS[name]}
+    </svg>
+  );
+}
 
 const STAGE_MINUTES = { 1: 20, 2: 16, 3: 12, 4: 10, 5: 8 };
 const PLAN_START_MINUTES = 8 * 60;
@@ -63,6 +124,29 @@ function startOfPersianWeek(value) {
 
 function isSameDay(first, second) {
   return startOfDay(first) === startOfDay(second);
+}
+
+/* ── ماه شمسی: اول ماه و تعداد روزهای آن ──
+   با تقویم فارسی Intl حساب می‌شود تا نیازی به جدول تبدیل تاریخ نباشد. */
+function persianMonthStart(value = Date.now()) {
+  const date = new Date(startOfDay(value));
+  for (let step = 0; step < 31; step += 1) {
+    if (Number(persianDayNumber.format(date)) === 1) return startOfDay(date);
+    date.setDate(date.getDate() - 1);
+  }
+  return startOfDay(value);
+}
+
+function persianMonthLength(monthStart) {
+  const month = Number(persianMonthNumber.format(new Date(monthStart)));
+  const cursor = new Date(startOfDay(monthStart));
+  let length = 0;
+  for (let step = 0; step < 32; step += 1) {
+    if (Number(persianMonthNumber.format(cursor)) !== month) break;
+    length += 1;
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  return length;
 }
 
 function stageCopy(stage) {
@@ -183,9 +267,10 @@ export default function ReviewNotebook({ userData, onOpenLearning }) {
   const [items, setItems] = useState(() => ReviewNotebookService.getAll(userId));
   const [filter, setFilter] = useState('all');
   const [isAdding, setIsAdding] = useState(false);
+  const [showStages, setShowStages] = useState(false);
   const [form, setForm] = useState({ title: '', subject: '', activityType: 'learning' });
   const [selectedDate, setSelectedDate] = useState(() => startOfDay());
-  const [weekStart, setWeekStart] = useState(() => startOfPersianWeek(Date.now()));
+  const [monthStart, setMonthStart] = useState(() => persianMonthStart(Date.now()));
   const today = startOfDay();
 
   const refresh = () => setItems(ReviewNotebookService.getAll(userId));
@@ -213,10 +298,15 @@ export default function ReviewNotebook({ userData, onOpenLearning }) {
     return timing.state === filter;
   }), [filter, items]);
 
-  const calendarDays = useMemo(
-    () => Array.from({ length: 7 }, (_, index) => addDays(weekStart, index)),
-    [weekStart],
-  );
+  /* ── شبکهٔ مربعی ماه شمسی (سبک گوگل‌کلندر): از شنبهٔ قبلِ اول ماه تا تکمیل هفتهٔ آخر ── */
+  const monthLength = useMemo(() => persianMonthLength(monthStart), [monthStart]);
+  const monthEnd = addDays(monthStart, monthLength);
+  const calendarDays = useMemo(() => {
+    const gridStart = startOfPersianWeek(monthStart);
+    const leading = Math.round((startOfDay(monthStart) - gridStart) / DAY);
+    const total = Math.ceil((leading + monthLength) / 7) * 7;
+    return Array.from({ length: total }, (_, index) => addDays(gridStart, index));
+  }, [monthLength, monthStart]);
 
   const activeItems = useMemo(() => items.filter((item) => item.status !== 'mastered'), [items]);
   const overdueItems = useMemo(
@@ -262,14 +352,59 @@ export default function ReviewNotebook({ userData, onOpenLearning }) {
   )).length;
 
   const countForDay = (day) => activeItems.filter((item) => isSameDay(item.dueAt, day)).length;
+
+  /* ── چهار کادر زیرین: چیپ‌های یک‌ردیفی، هم‌سبک ردیف مسیرهای بانک تست ── */
+  const summaryChips = [
+    {
+      id: 'remaining',
+      icon: 'clock',
+      accent: '#5b8cc7',
+      label: 'مانده امروز',
+      value: dailyPlan.length,
+      hint: 'مبحث برای مرور',
+    },
+    {
+      id: 'late',
+      icon: 'alert',
+      accent: '#e26d6d',
+      label: 'عقب‌افتاده',
+      value: overdueItems.length,
+      hint: overdueItems.length ? 'در اولویت امروز' : 'همه‌چیز مرتب است',
+    },
+    {
+      id: 'done',
+      icon: 'check',
+      accent: '#77b787',
+      label: 'انجام‌شده امروز',
+      value: completedToday,
+      hint: 'مرور ثبت‌شده',
+    },
+    {
+      id: 'time',
+      icon: 'timer',
+      accent: '#e0b45c',
+      label: 'زمان تقریبی',
+      value: totalMinutes,
+      unit: 'دقیقه',
+      hint: 'زمان تقریبی مطالعه امروز',
+    },
+  ];
+
   const goToToday = () => {
     setSelectedDate(today);
-    setWeekStart(startOfPersianWeek(today));
+    setMonthStart(persianMonthStart(today));
   };
-  const moveWeek = (direction) => {
-    const nextWeek = addDays(weekStart, direction * 7);
-    setWeekStart(nextWeek);
-    setSelectedDate(nextWeek);
+  const moveMonth = (direction) => {
+    const anchor = direction > 0
+      ? addDays(monthStart, monthLength)
+      : addDays(monthStart, -1);
+    const next = persianMonthStart(anchor);
+    setMonthStart(next);
+    setSelectedDate(next);
+  };
+  const pickDay = (day) => {
+    setSelectedDate(day);
+    if (day < monthStart || day >= monthEnd) setMonthStart(persianMonthStart(day));
   };
 
   const completeReview = (itemId) => {
@@ -297,71 +432,105 @@ export default function ReviewNotebook({ userData, onOpenLearning }) {
 
   return (
     <main className="review-notebook dash-stagger" dir="rtl">
-      <header className="review-notebook__hero">
-        <div>
-          <span className="review-notebook__eyebrow">SPACED REVIEW</span>
-          <h1>دفترچه مرور</h1>
-          <p>برنامه هر روز دقیقاً مشخص می‌کند کدام مبحث را در کدام مرحله G مرور کنی.</p>
+      {/* ── سرتیتر: هم‌سبک هیرو «درسنامهٔ جامع» — خط کوچک + خط بزرگ گرادیانی ── */}
+      <header className="review-hero">
+        <div className="review-hero__content">
+          <h1 className="review-hero__title">
+            <span className="review-hero__title-top">دفترچه مرور</span>
+            <span className="review-hero__title-accent">مرور فاصله‌دار</span>
+          </h1>
+          <p className="review-hero__subtitle">
+            برنامه هر روز دقیقاً مشخص می‌کند کدام مبحث را در کدام مرحله G مرور کنی.
+          </p>
+          <button
+            type="button"
+            className="review-help"
+            aria-expanded={showStages}
+            aria-controls="review-stages-help"
+            aria-label="مراحل مرور G چطور کار می‌کند؟"
+            title="مراحل مرور G چطور کار می‌کند؟"
+            onClick={() => setShowStages((value) => !value)}
+          >
+            <ReviewIcon name="help" className="review-help__icon" />
+          </button>
         </div>
-        <div className="review-hero-today">
-          <small>امروز در تقویم شمسی</small>
-          <strong>{fullDateFormatter.format(new Date(today))}</strong>
-          <span>{dailyPlan.length ? `${toFa(dailyPlan.length)} مرور · حدود ${toFa(totalMinutes)} دقیقه` : 'برنامه امروز کامل است'}</span>
-        </div>
+        <aside className="review-today-tile" aria-label="تقویم روز">
+          <small>{weekdayFormatter.format(new Date(today))}</small>
+          <strong>{dayFormatter.format(new Date(today))}</strong>
+          <span>{monthFormatter.format(new Date(today))}</span>
+        </aside>
       </header>
 
-      <section className="review-today-summary" aria-label="خلاصه برنامه امروز">
-        <div className="review-summary-card review-summary-card--primary">
-          <small>مانده امروز</small>
-          <strong>{toFa(dailyPlan.length)}</strong>
-          <span>مبحث برای مرور</span>
-        </div>
-        <div className="review-summary-card review-summary-card--late">
-          <small>عقب‌افتاده</small>
-          <strong>{toFa(overdueItems.length)}</strong>
-          <span>{overdueItems.length ? 'در اولویت امروز' : 'همه‌چیز مرتب است'}</span>
-        </div>
-        <div className="review-summary-card review-summary-card--done">
-          <small>انجام‌شده امروز</small>
-          <strong>{toFa(completedToday)}</strong>
-          <span>مرور ثبت‌شده</span>
-        </div>
-        <div className="review-summary-card">
-          <small>زمان تقریبی</small>
-          <strong>{toFa(totalMinutes)}</strong>
-          <span>دقیقه مطالعه</span>
-        </div>
+      {showStages && (
+        <section className="review-stages-help" id="review-stages-help" aria-label="مراحل مرور G">
+          <header>
+            <strong>مراحل مرور G چطور کار می‌کند؟</strong>
+            <span>
+              هر مبحثی که یاد می‌گیری وارد G1 می‌شود؛ با هر مرور موفق فاصله دو برابر می‌شود تا در G5 تثبیت شود.
+              مجموع چرخه: ۳۱ روز.
+            </span>
+          </header>
+          <div className="review-stages-help__rail">
+            {G5_STAGES.map((stage, index) => (
+              <div className="review-stages-help__stage" key={stage.id}>
+                <span>{stage.id}</span>
+                <strong>{toFa(stage.intervalDays)} روز بعد</strong>
+                <small>{index === G5_STAGES.length - 1 ? 'تثبیت نهایی' : stage.label}</small>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <section className="review-chips" aria-label="خلاصه برنامه امروز">
+        {summaryChips.map((chip) => (
+          <div
+            className="review-chip"
+            key={chip.id}
+            title={chip.hint}
+            style={{ '--chip-accent': chip.accent }}
+          >
+            <ReviewIcon name={chip.icon} className="review-chip__icon" />
+            <span>{chip.label}</span>
+            <strong>{toFa(chip.value)}{chip.unit ? ` ${chip.unit}` : ''}</strong>
+          </div>
+        ))}
       </section>
 
       <section className="review-calendar" aria-label="تقویم مرور شمسی">
         <header className="review-calendar__header">
           <div>
             <small>تقویم مرور</small>
-            <h2>{monthFormatter.format(new Date(selectedDate))}</h2>
+            <h2>{monthFormatter.format(new Date(monthStart))}</h2>
           </div>
           <div className="review-calendar__nav">
-            <button type="button" onClick={() => moveWeek(-1)} aria-label="هفته قبل">→</button>
+            <button type="button" onClick={() => moveMonth(-1)} aria-label="ماه قبل">→</button>
             <button type="button" className="review-calendar__today" onClick={goToToday}>امروز</button>
-            <button type="button" onClick={() => moveWeek(1)} aria-label="هفته بعد">←</button>
+            <button type="button" onClick={() => moveMonth(1)} aria-label="ماه بعد">←</button>
           </div>
         </header>
-        <div className="review-calendar__days">
+
+        <div className="review-calendar__weekdays" aria-hidden="true">
+          {WEEKDAY_LABELS.map((label) => <span key={label}>{label}</span>)}
+        </div>
+
+        <div className="review-calendar__grid">
           {calendarDays.map((day) => {
             const count = countForDay(day);
             const selected = isSameDay(day, selectedDate);
             const current = isSameDay(day, today);
+            const outside = day < monthStart || day >= monthEnd;
             return (
               <button
                 type="button"
-                className={`${selected ? 'is-selected' : ''} ${current ? 'is-today' : ''}`}
-                onClick={() => setSelectedDate(day)}
+                className={`review-calendar__cell ${selected ? 'is-selected' : ''} ${current ? 'is-today' : ''} ${outside ? 'is-outside' : ''}`}
+                onClick={() => pickDay(day)}
                 key={day}
                 aria-pressed={selected}
+                aria-label={`${fullDateFormatter.format(new Date(day))}${count ? ` — ${toFa(count)} مرور` : ''}`}
               >
-                <small>{weekdayFormatter.format(new Date(day))}</small>
                 <strong>{dayFormatter.format(new Date(day))}</strong>
-                <span>{count ? `${toFa(count)} مرور` : 'آزاد'}</span>
-                {current && <i>امروز</i>}
+                {count > 0 && <span className="review-calendar__count">{toFa(count)}</span>}
               </button>
             );
           })}
@@ -408,21 +577,6 @@ export default function ReviewNotebook({ userData, onOpenLearning }) {
             </div>
           )}
         </div>
-      </section>
-
-      <section className="review-cycle" aria-label="چرخه مرور G5">
-        <div className="review-cycle__intro">
-          <small>نقشه G5</small>
-          <strong>فاصله مرورها</strong>
-          <span>مجموع چرخه: ۳۱ روز</span>
-        </div>
-        {G5_STAGES.map((stage, index) => (
-          <div className="review-cycle__stage" key={stage.id}>
-            <span>{stage.id}</span>
-            <strong>{toFa(stage.intervalDays)} روز بعد</strong>
-            <small>{index === G5_STAGES.length - 1 ? 'تثبیت نهایی' : stage.label}</small>
-          </div>
-        ))}
       </section>
 
       <div className="review-library-heading">

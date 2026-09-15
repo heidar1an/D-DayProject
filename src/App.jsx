@@ -23,7 +23,7 @@ import ArticlePage from './layout/articles/ArticlePage';
 import ReadingListPage from './layout/articles/ReadingListPage';
 import AdminLayout from './layout/admin/AdminLayout';
 import { ArticleCover } from './layout/articles/articlesShared';
-import AvatarSvg from './layout/dashboard/setting/avatar/AvatarSvg';
+import { avatarSrc } from './layout/dashboard/setting/avatar/avatarOptions';
 import './layout/admin/admin.css';
 
 /* صفحه‌ای که برای مسیر داخلی مقالات رندر می‌شود؛ خود hash کاملاً پایدار می‌ماند */
@@ -445,10 +445,8 @@ function SiteHeader({ menuOpen, onMenuOpenChange, userData, onOpenDashboard, onO
           onClick={onOpenDashboard}
         >
           <span className="auth-link__avatar">
-            {userData.profile?.avatarConfig ? (
-              <AvatarSvg config={userData.profile.avatarConfig} title="آواتار کاربر" />
-            ) : userData.profile?.avatar ? (
-              <img src={userData.profile.avatar} alt="" />
+            {avatarSrc(userData.profile?.avatar) ? (
+              <img src={avatarSrc(userData.profile?.avatar)} alt="" />
             ) : (
               <HeaderUserIcon />
             )}
@@ -837,7 +835,10 @@ function getAppRoute() {
   const { hash } = window.location;
 
   /* اولویت با hash است تا ناوبری داخل سشن (مثل داشبورد → مقالات)، state قدیمی را باطل کند */
-  if (hash === '#dashboard') return 'dashboard';
+  /* داشبورد مسیر داخلی خودش را در query همان hash نگه می‌دارد: #dashboard?s=tests&l=test-bank */
+  if (hash === '#dashboard' || hash.startsWith('#dashboard?') || hash.startsWith('#dashboard/')) {
+    return 'dashboard';
+  }
   if (hash === '#onboarding') return 'onboarding';
   if (hash === '#auth') return 'auth';
   if (hash === '#articles' || hash.startsWith('#articles/')) return 'articles';
@@ -884,6 +885,11 @@ function getRouteUrl(route) {
 
   /* هنگام نرمال‌سازی لینک مستقیم، اسلاگ مقاله در hash حفظ شود */
   if (route === 'articles' && window.location.hash.startsWith('#articles')) {
+    return `${window.location.pathname}${window.location.search}${window.location.hash}`;
+  }
+
+  /* مسیر داخلی داشبورد (بخش/لایه) هم در لینک مستقیم و رفرش حفظ می‌شود */
+  if (route === 'dashboard' && window.location.hash.startsWith('#dashboard?')) {
     return `${window.location.pathname}${window.location.search}${window.location.hash}`;
   }
 

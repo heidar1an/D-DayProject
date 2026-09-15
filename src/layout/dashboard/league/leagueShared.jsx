@@ -4,8 +4,7 @@
  * تا قلب و آواتار در کل محصول یک شکل و یک رنگ بمانند.
  */
 import { useEffect, useState } from 'react';
-import AvatarSvg from '../setting/avatar/AvatarSvg';
-import { defaultAvatarConfig } from '../setting/avatar/avatarOptions';
+import { avatarSrc, fallbackAvatarSrc } from '../setting/avatar/avatarOptions';
 
 const FA_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
 
@@ -150,11 +149,11 @@ export function Icon({ name, className = 'h-[18px] w-[18px]', strokeWidth = 1.9,
 }
 
 /* ── آواتار گرد با حلقهٔ رنگی ── */
-export function UserAvatar({ config, size = 44, ringColor = 'rgba(255,255,255,0.14)', isYou = false }) {
-  const resolved = config ?? defaultAvatarConfig('female');
+export function UserAvatar({ avatar, size = 44, ringColor = 'rgba(255,255,255,0.14)', isYou = false }) {
+  const src = avatarSrc(avatar) ?? fallbackAvatarSrc();
   return (
     <span
-      className="grid shrink-0 place-items-center overflow-hidden rounded-full"
+      className="grid shrink-0 place-items-center overflow-hidden rounded-full bg-white/5"
       style={{
         width: size,
         height: size,
@@ -162,7 +161,7 @@ export function UserAvatar({ config, size = 44, ringColor = 'rgba(255,255,255,0.
       }}
       aria-hidden="true"
     >
-      <AvatarSvg config={resolved} className="h-full w-full" />
+      {src && <img src={src} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />}
     </span>
   );
 }

@@ -632,15 +632,11 @@
 }
 
 /* آواتار ساخته‌شده در آواتارساز */
-.user-profile-card__avatar-custom {
-  width: 100%;
-  height: 100%;
-}
-
-.user-profile-card__avatar-custom svg {
+.user-profile-card__avatar-image {
   display: block;
   width: 100%;
   height: 100%;
+  object-fit: cover;
 }
 
 .user-profile-card__level {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import AvatarSvg from './setting/avatar/AvatarSvg';
+import { avatarSrc } from './setting/avatar/avatarOptions';
 
 function getProfileName(userData) {
   const profile = userData?.profile || {};
@@ -47,10 +47,12 @@ export default function UserProfileCard({ userData }) {
         <div className="user-profile-card__avatar-figure">
           <div className="user-profile-card__avatar-circle">
             <div className="user-profile-card__avatar-inner">
-              {profile.avatarConfig ? (
-                <div className="user-profile-card__avatar-custom">
-                  <AvatarSvg config={profile.avatarConfig} title="آواتار کاربر" />
-                </div>
+              {avatarSrc(profile.avatar) ? (
+                <img
+                  className="user-profile-card__avatar-image"
+                  src={avatarSrc(profile.avatar)}
+                  alt="آواتار کاربر"
+                />
               ) : (
                 <>
                   <span className="user-profile-card__avatar-head" />

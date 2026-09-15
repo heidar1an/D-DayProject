@@ -2,14 +2,20 @@
  * نمای کامل یک یادداشت — از فهرست با کلیک روی کارت باز می‌شود.
  * ویرایش/حذف/گلچین با callback به والد؛ آیتم‌های چک‌لیست اپتیمستیک تیک می‌خورند
  * (والد ابتدا state محلی را عوض می‌کند و سرویس در پس‌زمینه می‌رود).
+ *
+ * «پرسش و پاسخ» در همین نما حالت بازیابی فعال دارد: پاسخ‌ها پنهان‌اند و با کلیک
+ * یکی‌یکی (یا همه با هم) باز می‌شوند. تپش هوشمند هم کل یادداشت را بازنویسی می‌کند.
  */
+import { useEffect, useState } from 'react';
 import {
+  NOTE_AI_ACTIONS,
   checklistProgress,
   formatNoteDate,
   noteColor,
   relativeEditedAt,
+  tagAccent,
 } from '../../../services/notes/notesService';
-import { DeleteButton, Icon, KindBadge, SubjectChip } from './notesShared';
+import { DeleteButton, Icon, KindBadge, SubjectChip, TagPill, toFa } from './notesShared';
 
 const SOURCE_LABELS = {
   lesson: 'درسنامه',
@@ -20,11 +26,55 @@ const SOURCE_LABELS = {
   other: 'سایر',
 };
 
-export default function NoteDetail({ note, onBack, onEdit, onDelete, onTogglePin, onToggleItem }) {
+export default function NoteDetail({ note, onBack, onEdit, onDelete, onTogglePin, onToggleItem, onRewrite }) {
+  const [revealed, setRevealed] = useState(() => new Set());
+  const [aiOpen, setAiOpen] = useState(false);
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiNotice, setAiNotice] = useState('');
+  const [aiError, setAiError] = useState('');
+
+  /* با عوض شدن یادداشت، حالت مرور و پنل هوشمند از صفر شروع می‌کنند */
+  useEffect(() => {
+    setRevealed(new Set());
+    setAiOpen(false);
+    setAiBusy(false);
+    setAiNotice('');
+    setAiError('');
+  }, [note?.id]);
+
   if (!note) return null;
 
   const progress = checklistProgress(note);
   const color = noteColor(note);
+  const pairs = note.pairs ?? [];
+  const table = note.table ?? { columns: [], rows: [] };
+  const allRevealed = pairs.length > 0 && pairs.every((pair) => revealed.has(pair.id));
+
+  const toggleReveal = (pairId) => {
+    setRevealed((current) => {
+      const next = new Set(current);
+      if (next.has(pairId)) next.delete(pairId);
+      else next.add(pairId);
+      return next;
+    });
+  };
+
+  const toggleAll = () => setRevealed(allRevealed ? new Set() : new Set(pairs.map((pair) => pair.id)));
+
+  const applyAI = async (actionId) => {
+    setAiBusy(true);
+    setAiError('');
+    try {
+      await onRewrite?.(note, actionId);
+      setAiOpen(false);
+      setAiNotice('یادداشت با تپش هوشمند بازنویسی شد.');
+      window.setTimeout(() => setAiNotice(''), 2600);
+    } catch {
+      setAiError('تپش هوشمند همین حالا پاسخ نمی‌دهد؛ دوباره تلاش کن.');
+    } finally {
+      setAiBusy(false);
+    }
+  };
 
   return (
     <div className="nt-pop space-y-4">
@@ -40,6 +90,15 @@ export default function NoteDetail({ note, onBack, onEdit, onDelete, onTogglePin
         </button>
 
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setAiOpen((current) => !current)}
+            aria-expanded={aiOpen}
+            className={`nt-ai__btn ${aiOpen ? 'is-open' : ''}`}
+          >
+            <Icon name="wand" size={14} />
+            تپش هوشمند
+          </button>
           <button
             type="button"
             onClick={() => onTogglePin?.(note)}
@@ -65,6 +124,44 @@ export default function NoteDetail({ note, onBack, onEdit, onDelete, onTogglePin
         </div>
       </div>
 
+      {/* پنل تپش هوشمند روی کل یادداشت */}
+      {aiOpen && (
+        <div className="nt-ai__panel">
+          <p className="nt-ai__hint">می‌خواهی تپش هوشمند این یادداشت را چطور بازنویسی کند؟</p>
+          <div className="nt-ai__actions mt-2">
+            {NOTE_AI_ACTIONS.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                title={option.hint}
+                className="nt-ai__chip"
+                disabled={aiBusy}
+                onClick={() => applyAI(option.id)}
+              >
+                {option.label}
+              </button>
+            ))}
+            {aiBusy && (
+              <span className="nt-ai__status">
+                <span className="nt-ai__spinner" aria-hidden="true" />
+                در حال نوشتن…
+              </span>
+            )}
+          </div>
+          {aiError && (
+            <p role="alert" className="nt-ai__error">
+              {aiError}
+            </p>
+          )}
+        </div>
+      )}
+
+      {aiNotice && (
+        <p role="status" className="rounded-xl bg-[#77b787]/10 px-4 py-2.5 text-xs text-[#9ed3ab]">
+          {aiNotice}
+        </p>
+      )}
+
       {/* بدنهٔ یادداشت */}
       <article className="relative overflow-hidden rounded-[2.5rem] border border-white/6 bg-[#282828] p-6 md:p-10">
         <span className="absolute inset-y-0 start-0 w-1.5" style={{ background: color }} aria-hidden="true" />
@@ -72,7 +169,7 @@ export default function NoteDetail({ note, onBack, onEdit, onDelete, onTogglePin
         <header className="space-y-4">
           <div className="flex flex-wrap items-center gap-2">
             <SubjectChip subjectId={note.subjectId} />
-            <KindBadge kind={note.kind} />
+            <KindBadge kind={note.kind} long />
             {note.pinned && (
               <span className="flex items-center gap-1 rounded-full bg-[#e0b45c]/12 px-2.5 py-1 text-[11px] text-[#e0b45c]">
                 <Icon name="pinFilled" size={11} />
@@ -95,12 +192,12 @@ export default function NoteDetail({ note, onBack, onEdit, onDelete, onTogglePin
           </p>
         </header>
 
-        {/* محتوا */}
-        {note.kind === 'text' ? (
-          note.body && (
-            <p className="mt-6 whitespace-pre-wrap text-sm leading-8 text-[#d6d6d6]">{note.body}</p>
-          )
-        ) : (
+        {/* محتوا بر اساس حالت */}
+        {note.kind === 'text' && note.body && (
+          <p className="mt-6 whitespace-pre-wrap text-sm leading-8 text-[#d6d6d6]">{note.body}</p>
+        )}
+
+        {note.kind === 'checklist' && (
           <div className="mt-6">
             {/* پیشرفت چک‌لیست — رنگ هرگز تنها حامل معنا نیست؛ عدد کنارش هست */}
             <div className="mb-4 flex items-center gap-3">
@@ -111,7 +208,7 @@ export default function NoteDetail({ note, onBack, onEdit, onDelete, onTogglePin
                 />
               </div>
               <span className="text-xs text-[#8a8a8a]">
-                {progress.done} از {progress.total} انجام شد
+                {toFa(progress.done)} از {toFa(progress.total)} انجام شد
               </span>
             </div>
 
@@ -145,14 +242,83 @@ export default function NoteDetail({ note, onBack, onEdit, onDelete, onTogglePin
           </div>
         )}
 
+        {note.kind === 'qa' && (
+          <div className="mt-6">
+            {pairs.length > 1 && (
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-[#937fcd]/25 bg-[#937fcd]/[0.07] px-4 py-3">
+                <span className="flex items-center gap-2 text-[11px] text-[#b6a6e6]">
+                  <Icon name="qa" size={14} />
+                  حالت مرور: پاسخ‌ها پنهان‌اند تا خودت بازیابی کنی.
+                </span>
+                <button type="button" onClick={toggleAll} className="nt-qa__toggle">
+                  <Icon name={allRevealed ? 'eyeOff' : 'eye'} size={12} />
+                  {allRevealed ? 'پنهان‌کردن همهٔ پاسخ‌ها' : 'نمایش همهٔ پاسخ‌ها'}
+                </button>
+              </div>
+            )}
+
+            <div className="nt-qa">
+              {pairs.map((pair, index) => {
+                const shown = revealed.has(pair.id);
+                return (
+                  <article key={pair.id} className="nt-qa__item">
+                    <div className="nt-qa__row">
+                      <span className="nt-qa__badge">{toFa(index + 1)}</span>
+                      <span className="nt-qa__text">{pair.question}</span>
+                      {pair.answer ? (
+                        <button type="button" className="nt-qa__toggle" aria-expanded={shown} onClick={() => toggleReveal(pair.id)}>
+                          <Icon name={shown ? 'eyeOff' : 'eye'} size={12} />
+                          {shown ? 'پنهان‌کردن پاسخ' : 'نمایش پاسخ'}
+                        </button>
+                      ) : (
+                        <span className="nt-qa__empty">پاسخی ثبت نشده</span>
+                      )}
+                    </div>
+                    {pair.answer && shown && <p className="nt-qa__answer">{pair.answer}</p>}
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {note.kind === 'table' && (
+          <div className="mt-6">
+            {table.columns.length > 0 ? (
+              <div className="nt-table-wrap">
+                <table className="nt-table">
+                  <thead>
+                    <tr>
+                      {table.columns.map((column) => (
+                        <th key={column.id} scope="col">
+                          {column.label}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {table.rows.map((row) => (
+                      <tr key={row.id}>
+                        {table.columns.map((column) => (
+                          <td key={column.id}>{row.cells?.[column.id] || '—'}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-[11px] text-[#6d6d6d]">جدول خالی است.</p>
+            )}
+          </div>
+        )}
+
         {/* تگ‌ها */}
         {(note.tags ?? []).length > 0 && (
           <div className="mt-6 flex flex-wrap items-center gap-2">
             <Icon name="tag" size={14} className="text-[#5c5c5c]" />
             {note.tags.map((tag) => (
-              <span key={tag} className="rounded-full bg-white/[0.06] px-3 py-1 text-[11px] text-[#aaa]">
-                {tag}
-              </span>
+              <TagPill key={tag} tag={tag} accent={tagAccent(tag)} />
             ))}
           </div>
         )}

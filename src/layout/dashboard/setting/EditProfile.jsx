@@ -1,9 +1,8 @@
 import { useState } from 'react';
 
 import { saveUserRecord } from '../../../services/userStorage';
-import AvatarBuilder from './avatar/AvatarBuilder';
-import AvatarSvg from './avatar/AvatarSvg';
-import { defaultAvatarConfig } from './avatar/avatarOptions';
+import AvatarPicker from './avatar/AvatarPicker';
+import { avatarSrc } from './avatar/avatarOptions';
 
 const inputClass =
   'w-full rounded-2xl border border-transparent bg-[#1d1d1d] py-3.5 pl-5 pr-12 text-white outline-none transition-colors duration-200 placeholder:text-[#777] focus:border-[#b99a86] [font-family:\'Pinar\',Tahoma,sans-serif]';
@@ -220,11 +219,10 @@ export default function EditProfile({ userData, onUserDataChange, onLogout }) {
     gender: profile.gender ?? '',
     birthDate: profile.birthDate ?? '',
     avatar: profile.avatar ?? '',
-    avatarConfig: profile.avatarConfig ?? null,
   };
   const [form, setForm] = useState(initialForm);
   const [isSaved, setIsSaved] = useState(false);
-  const [isBuilderOpen, setIsBuilderOpen] = useState(false);
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
 
   const handleChange = (field) => (event) => {
     setForm((current) => ({ ...current, [field]: event.target.value }));
@@ -236,13 +234,10 @@ export default function EditProfile({ userData, onUserDataChange, onLogout }) {
     setIsSaved(false);
   };
 
-  /* کانفیگ پیش‌فرض آواتارساز بر اساس جنسیت ثبت‌شده در فرم */
-  const getBuilderInitialConfig = () =>
-    form.avatarConfig ?? defaultAvatarConfig(form.gender === 'زن' ? 'female' : 'male');
-
-  const handleAvatarSave = (config) => {
-    setForm((current) => ({ ...current, avatarConfig: config, avatar: '' }));
-    setIsBuilderOpen(false);
+  /* شناسهٔ آواتار انتخاب‌شده از پاپ‌آپ برمی‌گردد؛ ذخیرهٔ نهایی با دکمهٔ فرم انجام می‌شود */
+  const handleAvatarSave = (avatarId) => {
+    setForm((current) => ({ ...current, avatar: avatarId ?? '' }));
+    setIsPickerOpen(false);
     setIsSaved(false);
   };
 
@@ -267,22 +262,24 @@ export default function EditProfile({ userData, onUserDataChange, onLogout }) {
     >
       <form onSubmit={handleSubmit} className="rounded-[2.5rem] bg-[#282828] p-8 md:rounded-[3rem] md:p-12">
         <header className="flex items-center gap-5">
-          {/* جای آواتار: پیش‌نمایش زنده آواتار ساخته‌شده یا نمای پیش‌فرض */}
+          {/* جای آواتار: پیش‌نمایش آواتار انتخاب‌شده یا نمای پیش‌فرض */}
           <div className="relative shrink-0">
             <span className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-[#b99a86]/30 bg-[#b99a86]/15 text-[#b99a86] md:h-28 md:w-28">
-              {form.avatarConfig ? (
-                <AvatarSvg config={form.avatarConfig} className="h-full w-full" />
-              ) : form.avatar ? (
-                <img src={form.avatar} alt="آواتار کاربر" className="h-full w-full object-cover" />
+              {avatarSrc(form.avatar) ? (
+                <img
+                  src={avatarSrc(form.avatar)}
+                  alt="آواتار کاربر"
+                  className="h-full w-full object-cover"
+                />
               ) : (
                 <UserIcon className="h-12 w-12 md:h-14 md:w-14" />
               )}
             </span>
             <button
               type="button"
-              onClick={() => setIsBuilderOpen(true)}
-              aria-label="ویرایش آواتار"
-              title="ویرایش آواتار"
+              onClick={() => setIsPickerOpen(true)}
+              aria-label="انتخاب آواتار"
+              title="انتخاب آواتار"
               className="absolute bottom-0 left-0 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-[#b99a86] text-white shadow-[0_4px_12px_rgba(0,0,0,0.4)] transition-colors duration-200 hover:bg-[#a3826e]"
             >
               <PaletteIcon className="h-4 w-4" />
@@ -296,11 +293,11 @@ export default function EditProfile({ userData, onUserDataChange, onLogout }) {
           </div>
         </header>
 
-        {isBuilderOpen && (
-          <AvatarBuilder
-            initialConfig={getBuilderInitialConfig()}
+        {isPickerOpen && (
+          <AvatarPicker
+            initialAvatar={form.avatar}
             onSave={handleAvatarSave}
-            onClose={() => setIsBuilderOpen(false)}
+            onClose={() => setIsPickerOpen(false)}
           />
         )}
 

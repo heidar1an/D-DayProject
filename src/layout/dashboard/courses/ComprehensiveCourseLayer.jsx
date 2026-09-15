@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import './comprehensiveCourse.css';
+import { LAYER_IDS, useLayerRoute } from '../dashboardRoute';
 import AnatomyLearningLayer from './learning/AnatomyLearningLayer';
 
 import anatomyImg from '../../../../images/courses/ChatGPT Image ۲۰ شهریور ۱۴۰۵، ۱۶_۴۴_۱۳.png';
@@ -18,6 +19,10 @@ import immunologyImg from '../../../../images/courses/immono.webp';
 
 const FA_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
 const toFa = (value) => String(value).replace(/\d/g, (digit) => FA_DIGITS[Number(digit)]);
+
+/* نمای آغازین لایهٔ درسنامهٔ جامع: شبکهٔ درس‌ها، بدون فیلتر و بدون لینک عمیق.
+   `anatomy` مسیر داخلی لایهٔ یادگیری آناتومی است و با slot همان‌جا ذخیره می‌شود. */
+const COMPREHENSIVE_VIEW = { filter: 'all', subject: null, deep: null, anatomy: null };
 
 /* SUBJECTS در صفحه «دوره‌ها» هم برای کارت‌های «کار امروز» استفاده می‌شود تا تصویر،
    رنگ و پیشرفت کارت‌ها با خود درسنامه یکی بماند. */
@@ -171,10 +176,18 @@ function SubjectCard({ subject, index, onOpen, spot = false, registerRef }) {
   );
 }
 
-export default function ComprehensiveCourseLayer({ onBack, userId = 'local-user', deepLink = null }) {
-  const [filter, setFilter] = useState('all');
-  const [anatomyRoute, setAnatomyRoute] = useState(() => deepLinkToAnatomyRoute(deepLink));
-  const [openSubject, setOpenSubject] = useState(() => (deepLink?.subject === 'anatomy' ? 'anatomy' : null));
+export default function ComprehensiveCourseLayer({ onBack, userId = 'local-user' }) {
+  /* نمای لایه (شبکهٔ درس‌ها ↔ لایهٔ آناتومی) روی مسیر داشبورد می‌نشیند تا Back/Forward و
+     رفرش همان‌جا بمانند؛ `deep` همان لینک عمیق کارت‌های «کار امروز» است. */
+  const [view, , patchView] = useLayerRoute(LAYER_IDS.comprehensive, COMPREHENSIVE_VIEW, {
+    screenOf: (current) => (current?.subject ? `subject:${current.subject}` : 'grid'),
+  });
+  const filter = view.filter ?? 'all';
+  const deepLink = view.deep ?? null;
+  const openSubject = view.subject ?? (deepLink?.subject === 'anatomy' ? 'anatomy' : null);
+  const anatomyRoute = view.anatomy ?? deepLinkToAnatomyRoute(deepLink);
+  const setFilter = (next) => patchView({ filter: next });
+  const setOpenSubject = (next) => patchView({ subject: next });
   const [spotId, setSpotId] = useState(null);
   const gridRef = useRef(null);
   const cardRefs = useRef(new Map());

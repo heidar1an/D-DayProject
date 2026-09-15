@@ -16,7 +16,7 @@
   white-space: nowrap;
 }
 
-/* نشان نوع یادداشت */
+/* نشان حالت یادداشت — هر حالت رنگ خودش را دارد */
 .nt-kind-badge {
   display: inline-flex;
   align-items: center;
@@ -32,6 +32,524 @@
 .nt-kind-badge--checklist {
   background: rgba(119, 183, 135, 0.12);
   color: #9ed3ab;
+}
+
+.nt-kind-badge--qa {
+  background: rgba(147, 127, 205, 0.14);
+  color: #b6a6e6;
+}
+
+.nt-kind-badge--table {
+  background: rgba(91, 140, 199, 0.14);
+  color: #9cc0e8;
+}
+
+/* ── تگ‌ها ── */
+.nt-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.26rem 0.7rem;
+  border-radius: 999px;
+  font-size: 11px;
+  border: 1px solid color-mix(in srgb, var(--accent) 26%, transparent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.nt-tag.is-interactive {
+  cursor: pointer;
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease;
+}
+
+.nt-tag.is-interactive:hover {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.nt-tag.is-active {
+  border-color: color-mix(in srgb, var(--accent) 70%, transparent);
+  background: color-mix(in srgb, var(--accent) 26%, transparent);
+  color: #fff;
+}
+
+.nt-tag__count {
+  font-style: normal;
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+.nt-tag__remove {
+  display: inline-grid;
+  place-items: center;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.6;
+  transition: opacity 200ms ease;
+}
+
+.nt-tag__remove:hover {
+  opacity: 1;
+}
+
+/* ── هیرو: هم‌زبان بصری سرتیتر «درسنامه جامع» ── */
+.nt-hero {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding: clamp(16px, 3.6vh, 42px) 0 4px;
+  text-align: center;
+}
+
+.nt-hero__glow {
+  position: absolute;
+  top: -3rem;
+  left: 50%;
+  width: 26rem;
+  height: 16rem;
+  transform: translateX(-50%);
+  pointer-events: none;
+  opacity: 0.22;
+  filter: blur(70px);
+  background: radial-gradient(circle, #5b8cc7 0%, transparent 70%);
+}
+
+.nt-hero__content {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.nt-hero__title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  color: #fff;
+  font-family: 'Doran', Tahoma, sans-serif;
+}
+
+.nt-hero__title-top {
+  font-weight: 500;
+  font-size: clamp(1.25rem, 2.6vw, 1.95rem);
+  color: #d6d6d6;
+}
+
+.nt-hero__title-accent {
+  font-weight: 800;
+  font-size: clamp(2.5rem, 6.2vw, 4.5rem);
+  line-height: 1.3;
+  background: linear-gradient(120deg, #5b8cc7 15%, #937fcd 85%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.nt-hero__subtitle {
+  max-width: 660px;
+  margin: 12px auto 0;
+  color: #b9b9b9;
+  font-size: clamp(0.9rem, 1.3vw, 1.05rem);
+  line-height: 2;
+}
+
+.nt-hero__stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 18px;
+}
+
+.nt-hero__stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.4rem 0.85rem;
+  font-size: 11px;
+  color: #aaa;
+}
+
+.nt-hero__cta {
+  display: flex;
+  justify-content: center;
+  margin-top: 22px;
+}
+
+.nt-hero__create {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  cursor: pointer;
+  border-radius: 1rem;
+  background: #5b8cc7;
+  color: #fff;
+  padding: 0.9rem 1.7rem;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  box-shadow: 0 16px 40px -16px rgba(91, 140, 199, 0.85);
+  transition: transform 200ms ease;
+}
+
+.nt-hero__create:hover {
+  transform: translateY(-2px);
+}
+
+/* ── نوار دسته‌بندی تگ‌ها ── */
+.nt-tagbar {
+  border-radius: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: #282828;
+  padding: 1rem 1.2rem;
+}
+
+.nt-tagbar__head {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #fff;
+  cursor: pointer;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 0.8rem;
+  text-align: right;
+}
+
+.nt-tagbar__chevron {
+  color: #8a8a8a;
+  transition: transform 220ms ease;
+}
+
+.nt-tagbar__head.is-open .nt-tagbar__chevron {
+  transform: rotate(180deg);
+}
+
+.nt-tagbar__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.nt-taggroup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.nt-taggroup__label {
+  display: inline-flex;
+  min-width: 6.5rem;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--accent);
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 11px;
+}
+
+.nt-taggroup__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+/* ── پرسش و پاسخ (بازیابی فعال) ── */
+.nt-qa {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.nt-qa__item {
+  border-radius: 1.2rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 0.9rem 1rem;
+}
+
+.nt-qa__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+.nt-qa__text {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 0.85rem;
+  line-height: 1.9;
+  color: #e6e6e6;
+}
+
+.nt-qa__badge {
+  display: inline-grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 1.45rem;
+  height: 1.45rem;
+  border-radius: 0.5rem;
+  background: rgba(147, 127, 205, 0.16);
+  color: #b6a6e6;
+  font-size: 10px;
+}
+
+.nt-qa__toggle {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 0.7rem;
+  border: 1px solid rgba(147, 127, 205, 0.3);
+  background: rgba(147, 127, 205, 0.1);
+  color: #b6a6e6;
+  cursor: pointer;
+  font-size: 10.5px;
+  white-space: nowrap;
+  transition: background-color 200ms ease;
+}
+
+.nt-qa__toggle:hover {
+  background: rgba(147, 127, 205, 0.2);
+  color: #d6cbf5;
+}
+
+.nt-qa__answer {
+  margin-top: 0.7rem;
+  margin-inline-start: 2.05rem;
+  border-top: 1px dashed rgba(255, 255, 255, 0.12);
+  padding-top: 0.7rem;
+  font-size: 0.85rem;
+  line-height: 1.95;
+  color: #a9d6b6;
+  white-space: pre-wrap;
+}
+
+.nt-qa__empty {
+  flex: 0 0 auto;
+  font-size: 11px;
+  color: #6d6d6d;
+  padding-top: 0.3rem;
+}
+
+/* ── جدول مقایسه ── */
+.nt-table-wrap {
+  overflow-x: auto;
+  border-radius: 1.2rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.nt-table {
+  width: 100%;
+  min-width: 26rem;
+  border-collapse: collapse;
+}
+
+.nt-table th {
+  background: rgba(255, 255, 255, 0.05);
+  color: #d6d6d6;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.7rem 0.9rem;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.nt-table td {
+  padding: 0.7rem 0.9rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  color: #c9c9c9;
+  font-size: 0.8rem;
+  line-height: 1.9;
+  vertical-align: top;
+}
+
+.nt-table tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.nt-table td:first-child {
+  color: #fff;
+  font-weight: 600;
+}
+
+/* ── تپش هوشمند ── */
+.nt-ai {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.45rem;
+  width: 100%;
+}
+
+.nt-ai__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 0.7rem;
+  border: 1px solid rgba(147, 127, 205, 0.32);
+  background: rgba(147, 127, 205, 0.1);
+  color: #b6a6e6;
+  cursor: pointer;
+  font-size: 10.5px;
+  white-space: nowrap;
+  transition:
+    background-color 200ms ease,
+    color 200ms ease;
+}
+
+.nt-ai--compact .nt-ai__btn {
+  padding: 0.3rem;
+  border-radius: 0.55rem;
+}
+
+.nt-ai__btn:hover,
+.nt-ai__btn.is-open {
+  background: rgba(147, 127, 205, 0.22);
+  color: #d6cbf5;
+}
+
+.nt-ai__panel {
+  width: 100%;
+  border-radius: 1rem;
+  border: 1px solid rgba(147, 127, 205, 0.28);
+  background: rgba(147, 127, 205, 0.07);
+  padding: 0.7rem;
+}
+
+.nt-ai__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.nt-ai__chip {
+  padding: 0.28rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: #aaa;
+  cursor: pointer;
+  font-size: 11px;
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease,
+    color 200ms ease;
+}
+
+.nt-ai__chip:hover {
+  border-color: rgba(147, 127, 205, 0.5);
+  color: #fff;
+}
+
+.nt-ai__chip.is-active {
+  border-color: rgba(147, 127, 205, 0.65);
+  background: rgba(147, 127, 205, 0.22);
+  color: #d9cffa;
+}
+
+.nt-ai__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #9d8fd6;
+  font-size: 10.5px;
+}
+
+.nt-ai__spinner {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 999px;
+  border: 2px solid rgba(147, 127, 205, 0.3);
+  border-top-color: #b6a6e6;
+  animation: nt-spin 0.7s linear infinite;
+}
+
+@keyframes nt-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.nt-ai__preview {
+  margin-top: 0.6rem;
+  border-radius: 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.28);
+  padding: 0.7rem 0.85rem;
+}
+
+.nt-ai__preview-text {
+  margin: 0;
+  color: #d6d6d6;
+  font-size: 12px;
+  line-height: 2;
+  white-space: pre-wrap;
+}
+
+.nt-ai__preview-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+
+.nt-ai__apply {
+  padding: 0.4rem 0.9rem;
+  border-radius: 0.7rem;
+  background: #937fcd;
+  color: #fff;
+  cursor: pointer;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 11px;
+}
+
+.nt-ai__apply:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.nt-ai__cancel {
+  padding: 0.4rem 0.9rem;
+  border-radius: 0.7rem;
+  background: rgba(255, 255, 255, 0.06);
+  color: #aaa;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.nt-ai__cancel:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.nt-ai__hint,
+.nt-ai__error {
+  margin: 0;
+  font-size: 11px;
+}
+
+.nt-ai__hint {
+  color: #8a8a8a;
+}
+
+.nt-ai__error {
+  margin-top: 0.5rem;
+  color: #ef9196;
 }
 
 /* دکمهٔ حذف دومرحله‌ای */
@@ -126,6 +644,19 @@
   }
 
   .nt-card:hover {
+    transform: none;
+  }
+
+  .nt-hero__create,
+  .nt-tagbar__chevron,
+  .nt-tag,
+  .nt-ai__btn,
+  .nt-ai__chip,
+  .nt-qa__toggle {
+    transition: none !important;
+  }
+
+  .nt-hero__create:hover {
     transform: none;
   }
 }

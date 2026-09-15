@@ -136,7 +136,7 @@ export default function LeagueProfile({ userData, me }) {
       {/* هویت لیگ */}
       <section aria-label="پروفایل لیگ" className="rounded-[2.5rem] bg-[#282828] p-5 md:p-8">
         <div className="flex flex-wrap items-center gap-5">
-          <UserAvatar config={profile.avatarConfig} size={84} isYou />
+          <UserAvatar avatar={profile.avatar} size={84} isYou />
           <div className="min-w-0 flex-1">
             <h2 className="text-2xl [font-family:'Doran',Tahoma,sans-serif]">{profile.name}</h2>
             <p className="mt-1 text-sm text-[#aaa]">{profile.university}</p>

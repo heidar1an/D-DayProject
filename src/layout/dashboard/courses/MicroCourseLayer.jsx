@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import './microCourse.css';
+import { LAYER_IDS, useLayerRoute } from '../dashboardRoute';
+
+/* نمای آغازین لایهٔ میکرو درسنامه: بدون فیلتر و بدون درسِ لینک‌شده */
+const MICRO_VIEW = { filter: 'all', subject: null, deep: null };
 
 const FA_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
 const toFa = (value) => String(value).replace(/\d/g, (digit) => FA_DIGITS[Number(digit)]);
@@ -214,8 +218,10 @@ function SubjectRow({ subject, onOpenSubject }) {
   );
 }
 
-export default function MicroCourseLayer({ onBack, onOpenComprehensive, initialSubject = null }) {
-  const [filter, setFilter] = useState('all');
+export default function MicroCourseLayer({ onBack, onOpenComprehensive }) {
+  /* فیلتر و درسِ لینک‌شده روی مسیر داشبورد می‌نشینند؛ متن کادر جست‌وجو محلی می‌ماند */
+  const [view, , patchView] = useLayerRoute(LAYER_IDS.micro, MICRO_VIEW);
+  const filter = view.filter ?? 'all';
   const [query, setQuery] = useState('');
 
   useEffect(() => {
@@ -257,7 +263,7 @@ export default function MicroCourseLayer({ onBack, onOpenComprehensive, initialS
 
   /* ورود به لایهٔ درسنامه جامع؛ اگر از کارت «سه سوته» با درس مشخص آمده‌ایم، همان درس باز شود */
   const openSubjectLayer = (subjectId) => {
-    onOpenComprehensive?.(subjectId ?? initialSubject ?? null);
+    onOpenComprehensive?.(subjectId ?? view.subject ?? view.deep?.subject ?? null);
   };
 
   return (

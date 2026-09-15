@@ -8,6 +8,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useAsyncData } from '../league/useAsyncData';
+import { LAYER_IDS, useLayerRoute } from '../dashboardRoute';
 import * as api from '../../../services/wiki/wikiService';
 import WikiHome from './WikiHome';
 import WikiResults from './WikiResults';
@@ -15,19 +16,42 @@ import WikiArticle from './WikiArticle';
 import { scrollWikiTop } from './wikiShared';
 import './wiki.css';
 
+/* نمای آغازین لایه؛ جست‌وجو، فیلتر و پشتهٔ مقاله‌ها هم روی مسیر داشبورد می‌نشینند
+   تا Back و رفرش دقیقاً به همان نتایج/مقاله برگردند. */
+const WIKI_HOME_VIEW = {
+  mode: 'home',
+  query: '',
+  filters: {},
+  sort: 'relevance',
+  slug: null,
+  stack: [],
+  fromResults: false,
+};
+
+/* هر مقاله یک ورودی تاریخچه است تا Back/Forward بین مقالات هم کار کند */
+const wikiScreenOf = (current) => (current?.mode === 'article' ? `article:${current.slug}` : current?.mode);
+
 export default function WikiLayer({ onBack }) {
-  const [mode, setMode] = useState('home');
+  const [view, setView, patchView] = useLayerRoute(LAYER_IDS.wiki, WIKI_HOME_VIEW, {
+    screenOf: wikiScreenOf,
+  });
+  const {
+    mode,
+    query: committedQuery,
+    filters,
+    sort,
+    slug: articleSlug,
+    stack: articleStack,
+    fromResults: cameFromResults,
+  } = view;
 
-  /* وضعیت نتایج — بین بازدید مقاله‌ها حفظ می‌شود تا Back دقیقاً به همان نتایج برگردد */
-  const [committedQuery, setCommittedQuery] = useState('');
-  const [draftQuery, setDraftQuery] = useState('');
-  const [filters, setFilters] = useState({});
-  const [sort, setSort] = useState('relevance');
+  /* متن داخل کادر جست‌وجو محلی می‌ماند و با هر تغییر «جست‌وجوی کامیت‌شده» هم‌گام می‌شود
+     (مثلاً وقتی با Back از مقاله به نتایج برمی‌گردیم). */
+  const [draftQuery, setDraftQuery] = useState(committedQuery);
 
-  /* پشته مقاله‌ها برای ناوبری بین مفاهیم مرتبط */
-  const [articleStack, setArticleStack] = useState([]);
-  const [articleSlug, setArticleSlug] = useState(null);
-  const [cameFromResults, setCameFromResults] = useState(false);
+  useEffect(() => {
+    setDraftQuery(committedQuery);
+  }, [committedQuery]);
 
   /* بارگذاری نتایج — فقط وقتی جست‌وجوی کامیت‌شده/فیلترها عوض شود */
   const { data: resultsData, loading: resultsLoading } = useAsyncData(
@@ -36,18 +60,21 @@ export default function WikiLayer({ onBack }) {
   );
 
   const goHome = useCallback(() => {
-    setMode('home');
-    setArticleStack([]);
-    setArticleSlug(null);
-  }, []);
+    setView((current) => ({ ...current, mode: 'home', stack: [], slug: null }));
+  }, [setView]);
 
-  const openResults = useCallback((term, nextFilters) => {
-    setCommittedQuery(term);
-    setDraftQuery(term);
-    if (nextFilters) setFilters(nextFilters);
-    setMode('results');
-    scrollWikiTop();
-  }, []);
+  const openResults = useCallback(
+    (term, nextFilters) => {
+      setView((current) => ({
+        ...current,
+        mode: 'results',
+        query: term,
+        filters: nextFilters ?? current.filters,
+      }));
+      scrollWikiTop();
+    },
+    [setView],
+  );
 
   const handleSearch = useCallback(
     (term) => {
@@ -55,52 +82,53 @@ export default function WikiLayer({ onBack }) {
         goHome();
         return;
       }
-      setFilters({});
-      setSort('relevance');
       api.saveRecentSearch(term);
-      openResults(term, {});
+      setView((current) => ({
+        ...current,
+        mode: 'results',
+        query: term,
+        filters: {},
+        sort: 'relevance',
+      }));
+      scrollWikiTop();
     },
-    [openResults, goHome],
+    [goHome, setView],
   );
 
   const handleBrowseSubject = useCallback(
     (subjectId) => {
-      setFilters({ subject: subjectId });
-      setSort('popular');
       openResults('', { subject: subjectId });
+      patchView({ sort: 'popular' });
     },
-    [openResults],
+    [openResults, patchView],
   );
 
   const handleOpenArticle = useCallback(
     (slug, { from } = {}) => {
-      if (from === 'article' && articleSlug) {
-        /* مقاله فعلی روی پشته می‌رود تا «بازگشت به مقاله قبل» به آن برگردد */
-        setArticleStack((stack) => [...stack, articleSlug].slice(-12));
-      } else {
-        setArticleStack([]);
-        setCameFromResults(from === 'results');
-      }
-      setArticleSlug(slug);
-      setMode('article');
+      setView((current) => {
+        if (from === 'article' && current.slug) {
+          /* مقاله فعلی روی پشته می‌رود تا «بازگشت به مقاله قبل» به آن برگردد */
+          return { ...current, mode: 'article', slug, stack: [...current.stack, current.slug].slice(-12) };
+        }
+        return { ...current, mode: 'article', slug, stack: [], fromResults: from === 'results' };
+      });
     },
-    [articleSlug],
+    [setView],
   );
 
   const goBackFromArticle = useCallback(() => {
-    if (articleStack.length > 0) {
-      const stack = [...articleStack];
-      const previous = stack.pop();
-      setArticleStack(stack);
-      setArticleSlug(previous);
-      return;
-    }
-    if (cameFromResults || committedQuery) {
-      setMode('results');
-      return;
-    }
-    goHome();
-  }, [articleStack, cameFromResults, committedQuery, goHome]);
+    setView((current) => {
+      if (current.stack.length > 0) {
+        const stack = [...current.stack];
+        const previous = stack.pop();
+        return { ...current, stack, slug: previous };
+      }
+      if (current.fromResults || current.query) {
+        return { ...current, mode: 'results', slug: null };
+      }
+      return { ...current, mode: 'home', stack: [], slug: null };
+    });
+  }, [setView]);
 
   /* Escape = back در هر نما (کلیک بیرون و بستن پیشنهادها را سرچ‌بار خودش مدیریت می‌کند) */
   useEffect(() => {
@@ -142,10 +170,8 @@ export default function WikiLayer({ onBack }) {
             onQueryChange={setDraftQuery}
             onSearch={handleSearch}
             onOpenArticle={handleOpenArticle}
-            onFiltersChange={(next) => {
-              setFilters(next);
-            }}
-            onSortChange={setSort}
+            onFiltersChange={(next) => patchView({ filters: next })}
+            onSortChange={(next) => patchView({ sort: next })}
           />
         )}
 

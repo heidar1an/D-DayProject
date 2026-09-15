@@ -2,11 +2,15 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import AIComposer from './AIComposer';
 import AIConversation from './AIConversation';
 import { useAIConversation, getSavedConversations } from './aiStore';
+import { LAYER_IDS, useLayerRoute } from '../dashboardRoute';
 import { SparkIcon, BookmarkIcon, PlusIcon, CloseIcon, SendIcon, toFaDigits } from './aiShared';
 import './ai.css';
 
 const faDate = (timestamp) =>
   new Date(timestamp).toLocaleDateString('fa-IR', { month: 'long', day: 'numeric' });
+
+/* گفت‌وگوی فعال روی مسیر داشبورد می‌نشیند تا رفرش همان گفت‌وگو را برگرداند */
+const AI_LAYER_VIEW = { conversationId: null };
 
 /*
  * لایهٔ «تپش هوشمند» — چیدمان سه‌بخشی:
@@ -16,9 +20,10 @@ const faDate = (timestamp) =>
  */
 export default function AILayer({ onBack }) {
   const ai = useAIConversation();
+  const [view, , patchView] = useLayerRoute(LAYER_IDS.ai, AI_LAYER_VIEW);
+  const activeConversationId = view.conversationId;
   const [draft, setDraft] = useState('');
   const [conversations, setConversations] = useState(() => getSavedConversations());
-  const [activeConversationId, setActiveConversationId] = useState(null);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [savedFlash, setSavedFlash] = useState(false);
   const savedTimer = useRef(null);
@@ -35,6 +40,16 @@ export default function AILayer({ onBack }) {
     };
   }, []);
 
+  /* رفرش روی گفت‌وگوی ذخیره‌شده: گفت‌وگو از حافظهٔ محلی بازخوانی می‌شود */
+  const restoredRef = useRef(false);
+  useEffect(() => {
+    if (restoredRef.current) return;
+    restoredRef.current = true;
+    if (!view.conversationId || ai.messages.length > 0) return;
+    if (!ai.loadConversation(view.conversationId)) patchView({ conversationId: null });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     composerRef.current?.querySelector('textarea')?.focus();
   }, []);
@@ -48,7 +63,7 @@ export default function AILayer({ onBack }) {
     if (!hasMessages) return;
     const savedId = ai.saveConversation();
     if (savedId) {
-      setActiveConversationId(savedId);
+      patchView({ conversationId: savedId });
       refreshConversations();
       setSavedFlash(true);
       clearTimeout(savedTimer.current);
@@ -59,14 +74,14 @@ export default function AILayer({ onBack }) {
   const handleNewConversation = () => {
     ai.reset();
     setDraft('');
-    setActiveConversationId(null);
+    patchView({ conversationId: null });
     setIsHistoryOpen(false);
     composerRef.current?.querySelector('textarea')?.focus();
   };
 
   const handleOpenConversation = (conversationId) => {
     if (ai.loadConversation(conversationId)) {
-      setActiveConversationId(conversationId);
+      patchView({ conversationId });
       setDraft('');
       setIsHistoryOpen(false);
       composerRef.current?.querySelector('textarea')?.focus();
@@ -75,7 +90,7 @@ export default function AILayer({ onBack }) {
 
   const handleDeleteConversation = (conversationId) => {
     ai.deleteConversation(conversationId);
-    if (conversationId === activeConversationId) setActiveConversationId(null);
+    if (conversationId === activeConversationId) patchView({ conversationId: null });
     refreshConversations();
   };
 

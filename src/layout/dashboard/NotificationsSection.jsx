@@ -104,7 +104,7 @@ function NotificationRow({ item, index }) {
     >
       {item.avatar ? (
         <span className="notifications__row-avatar">
-          <UserAvatar config={item.avatar} size={56} />
+          <UserAvatar avatar={item.avatar} size={56} />
         </span>
       ) : (
         <span className="notifications__row-icon" style={{ color: item.accent }} aria-hidden="true">

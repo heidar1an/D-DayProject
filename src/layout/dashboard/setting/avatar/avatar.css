@@ -1,10 +1,10 @@
-/* استایل‌های لایه آواتارساز — هماهنگ با تم تیره تپش */
+/* استایل‌های لایه انتخاب آواتار — هماهنگ با تم تیره تپش */
 
-.avatar-builder {
-  animation: avatar-builder-pop 0.28s ease-out both;
+.avatar-picker {
+  animation: avatar-picker-pop 0.28s ease-out both;
 }
 
-@keyframes avatar-builder-pop {
+@keyframes avatar-picker-pop {
   from {
     opacity: 0;
     transform: translateY(16px) scale(0.97);
@@ -15,25 +15,31 @@
   }
 }
 
-/* اسکرول‌بار نازک برای ناحیه گزینه‌ها */
-.avatar-builder__scroll {
+/* اسکرول‌بار نازک برای ناحیه آواتارها */
+.avatar-picker__scroll {
   scrollbar-width: thin;
   scrollbar-color: rgba(185, 154, 134, 0.45) transparent;
 }
 
-.avatar-builder__scroll::-webkit-scrollbar {
+.avatar-picker__scroll::-webkit-scrollbar {
   width: 6px;
 }
 
-.avatar-builder__scroll::-webkit-scrollbar-track {
+.avatar-picker__scroll::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.avatar-builder__scroll::-webkit-scrollbar-thumb {
+.avatar-picker__scroll::-webkit-scrollbar-thumb {
   border-radius: 999px;
   background: rgba(185, 154, 134, 0.45);
 }
 
-.avatar-builder__scroll::-webkit-scrollbar-thumb:hover {
+.avatar-picker__scroll::-webkit-scrollbar-thumb:hover {
   background: rgba(185, 154, 134, 0.7);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .avatar-picker {
+    animation: none;
+  }
 }

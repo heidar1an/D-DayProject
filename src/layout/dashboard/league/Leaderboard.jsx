@@ -18,7 +18,7 @@ import {
   toFa,
 } from './leagueShared';
 
-/* آواتار ورودی‌ها: یا کانفیگ صریح، یا ساخته‌شده از seed دترمینیستیکی */
+/* آواتار ورودی‌ها: شناسهٔ صریح، یا آواتار ساخته‌شده از seed دترمینیستیکی */
 const avatarOf = (entry) => entry.avatar ?? (entry.seed !== undefined ? avatarForSeed(entry.seed) : null);
 
 const SCOPES = [
@@ -47,7 +47,7 @@ export function PodiumCard({ entry, place, metric }) {
       style={{ animationDelay: `${place * 90}ms` }}
     >
       <RankChip rank={place} size="lg" />
-      <UserAvatar config={avatarOf(entry)} size={isCenter ? 62 : 48} />
+      <UserAvatar avatar={avatarOf(entry)} size={isCenter ? 62 : 48} />
       <strong className="mt-1 line-clamp-1 text-sm [font-family:'Doran',Tahoma,sans-serif]">
         {entry.name}
       </strong>
@@ -77,7 +77,7 @@ export function LeaderRow({ entry, metric }) {
       }`}
     >
       <RankChip rank={entry.rank} />
-      <UserAvatar config={avatarOf(entry)} size={40} isYou={entry.isYou} />
+      <UserAvatar avatar={avatarOf(entry)} size={40} isYou={entry.isYou} />
       <span className="min-w-0 flex-1">
         <strong className="block truncate text-sm [font-family:'Doran',Tahoma,sans-serif]">
           {entry.name}
@@ -124,6 +124,10 @@ export default function Leaderboard({ me }) {
 
   const activeMetric = METRICS.find((item) => item.id === metric) ?? METRICS[0];
 
+  /* ردیف «شما» در پاسخ سرویس آواتار ندارد؛ آواتار واقعی کاربر همان‌جا تزریق می‌شود */
+  const withMyAvatar = (list) =>
+    list.map((entry) => (entry.isYou && me?.avatar ? { ...entry, avatar: me.avatar } : entry));
+
   useEffect(() => {
     const token = ++loadTokenRef.current;
     setLoading(true);
@@ -133,7 +137,7 @@ export default function Leaderboard({ me }) {
       .then((result) => {
         if (token !== loadTokenRef.current) return;
         setData(result);
-        setItems(result.items);
+        setItems(withMyAvatar(result.items));
       })
       .finally(() => {
         if (token === loadTokenRef.current) setLoading(false);
@@ -145,7 +149,7 @@ export default function Leaderboard({ me }) {
     const token = ++loadTokenRef.current;
     fetchLeaderboard({ scope, metric, offset: data.nextOffset }).then((result) => {
       if (token !== loadTokenRef.current) return;
-      setItems((prev) => [...prev, ...result.items]);
+      setItems((prev) => [...prev, ...withMyAvatar(result.items)]);
       setData(result);
     });
   };

@@ -392,7 +392,7 @@ export default function LeagueSection({ userData }) {
           <div className="dash-stagger space-y-4">
             <div className="rounded-[2.5rem] bg-[#282828] p-5 md:p-8">
               <div className="flex flex-wrap items-center gap-5">
-                <UserAvatar config={me.avatarConfig} size={84} isYou />
+                <UserAvatar avatar={me.avatar} size={84} isYou />
                 <div className="min-w-0">
                   <h2 className="text-2xl [font-family:'Doran',Tahoma,sans-serif]">{me.name}</h2>
                   <p className="mt-1 text-sm text-[#aaa]">{me.university}</p>

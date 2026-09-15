@@ -5,7 +5,7 @@
  * سرویس — هیچ نایی مستقیماً به منبع داده وابسته نیست؛ حلّهٔ سؤال همیشه سمت سرویس
  * ساخته می‌شود.
  */
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   EMPTY_SCOPE,
   createSession,
@@ -27,6 +27,7 @@ import {
   saveExam,
 } from '../../../../services/examBuilder/examBuilderService';
 import { Icon, Skeleton, EmptyState, faNum, toFa } from './bankShared';
+import { LAYER_IDS, useLayerRoute } from '../../dashboardRoute';
 import './bank.css';
 import BankHome, { SubjectPicker } from './BankHome';
 import BankYears from './BankYears';
@@ -66,6 +67,26 @@ const DIFF_LABELS = { easy: 'آسان', medium: 'متوسط', hard: 'سخت', ve
 const BANK_KIND_SHORT = { national: 'کشوری', authored: 'تألیفی' };
 const TRACK_SHORT = { medicine: 'پزشکی', dentistry: 'دندان‌پزشکی' };
 
+/* نمای آغازین لایه و نماهایی که در آدرس نمی‌نشینند (محیط حل، چون سشن در حافظه است) */
+const TEST_BANK_HOME = { name: 'home', payload: null };
+const TEST_BANK_VOLATILE = ['live'];
+
+/* «صفحه»ی لایه: نماهای مبحثی با شناسهٔ درس تفکیک می‌شوند تا رفتن از یک درس به درس
+   دیگر یک ورودی تاریخچه بسازد و Back همان درس قبلی را برگرداند. */
+const testBankScreenOf = (current) => {
+  const name = current?.name ?? TEST_BANK_HOME.name;
+  if (name === 'topics' || name === 'subject') {
+    return `${name}:${current?.payload?.subjectId ?? ''}`;
+  }
+  return name;
+};
+
+/* ورودی کارت‌های بخش «تست» → نمای آغازین لایه (لینک عمیق کارت «آزمون‌های شخصی») */
+export function testBankEntryView(entry) {
+  if (entry === 'builder') return { name: 'builder', payload: { preset: null } };
+  return null;
+}
+
 /* خلاصهٔ متنی فیلتر برای زیرعنوان سشن */
 function summarizeFilters(filters) {
   const f = normalizeFilters(filters);
@@ -81,9 +102,13 @@ function summarizeFilters(filters) {
   return parts.join(' · ');
 }
 
-export default function TestBankLayer({ userData, initialView = null, onBack }) {
+export default function TestBankLayer({ userData, onBack }) {
   const userId = userData?.id ?? userData?.phone ?? 'guest';
-  const [view, setView] = useState(() => ({ name: initialView ?? 'home', payload: initialView === 'builder' ? { preset: null } : null }));
+  /* نمای لایه روی مسیر داشبورد می‌نشیند: Back/Forward بین نماها و رفرش در همان نما */
+  const [view, setView] = useLayerRoute(LAYER_IDS.testBank, TEST_BANK_HOME, {
+    volatile: TEST_BANK_VOLATILE,
+    screenOf: testBankScreenOf,
+  });
   const [returnView, setReturnView] = useState(null); // مقصد بازگشت پس از خروج از محیط حل
   const [scope, setScope] = useState(EMPTY_SCOPE); // دامنهٔ بانک: نوع بانک (کشوری/تألیفی) × رشته
   const [overview, setOverview] = useState(null);
@@ -126,6 +151,16 @@ export default function TestBankLayer({ userData, initialView = null, onBack }) 
     setView({ name: nextView, payload });
     setError(null);
     scrollToTop();
+  }, [setView]);
+
+  /* ── بازگشت سرد به کارنامه (رفرش روی کارنامه) — سشن از سرویس خوانده می‌شود ── */
+  const restoredRef = useRef(false);
+  useEffect(() => {
+    if (restoredRef.current) return;
+    restoredRef.current = true;
+    if (view.name !== 'result' || !view.payload?.sessionId) return;
+    openResult(view.payload.sessionId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /* ── شروع تمرین/آزمون — حلّهٔ سؤال سمت سرویس ساخته می‌شود ── */
@@ -314,7 +349,7 @@ export default function TestBankLayer({ userData, initialView = null, onBack }) 
     try {
       const session = await fetchSession(userId, sessionId);
       setResultSession(session);
-      go('result');
+      go('result', { sessionId });
     } catch {
       setError('کارنامه پیدا نشد.');
     } finally {
@@ -327,7 +362,7 @@ export default function TestBankLayer({ userData, initialView = null, onBack }) 
     const target = returnView ?? { name: 'home' };
     setRoom(null);
     if (target.name === 'result') {
-      go('result');
+      go('result', target.payload ?? null);
       return;
     }
     refreshOverview();

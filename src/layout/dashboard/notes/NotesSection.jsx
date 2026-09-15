@@ -2,9 +2,9 @@
  * بخش یادداشت تپش — دفترچهٔ شخصی دانشجوی پزشکی.
  *
  * ساختار (مستند کامل: README.md کنار همین پوشه):
- *   NotesSection ← پوسته: هیرو + آمار + جست‌وجو/فیلتر + گلچین + گرید کارت‌ها
- *   NoteDetail   ← نمای کامل یادداشت (چک‌لیست تعاملی، منبع، تگ‌ها)
- *   NoteEditor   ← مودال ساخت/ویرایش (متنی/چک‌لیست + موضوع + تگ + رنگ + منبع)
+ *   NotesSection ← پوسته: هیرو + آمار + جست‌وجو/فیلتر + دسته‌بندی تگ‌ها + گرید کارت‌ها
+ *   NoteDetail   ← نمای کامل یادداشت (چک‌لیست، پرسش و پاسخ، جدول، منبع، تگ‌ها)
+ *   NoteEditor   ← مودال ساخت/ویرایش (چهار حالت + موضوع + تگ دسته‌بندی‌شده + منبع)
  *   سرویس: src/services/notes (قرارداد API واقعی، فعلاً Mock + localStorage)
  *
  * تغییرات اپتیمستیک هستند: state محلی فوراً عوض می‌شود و سرویس در پس‌زمینه
@@ -13,14 +13,17 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   buildSnippet,
-  checklistProgress,
   createNote,
   deleteNote,
   fetchNotes,
   filterNotes,
+  groupTags,
   noteColor,
+  noteMetrics,
   relativeEditedAt,
+  runNoteAIOnNote,
   setNotePinned,
+  tagAccent,
   toggleChecklistItem,
   updateNote,
 } from '../../../services/notes/notesService';
@@ -29,7 +32,7 @@ import { useAsyncData } from '../league/useAsyncData';
 import { EmptyState, Skeleton, toFa } from '../league/leagueShared';
 import NoteDetail from './NoteDetail';
 import NoteEditor from './NoteEditor';
-import { DeleteButton, Icon, KindBadge, SubjectChip } from './notesShared';
+import { DeleteButton, Icon, KindBadge, SubjectChip, TagPill } from './notesShared';
 import './notes.css';
 
 const SORT_OPTIONS = [
@@ -61,7 +64,7 @@ function ErrorState({ onRetry }) {
 
 /* ── کارت یادداشت در گرید ── */
 function NoteCard({ note, onOpen, onTogglePin, onEdit, onDelete }) {
-  const progress = checklistProgress(note);
+  const metrics = noteMetrics(note);
   const color = noteColor(note);
 
   return (
@@ -117,30 +120,36 @@ function NoteCard({ note, onOpen, onTogglePin, onEdit, onDelete }) {
 
       <p className="mt-2 flex-1 text-xs leading-6 text-[#8a8a8a]">{buildSnippet(note)}</p>
 
-      {note.kind === 'checklist' && progress.total > 0 && (
+      {metrics.type === 'progress' && metrics.total > 0 && (
         <div className="mt-3 flex items-center gap-2.5">
           <div
             className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/8"
             role="progressbar"
-            aria-valuenow={progress.percent}
+            aria-valuenow={metrics.percent}
             aria-valuemin={0}
             aria-valuemax={100}
             aria-label="پیشرفت چک‌لیست"
           >
-            <span className="block h-full rounded-full bg-[#77b787] transition-[width] duration-500" style={{ width: `${progress.percent}%` }} />
+            <span className="block h-full rounded-full bg-[#77b787] transition-[width] duration-500" style={{ width: `${metrics.percent}%` }} />
           </div>
           <span className="text-[10px] text-[#6d6d6d]">
-            {toFa(progress.done)}/{toFa(progress.total)}
+            {toFa(metrics.done)}/{toFa(metrics.total)}
           </span>
         </div>
+      )}
+
+      {metrics.type === 'count' && (
+        <p className="mt-3 flex items-center gap-1.5 text-[10px] text-[#6d6d6d]">
+          <Icon name={metrics.icon} size={12} />
+          {toFa(metrics.count)} {metrics.unit}
+          {metrics.columns ? ` · ${toFa(metrics.columns)} ستون` : ''}
+        </p>
       )}
 
       {note.tags.length > 0 && (
         <div className="mt-3 flex flex-wrap items-center gap-1.5">
           {note.tags.slice(0, 3).map((tag) => (
-            <span key={tag} className="rounded-full bg-white/[0.05] px-2.5 py-0.5 text-[10px] text-[#8a8a8a]">
-              {tag}
-            </span>
+            <TagPill key={tag} tag={tag} accent={tagAccent(tag)} />
           ))}
           {note.tags.length > 3 && (
             <span className="rounded-full bg-white/[0.05] px-2.5 py-0.5 text-[10px] text-[#6d6d6d]">
@@ -157,11 +166,89 @@ function NoteCard({ note, onOpen, onTogglePin, onEdit, onDelete }) {
   );
 }
 
+/* ── دسته‌بندی تگ‌ها ──
+   تگ‌ها زیر عنوان دستهٔ خودشان (فیزیولوژی، عمومی، …) می‌آیند تا فهرست تگ‌ها
+   به‌هم‌ریخته نشود؛ کلیک روی هر تگ فهرست را فیلتر می‌کند. */
+function TagBrowser({ groups, activeTag, onSelect }) {
+  const [open, setOpen] = useState(false);
+  const total = groups.reduce((sum, group) => sum + group.tags.length, 0);
+
+  /* وقتی تگی فیلتر شده، پنل خودش باز می‌ماند تا فیلترِ فعال گم نشود */
+  useEffect(() => {
+    if (activeTag) setOpen(true);
+  }, [activeTag]);
+
+  if (groups.length === 0) return null;
+
+  return (
+    <section className="nt-tagbar" aria-label="دسته‌بندی تگ‌ها">
+      <button
+        type="button"
+        className={`nt-tagbar__head ${open ? 'is-open' : ''}`}
+        aria-expanded={open}
+        onClick={() => setOpen((current) => !current)}
+      >
+        <span className="flex flex-wrap items-center gap-2">
+          <Icon name="folder" size={14} />
+          دسته‌بندی تگ‌ها
+          <span className="text-[10px] font-normal text-[#6d6d6d]">
+            {toFa(total)} تگ در {toFa(groups.length)} دسته
+          </span>
+        </span>
+        <span className="flex items-center gap-2">
+          {activeTag && <TagPill tag={activeTag} accent={tagAccent(activeTag)} />}
+          <Icon name="chevron" size={16} className="nt-tagbar__chevron" />
+        </span>
+      </button>
+
+      {open && (
+        <div className="nt-tagbar__body">
+          <div>
+            <button
+              type="button"
+              aria-pressed={!activeTag}
+              onClick={() => onSelect(null)}
+              className={`cursor-pointer rounded-full border px-3.5 py-1.5 text-xs transition-colors ${
+                !activeTag
+                  ? 'border-white/25 bg-white/[0.1] text-white'
+                  : 'border-white/8 bg-white/[0.03] text-[#8a8a8a] hover:bg-white/[0.06]'
+              }`}
+            >
+              همهٔ تگ‌ها
+            </button>
+          </div>
+
+          {groups.map((group) => (
+            <div key={group.id} className="nt-taggroup" style={{ '--accent': group.accent }}>
+              <span className="nt-taggroup__label">
+                <Icon name="folder" size={12} />
+                {group.label}
+              </span>
+              <div className="nt-taggroup__tags">
+                {group.tags.map(({ tag, count }) => (
+                  <TagPill
+                    key={tag}
+                    tag={tag}
+                    accent={group.accent}
+                    count={count}
+                    active={activeTag === tag}
+                    onClick={() => onSelect(activeTag === tag ? null : tag)}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
 /* ── اسکلت بارگذاری اولیه ── */
 function SkeletonHome() {
   return (
     <div className="space-y-4" aria-hidden="true">
-      <Skeleton className="h-48 rounded-[2.5rem]" />
+      <Skeleton className="h-64 rounded-[2rem]" />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {Array.from({ length: 6 }, (_, index) => (
           <Skeleton key={index} className="h-52 rounded-[2rem]" />
@@ -185,6 +272,7 @@ export default function NotesSection({ userData }) {
   const [editor, setEditor] = useState(null); // null | { note: Note|null, saving: boolean }
   const [query, setQuery] = useState('');
   const [subjectFilter, setSubjectFilter] = useState('all');
+  const [tagFilter, setTagFilter] = useState(null);
   const [sort, setSort] = useState('updated');
 
   const goHome = useCallback(() => {
@@ -279,6 +367,19 @@ export default function NotesSection({ userData }) {
     [userData, silentRefresh],
   );
 
+  /* بازنویسی کل یادداشت با تپش هوشمند — نتیجه اپتیمستیک جایگزین و بعد ذخیره می‌شود */
+  const handleRewrite = useCallback(
+    async (note, action) => {
+      const next = await runNoteAIOnNote({ note, action });
+      const updated = await updateNote(userData, note.id, next);
+      if (!updated) return null;
+      setNotes((current) => (current ? current.map((row) => (row.id === updated.id ? updated : row)) : current));
+      silentRefresh();
+      return updated;
+    },
+    [userData, silentRefresh],
+  );
+
   /* Escape در نمای یادداشت = بازگشت به فهرست (وقتی مودال باز نیست) */
   useEffect(() => {
     if (mode !== 'note') return undefined;
@@ -309,8 +410,8 @@ export default function NotesSection({ userData }) {
   }, [notes]);
 
   const filtered = useMemo(
-    () => (notes ? filterNotes(notes, { query, subjectId: subjectFilter, sort }) : []),
-    [notes, query, subjectFilter, sort],
+    () => (notes ? filterNotes(notes, { query, subjectId: subjectFilter, tag: tagFilter, sort }) : []),
+    [notes, query, subjectFilter, tagFilter, sort],
   );
   const pinnedNotes = filtered.filter((note) => note.pinned);
   const restNotes = filtered.filter((note) => !note.pinned);
@@ -325,13 +426,16 @@ export default function NotesSection({ userData }) {
     }));
   }, [notes]);
 
-  const allTags = useMemo(() => {
-    const seen = new Set();
-    (notes ?? []).forEach((note) => (note.tags ?? []).forEach((tag) => seen.add(tag)));
-    return [...seen].sort((a, b) => new Intl.Collator('fa').compare(a, b));
-  }, [notes]);
+  /* تگ‌ها به تفکیک دسته (فیزیولوژی، آناتومی، …، عمومی) */
+  const tagGroups = useMemo(() => groupTags(notes), [notes]);
 
-  const isFiltering = query.trim() || subjectFilter !== 'all';
+  const isFiltering = query.trim() || subjectFilter !== 'all' || Boolean(tagFilter);
+
+  const resetFilters = useCallback(() => {
+    setQuery('');
+    setSubjectFilter('all');
+    setTagFilter(null);
+  }, []);
 
   const renderGrid = (list) => (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -374,65 +478,50 @@ export default function NotesSection({ userData }) {
           onDelete={handleDelete}
           onTogglePin={handleTogglePin}
           onToggleItem={handleToggleItem}
+          onRewrite={handleRewrite}
         />
       ) : (
         <div className="space-y-6">
-          {/* ── هیرو ── */}
-          <section
-            className="relative overflow-hidden rounded-[2.5rem] bg-[#282828] p-8 md:p-10"
-            aria-label="دفترچهٔ یادداشت"
-          >
-            <span
-              className="pointer-events-none absolute -top-24 end-10 h-64 w-64 rounded-full opacity-25 blur-3xl"
-              style={{ background: 'radial-gradient(circle, #5b8cc7 0%, transparent 70%)' }}
-              aria-hidden="true"
-            />
-            <span
-              className="pointer-events-none absolute -bottom-28 start-1/3 h-56 w-56 rounded-full opacity-20 blur-3xl"
-              style={{ background: 'radial-gradient(circle, #e26d6d 0%, transparent 70%)' }}
-              aria-hidden="true"
-            />
+          {/* ── هیرو — هم‌زبان بصری سرتیتر «درسنامه جامع» ── */}
+          <header className="nt-hero dash-stagger" aria-label="دفترچهٔ یادداشت">
+            <span className="nt-hero__glow" aria-hidden="true" />
+            <div className="nt-hero__content">
+              <h1 className="nt-hero__title">
+                <span className="nt-hero__title-top">دفترچهٔ شخصی تپش</span>
+                <span className="nt-hero__title-accent">یادداشت‌های من</span>
+              </h1>
+              <p className="nt-hero__subtitle">
+                هر نکته، ترفند و برنامه‌ات یک‌جا؛ متن و چک‌لیست بنویس، با پرسش و پاسخ خودت را
+                بسنج، مقایسه‌ها را در جدول بچین و بگذار تپش هوشمند مرتبشان کند.
+              </p>
 
-            <div className="relative flex flex-wrap items-start justify-between gap-6">
-              <div className="max-w-xl">
-                <h1 className="text-2xl leading-10 [font-family:'Doran',Tahoma,sans-serif] md:text-3xl">
-                  دفترچهٔ یادداشت
-                </h1>
-                <p className="mt-3 text-sm leading-7 text-[#8a8a8a]">
-                  نکته‌ها، ترفندها و برنامه‌هایت را جایی نگه دار که گم نشوند؛ یادداشت‌هایت را به
-                  درسنامه، تست یا مقاله وصل کن و با چک‌لیست پیشرفت جمع‌بندی‌ات را ببین.
-                </p>
-
-                <div className="mt-5 flex flex-wrap items-center gap-2 text-[11px] text-[#aaa]">
-                  <span className="flex items-center gap-1.5 rounded-full bg-white/[0.05] px-3 py-1.5">
-                    <Icon name="note" size={13} />
-                    {toFa(stats.total)} یادداشت
-                  </span>
-                  <span className="flex items-center gap-1.5 rounded-full bg-white/[0.05] px-3 py-1.5">
-                    <Icon name="pinFilled" size={13} />
-                    {toFa(stats.pinned)} گلچین‌شده
-                  </span>
-                  <span className="flex items-center gap-1.5 rounded-full bg-white/[0.05] px-3 py-1.5">
-                    <Icon name="tag" size={13} />
-                    {toFa(stats.subjects)} موضوع
-                  </span>
-                  <span className="flex items-center gap-1.5 rounded-full bg-white/[0.05] px-3 py-1.5">
-                    <Icon name="spark" size={13} />
-                    {toFa(stats.thisWeek)} این هفته
-                  </span>
-                </div>
+              <div className="nt-hero__stats">
+                <span className="nt-hero__stat">
+                  <Icon name="note" size={13} />
+                  {toFa(stats.total)} یادداشت
+                </span>
+                <span className="nt-hero__stat">
+                  <Icon name="pinFilled" size={13} />
+                  {toFa(stats.pinned)} گلچین‌شده
+                </span>
+                <span className="nt-hero__stat">
+                  <Icon name="tag" size={13} />
+                  {toFa(stats.subjects)} موضوع
+                </span>
+                <span className="nt-hero__stat">
+                  <Icon name="spark" size={13} />
+                  {toFa(stats.thisWeek)} این هفته
+                </span>
               </div>
 
-              <button
-                type="button"
-                onClick={() => setEditor({ note: null, saving: false })}
-                className="flex cursor-pointer items-center gap-2 rounded-2xl bg-[#5b8cc7] px-6 py-3.5 text-sm font-bold text-white shadow-[0_16px_40px_-16px_rgba(91,140,199,0.8)] transition-transform hover:-translate-y-0.5 [font-family:'Doran',Tahoma,sans-serif]"
-              >
-                <Icon name="plus" size={16} />
-                یادداشت جدید
-              </button>
+              <div className="nt-hero__cta">
+                <button type="button" onClick={() => setEditor({ note: null, saving: false })} className="nt-hero__create">
+                  <Icon name="plus" size={16} />
+                  ساخت یادداشت
+                </button>
+              </div>
             </div>
-          </section>
+          </header>
 
           {notes.length === 0 ? (
             <EmptyState
@@ -522,6 +611,8 @@ export default function NotesSection({ userData }) {
                 )}
               </section>
 
+              <TagBrowser groups={tagGroups} activeTag={tagFilter} onSelect={setTagFilter} />
+
               {filtered.length === 0 ? (
                 <EmptyState
                   icon="search"
@@ -530,10 +621,7 @@ export default function NotesSection({ userData }) {
                   action={
                     <button
                       type="button"
-                      onClick={() => {
-                        setQuery('');
-                        setSubjectFilter('all');
-                      }}
+                      onClick={resetFilters}
                       className="mt-3 cursor-pointer rounded-xl bg-white/[0.06] px-5 py-2.5 text-xs text-[#aaa] transition-colors hover:bg-white/[0.1] hover:text-white"
                     >
                       پاک‌کردن فیلترها
@@ -553,9 +641,15 @@ export default function NotesSection({ userData }) {
                   )}
 
                   <section aria-label="همهٔ یادداشت‌ها" className="space-y-3">
-                    {pinnedNotes.length > 0 && (
-                      <h2 className="text-sm text-[#8a8a8a] [font-family:'Doran',Tahoma,sans-serif]">
+                    {(pinnedNotes.length > 0 || isFiltering) && (
+                      <h2 className="flex flex-wrap items-center gap-2 text-sm text-[#8a8a8a] [font-family:'Doran',Tahoma,sans-serif]">
                         {isFiltering ? 'نتیجه‌های دیگر' : 'همهٔ یادداشت‌ها'}
+                        {tagFilter && (
+                          <span className="flex items-center gap-1.5 text-[11px] text-[#6d6d6d]">
+                            با تگ
+                            <TagPill tag={tagFilter} accent={tagAccent(tagFilter)} />
+                          </span>
+                        )}
                       </h2>
                     )}
                     {renderGrid(restNotes)}
@@ -571,7 +665,7 @@ export default function NotesSection({ userData }) {
       <NoteEditor
         open={Boolean(editor)}
         note={editor?.note ?? null}
-        allTags={allTags}
+        tagGroups={tagGroups}
         saving={Boolean(editor?.saving)}
         onSave={handleSave}
         onClose={() => {

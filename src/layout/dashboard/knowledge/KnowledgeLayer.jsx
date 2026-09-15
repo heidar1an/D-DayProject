@@ -18,6 +18,7 @@ import TopicsView from './TopicsView';
 import CourseView from './CourseView';
 import PathView from './PathView';
 import KnowledgeSearchBar from './KnowledgeSearchBar';
+import { LAYER_IDS, useLayerRoute } from '../dashboardRoute';
 import {
   GraphSkeleton,
   ErrorState,
@@ -26,6 +27,9 @@ import {
   faCount,
 } from './knowledgeShared';
 import './knowledge.css';
+
+/* نمای آغازین لایه: تب گراف، بدون مبحث باز و بدون انتخاب */
+const KNOWLEDGE_VIEW = { mode: 'graph', topicId: null, selectedId: null };
 
 const VIEW_TABS = [
   { id: 'graph', label: 'گراف' },
@@ -44,9 +48,15 @@ const DEPTH_OPTIONS = [
 export default function KnowledgeLayer({ userData, onBack }) {
   const { data, loading, error, retry } = useAsyncData(() => api.getGraph(), []);
 
-  const [mode, setMode] = useState('graph');
-  const [topicId, setTopicId] = useState(null);
-  const [selectedId, setSelectedId] = useState(null);
+  /* نمای لایه (تب شبکه/درخت/… و صفحهٔ مبحث) روی مسیر داشبورد می‌نشیند:
+     رفرش همان تب و همان مبحث را برمی‌گرداند و Back مراحل را عقب می‌رود. */
+  const [view, , patchView] = useLayerRoute(LAYER_IDS.knowledge, KNOWLEDGE_VIEW, {
+    screenOf: (current) => (current?.topicId ? `topic:${current.topicId}` : current?.mode ?? 'graph'),
+  });
+  const { mode, topicId, selectedId } = view;
+  const setMode = useCallback((next) => patchView({ mode: next }), [patchView]);
+  const setTopicId = useCallback((next) => patchView({ topicId: next }), [patchView]);
+  const setSelectedId = useCallback((next) => patchView({ selectedId: next }), [patchView]);
   const [focusToken, setFocusToken] = useState(0);
   const [courseFilter, setCourseFilter] = useState(() => new Set());
   const [depth, setDepth] = useState(1);
