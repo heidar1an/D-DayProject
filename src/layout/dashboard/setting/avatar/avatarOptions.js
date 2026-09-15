@@ -1,7 +1,10 @@
 /*
- * گزینه‌ها، پالت‌های رنگی و مقادیر پیش‌فرض آواتارساز تپش.
- * ساختار کانفیگ آواتار به‌صورت یک آبجکت کوچک JSON ذخیره می‌شود
- * تا حجم localStorage در قیاس با عکس data-url ناچیز بماند.
+ * گزینه‌ها، پالت‌ها و مقادیر پیش‌فرض آواتارساز تپش.
+ *
+ * سبک مرجع: تصویرسازی تخت با خط دور (flat line-art).
+ *  • پس‌زمینه‌ها همه روشن و پاستلی‌اند تا چهره بیرون بزند.
+ *  • پالت‌ها اشباع بالاتری دارند چون کنار خط دور تیره می‌نشینند.
+ *  • کانفیگ آواتار یک آبجکت کوچک JSON است تا حجم localStorage ناچیز بماند.
  */
 
 export const GENDERS = [
@@ -9,69 +12,76 @@ export const GENDERS = [
   { id: 'male', label: 'پسرانه' },
 ];
 
-/* ---------- پالت‌های رنگی (هماهنگ با تم بژ/قهوه‌ای تپش) ---------- */
+/* ---------- پالت‌های رنگی ---------- */
 
 export const SKIN_TONES = [
-  { id: 't1', label: 'خیلی روشن', hex: '#ffe3c9' },
-  { id: 't2', label: 'روشن', hex: '#f5cfae' },
-  { id: 't3', label: 'گندمی', hex: '#eab98d' },
-  { id: 't4', label: 'برنزه', hex: '#d29a6b' },
-  { id: 't5', label: 'تیره', hex: '#a96f45' },
-  { id: 't6', label: 'خیلی تیره', hex: '#7e4f30' },
+  { id: 't1', label: 'خیلی روشن', hex: '#f9d8bb' },
+  { id: 't2', label: 'روشن', hex: '#f2bb92' },
+  { id: 't3', label: 'هلویی', hex: '#e5a473' },
+  { id: 't4', label: 'گندمی', hex: '#cf8c5c' },
+  { id: 't5', label: 'برنزه', hex: '#a96b40' },
+  { id: 't6', label: 'قهوه‌ای', hex: '#84512f' },
+  { id: 't7', label: 'تیره', hex: '#5f3a22' },
 ];
 
 export const HAIR_COLORS = [
-  { id: 'black', label: 'مشکی', hex: '#262220' },
-  { id: 'brown-dark', label: 'قهوه‌ای تیره', hex: '#40291d' },
-  { id: 'brown', label: 'قهوه‌ای', hex: '#5c3d26' },
-  { id: 'honey', label: 'عسلی', hex: '#8a5a33' },
-  { id: 'blond', label: 'بلوند', hex: '#c79a63' },
-  { id: 'gray', label: 'خاکستری', hex: '#a3a3a3' },
-  { id: 'white', label: 'سفید', hex: '#e9e5df' },
-  { id: 'burgundy', label: 'شرابی', hex: '#6e3440' },
+  { id: 'black', label: 'مشکی', hex: '#20202a' },
+  { id: 'brown-dark', label: 'قهوه‌ای تیره', hex: '#422b1d' },
+  { id: 'brown', label: 'قهوه‌ای', hex: '#6f4426' },
+  { id: 'honey', label: 'عسلی', hex: '#a5643a' },
+  { id: 'ginger', label: 'نارنجی', hex: '#e2552b' },
+  { id: 'burgundy', label: 'شرابی', hex: '#8e2f3c' },
+  { id: 'blond', label: 'بلوند', hex: '#e8c46a' },
+  { id: 'blue', label: 'آبی', hex: '#8ec5e8' },
+  { id: 'gray', label: 'خاکستری', hex: '#9aa0a6' },
+  { id: 'white', label: 'سفید', hex: '#f2efe9' },
 ];
 
 export const EYE_COLORS = [
+  { id: 'black', label: 'مشکی', hex: '#23232b' },
   { id: 'brown', label: 'قهوه‌ای', hex: '#5b3a26' },
-  { id: 'black', label: 'مشکی', hex: '#2b2b2b' },
-  { id: 'green', label: 'سبز', hex: '#4f7a58' },
-  { id: 'blue', label: 'آبی', hex: '#4a6f9b' },
-  { id: 'honey', label: 'عسلی', hex: '#9b7440' },
+  { id: 'honey', label: 'عسلی', hex: '#a5743a' },
+  { id: 'green', label: 'سبز', hex: '#3f7a4f' },
+  { id: 'blue', label: 'آبی', hex: '#3f6f9e' },
 ];
 
 export const CLOTH_COLORS = [
-  { id: 'white', label: 'سفید', hex: '#f1ece3' },
-  { id: 'cream', label: 'کرم', hex: '#ddd0bf' },
-  { id: 'beige', label: 'بژ', hex: '#b99a86' },
-  { id: 'brown', label: 'قهوه‌ای', hex: '#7a5c49' },
-  { id: 'olive', label: 'زیتونی', hex: '#6f7461' },
-  { id: 'mint', label: 'سبز پزشکی', hex: '#7fa08f' },
-  { id: 'navy', label: 'سرمه‌ای', hex: '#2f3d52' },
-  { id: 'gray', label: 'طوسی', hex: '#565656' },
-  { id: 'black', label: 'مشکی', hex: '#2e2e2e' },
-  { id: 'rose', label: 'گلبهی', hex: '#c98d84' },
+  { id: 'white', label: 'سفید', hex: '#ffffff' },
+  { id: 'cream', label: 'کرم', hex: '#f3e7d3' },
+  { id: 'sky', label: 'آبی روشن', hex: '#cfe2f3' },
+  { id: 'blue', label: 'آبی', hex: '#7ba7d7' },
+  { id: 'navy', label: 'سرمه‌ای', hex: '#33415c' },
+  { id: 'mint', label: 'نعنایی', hex: '#a8dcc0' },
+  { id: 'green', label: 'سبز', hex: '#5cb85c' },
+  { id: 'forest', label: 'سبز تیره', hex: '#3d8b4f' },
+  { id: 'yellow', label: 'زرد', hex: '#f5cf46' },
+  { id: 'orange', label: 'نارنجی', hex: '#e8703a' },
+  { id: 'rose', label: 'گلبهی', hex: '#e79a9a' },
+  { id: 'gray', label: 'طوسی', hex: '#9aa0a6' },
+  { id: 'black', label: 'مشکی', hex: '#2b2b33' },
 ];
 
 export const COVERING_COLORS = [
-  { id: 'black', label: 'مشکی', hex: '#26221f' },
-  { id: 'gray', label: 'طوسی', hex: '#565656' },
-  { id: 'beige', label: 'بژ', hex: '#b99a86' },
-  { id: 'cream', label: 'کرم', hex: '#ddd0bf' },
-  { id: 'brown', label: 'قهوه‌ای', hex: '#7a5c49' },
-  { id: 'navy', label: 'سرمه‌ای', hex: '#2f3d52' },
-  { id: 'rose', label: 'گلبهی', hex: '#c98d84' },
-  { id: 'olive', label: 'زیتونی', hex: '#6f7461' },
+  { id: 'black', label: 'مشکی', hex: '#2b2b33' },
+  { id: 'cream', label: 'کرم', hex: '#f3e7d3' },
+  { id: 'white', label: 'سفید', hex: '#ffffff' },
+  { id: 'rose', label: 'گلبهی', hex: '#e79a9a' },
+  { id: 'sky', label: 'آبی روشن', hex: '#cfe2f3' },
+  { id: 'mint', label: 'نعنایی', hex: '#a8dcc0' },
+  { id: 'orange', label: 'نارنجی', hex: '#e8703a' },
+  { id: 'navy', label: 'سرمه‌ای', hex: '#33415c' },
 ];
 
+/* پس‌زمینه‌ها همه روشن‌اند تا خط دور و رنگ‌های جسور چهره دیده شوند */
 export const BG_COLORS = [
-  { id: 'beige', label: 'بژ تپشی', hex: '#b99a86' },
-  { id: 'cream', label: 'کرم', hex: '#e6dccc' },
-  { id: 'tan', label: 'کرم تیره', hex: '#8a7360' },
-  { id: 'brown', label: 'قهوه‌ای', hex: '#4a392e' },
-  { id: 'mint', label: 'سبز', hex: '#9db8a9' },
-  { id: 'navy', label: 'سرمه‌ای', hex: '#33415c' },
-  { id: 'gray', label: 'طوسی تیره', hex: '#3a3a3a' },
-  { id: 'rose', label: 'گلبهی', hex: '#d8a79e' },
+  { id: 'cream', label: 'کرم', hex: '#f4efea' },
+  { id: 'peach', label: 'هلویی', hex: '#fbe6db' },
+  { id: 'rose', label: 'گلبهی', hex: '#fbe2e4' },
+  { id: 'mint', label: 'نعنایی', hex: '#e3f2e8' },
+  { id: 'sky', label: 'آبی روشن', hex: '#e2ecf8' },
+  { id: 'lilac', label: 'بنفش روشن', hex: '#eee7f7' },
+  { id: 'sand', label: 'شنی', hex: '#f6eddb' },
+  { id: 'gray', label: 'طوسی', hex: '#ededed' },
 ];
 
 /* ---------- گزینه‌های ساختاری ---------- */
@@ -99,6 +109,7 @@ export const HAIR_STYLES = [
 ];
 
 export const EYE_STYLES = [
+  { id: 'dot', label: 'نقطه‌ای' },
   { id: 'round', label: 'گرد' },
   { id: 'almond', label: 'بادامی' },
   { id: 'sleepy', label: 'آرام' },
@@ -150,23 +161,26 @@ export const COVERING_STYLES = [
   { id: 'headscarf', label: 'روسری', genders: ['female'] },
   { id: 'maghnaeh', label: 'مقنعه', genders: ['female'] },
   { id: 'chador', label: 'چادر', genders: ['female'] },
-  { id: 'cap', label: 'کلاه', genders: ['female', 'male'] },
+  { id: 'cap', label: 'کلاه لبه‌دار', genders: ['female', 'male'] },
+  { id: 'beanie', label: 'کلاه بافت', genders: ['female', 'male'] },
 ];
 
 export const ACCESSORY_STYLES = [
   { id: 'glasses-round', label: 'عینک گرد' },
   { id: 'glasses-square', label: 'عینک مربعی' },
-  { id: 'stethoscope', label: 'گوشی پزشکی' },
+  { id: 'sunglasses', label: 'عینک آفتابی' },
   { id: 'earrings', label: 'گوشواره' },
+  { id: 'earphones', label: 'هندزفری' },
+  { id: 'stethoscope', label: 'گوشی پزشکی' },
 ];
 
 /* ---------- مقادیر پیش‌فرض و ابزارها ---------- */
 
 const BASE_DEFAULT = {
-  skin: 't2',
+  skin: 't3',
   face: 'oval',
   hairColor: 'black',
-  eyes: 'almond',
+  eyes: 'dot',
   eyeColor: 'brown',
   brows: 'normal',
   mouth: 'smile',
@@ -174,9 +188,9 @@ const BASE_DEFAULT = {
   facialHair: 'none',
   body: 'medium',
   covering: 'none',
-  coveringColor: 'beige',
+  coveringColor: 'cream',
   accessories: [],
-  bg: 'beige',
+  bg: 'cream',
 };
 
 export const DEFAULT_CONFIGS = {
@@ -185,19 +199,19 @@ export const DEFAULT_CONFIGS = {
     gender: 'female',
     hair: 'long-wavy',
     cloth: 'tshirt',
-    clothColor: 'cream',
+    clothColor: 'green',
   },
   male: {
     ...BASE_DEFAULT,
     gender: 'male',
     hair: 'short',
     cloth: 'tshirt',
-    clothColor: 'navy',
+    clothColor: 'sky',
   },
 };
 
 export function defaultAvatarConfig(gender = 'female') {
-  return { ...DEFAULT_CONFIGS[gender] , accessories: [] };
+  return { ...DEFAULT_CONFIGS[gender], accessories: [] };
 }
 
 /* با تغییر جنسیت، گزینه‌های مشترک حفظ و گزینه‌های وابسته به جنسیت بازنشانی می‌شوند */
@@ -254,14 +268,12 @@ export function randomAvatarConfig(gender) {
     config.facialHair = pick(FACIAL_HAIR_STYLES);
   }
 
-  config.accessories = ACCESSORY_STYLES.filter(() => Math.random() < 0.3).map(
-    (item) => item.id,
-  );
+  config.accessories = ACCESSORY_STYLES.filter(() => Math.random() < 0.25).map((item) => item.id);
 
   return config;
 }
 
 /* پیدا کردن رنگ از پالت با تحمل مقادیر ناشناخته (کانفیگ‌های قدیمی) */
 export function paletteColor(palette, id, fallbackId) {
-  return palette.find((item) => item.id === id) ?? palette.find((item) => item.id === fallbackId);
+  return palette.find((item) => item.id === id) ?? palette.find((item) => item.id === fallbackId) ?? palette[0];
 }

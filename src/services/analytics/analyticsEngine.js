@@ -740,59 +740,86 @@ function summarizePeriod(attempts) {
 
 /* ────────────────────────── سری زمانی روزانه ────────────────────────── */
 
+/* شروع امروز (۰۰:۰۰ محلی) — مبنای مشترک همهٔ بازه‌های روزانه تا مرز روزها ثابت بماند */
+export const startOfToday = () => {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0);
+  return date.getTime();
+};
+
 /*
- * سری روزانه برای نمودار روند — روزهای خالی هم صفر می‌شوند تا «دوره‌های بدون
- * فعالیت» دیده شوند. امتیاز هر روز با پنجرهٔ غلتان ۷روزه محاسبه می‌شود تا خط
- * امتیاز خوانا باشد.
+ * سری روزانه برای نمودار روند — دقیقاً یک نقطه برای هر روزِ بازه، از قدیمی‌ترین
+ * روز تا **خودِ امروز**. روزهای بدون فعالیت هم با مقدار خالی حاضرند تا «دوره‌های
+ * بدون فعالیت» در نمودار دیده شوند.
+ *
+ * نکتهٔ حساس: مبنای روزها نیمه‌شب محلی است، نه پایان امروز. اگر مبنا پایان روز
+ * باشد، برچسبِ نیمروز به روز بعد می‌افتد و کل سری یک روز جابه‌جا می‌شود و امروز
+ * از نمودار می‌افتد (باگی که قبلاً همین‌جا بود).
+ *
+ * امتیاز عملکرد هر روز با پنجرهٔ غلتان هفت‌روزهٔ واقعی حساب می‌شود (نه «۱۴۰ تلاش
+ * آخر»)؛ اگر دادهٔ هفت روز کمتر از حد نمونه باشد، پنجره تا سقف ۲۸ روز عقب می‌رود
+ * تا خط امتیاز هم به تغییرات اخیر واکنش بدهد و هم بی‌داده نماند.
  */
 export function buildDailySeries(attempts, { days = 90 } = {}) {
-  const endOfToday = new Date();
-  endOfToday.setHours(23, 59, 59, 999);
-  const startTime = endOfToday.getTime() - (days - 1) * 86400000;
-  const scoped = attempts.filter((attempt) => attempt.timestamp >= startTime);
+  const dayMs = 86400000;
+  const todayStart = startOfToday();
+  const rangeStart = todayStart - (days - 1) * dayMs;
+  const rangeEnd = todayStart + dayMs; /* ابتدای فردا — کران بازِ بالای بازه */
 
   const byDay = new Map();
-  for (const attempt of scoped) {
+  for (const attempt of attempts) {
+    if (attempt.timestamp < rangeStart || attempt.timestamp >= rangeEnd) continue;
     const key = dayKey(attempt.timestamp);
-    const entry = byDay.get(key) ?? { key, ts: new Date(`${key}T12:00:00`).getTime(), attempts: [] };
+    const entry = byDay.get(key) ?? { key, attempts: [] };
     entry.attempts.push(attempt);
     byDay.set(key, entry);
   }
 
-  const series = [];
   const dayLabelFmt = new Intl.DateTimeFormat('fa-IR', { day: 'numeric', month: 'short' });
+  const fullLabelFmt = new Intl.DateTimeFormat('fa-IR', { weekday: 'long', day: 'numeric', month: 'long' });
+  const series = [];
   for (let index = 0; index < days; index += 1) {
-    const ts = startTime + index * 86400000 + 12 * 3600000;
+    const dayStart = rangeStart + index * dayMs;
+    const ts = dayStart + 12 * 3600000; /* نیمروز — نمایندهٔ همان روز برای کلید و برچسب */
     const key = dayKey(ts);
     const entry = byDay.get(key);
-    const accuracy = entry ? calculateAccuracy(entry.attempts) : { total: 0, accuracy: null };
-    const times = entry ? entry.attempts.filter((a) => a.timeSpent > 0).map((a) => a.timeSpent) : [];
+    const accuracy = entry ? calculateAccuracy(entry.attempts) : { total: 0, correct: 0, wrong: 0, unanswered: 0, accuracy: null };
+    const times = entry ? entry.attempts.filter((attempt) => attempt.timeSpent > 0).map((attempt) => attempt.timeSpent) : [];
     series.push({
       key,
       ts,
+      dayStart,
+      isToday: dayStart === todayStart,
       label: dayLabelFmt.format(new Date(ts)),
+      fullLabel: fullLabelFmt.format(new Date(ts)),
       count: accuracy.total,
-      correct: entry ? accuracy.correct : 0,
-      wrong: entry ? accuracy.wrong : 0,
+      correct: accuracy.correct,
+      wrong: accuracy.wrong,
+      unanswered: accuracy.unanswered,
       accuracy: accuracy.accuracy,
       averageTime: times.length ? Math.round(mean(times)) : null,
     });
   }
 
-  /* امتیاز عملکرد با پنجرهٔ غلتان هفت روز — روی کل بازه (شامل قبل از شروع پنجره) */
-  const window = [];
-  const scopedSorted = [...attempts].sort((a, b) => a.timestamp - b.timestamp);
+  /* امتیاز عملکرد — پنجرهٔ غلتان ۷ روزه با عقب‌نشینی کنترل‌شده تا ۲۸ روز */
+  const PERF_WINDOW_DAYS = 7;
+  const PERF_LOOKBACK_DAYS = 28;
+  const MIN_SAMPLES = 5;
+  const sorted = [...attempts].sort((a, b) => a.timestamp - b.timestamp);
   let cursor = 0;
-  const cutoff = startTime;
   for (const point of series) {
-    while (cursor < scopedSorted.length && scopedSorted[cursor].timestamp <= point.ts + 12 * 3600000) {
-      window.push(scopedSorted[cursor]);
-      cursor += 1;
+    const dayEnd = point.dayStart + dayMs;
+    while (cursor < sorted.length && sorted[cursor].timestamp < dayEnd) cursor += 1;
+    const before = sorted.slice(0, cursor);
+    const windowStart = point.dayStart - (PERF_WINDOW_DAYS - 1) * dayMs;
+    let windowAttempts = before.filter((attempt) => attempt.timestamp >= windowStart);
+    if (windowAttempts.length < MIN_SAMPLES) {
+      const lookbackStart = point.dayStart - (PERF_LOOKBACK_DAYS - 1) * dayMs;
+      windowAttempts = before.filter((attempt) => attempt.timestamp >= lookbackStart);
     }
-    const windowAttempts = window.slice(-140);
-    point.performanceScore = windowAttempts.length >= 5 ? calculatePerformanceScore(windowAttempts).score : null;
+    point.performanceScore = windowAttempts.length >= MIN_SAMPLES ? calculatePerformanceScore(windowAttempts).score : null;
   }
-  return series.filter((point) => point.ts <= Date.now());
+  return series;
 }
 
 /* ────────────────────────── آزمون‌ها ────────────────────────── */
@@ -815,7 +842,8 @@ export function aggregateExams(examSessions, attempts) {
       const times = items.filter((a) => a.timeSpent > 0).map((a) => a.timeSpent);
       const negative = session.negativeMarking ?? 0;
       const score = Math.max(0, accuracy.correct + accuracy.wrong * negative);
-      const percentage = items.length ? round1((score / items.length) * 100) : 0;
+      /* آزمونی که در بازهٔ فیلتر هیچ تلاشی ندارد، درصد ندارد — نه صفر درصد */
+      const percentage = items.length ? round1((score / items.length) * 100) : null;
       return {
         examId: session.id,
         session,

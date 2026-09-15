@@ -71,20 +71,24 @@
   gap: 14px;
 }
 
+/* ── اعداد داشبورد ──
+   قرارداد پروژه: متن با Doran، عدد با Pinar. هر عنصری که محتوایش عدد است
+   (تایمر هدر، آمار نمودار، آمار پروفایل، عددهای همخوان) فونتش Pinar است. */
 .dashboard-header__time {
   display: flex;
+  flex: none;
   align-items: center;
-  gap: 8px;
-  min-width: 150px;
-  padding: 9px 15px;
+  gap: 9px;
+  padding: 9px 14px;
   border: 0;
   border-radius: 16px;
   background: #132943;
   box-shadow: inset 3px 0 #285584;
   color: #5b91cb;
-  font-family: 'Doran', Tahoma, sans-serif;
-  font-size: 0.95rem;
-  font-weight: 500;
+  font-family: 'Pinar', Tahoma, sans-serif;
+  font-size: 1.06rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
 .dashboard-header__time svg {
@@ -94,6 +98,7 @@
 }
 
 .dashboard-header__icon-btn {
+  position: relative;
   display: grid;
   width: 38px;
   height: 38px;
@@ -107,7 +112,6 @@
 }
 
 .dashboard-header__icon-btn:hover,
-.user-profile-card__chat-btn:hover,
 .dashboard-action-card:hover {
   transform: translateY(-3px);
 }
@@ -117,6 +121,26 @@
   height: 31px;
   object-fit: contain;
   filter: brightness(0) invert(1);
+}
+
+/* بج اعلان‌های نخوانده روی زنگولهٔ هدر — زبان بصری بج‌های لیگ */
+.dashboard-header__icon-badge {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  display: grid;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #e26d6d;
+  color: #fff;
+  font-family: 'Pinar', Tahoma, sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1;
+  place-items: center;
+  box-shadow: 0 0 0 2px #282828;
 }
 
 /* حالت فعال زنگوله: مثل طرح، آیکون بژ روشن می‌شود */
@@ -158,10 +182,260 @@
   text-align: center;
 }
 
+/* سربرگ لایه: تیتر + شمارندهٔ نخوانده‌ها، هر دو وسط‌چین */
+.notifications__header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: clamp(18px, 2.6vh, 30px);
+}
+
+.notifications__badge {
+  flex-shrink: 0;
+  padding: 5px 12px 6px;
+  border-radius: 999px;
+  background: rgba(226, 109, 109, 0.16);
+  color: #ef9196;
+  font-family: 'Pinar', Tahoma, sans-serif;
+  font-size: 0.76rem;
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px rgba(226, 109, 109, 0.4);
+}
+
 .notifications__list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ── ردیف اعلان — ظاهر پیام‌رسان: آواتار + حباب پیام (فقط نمایش) ── */
+.notifications__row {
+  /* رنگ حباب؛ ردیف نخوانده همان متغیر را بازنویسی می‌کند تا دم حباب هم‌رنگ بماند */
+  --n-bubble: rgba(255, 255, 255, 0.075);
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  padding: 16px 18px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  animation: notifications-row-in 420ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(var(--n-i, 0) * 45ms);
+}
+
+.notifications__row--unread {
+  --n-bubble: rgba(147, 127, 205, 0.22);
+  background: rgba(147, 127, 205, 0.08);
+  border-color: rgba(147, 127, 205, 0.3);
+}
+
+.notifications__row--skeleton {
+  animation: none;
+}
+
+.notifications__row-avatar {
+  flex-shrink: 0;
+}
+
+.notifications__row-icon {
+  display: grid;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.06);
+  place-items: center;
+}
+
+.notifications__row-glyph {
+  width: 26px;
+  height: 26px;
+}
+
+.notifications__row-body {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.notifications__row-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.notifications__row-name {
+  color: #fff;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 1.08rem;
+  font-weight: 600;
+}
+
+.notifications__row-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.84rem;
+}
+
+.notifications__row-tag-icon {
+  width: 13px;
+  height: 13px;
+}
+
+/* زمان در انتهای ردیف سربرگ (سمت چپ در RTL) — مثل پیام‌رسان‌ها */
+.notifications__row-time {
+  margin-inline-start: auto;
+  padding-inline-start: 10px;
+  color: #7c7c7c;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+/* حباب پیام + دم کوچک سمت آواتار — حباب به اندازهٔ متن می‌نشیند، نه تمام‌عرض */
+.notifications__row-bubble {
+  position: relative;
+  align-self: flex-start;
+  display: flex;
+  max-width: min(100%, 46rem);
+  flex-direction: column;
+  gap: 5px;
+  padding: 13px 18px 14px;
+  border-radius: 22px;
+  border-start-start-radius: 8px;
+  background: var(--n-bubble);
+}
+
+.notifications__row-bubble::before {
+  content: '';
+  position: absolute;
+  top: 15px;
+  inset-inline-start: -5px;
+  width: 12px;
+  height: 12px;
+  border-start-start-radius: 2px;
+  background: var(--n-bubble);
+  transform: rotate(45deg);
+}
+
+.notifications__row-text {
+  color: #ececec;
+  font-family: 'Pinar', Tahoma, sans-serif;
+  font-size: 1.02rem;
+  line-height: 1.95;
+}
+
+.notifications__row-note {
+  color: #9a9a9a;
+  font-size: 0.88rem;
+  line-height: 1.8;
+}
+
+.notifications__row-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.notifications__row-rarity {
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.notifications__row-hearts {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px 6px;
+  border-radius: 999px;
+  background: rgba(226, 109, 109, 0.12);
+  color: #ef9196;
+  font-size: 0.86rem;
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px rgba(226, 109, 109, 0.35);
+}
+
+.notifications__row-heart {
+  width: 15px;
+  height: 15px;
+}
+
+/* ── اسکلت لودینگ ── */
+.notifications__sk-avatar {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+.notifications__sk-lines {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 9px;
+  padding-top: 5px;
+}
+
+.notifications__sk-line {
+  width: 42%;
+  height: 12px;
+}
+
+.notifications__sk-bubble {
+  width: 100%;
+  height: 54px;
+  border-radius: 22px;
+}
+
+/* ── حالت خطا ── */
+.notifications__error {
+  padding: 26px 10px;
+  color: #aaa;
+  font-family: 'Pinar', Tahoma, sans-serif;
+  font-size: 0.86rem;
+  text-align: center;
+}
+
+.notifications__retry {
+  margin-top: 12px;
+  padding: 8px 20px;
+  border: 0;
+  border-radius: 12px;
+  background: rgba(147, 127, 205, 0.2);
+  color: #c9bdf0;
+  cursor: pointer;
+  font-family: 'Pinar', Tahoma, sans-serif;
+  font-size: 0.8rem;
+  transition: background-color 160ms ease;
+}
+
+.notifications__retry:hover {
+  background: rgba(147, 127, 205, 0.32);
+}
+
+@keyframes notifications-row-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notifications__row {
+    animation: none;
+  }
 }
 
 .dashboard__main {
@@ -189,6 +463,7 @@
   min-height: 480px;
   flex-direction: column;
   padding: 34px 38px;
+  border: 1px solid rgba(255, 255, 255, 0.045);
   border-radius: 64px;
   background: #282828;
   box-shadow: inset 0 1px rgba(255, 255, 255, 0.025);
@@ -199,39 +474,69 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 14px 22px;
+  gap: 12px 18px;
 }
 
-.dashboard__chart-title {
-  margin: 0;
-  color: #fff;
-  font-family: 'Doran', Tahoma, sans-serif;
-  font-size: clamp(1.15rem, 1.6vw, 1.4rem);
-  font-weight: 600;
-}
-
+/* آمار هدر = خودِ تیتر کادر. آیکن سمت راست متن می‌نشیند (اولین فرزند در چیدمان RTL). */
 .dashboard__chart-stats {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 18px;
-  margin-inline-end: auto;
+  gap: 10px;
 }
 
 .dashboard__chart-stat {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
+  padding: 7px 13px;
+  border-radius: 14px;
   font-family: 'Pinar', Tahoma, sans-serif;
-  font-size: 0.95rem;
+}
+
+.dashboard__chart-stat svg {
+  flex: 0 0 auto;
+}
+
+.dashboard__chart-stat-text {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: 0.9rem;
   font-weight: 600;
 }
 
+.dashboard__chart-stat-text b {
+  font-family: 'Pinar', Tahoma, sans-serif;
+  font-size: 1.18rem;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.dashboard__chart-stat-text i {
+  font-size: 0.78rem;
+  font-style: normal;
+  font-weight: 500;
+  opacity: 0.86;
+}
+
 .dashboard__chart-stat--streak {
+  background: rgba(255, 151, 23, 0.1);
   color: #ff9717;
 }
 
 .dashboard__chart-stat--hearts {
-  color: #ff6969;
+  background: rgba(255, 105, 105, 0.1);
+  color: #ff8585;
+}
+
+/* ابزارهای نمودار: سوییچ حالت + دراپ‌داون بازه — سمت چپ هدر */
+.dashboard__chart-tools {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-inline-start: auto;
 }
 
 .dashboard__chart-period {
@@ -262,6 +567,7 @@
 .user-profile-card,
 .dashboard-action-card {
   background: #282828;
+  border: 1px solid rgba(255, 255, 255, 0.045);
   box-shadow: inset 0 1px rgba(255, 255, 255, 0.025);
 }
 
@@ -269,57 +575,6 @@
   min-height: 630px;
   padding: 31px 38px 37px;
   border-radius: 64px;
-}
-
-.user-profile-card__header {
-  display: flex;
-  justify-content: flex-end;
-  min-height: 46px;
-}
-
-/* لایهٔ اعلان‌های لیگ همخوان‌ها — پنل بازشو از آیکون چت، لنگر جایگاه همین wrap است */
-.user-profile-card__chat-wrap {
-  position: relative;
-}
-
-.user-profile-card__chat-btn {
-  display: grid;
-  width: 52px;
-  height: 52px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  place-items: center;
-  cursor: pointer;
-  transition: transform 160ms ease;
-}
-
-/* بج اعلان نخواندهٔ همخوان‌ها روی آیکون چت — هم‌زبان با بج زنگ لیگ */
-.user-profile-card__chat-badge {
-  position: absolute;
-  top: -3px;
-  left: -3px;
-  display: grid;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 5px;
-  border-radius: 999px;
-  background: #e26d6d;
-  color: #fff;
-  font-family: 'Pinar', Tahoma, sans-serif;
-  font-size: 0.68rem;
-  font-weight: 700;
-  line-height: 1;
-  place-items: center;
-  box-shadow: 0 0 0 2px #282828;
-}
-
-.user-profile-card__chat-btn img {
-  width: 48px;
-  height: 48px;
-  object-fit: contain;
-  filter: sepia(0.34) saturate(0.75) hue-rotate(335deg) brightness(1.44);
-  opacity: 0.92;
 }
 
 .user-profile-card__avatar {
@@ -450,9 +705,10 @@
 }
 
 .user-profile-card__stat-value {
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Pinar', Tahoma, sans-serif;
   font-size: 1.55rem;
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
 .user-profile-card__stat-label {
@@ -504,23 +760,18 @@
   gap: 34px;
 }
 
+/* ── کادر همخوان‌ها ──
+   ردیف‌ها تک‌خطی‌اند (آواتار + نام + دو عدد) تا کارت در همان ارتفاع کارت‌های
+   کنارش جا شود؛ ارتفاع ردیف‌ها با 1fr تقسیم می‌شود و هیچ‌وقت از کارت بیرون نمی‌زند. */
 .peers-section {
   display: flex;
   min-height: 318px;
   flex-direction: column;
   padding: 30px 30px 26px;
+  border: 1px solid rgba(255, 255, 255, 0.045);
   border-radius: 64px;
   background: #282828;
   box-shadow: inset 0 1px rgba(255, 255, 255, 0.025);
-}
-
-.peers-section__title {
-  margin: 0;
-  color: #fff;
-  font-family: 'Doran', Tahoma, sans-serif;
-  font-size: clamp(1.1rem, 1.5vw, 1.3rem);
-  font-weight: 600;
-  text-align: right;
 }
 
 .peers-section__header {
@@ -528,7 +779,16 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  margin-bottom: 14px;
+  margin-bottom: 13px;
+}
+
+.peers-section__title {
+  margin: 0;
+  color: #fff;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: clamp(1.05rem, 1.4vw, 1.24rem);
+  font-weight: 600;
+  text-align: right;
 }
 
 .peers-section__count {
@@ -542,86 +802,195 @@
   white-space: nowrap;
 }
 
-.peers-section__list {
+/* ── لیست همخوان‌ها ──
+   ناحیهٔ اسکرول: هر تعداد همخوان، کارت از قالب بیرون نمی‌زند.
+   ردیف‌ها ارتفاع طبیعی خودشان را می‌گیرند (auto) تا وقتی تعداد از کادر بیشتر شد
+   لیست اسکرول بخورد؛ محو تدریجی بالا/پایین نشانهٔ «بیشتر هست» است. */
+.peers-section__list-wrap {
+  position: relative;
+  display: flex;
   flex: 1 1 auto;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.peers-section__list {
   display: grid;
-  grid-auto-rows: minmax(48px, 1fr);
-  gap: 8px;
+  grid-auto-rows: minmax(38px, auto);
+  align-content: start;
+  gap: clamp(5px, 0.8vh, 7px);
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #3d3d3d transparent;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
+.peers-section__list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.peers-section__list::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: #3d3d3d;
+}
+
+.peers-section__list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.peers-section__fade {
+  position: absolute;
+  inset-inline: 0;
+  height: 30px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease;
+}
+
+.peers-section__fade--top {
+  top: 0;
+  background: linear-gradient(180deg, #282828, rgba(40, 40, 40, 0));
+}
+
+.peers-section__fade--bottom {
+  bottom: 0;
+  background: linear-gradient(0deg, #282828, rgba(40, 40, 40, 0));
+}
+
+.peers-section__list-wrap.has-above .peers-section__fade--top,
+.peers-section__list-wrap.has-below .peers-section__fade--bottom {
+  opacity: 1;
+}
+
+.peers-section__list > li {
+  display: flex;
+  min-height: 0;
+}
+
 .peers-section__peer {
   display: flex;
+  flex: 1 1 auto;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
-  padding: 6px 12px;
+  min-width: 0;
+  padding: 5px 11px;
   border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 20px;
+  border-radius: 18px;
   background: #202020;
   color: #fff;
   cursor: pointer;
   font-family: 'Pinar', Tahoma, sans-serif;
   text-align: right;
-  transition: border-color 160ms ease, transform 160ms ease;
+  transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
 }
 
 .peers-section__peer:hover {
   border-color: rgba(255, 255, 255, 0.16);
+  background: #242424;
   transform: translateY(-1px);
+}
+
+.peers-section__peer:focus-visible {
+  outline: 2px solid var(--peer-tint, #b99a86);
+  outline-offset: 2px;
 }
 
 .peers-section__avatar {
   display: grid;
   flex: 0 0 auto;
-  width: 38px;
-  height: 38px;
-  place-items: center;
+  width: clamp(28px, 4.4vh, 34px);
+  height: clamp(28px, 4.4vh, 34px);
   border-radius: 50%;
   background: linear-gradient(140deg, var(--peer-tint, #b99a86), color-mix(in srgb, var(--peer-tint, #b99a86) 42%, #1d1d1d));
   color: #fff;
   font-family: 'Doran', Tahoma, sans-serif;
-  font-size: 1rem;
-}
-
-.peers-section__meta {
-  display: grid;
-  flex: 1 1 auto;
-  gap: 1px;
-  min-width: 0;
+  font-size: 0.82rem;
+  place-items: center;
 }
 
 .peers-section__name {
+  flex: 1 1 auto;
+  min-width: 0;
   overflow: hidden;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.peers-section__hearts {
-  color: #999;
-  font-size: 0.6rem;
+/* دو عدد کلیدی: قلب امروز و روزهای متوالی — هم‌رنگ با آمار هدر نمودار */
+.peers-section__metrics {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 9px;
+}
+
+.peers-section__metric {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'Pinar', Tahoma, sans-serif;
+  font-size: 0.74rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.peers-section__metric--hearts {
+  color: #ff8585;
+}
+
+.peers-section__metric--streak {
+  color: #ffa53d;
 }
 
 .peers-section__chevron {
   flex: 0 0 auto;
   color: #5f5f5f;
+  transition: color 160ms ease, transform 160ms ease;
 }
 
-.peers-section__peer--add {
-  border-style: dashed;
-  border-color: rgba(185, 154, 134, 0.45);
+.peers-section__peer:hover .peers-section__chevron {
+  color: #9a9a9a;
+  transform: translateX(-2px);
+}
+
+/* ردیف «افزودن همخوان» — بیرون از ناحیهٔ اسکرول می‌ماند تا همیشه در دسترس باشد */
+.peers-section__add {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: clamp(38px, 4.8vh, 46px);
+  margin-top: clamp(5px, 0.8vh, 7px);
+  padding: 5px 11px;
+  border: 1px dashed rgba(185, 154, 134, 0.45);
+  border-radius: 18px;
   background: transparent;
   color: #c7aa98;
+  cursor: pointer;
+  font-family: 'Pinar', Tahoma, sans-serif;
+  text-align: right;
+  transition: border-color 160ms ease, background-color 160ms ease;
 }
 
-.peers-section__peer--add:hover {
+.peers-section__add:hover {
   border-color: #b99a86;
+  background: rgba(185, 154, 134, 0.06);
 }
 
-.peers-section__peer--add .peers-section__name {
+.peers-section__add:focus-visible {
+  outline: 2px solid #b99a86;
+  outline-offset: 2px;
+}
+
+.peers-section__add-label {
   font-size: 0.76rem;
 }
 
@@ -629,7 +998,7 @@
   border: 1.5px dashed #b99a86;
   background: transparent;
   color: #b99a86;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
 }
 
 .dashboard-action-card {
@@ -758,7 +1127,6 @@
   }
 
   .dashboard-header__time {
-    min-width: auto;
     padding: 10px 13px;
   }
 
@@ -859,6 +1227,23 @@
     padding: 22px 20px 24px;
   }
 
+  /* در موبایل کارت در جریان عادی صفحه است، پس ردیف‌ها ارتفاع ثابت خودشان را می‌گیرند
+     و اسکرول داخلی/محو تدریجی لازم نیست (کل صفحه اسکرول می‌شود) */
+  .peers-section__list {
+    grid-auto-rows: minmax(46px, auto);
+    gap: 7px;
+    overflow: visible;
+  }
+
+  .peers-section__fade {
+    display: none;
+  }
+
+  .peers-section__avatar {
+    width: 34px;
+    height: 34px;
+  }
+
   .dashboard-action-card__icon {
     width: 108px;
   }
@@ -929,7 +1314,7 @@
   }
 
   .dashboard__top-row {
-    flex: 1.9 1 0;
+    flex: 1.7 1 0;
     grid-template-columns: minmax(255px, 1fr) minmax(0, 1.9fr);
     gap: clamp(14px, 2.2vw, 34px);
   }
@@ -941,7 +1326,7 @@
 
   .dashboard__cards-row {
     min-height: 0;
-    flex: 1 1 0;
+    flex: 1.15 1 0;
     gap: clamp(14px, 2.2vw, 34px);
   }
 
@@ -961,23 +1346,6 @@
     flex: 1 1 auto;
     flex-direction: column;
     padding: clamp(12px, 2.8vh, 31px) clamp(20px, 2.6vw, 38px) clamp(12px, 3vh, 37px);
-  }
-
-  .user-profile-card__header {
-    position: absolute;
-    top: clamp(10px, 1.8vh, 22px);
-    inset-inline-end: clamp(14px, 2vw, 26px);
-    min-height: 0;
-  }
-
-  .user-profile-card__chat-btn {
-    width: clamp(40px, 5vh, 52px);
-    height: clamp(40px, 5vh, 52px);
-  }
-
-  .user-profile-card__chat-btn img {
-    width: 88%;
-    height: 88%;
   }
 
   .user-profile-card__avatar {
@@ -1043,5 +1411,32 @@
   .dashboard-action-card__title {
     margin-top: clamp(12px, 2.8vh, 25px);
     font-size: clamp(1.15rem, 1.2vw + 1vh, 2rem);
+  }
+}
+
+/* ── تبلت (۷۰۱ تا ۱۰۲۴) ──
+   در این بازهٔ عرض، چهار ستون کارت به ~۱۳۰px می‌رسد و محتوایشان روی هم می‌افتد.
+   این بلوک عمداً در انتهای فایل است تا روی تنظیمات «حالت اپ‌مانند» (min-width: 701px)
+   بنشیند: در تبلت ارتفاع ثابت نیست و بخش داشبورد اسکرول می‌شود. */
+@media (min-width: 701px) and (max-width: 1024px) {
+  .dashboard__top-row {
+    flex: 0 0 auto;
+    grid-template-columns: minmax(238px, 1fr) minmax(0, 1.55fr);
+  }
+
+  /* ارتفاع قطعی برای کادر نمودار؛ همین ارتفاع به کارت پروفایل هم می‌رسد
+     تا آواتار (که با cqh اندازه می‌گیرد) به ۴۰px سقوط نکند. */
+  .dashboard__chart {
+    min-height: 430px;
+  }
+
+  .dashboard__cards-row {
+    flex: 0 0 auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* دو ستون پیشرفت در این عرض جا نمی‌شود */
+  .user-profile-card__progress {
+    grid-template-columns: 1fr;
   }
 }

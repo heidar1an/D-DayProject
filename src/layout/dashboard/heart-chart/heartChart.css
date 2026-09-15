@@ -27,6 +27,21 @@
   overflow: visible;
 }
 
+/* ── پوستهٔ گذار حالت (میله‌ای ↔ خطی) ──
+   حالت فعلی با فید کوتاه بیرون می‌رود و حالت جدید با انیمیشن ورود خودش می‌آید. */
+.heart-chart__stage {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  flex-direction: column;
+  transition: opacity 190ms ease, transform 190ms ease;
+}
+
+.heart-chart__stage.is-switching {
+  opacity: 0;
+  transform: translateY(6px) scale(0.985);
+}
+
 .heart-chart__grid {
   stroke: rgba(255, 255, 255, 0.06);
 }
@@ -46,10 +61,22 @@
   opacity: 0.55;
 }
 
-.heart-chart__avg-label {
-  fill: #7ba2cf;
+/* چیپ میانگین — چون روی میله‌ها می‌نشیند، پس‌زمینهٔ توپر و کادر دارد تا همیشه خوانا بماند */
+.heart-chart__avg-chip {
+  position: absolute;
+  left: 10px;
+  z-index: 3;
+  padding: 3px 10px;
+  border: 1px solid rgba(91, 140, 199, 0.32);
+  border-radius: 999px;
+  background: #1f1f1f;
+  color: #8fb4dd;
   font-family: 'Pinar', Tahoma, sans-serif;
   font-size: 10.5px;
+  line-height: 1.6;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translateY(-50%);
 }
 
 /* ── میله‌ها ── */
@@ -116,27 +143,126 @@
   font-weight: 600;
 }
 
-/* ── ستون‌های hover/focus ── */
+/* ── ستون‌های hover/focus ──
+   چپ و عرض هر ستون از هندسهٔ svg (PAD.left + slot * i) به‌صورت inline می‌آید،
+   پس هاله دقیقاً روی همان ستونی می‌نشیند که زیر نشانگر است — نه ستون کنارش. */
 .heart-chart__overlay {
   position: absolute;
   inset: 0;
-  display: flex;
   direction: ltr;
 }
 
 .heart-chart__column {
-  flex: 1;
-  min-width: 0;
+  position: absolute;
+  top: 0;
+  bottom: 0;
   outline: none;
-  border-radius: 10px;
 }
 
-.heart-chart__column.is-hover {
-  background: linear-gradient(180deg, transparent 62%, rgba(255, 105, 105, 0.06) 100%);
+/* هالهٔ هاور: نوار عمودی نرم که از بالای ستون شروع می‌شود و تا خط پایهٔ نمودار می‌آید.
+   مقدار --chart-pad-bottom از همان PAD نمودار می‌آید تا هاله با محور هم‌تراز بماند. */
+.heart-chart__column::before {
+  position: absolute;
+  inset: 6px 2px var(--chart-pad-bottom, 34px);
+  border-radius: 14px;
+  background-color: rgba(255, 255, 255, 0.018);
+  background-image: linear-gradient(
+    180deg,
+    rgba(255, 105, 105, 0.17) 0%,
+    rgba(255, 105, 105, 0.07) 34%,
+    rgba(255, 105, 105, 0.02) 68%,
+    transparent 100%
+  );
+  content: '';
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 170ms ease;
 }
 
-.heart-chart__column:focus-visible {
-  background: rgba(255, 255, 255, 0.045);
+/* خط پایهٔ ستون — نشان می‌دهد هاور روی کدام slot نشسته است */
+.heart-chart__column::after {
+  position: absolute;
+  inset-inline: 6px;
+  bottom: var(--chart-pad-bottom, 34px);
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255, 105, 105, 0.5), transparent);
+  content: '';
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 170ms ease;
+}
+
+.heart-chart__column.is-hover::before,
+.heart-chart__column:focus-visible::before,
+.heart-chart__column.is-hover::after,
+.heart-chart__column:focus-visible::after {
+  opacity: 1;
+}
+
+.heart-chart__column:focus-visible::before {
+  background-image: linear-gradient(
+    180deg,
+    rgba(91, 140, 199, 0.18) 0%,
+    rgba(91, 140, 199, 0.06) 34%,
+    transparent 100%
+  );
+}
+
+/* ── حالت خطی ── */
+.heart-chart__guide {
+  stroke: rgba(255, 105, 105, 0.28);
+  stroke-width: 1;
+  stroke-dasharray: 3 5;
+  stroke-linecap: round;
+}
+
+.heart-chart__line-area {
+  animation: heart-area-in 620ms ease-out 220ms backwards;
+}
+
+.heart-chart__line-stroke {
+  fill: none;
+  stroke: #ff7b7b;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  filter: drop-shadow(0 4px 14px rgba(255, 105, 105, 0.28));
+  animation: heart-line-draw 900ms cubic-bezier(0.4, 0.05, 0.25, 1) forwards;
+}
+
+.heart-chart__dot-wrap {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: heart-dot-in 420ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(var(--i) * 32ms + 420ms);
+}
+
+.heart-chart__dot-halo {
+  fill: rgba(255, 105, 105, 0.14);
+}
+
+.heart-chart__dot {
+  fill: #1f1f1f;
+  stroke: #ff7b7b;
+  stroke-width: 2;
+  transition: opacity 160ms ease;
+}
+
+.heart-chart__dot.is-current {
+  fill: #ff7b7b;
+  stroke: #ffd0c9;
+}
+
+.heart-chart__dot.is-hover {
+  fill: #ff9a8d;
+  stroke: #ffe2dd;
+}
+
+.heart-chart__plot.is-hovering .heart-chart__dot-wrap:not(.is-hover) .heart-chart__dot {
+  opacity: 0.42;
 }
 
 /* ── تولتیپ ── */
@@ -366,6 +492,64 @@
   font-size: 0.85rem;
 }
 
+/* ── سوییچ حالت نمایش (میله‌ای / خطی) ──
+   هم‌خانوادهٔ دراپ‌داون بازه: پالت آبی #132943 / #5b8cc7.
+   نشانگر فعال یک قرص شناور است که با تغییر حالت بین دو دکمه سُر می‌خورد. */
+.chart-mode {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  background: #1e1e1e;
+}
+
+.chart-mode__pill {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  border-radius: 11px;
+  background: #132943;
+  pointer-events: none;
+  transition: left 300ms cubic-bezier(0.22, 1, 0.36, 1),
+    width 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.chart-mode__btn {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 11px;
+  border: 0;
+  border-radius: 11px;
+  background: transparent;
+  color: #8a8a8a;
+  cursor: pointer;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  line-height: 1;
+  transition: color 200ms ease;
+}
+
+.chart-mode__btn:hover {
+  color: #cfcfcf;
+}
+
+.chart-mode__btn.is-active {
+  color: #5b8cc7;
+}
+
+.chart-mode__btn:focus-visible {
+  outline: 2px solid #5b8cc7;
+  outline-offset: 2px;
+}
+
 /* ── انیمیشن‌ها ── */
 @keyframes heart-bar-rise {
   from {
@@ -373,6 +557,36 @@
   }
   to {
     transform: scaleY(1);
+  }
+}
+
+/* رسم تدریجی خط — مسیر با pathLength=1 نرمال شده، پس دش‌آرایه هم ۰..۱ است */
+@keyframes heart-line-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes heart-dot-in {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes heart-area-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
@@ -439,9 +653,30 @@
   .heart-range__menu,
   .heart-chart__pulse-ring,
   .heart-chart__skeleton span,
-  .heart-chart__insights--loading {
+  .heart-chart__insights--loading,
+  .chart-mode__btn,
+  .chart-mode__pill {
     animation: none !important;
     transition: none !important;
+  }
+
+  /* خط بدون انیمیشن رسم، کامل دیده شود */
+  .heart-chart__line-stroke {
+    stroke-dashoffset: 0;
+    animation: none !important;
+  }
+
+  .heart-chart__line-area,
+  .heart-chart__dot-wrap {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* گذار حالت هم خاموش می‌شود؛ نمودار مستقیم عوض می‌شود */
+  .heart-chart__stage {
+    transition: none !important;
+    transform: none !important;
+    opacity: 1 !important;
   }
 }
 
@@ -455,6 +690,15 @@
 @media (max-width: 700px) {
   .heart-chart__ylabel {
     font-size: 9.5px;
+  }
+
+  /* در عرض کم، سوییچ حالت فقط آیکنی می‌شود تا هدر دو خطی نشود */
+  .chart-mode__label {
+    display: none;
+  }
+
+  .chart-mode__btn {
+    padding: 7px 10px;
   }
 
   .heart-chart__insights {

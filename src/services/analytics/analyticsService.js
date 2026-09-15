@@ -28,6 +28,7 @@ import {
   buildDailySeries,
   comparePeriods,
   aggregateByQuestion,
+  startOfToday,
 } from './analyticsEngine';
 
 const STATE_KEY_PREFIX = 'tapesh:analytics:v1:';
@@ -201,10 +202,14 @@ export function loadAttemptHistory(userId) {
 
 /* ────────────────────────── اعمال فیلتر ────────────────────────── */
 
+/*
+ * مرز بازه‌ها روی «شروع روز» بسته می‌شود نه روی ساعت جاری؛ وگرنه روز اولِ بازه
+ * فقط بخشی از دادهٔ آن روز را می‌دید و با سری روزانهٔ نمودار روند ناهم‌تراز می‌شد.
+ */
 function applyFilters(attempts, filters) {
   const f = normalizeFilters(filters);
   const days = rangeDays(f.range);
-  const cutoff = days ? Date.now() - days * 86400000 : null;
+  const cutoff = days ? startOfToday() - (days - 1) * 86400000 : null;
   return attempts.filter((attempt) => {
     if (cutoff && attempt.timestamp < cutoff) return false;
     if (f.mode !== 'all' && attempt.mode !== f.mode) return false;
@@ -237,7 +242,7 @@ function previousPeriodAttempts(attempts, filters) {
     const shape = filterShape(attempts);
     return shape.slice(0, Math.floor(shape.length / 2));
   }
-  const currentCutoff = Date.now() - days * 86400000;
+  const currentCutoff = startOfToday() - (days - 1) * 86400000;
   const previousCutoff = currentCutoff - days * 86400000;
   return filterShape(attempts).filter((attempt) => attempt.timestamp < currentCutoff && attempt.timestamp >= previousCutoff);
 }
@@ -299,8 +304,8 @@ export function fetchPerformanceTrend(userId, filters = {}) {
     const days = rangeDays(f.range) ?? HISTORY_DAYS;
     const filtered = applyFilters(attempts, filters);
     const series = buildDailySeries(filtered, { days });
-    /* نقاط مهم: آزمون‌های داخل بازه */
-    const cutoff = Date.now() - days * 86400000;
+    /* نقاط مهم: آزمون‌های داخل بازه — هم‌مرز با سری روزانه */
+    const cutoff = startOfToday() - (days - 1) * 86400000;
     const examEvents = sessions
       .filter((session) => session.mode === 'exam' && (session.submittedAt ?? 0) >= cutoff)
       .map((session) => {
@@ -424,7 +429,7 @@ export function fetchAnalyticsBundle(userId, filters = {}) {
     const model = buildAnalyticsModel(filtered);
     const f = normalizeFilters(filters);
     const days = rangeDays(f.range) ?? HISTORY_DAYS;
-    const cutoff = Date.now() - days * 86400000;
+    const cutoff = startOfToday() - (days - 1) * 86400000;
 
     const examSessions = sessions.filter((session) => session.mode === 'exam');
     return {
@@ -462,7 +467,7 @@ export function fetchAnalyticsBundle(userId, filters = {}) {
       insights: model.insights,
       diagnosis: model.diagnosis,
       recommendations: model.recommendations,
-      exams: aggregateExams(examSessions, filtered).slice(0, 6),
+      exams: aggregateExams(examSessions, filtered).filter((exam) => exam.total > 0).slice(0, 6),
       recency: model.recency,
     };
   });

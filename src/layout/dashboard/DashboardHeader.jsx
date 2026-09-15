@@ -2,6 +2,9 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import Brand from './Brand';
 import settingsIcon from '../../../images/icons/icons8-setting-500.png';
 
+const FA_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
+const toFa = (value) => String(value).replace(/\d/g, (digit) => FA_DIGITS[Number(digit)]);
+
 const navigationItems = [
   { id: 'dashboard', label: 'داشبورد' },
   { id: 'courses', label: 'دوره‌ها' },
@@ -25,6 +28,7 @@ export default function DashboardHeader({
   onSettingsToggle,
   areNotificationsOpen,
   onNotificationsToggle,
+  notificationsUnreadCount = 0,
   headerTime,
   isPomodoroActive,
   isPomodoroRunning,
@@ -125,11 +129,12 @@ export default function DashboardHeader({
             aria-pressed={isPomodoroActive}
             onClick={onPomodoroOpen}
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            {/* عدد اول می‌آید تا در چیدمان راست‌به‌چپ سمت راست بنشیند و آیکون ساعت سمت چپ عدد بماند */}
+            <span>{headerTime}</span>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
               <circle cx="12" cy="12" r="10"/>
               <path d="M12 6v6l4 2"/>
             </svg>
-            <span>{headerTime}</span>
           </button>
 
           <button
@@ -144,6 +149,12 @@ export default function DashboardHeader({
               <path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
               <path d="M10 21h4" />
             </svg>
+
+            {notificationsUnreadCount > 0 && (
+              <span className="dashboard-header__icon-badge" aria-hidden="true">
+                {toFa(notificationsUnreadCount)}
+              </span>
+            )}
           </button>
 
           <button className="dashboard-header__icon-btn" aria-label="تنظیمات" aria-pressed={isSettingsOpen}

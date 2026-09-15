@@ -1,0 +1,406 @@
+/*
+ * کارت‌های «دوره‌های من» — myc-*
+ *
+ * هر خانوادهٔ دوره (درسنامه جامع / میکرو درسنامه / دوره‌های بین‌الملل) هویت
+ * بصریِ خودش را دارد تا کاربر در یک نگاه نوع دوره را تشخیص بدهد. بافت‌ها و
+ * رنگ‌ها از همان لایهٔ مبدأ برداشت شده‌اند (dars-* / micr-* / intl-*) تا کل
+ * سایت یک‌دست بماند.
+ *
+ * متغیرهای هر کارت:
+ *   --accent — رنگ اختصاصیِ خودِ دوره
+ *   --kind   — رنگ ثابتِ «نوع دوره»
+ *   --soft   — رنگ پس‌زمینهٔ ملایم (برای بین‌الملل)
+ */
+
+/* ── بدنهٔ مشترک کارت ───────────────────────────────────────────── */
+.myc-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  isolation: isolate;
+  justify-content: space-between;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1.75rem;
+  padding: 1rem;
+  text-align: right;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+@media (min-width: 768px) {
+  .myc-tile {
+    border-radius: 2rem;
+    padding: 1.25rem;
+  }
+}
+
+.myc-tile:hover {
+  transform: translateY(-4px);
+}
+
+.myc-tile__texture {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* نوار باریکِ لبه — اولین نشانهٔ نوع دوره (در راست‌به‌چپ: لبهٔ راست) */
+.myc-tile__rail {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  inset-inline-start: 0;
+  width: 3px;
+  background: linear-gradient(to bottom, var(--kind), transparent 88%);
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.myc-tile__head,
+.myc-tile__body {
+  position: relative;
+}
+
+.myc-tile__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+/* ── ۱) درسنامه جامع: سطح یک‌دست با هالهٔ نرم (هم‌زبان با dars-card) ── */
+.myc-tile--comprehensive {
+  border-color: color-mix(in srgb, var(--accent) 48%, transparent);
+  background: linear-gradient(150deg, rgba(29, 43, 61, 0.95), rgba(15, 24, 34, 0.95));
+  box-shadow: 0 12px 28px -14px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+.myc-tile--comprehensive .myc-tile__texture {
+  background: radial-gradient(
+    circle at 14% 6%,
+    color-mix(in srgb, var(--accent) 32%, transparent),
+    transparent 58%
+  );
+}
+
+.myc-tile--comprehensive:hover {
+  border-color: var(--accent);
+}
+
+/* ── ۲) میکرو درسنامه: کادر خط‌چین + هاشورِ ریز (سبکِ کوتاه و فشرده) ── */
+.myc-tile--micro {
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--kind) 55%, transparent);
+  background: linear-gradient(160deg, rgba(35, 30, 52, 0.92), rgba(17, 16, 24, 0.95));
+}
+
+.myc-tile--micro .myc-tile__texture {
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.05) 0 1px,
+    transparent 1px 9px
+  );
+}
+
+.myc-tile--micro:hover {
+  border-style: solid;
+  border-color: var(--kind);
+}
+
+/* ── ۳) دوره‌های بین‌الملل: شبکهٔ خطی + اورب‌های کادری (هم‌زبان با intl) ── */
+.myc-tile--international {
+  border-color: color-mix(in srgb, var(--kind) 42%, transparent);
+  background: linear-gradient(150deg, var(--soft, #141b26), #0a0d12 88%);
+}
+
+.myc-tile--international .myc-tile__texture {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size: 22px 22px;
+  -webkit-mask-image: linear-gradient(to top, #000, transparent 82%);
+  mask-image: linear-gradient(to top, #000, transparent 82%);
+  opacity: 0.55;
+}
+
+.myc-tile--international .myc-tile__texture::before,
+.myc-tile--international .myc-tile__texture::after {
+  content: '';
+  position: absolute;
+  aspect-ratio: 1;
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, white 10%);
+  border-radius: 50%;
+}
+
+.myc-tile--international .myc-tile__texture::before {
+  top: -28%;
+  inset-inline-start: -14%;
+  width: 56%;
+  opacity: 0.5;
+}
+
+.myc-tile--international .myc-tile__texture::after {
+  bottom: -26%;
+  inset-inline-end: -12%;
+  width: 44%;
+  opacity: 0.28;
+}
+
+.myc-tile--international:hover {
+  border-color: var(--kind);
+}
+
+/* ── چیپ نوع دوره ───────────────────────────────────────────────── */
+.myc-tile__kind {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  border: 1px solid color-mix(in srgb, var(--kind) 45%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--kind) 16%, transparent);
+  padding: 0.28rem 0.55rem;
+  color: color-mix(in srgb, var(--kind) 70%, white);
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 0.6rem;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.myc-tile__status {
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.28rem 0.55rem;
+  color: rgba(255, 255, 255, 0.72);
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 0.6rem;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.myc-tile__status--done {
+  background: rgba(119, 183, 135, 0.18);
+  color: #a3d8b5;
+}
+
+/* ── متن کارت ───────────────────────────────────────────────────── */
+.myc-tile__title {
+  display: block;
+  color: #fff;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 0.875rem;
+  line-height: 1.75rem;
+}
+
+@media (min-width: 768px) {
+  .myc-tile__title {
+    font-size: 1rem;
+  }
+}
+
+.myc-tile__tagline {
+  display: block;
+  margin-top: 0.15rem;
+  overflow: hidden;
+  color: #9a9a9a;
+  font-size: 0.625rem;
+  line-height: 1.4rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (min-width: 768px) {
+  .myc-tile__tagline {
+    font-size: 0.6875rem;
+  }
+}
+
+.myc-tile__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+  color: #9aa5b6;
+  font-size: 0.625rem;
+}
+
+@media (min-width: 768px) {
+  .myc-tile__foot {
+    font-size: 0.6875rem;
+  }
+}
+
+.myc-tile__percent {
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+/* ── دکمهٔ اقدام ────────────────────────────────────────────────── */
+.myc-tile__cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  margin-top: 0.6rem;
+  border-radius: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  color: #fff;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 0.6875rem;
+  transition:
+    filter 0.2s ease,
+    transform 0.2s ease;
+}
+
+@media (min-width: 768px) {
+  .myc-tile__cta {
+    font-size: 0.75rem;
+  }
+}
+
+.myc-tile:hover .myc-tile__cta {
+  filter: brightness(1.12);
+  transform: translateY(-1px);
+}
+
+/* ── نمایش پیشرفت ───────────────────────────────────────────────── */
+.myc-meter {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 0.25rem;
+  margin-top: 0.6rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.myc-meter__fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(
+    to left,
+    var(--accent),
+    color-mix(in srgb, var(--accent) 55%, #937fcd)
+  );
+}
+
+/* مهره‌ای (بین‌الملل): نشانگرِ سفید روی لبهٔ پیشرفت */
+.myc-meter--beads {
+  overflow: visible;
+}
+
+.myc-meter__head {
+  position: absolute;
+  top: 50%;
+  inset-inline-end: -2px;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 70%, transparent);
+  transform: translateY(-50%);
+}
+
+/* قطعه‌ای (میکرو): ده تکهٔ جداگانه — حسِ مرور کوتاه و مرحله‌ای */
+.myc-meter--segments {
+  display: flex;
+  gap: 3px;
+  height: 0.3rem;
+  overflow: visible;
+  background: none;
+}
+
+.myc-meter--segments i {
+  flex: 1;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  transition: background 0.2s ease;
+}
+
+.myc-meter--segments i.is-on {
+  background: var(--accent);
+}
+
+/* ── راهنما / فیلترِ نوع دوره (لایهٔ همهٔ دوره‌های من) ─────────── */
+.myc-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.4rem 0.8rem;
+  color: rgba(255, 255, 255, 0.65);
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 0.6875rem;
+  white-space: nowrap;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+@media (min-width: 768px) {
+  .myc-filter {
+    padding: 0.45rem 0.95rem;
+    font-size: 0.75rem;
+  }
+}
+
+.myc-filter:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.myc-filter__dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: var(--kind);
+  opacity: 0.55;
+}
+
+.myc-filter.is-active {
+  border-color: color-mix(in srgb, var(--kind) 65%, transparent);
+  background: color-mix(in srgb, var(--kind) 16%, transparent);
+  color: color-mix(in srgb, var(--kind) 72%, white);
+}
+
+.myc-filter.is-active .myc-filter__dot {
+  opacity: 1;
+}
+
+.myc-filter__count {
+  font-family: 'Doran', Tahoma, sans-serif;
+  opacity: 0.7;
+}
+
+/* عنوانِ دسته در لایهٔ همهٔ دوره‌های من */
+.myc-group__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.9rem;
+  color: rgba(255, 255, 255, 0.78);
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 0.8125rem;
+}
+
+@media (min-width: 768px) {
+  .myc-group__label {
+    font-size: 0.9375rem;
+  }
+}
+
+.myc-group__rule {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to left, rgba(255, 255, 255, 0.14), transparent);
+}

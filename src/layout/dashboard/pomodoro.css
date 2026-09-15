@@ -67,72 +67,242 @@
   }
 }
 
-.pomodoro__circle.is-break .pomodoro__water::after {
-  background: linear-gradient(180deg, rgba(95, 174, 124, 0.92), rgba(24, 64, 40, 0.97));
-}
-
-.pomodoro__circle.is-break .pomodoro__wave {
-  background: rgba(119, 183, 135, 0.5);
-}
-
-.pomodoro__circle.is-break .pomodoro__wave--back {
-  background: rgba(70, 140, 100, 0.38);
-}
-
+/* ── مایع گوی پومودو ──
+   بدنهٔ مایع + سطح موج‌دار + حباب‌های ریز. موج‌ها با SVG کشیده می‌شوند تا لبهٔ
+   آب واقعاً موج بخورد، نه اینکه یک خط صاف بالا بیاید. */
 .pomodoro__water {
   position: absolute;
+  z-index: 0;
   right: 0;
   bottom: 0;
   left: 0;
   transition: height 1s linear;
+  will-change: height;
 }
 
-.pomodoro__water::after {
-  content: '';
+.pomodoro__liquid {
   position: absolute;
   top: 0;
   right: 0;
   bottom: 0;
   left: 0;
   z-index: 1;
-  background: linear-gradient(180deg, rgba(52, 118, 187, 0.92), rgba(23, 58, 96, 0.97));
+  overflow: hidden;
+  background: linear-gradient(180deg, #4a92d4 0%, #2a6396 28%, #16375a 66%, #0d2136 100%);
 }
 
-.pomodoro__wave {
+/* درخشش نرم درست زیر سطح آب؛ چون از خود خط آب شفاف شروع می‌شود، درز نمی‌اندازد */
+.pomodoro__liquid::before {
+  content: '';
   position: absolute;
   top: 0;
-  left: 50%;
-  width: 205%;
-  aspect-ratio: 1;
-  border: 0;
-  border-radius: 43%;
-  background: rgba(70, 130, 195, 0.5);
-  animation: pomodoro-wave 6.4s linear infinite;
+  right: 0;
+  left: 0;
+  height: 64%;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(198, 234, 255, 0.2) 11%,
+    rgba(150, 205, 250, 0.07) 36%,
+    transparent 64%
+  );
+  animation: pomodoro-surface 4.2s ease-in-out infinite;
+}
+
+@keyframes pomodoro-surface {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* درخشش نرم از کف مایع به سمت بالا */
+.pomodoro__depth {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 42%;
+  background: radial-gradient(
+    74% 90% at 50% 128%,
+    rgba(104, 180, 246, 0.22),
+    rgba(104, 180, 246, 0) 70%
+  );
+}
+
+/* برق مایع: نوار نور موربی که آرام از روی آب می‌گذرد */
+.pomodoro__sheen {
+  position: absolute;
+  top: -60%;
+  left: -70%;
+  width: 52%;
+  height: 220%;
+  background: linear-gradient(96deg, transparent, rgba(214, 238, 255, 0.18), transparent);
+  transform: rotate(12deg);
+  animation: pomodoro-sheen 7.6s ease-in-out infinite;
+}
+
+@keyframes pomodoro-sheen {
+  0% {
+    transform: translateX(0) rotate(12deg);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  62% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: translateX(430%) rotate(12deg);
+    opacity: 0;
+  }
+}
+
+/* حباب‌ها: هر حباب یک ستون هم‌قد مایع است که از کف تا سطح بالا می‌رود */
+.pomodoro__bubble {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--bubble-x);
+  width: var(--bubble-size);
+  animation: pomodoro-bubble var(--bubble-duration) linear infinite;
+  animation-delay: var(--bubble-delay);
   will-change: transform;
 }
 
-.pomodoro__wave--back {
-  width: 215%;
-  border-radius: 45%;
-  background: rgba(43, 95, 148, 0.38);
-  animation-duration: 9.6s;
-  animation-direction: reverse;
+.pomodoro__bubble::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: var(--bubble-size);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 34% 30%,
+    rgba(255, 255, 255, 0.98),
+    rgba(190, 224, 252, 0.6) 56%,
+    rgba(190, 224, 252, 0) 74%
+  );
 }
 
-@keyframes pomodoro-wave {
+@keyframes pomodoro-bubble {
+  0% {
+    transform: translateY(6%);
+    opacity: 0;
+  }
+  14% {
+    opacity: 0.95;
+  }
+  72% {
+    opacity: 0.55;
+  }
+  100% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+
+/* موج‌ها: پایینشان روی خط آب می‌نشیند و فقط بخش بالای خط دیده می‌شود.
+   تا وقتی آب به سطح محسوسی نرسیده، موج‌ها محو می‌مانند تا گوی خالی، خالی بماند. */
+.pomodoro__waves {
+  position: absolute;
+  z-index: 2;
+  bottom: 100%;
+  left: 0;
+  width: 100%;
+  height: 36px;
+  opacity: min(1, calc(var(--pomodoro-fill, 1) * 14));
+  transition: opacity 600ms ease;
+}
+
+.pomodoro__wave-path {
+  animation: pomodoro-wave-front 5.6s linear infinite;
+}
+
+.pomodoro__wave-path--front {
+  fill: #4a92d4;
+}
+
+.pomodoro__wave-path--back {
+  fill: rgba(150, 199, 243, 0.5);
+  animation-name: pomodoro-wave-back;
+  animation-duration: 9.2s;
+}
+
+/* برق روی تاج موج؛ هم‌زمان با موج جابه‌جا می‌شود و آرام نفس می‌کشد */
+.pomodoro__wave-gloss {
+  fill: url(#pomodoro-surface-light);
+  animation: pomodoro-wave-front 5.6s linear infinite, pomodoro-gloss 4.2s ease-in-out infinite;
+}
+
+@keyframes pomodoro-gloss {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes pomodoro-wave-front {
   from {
-    transform: translate(-50%, -50%) rotate(0deg);
+    transform: translateX(0);
   }
   to {
-    transform: translate(-50%, -50%) rotate(360deg);
+    transform: translateX(-300px);
   }
+}
+
+@keyframes pomodoro-wave-back {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-420px);
+  }
+}
+
+/* حالت استراحت: همان مایع با تم سبز */
+.pomodoro__circle.is-break .pomodoro__liquid {
+  background: linear-gradient(180deg, #6cc08c 0%, #46945f 28%, #2b6644 66%, #17422b 100%);
+}
+
+.pomodoro__circle.is-break .pomodoro__liquid::before {
+  background: linear-gradient(
+    180deg,
+    rgba(208, 246, 220, 0.46),
+    rgba(150, 226, 180, 0.12) 46%,
+    transparent
+  );
+}
+
+.pomodoro__circle.is-break .pomodoro__depth {
+  background: radial-gradient(
+    76% 100% at 50% 116%,
+    rgba(112, 208, 150, 0.4),
+    rgba(112, 208, 150, 0) 72%
+  );
+}
+
+.pomodoro__circle.is-break .pomodoro__wave-path--front {
+  fill: #6cc08c;
+}
+
+.pomodoro__circle.is-break .pomodoro__wave-path--back {
+  fill: rgba(178, 238, 198, 0.5);
 }
 
 .pomodoro__time {
   position: relative;
   z-index: 2;
   color: #fff;
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Pinar', Tahoma, sans-serif;
   font-size: clamp(3.1rem, 4.6vw + 2vh, 5.1rem);
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -271,10 +441,11 @@
 
 .pomodoro-card__today-value {
   color: #5b91cb;
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Pinar', Tahoma, sans-serif;
   font-size: clamp(3rem, 4.2vw, 4.3rem);
   font-weight: 700;
   line-height: 1.1;
+  font-variant-numeric: tabular-nums;
 }
 
 .pomodoro-card__today-minutes {
@@ -287,8 +458,9 @@
 
 .pomodoro-card__today-minutes strong {
   color: #7fb2e0;
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Pinar', Tahoma, sans-serif;
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
 /* کادر زمان هدر: وضعیت‌های پومودو */
@@ -316,12 +488,13 @@
   box-shadow: inset 3px 0 #5fae7c;
 }
 
+/* نقطه وضعیت در گوشهٔ بالا-راست کادر می‌نشیند تا روی آیکون ساعتِ سمت چپ نیفتد */
 .dashboard-header__time.is-running::after,
 .dashboard-header__time.is-break::after {
   content: '';
   position: absolute;
-  top: 8px;
-  inset-inline-end: 9px;
+  top: 7px;
+  inset-inline-start: 9px;
   width: 7px;
   height: 7px;
   border-radius: 50%;
@@ -404,5 +577,26 @@
   .pomodoro-card__chart-body {
     min-height: 150px;
     border-radius: 22px;
+  }
+}
+
+/* دسترس‌پذیری: با تنظیم «کاهش حرکت»، سطح آب آرام می‌ماند */
+@media (prefers-reduced-motion: reduce) {
+  .pomodoro__wave-path,
+  .pomodoro__wave-gloss,
+  .pomodoro__bubble,
+  .pomodoro__sheen,
+  .pomodoro__liquid::before,
+  .pomodoro__circle.is-running {
+    animation: none;
+  }
+
+  .pomodoro__bubble,
+  .pomodoro__sheen {
+    opacity: 0;
+  }
+
+  .pomodoro__water {
+    transition: none;
   }
 }

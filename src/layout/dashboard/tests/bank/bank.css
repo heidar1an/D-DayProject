@@ -66,10 +66,10 @@
 .tb-option {
   cursor: pointer;
   border-radius: 1.15rem;
-  border: 1.5px solid;
+  border: 0;
   padding: 0.95rem 1.05rem;
   font-size: 0.95rem;
-  transition: border-color 0.16s ease, background 0.16s ease, transform 0.16s ease;
+  transition: background 0.16s ease, transform 0.16s ease;
 }
 
 .tb-option:active {
@@ -245,6 +245,27 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* ─────────────── ورود به درس و حرکت بین مباحث ─────────────── */
+/* ورود نرم به نمای یک درس — چه بار اول، چه بازگشت از محیط حل */
+.tb-subject-in {
+  animation: tb-subject-in 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes tb-subject-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* حرکت نرم بین بخش‌ها/مباحث یک درس — با تغییر key دوباره اجرا می‌شود */
+.tb-topics-in {
+  animation: tb-topics-in 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes tb-topics-in {
+  from { opacity: 0; transform: translateY(9px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 /* ─────────────── دراور موبایل ─────────────── */
 .tb-drawer {
   position: fixed;
@@ -320,7 +341,9 @@
   .tb-fade,
   .tb-pop,
   .tb-question,
-  .tb-reveal {
+  .tb-reveal,
+  .tb-subject-in,
+  .tb-topics-in {
     animation: none;
   }
 

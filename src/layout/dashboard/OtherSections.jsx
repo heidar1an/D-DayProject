@@ -1,13 +1,116 @@
 import { Suspense, lazy } from 'react';
+import './otherSections.css';
 
 /* AI Card با lazy load بارگذاری می‌شود تا به سنگین‌شدن بخش «سایر بخش‌ها» دامن نزند */
 const AICard = lazy(() => import('./ai/AICard'));
 
-function AICardSkeleton() {
-  return <div className="h-72 w-full rounded-[2.5rem] bg-[#242426]" aria-hidden="true" />;
+/* ── آیکون‌های بخش (stroke ساده، ۲۴×۲۴، هم‌زبان با aiShared) ───────────────── */
+
+const iconProps = {
+  viewBox: '0 0 24 24',
+  fill: 'none',
+  stroke: 'currentColor',
+  strokeWidth: 1.7,
+  strokeLinecap: 'round',
+  strokeLinejoin: 'round',
+  'aria-hidden': true,
+};
+
+/* شبکه دانش — گره‌های به‌هم‌وصل */
+function NetworkIcon(props) {
+  return (
+    <svg {...iconProps} {...props}>
+      <circle cx="6.2" cy="6.8" r="2.3" />
+      <circle cx="17.8" cy="8.6" r="2.3" />
+      <circle cx="11" cy="18" r="2.3" />
+      <path d="M8.3 7.4 15.6 8.5" />
+      <path d="M7.3 9 9.9 15.9" />
+      <path d="M16.4 10.7 12.3 16.2" />
+    </svg>
+  );
 }
 
-export default function OtherSections({ onOpenWiki, onOpenKnowledge }) {
+/* ویکی تپش — کتابِ بازِ دوصفحه‌ای */
+function WikiIcon(props) {
+  return (
+    <svg {...iconProps} {...props}>
+      <path d="M4 6a1.6 1.6 0 0 1 1.6-1.6H10a2 2 0 0 1 2 2v13a2 2 0 0 0-2-1.7H5.6A1.6 1.6 0 0 1 4 16.1V6Z" />
+      <path d="M20 6a1.6 1.6 0 0 0-1.6-1.6H14a2 2 0 0 0-2 2v13a2 2 0 0 1 2-1.7h4.4A1.6 1.6 0 0 0 20 16.1V6Z" />
+    </svg>
+  );
+}
+
+/* مقالات — صفحهٔ نوشته */
+function ArticleIcon(props) {
+  return (
+    <svg {...iconProps} {...props}>
+      <path d="M4.5 6a1.5 1.5 0 0 1 1.5-1.5h12A1.5 1.5 0 0 1 19.5 6v12a1.5 1.5 0 0 1-1.5 1.5H6A1.5 1.5 0 0 1 4.5 18V6Z" />
+      <path d="M8 8.8h5.5" />
+      <path d="M8 12.2h8" />
+      <path d="M8 15.6h8" />
+    </svg>
+  );
+}
+
+/* درخواست پشتیبان — هدست */
+function SupportIcon(props) {
+  return (
+    <svg {...iconProps} {...props}>
+      <path d="M5 15.2v-3.4a7 7 0 0 1 14 0v3.4" />
+      <rect x="3" y="13.4" width="4.3" height="6.6" rx="2.15" />
+      <rect x="16.7" y="13.4" width="4.3" height="6.6" rx="2.15" />
+    </svg>
+  );
+}
+
+/* فلش ورود — در RTL رو به چپ */
+function ArrowIcon(props) {
+  return (
+    <svg {...iconProps} {...props}>
+      <path d="M19 12H5" />
+      <path d="m11 6-6 6 6 6" />
+    </svg>
+  );
+}
+
+/* ── دادهٔ کارت‌های ثانویه ──────────────────────────────────────────────────── */
+
+const SECONDARY_CARDS = [
+  {
+    id: 'knowledge-network',
+    title: 'شبکه دانش',
+    description: 'گراف، درخت و مسیر یادگیری مفاهیم درسی',
+    accent: 'blue',
+    Icon: NetworkIcon,
+  },
+  {
+    id: 'tapesh-wiki',
+    title: 'ویکی تپش',
+    description: 'جست‌وجوی سریع در دانشنامهٔ مفاهیم درسی',
+    accent: 'green',
+    Icon: WikiIcon,
+  },
+  {
+    id: 'articles',
+    title: 'مقالات',
+    description: 'نوشته‌ها و یادداشت‌های آموزشی تپش',
+    accent: 'brown',
+    Icon: ArticleIcon,
+  },
+  {
+    id: 'support-request',
+    title: 'درخواست پشتیبان',
+    description: 'سؤال یا مشکلت را با تیم تپش در میان بگذار',
+    accent: 'gold',
+    Icon: SupportIcon,
+  },
+];
+
+function AICardSkeleton() {
+  return <div className="other-sections__ai-skeleton" aria-hidden="true" />;
+}
+
+export default function OtherSections({ onOpenWiki, onOpenKnowledge, onOpenSmartAI }) {
   const handleSectionClick = (sectionId) => {
     /* مقالات به بخش عمومی سایت وصل است؛ دکمه Back کاربر را به داشبورد برمی‌گرداند */
     if (sectionId === 'articles') {
@@ -25,44 +128,38 @@ export default function OtherSections({ onOpenWiki, onOpenKnowledge }) {
     console.log(`بخش انتخاب شد: ${sectionId}`);
   };
 
-  const secondaryCards = [
-    { id: 'knowledge-network', title: 'شبکه دانش' },
-    { id: 'tapesh-wiki', title: 'ویکی تپش' },
-    { id: 'articles', title: 'مقالات', highlighted: true },
-    { id: 'support-request', title: 'درخواست پشتیبان' },
-  ];
-
   return (
     <main
       dir="rtl"
-      className="dash-stagger mx-auto w-[var(--content-width)] bg-black py-8 text-white md:py-10 [font-family:'Pinar',Tahoma,sans-serif]"
+      className="other-sections dash-stagger"
+      aria-label="سایر بخش‌ها"
     >
-      {/* تپش هوشمند — کارت مینیمال که با تعامل باز می‌شود؛ لایهٔ جداگانه ندارد */}
-      <div className="mb-6 md:mb-8">
+      {/* تپش هوشمند — کارت ورودی به لایهٔ مستقل گفت‌وگو */}
+      <div className="other-sections__ai">
         <Suspense fallback={<AICardSkeleton />}>
-          <AICard />
+          <AICard onOpen={onOpenSmartAI} />
         </Suspense>
       </div>
-      <div className="dash-stagger grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
-        {secondaryCards.map((card) => (
+
+      <div className="other-sections__grid dash-stagger">
+        {SECONDARY_CARDS.map(({ id, title, description, accent, Icon }) => (
           <button
-            key={card.id}
+            key={id}
             type="button"
-            onClick={() => handleSectionClick(card.id)}
-            className={`flex h-36 w-full cursor-pointer items-center justify-center rounded-[2.5rem] bg-[#242426] text-lg font-bold text-white transition-colors duration-300 hover:bg-[#2e2e30] md:h-40 md:text-xl [font-family:'Doran',Tahoma,sans-serif] ${
-              card.highlighted ? 'border border-[#5b8cc7]' : ''
-            }`}
+            onClick={() => handleSectionClick(id)}
+            className={`other-card other-card--${accent}`}
           >
-            <span className="flex items-center gap-3">
-              <span>{card.title}</span>
-              {card.highlighted && (
-                <span
-                  className="text-sm font-normal text-gray-500"
-                  aria-hidden="true"
-                >
-                  ×
-                </span>
-              )}
+            <span className="other-card__badge" aria-hidden="true">
+              <Icon width={26} height={26} />
+            </span>
+
+            <span className="other-card__body">
+              <strong className="other-card__title">{title}</strong>
+              <span className="other-card__desc">{description}</span>
+            </span>
+
+            <span className="other-card__arrow" aria-hidden="true">
+              <ArrowIcon width={16} height={16} />
             </span>
           </button>
         ))}

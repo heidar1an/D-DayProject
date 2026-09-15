@@ -12,7 +12,6 @@ import {
   fetchExamDetail,
   fetchQuestionAnalytics,
   TIME_RANGES,
-  MODE_FILTERS,
   normalizeFilters,
 } from '../../../services/analytics/analyticsService';
 import {
@@ -121,28 +120,6 @@ export default function AnalyticsLayer({ userData, onBack }) {
     setFilters((current) => normalizeFilters({ ...current, ...patch }));
   };
 
-  const activeFilterChips = useMemo(() => {
-    const chips = [];
-    if (filters.mode !== 'all') chips.push({ key: 'mode', label: MODE_FILTERS.find((mode) => mode.key === filters.mode)?.label, reset: { mode: 'all' } });
-    filters.subjectIds.forEach((subjectId) => {
-      const subject = bundle?.subjects.find((item) => item.subjectId === subjectId);
-      chips.push({ key: `subject-${subjectId}`, label: subject?.name ?? subjectId, reset: { subjectIds: filters.subjectIds.filter((id) => id !== subjectId) } });
-    });
-    return chips;
-  }, [filters, bundle]);
-
-  const runRecommendation = (recommendation) => {
-    if (recommendation.target === 'practice' && recommendation.payload?.subjectId) {
-      go('subject', { subjectId: recommendation.payload.subjectId });
-      return;
-    }
-    if (recommendation.target === 'lesson' && recommendation.payload?.subjectId) {
-      go('subject', { subjectId: recommendation.payload.subjectId });
-      return;
-    }
-    setToast('این اقدام در نسخهٔ کامل به بخش مربوطهٔ تپش وصل می‌شود؛ اینجا مسیرش را می‌بینی.');
-  };
-
   const handleBack = () => {
     switch (view.name) {
       case 'home':
@@ -199,18 +176,25 @@ export default function AnalyticsLayer({ userData, onBack }) {
         </span>
       </header>
 
-      {/* عنوان صفحه (فقط خانه) */}
+      {/* سرتیتر صفحه (فقط خانه) — هم‌خانواده با سرتیتر «میکرو درسنامه» */}
       {view.name === 'home' && (
-        <div className="mb-5 dashboard-layer-reveal--down">
-          <h1 className="text-2xl font-extrabold [font-family:'Doran',Tahoma,sans-serif] md:text-3xl">تحلیل عملکرد تست‌ها</h1>
-          <p className="mt-2 text-[13px] leading-6 text-[#9a9a9a]">
-            تست‌هایت را فقط بررسی نکن؛ از آن‌ها برای شناخت بهتر مسیر یادگیری‌ات استفاده کن.
-          </p>
-        </div>
+        <header className="an-hero dashboard-layer-reveal--down">
+          <div className="an-hero__content">
+            <span className="an-hero__chip">
+              <i aria-hidden="true" />
+              تصویری زنده از مسیر یادگیری‌ات
+            </span>
+            <h1 className="an-hero__title">تحلیل عملکرد</h1>
+            <p className="an-hero__kicker">هر عدد یک سرنخ — از تست‌های تو، برای تصمیم بعدی</p>
+            <p className="an-hero__subtitle">
+              روند، نقاط قوت و نقاط ضعفت از دادهٔ واقعی تست‌هایت ساخته می‌شود؛ هیچ عددی تزئینی نیست.
+            </p>
+          </div>
+        </header>
       )}
 
-      {/* فیلترها — در تمام نماها پایدار */}
-      <div className="mb-6 space-y-2.5">
+      {/* فیلتر بازهٔ زمانی — در تمام نماها پایدار */}
+      <div className="mb-4">
         <div className="an-chiprow" role="group" aria-label="بازهٔ زمانی">
           {TIME_RANGES.map((range) => (
             <button
@@ -224,63 +208,23 @@ export default function AnalyticsLayer({ userData, onBack }) {
             </button>
           ))}
         </div>
-        <div className="an-chiprow" role="group" aria-label="نوع تست">
-          {MODE_FILTERS.map((mode) => (
-            <button
-              key={mode.key}
-              type="button"
-              aria-pressed={filters.mode === mode.key}
-              onClick={() => updateFilter({ mode: mode.key })}
-              className={`an-chip ${filters.mode === mode.key ? 'an-chip--on' : ''}`}
-            >
-              {mode.label}
-            </button>
-          ))}
-          {(bundle?.subjects ?? []).map((subject) => {
-            const active = filters.subjectIds.includes(subject.subjectId);
-            return (
-              <button
-                key={subject.subjectId}
-                type="button"
-                aria-pressed={active}
-                onClick={() =>
-                  updateFilter({
-                    subjectIds: active
-                      ? filters.subjectIds.filter((id) => id !== subject.subjectId)
-                      : [...filters.subjectIds, subject.subjectId],
-                  })
-                }
-                className={`an-chip ${active ? 'an-chip--on' : ''}`}
-                style={active ? { borderColor: `${subject.accent}80`, color: subject.accent, background: `${subject.accent}14` } : undefined}
-              >
-                {subject.name}
-              </button>
-            );
-          })}
-          {activeFilterChips.length > 1 && (
-            <button type="button" onClick={() => setFilters(normalizeFilters({}))} className="an-chip text-[#e26d6d]">
-              پاک کردن همه
-            </button>
-          )}
-        </div>
       </div>
 
       {/* لودینگ */}
       {(busy || (!bundle && view.name !== 'exam-detail')) && (
         <div className="space-y-4" aria-hidden="true">
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
-            {[...Array(5)].map((_, index) => (
-              <Skeleton key={index} className="h-20 rounded-2xl" />
-            ))}
+          <div className="grid gap-4 lg:grid-cols-2">
+            <Skeleton className="h-52 rounded-3xl" />
+            <Skeleton className="h-52 rounded-3xl" />
           </div>
-          <Skeleton className="h-64 rounded-[2rem]" />
-          <Skeleton className="h-52 rounded-[2rem]" />
+          <Skeleton className="h-64 rounded-3xl" />
+          <Skeleton className="h-48 rounded-3xl" />
         </div>
       )}
 
       {/* نماها */}
       {!busy && view.name === 'home' && (
-        <AnalyticsHome data={bundle} onNavigate={go} onRunRecommendation={runRecommendation} onOpenExam={(examId) => go('exam-detail', { examId })} />
+        <AnalyticsHome data={bundle} onNavigate={go} onOpenExam={(examId) => go('exam-detail', { examId })} />
       )}
 
       {!busy && view.name === 'subject' && bundle && (

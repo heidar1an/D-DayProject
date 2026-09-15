@@ -5,9 +5,10 @@
  * با اتصال Backend فقط بدنهٔ توابع به fetch تبدیل می‌شود؛ امضا و شکل Entityها عوض نمی‌شود.
  *
  * قراردادهای آینده:
- *   GET  /api/bank/overview                     → fetchBankOverview()
+ *   GET  /api/bank/overview?bankKind=&track=      → fetchBankOverview()      (نمای کلی درون دامنه)
  *   POST /api/bank/questions/search             → searchQuestions()          (فیلتر + صفحه‌بندی)
  *   GET  /api/bank/questions/:id                → fetchQuestion()
+ *   GET  /api/bank/questions/:id/attempts       → fetchQuestionAttemptStats()  (شکست تلاش‌های کاربر روی یک سؤال)
  *   POST /api/bank/sessions                     → createSession()            (blueprint سمت سرور به سؤال تبدیل می‌شود)
  *   GET  /api/sessions/:id                      → fetchSession()
  *   PUT  /api/sessions/:id/progress             → saveSessionProgress()      (autosave)
@@ -18,6 +19,11 @@
  *   GET/POST/DELETE /api/bank/filters           → فیلترهای ذخیره‌شده («آزمون من»)
  *   GET  /api/bank/history                      → fetchHistory()
  *
+ * دو محور طبقه‌بندی محتوا (هر دو فیلد استاندارد فیلتر و blueprint سشن‌اند):
+ *   bankKinds → national «بانک تست کشوری» | authored «بانک تست تألیفی»
+ *   tracks    → medicine «علوم پایه پزشکی» | dentistry «علوم پایه دندان‌پزشکی»
+ * هر دو از خود رکورد سؤال مشتق می‌شوند (source/track)؛ UI هیچ‌وقت لیست دستی نگه نمی‌دارد.
+ *
  * اصول طراحی:
  *  - حلّهٔ سؤال (questionIds) همیشه در سشن سمت سرویس ساخته می‌شود؛ UI هرگز blueprint
  *    را به لیست سؤال تبدیل نمی‌کند تا بعداً منطق پیشنهاد هوشمند همین‌جا جایگزین شود.
@@ -27,6 +33,7 @@
  */
 
 import {
+  BANK_KINDS,
   BANK_YEARS,
   BANK_STATS,
   DIFFICULTIES,
@@ -35,7 +42,11 @@ import {
   SOURCES,
   SUBJECTS,
   TOPIC_TREE,
+  TRACKS,
+  bankKindOf,
+  buildStats,
   questionById,
+  trackOf,
 } from './mockData';
 
 const STATE_KEY_PREFIX = 'tapesh:testbank:v1:';
@@ -102,6 +113,8 @@ function mutateState(userId, mutator) {
 
 /* فیلتر استاندارد بانک — UI و Blueprint سشن هر دو از همین شکل استفاده می‌کنند */
 export const EMPTY_FILTERS = {
+  bankKinds: [], // national | authored — «بانک تست کشوری / بانک تست تألیفی»
+  tracks: [], // medicine | dentistry — «علوم پایه پزشکی / علوم پایه دندان‌پزشکی»
   subjectIds: [],
   topicPaths: [], // ['قلب و عروق'] یا ['قلب و عروق', 'ECG']
   yearFrom: null,
@@ -117,6 +130,8 @@ export const EMPTY_FILTERS = {
 export function normalizeFilters(filters = {}) {
   const merged = { ...EMPTY_FILTERS, ...filters };
   return {
+    bankKinds: [...(merged.bankKinds ?? [])],
+    tracks: [...(merged.tracks ?? [])],
     subjectIds: [...(merged.subjectIds ?? [])],
     topicPaths: [...(merged.topicPaths ?? [])],
     yearFrom: merged.yearFrom ?? null,
@@ -130,9 +145,38 @@ export function normalizeFilters(filters = {}) {
   };
 }
 
+/*
+ * «دامنهٔ بانک» — انتخاب سطح بالای کاربر: نوع بانک (کشوری/تألیفی) و رشته
+ * (پزشکی/دندان‌پزشکی). شکل واحدی دارد و همهٔ نماها آن را با scopeToFilters
+ * به فیلتر استاندارد تبدیل می‌کنند، پس منطق فیلتر فقط در filterQuestions می‌ماند.
+ */
+export const EMPTY_SCOPE = { bankKind: null, track: null };
+
+export const normalizeScope = (scope = {}) => ({
+  bankKind: scope?.bankKind ?? null,
+  track: scope?.track ?? null,
+});
+
+export const scopeToFilters = (scope) => {
+  const s = normalizeScope(scope);
+  return normalizeFilters({
+    bankKinds: s.bankKind ? [s.bankKind] : [],
+    tracks: s.track ? [s.track] : [],
+  });
+};
+
+export const scopeLabel = (scope) => {
+  const s = normalizeScope(scope);
+  const bank = s.bankKind ? BANK_KINDS[s.bankKind]?.short : null;
+  const track = s.track ? TRACKS[s.track]?.short : null;
+  return [bank, track].filter(Boolean).join(' · ');
+};
+
 export const activeFilterCount = (filters) => {
   const f = normalizeFilters(filters);
   return (
+    f.bankKinds.length +
+    f.tracks.length +
     f.subjectIds.length +
     f.topicPaths.length +
     (f.yearFrom ? 1 : 0) +
@@ -170,6 +214,8 @@ function filterQuestions(filters, state) {
   const query = f.search.toLowerCase();
 
   return QUESTIONS.filter((question) => {
+    if (f.bankKinds.length && !f.bankKinds.includes(bankKindOf(question))) return false;
+    if (f.tracks.length && !f.tracks.includes(trackOf(question))) return false;
     if (f.subjectIds.length && !f.subjectIds.includes(question.subject)) return false;
     if (f.topicPaths.length) {
       const match = f.topicPaths.some((topic) => question.topicPath.includes(topic));
@@ -228,19 +274,30 @@ const subjectById = (id) => SUBJECTS.find((subject) => subject.id === id) ?? nul
 /*
  * GET /api/bank/overview — آمار بانک + شمارنده‌های کاربر؛ همهٔ اعداد UI از همین
  * پاسخ می‌آید تا هیچ جایی به شمارش مستقیم دادهٔ Mock وابسته نباشد.
+ *
+ * scope = { bankKind, track } — نمای کلی «درون دامنهٔ انتخابی» محاسبه می‌شود:
+ * آمار بانک، درس‌ها، سال‌ها، مباحث و برچسب‌ها همه از همان مجموعهٔ فیلترشده می‌آیند.
+ * در عوض شمارنده‌های کاربر و «نقشهٔ تعداد» دو محور (banks/tracks) همیشه کل بانک را
+ * نشان می‌دهند تا سوییچر انتخاب بانک همیشه عدد واقعی داشته باشد.
+ *
+ * سال‌ها فقط بر پایهٔ سؤال‌های رسمی (official) ساخته می‌شوند، چون «آزمون سال‌به‌سال»
+ * دقیقاً همان سؤال‌ها را اجرا می‌کند؛ پس عدد کارت سال با محتوای آزمون یکی است.
  */
-export function fetchBankOverview(userId) {
+export function fetchBankOverview(userId, scope = EMPTY_SCOPE) {
   return respond(() => {
     const state = loadState(userId);
     const stats = userQuestionStats(state);
+    const activeScope = normalizeScope(scope);
+    const scoped = filterQuestions(scopeToFilters(activeScope), state).map((entry) => entry.question);
 
     const subjectCounts = SUBJECTS.map((subject) => ({
       ...subject,
-      questionCount: QUESTIONS.filter((question) => question.subject === subject.id).length,
+      questionCount: scoped.filter((question) => question.subject === subject.id).length,
     }));
 
+    const yearPool = scoped.filter((question) => question.source === 'official');
     const yearCounts = BANK_YEARS.map((year) => {
-      const items = QUESTIONS.filter((question) => question.year === year);
+      const items = yearPool.filter((question) => question.year === year);
       const community = items.length
         ? Math.round(items.reduce((sum, question) => sum + question.stats.correctPercent, 0) / items.length)
         : 0;
@@ -258,20 +315,32 @@ export function fetchBankOverview(userId) {
     const correctTotal = answeredAll.reduce((sum, entry) => sum + entry.correct, 0);
 
     const topicCounts = {};
-    for (const question of QUESTIONS) {
+    for (const question of scoped) {
       const topic = question.topicPath[0];
       topicCounts[topic] = (topicCounts[topic] ?? 0) + 1;
     }
 
     return {
-      bank: BANK_STATS,
+      scope: activeScope,
+      bank: buildStats(scoped),
+      /* نقشهٔ دو محور برای سوییچر — شمارندهٔ کل بانک (بدون اعمال scope) */
+      banks: Object.entries(BANK_KINDS).map(([id, meta]) => ({
+        id,
+        ...meta,
+        questionCount: QUESTIONS.filter((question) => bankKindOf(question) === id).length,
+      })),
+      tracks: Object.entries(TRACKS).map(([id, meta]) => ({
+        id,
+        ...meta,
+        questionCount: QUESTIONS.filter((question) => trackOf(question) === id).length,
+      })),
       subjects: subjectCounts,
       years: yearCounts,
       topics: topicCounts,
       tags: {
-        featured: QUESTIONS.filter((question) => question.tags.includes('منتخب')).length,
-        frequent: QUESTIONS.filter((question) => question.tags.includes('پرتکرار')).length,
-        challenging: QUESTIONS.filter((question) => ['hard', 'very_hard'].includes(question.difficulty)).length,
+        featured: scoped.filter((question) => question.tags.includes('منتخب')).length,
+        frequent: scoped.filter((question) => question.tags.includes('پرتکرار')).length,
+        challenging: scoped.filter((question) => ['hard', 'very_hard'].includes(question.difficulty)).length,
       },
       user: {
         solvedCount: stats.size,
@@ -341,6 +410,64 @@ export function fetchQuestion(questionId) {
     const question = questionById(questionId);
     if (!question) throw new Error('question-not-found');
     return question;
+  });
+}
+
+/*
+ * GET /api/bank/questions/:id/attempts — شکستِ تلاش‌های کاربر روی یک سؤال.
+ * همهٔ عددها از سشن‌های ثبت‌شده مشتق می‌شوند (هیچ شمارندهٔ دستی ذخیره نمی‌شود):
+ *   attempts → بارهایی که پاسخ ثبت شده   |  correct / wrong → نتیجهٔ همان بارها
+ *   skipped  → سؤال در سشن ثبت‌شده بوده ولی بی‌پاسخ مانده
+ *   doubted  → در حین حل علامت‌گذاری شده («شک داشتم»)
+ *   lastAnsweredAt / lastCorrect → تازه‌ترین پاسخ ثبت‌شده
+ */
+export function fetchQuestionAttemptStats(userId, questionId) {
+  return respond(() => {
+    const state = loadState(userId);
+    const question = questionById(questionId);
+
+    let attempts = 0;
+    let correct = 0;
+    let wrong = 0;
+    let skipped = 0;
+    let doubted = 0;
+    let lastAnsweredAt = 0;
+    let lastCorrect = null;
+
+    for (const session of state.sessions) {
+      if (session.status === 'in_progress') continue;
+      if (!session.questionIds?.includes(questionId)) continue;
+
+      const answer = session.answers?.[questionId];
+      if (answer) {
+        const isCorrect = question ? answer.selected === question.correctAnswer : Boolean(answer.isCorrect);
+        attempts += 1;
+        if (isCorrect) correct += 1;
+        else wrong += 1;
+
+        const at = answer.answeredAt ?? session.submittedAt ?? 0;
+        if (at >= lastAnsweredAt) {
+          lastAnsweredAt = at;
+          lastCorrect = isCorrect;
+        }
+      } else {
+        skipped += 1;
+      }
+
+      if (session.marked?.includes(questionId)) doubted += 1;
+    }
+
+    return {
+      questionId,
+      appearances: attempts + skipped,
+      attempts,
+      correct,
+      wrong,
+      skipped,
+      doubted,
+      lastAnsweredAt: lastAnsweredAt || null,
+      lastCorrect,
+    };
   });
 }
 
@@ -552,6 +679,7 @@ export function fetchSessionQuestions(session) {
       return items.map((question) => ({
         id: question.id,
         subject: question.subject,
+        track: trackOf(question),
         topicPath: question.topicPath,
         type: question.type,
         difficulty: question.difficulty,
@@ -833,4 +961,17 @@ export function fetchSubmittedSessions(userId) {
 
 /* ────────────────────────── خروجی‌های ثابت برای UI ────────────────────────── */
 
-export { BANK_YEARS, BANK_STATS, DIFFICULTIES, QUESTION_TYPES, QUESTIONS, SOURCES, SUBJECTS, TOPIC_TREE };
+export {
+  BANK_KINDS,
+  BANK_YEARS,
+  BANK_STATS,
+  DIFFICULTIES,
+  QUESTION_TYPES,
+  QUESTIONS,
+  SOURCES,
+  SUBJECTS,
+  TOPIC_TREE,
+  TRACKS,
+  bankKindOf,
+  trackOf,
+};

@@ -9,7 +9,7 @@
  *   LeagueProfile  → آمار، استریک، دفتر قلب، فصل‌ها، ریوارد، حریم خصوصی
  * همهٔ داده‌ها از src/services/league/leagueService.js می‌آیند (فعلاً Mock، قرارداد API واقعی).
  */
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   fetchChallenges,
   fetchLeaderboard,
@@ -115,86 +115,6 @@ function LeagueLadder({ tiers, currentTier, meRank }) {
         پایان فصل: <span className="text-[#9ed3ab]">۳ نفر اول صعود</span> می‌کنند،{' '}
         <span className="text-[#ef9196]">۳ نفر آخر سقوط</span> — جایگاهت همین حالا: رتبهٔ {toFa(meRank)} {currentTier.name}.
       </p>
-    </div>
-  );
-}
-
-/* زنگ اعلان‌های لیگ */
-function LeagueBell({ notifications }) {
-  const [open, setOpen] = useState(false);
-  const [items, setItems] = useState(notifications);
-  const wrapRef = useRef(null);
-  const unread = items.filter((item) => item.unread).length;
-
-  useEffect(() => {
-    setItems(notifications);
-  }, [notifications]);
-
-  /* بستن با کلیک بیرون پنل یا Escape */
-  useEffect(() => {
-    if (!open) return;
-    const handlePointer = (event) => {
-      if (!wrapRef.current?.contains(event.target)) setOpen(false);
-    };
-    const handleKey = (event) => {
-      if (event.key === 'Escape') setOpen(false);
-    };
-    document.addEventListener('pointerdown', handlePointer);
-    window.addEventListener('keydown', handleKey);
-    return () => {
-      document.removeEventListener('pointerdown', handlePointer);
-      window.removeEventListener('keydown', handleKey);
-    };
-  }, [open]);
-
-  const toggle = () => {
-    setOpen((prev) => {
-      if (!prev) trackEvent('notifications_open');
-      return !prev;
-    });
-    if (!open) setTimeout(() => setItems((prev) => prev.map((item) => ({ ...item, unread: false }))), 600);
-  };
-
-  const iconFor = { warn: 'warn', up: 'up', swords: 'swords', trophy: 'trophy', heart: 'heart' };
-
-  return (
-    <div className="relative" ref={wrapRef}>
-      <button
-        type="button"
-        onClick={toggle}
-        aria-expanded={open}
-        aria-label="اعلان‌های لیگ"
-        className="relative grid h-11 w-11 cursor-pointer place-items-center rounded-2xl bg-[#282828] text-white transition-transform hover:-translate-y-0.5"
-      >
-        <Icon name="bell" className="h-5 w-5" />
-        {unread > 0 && (
-          <span className="absolute -left-0.5 -top-0.5 grid h-5 w-5 place-items-center rounded-full bg-[#e26d6d] text-[10px] font-bold">
-            {toFa(unread)}
-          </span>
-        )}
-      </button>
-
-      {open && (
-        <div className="lg-notif-panel absolute left-0 top-full z-30 mt-2 w-[min(22rem,calc(100vw-3rem))] rounded-3xl border border-white/10 bg-[#232323] p-2 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.85)]">
-          <p className="px-3 py-2 text-sm [font-family:'Doran',Tahoma,sans-serif]">اعلان‌های لیگ</p>
-          <ul className="max-h-80 space-y-1 overflow-y-auto">
-            {items.map((item) => (
-              <li
-                key={item.id}
-                className={`flex items-start gap-3 rounded-2xl px-3 py-2.5 ${item.unread ? 'bg-white/[0.05]' : ''}`}
-              >
-                <span className={`mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-xl ${item.unread ? 'bg-[#937fcd]/20 text-[#c9bdf0]' : 'bg-white/5 text-[#8a8a8a]'}`}>
-                  <Icon name={iconFor[item.icon] ?? 'bell'} className="h-4 w-4" />
-                </span>
-                <span className="min-w-0">
-                  <span className="block text-[13px] leading-5">{item.text}</span>
-                  <span className="block text-[11px] text-[#8a8a8a]">{item.time}</span>
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
     </div>
   );
 }
@@ -461,7 +381,6 @@ export default function LeagueSection({ userData }) {
             </p>
           )}
         </div>
-        {overview && <LeagueBell notifications={overview.notifications} />}
       </header>
 
       {loading && <HeroSkeleton />}

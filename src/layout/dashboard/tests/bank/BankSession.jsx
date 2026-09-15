@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   fetchHistory,
+  fetchQuestionAttemptStats,
   reportQuestion,
   saveSessionProgress,
   submitSession,
@@ -17,8 +18,11 @@ import {
   QUESTION_TYPES,
   SOURCES,
   SUBJECTS,
+  bankKindOf,
+  trackOf,
 } from '../../../../services/testBank/testBankService';
 import {
+  BankKindBadge,
   DifficultyBadge,
   EmptyState,
   Icon,
@@ -26,9 +30,12 @@ import {
   OptionButton,
   QuestionFigure,
   SourceBadge,
+  TrackBadge,
   TypeBadge,
   faNum,
   formatClock,
+  formatFullDate,
+  formatFullTime,
   toFa,
 } from './bankShared';
 
@@ -268,7 +275,7 @@ function QuestionNavigator({ questions, answers, marked, currentIndex, reviewMod
         })}
       </div>
 
-      <ul className="mt-4 space-y-2 border-t border-white/8 pt-3 text-[11px] text-[#8a8a8a]">
+      <ul className="mt-4 grid grid-cols-2 gap-x-3 gap-y-2 border-t border-white/8 pt-3 text-[11px] text-[#8a8a8a]">
         <li className="flex items-center gap-2">
           <span className="h-2.5 w-2.5 rounded-md bg-[#61D192]/60" aria-hidden="true" /> پاسخ داده‌شده
         </li>
@@ -283,6 +290,77 @@ function QuestionNavigator({ questions, answers, marked, currentIndex, reviewMod
         </li>
       </ul>
     </div>
+  );
+}
+
+/* ── پنل سمت چپ: پیشرفت همین تمرین + شکست تلاش‌های کاربر روی سؤال جاری ──
+   همهٔ عددها از سرویس می‌آید؛ «کل بار» = تعداد بارهایی که سؤال در سشن‌های ثبت‌شده ظاهر شده. */
+function SessionInsights({ answeredCount, total, questionStats }) {
+  const stat = questionStats;
+  /* رنگ هر ردیف همان رنگ راهنمای پایین همین کادر است (نقشهٔ سؤال‌ها) */
+  const rows = [
+    { key: 'appearances', label: 'کل بار', value: stat?.appearances ?? 0, dot: 'bg-[#e0b45c]' },
+    { key: 'correct', label: 'درست', value: stat?.correct ?? 0, dot: 'bg-[#61D192]/60' },
+    { key: 'wrong', label: 'غلط', value: stat?.wrong ?? 0, dot: 'bg-[#e26d6d]/60' },
+    { key: 'skipped', label: 'بی‌پاسخ', value: stat?.skipped ?? 0, dot: 'bg-white/20' },
+  ];
+
+  return (
+    <>
+      {/* پیشرفت پاسخ‌دهی همین تمرین */}
+      <div className="rounded-2xl bg-white/[0.04] px-3.5 py-3">
+        <span className="text-[11px] text-[#8a8a8a]">پیشرفت این تمرین</span>
+        <strong className="mt-1 block text-[13px] [font-family:'Doran',Tahoma,sans-serif]">
+          {faNum(answeredCount)} از {faNum(total)} پاسخ داده شده
+        </strong>
+        <span className="mt-2 block h-1.5 overflow-hidden rounded-full bg-white/8" aria-hidden="true">
+          <span
+            className="block h-full rounded-full bg-gradient-to-l from-[#61D192] to-[#61D192]/70"
+            style={{ width: `${total ? (answeredCount / total) * 100 : 0}%` }}
+          />
+        </span>
+      </div>
+
+      {/* شکست تلاش‌های کاربر روی همین سؤال */}
+      <section className="mt-3 rounded-2xl bg-white/[0.04] px-3.5 py-3" aria-label="آمار این سؤال">
+        <h4 className="flex items-center gap-1.5 text-[11.5px] font-bold text-[#bbb] [font-family:'Doran',Tahoma,sans-serif]">
+          <Icon name="chart" className="h-3.5 w-3.5 text-[#61D192]" />
+          آمار این سؤال
+        </h4>
+
+        {stat === null ? (
+          <p className="mt-2 text-[11.5px] text-[#777]">در حال خواندن…</p>
+        ) : stat.appearances === 0 ? (
+          <p className="mt-2 text-[11.5px] text-[#777]">این سؤال را هنوز نزده‌ای.</p>
+        ) : (
+          <>
+            <dl className="mt-2.5 space-y-1.5 text-[11.5px]">
+              {rows.map((row) => (
+                <div
+                  key={row.key}
+                  className="flex items-center justify-between gap-2 rounded-lg bg-white/[0.05] px-2.5 py-1.5"
+                >
+                  <dt className="flex items-center gap-2 text-[#9a9a9a]">
+                    <span className={`h-2.5 w-2.5 shrink-0 rounded-md ${row.dot}`} aria-hidden="true" />
+                    {row.label}
+                  </dt>
+                  <dd className="font-bold [font-family:'Doran',Tahoma,sans-serif]">{toFa(row.value)}</dd>
+                </div>
+              ))}
+            </dl>
+
+            <p className="mt-2.5 flex items-start gap-1.5 text-[11px] leading-5 text-[#8a8a8a]">
+              <Icon name="history" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+              <span>
+                {stat.lastAnsweredAt
+                  ? `آخرین پاسخ: ${formatFullTime(stat.lastAnsweredAt)} · ${formatFullDate(stat.lastAnsweredAt)}`
+                  : 'پاسخی ثبت نشده؛ فقط بی‌پاسخ مانده است.'}
+              </span>
+            </p>
+          </>
+        )}
+      </section>
+    </>
   );
 }
 
@@ -311,6 +389,7 @@ export default function BankSession({ userId, session, questions, onFinished, on
   const [submitOpen, setSubmitOpen] = useState(false);
   const [elapsed, setElapsed] = useState(() => Math.floor((Date.now() - session.startedAt) / 1000));
   const [submitting, setSubmitting] = useState(false);
+  const [questionStats, setQuestionStats] = useState(null); // شکست تلاش‌های کاربر روی سؤال جاری
   const questionStartRef = useRef(Date.now());
   const autoSubmittedRef = useRef(false);
 
@@ -334,11 +413,28 @@ export default function BankSession({ userId, session, questions, onFinished, on
     };
   }, [userId, isExam]);
 
-  /* تایمر: exam شمارش معکوس، practice شمارش صعودی */
+  /* شکست تلاش‌های کاربر روی سؤال جاری — با هر جابه‌جایی سؤال دوباره خوانده می‌شود */
   useEffect(() => {
+    if (isReview || !question?.id) {
+      setQuestionStats(null);
+      return undefined;
+    }
+    let alive = true;
+    setQuestionStats(null);
+    fetchQuestionAttemptStats(userId, question.id)
+      .then((data) => alive && setQuestionStats(data))
+      .catch(() => alive && setQuestionStats(null));
+    return () => {
+      alive = false;
+    };
+  }, [userId, question?.id, isReview]);
+
+  /* تایمر فقط در «آزمون» معنا دارد؛ تمرین‌های آموزشی بی‌زمان‌اند و شمارنده ندارند */
+  useEffect(() => {
+    if (!isExam) return undefined;
     const id = setInterval(() => setElapsed(Math.floor((Date.now() - session.startedAt) / 1000)), 1000);
     return () => clearInterval(id);
-  }, [session.startedAt]);
+  }, [isExam, session.startedAt]);
 
   const remaining = session.endsAt ? Math.floor((session.endsAt - Date.now()) / 1000) : null;
 
@@ -460,30 +556,24 @@ export default function BankSession({ userId, session, questions, onFinished, on
 
   return (
     <div dir="rtl">
-      {/* ── نوار بالای محیط حل ── */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-[1.75rem] border border-white/8 bg-[#242426] px-4 py-3 md:px-5">
-        <div className="flex min-w-0 items-center gap-3">
-          <button
-            type="button"
-            onClick={() => (isExam ? onExit() : setSubmitOpen(true))}
-            className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-white/6 px-3 py-2 text-xs transition-colors hover:bg-white/12"
-          >
-            <Icon name="back" className="h-3.5 w-3.5" />
-            خروج
-          </button>
-          <div className="min-w-0">
-            <strong className="block truncate text-sm [font-family:'Doran',Tahoma,sans-serif]">{session.title}</strong>
-            <span className="text-[11px] text-[#8a8a8a]">
-              {isExam ? 'آزمون' : isReview ? 'مرور' : 'تمرین'} · {faNum(answeredCount)} از {faNum(questions.length)} پاسخ داده شده
-            </span>
-          </div>
-        </div>
+      {/* ── نوار کنترلی — بدون کادر و بدون عنوان سشن؛ شمارش پاسخ‌ها در پنل سمت چپ است ── */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <button
+          type="button"
+          onClick={() => (isExam ? onExit() : finish())}
+          className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-white/6 px-3 py-2 text-xs text-[#bbb] transition-colors hover:bg-white/12 hover:text-white"
+        >
+          <Icon name="back" className="h-3.5 w-3.5" />
+          خروج
+        </button>
 
         <div className="flex items-center gap-2">
-          <span className={`tb-timer ${timerClass}`} role="timer" aria-label={remaining !== null ? 'زمان باقی‌مانده' : 'زمان سپری‌شده'}>
-            <Icon name="clock" className="h-4 w-4" />
-            {remaining !== null ? formatClock(remaining) : formatClock(elapsed)}
-          </span>
+          {isExam && (
+            <span className={`tb-timer ${timerClass}`} role="timer" aria-label={remaining !== null ? 'زمان باقی‌مانده' : 'زمان سپری‌شده'}>
+              <Icon name="clock" className="h-4 w-4" />
+              {remaining !== null ? formatClock(remaining) : formatClock(elapsed)}
+            </span>
+          )}
           {!isReview && (
             <button
               type="button"
@@ -519,6 +609,8 @@ export default function BankSession({ userId, session, questions, onFinished, on
                   </span>
                 )}
                 <span className="text-[11px] text-[#777]">{question.topicPath.join(' › ')}</span>
+                <BankKindBadge kind={bankKindOf(question)} />
+                <TrackBadge track={trackOf(question)} />
                 <DifficultyBadge difficulty={question.difficulty} />
               </div>
 
@@ -666,20 +758,22 @@ export default function BankSession({ userId, session, questions, onFinished, on
             >
               سؤال قبلی
             </button>
-            {isLast ? (
+            {isLast && isExam ? (
               <button
                 type="button"
-                onClick={() => (isExam ? setSubmitOpen(true) : finish())}
+                onClick={() => setSubmitOpen(true)}
                 disabled={submitting}
                 className="cursor-pointer rounded-xl bg-[#61D192] px-5 py-2.5 text-sm font-bold text-[#12271a] transition-transform hover:-translate-y-0.5 disabled:opacity-60"
               >
-                {isExam ? 'پایان آزمون و مشاهدهٔ کارنامه' : 'پایان تمرین و مشاهدهٔ نتیجه'}
+                پایان آزمون و مشاهدهٔ کارنامه
               </button>
             ) : (
               <button
                 type="button"
                 onClick={() => goTo(currentIndex + 1)}
-                className="cursor-pointer rounded-xl bg-[#937fcd] px-5 py-2.5 text-sm font-bold transition-transform hover:-translate-y-0.5"
+                disabled={isLast}
+                title={isLast ? 'به آخرین سؤال رسیده‌ای' : undefined}
+                className="cursor-pointer rounded-xl bg-[#937fcd] px-5 py-2.5 text-sm font-bold transition-transform hover:-translate-y-0.5 disabled:cursor-default disabled:opacity-40 disabled:hover:translate-y-0"
               >
                 سؤال بعدی
               </button>
@@ -687,10 +781,12 @@ export default function BankSession({ userId, session, questions, onFinished, on
           </div>
         </div>
 
-        {/* ── نویگیتور دسکتاپ ── */}
+        {/* ── پنل سمت چپ: پیشرفت تمرین + آمار سؤال + نقشهٔ سؤال‌ها ── */}
         <aside className="hidden lg:block">
-          <div className="sticky top-6 rounded-[1.75rem] border border-white/8 bg-[#242426] p-4">
-            <h3 className="mb-3 flex items-center gap-2 text-sm [font-family:'Doran',Tahoma,sans-serif]">
+          <div className="sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto rounded-[1.75rem] border border-white/8 bg-[#242426] p-4">
+            <SessionInsights answeredCount={answeredCount} total={questions.length} questionStats={questionStats} />
+
+            <h3 className="mb-3 mt-4 flex items-center gap-2 text-sm [font-family:'Doran',Tahoma,sans-serif]">
               <Icon name="grid" className="h-4 w-4 text-[#61D192]" />
               نقشهٔ سؤال‌ها
             </h3>
@@ -728,11 +824,11 @@ export default function BankSession({ userId, session, questions, onFinished, on
           </button>
           <button
             type="button"
-            onClick={() => (isLast ? (isExam ? setSubmitOpen(true) : finish()) : goTo(currentIndex + 1))}
-            disabled={submitting}
+            onClick={() => (isLast && isExam ? setSubmitOpen(true) : goTo(currentIndex + 1))}
+            disabled={submitting || (isLast && !isExam)}
             className="shrink-0 cursor-pointer rounded-xl bg-[#61D192] px-4 py-2.5 text-xs font-bold text-[#12271a] disabled:opacity-60"
           >
-            {isLast ? (isExam ? 'پایان' : 'نتیجه') : 'بعدی'}
+            {isLast && isExam ? 'پایان' : 'سؤال بعدی'}
           </button>
         </div>
       </div>
@@ -748,6 +844,9 @@ export default function BankSession({ userId, session, questions, onFinished, on
                 <Icon name="x" className="h-4 w-4" />
               </button>
             </div>
+            <div className="mb-4">
+              <SessionInsights answeredCount={answeredCount} total={questions.length} questionStats={questionStats} />
+            </div>
             <QuestionNavigator
               questions={questions}
               answers={answers}
@@ -760,19 +859,13 @@ export default function BankSession({ userId, session, questions, onFinished, on
         </>
       )}
 
-      {/* مودال پایان آزمون/تمرین */}
-      <Modal open={submitOpen} onClose={() => setSubmitOpen(false)} title="پایان سشن">
-        <h3 className="text-base [font-family:'Doran',Tahoma,sans-serif]">
-          {isExam ? 'آزمون را تمام می‌کنی؟' : 'از تمرین خارج می‌شی؟'}
-        </h3>
+      {/* مودال پایان آزمون — تمرین هیچ مودالی ندارد و مستقیم تمام می‌شود */}
+      <Modal open={submitOpen} onClose={() => setSubmitOpen(false)} title="پایان آزمون">
+        <h3 className="text-base [font-family:'Doran',Tahoma,sans-serif]">آزمون را تمام می‌کنی؟</h3>
         <p className="mt-2 text-sm leading-6 text-[#9a9a9a]">
-          {isExam
-            ? answeredCount < questions.length
-              ? `${faNum(questions.length - answeredCount)} سؤال بی‌پاسخ مانده؛ بی‌پاسخ‌ها غلط حساب می‌شوند.`
-              : 'به همهٔ سؤال‌ها پاسخ دادی. آمادهٔ دیدن کارنامه‌ای.'
-            : answeredCount > 0
-              ? `پیشرفتت ذخیره می‌شود؛ نتیجهٔ ${faNum(answeredCount)} پاسخ ثبت‌شده تحلیل می‌شود.`
-              : 'فعلاً پاسخی ثبت نکردی؛ می‌توانی بعداً ادامه بدهی.'}
+          {answeredCount < questions.length
+            ? `${faNum(questions.length - answeredCount)} سؤال بی‌پاسخ مانده؛ بی‌پاسخ‌ها غلط حساب می‌شوند.`
+            : 'به همهٔ سؤال‌ها پاسخ دادی. آمادهٔ دیدن کارنامه‌ای.'}
         </p>
         <div className="mt-5 flex gap-2">
           <button
@@ -784,29 +877,18 @@ export default function BankSession({ userId, session, questions, onFinished, on
             disabled={submitting}
             className="flex-1 cursor-pointer rounded-xl bg-[#61D192] px-4 py-2.5 text-sm font-bold text-[#12271a] transition-transform hover:-translate-y-0.5 disabled:opacity-60"
           >
-            {isExam ? 'ثبت نهایی و کارنامه' : 'پایان و نتیجه'}
+            ثبت نهایی و کارنامه
           </button>
-          {isExam && (
-            <button
-              type="button"
-              onClick={() => {
-                setSubmitOpen(false);
-                onExit();
-              }}
-              className="cursor-pointer rounded-xl bg-white/8 px-4 py-2.5 text-sm transition-colors hover:bg-white/12"
-            >
-              ادامه بعداً
-            </button>
-          )}
-          {!isExam && (
-            <button
-              type="button"
-              onClick={() => setSubmitOpen(false)}
-              className="cursor-pointer rounded-xl bg-white/8 px-4 py-2.5 text-sm transition-colors hover:bg-white/12"
-            >
-              ادامهٔ تمرین
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => {
+              setSubmitOpen(false);
+              onExit();
+            }}
+            className="cursor-pointer rounded-xl bg-white/8 px-4 py-2.5 text-sm transition-colors hover:bg-white/12"
+          >
+            ادامه بعداً
+          </button>
         </div>
       </Modal>
 

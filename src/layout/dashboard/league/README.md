@@ -11,7 +11,7 @@ src/services/league/
 └── leagueService.js   ← لایهٔ سرویس با امضای API واقعی (فعلاً Mock + تأخیر شبکه)
 
 src/layout/dashboard/league/
-├── LeagueSection.jsx  ← پوسته: هیرو (League Header)، نردبان لیگ، ناوبری، توست قلب، اعلان‌ها
+├── LeagueSection.jsx  ← پوسته: هیرو (League Header)، نردبان لیگ، ناوبری، توست قلب
 ├── Leaderboard.jsx    ← سه مقیاس رقابت، پودیوم، کاربر چسبان، صفحه‌بندی
 ├── Challenges.jsx     ← روزانه / هفتگی / نبردهای رقابتی / پروتوتایپ دوئل
 ├── LeagueAchievements.jsx ← دستاوردها با دسته و کمیابی
@@ -45,12 +45,14 @@ src/layout/dashboard/league/
 
 ## ۳. API Contract (قرارداد با Backend)
 
-- `GET /api/league/overview` — من، لیگ فعلی، نردبان، فصل، رویدادها، اعلان‌ها، فاصله تا رتبهٔ بعد
+- `GET /api/league/overview` — من، لیگ فعلی، نردبان، فصل، رویدادها، فاصله تا رتبهٔ بعد
 - `GET /api/league/leaderboard?scope=university|universities|global&metric=total|avg|active&offset=` — صفحهٔ رتبه‌ها + `nextOffset`
 - `GET /api/league/challenges` — روزانه/هفتگی/نبرد/دوئل
 - `GET /api/league/achievements` — دستاوردها + تعداد باز‌شده
 - `GET /api/league/profile-details` — عناوین، ریواردها، دفتر قلب، تقویم استریک، تاریخچهٔ فصل‌ها
-- `GET /api/league/friends/notifications` — اقدامات، نتایج و دستاوردهای «فقط همخوان‌ها» (پنل آیکون چتِ کادر پروفایل داشبورد)
+- `GET /api/league/notifications` — اعلان‌های شخصی لیگ (رتبه، رقیب، نبرد، رویداد)
+- `GET /api/league/friends/notifications` — اقدامات، نتایج و دستاوردهای «فقط همخوان‌ها»
+- `PATCH /api/league/notifications` — علامت‌گذاری اعلان‌های لیگ به‌عنوان خوانده‌شده
 - `PATCH /api/league/friends/notifications` — علامت‌گذاری اعلان‌های همخوان‌ها به‌عنوان خوانده‌شده
 - `POST /api/league/challenges/:id/claim` — ثبت قلب با اعتبارسنجی سرور
 - `POST /api/league/battles/:id/join` — عضویت در نبرد
@@ -58,6 +60,12 @@ src/layout/dashboard/league/
 - `POST /api/league/events` — Analytics
 
 اتصال واقعی فقط بدنهٔ توابع `leagueService.js` را تغییر می‌دهد؛ UI دست نمی‌خورد.
+
+### سطح اعلان‌ها
+
+اعلان‌ها یک سطح واحد دارند: لایهٔ `NotificationsSection` که از زنگولهٔ هدر اصلی داشبورد باز
+می‌شود و دو منبع بالا (لیگ + همخوان‌ها) را در یک فهرست واحد جمع می‌کند. نه کادر پروفایل
+داشبورد و نه سربرگ لایهٔ لیگ، اعلان جداگانه ندارند.
 
 ## ۴. کنترل از پنل مدیریت (بدون Hard-Code در Frontend)
 

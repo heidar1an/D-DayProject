@@ -6,11 +6,16 @@
  * آن‌ها در testBankService.js و localStorage هر کاربر ذخیره می‌شوند.
  *
  * شکل رکورد سؤال (قرارداد پایدار — با اتصال Backend همین شکل از API می‌آید):
- *   id | subject (id از SUBJECTS) | topicPath (مسیر سلسله‌مراتبی) | type | difficulty
- *   year | source + sourceLabel | tags | stem | figure | options | correctAnswer
+ *   id | subject (id از SUBJECTS) | track (رشته) | topicPath (مسیر سلسله‌مراتبی) | type
+ *   difficulty | year | source (kind بانک از آن مشتق می‌شود) | tags | stem | figure
+ *   options | correctAnswer
  *   explanation { summary, deep, keyPoint, trap, whyWrong[] }
  *   stats { solves, correctPercent, optionPercents, avgTimeSec, difficultyIndex }
  *   createdAt | updatedAt
+ *
+ * دو محور طبقه‌بندی محتوا (هر دو از فیلدهای خود رکورد مشتق می‌شوند، نه لیست جدا):
+ *   bankKind (نوع بانک)  → national «کشوری» (official/comprehensive) | authored «تالیفی» (tapesh)
+ *   track (رشته)         → medicine «علوم پایه پزشکی» | dentistry «علوم پایه دندان‌پزشکی»
  *
  * سؤال‌ها تالیفی تیم محتوای تپش و نمونه‌سازی هم‌سو با آزمون علوم پایه وزارت بهداشت‌اند؛
  * در نسخهٔ واقعی این بانک از سرور تغذیه می‌شود و آمار جامعه از Results محاسبه خواهد شد.
@@ -64,6 +69,7 @@ export const TOPIC_TREE = {
     { name: 'غدد درون‌ریز', children: ['غدهٔ تیروئید'] },
     { name: 'خون', children: ['انعقاد خون'] },
     { name: 'عضله', children: ['فیزیولوژی انقباض'] },
+    { name: 'غدد بزاقی', children: ['ترشح و تنظیم بزاق'] },
   ],
   anatomy: [
     {
@@ -73,7 +79,7 @@ export const TOPIC_TREE = {
     { name: 'قلب و توراکس', children: ['آناتومی قلب', 'دیافراگم'] },
     { name: 'اندام تحتانی', children: ['اعصاب اندام تحتانی'] },
     { name: 'شکم و لگن', children: ['کانال اینگوینال'] },
-    { name: 'سر و گردن', children: ['ترایگل‌های گردن'] },
+    { name: 'سر و گردن', children: ['ترایگل‌های گردن', 'عصب سه‌قلو و شاخه‌ها'] },
     { name: 'نوروآناتومی', children: ['سیستم بینایی', 'عروق مغز'] },
   ],
   biochemistry: [
@@ -83,11 +89,24 @@ export const TOPIC_TREE = {
       children: ['گلیکولیز و گلوکونئوژنز', 'شنت هگزوز مونوفسفات'],
     },
     { name: 'متابولیسم لیپید', children: ['سنتز اسید چرب'] },
-    { name: 'بیوشیمی مولکولی', children: ['ترجمهٔ پروتئین', 'جهش‌ها'] },
+    { name: 'بیوشیمی مولکولی', children: ['ترجمهٔ پروتئین', 'جهش‌ها', 'ساختار کلاژن'] },
     { name: 'ویتامین‌ها', children: ['ویتامین‌های محلول در چربی'] },
     { name: 'تعادل اسید-باز', children: ['بافرها'] },
     { name: 'چرخهٔ اوره', children: [] },
   ],
+  histology: [
+    { name: 'بافت‌شناسی دهان و دندان', children: ['مینا و عاج', 'مخاط دهان'] },
+    { name: 'بافت پوششی', children: ['اپیتلیوم‌ها'] },
+  ],
+  microbiology: [
+    { name: 'باکتری‌های گرم مثبت', children: ['استافیلوکوک', 'استرپتوکوک'] },
+    { name: 'باکتری‌های گرم منفی', children: ['آنتروباکتریاسه'] },
+  ],
+  immunology: [
+    { name: 'پاسخ ایمنی هومورال', children: ['ایمونوگلوبولین‌ها'] },
+    { name: 'ایمنی سلولی', children: ['لنفوسیت T'] },
+  ],
+  pathology: [{ name: 'پاتولوژی دهان', children: ['ضایعات پیش‌بدخیم'] }],
 };
 
 /* ────────────────────────── متادیتای سؤال ────────────────────────── */
@@ -115,6 +134,49 @@ export const SOURCES = {
   tapesh: { label: 'تألیفی تپش', accent: '#61D192' },
 };
 
+/* ────────────────────────── نوع بانک (کشوری / تالیفی) ────────────────────────── */
+
+/*
+ * محور اول طبقه‌بندی: منبع هر سؤال به یکی از دو «بانک» نگاشت می‌شود.
+ *   national = سؤال‌های آزمون‌های کشوری (وزارت بهداشت + جامع)
+ *   authored = سؤال‌های تألیفی اختصاصی تیم محتوای تپش
+ * این نگاشت تنها جای تعریف رابطهٔ منبع↔بانک است؛ UI و فیلترها از خود رکورد
+ * سؤال (source) به bankKind می‌رسند و هیچ‌جا لیست دستی نگه‌داری نمی‌شود.
+ */
+export const BANK_KINDS = {
+  national: {
+    label: 'بانک تست کشوری',
+    short: 'کشوری',
+    accent: '#937fcd',
+    description: 'سؤال‌های رسمی آزمون‌های کشوری علوم پایه (وزارت بهداشت و جامع)',
+  },
+  authored: {
+    label: 'بانک تست تألیفی',
+    short: 'تألیفی',
+    accent: '#61D192',
+    description: 'سؤال‌های تألیفی اختصاصی تیم محتوای تپش، هم‌سو با سبک آزمون کشوری',
+  },
+};
+
+export const SOURCE_BANK = {
+  official: 'national',
+  comprehensive: 'national',
+  tapesh: 'authored',
+};
+
+/* ────────────────────────── رشته (پزشکی / دندان‌پزشکی) ────────────────────────── */
+
+/*
+ * محور دوم طبقه‌بندی: هر سؤال به یک رشته تعلق دارد تا سؤال‌های علوم پایهٔ
+ * پزشکی و دندان‌پزشکی از هم جدا شوند. در نسخهٔ واقعی، محتوای مشترک دو رشته
+ * می‌تواند با دو رکورد (یا فیلد چندمقداری) از سرور بیاید؛ اینجا برای سادگی
+ * هر سؤال یک رشته دارد و درخت مبحث هم به‌ازای هر رشته ساخته می‌شود.
+ */
+export const TRACKS = {
+  medicine: { label: 'علوم پایه پزشکی', short: 'پزشکی', accent: '#5b8cc7' },
+  dentistry: { label: 'علوم پایه دندان‌پزشکی', short: 'دندان‌پزشکی', accent: '#e0b45c' },
+};
+
 export const BANK_YEARS = [1398, 1399, 1400, 1401, 1402, 1403, 1404];
 
 /* ────────────────────────── سؤال‌های بانک (QUESTIONS) ────────────────────────── */
@@ -123,6 +185,7 @@ export const QUESTIONS = [
   /* ═══════════════ فیزیولوژی (۱۵ سؤال) ═══════════════ */
   {
     id: 'tb-phy-01',
+    track: 'medicine',
     subject: 'physiology',
     topicPath: ['قلب و عروق', 'چرخهٔ قلبی'],
     type: 'memorization',
@@ -156,6 +219,7 @@ export const QUESTIONS = [
   },
   {
     id: 'tb-phy-02',
+    track: 'medicine',
     subject: 'physiology',
     topicPath: ['قلب و عروق', 'ECG'],
     type: 'concept',
@@ -189,6 +253,7 @@ export const QUESTIONS = [
   },
   {
     id: 'tb-phy-03',
+    track: 'medicine',
     subject: 'physiology',
     topicPath: ['قلب و عروق', 'تنظیم فشار خون'],
     type: 'concept',
@@ -222,6 +287,7 @@ export const QUESTIONS = [
   },
   {
     id: 'tb-phy-04',
+    track: 'medicine',
     subject: 'physiology',
     topicPath: ['قلب و عروق', 'الکتروفیزیولوژی قلب'],
     type: 'image',
@@ -255,6 +321,7 @@ export const QUESTIONS = [
   },
   {
     id: 'tb-phy-05',
+    track: 'medicine',
     subject: 'physiology',
     topicPath: ['تنفس', 'حجم‌ها و ظرفیت‌های ریوی'],
     type: 'calculation',
@@ -283,6 +350,7 @@ export const QUESTIONS = [
   },
   {
     id: 'tb-phy-06',
+    track: 'medicine',
     subject: 'physiology',
     topicPath: ['تنفس', 'انتقال گازها'],
     type: 'image',
@@ -316,6 +384,7 @@ export const QUESTIONS = [
   },
   {
     id: 'tb-phy-07',
+    track: 'medicine',
     subject: 'physiology',
     topicPath: ['کلیه', 'فیزیولوژی لوله‌های نفرون'],
     type: 'concept',
@@ -349,6 +418,7 @@ export const QUESTIONS = [
   },
   {
     id: 'tb-phy-08',
+    track: 'medicine',
     subject: 'physiology',
     topicPath: ['کلیه', 'تعادل اسید-باز'],
     type: 'clinical',
@@ -382,6 +452,7 @@ export const QUESTIONS = [
   },
   {
     id: 'tb-phy-09',
+    track: 'medicine',
     subject: 'physiology',
     topicPath: ['عصب', 'سیناپس و گیرنده‌ها'],
     type: 'concept',
@@ -415,6 +486,7 @@ export const QUESTIONS = [
   },
   {
     id: 'tb-phy-10',
+    track: 'medicine',
     subject: 'physiology',
     topicPath: ['عصب', 'سیستم عصبی خودکار'],
     type: 'memorization',
@@ -448,6 +520,7 @@ export const QUESTIONS = [
   },
   {
     id: 'tb-phy-11',
+    track: 'medicine',
     subject: 'physiology',
     topicPath: ['گوارش', 'هورمون‌های گوارشی'],
     type: 'memorization',
@@ -476,6 +549,7 @@ export const QUESTIONS = [
   },
   {
     id: 'tb-phy-12',
+    track: 'medicine',
     subject: 'physiology',
     topicPath: ['غدد درون‌ریز', 'غدهٔ تیروئید'],
     type: 'concept',
@@ -509,6 +583,7 @@ export const QUESTIONS = [
   },
   {
     id: 'tb-phy-13',
+    track: 'medicine',
     subject: 'physiology',
     topicPath: ['خون', 'انعقاد خون'],
     type: 'clinical',
@@ -542,6 +617,7 @@ export const QUESTIONS = [
   },
   {
     id: 'tb-phy-14',
+    track: 'medicine',
     subject: 'physiology',
     topicPath: ['عضله', 'فیزیولوژی انقباض'],
     type: 'concept',
@@ -575,6 +651,7 @@ export const QUESTIONS = [
   },
   {
     id: 'tb-phy-15',
+    track: 'medicine',
     subject: 'physiology',
     topicPath: ['قلب و عروق', 'چرخهٔ قلبی'],
     type: 'calculation',
@@ -605,6 +682,7 @@ export const QUESTIONS = [
   /* ═══════════════ آناتومی (۱۰ سؤال) ═══════════════ */
   {
     id: 'tb-ana-01',
+    track: 'medicine',
     subject: 'anatomy',
     topicPath: ['اندام فوقانی', 'ناحیهٔ سرشانه و براکیال پلکسوس'],
     type: 'clinical',
@@ -638,6 +716,7 @@ export const QUESTIONS = [
   },
   {
     id: 'tb-ana-02',
+    track: 'medicine',
     subject: 'anatomy',
     topicPath: ['اندام فوقانی', 'اعصاب اندام فوقانی'],
     type: 'clinical',
@@ -666,6 +745,7 @@ export const QUESTIONS = [
   },
   {
     id: 'tb-ana-03',
+    track: 'medicine',
     subject: 'anatomy',
     topicPath: ['اندام فوقانی', 'استخوان‌شناسی'],
     type: 'memorization',
@@ -699,6 +779,7 @@ export const QUESTIONS = [
   },
   {
     id: 'tb-ana-04',
+    track: 'medicine',
     subject: 'anatomy',
     topicPath: ['قلب و توراکس', 'آناتومی قلب'],
     type: 'memorization',
@@ -732,6 +813,7 @@ export const QUESTIONS = [
   },
   {
     id: 'tb-ana-05',
+    track: 'medicine',
     subject: 'anatomy',
     topicPath: ['قلب و توراکس', 'دیافراگم'],
     type: 'memorization',
@@ -760,6 +842,7 @@ export const QUESTIONS = [
   },
   {
     id: 'tb-ana-06',
+    track: 'medicine',
     subject: 'anatomy',
     topicPath: ['اندام تحتانی', 'اعصاب اندام تحتانی'],
     type: 'clinical',
@@ -793,6 +876,7 @@ export const QUESTIONS = [
   },
   {
     id: 'tb-ana-07',
+    track: 'medicine',
     subject: 'anatomy',
     topicPath: ['شکم و لگن', 'کانال اینگوینال'],
     type: 'memorization',
@@ -826,6 +910,7 @@ export const QUESTIONS = [
   },
   {
     id: 'tb-ana-08',
+    track: 'medicine',
     subject: 'anatomy',
     topicPath: ['سر و گردن', 'ترایگل‌های گردن'],
     type: 'concept',
@@ -859,6 +944,7 @@ export const QUESTIONS = [
   },
   {
     id: 'tb-ana-09',
+    track: 'medicine',
     subject: 'anatomy',
     topicPath: ['نوروآناتومی', 'سیستم بینایی'],
     type: 'clinical',
@@ -892,6 +978,7 @@ export const QUESTIONS = [
   },
   {
     id: 'tb-ana-10',
+    track: 'medicine',
     subject: 'anatomy',
     topicPath: ['نوروآناتومی', 'عروق مغز'],
     type: 'clinical',
@@ -927,6 +1014,7 @@ export const QUESTIONS = [
   /* ═══════════════ بیوشیمی (۱۰ سؤال) ═══════════════ */
   {
     id: 'tb-bio-01',
+    track: 'medicine',
     subject: 'biochemistry',
     topicPath: ['آنزیم‌ها', 'سینتیک آنزیمی'],
     type: 'image',
@@ -960,6 +1048,7 @@ export const QUESTIONS = [
   },
   {
     id: 'tb-bio-02',
+    track: 'medicine',
     subject: 'biochemistry',
     topicPath: ['آنزیم‌ها', 'مهارکننده‌های آنزیمی'],
     type: 'concept',
@@ -993,6 +1082,7 @@ export const QUESTIONS = [
   },
   {
     id: 'tb-bio-03',
+    track: 'medicine',
     subject: 'biochemistry',
     topicPath: ['متابولیسم کربوهیدرات', 'گلیکولیز و گلوکونئوژنز'],
     type: 'calculation',
@@ -1021,6 +1111,7 @@ export const QUESTIONS = [
   },
   {
     id: 'tb-bio-04',
+    track: 'medicine',
     subject: 'biochemistry',
     topicPath: ['متابولیسم کربوهیدرات', 'شنت هگزوز مونوفسفات'],
     type: 'memorization',
@@ -1054,6 +1145,7 @@ export const QUESTIONS = [
   },
   {
     id: 'tb-bio-05',
+    track: 'medicine',
     subject: 'biochemistry',
     topicPath: ['ویتامین‌ها', 'ویتامین‌های محلول در چربی'],
     type: 'memorization',
@@ -1082,6 +1174,7 @@ export const QUESTIONS = [
   },
   {
     id: 'tb-bio-06',
+    track: 'medicine',
     subject: 'biochemistry',
     topicPath: ['متابولیسم لیپید', 'سنتز اسید چرب'],
     type: 'concept',
@@ -1115,6 +1208,7 @@ export const QUESTIONS = [
   },
   {
     id: 'tb-bio-07',
+    track: 'medicine',
     subject: 'biochemistry',
     topicPath: ['بیوشیمی مولکولی', 'ترجمهٔ پروتئین'],
     type: 'memorization',
@@ -1143,6 +1237,7 @@ export const QUESTIONS = [
   },
   {
     id: 'tb-bio-08',
+    track: 'medicine',
     subject: 'biochemistry',
     topicPath: ['بیوشیمی مولکولی', 'جهش‌ها'],
     type: 'concept',
@@ -1171,6 +1266,7 @@ export const QUESTIONS = [
   },
   {
     id: 'tb-bio-09',
+    track: 'medicine',
     subject: 'biochemistry',
     topicPath: ['تعادل اسید-باز', 'بافرها'],
     type: 'calculation',
@@ -1199,6 +1295,7 @@ export const QUESTIONS = [
   },
   {
     id: 'tb-bio-10',
+    track: 'medicine',
     subject: 'biochemistry',
     topicPath: ['چرخهٔ اوره'],
     type: 'concept',
@@ -1230,6 +1327,418 @@ export const QUESTIONS = [
     createdAt: '2026-01-27',
     updatedAt: '2026-08-13',
   },
+
+  /* ═══════════════ تألیفی تپش — علوم پایه پزشکی ═══════════════ */
+  {
+    id: 'tb-phy-16',
+    track: 'medicine',
+    subject: 'physiology',
+    topicPath: ['کلیه', 'فیزیولوژی لوله‌های نفرون'],
+    type: 'concept',
+    difficulty: 'medium',
+    year: 1404,
+    source: 'tapesh',
+    tags: ['منتخب'],
+    stem: 'هورمون ADH (وازوپرسین) در سلول‌های مجرای جمع‌کنندهٔ نفرون با کدام مسیر، بازجذب آب را افزایش می‌دهد؟',
+    figure: null,
+    options: [
+      'اتصال به گیرندهٔ V2، افزایش cAMP و درج آکوپورین-۲ در غشای اپیکال',
+      'اتصال به گیرندهٔ V1، افزایش IP₃ و انقباض عضلهٔ صاف عروق',
+      'مهار مستقیم کانال‌های سدیمی اپیکال بدون واسطهٔ پیام‌رسان ثانویه',
+      'اتصال به گیرندهٔ V2 و کاهش cAMP در سلول مجرای جمع‌کننده',
+    ],
+    correctAnswer: 0,
+    explanation: {
+      summary: 'ADH با گیرندهٔ V2 (Gs → cAMP → PKA) وزیکول‌های حاوی آکوپورین-۲ را به غشای اپیکال می‌آورد و بازجذب آب را زیاد می‌کند.',
+      deep: 'گیرندهٔ V2 روی سلول‌های اصلی مجرای جمع‌کننده است و از مسیر cAMP-PKA، آکوپورین-۲ را از وزیکول‌های سیتوپلاسمی به غشای اپیکال منتقل می‌کند؛ هم‌زمان آکوپورین-۳ و ۴ در غشای بازال واسطهٔ خروج آب به اینتراستیشیوم می‌شوند. اثر دیگر ADH بر V2، افزایش سنتز پروستاگلندین و آزادسازی فاکتور فون‌ویلبراند است. گیرندهٔ V1 در عضلهٔ صاف عروق با مسیر IP₃/Ca²⁺ انقباض می‌دهد و ربطی به بازجذب آب ندارد.',
+      keyPoint: 'ADH: V2 (کلیه، cAMP، آکوپورین-۲) | V1 (عروق، IP₃/Ca²⁺).',
+      trap: 'گیرندهٔ V2 با Gs کار می‌کند، پس cAMP را بالا می‌برد نه پایین؛ گزینهٔ «کاهش cAMP» دام ظاهری-محتمل است.',
+      whyWrong: [
+        { index: 1, text: 'این توصیف گیرندهٔ V1 در عضلهٔ صاف عروق است، نه مسیر بازجذب آب.' },
+        { index: 2, text: 'ADH از طریق پیام‌رسان ثانویه (cAMP) عمل می‌کند؛ اثر مستقیم روی کانال سدیمی ندارد.' },
+        { index: 3, text: 'V2 با Gs، cAMP را افزایش می‌دهد؛ کاهش cAMP اثر ADH را خنثی می‌کرد.' },
+      ],
+    },
+    stats: { solves: 1893, correctPercent: 62, optionPercents: [62, 19, 8, 11], avgTimeSec: 34, difficultyIndex: 0.62 },
+    createdAt: '2026-05-04',
+    updatedAt: '2026-09-05',
+  },
+  {
+    id: 'tb-ana-11',
+    track: 'medicine',
+    subject: 'anatomy',
+    topicPath: ['اندام فوقانی', 'اعصاب اندام فوقانی'],
+    type: 'clinical',
+    difficulty: 'medium',
+    year: 1404,
+    source: 'tapesh',
+    tags: ['پرتکرار'],
+    stem: 'در سندرم تونل کارپال، کدام عصب زیر رتیناکولوم فلکسور فشرده می‌شود و بیشترین اختلال حس در کدام ناحیه است؟',
+    figure: null,
+    options: [
+      'عصب اولنار؛ حس انگشت کوچک و کنارهٔ داخلی دست',
+      'عصب مدیان؛ حس سطح پالمار سه انگشت و نیم اول',
+      'عصب رادیال؛ حس پشت دست و فضای بین‌انگشتی اول',
+      'عصب مدیان؛ حس تمام انگشتان شامل انگشت کوچک',
+    ],
+    correctAnswer: 1,
+    explanation: {
+      summary: 'در تونل کارپال عصب مدیان زیر رتیناکولوم فشرده می‌شود؛ حس سه انگشت و نیم اول (به‌جز شاخهٔ پالمار پوستی) و عضلات تنار گرفتار می‌شوند.',
+      deep: 'عصب مدیان همراه تاندون‌های فلکسور سطحی و عمقی از تونل کارپال می‌گذرد؛ فشردگی مزمن باعث پارستزی شبانه، ضعف ابداکشن شست (کنار رفتن شست) و آتروفی تنار می‌شود. شاخهٔ پالمار پوستی مدیان پیش از ورود به تونل جدا می‌شود، پس حس پایهٔ تنار دست‌نخورده می‌ماند. عصب اولنار از کانال گویون (خارج تونل) و رادیال در پشت مچ عبور می‌کند.',
+      keyPoint: 'تونل کارپال = مدیان؛ سه‌ونیم انگشت اول + تنار. اولنار = گویون؛ claw hand. رادیال = wrist drop.',
+      trap: '«تمام انگشتان» غلط است؛ نیمهٔ داخلی انگشت چهارم و انگشت کوچک از عصب اولنار می‌گیرند.',
+      whyWrong: [
+        { index: 0, text: 'اولنار در کانال گویون فشرده می‌شود، نه در تونل کارپال.' },
+        { index: 2, text: 'رادیال حس پشت دست را می‌دهد و در تونل کارپال نیست.' },
+        { index: 3, text: 'ناحیهٔ انگشت کوچک از عصب اولنار عصب‌گیری می‌کند.' },
+      ],
+    },
+    stats: { solves: 2244, correctPercent: 71, optionPercents: [12, 71, 9, 8], avgTimeSec: 29, difficultyIndex: 0.71 },
+    createdAt: '2026-05-11',
+    updatedAt: '2026-09-06',
+  },
+  {
+    id: 'tb-bio-11',
+    track: 'medicine',
+    subject: 'biochemistry',
+    topicPath: ['متابولیسم کربوهیدرات', 'گلیکولیز و گلوکونئوژنز'],
+    type: 'memorization',
+    difficulty: 'medium',
+    year: 1404,
+    source: 'tapesh',
+    tags: ['منتخب'],
+    stem: 'در گلوکونئوژنز، کدام آنزیم با کربوکسیله‌کردن پیروات به اگزالواستات این نقطهٔ کنترل گلیکولیز را دور می‌زند و کوفاکتور آن چیست؟',
+    figure: null,
+    options: [
+      'پیروات کربوکسیلاز؛ بیوتین',
+      'پیروات دهیدروژناز؛ NAD⁺ و تیامین',
+      'فسفوفروکتوکیناز-۱؛ ATP',
+      'پیروات کیناز؛ فروکتوز-۲٬۶-بیس‌فسفات',
+    ],
+    correctAnswer: 0,
+    explanation: {
+      summary: 'پیروات کربوکسیلاز در میتوکندری با کوفاکتور بیوتین پیروات را به اگزالواستات تبدیل می‌کند؛ اولین واکنش اختصاصی گلوکونئوژنز.',
+      deep: 'پیروات کربوکسیلاز با بیوتین (کربوکسی‌بیوتین-آنزیم) ATP مصرف می‌کند و اگزالواستات می‌سازد؛ اگزالواستات سپس به PEP تبدیل می‌شود (PEP کربوکسی‌کیناز). این آنزیم با استیل-CoA آلوستری فعال می‌شود — یعنی وقتی انرژی فراوان است، مادهٔ اولیهٔ ساخت گلوکز فراهم می‌شود. در گلیکولیز، پیروات کیناز همان واکنش برگشت‌ناپذیر را در جهت مخالف انجام می‌دهد.',
+      keyPoint: 'سه دروازهٔ گلوکونئوژنز: پیروات کربوکسیلاز (بیوتین)، PEP کربوکسی‌کیناز، فروکتوز-۱٬۶-بیس‌فسفاتاز و گلوکز-۶-فسفاتاز.',
+      trap: 'کمبود بیوتین (یا آنتی‌بیوتیک‌های مهارکنندهٔ جذب بیوتین) دقیقاً همین واکنش را می‌خواباند و اسیدوز لاکتیک می‌دهد.',
+      whyWrong: [
+        { index: 1, text: 'پیروات دهیدروژناز پیروات را به استیل-CoA می‌برد (ورود به کربس)، نه به اگزالواستات.' },
+        { index: 2, text: 'PFK-1 آنزیم گلیکولیز است و در گلوکونئوژنز با فروکتوز-۱٬۶-بیس‌فسفاتاز دور زده می‌شود.' },
+        { index: 3, text: 'پیروات کیناز آنزیم گلیکولیز است؛ دور زدن آن کار PEP کربوکسی‌کیناز است.' },
+      ],
+    },
+    stats: { solves: 1671, correctPercent: 59, optionPercents: [59, 21, 12, 8], avgTimeSec: 36, difficultyIndex: 0.59 },
+    createdAt: '2026-05-18',
+    updatedAt: '2026-09-07',
+  },
+  {
+    id: 'tb-imm-01',
+    track: 'medicine',
+    subject: 'immunology',
+    topicPath: ['پاسخ ایمنی هومورال', 'ایمونوگلوبولین‌ها'],
+    type: 'memorization',
+    difficulty: 'easy',
+    year: 1404,
+    source: 'tapesh',
+    tags: ['پرتکرار'],
+    stem: 'آنتی‌بادی غالب در ترشحات مخاطی (بزاق، شیر مادر، ترشح بینی) کدام است و ویژگی ساختاری آن چیست؟',
+    figure: null,
+    options: [
+      'IgM؛ پنتامر متصل با زنجیرهٔ J',
+      'IgA ترشحی؛ دایمر متصل با زنجیرهٔ J و قطعهٔ ترشحی',
+      'IgG؛ مونومر با توان عبور از جفت',
+      'IgE؛ مونومر متصل به گیرندهٔ ماست‌سل',
+    ],
+    correctAnswer: 1,
+    explanation: {
+      summary: 'IgA ترشحی دایمری است که با زنجیرهٔ J به هم می‌پیوندد و با قطعهٔ ترشحی (SC) در برابر پروتئازهای مخاطی محافظت می‌شود.',
+      deep: 'پلاسماسل‌های زیراپیتلیال IgA دایمر (دو مونومر + زنجیرهٔ J) می‌سازند؛ این کمپلکس با گیرندهٔ پلی-IgR از سلول اپیتلیال عبور می‌کند و بخشی از گیرنده به‌عنوان قطعهٔ ترشحی به آن می‌چسبد. IgA ترشحی مکانیسم اصلی ایمنی مخاطی است و از چسبیدن پاتوژن به اپیتلیوم جلوگیری می‌کند (حذف ایمنی). IgM تنها ایمونوگلوبولین پنتامری است؛ IgG با FcRn از جفت می‌گذرد و IgE به ماست‌سل می‌چسبد.',
+      keyPoint: 'IgA ترشحی = دایمر + زنجیرهٔ J + قطعهٔ ترشحی | IgM = پنتامر | IgG = عبور از جفت.',
+      trap: 'زنجیرهٔ J هم در IgM و هم در IgA دایمر وجود دارد؛ تفکیک‌کنندهٔ اصلی IgA ترشحی «قطعهٔ ترشحی» است.',
+      whyWrong: [
+        { index: 0, text: 'IgM پنتامری است و در ترشحات مخاطی آنتی‌بادی غالب نیست.' },
+        { index: 2, text: 'IgG عمدتاً در سرم و مایع بین‌بافتی است و از جفت می‌گذرد.' },
+        { index: 3, text: 'IgE با آلرژی و انگل مرتبط است، نه ایمنی مخاطی غالب.' },
+      ],
+    },
+    stats: { solves: 3102, correctPercent: 76, optionPercents: [10, 76, 8, 6], avgTimeSec: 24, difficultyIndex: 0.76 },
+    createdAt: '2026-05-22',
+    updatedAt: '2026-09-08',
+  },
+  {
+    id: 'tb-mic-01',
+    track: 'medicine',
+    subject: 'microbiology',
+    topicPath: ['باکتری‌های گرم مثبت', 'استافیلوکوک'],
+    type: 'concept',
+    difficulty: 'medium',
+    year: 1404,
+    source: 'tapesh',
+    tags: ['منتخب'],
+    stem: 'مطمئن‌ترین آزمون آزمایشگاهی برای تفکیک استافیلوکوکوس اورئوس از سایر گونه‌های کوآگولاز-منفی این جنس کدام است؟',
+    figure: null,
+    options: [
+      'کاتالاز مثبت بودن',
+      'آزمون کوآگولاز (لخته‌شدن پلاسما)',
+      'همولیز بتا روی بلاد آگار',
+      'رشد روی محیط مانیتول سالت آگار',
+    ],
+    correctAnswer: 1,
+    explanation: {
+      summary: 'کوآگولاز آنزیمی است که فیبرینوژن را به فیبرین تبدیل می‌کند؛ استاف اورئوس کوآگولاز-مثبت و بقیهٔ گونه‌ها کوآگولاز-منفی‌اند.',
+      deep: 'کوآگولاز (چه آزاد و چه متصل به دیواره) پلاسمای انسانی را لخته می‌کند و پاسخ قطعی برای شناسایی S. aureus است. کاتالاز بین استاف و استرپتوکوک تفکیک می‌کند (استاف مثبت)، پس در سطح جنس است نه گونه. همولیز بتا در برخی گونه‌ها دیده می‌شود و اختصاصی نیست؛ رشد روی مانیتول سالت آگار آزمون غربالگری مفیدی است ولی برخی گونه‌های کوآگولاز-منفی هم مانیتول را تخمیر می‌کنند.',
+      keyPoint: 'کاتالاز → تفکیک جنس (استاف از استرپ) | کوآگولاز → تفکیک S. aureus از سایر استاف‌ها.',
+      trap: 'مانیتول سالت آگار «انتخابی-تفریقی» است و برای غربالگری خوب است، اما برای تشخیص قطعی کوآگولاز استاندارد طلایی محسوب می‌شود.',
+      whyWrong: [
+        { index: 0, text: 'کاتالاز مثبت بودن در همهٔ استافیلوکوک‌ها (از جمله کوآگولاز-منفی‌ها) دیده می‌شود.' },
+        { index: 2, text: 'همولیز بتا در چند گونهٔ دیگر هم دیده می‌شود و اختصاصی نیست.' },
+        { index: 3, text: 'این محیط غربالگری است و تعدادی از کوآگولاز-منفی‌ها هم روی آن تخمیر می‌دهند.' },
+      ],
+    },
+    stats: { solves: 2760, correctPercent: 68, optionPercents: [19, 68, 7, 6], avgTimeSec: 27, difficultyIndex: 0.68 },
+    createdAt: '2026-05-26',
+    updatedAt: '2026-09-09',
+  },
+
+  /* ═══════════════ علوم پایه دندان‌پزشکی ═══════════════ */
+  {
+    id: 'tb-den-01',
+    track: 'dentistry',
+    subject: 'anatomy',
+    topicPath: ['سر و گردن', 'عصب سه‌قلو و شاخه‌ها'],
+    type: 'memorization',
+    difficulty: 'medium',
+    year: 1403,
+    source: 'official',
+    tags: ['پرتکرار'],
+    stem: 'عصب آلوئولار تحتانی (IAN) شاخهٔ کدام تقسیم عصب سه‌قلو است و از کدام مسیر عبور می‌کند؟',
+    figure: null,
+    options: [
+      'شاخهٔ V2 (ماگزیلاری)؛ از سینوس ماگزیلاری',
+      'شاخهٔ V3 (ماندیبولار)؛ از کانال ماندیبول',
+      'شاخهٔ V1 (افتالمیک)؛ از شکاف اوربیتال فوقانی',
+      'شاخهٔ V3؛ از سوراخ مِنتال به سمت داخل',
+    ],
+    correctAnswer: 1,
+    explanation: {
+      summary: 'IAN از تقسیم ماندیبولار (V3) جدا می‌شود، از سوراخ ماندیبول وارد کانال ماندیبول می‌شود و حس دندان‌های پایین را می‌دهد.',
+      deep: 'V3 پس از خروج از سوراخ اوال، شاخه‌های حرکتی (ماسِتر، تِریگویید داخلی و خارجی، پتریگویید) و حسی (بوکال، لینگوال، آلوئولار تحتانی، اوریکولوتِرمپورال) می‌دهد. IAN همراه شریان و ورید آلوئولار تحتانی در کانال ماندیبول حرکت می‌کند و در ناحیهٔ پرمولار به دو شاخهٔ مِنتال (حس چانه و لب پایین) و اینسیزیو (حس دندان‌های قدامی) تقسیم می‌شود. بی‌حسی IAN در جراحی دندان عقل و ایمپلنت اهمیت بالینی زیادی دارد.',
+      keyPoint: 'V1 = چشم و بینی | V2 = گونه، بینی، دندان‌های بالا | V3 = دندان‌های پایین، زبان، عضلات جویدن.',
+      trap: 'عصب لینگوال هم از V3 است ولی مسیرش جدا و صرفاً حسی است؛ با IAN اشتباه گرفته می‌شود.',
+      whyWrong: [
+        { index: 0, text: 'V2 شاخهٔ ماگزیلاری است و حس دندان‌های بالا را می‌دهد.' },
+        { index: 2, text: 'V1 شاخهٔ افتالمیک است و به دندان‌ها شاخه‌ای نمی‌دهد.' },
+        { index: 3, text: 'سوراخ مِنتال محل خروج IAN است، نه محل ورود آن به کانال.' },
+      ],
+    },
+    stats: { solves: 1988, correctPercent: 66, optionPercents: [13, 66, 8, 13], avgTimeSec: 31, difficultyIndex: 0.66 },
+    createdAt: '2026-02-03',
+    updatedAt: '2026-08-20',
+  },
+  {
+    id: 'tb-den-02',
+    track: 'dentistry',
+    subject: 'histology',
+    topicPath: ['بافت‌شناسی دهان و دندان', 'مینا و عاج'],
+    type: 'concept',
+    difficulty: 'easy',
+    year: 1402,
+    source: 'official',
+    tags: ['پرتکرار'],
+    stem: 'مینای دندان توسط کدام سلول ساخته می‌شود و مهم‌ترین ویژگی آن نسبت به سایر بافت‌های بدن چیست؟',
+    figure: null,
+    options: [
+      'ادونتوبلاست؛ بافتی زنده با بازسازی مداوم در طول عمر',
+      'آملوبلاست؛ سخت‌ترین بافت بدن و بدون توان بازسازی پس از تکامل',
+      'سمنتوبلاست؛ بافتی شبیه استخوان با عروق فراوان',
+      'فیبروبلاست پالپ؛ مینای ثانویه را در تمام عمر می‌سازد',
+    ],
+    correctAnswer: 1,
+    explanation: {
+      summary: 'آملوبلاست‌ها مینا را می‌سازند؛ پس از تکامل و رویش دندان این سلول‌ها از بین می‌روند، پس مینا بازسازی نمی‌شود.',
+      deep: 'آملوبلاست‌ها به‌صورت لایه‌ای از سطح به عمق مینا را می‌سازند و با اتمام آمی‌لوژنِز، در مرحلهٔ رویش از بین می‌روند؛ به همین دلیل مینای بالغ سلول ندارد و ضایعات آن (پوسیدگی، سایش) خودبه‌خود ترمیم نمی‌شود. در مقابل، عاج توسط ادونتوبلاست‌ها ساخته می‌شود که پس از رویش هم باقی می‌مانند و می‌توانند عاج ثانویه و ترمیمی بسازند.',
+      keyPoint: 'مینا = آملوبلاست (پایان‌پذیر، بدون بازسازی) | عاج = ادونتوبلاست (قابل بازسازی).',
+      trap: 'سخت‌ترین بافت بدن میناست، اما بیشترین استحکام کششی و توان ترمیم متعلق به عاج است.',
+      whyWrong: [
+        { index: 0, text: 'ادونتوبلاست عاج می‌سازد و مینا بازسازی نمی‌شود.' },
+        { index: 2, text: 'سمنتوبلاست سِمان ریشه را می‌سازد؛ سِمان عروق ندارد.' },
+        { index: 3, text: 'پالپ مینا نمی‌سازد؛ تنها عاج ثانویه/ترمیمی از ادونتوبلاست‌های پالپ می‌آید.' },
+      ],
+    },
+    stats: { solves: 2340, correctPercent: 74, optionPercents: [14, 74, 7, 5], avgTimeSec: 26, difficultyIndex: 0.74 },
+    createdAt: '2026-02-10',
+    updatedAt: '2026-08-22',
+  },
+  {
+    id: 'tb-den-03',
+    track: 'dentistry',
+    subject: 'histology',
+    topicPath: ['بافت‌شناسی دهان و دندان', 'مینا و عاج'],
+    type: 'concept',
+    difficulty: 'medium',
+    year: 1404,
+    source: 'tapesh',
+    tags: ['منتخب'],
+    stem: 'عاج (Dentin) توسط کدام سلول و با چه الگویی ساخته می‌شود؟',
+    figure: null,
+    options: [
+      'آملوبلاست؛ با ترشح لایه‌به‌لایه از خارج به داخل',
+      'ادونتوبلاست؛ با عقب‌نشینی تدریجی و جای‌گذاشتن زائدهٔ سلولی در کانالیکول',
+      'سمنتوبلاست؛ فقط در ریشه و پس از بسته‌شدن آپکس',
+      'فیبروبلاست؛ با رسوب کلاژن نوع I بدون سلول اختصاصی',
+    ],
+    correctAnswer: 1,
+    explanation: {
+      summary: 'ادونتوبلاست‌ها با ترشح ماتریکس و عقب‌نشینی به‌سمت پالپ، زائدهٔ سلولی خود را در کانالیکول دنتینی باقی می‌گذارند.',
+      deep: 'ادونتوبلاست‌ها از پاپیلای دنتال منشأ می‌گیرند و پس از تمایز، پیش‌عاج (predentin) می‌سازند که بعداً معدنی می‌شود. با هر لایه ترشح، جسم سلولی به‌سمت پالپ عقب می‌رود و زائده (Tomes fiber) در کانالیکول باقی می‌ماند؛ همین ساختار مسیر انتقال حس و تغذیه در عاج را می‌سازد. عاج برخلاف مینا پس از رویش هم ساخته می‌شود (عاج ثانویه و ترمیمی).',
+      keyPoint: 'عاج = ادونتوبلاست + کانالیکول‌های دنتینی | مینا = آملوبلاست بدون سلول باقی‌مانده.',
+      trap: 'عاج و مینا هر دو از سلول‌های اکتومزانشیمال/اپیتلیالی ساخته می‌شوند ولی فقط عاج سلول زندهٔ باقی‌مانده دارد.',
+      whyWrong: [
+        { index: 0, text: 'آملوبلاست مینا را می‌سازد و پس از تکامل از بین می‌رود.' },
+        { index: 2, text: 'سمنتوبلاست لایهٔ سِمان سطح ریشه را می‌سازد، نه عاج تاج.' },
+        { index: 3, text: 'فیبروبلاست پالپ کلاژن پالپ را می‌سازد؛ عاج سلول اختصاصی خود (ادونتوبلاست) را دارد.' },
+      ],
+    },
+    stats: { solves: 1614, correctPercent: 69, optionPercents: [11, 69, 9, 11], avgTimeSec: 28, difficultyIndex: 0.69 },
+    createdAt: '2026-05-30',
+    updatedAt: '2026-09-10',
+  },
+  {
+    id: 'tb-den-04',
+    track: 'dentistry',
+    subject: 'microbiology',
+    topicPath: ['باکتری‌های گرم مثبت', 'استرپتوکوک'],
+    type: 'concept',
+    difficulty: 'medium',
+    year: 1401,
+    source: 'official',
+    tags: ['پرتکرار', 'منتخب'],
+    stem: 'عامل اصلی شروع پوسیدگی مینا کدام باکتری است و مکانیسم چسبیدن آن به سطح دندان چیست؟',
+    figure: null,
+    options: [
+      'لاکتوباسیلوس؛ تولید پروتئاز تخریب‌کنندهٔ ماتریکس مینا',
+      'استرپتوکوکوس موتانس؛ تولید گلوکان نامحلول از ساکارز و تشکیل بیوفیلم',
+      'پورفیروموناس ژینژیوالیس؛ تخریب کلاژن پریودنشیوم',
+      'کاندیدا آلبیکانس؛ تخریب کلاژن عاج در دندان‌های پوسیده',
+    ],
+    correctAnswer: 1,
+    explanation: {
+      summary: 'S. mutans با آنزیم گلوکوزیل‌ترانسفراز از ساکارز، گلوکان نامحلول (دکستران) می‌سازد و به‌شکل بیوفیلم محکم به مینا می‌چسبد.',
+      deep: 'پوسیدگی نتیجهٔ تعادل میان دمینرالیزاسیون اسیدی و رمینرالیزاسیون است. S. mutans به‌عنوان باکتری آغازگر کلونیزه می‌شود، گلوکان نامحلول می‌سازد که پایهٔ ماتریکس پلاک است و با تخمیر ساکارز اسید لاکتیک تولید می‌کند. لاکتوباسیل‌ها در پیشرفت ضایعه (عاج) نقش دارند و پورفیروموناس ژینژیوالیس عامل اصلی بیماری پریودنتال است، نه پوسیدگی.',
+      keyPoint: 'پوسیدگی: S. mutans (آغازگر) + لاکتوباسیلوس (پیشرفت) | پریودنتیت: P. gingivalis و بی‌هوای گرم-منفی.',
+      trap: 'لاکتوباسیلوس اسید بیشتری تولید می‌کند ولی توان کلونیزاسیون اولیه روی مینای سالم را ندارد؛ نقش «آغازگر» مخصوص S. mutans است.',
+      whyWrong: [
+        { index: 0, text: 'لاکتوباسیل‌ها در پیشرفت ضایعه نقش دارند ولی آغازگر چسبیدن به مینا نیستند.' },
+        { index: 2, text: 'P. gingivalis عامل پریودنتیت است، نه پوسیدگی.' },
+        { index: 3, text: 'کاندیدا در عفونت‌های فرصت‌طلب مخاطی مطرح است، نه شروع پوسیدگی.' },
+      ],
+    },
+    stats: { solves: 2871, correctPercent: 72, optionPercents: [12, 72, 9, 7], avgTimeSec: 27, difficultyIndex: 0.72 },
+    createdAt: '2026-02-16',
+    updatedAt: '2026-08-24',
+  },
+  {
+    id: 'tb-den-05',
+    track: 'dentistry',
+    subject: 'physiology',
+    topicPath: ['غدد بزاقی', 'ترشح و تنظیم بزاق'],
+    type: 'concept',
+    difficulty: 'medium',
+    year: 1400,
+    source: 'official',
+    tags: ['پرتکرار'],
+    stem: 'ترشح آبکی بزاق (حجم و جریان) عمدتاً تحت کنترل کدام بخش دستگاه عصبی و کدام گیرنده است؟',
+    figure: null,
+    options: [
+      'سمپاتیک؛ نوراپی‌نفرین با گیرندهٔ α₁',
+      'پاراسمپاتیک؛ استیل‌کولین با گیرندهٔ موسکارینی (M₃)',
+      'پاراسمپاتیک؛ استیل‌کولین با گیرندهٔ نیکوتینی روی سلول آسینار',
+      'سمپاتیک؛ دوپامین با گیرندهٔ D₁',
+    ],
+    correctAnswer: 1,
+    explanation: {
+      summary: 'بزاق غالباً پاراسمپاتیک است؛ ACh روی گیرندهٔ M₃ سلول آسینار با مسیر IP₃/Ca²⁺ ترشح آبکی و فراوان ایجاد می‌کند.',
+      deep: 'عصب‌دهی پاراسمپاتیک غدد بزاقی از عصب زوج VII (زیرزبانی و زیرفکی) و زوج IX (پاروتید) می‌آید و «ترشح آبکی غنی از الکترولیت» می‌سازد؛ همین است که در خشکی دهان آنتی‌کولینرژیک‌ها (مثل آتروپین) دیده می‌شود. تحریک سمپاتیک هم ترشح می‌آورد ولی حجم کم و محتوای پروتئینی/موکوسی بیشتر دارد؛ به همین دلیل «حجم اصلی بزاق» به پاراسمپاتیک نسبت داده می‌شود.',
+      keyPoint: 'بزاق: پاراسمپاتیک = حجم زیاد و آبکی (M₃) | سمپاتیک = حجم کم و پروتئینی.',
+      trap: 'گیرندهٔ موسکارینی در سلول آسینار است، نه نیکوتینی؛ نیکوتینی گیرندهٔ گانگلیون پاراسمپاتیک است.',
+      whyWrong: [
+        { index: 0, text: 'سمپاتیک α₁ ترشح پروتئینی کم‌حجم می‌دهد، نه جریان اصلی آبکی.' },
+        { index: 2, text: 'گیرندهٔ نیکوتینی در گانگلیون است؛ سلول آسینار گیرندهٔ موسکارینی دارد.' },
+        { index: 3, text: 'دوپامین نقش فیزیولوژیک اصلی در تنظیم ترشح بزاق ندارد.' },
+      ],
+    },
+    stats: { solves: 2065, correctPercent: 64, optionPercents: [17, 64, 12, 7], avgTimeSec: 30, difficultyIndex: 0.64 },
+    createdAt: '2026-02-22',
+    updatedAt: '2026-08-26',
+  },
+  {
+    id: 'tb-den-06',
+    track: 'dentistry',
+    subject: 'biochemistry',
+    topicPath: ['بیوشیمی مولکولی', 'ساختار کلاژن'],
+    type: 'concept',
+    difficulty: 'hard',
+    year: 1404,
+    source: 'tapesh',
+    tags: ['منتخب'],
+    stem: 'کدام تغییر پس از ترجمه، پایداری مارپیچ سه‌گانهٔ کلاژن را تأمین می‌کند و کمبود ویتامین C چگونه به لق‌شدن دندان و خونریزی لثه می‌انجامد؟',
+    figure: null,
+    options: [
+      'هیدروکسیلاسیون پرولین و لیزین؛ کمبود ویتامین C این واکنش را متوقف و مارپیچ را ناپایدار می‌کند',
+      'فسفوریلاسیون سرین در انتهای زنجیره؛ کمبود ویتامین C کیناز را مهار می‌کند',
+      'گلیکوزیلاسیون آسپاراژین؛ کمبود ویتامین C مسیر N-گلیکوزیلاسیون را می‌بندد',
+      'کراس‌لینک دی‌سولفیدی بین زنجیره‌ها؛ کمبود ویتامین C اکسیداسیون سیستئین را می‌خواباند',
+    ],
+    correctAnswer: 0,
+    explanation: {
+      summary: 'پرولیل و لیزیل هیدروکسیلاز به ویتامین C (آسکوربات) نیاز دارند؛ بدون هیدروکسیلاسیون، مارپیچ سه‌گانه ناپایدار می‌شود.',
+      deep: 'کلاژن پس از ترجمه دستخوش هیدروکسیلاسیون پرولین و لیزین می‌شود که پیوندهای هیدروژنی درون و بین زنجیره‌ها را ممکن می‌کند و دمای ذوب مارپیچ را بالا می‌برد. آسکوربات کوفاکتور آنزیم‌های پرولیل/لیزیل هیدروکسیلاز است و در چرخهٔ احیای آهن فعال نقش دارد. کمبود آن (اسکوربوت) → کلاژن معیوب → شکنندگی عروق (پتشیا)، خونریزی لثه، لق‌شدن دندان (از دست رفتن لیگامان پریودنتال) و اختلال ترمیم زخم. کراس‌لینک‌های کلاژن از نوع لیزین-اکسیداز (مس‌وابسته) هستند، نه دی‌سولفیدی.',
+      keyPoint: 'ویتامین C = کوفاکتور هیدروکسیلاسیون پرولین/لیزین | مس = کوفاکتور لیزیل اکسیداز (کراس‌لینک).',
+      trap: 'کراس‌لینک کلاژن با پیوند کووالان بین لیزین‌ها (لیزیل اکسیداز، مس‌وابسته) ساخته می‌شود؛ پیوند دی‌سولفیدی در کلاژن نقشی ندارد.',
+      whyWrong: [
+        { index: 1, text: 'فسفوریلاسیون در پایداری مارپیچ سه‌گانهٔ کلاژن نقش ندارد.' },
+        { index: 2, text: 'کلاژن عمدتاً O-گلیکوزیله است و مسیر N-گلیکوزیلاسیون عامل پایداری آن نیست.' },
+        { index: 3, text: 'کراس‌لینک کلاژن لیزینی (مس‌وابسته) است، نه دی‌سولفیدی.' },
+      ],
+    },
+    stats: { solves: 1422, correctPercent: 52, optionPercents: [52, 14, 12, 22], avgTimeSec: 44, difficultyIndex: 0.52 },
+    createdAt: '2026-06-02',
+    updatedAt: '2026-09-11',
+  },
+  {
+    id: 'tb-den-07',
+    track: 'dentistry',
+    subject: 'pathology',
+    topicPath: ['پاتولوژی دهان', 'ضایعات پیش‌بدخیم'],
+    type: 'clinical',
+    difficulty: 'medium',
+    year: 1403,
+    source: 'official',
+    tags: ['پرتکرار'],
+    stem: 'کدام ضایعه، شایع‌ترین اختلال بالقوه بدخیم مخاط دهان است و به‌صورت پلاک سفیدی دیده می‌شود که قابل جدا کردن نیست؟',
+    figure: null,
+    options: [
+      'کاندیدیازیس دهانی',
+      'لوکوپلاکیا',
+      'آفت راجعهٔ دهانی',
+      'لیکن پلانوس اروزیو',
+    ],
+    correctAnswer: 1,
+    explanation: {
+      summary: 'لوکوپلاکیا اصطلاحی بالینی برای پلاک سفید بدون علت مشخص دیگر است و شایع‌ترین ضایعهٔ بالقوه بدخیم مخاط دهان محسوب می‌شود.',
+      deep: 'تشخیص لوکوپلاکیا «تشخیص طردی» است: هر پلاک سفید مخاطی که با تراشیدن جدا نشود و به بیماری شناخته‌شدهٔ دیگری (کاندیدیازیس، لیکن پلانوس، لکوادمای اصطکاکی) نسبت داده نشود، لوکوپلاکیا نام می‌گیرد. ریسک تبدیل بدخیم آن حدود ۱ تا ۵ درصد است و در نواحی کف دهان، کنارهٔ زبان و وستیبولار بیشتر است. اریتروپلاکیا (پلاک قرمز) شیوع کمتری دارد اما ریسک بدخیمی آن بسیار بالاتر است.',
+      keyPoint: 'لوکوپلاکیا = شایع‌ترین ضایعهٔ بالقوه بدخیم | اریتروپلاکیا = کم‌شیوع‌تر ولی پرخطرتر.',
+      trap: 'لیکن پلانوس هم پتانسیل بدخیمی دارد ولی «پلاک سفید بدون تشخیص دیگر» تعریف لوکوپلاکیا است و کاندیدیازیس با ضدقارچ برطرف می‌شود.',
+      whyWrong: [
+        { index: 0, text: 'کاندیدیازیس عفونی است و با درمان ضدقارچ برطرف می‌شود؛ تشخیص طردی نیست.' },
+        { index: 2, text: 'آفت راجعهٔ دهانی زخم دردناک عودکننده است، نه پلاک سفید.' },
+        { index: 3, text: 'لیکن پلانوس الگوی بالینی و هیستولوژیک شناخته‌شدهٔ خود را دارد و در تشخیص طردی کنار گذاشته می‌شود.' },
+      ],
+    },
+    stats: { solves: 1755, correctPercent: 61, optionPercents: [12, 61, 11, 16], avgTimeSec: 32, difficultyIndex: 0.61 },
+    createdAt: '2026-03-02',
+    updatedAt: '2026-08-28',
+  },
 ];
 
 /* ────────────────────────── شاخص‌های مشتق (INDEXES) ────────────────────────── */
@@ -1242,12 +1751,33 @@ export const questionsBySubject = (subjectId) =>
 export const yearQuestionIds = (year) =>
   QUESTIONS.filter((question) => question.year === year).map((question) => question.id);
 
-export const BANK_STATS = {
-  totalQuestions: QUESTIONS.length,
-  subjectsCovered: [...new Set(QUESTIONS.map((question) => question.subject))].length,
-  yearsCovered: [...new Set(QUESTIONS.map((question) => question.year))].length,
-  totalSolves: QUESTIONS.reduce((sum, question) => sum + question.stats.solves, 0),
-  averageCorrect: Math.round(
-    QUESTIONS.reduce((sum, question) => sum + question.stats.correctPercent, 0) / QUESTIONS.length,
-  ),
-};
+/* ── مشتق‌های دو محور طبقه‌بندی ──
+   bankKind و track همیشه از خود رکورد سؤال خوانده می‌شوند تا افزودن محتوای جدید
+   (یا اتصال Backend) نیازی به نگه‌داری هیچ فهرست دستی نداشته باشد. */
+export const bankKindOf = (question) =>
+  SOURCE_BANK[question?.source] ?? (question?.bank ?? 'authored');
+
+export const trackOf = (question) => question?.track ?? 'medicine';
+
+export const questionsByBank = (kind) =>
+  QUESTIONS.filter((question) => bankKindOf(question) === kind);
+
+export const questionsByTrack = (track) =>
+  QUESTIONS.filter((question) => trackOf(question) === track);
+
+/*
+ * آمار یک مجموعهٔ سؤال — پایهٔ شمارنده‌های «نمای کلی بانک».
+ * چون سرویس می‌تواند مجموعه را با فیلتر (نوع بانک/رشته) کوچک کند، آمار را
+ * به‌جای ثابت‌بودن، تابع مجموعه می‌سازیم.
+ */
+export const buildStats = (questions = QUESTIONS) => ({
+  totalQuestions: questions.length,
+  subjectsCovered: [...new Set(questions.map((question) => question.subject))].length,
+  yearsCovered: [...new Set(questions.map((question) => question.year))].length,
+  totalSolves: questions.reduce((sum, question) => sum + question.stats.solves, 0),
+  averageCorrect: questions.length
+    ? Math.round(questions.reduce((sum, question) => sum + question.stats.correctPercent, 0) / questions.length)
+    : 0,
+});
+
+export const BANK_STATS = buildStats(QUESTIONS);

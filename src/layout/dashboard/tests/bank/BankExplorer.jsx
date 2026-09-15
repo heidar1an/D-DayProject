@@ -1,8 +1,8 @@
 /*
  * BankExplorer — کاوشگر بانک تست: جستجو + Filter Builder حرفه‌ای.
- * فیلترها ترکیب‌پذیرند (درس × مبحث × سال × منبع × نوع × سختی × وضعیت کاربر × متن)
- * و به شکل Chip قابل حذف مستقل نمایش داده می‌شوند. فیلتر ذخیره‌شده («آزمون من»)
- * همان blueprint سشن است و مستقیم به startPractice/startExam می‌رود.
+ * فیلترها ترکیب‌پذیرند (نوع بانک × رشته × درس × مبحث × سال × منبع × نوع × سختی ×
+ * وضعیت کاربر × متن) و به شکل Chip قابل حذف مستقل نمایش داده می‌شوند. فیلتر ذخیره‌شده
+ * («آزمون من») همان blueprint سشن است و مستقیم به startPractice/startExam می‌رود.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -13,19 +13,25 @@ import {
   saveFilterPreset,
   searchQuestions,
   toggleBookmark,
+  BANK_KINDS,
   BANK_YEARS,
   QUESTION_TYPES,
   SOURCES,
   SUBJECTS,
   TOPIC_TREE,
+  TRACKS,
+  bankKindOf,
+  trackOf,
 } from '../../../../services/testBank/testBankService';
 import {
+  BankKindBadge,
   DifficultyBadge,
   EmptyState,
   Icon,
   Modal,
   Skeleton,
   SourceBadge,
+  TrackBadge,
   TypeBadge,
   faNum,
   toFa,
@@ -122,6 +128,21 @@ function FilterPanel({ filters, setFilters, subjectsMeta, saved, onApplySaved, o
 
   return (
     <div className="space-y-6">
+      {/* دو محور سطح بالا — هم‌راستا با «انتخاب بانک» در خانه؛ اینجا قابل ترکیب و تغییرند */}
+      <ChipGroup
+        title="نوع بانک"
+        options={Object.entries(BANK_KINDS).map(([value, meta]) => ({ value, label: meta.short }))}
+        selected={filters.bankKinds}
+        onChange={(bankKinds) => patch({ bankKinds })}
+      />
+
+      <ChipGroup
+        title="رشته"
+        options={Object.entries(TRACKS).map(([value, meta]) => ({ value, label: meta.short }))}
+        selected={filters.tracks}
+        onChange={(tracks) => patch({ tracks })}
+      />
+
       <CheckboxGroup
         title="درس"
         options={SUBJECTS.filter((subject) => subjectsMeta[subject.id] > 0).map((subject) => ({
@@ -297,6 +318,8 @@ function QuestionResultCard({ entry, onSolve, onToggleBookmark }) {
 
       <footer className="mt-4 flex flex-wrap items-center gap-2 text-[11px] text-[#8a8a8a]">
         <TypeBadge type={question.type} />
+        <BankKindBadge kind={bankKindOf(question)} />
+        <TrackBadge track={trackOf(question)} />
         {question.figure && (
           <span className="rounded-full bg-white/6 px-2.5 py-1 text-[10px]">شکل‌دار</span>
         )}
@@ -424,6 +447,12 @@ export default function BankExplorer({
   const activeChips = useMemo(() => {
     const chips = [];
     const subjectName = (id) => SUBJECTS.find((subject) => subject.id === id)?.name ?? id;
+    for (const kind of filters.bankKinds) {
+      chips.push({ key: `bank-${kind}`, label: BANK_KINDS[kind]?.label ?? kind, remove: () => setFilters((prev) => ({ ...prev, bankKinds: prev.bankKinds.filter((item) => item !== kind) })) });
+    }
+    for (const track of filters.tracks) {
+      chips.push({ key: `track-${track}`, label: TRACKS[track]?.label ?? track, remove: () => setFilters((prev) => ({ ...prev, tracks: prev.tracks.filter((item) => item !== track) })) });
+    }
     for (const id of filters.subjectIds) {
       chips.push({ key: `subject-${id}`, label: subjectName(id), remove: () => setFilters((prev) => ({ ...prev, subjectIds: prev.subjectIds.filter((item) => item !== id) })) });
     }

@@ -1,0 +1,15 @@
+[
+  {
+    "id": "adm-5e246f08",
+    "username": "0135",
+    "name": "مدیر تپش",
+    "email": "",
+    "passwordHash": "scrypt$c29f98ed7b54afe80cb4f9a5e98cc2b9$b75a2fb2a3896e1b6042b61fddfe1c72eb81042195d405f989859d4906bb7e36f5ff9fa9f9d9b4035f15b5564a692389e931a275338c65ac6c808e60e90e801e",
+    "role": "super-admin",
+    "isActive": true,
+    "mustChangePassword": true,
+    "createdAt": "2026-09-15T12:16:39.391Z",
+    "updatedAt": "2026-09-15T12:19:34.378Z",
+    "lastLoginAt": "2026-09-15T12:19:34.378Z"
+  }
+]

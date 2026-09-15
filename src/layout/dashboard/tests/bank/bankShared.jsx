@@ -5,10 +5,10 @@
  */
 import { useEffect } from 'react';
 import { toFa, faNum } from '../../league/leagueShared';
-import { DIFFICULTIES, QUESTION_TYPES, SOURCES } from '../../../../services/testBank/testBankService';
+import { BANK_KINDS, DIFFICULTIES, QUESTION_TYPES, SOURCES, TRACKS } from '../../../../services/testBank/testBankService';
 
 export { toFa, faNum };
-export { DIFFICULTIES, QUESTION_TYPES, SOURCES };
+export { BANK_KINDS, DIFFICULTIES, QUESTION_TYPES, SOURCES, TRACKS };
 
 /* ── آیکن‌های خطی لایهٔ بانک تست ── */
 const iconPaths = {
@@ -166,6 +166,32 @@ const iconPaths = {
       <path d="M16 5.4a3.5 3.5 0 0 1 0 6.2M18.5 20v-1a6.4 6.4 0 0 0-2.5-4.9" />
     </>
   ),
+  /* آیکن محور «نوع بانک» */
+  shield: (
+    <>
+      <path d="M12 3.2 5 6.2v5c0 4.2 2.9 7.7 7 9.1 4.1-1.4 7-4.9 7-9.1v-5z" />
+      <path d="m9 12 2.2 2.2L15.4 10" />
+    </>
+  ),
+  pen: (
+    <>
+      <path d="M4 20.2h4L18.6 9.6a2.2 2.2 0 0 0-3.1-3.1L4.9 17.1z" />
+      <path d="m14.4 7.6 2.6 2.6" />
+    </>
+  ),
+  /* آیکن محور «رشته» */
+  stethoscope: (
+    <>
+      <path d="M6 3.5v3.6a3.6 3.6 0 0 0 7.2 0V3.5" />
+      <path d="M9.6 10.7v3.4a4.6 4.6 0 0 0 9.2 0v-1.4" />
+      <circle cx="18.8" cy="9.6" r="2.1" />
+    </>
+  ),
+  tooth: (
+    <>
+      <path d="M12 3.6c-1.4 0-2 .8-3.3.8-.9 0-1.9-.5-3 .2-1.4.9-1.7 3.1-1.2 5.2.4 1.7.8 2.7.8 4.2 0 2 .5 4.8 1.9 4.8 1.2 0 1.1-2.8 2-4.1.4-.7.9-1 1.5-1s1.1.3 1.5 1c.9 1.3.8 4.1 2 4.1 1.4 0 1.9-2.8 1.9-4.8 0-1.5.4-2.5.8-4.2.5-2.1.2-4.3-1.2-5.2-1.1-.7-2.1-.2-3-.2-1.3 0-1.9-.8-3.3-.8z" />
+    </>
+  ),
 };
 
 export function Icon({ name, className = 'h-[18px] w-[18px]', strokeWidth = 1.9, style }) {
@@ -228,6 +254,38 @@ export function SourceBadge({ source, className = '' }) {
   );
 }
 
+/* ── نشان «نوع بانک» (کشوری / تألیفی) و «رشته» (پزشکی / دندان‌پزشکی) ──
+   هر دو از رکورد سؤال مشتق می‌شوند؛ نشان فقط نمایش می‌دهد، منطق در سرویس است. */
+export function BankKindBadge({ kind, className = '' }) {
+  const meta = BANK_KINDS[kind];
+  if (!meta) return null;
+  return (
+    <span
+      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] ${className}`}
+      style={{ background: `${meta.accent}12`, color: meta.accent }}
+      title={meta.description}
+    >
+      <Icon name={kind === 'authored' ? 'pen' : 'shield'} className="h-3 w-3" />
+      {meta.short}
+    </span>
+  );
+}
+
+export function TrackBadge({ track, className = '' }) {
+  const meta = TRACKS[track];
+  if (!meta) return null;
+  return (
+    <span
+      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] ${className}`}
+      style={{ background: `${meta.accent}12`, color: meta.accent }}
+      title={meta.label}
+    >
+      <Icon name={track === 'dentistry' ? 'tooth' : 'stethoscope'} className="h-3 w-3" />
+      {meta.short}
+    </span>
+  );
+}
+
 /* ── اسکلت لودینگ ── */
 export function Skeleton({ className = '' }) {
   return <span className={`tb-sk block ${className}`} aria-hidden="true" />;
@@ -258,6 +316,9 @@ export function formatClock(totalSeconds) {
 
 const dateFmt = new Intl.DateTimeFormat('fa-IR', { day: 'numeric', month: 'long', year: 'numeric' });
 export const formatFullDate = (ts) => dateFmt.format(new Date(ts));
+
+const timeFmt = new Intl.DateTimeFormat('fa-IR', { hour: '2-digit', minute: '2-digit' });
+export const formatFullTime = (ts) => timeFmt.format(new Date(ts));
 
 export function formatAgo(ts) {
   if (!ts) return '—';
@@ -413,18 +474,18 @@ export function QuestionFigure({ name }) {
   );
 }
 
-/* ── گزینهٔ سؤال — حالت‌های Default/Hover/Selected/Correct/Wrong/Disabled ── */
+/* ── گزینهٔ سؤال — بدون کادر؛ حالت‌ها فقط با پس‌زمینه و نشانگر حرف مشخص می‌شوند ── */
 export function OptionButton({ option, index, state = 'idle', onSelect, disabled }) {
   const skin =
     state === 'correct'
-      ? 'border-[#61D192]/50 bg-[#61D192]/[0.09] text-[#eaf6ef]'
+      ? 'bg-[#61D192]/[0.13] text-[#eaf6ef]'
       : state === 'wrong'
-        ? 'border-[#e26d6d]/50 bg-[#e26d6d]/[0.08] text-[#f3e2e2]'
+        ? 'bg-[#e26d6d]/[0.12] text-[#f3e2e2]'
         : state === 'selected'
-          ? 'border-[#937fcd]/70 bg-[#937fcd]/[0.12] text-white'
+          ? 'bg-[#937fcd]/[0.18] text-white'
           : state === 'muted'
-            ? 'border-white/6 bg-white/[0.015] text-[#8a8a8a]'
-            : 'border-white/8 bg-[#2a2a2a] text-[#d9d9d9] hover:border-white/20 hover:bg-[#303030]';
+            ? 'bg-white/[0.015] text-[#8a8a8a]'
+            : 'bg-white/[0.045] text-[#d9d9d9] hover:bg-white/[0.08]';
 
   return (
     <button

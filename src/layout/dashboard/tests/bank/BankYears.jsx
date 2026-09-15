@@ -1,10 +1,13 @@
 /*
  * BankYears — نمای «آزمون‌های سال به سال». هر سال یک کارت با آمار واقعی بانک است؛
  * شروع آزمون در حالت Exam با نمرهٔ منفی وزارت بهداشت (-۰٫۲۵) انجام می‌شود.
+ *
+ * این نما فقط روی سؤال‌های رسمی (کشوری) ساخته می‌شود؛ اگر دامنهٔ فعال «تألیفی» باشد
+ * یا رشتی سؤال رسمی نداشته باشد، به‌جای فهرست خالی، راهنمای تغییر دامنه نشان داده می‌شود.
  */
-import { DifficultyBadge, Icon, Skeleton, faNum, toFa } from './bankShared';
+import { EmptyState, Icon, Skeleton, faNum, toFa } from './bankShared';
 
-export default function BankYears({ overview, onStartYearExam }) {
+export default function BankYears({ overview, scope, onStartYearExam }) {
   if (!overview) {
     return (
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -12,6 +15,20 @@ export default function BankYears({ overview, onStartYearExam }) {
           <Skeleton key={index} className="h-64 rounded-[2rem]" />
         ))}
       </div>
+    );
+  }
+
+  if (!overview.years.length) {
+    return (
+      <EmptyState
+        icon="calendar"
+        title="در این دامنه آزمون سال‌به‌سال وجود ندارد"
+        note={
+          scope?.bankKind === 'authored'
+            ? 'آزمون‌های سال‌به‌سال فقط از سؤال‌های رسمی آزمون کشوری ساخته می‌شوند؛ برای دیدنشان دامنه را روی «کشوری» بگذار.'
+            : 'برای این رشته هنوز سؤال رسمی در بانک ثبت نشده است؛ دامنهٔ رشته را تغییر بده یا از «تست مبحثی» شروع کن.'
+        }
+      />
     );
   }
 
@@ -26,7 +43,7 @@ export default function BankYears({ overview, onStartYearExam }) {
         </div>
         <span className="tb-badge tb-badge--plain">
           <Icon name="info" className="h-3.5 w-3.5" />
-          تعداد سؤال هر سال برابر بانک فعلی است
+          {faNum(overview.years.length)} سال · سؤال‌های رسمی کشوری
         </span>
       </div>
 

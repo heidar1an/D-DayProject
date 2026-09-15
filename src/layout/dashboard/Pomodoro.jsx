@@ -184,6 +184,39 @@ function useAnimatedLabel(label) {
   return displayed;
 }
 
+/* ── موج‌های گوی پومودو ──
+   هر مسیر سه دورهٔ کامل موج می‌کشد؛ با جابه‌جایی دقیقاً یک دوره، حلقه بی‌درز می‌شود.
+   عرض viewBox ثابت است و با preserveAspectRatio روی عرض واقعی گوی کشیده می‌شود. */
+const WAVE_VIEWBOX_WIDTH = 600;
+const WAVE_HEIGHT = 36;
+
+function buildWavePath(period, amplitude) {
+  const mid = WAVE_HEIGHT / 2;
+  const cycles = Math.ceil((WAVE_VIEWBOX_WIDTH * 3) / period);
+  let path = `M0 ${mid}`;
+
+  for (let index = 0; index < cycles; index += 1) {
+    const start = index * period;
+    const peak = index % 2 === 0 ? mid - amplitude * 2 : mid + amplitude * 2;
+    path += ` Q ${start + period / 2} ${peak} ${start + period} ${mid}`;
+  }
+
+  return `${path} L ${cycles * period} ${WAVE_HEIGHT} L 0 ${WAVE_HEIGHT} Z`;
+}
+
+/* موج پشت (کم‌رنگ‌تر و بلندتر) و موج رو (هم‌رنگ سطح مایع تا لبه یکدست بماند) */
+const WAVE_BACK_PATH = buildWavePath(420, 15);
+const WAVE_FRONT_PATH = buildWavePath(300, 11);
+
+/* حباب‌های ریز داخل مایع؛ هر کدام ریتم و اندازهٔ خودش را دارد تا حرکت زنده به نظر برسد */
+const POMODORO_BUBBLES = [
+  { x: '12%', size: '7px', duration: '7.2s', delay: '-1.4s' },
+  { x: '27%', size: '4px', duration: '5.8s', delay: '-4.2s' },
+  { x: '44%', size: '9px', duration: '8.6s', delay: '-2.6s' },
+  { x: '63%', size: '5px', duration: '6.6s', delay: '-5.4s' },
+  { x: '81%', size: '7px', duration: '9.4s', delay: '-3.2s' },
+];
+
 export default function Pomodoro({
   secondsLeft,
   isRunning,
@@ -210,14 +243,49 @@ export default function Pomodoro({
   return (
     <div className="pomodoro dash-stagger" dir="rtl">
       <div className="pomodoro__hero">
-        <div className={circleClassName}>
+        <div className={circleClassName} style={{ '--pomodoro-fill': elapsedRatio }}>
           <div
             className="pomodoro__water"
             style={{ height: `${elapsedRatio * 100}%` }}
             aria-hidden="true"
           >
-            <span className="pomodoro__wave pomodoro__wave--back" />
-            <span className="pomodoro__wave pomodoro__wave--front" />
+            {/* بدنهٔ مایع: گرادیان عمقی + جلوه‌های سطح و حباب‌ها */}
+            <span className="pomodoro__liquid">
+              <span className="pomodoro__depth" />
+              <span className="pomodoro__sheen" />
+              {POMODORO_BUBBLES.map((bubble) => (
+                <span
+                  key={bubble.x}
+                  className="pomodoro__bubble"
+                  style={{
+                    '--bubble-x': bubble.x,
+                    '--bubble-size': bubble.size,
+                    '--bubble-duration': bubble.duration,
+                    '--bubble-delay': bubble.delay,
+                  }}
+                />
+              ))}
+            </span>
+
+            {/* موج‌ها دقیقاً روی خط آب می‌نشینند و سطح مایع را زنده می‌کنند */}
+            <svg
+              className="pomodoro__waves"
+              viewBox={`0 0 ${WAVE_VIEWBOX_WIDTH} ${WAVE_HEIGHT}`}
+              preserveAspectRatio="none"
+              focusable="false"
+            >
+              <defs>
+                {/* برق سطح: از تاج موج تا خط آب محو می‌شود، پس روی تم آبی و سبز یکسان کار می‌کند */}
+                <linearGradient id="pomodoro-surface-light" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#ffffff" stopOpacity="0.45" />
+                  <stop offset="55%" stopColor="#ffffff" stopOpacity="0.08" />
+                  <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              <path className="pomodoro__wave-path pomodoro__wave-path--back" d={WAVE_BACK_PATH} />
+              <path className="pomodoro__wave-path pomodoro__wave-path--front" d={WAVE_FRONT_PATH} />
+              <path className="pomodoro__wave-path pomodoro__wave-gloss" d={WAVE_FRONT_PATH} />
+            </svg>
           </div>
           <span className="pomodoro__time">{formatTimer(secondsLeft)}</span>
         </div>

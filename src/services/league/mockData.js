@@ -6,12 +6,12 @@
 
 /* ── آواتار‌های ساخته‌شده برای بازیکنان Mock (دترمینیستیکی بر اساس seed) ── */
 const AVATAR_POOL = {
-  skins: ['t1', 't2', 't3', 't4', 't5'],
-  hairColors: ['black', 'brown-dark', 'brown', 'honey', 'blond', 'burgundy'],
-  bgs: ['beige', 'cream', 'tan', 'mint', 'navy', 'gray', 'rose', 'brown'],
+  skins: ['t1', 't2', 't3', 't4', 't5', 't6'],
+  hairColors: ['black', 'brown-dark', 'brown', 'honey', 'ginger', 'burgundy', 'blond', 'blue'],
+  bgs: ['cream', 'peach', 'rose', 'mint', 'sky', 'lilac', 'sand', 'gray'],
   femaleHair: ['long-wavy', 'bob', 'ponytail', 'bun', 'braids', 'curly-long'],
   maleHair: ['short', 'buzz', 'sidepart', 'spiky', 'curly', 'shoulder'],
-  clothColors: ['cream', 'beige', 'brown', 'olive', 'mint', 'navy', 'gray', 'black', 'rose'],
+  clothColors: ['white', 'cream', 'sky', 'blue', 'navy', 'mint', 'green', 'forest', 'yellow', 'orange', 'rose', 'gray'],
 };
 
 export function avatarForSeed(seed) {

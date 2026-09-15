@@ -8,6 +8,8 @@
  *   GET  /api/league/challenges
  *   GET  /api/league/achievements
  *   GET  /api/league/profile-details
+ *   GET  /api/league/notifications
+ *   GET  /api/league/friends/notifications
  *   POST /api/league/challenges/:id/claim   ← اعتبارسنجی سمت سرور (Anti-Cheat)
  *   POST /api/league/battles/:id/join
  *   POST /api/league/duels                  ← نسخهٔ نهایی Duel
@@ -92,7 +94,6 @@ export function fetchLeagueOverview(userData) {
       tiers: LEAGUE_TIERS,
       season: SEASON,
       liveEvents: LIVE_EVENTS,
-      notifications: LEAGUE_NOTIFICATIONS,
       activity: ACTIVITY_FEED,
       nextRank: {
         rank: me.rank - 1,
@@ -201,9 +202,29 @@ export function fetchProfileDetails(userData) {
   }));
 }
 
+/* GET /api/league/notifications
+ * اعلان‌های شخصی لیگ (رتبه، رقیب، نبرد، رویداد) — تغذیه‌کنندهٔ فهرست لایهٔ اعلان‌های هدر.
+ */
+export function fetchLeagueNotifications() {
+  return respond(() => ({
+    items: LEAGUE_NOTIFICATIONS,
+    unreadCount: LEAGUE_NOTIFICATIONS.filter((item) => item.unread).length,
+  }));
+}
+
+export function markLeagueNotificationsRead() {
+  return respond(() => {
+    LEAGUE_NOTIFICATIONS.forEach((item) => {
+      item.unread = false;
+    });
+
+    return { ok: true };
+  });
+}
+
 /* GET /api/league/friends/notifications
- * فعالیت‌ها، نتایج و دستاوردهای «فقط همخوان‌ها» — تغذیه‌کنندهٔ پنل آیکون چت پروفایل داشبورد.
- * markAllRead: بعد از باز شدن پنل، unreadها را مصرف می‌کند (در نسخهٔ واقعی: PATCH روی سرور).
+ * فعالیت‌ها، نتایج و دستاوردهای «فقط همخوان‌ها» — تغذیه‌کنندهٔ فهرست لایهٔ اعلان‌های هدر.
+ * markAllRead: بعد از باز شدن لایه، unreadها را مصرف می‌کند (در نسخهٔ واقعی: PATCH روی سرور).
  */
 export function fetchFriendsLeagueNotifications() {
   return respond(() => ({

@@ -1,0 +1,102 @@
+[
+  {
+    "id": "pg-c48a4e07",
+    "title": "درباره تپش",
+    "slug": "about",
+    "contentHtml": "<p>این صفحه هنوز محتوایی ندارد.</p>",
+    "status": "draft",
+    "cover": "",
+    "seo": {
+      "title": "",
+      "description": "",
+      "canonical": "",
+      "ogImage": "",
+      "robots": "index,follow"
+    },
+    "publishedAt": null,
+    "createdAt": "2026-09-15T12:16:39.407Z",
+    "updatedAt": "2026-09-15T12:16:39.407Z",
+    "createdBy": "seed",
+    "updatedBy": "seed"
+  },
+  {
+    "id": "pg-3cb12a0a",
+    "title": "تماس با ما",
+    "slug": "contact",
+    "contentHtml": "<p>این صفحه هنوز محتوایی ندارد.</p>",
+    "status": "draft",
+    "cover": "",
+    "seo": {
+      "title": "",
+      "description": "",
+      "canonical": "",
+      "ogImage": "",
+      "robots": "index,follow"
+    },
+    "publishedAt": null,
+    "createdAt": "2026-09-15T12:16:39.407Z",
+    "updatedAt": "2026-09-15T12:16:39.407Z",
+    "createdBy": "seed",
+    "updatedBy": "seed"
+  },
+  {
+    "id": "pg-35d8a5cd",
+    "title": "سوالات متداول",
+    "slug": "faq",
+    "contentHtml": "<p>این صفحه هنوز محتوایی ندارد.</p>",
+    "status": "draft",
+    "cover": "",
+    "seo": {
+      "title": "",
+      "description": "",
+      "canonical": "",
+      "ogImage": "",
+      "robots": "index,follow"
+    },
+    "publishedAt": null,
+    "createdAt": "2026-09-15T12:16:39.407Z",
+    "updatedAt": "2026-09-15T12:16:39.407Z",
+    "createdBy": "seed",
+    "updatedBy": "seed"
+  },
+  {
+    "id": "pg-5d2506a4",
+    "title": "حریم خصوصی",
+    "slug": "privacy",
+    "contentHtml": "<p>این صفحه هنوز محتوایی ندارد.</p>",
+    "status": "draft",
+    "cover": "",
+    "seo": {
+      "title": "",
+      "description": "",
+      "canonical": "",
+      "ogImage": "",
+      "robots": "index,follow"
+    },
+    "publishedAt": null,
+    "createdAt": "2026-09-15T12:16:39.407Z",
+    "updatedAt": "2026-09-15T12:16:39.407Z",
+    "createdBy": "seed",
+    "updatedBy": "seed"
+  },
+  {
+    "id": "pg-0eb35195",
+    "title": "قوانین و مقررات",
+    "slug": "terms",
+    "contentHtml": "<p>این صفحه هنوز محتوایی ندارد.</p>",
+    "status": "draft",
+    "cover": "",
+    "seo": {
+      "title": "",
+      "description": "",
+      "canonical": "",
+      "ogImage": "",
+      "robots": "index,follow"
+    },
+    "publishedAt": null,
+    "createdAt": "2026-09-15T12:16:39.407Z",
+    "updatedAt": "2026-09-15T12:16:39.407Z",
+    "createdBy": "seed",
+    "updatedBy": "seed"
+  }
+]

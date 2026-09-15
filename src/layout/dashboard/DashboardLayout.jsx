@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import DashboardHeader from './DashboardHeader';
 import SettingHeader from './setting/SettingHeader';
 import EditProfile from './setting/EditProfile';
@@ -7,9 +7,11 @@ import Security from './setting/Security';
 import Soppurt from './setting/Soppurt';
 import DashboardHome from './DashboardHome';
 import CoursesSection from './CoursesSection';
+import MyCoursesLayer from './MyCoursesLayer';
 import ComprehensiveCourseLayer from './courses/ComprehensiveCourseLayer';
 import MicroCourseLayer from './courses/MicroCourseLayer';
 import ReferenceLayer from './courses/ReferenceLayer';
+import InternationalCoursesLayer from './courses/InternationalCoursesLayer';
 import TestsSection from './TestsSection';
 import InternationalExamsLayer from './tests/InternationalExamsLayer';
 import CoordinatedExamsLayer from './tests/coordinated/CoordinatedExamsLayer';
@@ -18,12 +20,17 @@ import AnalyticsLayer from './analytics/AnalyticsLayer';
 import OtherSections from './OtherSections';
 import WikiLayer from './wiki/WikiLayer';
 import KnowledgeLayer from './knowledge/KnowledgeLayer';
+import AILayer from './ai/AILayer';
 import NotificationsSection from './NotificationsSection';
 import LeagueSection from './league/LeagueSection';
 import FlashcardSection from './flashcards/FlashcardSection';
 import NotesSection from './notes/NotesSection';
 import ReviewNotebook from './review/ReviewNotebook';
 import Pomodoro, { usePomodoro, formatTimer } from './Pomodoro';
+import {
+  fetchFriendsLeagueNotifications,
+  fetchLeagueNotifications,
+} from '../../services/league/leagueService';
 
 const settingsTabLabels = {
   profile: 'ویرایش پروفایل',
@@ -33,18 +40,60 @@ const settingsTabLabels = {
   support: 'راهنما و پشتیبان',
 };
 
+/*
+ * شمارندهٔ اعلان‌های نخوانده برای بج زنگولهٔ هدر — همان دو سرویسی که لایهٔ اعلان‌ها تغذیه می‌کنند.
+ * فقط تعداد لازم است؛ خود لایه دادهٔ کامل را جداگانه می‌گیرد.
+ */
+function useUnreadNotificationsCount(isLayerOpen) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    let alive = true;
+    let timerId;
+
+    const poll = () => {
+      Promise.all([fetchFriendsLeagueNotifications(), fetchLeagueNotifications()])
+        .then(([friends, league]) => {
+          if (alive) setCount(friends.unreadCount + league.unreadCount);
+        })
+        .catch(() => {
+          /* در حالت آفلاین آخرین تعداد حفظ می‌شود */
+        });
+
+      timerId = window.setTimeout(poll, 90 * 1000);
+    };
+
+    poll();
+
+    return () => {
+      alive = false;
+      window.clearTimeout(timerId);
+    };
+  }, []);
+
+  /* وقتی لایهٔ اعلان‌ها باز و خوانده شد، بج صفر می‌شود */
+  useEffect(() => {
+    if (isLayerOpen) setCount(0);
+  }, [isLayerOpen]);
+
+  return count;
+}
+
 export default function DashboardLayout({ userData, onUserDataChange, onLogout }) {
   const [activeSection, setActiveSection] = useState('dashboard');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState('profile');
   const [areNotificationsOpen, setAreNotificationsOpen] = useState(false);
   const [openCourseLayer, setOpenCourseLayer] = useState(null); // null | { id, target }
+  const [openMyCoursesLayer, setOpenMyCoursesLayer] = useState(false);
   const [openInternationalLayer, setOpenInternationalLayer] = useState(false);
   const [openCoordinatedLayer, setOpenCoordinatedLayer] = useState(false);
   const [openTestBankLayer, setOpenTestBankLayer] = useState(null); // null | {initialView}
   const [openAnalyticsLayer, setOpenAnalyticsLayer] = useState(false);
   const [openWikiLayer, setOpenWikiLayer] = useState(false);
   const [openKnowledgeLayer, setOpenKnowledgeLayer] = useState(false);
+  const [openAILayer, setOpenAILayer] = useState(false);
+  const unreadNotificationsCount = useUnreadNotificationsCount(areNotificationsOpen);
   const {
     secondsLeft,
     isRunning,
@@ -68,6 +117,7 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
     setOpenAnalyticsLayer(false);
     setOpenWikiLayer(false);
     setOpenKnowledgeLayer(false);
+    setOpenAILayer(false);
   };
 
   const handleSettingsToggle = () => {
@@ -80,6 +130,7 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
     setIsSettingsOpen(true);
     setAreNotificationsOpen(false);
     setOpenCourseLayer(null);
+    setOpenMyCoursesLayer(false);
     setOpenInternationalLayer(false);
     setOpenCoordinatedLayer(false);
     setOpenTestBankLayer(null);
@@ -96,6 +147,7 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
     setIsSettingsOpen(false);
     setAreNotificationsOpen(true);
     setOpenCourseLayer(null);
+    setOpenMyCoursesLayer(false);
     setOpenInternationalLayer(false);
     setOpenCoordinatedLayer(false);
     setOpenTestBankLayer(null);
@@ -104,12 +156,45 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
     setOpenKnowledgeLayer(false);
   };
 
-  /* «درسنامه جامع»، «میکرو درسنامه» و «رفرنس» لایه دارند؛ بقیه دوره‌ها به‌زودی.
-     target برای لینک عمیق است: { subject, moduleId?, unitId?, stepId? } */
+  const handleOpenMyCourses = () => {
+    setOpenMyCoursesLayer(true);
+    setIsSettingsOpen(false);
+    setAreNotificationsOpen(false);
+    setOpenCourseLayer(null);
+    setOpenInternationalLayer(false);
+    setOpenCoordinatedLayer(false);
+    setOpenTestBankLayer(null);
+    setOpenAnalyticsLayer(false);
+    setOpenWikiLayer(false);
+    setOpenKnowledgeLayer(false);
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+
+  const handleCloseMyCourses = () => {
+    setOpenMyCoursesLayer(false);
+  };
+
+  /* دوره‌های دارای لایهٔ مستقل؛ target برای لینک عمیق دوره‌های آموزشی است. */
   const handleOpenCourse = (courseId, target = null) => {
-    if (courseId !== 'comprehensive' && courseId !== 'micro' && courseId !== 'reference') return;
+    if (courseId !== 'comprehensive' && courseId !== 'micro' && courseId !== 'reference' && courseId !== 'international') return;
 
     setOpenCourseLayer({ id: courseId, target });
+    setOpenMyCoursesLayer(false);
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+
+  const handleOpenSmartAI = () => {
+    setOpenAILayer(true);
+    setIsSettingsOpen(false);
+    setAreNotificationsOpen(false);
+    setOpenCourseLayer(null);
+    setOpenMyCoursesLayer(false);
+    setOpenInternationalLayer(false);
+    setOpenCoordinatedLayer(false);
+    setOpenTestBankLayer(null);
+    setOpenAnalyticsLayer(false);
+    setOpenWikiLayer(false);
+    setOpenKnowledgeLayer(false);
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
@@ -120,10 +205,14 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
         onOpenFlashcards={() => handleSectionChange('flashcards')}
         onOpenNotes={() => handleSectionChange('notes')}
         onOpenReviewNotebook={() => handleSectionChange('review-notebook')}
-        onOpenLeague={() => handleSectionChange('league')}
       />
     ),
-    courses: <CoursesSection onOpenCourse={handleOpenCourse} />,
+    courses: (
+      <CoursesSection
+        onOpenCourse={handleOpenCourse}
+        onOpenAllCourses={handleOpenMyCourses}
+      />
+    ),
     tests: (
       <TestsSection
         onOpenAnalytics={() => {
@@ -150,7 +239,7 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
         }}
       />
     ),
-    other: <OtherSections onOpenWiki={() => {
+    other: <OtherSections onOpenSmartAI={handleOpenSmartAI} onOpenWiki={() => {
       setOpenWikiLayer(true);
       window.scrollTo({ top: 0, behavior: 'instant' });
     }} onOpenKnowledge={() => {
@@ -188,6 +277,7 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
         onSettingsToggle={handleSettingsToggle}
         areNotificationsOpen={areNotificationsOpen}
         onNotificationsToggle={handleNotificationsToggle}
+        notificationsUnreadCount={unreadNotificationsCount}
         headerTime={formatTimer(secondsLeft)}
         isPomodoroActive={activeSection === 'pomodoro'}
         isPomodoroRunning={isRunning}
@@ -233,12 +323,21 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
         </div>
       ) : areNotificationsOpen ? (
         <NotificationsSection />
+      ) : openAILayer ? (
+        <div className="dashboard__section dashboard-layer-reveal" key="tapesh-smart-ai">
+          <AILayer onBack={() => setOpenAILayer(false)} />
+        </div>
       ) : openCourseLayer ? (
         <div
           className="dashboard__section dashboard-layer-reveal"
-          key={`course-${openCourseLayer.id}-${openCourseLayer.target?.subject ?? ''}-${openCourseLayer.target?.unitId ?? ''}`}
+          key={`course-${openCourseLayer.id}-${openCourseLayer.target?.subject ?? ''}-${openCourseLayer.target?.unitId ?? ''}-${openCourseLayer.target?.courseId ?? ''}`}
         >
-          {openCourseLayer.id === 'micro' ? (
+          {openCourseLayer.id === 'international' ? (
+            <InternationalCoursesLayer
+              onBack={() => setOpenCourseLayer(null)}
+              initialCourseId={openCourseLayer.target?.courseId ?? null}
+            />
+          ) : openCourseLayer.id === 'micro' ? (
             <MicroCourseLayer
               onBack={() => setOpenCourseLayer(null)}
               onOpenComprehensive={(subjectId) =>
@@ -258,6 +357,13 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
               deepLink={openCourseLayer.target}
             />
           )}
+        </div>
+      ) : openMyCoursesLayer ? (
+        <div className="dashboard__section dashboard-layer-reveal" key="my-courses">
+          <MyCoursesLayer
+            onBack={handleCloseMyCourses}
+            onOpenCourse={handleOpenCourse}
+          />
         </div>
       ) : openInternationalLayer ? (
         <div className="dashboard__section dashboard-layer-reveal" key="international-exams">

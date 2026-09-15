@@ -21,7 +21,10 @@ import DashboardLayout from './layout/dashboard/DashboardLayout';
 import ArticlesPage from './layout/articles/ArticlesPage';
 import ArticlePage from './layout/articles/ArticlePage';
 import ReadingListPage from './layout/articles/ReadingListPage';
+import AdminLayout from './layout/admin/AdminLayout';
 import { ArticleCover } from './layout/articles/articlesShared';
+import AvatarSvg from './layout/dashboard/setting/avatar/AvatarSvg';
+import './layout/admin/admin.css';
 
 /* صفحه‌ای که برای مسیر داخلی مقالات رندر می‌شود؛ خود hash کاملاً پایدار می‌ماند */
 function ArticlesRoute({ articleSlug }) {
@@ -442,7 +445,9 @@ function SiteHeader({ menuOpen, onMenuOpenChange, userData, onOpenDashboard, onO
           onClick={onOpenDashboard}
         >
           <span className="auth-link__avatar">
-            {userData.profile?.avatar ? (
+            {userData.profile?.avatarConfig ? (
+              <AvatarSvg config={userData.profile.avatarConfig} title="آواتار کاربر" />
+            ) : userData.profile?.avatar ? (
               <img src={userData.profile.avatar} alt="" />
             ) : (
               <HeaderUserIcon />
@@ -836,6 +841,7 @@ function getAppRoute() {
   if (hash === '#onboarding') return 'onboarding';
   if (hash === '#auth') return 'auth';
   if (hash === '#articles' || hash.startsWith('#articles/')) return 'articles';
+  if (hash === '#admin' || hash.startsWith('#admin/')) return 'admin';
 
   const state = window.history.state ?? {};
 
@@ -931,6 +937,10 @@ function App() {
   const [articlesOpen, setArticlesOpen] = useState(
     () => getAppRoute() === 'articles',
   );
+  /* پنل مدیریت یک مسیر مستقل است و برای ورود به آن به حساب کاربری سایت نیاز نیست */
+  const [adminOpen, setAdminOpen] = useState(
+    () => getAppRoute() === 'admin',
+  );
   const [articleSlug, setArticleSlug] = useState(() =>
     getAppRoute() === 'articles' ? getArticleSlug() : null,
   );
@@ -997,6 +1007,7 @@ function App() {
       setOnboardingOpen(route === 'onboarding');
       setDashboardOpen(route === 'dashboard');
       setArticlesOpen(route === 'articles');
+      setAdminOpen(route === 'admin');
       setArticleSlug(route === 'articles' ? getArticleSlug() : null);
 
       /* ورود به مقالات (فهرست یا مقاله) همیشه از بالای صفحه شروع شود */
@@ -1207,8 +1218,25 @@ function App() {
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
+  /* بازگشت از پنل مدیریت به سایت؛ نشست مدیر دست‌نخورده می‌ماند */
+  const closeAdmin = () => {
+    window.history.replaceState(getRouteState('home'), '', getRouteUrl('home'));
+    setAdminOpen(false);
+    setAuthOpen(false);
+    setOnboardingOpen(false);
+    setDashboardOpen(false);
+    setArticlesOpen(false);
+    setArticleSlug(null);
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+
   if (!isOnline) {
     return <OfflinePage />;
+  }
+
+  /* پنل مدیریت: پیش از همهٔ مسیرها بررسی می‌شود چون خودش نشست و ورود مستقل دارد */
+  if (adminOpen) {
+    return <AdminLayout onExit={closeAdmin} />;
   }
 
   if (onboardingOpen) {

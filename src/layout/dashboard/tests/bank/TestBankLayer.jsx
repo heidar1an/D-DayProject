@@ -7,12 +7,15 @@
  */
 import { useCallback, useEffect, useState } from 'react';
 import {
+  EMPTY_SCOPE,
   createSession,
   fetchBankOverview,
   fetchReviewSession,
   fetchSession,
   fetchSessionQuestions,
   normalizeFilters,
+  scopeLabel,
+  scopeToFilters,
   trackEvent,
 } from '../../../../services/testBank/testBankService';
 import {
@@ -29,6 +32,7 @@ import BankHome, { SubjectPicker } from './BankHome';
 import BankYears from './BankYears';
 import BankTopics from './BankTopics';
 import BankExplorer from './BankExplorer';
+import BankSubject from './BankSubject';
 import BankHistory from './BankHistory';
 import BankSession from './BankSession';
 import BankResult from './BankResult';
@@ -36,10 +40,10 @@ import PersonalExamBuilder from '../builder/PersonalExamBuilder';
 import SavedExamsView from '../builder/SavedExamsView';
 
 const VIEW_LABELS = {
-  home: 'خانهٔ بانک تست',
   subjects: 'بر اساس درس',
   years: 'آزمون‌های سال به سال',
   topics: 'تست مبحثی',
+  subject: 'مباحث درس',
   browse: 'کاوشگر بانک تست',
   builder: 'آزمون‌ساز شخصی',
   'my-exams': 'آزمون‌های من',
@@ -59,10 +63,15 @@ const STATUS_LABELS = {
 
 const DIFF_LABELS = { easy: 'آسان', medium: 'متوسط', hard: 'سخت', very_hard: 'بسیار سخت' };
 
+const BANK_KIND_SHORT = { national: 'کشوری', authored: 'تألیفی' };
+const TRACK_SHORT = { medicine: 'پزشکی', dentistry: 'دندان‌پزشکی' };
+
 /* خلاصهٔ متنی فیلتر برای زیرعنوان سشن */
 function summarizeFilters(filters) {
   const f = normalizeFilters(filters);
   const parts = [];
+  if (f.bankKinds.length) parts.push(f.bankKinds.map((kind) => BANK_KIND_SHORT[kind]).join('، '));
+  if (f.tracks.length) parts.push(f.tracks.map((track) => TRACK_SHORT[track]).join('، '));
   if (f.subjectIds.length) parts.push(f.subjectIds.length <= 3 ? f.subjectIds.join('، ') : `${toFa(f.subjectIds.length)} درس`);
   if (f.topicPaths.length) parts.push(f.topicPaths.join(' › '));
   if (f.yearFrom || f.yearTo) parts.push(`سال ${f.yearFrom ?? '…'} تا ${f.yearTo ?? '…'}`);
@@ -76,6 +85,7 @@ export default function TestBankLayer({ userData, initialView = null, onBack }) 
   const userId = userData?.id ?? userData?.phone ?? 'guest';
   const [view, setView] = useState(() => ({ name: initialView ?? 'home', payload: initialView === 'builder' ? { preset: null } : null }));
   const [returnView, setReturnView] = useState(null); // مقصد بازگشت پس از خروج از محیط حل
+  const [scope, setScope] = useState(EMPTY_SCOPE); // دامنهٔ بانک: نوع بانک (کشوری/تألیفی) × رشته
   const [overview, setOverview] = useState(null);
   const [room, setRoom] = useState(null); // { session, questions }
   const [resultSession, setResultSession] = useState(null);
@@ -84,15 +94,31 @@ export default function TestBankLayer({ userData, initialView = null, onBack }) 
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'instant' });
 
+  /* تغییر دامنه — اگر مقدار عوض نشده باشد همان state قبلی برمی‌گردد تا نمای کلی
+     بی‌دلیل دوباره واکشی نشود. */
+  const updateScope = useCallback((patch) => {
+    setScope((prev) => {
+      const next = { ...prev, ...patch };
+      return next.bankKind === prev.bankKind && next.track === prev.track ? prev : next;
+    });
+  }, []);
+
+  /* هر فیلتری که به سرویس می‌رود، اول با دامنهٔ فعلی ترکیب می‌شود؛ پس همهٔ
+     مسیرها (تمرین، آزمون، مبحثی، سال‌به‌سال، کاوشگر) خودکار داخل دامنه می‌مانند. */
+  const withScope = useCallback(
+    (filters) => ({ ...scopeToFilters(scope), ...(filters ?? {}) }),
+    [scope],
+  );
+
   const refreshOverview = useCallback(() => {
     let alive = true;
-    fetchBankOverview(userId)
+    fetchBankOverview(userId, scope)
       .then((data) => alive && setOverview(data))
       .catch(() => alive && setOverview(null));
     return () => {
       alive = false;
     };
-  }, [userId]);
+  }, [userId, scope]);
 
   useEffect(() => refreshOverview(), [refreshOverview]);
 
@@ -125,12 +151,12 @@ export default function TestBankLayer({ userData, initialView = null, onBack }) 
 
   /* تمرین از کاوشگر (فیلترها) یا تک‌سؤال */
   const startPractice = (payload, originView) => {
-    const filters = payload?.filters ? normalizeFilters(payload.filters) : null;
+    const filters = withScope(payload?.filters ? normalizeFilters(payload.filters) : null);
     return launchSession(
       {
         mode: 'practice',
         title: payload?.singleQuestion ? 'حل تک‌سؤال' : 'تمرین بانک تست',
-        subtitle: payload?.singleQuestion ? '' : summarizeFilters(filters ?? {}),
+        subtitle: payload?.singleQuestion ? '' : summarizeFilters(filters),
         filters,
         questionIds: payload?.singleQuestion ? [payload.singleQuestion] : null,
       },
@@ -145,7 +171,7 @@ export default function TestBankLayer({ userData, initialView = null, onBack }) 
         mode: 'exam',
         title: payload?.title ?? 'آزمون شخصی',
         subtitle: payload?.subtitle ?? '',
-        filters: payload?.filters ? normalizeFilters(payload.filters) : null,
+        filters: withScope(payload?.filters ? normalizeFilters(payload.filters) : null),
         count: payload?.count ?? null,
         durationMinutes: payload?.durationMinutes ?? null,
         negativeMarking: payload?.negativeMarking ?? 0,
@@ -207,9 +233,9 @@ export default function TestBankLayer({ userData, initialView = null, onBack }) 
     }
   };
 
-  /* آزمون سال‌به‌سال */
+  /* آزمون سال‌به‌سال — فقط سؤال‌های رسمی همان سال، داخل دامنهٔ فعلی (نوع بانک/رشته) */
   const startYearExam = (entry) => {
-    trackEvent('bank_year_exam_opened', { year: entry.year });
+    trackEvent('bank_year_exam_opened', { year: entry.year, scope: scopeLabel(scope) });
     return launchSession(
       {
         mode: 'exam',
@@ -217,7 +243,7 @@ export default function TestBankLayer({ userData, initialView = null, onBack }) 
         subtitle: `${faNum(entry.questionCount)} سؤال رسمی · ${toFa(entry.durationMinutes)} دقیقه · نمرهٔ منفی ۳/۱−`,
         blueprint: { kind: 'year', year: entry.year },
         questionIds: null,
-        filters: { yearFrom: entry.year, yearTo: entry.year, sources: ['official'] },
+        filters: withScope({ yearFrom: entry.year, yearTo: entry.year, sources: ['official'] }),
         durationMinutes: entry.durationMinutes,
         negativeMarking: -0.25,
       },
@@ -226,11 +252,11 @@ export default function TestBankLayer({ userData, initialView = null, onBack }) 
   };
 
   /* تمرین مبحثی */
-  const startTopicPractice = (config) => {
-    const filters = {
+  const startTopicPractice = (config, originView = { name: 'topics' }) => {
+    const filters = withScope({
       subjectIds: [config.subjectId],
       topicPaths: config.topic ? (config.subtopic ? [config.topic, config.subtopic] : [config.topic]) : [],
-    };
+    });
     return launchSession(
       {
         mode: 'practice',
@@ -240,18 +266,27 @@ export default function TestBankLayer({ userData, initialView = null, onBack }) 
         count: config.count ?? null,
         shuffle: config.shuffle ?? false,
       },
-      { originView: { name: 'topics' } },
+      { originView },
     );
   };
 
-  /* ── پایان سشن → کارنامه (+ ثبت Attempt برای آزمون شخصیِ منبع سشن) ── */
+  /* ── پایان سشن ──
+     آزمون → کارنامه. تمرین‌های آموزشی کارنامه ندارند؛ تلاش‌ها ثبت می‌شود و بی‌سر‌و‌صدا
+     به همان نمایی که از آن آمده‌ایم برمی‌گردیم (مثلاً فهرست مباحث همان درس). */
   const finishSession = (submitted) => {
     setRoom(null);
-    setResultSession(submitted);
     refreshOverview();
     if (submitted.blueprint?.examId) {
       recordAttempt(userId, submitted.blueprint.examId, submitted);
     }
+
+    if (submitted.mode === 'practice') {
+      const target = returnView && returnView.name !== 'result' ? returnView : { name: 'home' };
+      go(target.name, target.payload ?? null);
+      return;
+    }
+
+    setResultSession(submitted);
     go('result');
   };
 
@@ -324,6 +359,7 @@ export default function TestBankLayer({ userData, initialView = null, onBack }) 
   };
 
   const showBackToHome = !['home'].includes(view.name);
+  const activeScopeLabel = scopeLabel(scope);
 
   return (
     <section
@@ -337,10 +373,14 @@ export default function TestBankLayer({ userData, initialView = null, onBack }) 
           <button
             type="button"
             onClick={handleBack}
-            className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#282828] px-3.5 py-2.5 text-xs text-[#aaa] transition-colors hover:bg-[#333] hover:text-white"
+            aria-label={view.name === 'live' ? 'خروج از محیط حل' : 'بازگشت'}
+            className={`flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#282828] py-2.5 text-xs text-[#aaa] transition-colors hover:bg-[#333] hover:text-white ${
+              view.name === 'live' ? 'px-2.5' : 'px-3.5'
+            }`}
           >
             <Icon name="back" className="h-3.5 w-3.5" />
-            {view.name === 'live' ? 'خروج از محیط حل' : view.name === 'result' ? 'بازگشت' : 'بازگشت'}
+            {/* در «محیط حل» فقط آیکن — عنوان حذف شده است */}
+            {view.name !== 'live' && 'بازگشت'}
           </button>
         ) : (
           <button
@@ -352,9 +392,21 @@ export default function TestBankLayer({ userData, initialView = null, onBack }) 
             بازگشت به تست
           </button>
         )}
-        <span className="flex items-center gap-1.5 text-xs text-[#8a8a8a]">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#61D192]" aria-hidden="true" />
-          {VIEW_LABELS[view.name] ?? 'بانک تست'}
+        {/* سمت راست: برچسب نما (جز خانه/محیط حل/مباحث درس) + دامنهٔ فعال */}
+        <span className="flex items-center gap-2.5">
+          {!['home', 'live', 'subject'].includes(view.name) && (
+            <span className="flex items-center gap-1.5 text-xs text-[#8a8a8a]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#61D192]" aria-hidden="true" />
+              {VIEW_LABELS[view.name] ?? 'بانک تست'}
+            </span>
+          )}
+          {/* دامنهٔ فعال (نوع بانک/رشته) — روی نماها یادآوری می‌شود تا کاربر بداند داخل کدام بانک است */}
+          {activeScopeLabel && !['home', 'live'].includes(view.name) && (
+            <span className="tb-badge tb-badge--plain" title="دامنهٔ فعال این بانک">
+              <Icon name="filter" className="h-3 w-3" />
+              {activeScopeLabel}
+            </span>
+          )}
         </span>
       </header>
 
@@ -374,7 +426,7 @@ export default function TestBankLayer({ userData, initialView = null, onBack }) 
 
       {!busy && view.name === 'home' && (
         <div className="dashboard-layer-reveal">
-          <BankHome overview={overview} onNavigate={navigate} />
+          <BankHome overview={overview} scope={scope} onScopeChange={updateScope} onNavigate={navigate} />
         </div>
       )}
 
@@ -386,7 +438,7 @@ export default function TestBankLayer({ userData, initialView = null, onBack }) 
 
       {!busy && view.name === 'years' && (
         <div className="dashboard-layer-reveal">
-          <BankYears overview={overview} onStartYearExam={startYearExam} />
+          <BankYears overview={overview} scope={scope} onStartYearExam={startYearExam} />
         </div>
       )}
 
@@ -394,8 +446,26 @@ export default function TestBankLayer({ userData, initialView = null, onBack }) 
         <div className="dashboard-layer-reveal">
           <BankTopics
             userId={userId}
+            scope={scope}
             initialSubjectId={view.payload?.subjectId ?? null}
             onStartPractice={startTopicPractice}
+          />
+        </div>
+      )}
+
+      {!busy && view.name === 'subject' && (
+        <div className="dashboard-layer-reveal">
+          <BankSubject
+            userId={userId}
+            scope={scope}
+            subjectId={view.payload?.subjectId ?? null}
+            subjectTitle={view.payload?.subjectTitle ?? null}
+            onStartTopic={(config) =>
+              startTopicPractice(config, {
+                name: 'subject',
+                payload: { subjectId: view.payload?.subjectId ?? null, subjectTitle: view.payload?.subjectTitle ?? null },
+              })
+            }
           />
         </div>
       )}
@@ -405,7 +475,7 @@ export default function TestBankLayer({ userData, initialView = null, onBack }) 
           <BankExplorer
             userId={userId}
             overview={overview}
-            initialFilters={view.payload?.filters ?? {}}
+            initialFilters={withScope(view.payload?.filters)}
             onSolve={(questionId) => startPractice({ singleQuestion: questionId }, { name: 'browse', payload: view.payload })}
             onStartPractice={(filters) => startPractice({ filters }, { name: 'browse', payload: view.payload })}
             onStartExam={(filters) =>

@@ -1,14 +1,16 @@
 /*
  * BankTopics — نمای «تست مبحثی»: درس ← مبحث ← زیرمبحث ← تعداد تست.
  * شمارش نتایج همیشه از سرویس می‌آید (searchQuestions) تا UI به دادهٔ خام وابسته نماند.
+ * دامنهٔ فعال (نوع بانک/رشته) روی شمارش و شروع سشن اعمال می‌شود تا عدد نمایش‌داده‌شده
+ * دقیقاً همان چیزی باشد که کاربر می‌گیرد.
  */
 import { useEffect, useMemo, useState } from 'react';
-import { searchQuestions, SUBJECTS, TOPIC_TREE } from '../../../../services/testBank/testBankService';
+import { scopeToFilters, searchQuestions, SUBJECTS, TOPIC_TREE } from '../../../../services/testBank/testBankService';
 import { Icon, Skeleton, toFa } from './bankShared';
 
 const COUNT_OPTIONS = [5, 10, 20, null]; // null = همه
 
-export default function BankTopics({ userId, initialSubjectId = null, onStartPractice }) {
+export default function BankTopics({ userId, scope, initialSubjectId = null, onStartPractice }) {
   const [subjectId, setSubjectId] = useState(initialSubjectId ?? 'physiology');
   const [topic, setTopic] = useState(null);
   const [subtopic, setSubtopic] = useState(null);
@@ -28,13 +30,14 @@ export default function BankTopics({ userId, initialSubjectId = null, onStartPra
     setSubtopic(null);
   }, [topic]);
 
-  /* شمارش مخزن فعلی از سرویس */
+  /* شمارش مخزن فعلی از سرویس — داخل دامنهٔ فعال */
   useEffect(() => {
     let alive = true;
     setPool(null);
     searchQuestions(
       userId,
       {
+        ...scopeToFilters(scope),
         subjectIds: [subjectId],
         topicPaths: topic ? (subtopic ? [topic, subtopic] : [topic]) : [],
       },
@@ -45,7 +48,7 @@ export default function BankTopics({ userId, initialSubjectId = null, onStartPra
     return () => {
       alive = false;
     };
-  }, [userId, subjectId, topic, subtopic]);
+  }, [userId, scope, subjectId, topic, subtopic]);
 
   const subject = subjects.find((item) => item.id === subjectId);
 

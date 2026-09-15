@@ -1,83 +1,74 @@
 /*
  * BankHome — داشبورد ورود به بانک تست. همهٔ مسیرهای تست‌زدن («چطور می‌خواهی تست بزنی؟»)
  * کارت‌های داده‌محورند و با افزودن آیتم جدید به آرایه، بدون تغییر UI اضافه می‌شوند.
+ * فهرست دروس علوم پایه از لایهٔ «درسنامهٔ جامع» خوانده می‌شود تا نام‌گذاری هر دو بخش
+ * یکی بماند؛ تعداد تست هر درس از خود بانک تست می‌آید.
+ *
+ * بالای صفحه، «انتخاب بانک» می‌نشیند: نوع بانک (کشوری / تألیفی) و رشته (پزشکی /
+ * دندان‌پزشکی). این انتخاب دامنهٔ لایه است و همهٔ نماهای بعدی با آن فیلتر می‌شوند.
  */
-import { useState } from 'react';
-import {
-  DIFFICULTIES,
-  EmptyState,
-  Icon,
-  Skeleton,
-  SourceBadge,
-  faNum,
-  toFa,
-} from './bankShared';
-import { formatAgo } from './bankShared';
+import { BANK_KINDS, Icon, Skeleton, TRACKS, toFa } from './bankShared';
+import { SUBJECTS as COMPREHENSIVE_SUBJECTS } from '../../courses/ComprehensiveCourseLayer';
 
-const MODE_LABEL = { practice: 'تمرین', exam: 'آزمون', review: 'مرور' };
+/* نگاشت شناسهٔ درس‌های «درسنامهٔ جامع» به شناسهٔ درس‌های بانک تست؛
+   فقط جاهایی که دو لایه هم‌نام نیستند اینجا نوشته می‌شوند. */
+const BANK_SUBJECT_ID = { english: 'esl' };
 
-/* کارت مسیر — واحد تکرارشوندهٔ بخش «چطور می‌خواهی تست بزنی؟» */
-function PathCard({ icon, accent = '#61D192', title, description, meta, onClick, wide = false }) {
+/* چیپ مسیر — واحد تکرارشوندهٔ بخش «چطور می‌خواهی تست بزنی؟».
+   همهٔ مسیرها در یک ردیف افقی می‌نشینند، پس چیپ فقط آیکن و عنوان را نگه می‌دارد. */
+function PathChip({ icon, accent = '#61D192', title, onClick }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`group flex cursor-pointer flex-col justify-between gap-4 rounded-[1.75rem] border border-white/8 bg-[#242426] p-5 text-right transition-all hover:-translate-y-0.5 hover:border-white/16 hover:bg-[#2a2a2c] ${
-        wide ? 'md:col-span-2' : ''
-      }`}
+      className="group flex shrink-0 cursor-pointer snap-start items-center gap-2 whitespace-nowrap rounded-full border border-white/8 bg-[#242426] px-4 py-2.5 text-[13px] text-[#ddd] transition-colors hover:border-white/20 hover:bg-[#2a2a2c] hover:text-white"
     >
-      <div className="flex items-start justify-between gap-3">
-        <span
-          className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl"
-          style={{ background: `${accent}14`, color: accent }}
-        >
-          <Icon name={icon} className="h-5.5 w-5.5" />
-        </span>
-        {meta != null && meta !== '' && (
-          <span className="rounded-full bg-white/6 px-2.5 py-1 text-[11px] text-[#aaa]">{meta}</span>
-        )}
-      </div>
-      <div>
-        <h3 className="flex items-center gap-1.5 text-[15px] font-bold [font-family:'Doran',Tahoma,sans-serif]">
-          {title}
-          <Icon name="chevron" className="h-3.5 w-3.5 -rotate-90 text-[#666] transition-colors group-hover:text-[#61D192]" />
-        </h3>
-        <p className="mt-1.5 text-[12.5px] leading-6 text-[#9a9a9a]">{description}</p>
-      </div>
+      <Icon name={icon} className="h-4 w-4 shrink-0" style={{ color: accent }} />
+      {title}
     </button>
   );
 }
 
-/* ── جستجوی سریع سربرگ ── */
-function HeroSearch({ onSearch }) {
-  const [query, setQuery] = useState('');
+/* کادر مربعی درس — هم‌شکل کارت‌های لایهٔ «درسنامهٔ جامع» ولی بدون تصویر:
+   عنوان، شمار جلسه/تست، نوار پیشرفت و پاصفحه. همهٔ درس‌ها فعال‌اند و کلیک،
+   نمای مباحث همان درس را باز می‌کند. */
+function SubjectTile({ subject, onOpen }) {
   return (
-    <form
-      onSubmit={(event) => {
-        event.preventDefault();
-        if (query.trim()) onSearch(query.trim());
-      }}
-      className="relative"
-      role="search"
+    <button
+      type="button"
+      onClick={onOpen}
+      aria-label={`${subject.title} — ${toFa(subject.questionCount)} تست در بانک`}
+      className="group relative flex aspect-square w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-[1.75rem] border border-white/8 bg-[#242426] px-3.5 py-5 text-center transition-all duration-200 hover:-translate-y-0.5 hover:border-white/16 hover:bg-[#2a2a2c]"
     >
-      <Icon name="search" className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#777]" />
-      <input
-        type="search"
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-        placeholder="جستجو در سؤال‌ها… مثلاً «پتانسیل عمل»"
-        aria-label="جستجوی سؤال در بانک تست"
-        className="w-full rounded-2xl border border-white/8 bg-[#2a2a2a] py-3.5 pe-4 ps-12 text-sm text-white placeholder:text-[#666] focus:border-[#61D192]/50 focus:outline-none"
+      {/* هالهٔ رنگی درس — همان حس کارت‌های درسنامه، بدون تصویر */}
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-14 left-1/2 h-32 w-32 -translate-x-1/2 rounded-full opacity-25 blur-3xl transition-opacity duration-300 group-hover:opacity-45"
+        style={{ background: subject.accent }}
       />
-      {query.trim() && (
-        <button
-          type="submit"
-          className="absolute left-2 top-1/2 -translate-y-1/2 cursor-pointer rounded-xl bg-[#61D192] px-4 py-2 text-xs font-bold text-[#12271a] transition-transform hover:-translate-y-[calc(50%+2px)]"
-        >
-          جستجو
-        </button>
-      )}
-    </form>
+
+      <h3
+        className="relative text-2xl font-bold leading-9 [font-family:'Doran',Tahoma,sans-serif] md:text-3xl md:leading-10"
+        style={{ color: subject.accent }}
+      >
+        {subject.title}
+      </h3>
+
+      <p className="relative mt-2 text-xs text-[#9a9a9a] md:text-[13px]">
+        {toFa(subject.lessons)} درسنامه · {toFa(subject.questionCount)} تست
+      </p>
+
+      <span className="relative mt-5 h-1.5 w-2/5 overflow-hidden rounded-full bg-white/8" aria-hidden="true">
+        <span
+          className="block h-full rounded-full transition-[width] duration-700"
+          style={{ width: `${subject.progress}%`, background: subject.accent }}
+        />
+      </span>
+
+      <span className="relative mt-2 text-xs font-bold" style={{ color: subject.accent }}>
+        {toFa(subject.progress)}٪
+      </span>
+    </button>
   );
 }
 
@@ -111,12 +102,147 @@ export function SubjectPicker({ overview, onPick }) {
   );
 }
 
+/* ── گزینهٔ یک محور انتخاب بانک ── */
+function ScopeOption({ icon, title, hint, count, accent, active, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      title={hint}
+      className={`flex cursor-pointer items-center gap-2.5 rounded-2xl border px-3.5 py-2.5 text-right transition-colors ${
+        active
+          ? 'text-white'
+          : 'border-white/8 bg-white/[0.02] text-[#bbb] hover:border-white/20 hover:bg-white/[0.06]'
+      }`}
+      style={active ? { borderColor: `${accent}80`, background: `${accent}1f` } : undefined}
+    >
+      <span
+        className="grid h-8 w-8 shrink-0 place-items-center rounded-xl"
+        style={{ background: `${accent}${active ? '2e' : '16'}`, color: accent }}
+        aria-hidden="true"
+      >
+        <Icon name={icon} className="h-4 w-4" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <strong className="block truncate text-[13px] [font-family:'Doran',Tahoma,sans-serif]">{title}</strong>
+        <span className="text-[10.5px] text-[#8a8a8a]">{count != null ? `${toFa(count)} سؤال` : hint}</span>
+      </span>
+      {active && <Icon name="check" className="h-4 w-4 shrink-0" style={{ color: accent }} />}
+    </button>
+  );
+}
+
+/* یک محور (نوع بانک یا رشته) — گزینهٔ «همه» همیشه اول است تا پیش‌فرض، کل بانک بماند */
+function ScopeAxis({ label, icon, options, value, onPick, all }) {
+  return (
+    <div>
+      <div className="mb-2 flex items-center gap-1.5 text-[11.5px] text-[#8a8a8a]">
+        <Icon name={icon} className="h-3.5 w-3.5" style={{ color: '#61D192' }} />
+        {label}
+      </div>
+      <div className="grid gap-2 sm:grid-cols-3">
+        <ScopeOption
+          icon={all.icon}
+          title={all.title}
+          hint={all.hint}
+          count={all.count}
+          accent={all.accent}
+          active={!value}
+          onClick={() => onPick(null)}
+        />
+        {options.map((option) => (
+          <ScopeOption
+            key={option.id}
+            icon={option.icon}
+            title={option.title}
+            hint={option.hint}
+            count={option.count}
+            accent={option.accent}
+            active={value === option.id}
+            onClick={() => onPick(option.id)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── «انتخاب بانک» — نوع بانک (کشوری/تألیفی) و رشته (پزشکی/دندان‌پزشکی) ──
+   دو محور مستقل و ترکیب‌پذیر؛ نتیجه به‌شکل scope به سرویس می‌رود و همهٔ
+   نمای‌های لایه (سال، مبحث، کاوشگر، سازنده) با همان دامنه ساخته می‌شوند. */
+export function BankScopeSwitcher({ scope, onScopeChange, banks = [], tracks = [] }) {
+  const total = banks.reduce((sum, entry) => sum + entry.questionCount, 0);
+  const activeBank = banks.find((entry) => entry.id === scope.bankKind) ?? null;
+  const activeTrack = tracks.find((entry) => entry.id === scope.track) ?? null;
+  const activeLabel = [activeBank?.short, activeTrack?.short].filter(Boolean).join(' · ');
+
+  return (
+    <section
+      aria-label="انتخاب بانک تست"
+      className="dash-stagger rounded-[2rem] border border-white/8 bg-[#242426] p-5 md:p-6"
+    >
+      <header className="mb-4 flex flex-wrap items-end justify-between gap-3">
+        <div className="min-w-0">
+          <h2 className="text-base font-bold [font-family:'Doran',Tahoma,sans-serif] md:text-lg">
+            بانک تست را انتخاب کن
+          </h2>
+          <p className="mt-1.5 text-[12.5px] leading-6 text-[#8a8a8a]">
+            تست‌ها یا <b className="text-[#c9bdf0]">کشوری</b>‌اند یا <b className="text-[#7ee0ac]">تألیفی</b>؛ رشته هم
+            علوم پایهٔ پزشکی یا دندان‌پزشکی. این انتخاب، دامنهٔ همهٔ بخش‌های بانک را تعیین می‌کند.
+          </p>
+        </div>
+        {activeLabel && (
+          <span className="tb-badge tb-badge--plain">
+            <Icon name="filter" className="h-3.5 w-3.5" />
+            دامنهٔ فعال: {activeLabel}
+          </span>
+        )}
+      </header>
+
+      <div className="grid gap-5 lg:grid-cols-2">
+        <ScopeAxis
+          label="نوع بانک"
+          icon="shield"
+          value={scope.bankKind}
+          onPick={(id) => onScopeChange({ bankKind: id })}
+          options={banks.map((entry) => ({
+            id: entry.id,
+            icon: entry.id === 'authored' ? 'pen' : 'shield',
+            title: entry.short,
+            hint: entry.label,
+            count: entry.questionCount,
+            accent: entry.accent,
+          }))}
+          all={{ icon: 'grid', title: 'همه', hint: 'هر دو بانک', count: total, accent: '#9aa5b1' }}
+        />
+        <ScopeAxis
+          label="رشته"
+          icon="stethoscope"
+          value={scope.track}
+          onPick={(id) => onScopeChange({ track: id })}
+          options={tracks.map((entry) => ({
+            id: entry.id,
+            icon: entry.id === 'dentistry' ? 'tooth' : 'stethoscope',
+            title: entry.short,
+            hint: entry.label,
+            count: entry.questionCount,
+            accent: entry.accent,
+          }))}
+          all={{ icon: 'users', title: 'همه', hint: 'هر دو رشته', count: total, accent: '#9aa5b1' }}
+        />
+      </div>
+    </section>
+  );
+}
+
 /* ══════════════════════════ BankHome ══════════════════════════ */
-export default function BankHome({ overview, onNavigate }) {
+export default function BankHome({ overview, scope, onScopeChange, onNavigate }) {
   if (!overview) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-52 rounded-[2.5rem]" />
+        <Skeleton className="h-40 rounded-[2rem]" />
         <div className="grid grid-cols-3 gap-4">
           <Skeleton className="h-20 rounded-3xl" />
           <Skeleton className="h-20 rounded-3xl" />
@@ -132,15 +258,41 @@ export default function BankHome({ overview, onNavigate }) {
   }
 
   const { bank, user, tags } = overview;
+  const banks = overview.banks ?? [];
+  const tracks = overview.tracks ?? [];
+  const authoredOnly = scope?.bankKind === 'authored';
+
+  /* کادرهای مربعی دروس — عنوان، رنگ، جلسه‌ها، فصل‌ها و پیشرفت از لایهٔ «درسنامهٔ جامع»
+     خوانده می‌شود تا با آن لایه هم‌شکل و هم‌نام بماند؛ تعداد تست از خود بانک تست می‌آید.
+     دروسی که هنوز سؤالی در بانک ندارند کم‌رنگ و با برچسب «به‌زودی» نشان داده می‌شوند. */
+  const subjectRail = COMPREHENSIVE_SUBJECTS.map((subject) => {
+    const bankSubject =
+      overview.subjects.find((item) => item.id === (BANK_SUBJECT_ID[subject.id] ?? subject.id)) ?? null;
+    return {
+      id: subject.id,
+      title: subject.title,
+      accent: subject.accent,
+      lessons: subject.lessons,
+      chapters: subject.chapters,
+      progress: subject.progress,
+      bankId: bankSubject?.id ?? null,
+      questionCount: bankSubject?.questionCount ?? 0,
+    };
+  });
 
   const pathCards = [
-    {
-      icon: 'calendar',
-      title: 'آزمون‌های سال به سال',
-      description: 'سؤال‌های رسمی آزمون علوم پایه، سال‌به‌سال و هم‌سو با سبک وزارت بهداشت',
-      meta: `${toFa(bank.yearsCovered)} سال`,
-      onClick: () => onNavigate('years'),
-    },
+    /* «سال‌به‌سال» فقط روی سؤال‌های رسمی معنا دارد؛ در بانک تألیفی این مسیر نمایش داده نمی‌شود. */
+    ...(authoredOnly
+      ? []
+      : [
+          {
+            icon: 'calendar',
+            title: 'آزمون‌های سال به سال',
+            description: 'سؤال‌های رسمی آزمون علوم پایه، سال‌به‌سال و هم‌سو با سبک وزارت بهداشت',
+            meta: `${toFa(bank.yearsCovered)} سال`,
+            onClick: () => onNavigate('years'),
+          },
+        ]),
     {
       icon: 'layers',
       title: 'تست مبحثی',
@@ -196,179 +348,58 @@ export default function BankHome({ overview, onNavigate }) {
       meta: `${toFa(tags.challenging)} سؤال`,
       onClick: () => onNavigate('browse', { filters: { difficulties: ['hard', 'very_hard'] } }),
     },
-    {
-      icon: 'dice',
-      accent: '#5b8cc7',
-      title: 'آزمون تصادفی',
-      description: 'از کل بانک، سؤال‌های شانسی در حالت آزمون',
-      onClick: () => onNavigate('builder', { preset: 'random' }),
-    },
-    {
-      icon: 'card',
-      accent: '#b99a86',
-      title: 'آزمون‌های من',
-      description: user.sessionCount
-        ? 'آزمون‌های ذخیره‌شده‌ات با روند پیشرفت و تلاش‌های اخیر'
-        : 'آزمون‌هایی که در آزمون‌ساز ذخیره می‌کنی اینجا می‌مانند',
-      onClick: () => onNavigate('my-exams'),
-      wide: true,
-    },
-    {
-      icon: 'target',
-      accent: '#937fcd',
-      title: 'آزمون‌ساز شخصی',
-      description: 'هدف، درس، مبحث، سختی، زمان و Blueprint — آزمون دقیقاً به‌اندازهٔ نیازت بساز',
-      onClick: () => onNavigate('builder'),
-      wide: true,
-    },
-  ];
-
-  const quickAccess = [
-    { icon: 'heart', label: 'نشان‌شده‌ها', count: user.bookmarkCount, filters: { status: 'bookmarked' } },
-    { icon: 'x', label: 'غلط‌های من', count: user.wrongCount, filters: { status: 'wrong' } },
-    { icon: 'refresh', label: 'نیاز به مرور', count: user.reviewCount, filters: { status: 'review' } },
-    { icon: 'history', label: 'تاریخچه', count: user.sessionCount, history: true },
   ];
 
   return (
     <div className="space-y-6">
-      {/* ── سربرگ + جستجو ── */}
-      <section className="dash-stagger rounded-[2.5rem] border border-white/8 bg-[#242426] p-6 md:p-8">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-extrabold text-[#61D192] [font-family:'Doran',Tahoma,sans-serif] md:text-3xl">
-              بانک تست علوم پایه
-            </h1>
-            <p className="mt-2 max-w-xl text-sm leading-7 text-[#aaa]">
-              {faNum(bank.totalQuestions)} سؤال از {toFa(bank.subjectsCovered)} درس و {toFa(bank.yearsCovered)} سال
-              آزمون؛ با تحلیل کامل هر سؤال و آمار واقعی پاسخ‌دهندگان. هر تست را به یک واحد یادگیری تبدیل کن.
-            </p>
-          </div>
-          <div className="hidden shrink-0 items-center gap-2 md:flex">
-            <span className="tb-badge" style={{ background: 'rgba(97,209,146,0.1)', color: '#61D192' }}>
-              <Icon name="users" className="h-3.5 w-3.5" />
-              {faNum(bank.totalSolves)} حل ثبت‌شده
+      {/* ── سربرگ: هم‌اندازه و هم‌فونت هیرو «درسنامهٔ جامع» — خط کوچک + خط بزرگ گرادیانی ── */}
+      <header className="dash-stagger flex justify-center pt-[clamp(30px,5.5vh,60px)] pb-2.5 text-center">
+        <div className="min-w-0 flex-1">
+          <h1 className="flex flex-col items-center gap-1.5 [font-family:'Doran',Tahoma,sans-serif]">
+            <span className="text-[clamp(1.4rem,2.8vw,2.1rem)] font-medium text-[#d6d6d6]">بانک تست</span>
+            <span className="text-[clamp(3rem,6.8vw,5.1rem)] font-extrabold leading-[1.3] text-[#61D192]">
+              علوم پایه
             </span>
-          </div>
+          </h1>
+          <p className="mx-auto mt-3.5 max-w-[620px] text-[clamp(0.95rem,1.4vw,1.1rem)] leading-[2] text-[#b9b9b9]">
+            بانک تست کشوری و تألیفی علوم پایه — پزشکی و دندان‌پزشکی، به همراه ابزارهای نوین تحلیل
+          </p>
         </div>
+      </header>
 
-        <div className="mt-5">
-          <HeroSearch onSearch={(search) => onNavigate('browse', { filters: { search } })} />
-        </div>
+      {/* ── انتخاب بانک: نوع بانک (کشوری/تألیفی) × رشته (پزشکی/دندان‌پزشکی) ── */}
+      <BankScopeSwitcher scope={scope} onScopeChange={onScopeChange} banks={banks} tracks={tracks} />
 
-        {/* دسترسی سریع */}
-        <div className="mt-4 flex flex-wrap gap-2">
-          {quickAccess.map((item) => (
-            <button
-              key={item.label}
-              type="button"
-              onClick={() => (item.history ? onNavigate('history') : onNavigate('browse', { filters: item.filters }))}
-              className="flex cursor-pointer items-center gap-1.5 rounded-full bg-white/5 px-3.5 py-2 text-xs text-[#bbb] transition-colors hover:bg-white/10 hover:text-white"
-            >
-              <Icon name={item.icon} className="h-3.5 w-3.5" />
-              {item.label}
-              <span className="rounded-full bg-white/10 px-1.5 text-[10px] text-[#ddd]">{toFa(item.count)}</span>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* ── آمار کاربر ── */}
-      <section className="grid grid-cols-2 gap-3 md:grid-cols-4" aria-label="آمار تو در بانک تست">
-        {[
-          { label: 'سؤال حل‌شده', value: user.solvedCount, accent: '#61D192' },
-          { label: 'دقت کل', value: user.accuracy === null ? '—' : `${toFa(user.accuracy)}٪`, accent: '#937fcd' },
-          { label: 'سشن کامل‌شده', value: user.sessionCount, accent: '#5b8cc7' },
-          { label: 'میانگین پاسخ جامعه', value: `${toFa(bank.averageCorrect)}٪`, accent: '#e0b45c' },
-        ].map((stat) => (
-          <div key={stat.label} className="rounded-3xl border border-white/8 bg-[#242426] px-4 py-4 text-center">
-            <strong className="block text-xl [font-family:'Doran',Tahoma,sans-serif]" style={{ color: stat.accent }}>
-              {typeof stat.value === 'number' ? faNum(stat.value) : stat.value}
-            </strong>
-            <span className="mt-1 block text-[11px] text-[#8a8a8a]">{stat.label}</span>
-          </div>
-        ))}
-      </section>
-
-      {/* ── مسیرها ── */}
+      {/* ── مسیرها: همه در یک ردیف افقی (بدون عنوان) ── */}
       <section aria-label="چطور می‌خواهی تست بزنی؟">
-        <div className="mb-4 flex items-center gap-2">
-          <h2 className="text-lg font-bold [font-family:'Doran',Tahoma,sans-serif]">چطور می‌خواهی تست بزنی؟</h2>
-          <span className="h-px flex-1 bg-white/8" aria-hidden="true" />
-        </div>
-        <div className="dash-stagger grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {pathCards.map((card) => (
-            <PathCard key={card.title} {...card} />
-          ))}
+        {/* ردیف وسط‌چین؛ اگر از عرض صفحه بیشتر شد، از ابتدا اسکرول می‌شود */}
+        <div className="dash-stagger overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="mx-auto flex w-max gap-2.5">
+            {pathCards.map((card) => (
+              <PathChip key={card.title} {...card} />
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* ── آخرین سشن‌ها ── */}
-      <section aria-label="آخرین سشن‌های تو">
-        <div className="mb-3 flex items-center justify-between gap-2">
-          <h2 className="text-lg font-bold [font-family:'Doran',Tahoma,sans-serif]">آخرین کارنامه‌ها</h2>
-          <button
-            type="button"
-            onClick={() => onNavigate('history')}
-            className="flex cursor-pointer items-center gap-1 text-xs text-[#61D192] transition-colors hover:text-[#7ee0ac]"
-          >
-            تاریخچهٔ کامل
-            <Icon name="chevron" className="h-3.5 w-3.5 rotate-90" />
-          </button>
+      {/* ── کادرهای مربعی دروس — بدون عنوان؛ خط آخر وسط‌چین می‌شود ── */}
+      <section aria-label="دروس علوم پایه">
+        {/* چیدمان flex با justify-center: آیتم‌های خط آخر اگر به اندازهٔ عرض نرسیدند، وسط می‌مانند */}
+        <div className="dash-stagger flex flex-wrap justify-center gap-3.5">
+          {subjectRail.map((subject) => (
+            <div
+              key={subject.id}
+              className="w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-0.62rem)] md:w-[calc(25%-0.7rem)] lg:w-[calc(20%-0.76rem)]"
+            >
+              <SubjectTile
+                subject={subject}
+                onOpen={() =>
+                  onNavigate('subject', { subjectId: subject.bankId ?? subject.id, subjectTitle: subject.title })
+                }
+              />
+            </div>
+          ))}
         </div>
-        {user.history.length === 0 ? (
-          <EmptyState
-            icon="history"
-            title="هنوز سشنی نداری"
-            note="اولین تمرین یا آزمون‌ات را بزن؛ کارنامه و تحلیل همان‌جا ساخته می‌شود."
-            action={
-              <button
-                type="button"
-                onClick={() => onNavigate('topics')}
-                className="mt-3 cursor-pointer rounded-xl bg-[#61D192] px-5 py-2.5 text-sm font-bold text-[#12271a] transition-transform hover:-translate-y-0.5"
-              >
-                شروع تمرین
-              </button>
-            }
-          />
-        ) : (
-          <ul className="divide-y divide-white/6 overflow-hidden rounded-[1.75rem] border border-white/8 bg-[#242426]">
-            {user.history.map((item) => (
-              <li key={item.id}>
-                <button
-                  type="button"
-                  onClick={() => onNavigate('result', { sessionId: item.id })}
-                  className="flex w-full cursor-pointer items-center justify-between gap-3 px-5 py-4 text-right transition-colors hover:bg-white/[0.03]"
-                >
-                  <span className="flex min-w-0 items-center gap-3">
-                    <span
-                      className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${
-                        item.mode === 'exam' ? 'bg-[#937fcd]/15 text-[#c9bdf0]' : 'bg-[#61D192]/12 text-[#61D192]'
-                      }`}
-                    >
-                      <Icon name={item.mode === 'exam' ? 'timer' : 'book'} className="h-4.5 w-4.5" />
-                    </span>
-                    <span className="min-w-0">
-                      <strong className="block truncate text-[13.5px] [font-family:'Doran',Tahoma,sans-serif]">{item.title}</strong>
-                      <span className="text-[11px] text-[#8a8a8a]">
-                        {MODE_LABEL[item.mode] ?? item.mode} · {faNum(item.total)} سؤال · {formatAgo(item.submittedAt)}
-                      </span>
-                    </span>
-                  </span>
-                  {item.percentage !== null && (
-                    <span
-                      className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-bold [font-family:'Doran',Tahoma,sans-serif] ${
-                        item.percentage >= 60 ? 'bg-[#61D192]/12 text-[#61D192]' : 'bg-[#e26d6d]/12 text-[#ef9196]'
-                      }`}
-                    >
-                      {toFa(item.percentage)}٪
-                    </span>
-                  )}
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
       </section>
     </div>
   );

@@ -167,12 +167,12 @@ export function Skeleton({ className = '' }) {
 
 export function EmptyState({ icon = 'chart', title, note, action }) {
   return (
-    <div className="flex flex-col items-center gap-2 rounded-[2rem] border border-dashed border-white/12 bg-white/[0.02] px-6 py-12 text-center">
-      <span className="grid h-12 w-12 place-items-center rounded-full bg-white/5 text-[#8a8a8a]">
-        <Icon name={icon} className="h-6 w-6" />
+    <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-white/12 bg-white/[0.02] px-6 py-8 text-center">
+      <span className="grid h-11 w-11 place-items-center rounded-full bg-white/5 text-[#8a8a8a]">
+        <Icon name={icon} className="h-5 w-5" />
       </span>
-      <strong className="mt-1 [font-family:'Doran',Tahoma,sans-serif]">{title}</strong>
-      {note && <p className="max-w-md text-sm leading-6 text-[#8a8a8a]">{note}</p>}
+      <strong className="mt-1 text-[13.5px] [font-family:'Doran',Tahoma,sans-serif]">{title}</strong>
+      {note && <p className="max-w-md text-[12.5px] leading-6 text-[#8a8a8a]">{note}</p>}
       {action}
     </div>
   );
@@ -257,15 +257,15 @@ export const errorTypeLabel = (type) => ERROR_TYPES[type]?.label ?? 'ثبت‌ن
 /* ── کارت پایهٔ بخش ── */
 export function Card({ title, icon, hint, action, children, className = '', ariaLabel }) {
   return (
-    <section className={`rounded-[2rem] border border-white/8 bg-[#242426] p-5 md:p-6 ${className}`} aria-label={ariaLabel ?? title}>
+    <section className={`rounded-3xl border border-white/8 bg-[#242426] p-4 md:p-[18px] ${className}`} aria-label={ariaLabel ?? title}>
       {(title || action) && (
-        <header className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <header className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <div>
-            <h2 className="flex items-center gap-2 text-[15px] font-bold [font-family:'Doran',Tahoma,sans-serif]">
-              {icon && <Icon name={icon} className="h-4.5 w-4.5 text-[#61D192]" />}
+            <h2 className="flex items-center gap-2 text-[14.5px] font-bold [font-family:'Doran',Tahoma,sans-serif]">
+              {icon && <Icon name={icon} className="h-4 w-4 text-[#61D192]" />}
               {title}
             </h2>
-            {hint && <p className="mt-1 text-xs leading-5 text-[#8a8a8a]">{hint}</p>}
+            {hint && <p className="mt-1 max-w-3xl text-[11.5px] leading-5 text-[#8a8a8a]">{hint}</p>}
           </div>
           {action}
         </header>
@@ -330,13 +330,33 @@ export function RingScore({ score, size = 132, stroke = 11, accent = '#61D192', 
   );
 }
 
-/* ── نمودار خطی روند (X: زمان، Y: metric) ── */
-export function TrendChart({ points, accent = '#61D192', height = 190, ariaLabel, yMax = 100, markerEvents = [], emptyNote }) {
+/* ── نمودار خطی روند (X: زمان، Y: سنجه) ── */
+/*
+ * نمودار روند روی کل دادهٔ بازه رسم می‌شود:
+ *  - یک نقطه برای هر روز؛ روزهای بدون داده خط را نمی‌شکنند (segment جدا).
+ *  - محور عمودی مقداردار (به فارسی) + خط‌چین میانگین بازه.
+ *  - تعامل hover: خط راهنما + تولتیپ تاریخ/مقدار/تعداد تست.
+ *  - نشانگر آزمون‌ها با tooltip عنوان آزمون.
+ */
+export function TrendChart({
+  points,
+  accent = '#61D192',
+  height = 216,
+  ariaLabel,
+  yMax = 100,
+  yMin = 0,
+  markerEvents = [],
+  emptyNote,
+  valueFormat,
+  unit = '',
+}) {
+  const [hoverIndex, setHoverIndex] = useState(null);
   const width = 640;
-  const padX = 14;
-  const padTop = 16;
-  const padBottom = 26;
-  const innerW = width - padX * 2;
+  const padLeft = 46;
+  const padRight = 16;
+  const padTop = 20;
+  const padBottom = 32;
+  const innerW = width - padLeft - padRight;
   const innerH = height - padTop - padBottom;
   const valid = points.filter((point) => point.value !== null && point.value !== undefined);
 
@@ -348,11 +368,17 @@ export function TrendChart({ points, accent = '#61D192', height = 190, ariaLabel
     );
   }
 
-  const step = innerW / (points.length - 1);
-  const xOf = (index) => padX + index * step;
-  const yOf = (value) => padTop + innerH * (1 - Math.max(0, Math.min(yMax, value)) / yMax);
+  const span = Math.max(1, yMax - yMin);
+  const step = points.length > 1 ? innerW / (points.length - 1) : 0;
+  const xOf = (index) => padLeft + index * step;
+  const yOf = (value) => padTop + innerH * (1 - (Math.max(yMin, Math.min(yMax, value)) - yMin) / span);
 
-  /* خط شکسته: از نقاط null عبور نمی‌کند */
+  /* پنج خط راهنمای افقی با مقدار — نمودار بدون مقیاس، خوانا نیست */
+  const tickValues = [0, 0.25, 0.5, 0.75, 1].map((ratio) => yMax - ratio * span);
+  const average = valid.reduce((total, point) => total + point.value, 0) / valid.length;
+  const format = valueFormat ?? ((value) => `${faNum(Math.round(value))}${unit}`);
+
+  /* خط شکسته: از روزهای بدون داده عبور نمی‌کند */
   const segments = [];
   let current = [];
   points.forEach((point, index) => {
@@ -360,40 +386,128 @@ export function TrendChart({ points, accent = '#61D192', height = 190, ariaLabel
       if (current.length) segments.push(current);
       current = [];
     } else {
-      current.push({ x: xOf(index), y: yOf(point.value) });
+      current.push({ index, x: xOf(index), y: yOf(point.value) });
     }
   });
   if (current.length) segments.push(current);
 
-  const lastValidIndex = valid.length ? points.map((p) => p.value != null).lastIndexOf(true) : null;
-  const lastPoint = lastValidIndex >= 0 ? { x: xOf(lastValidIndex), y: yOf(points[lastValidIndex].value) } : null;
+  /*
+   * پل ارتباطی: در بازه‌های کم‌تراکم (سشن‌ها هر ۲-۳ روز) خط تکه‌تکه می‌شود و
+   * نمودار به چند نقطهٔ جدا تبدیل می‌شود. این خط‌چین کم‌رنگ همهٔ نقاط واقعی را
+   * به هم وصل می‌کند تا «روند» خوانده شود، بی‌آنکه روزهای بی‌داده مقدار جعلی بگیرند.
+   */
+  const bridge = valid.map((point) => ({ x: xOf(point.index), y: yOf(point.value) }));
+
+  const lastIndex = points.map((point) => point.value != null).lastIndexOf(true);
+  const lastPoint = lastIndex >= 0 ? { x: xOf(lastIndex), y: yOf(points[lastIndex].value) } : null;
+  const hovered = hoverIndex !== null ? points[hoverIndex] : null;
+  const hoveredHasValue = hovered && hovered.value !== null && hovered.value !== undefined;
+  const hoverLeft = hoverIndex !== null ? (xOf(hoverIndex) / width) * 100 : 0;
+  /* در نیمهٔ بالای نمودار تولتیپ زیر نقطه می‌نشیند تا از کادر بیرون نزند */
+  const hoverPlaceBelow = hoveredHasValue && yOf(hovered.value) / height < 0.34;
+
+  const handleMove = (event) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    if (!rect.width || !step) return;
+    const xInView = ((event.clientX - rect.left) / rect.width) * width;
+    const index = Math.round((xInView - padLeft) / step);
+    setHoverIndex(Math.max(0, Math.min(points.length - 1, index)));
+  };
 
   return (
-    <div dir="ltr">
-      <svg viewBox={`0 0 ${width} ${height}`} className="w-full" role="img" aria-label={ariaLabel}>
-        {/* خطوط راهنمای افقی */}
-        {[0, 0.5, 1].map((ratio) => (
-          <line
-            key={ratio}
-            x1={padX}
-            x2={width - padX}
-            y1={padTop + innerH * ratio}
-            y2={padTop + innerH * ratio}
-            stroke="rgba(255,255,255,0.07)"
-            strokeWidth="1"
-          />
+    <div dir="ltr" className="relative">
+      <svg
+        viewBox={`0 0 ${width} ${height}`}
+        className="w-full touch-pan-y"
+        role="img"
+        aria-label={ariaLabel}
+        onPointerMove={handleMove}
+        onPointerLeave={() => setHoverIndex(null)}
+      >
+        <defs>
+          <linearGradient id="an-trend-area" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={accent} stopOpacity="0.3" />
+            <stop offset="100%" stopColor={accent} stopOpacity="0" />
+          </linearGradient>
+        </defs>
+
+        {/* ناحیهٔ تعامل — کل پلات hoverپذیر می‌شود */}
+        <rect x={padLeft} y={padTop} width={innerW} height={innerH} fill="transparent" />
+
+        {/* خطوط راهنما + مقیاس محور عمودی */}
+        {tickValues.map((value, index) => (
+          <g key={`tick-${index}`}>
+            <line x1={padLeft} x2={width - padRight} y1={yOf(value)} y2={yOf(value)} stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
+            <text x={padLeft - 8} y={yOf(value) + 3.5} textAnchor="end" fontSize="10" fill="#777">
+              {faNum(Math.round(value))}
+            </text>
+          </g>
         ))}
+
+        {/* میانگین کل بازه */}
+        <line
+          x1={padLeft}
+          x2={width - padRight}
+          y1={yOf(average)}
+          y2={yOf(average)}
+          stroke={accent}
+          strokeOpacity="0.4"
+          strokeWidth="1"
+          strokeDasharray="5 4"
+        />
+
         {/* نشانگرهای آزمون */}
         {markerEvents.map((event) => (
           <g key={event.id}>
-            <line x1={xOf(event.dayIndex)} x2={xOf(event.dayIndex)} y1={padTop - 4} y2={height - padBottom} stroke="rgba(224,180,92,0.4)" strokeWidth="1.2" strokeDasharray="3 3" />
-            <circle cx={xOf(event.dayIndex)} cy={padTop - 4} r="3" fill="#e0b45c" />
+            <line
+              x1={xOf(event.dayIndex)}
+              x2={xOf(event.dayIndex)}
+              y1={padTop - 6}
+              y2={padTop + innerH}
+              stroke="rgba(224,180,92,0.42)"
+              strokeWidth="1.2"
+              strokeDasharray="3 3"
+            >
+              <title>{event.title}</title>
+            </line>
+            <circle cx={xOf(event.dayIndex)} cy={padTop - 8} r="3.2" fill="#e0b45c">
+              <title>{event.title}</title>
+            </circle>
           </g>
         ))}
+
+        {/* سطح زیر خط — روی همان پل ارتباطی، تا در بازه‌های کم‌تراکم تکه‌تکه نشود */}
+        {bridge.length > 1 && (
+          <polygon
+            points={[
+              ...bridge,
+              { x: bridge[bridge.length - 1].x, y: yOf(yMin) },
+              { x: bridge[0].x, y: yOf(yMin) },
+            ]
+              .map((point) => `${point.x},${point.y}`)
+              .join(' ')}
+            fill="url(#an-trend-area)"
+          />
+        )}
+
+        {/* پل ارتباطی بین روزهای دارای داده — روند را خوانا می‌کند */}
+        {bridge.length > 1 && (
+          <polyline
+            points={bridge.map((point) => `${point.x},${point.y}`).join(' ')}
+            fill="none"
+            stroke={accent}
+            strokeOpacity="0.32"
+            strokeWidth="1.6"
+            strokeDasharray="5 5"
+            strokeLinecap="round"
+          />
+        )}
+
+        {/* خط روند — فقط روزهای پیوسته */}
         {segments.map((segment, index) => (
           <polyline
-            key={index}
-            points={segment.map((p) => `${p.x},${p.y}`).join(' ')}
+            key={`line-${index}`}
+            points={segment.map((point) => `${point.x},${point.y}`).join(' ')}
             fill="none"
             stroke={accent}
             strokeWidth="2.2"
@@ -401,12 +515,51 @@ export function TrendChart({ points, accent = '#61D192', height = 190, ariaLabel
             strokeLinejoin="round"
           />
         ))}
-        {lastPoint && <circle cx={lastPoint.x} cy={lastPoint.y} r="3.6" fill={accent} stroke="#1b1b1e" strokeWidth="2" />}
+
+        {/* نقاط روزهای دارای داده — در بازه‌های بلند ریزتر */}
+        {valid.map((point) => (
+          <circle key={`dot-${point.key ?? point.index}`} cx={xOf(point.index)} cy={yOf(point.value)} r={points.length > 45 ? 1.6 : 2.5} fill={accent} fillOpacity="0.85" />
+        ))}
+
+        {lastPoint && <circle cx={lastPoint.x} cy={lastPoint.y} r="4" fill={accent} stroke="#1b1b1e" strokeWidth="2" />}
+
+        {/* خط راهنمای hover */}
+        {hovered && (
+          <g>
+            <line x1={xOf(hoverIndex)} x2={xOf(hoverIndex)} y1={padTop} y2={padTop + innerH} stroke="rgba(255,255,255,0.26)" strokeWidth="1" />
+            {hoveredHasValue && <circle cx={xOf(hoverIndex)} cy={yOf(hovered.value)} r="4.4" fill={accent} stroke="#1b1b1e" strokeWidth="2" />}
+          </g>
+        )}
       </svg>
-      <div className="mt-1 flex justify-between px-1 text-[10px] text-[#777]" dir="rtl">
-        <span>{points[0]?.label}</span>
-        <span>{points[Math.floor(points.length / 2)]?.label}</span>
-        <span>امروز</span>
+
+      {/* تولتیپ روز انتخاب‌شده */}
+      {hovered && (
+        <div
+          dir="rtl"
+          className={`pointer-events-none absolute z-10 -translate-x-1/2 rounded-xl border border-white/12 bg-[#1b1b1e]/95 px-3 py-2 text-[11px] whitespace-nowrap shadow-xl ${hoverPlaceBelow ? 'translate-y-[22%]' : '-translate-y-[135%]'}`}
+          style={{ left: `${Math.min(90, Math.max(10, hoverLeft))}%`, top: `${((hoveredHasValue ? yOf(hovered.value) : padTop) / height) * 100}%` }}
+        >
+          <strong className="block text-[11.5px] text-[#eaf6ef]">{hovered.fullLabel ?? hovered.label}</strong>
+          <span className="mt-0.5 block font-semibold" style={{ color: accent }}>
+            {hoveredHasValue ? format(hovered.value) : 'بدون داده'}
+          </span>
+          <span className="mt-0.5 block text-[10px] text-[#8a8a8a]">
+            {faNum(hovered.count ?? 0)} تست در این روز
+          </span>
+        </div>
+      )}
+
+      {/* برچسب‌های محور افقی — هم‌جهت با نمودار (چپ: قدیمی‌ترین، راست: امروز) */}
+      <div className="relative mt-1 h-4 text-[10px] text-[#777]" dir="ltr">
+        <span className="absolute" style={{ left: `${(padLeft / width) * 100}%` }}>
+          {points[0]?.label}
+        </span>
+        <span className="absolute -translate-x-1/2" style={{ left: `${(xOf(Math.floor((points.length - 1) / 2)) / width) * 100}%` }}>
+          {points[Math.floor((points.length - 1) / 2)]?.label}
+        </span>
+        <span className="absolute -translate-x-full" style={{ left: `${((width - padRight) / width) * 100}%` }}>
+          {points[points.length - 1]?.isToday ? 'امروز' : points[points.length - 1]?.label}
+        </span>
       </div>
     </div>
   );
@@ -436,7 +589,7 @@ export function ColumnChart({ columns, height = 160, ariaLabel }) {
 }
 
 /* ── دونات سهمی‌ها ── */
-export function DonutChart({ segments, size = 150, stroke = 20, centerLabel, centerSub, ariaLabel }) {
+export function DonutChart({ segments, size = 150, stroke = 20, centerLabel, centerSub, ariaLabel, compact = false }) {
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
   const total = segments.reduce((sum, segment) => sum + segment.value, 0);
@@ -469,8 +622,8 @@ export function DonutChart({ segments, size = 150, stroke = 20, centerLabel, cen
           })}
       </svg>
       <div className="absolute text-center">
-        <strong className="block text-xl font-extrabold [font-family:'Doran',Tahoma,sans-serif]">{centerLabel}</strong>
-        {centerSub && <span className="text-[10px] text-[#888]">{centerSub}</span>}
+        <strong className={`block font-extrabold [font-family:'Doran',Tahoma,sans-serif] ${compact ? 'text-base' : 'text-xl'}`}>{centerLabel}</strong>
+        {centerSub && <span className={`block ${compact ? 'text-[9px]' : 'text-[10px]'} text-[#888]`}>{centerSub}</span>}
       </div>
     </div>
   );

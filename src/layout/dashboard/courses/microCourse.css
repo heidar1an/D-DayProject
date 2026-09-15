@@ -422,9 +422,6 @@
   to {
     stroke-dashoffset: var(--off);
   }
-}}  100% {
-    transform: scale(1);
-  }
 }
 
 /* ── واکنش‌گرایی ── */
