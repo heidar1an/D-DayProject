@@ -5,7 +5,7 @@
  * فایل JSON روی دیسک + توابع دامنهٔ خالص. با مهاجرت به یک Backend واقعی، فقط بدنهٔ
  * همین توابع به کوئری دیتابیس تبدیل می‌شود و امضاها دست‌نخورده می‌مانند.
  *
- * مجموعه‌ها: admins | articles | categories | pages | media | banners | activity
+ * مجموعه‌ها: admins | articles | categories | pages | media | banners | activity | notes
  * سند تکی: settings
  *
  * امنیت پیاده‌شده در این لایه:
@@ -43,30 +43,49 @@ export const PERMISSIONS = [
   'users.create', 'users.read', 'users.update', 'users.delete',
   'settings.read', 'settings.update',
   'logs.read',
+  'notes.create', 'notes.read', 'notes.update', 'notes.delete',
+  /* مرکز تحلیل — تفکیک‌شده تا دادهٔ حساس به هر نقشی داده نشود */
+  'analytics.read',
+  'analytics.users.read',
+  'analytics.seo.read',
+  'analytics.revenue.read',
+  'analytics.security.read',
+  'analytics.alerts.manage',
+  'analytics.export',
 ];
+
+/*
+ * سنجه‌های حساس مرکز تحلیل: بخش‌های مالی، امنیتی و دادهٔ شخصی کاربران.
+ * نقش `admin` این‌ها را ندارد و فقط مدیر کل می‌بیند.
+ */
+export const SENSITIVE_ANALYTICS = ['analytics.users.read', 'analytics.revenue.read', 'analytics.security.read', 'analytics.alerts.manage'];
 
 export const ROLES = {
   'super-admin': {
     id: 'super-admin',
     label: 'مدیر کل',
-    description: 'دسترسی کامل به همهٔ بخش‌ها',
+    description: 'دسترسی کامل به همهٔ بخش‌ها، از جمله تحلیل مالی و امنیتی',
     permissions: ['*'],
   },
   admin: {
     id: 'admin',
     label: 'مدیر',
-    description: 'مدیریت محتوا و کاربران، بدون حذف مدیران',
-    permissions: PERMISSIONS.filter((permission) => permission !== 'users.delete'),
+    description: 'مدیریت محتوا و کاربران + تحلیل عمومی؛ بدون دادهٔ مالی و امنیتی',
+    permissions: PERMISSIONS.filter(
+      (permission) => permission !== 'users.delete' && !SENSITIVE_ANALYTICS.includes(permission),
+    ),
   },
   editor: {
     id: 'editor',
     label: 'نویسنده',
-    description: 'ایجاد و ویرایش مقاله، بدون حذف یا مدیریت کاربران',
+    description: 'ایجاد و ویرایش مقاله + تحلیل محتوا و آموزش؛ بدون دادهٔ کاربران، مالی و امنیتی',
     permissions: [
       'articles.create', 'articles.read', 'articles.update', 'articles.publish',
       'categories.create', 'categories.read',
       'pages.read', 'pages.update',
       'media.upload', 'media.read', 'media.delete',
+      'notes.create', 'notes.read', 'notes.update', 'notes.delete',
+      'analytics.read',
     ],
   },
 };
@@ -89,7 +108,7 @@ export function hasPermission(admin, permission) {
 
 /* ───────────────────────────── ذخیره‌سازی پایه ───────────────────────────── */
 
-const COLLECTIONS = ['admins', 'articles', 'categories', 'pages', 'media', 'banners', 'activity'];
+const COLLECTIONS = ['admins', 'articles', 'categories', 'pages', 'media', 'banners', 'activity', 'notes', 'events', 'alerts'];
 
 const files = {
   settings: resolve(contentDir, 'settings.json'),
@@ -331,6 +350,7 @@ function ensureStore() {
   ensureFile(files.media, []);
   ensureFile(files.banners, seedBanners());
   ensureFile(files.activity, []);
+  ensureFile(files.notes, []);
   ensureFile(files.settings, DEFAULT_SETTINGS);
 }
 
@@ -523,6 +543,20 @@ export function clearExpiredSessions() {
   sessions.forEach((session, token) => {
     if (session.expiresAt < now) sessions.delete(token);
   });
+}
+
+/* وضعیت واقعی نشست‌ها — برای بخش «سلامت سیستم» مرکز تحلیل */
+export function sessionStats() {
+  clearExpiredSessions();
+  const now = Date.now();
+  const active = [...sessions.values()].filter((session) => session.expiresAt > now);
+
+  return {
+    active: active.length,
+    /* ۹۰٪ پنجرهٔ ۱۲ ساعته — نزدیک به انقضا */
+    expiringSoon: active.filter((session) => session.expiresAt - now < 0.1 * 12 * 3_600_000).length,
+    oldest: active.length ? new Date(Math.min(...active.map((session) => session.expiresAt))).toISOString() : null,
+  };
 }
 
 /* ────────────────────────────── گزارش رویدادها ────────────────────────────── */
@@ -883,6 +917,154 @@ export function deleteBanner(id) {
 
   writeCollection('banners', banners.filter((banner) => banner.id !== id));
   return target;
+}
+
+/* ──────────────────────────── یادداشت‌های پنل ────────────────────────────
+ * دفترچهٔ شخصی هر مدیر: نکته‌ها و برنامه‌ها در دو حالت «متنی» و «چک‌لیست».
+ * یادداشت‌ها به نویسنده‌شان گره خورده‌اند (`authorId`) و هیچ‌کس یادداشت دیگری را
+ * نمی‌بیند؛ پس همهٔ توابع، شناسهٔ مدیر جاری را می‌گیرند.
+ */
+
+export const NOTE_KINDS = ['text', 'checklist'];
+
+const NOTE_MAX_BODY = 20_000;
+const NOTE_MAX_ITEMS = 200;
+
+export function listNotes({ adminId, search = '', kind = 'all', sort = 'updated' } = {}) {
+  const query = normalizeSearch(search);
+  const mine = readCollection('notes').filter((note) => note.authorId === adminId);
+
+  const filtered = mine.filter((note) => {
+    if (kind !== 'all' && note.kind !== kind) return false;
+    if (!query) return true;
+    return [note.title, note.body, ...(note.items ?? []).map((item) => item.text)]
+      .some((field) => normalizeSearch(field).includes(query));
+  });
+
+  const sorters = {
+    updated: (a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt)),
+    created: (a, b) => String(b.createdAt).localeCompare(String(a.createdAt)),
+    title: (a, b) => String(a.title).localeCompare(String(b.title), 'fa'),
+  };
+
+  /* گلچین‌شده‌ها همیشه جلوتر از بقیه می‌آیند */
+  filtered.sort((a, b) => (
+    a.pinned === b.pinned ? 0 : (a.pinned ? -1 : 1)
+  ) || (sorters[sort] ?? sorters.updated)(a, b));
+
+  const items = mine.flatMap((note) => note.items ?? []);
+
+  return {
+    notes: filtered,
+    stats: {
+      total: mine.length,
+      checklists: mine.filter((note) => note.kind === 'checklist').length,
+      pinned: mine.filter((note) => note.pinned).length,
+      doneItems: items.filter((item) => item.done).length,
+      totalItems: items.length,
+    },
+  };
+}
+
+export function getNote(id, adminId) {
+  return readCollection('notes').find((note) => note.id === id && note.authorId === adminId) ?? null;
+}
+
+function notePayload(input, existing = null) {
+  const kind = NOTE_KINDS.includes(input.kind) ? input.kind : (existing?.kind ?? 'text');
+  const title = String(input.title ?? '').trim().slice(0, 140);
+
+  const body = kind === 'text' ? String(input.body ?? '').trim().slice(0, NOTE_MAX_BODY) : '';
+  const items = kind === 'checklist'
+    ? (Array.isArray(input.items) ? input.items : [])
+        .map((item) => ({
+          id: item.id || makeId('itm'),
+          text: String(item.text ?? '').trim().slice(0, 300),
+          done: Boolean(item.done),
+        }))
+        .filter((item) => item.text)
+        .slice(0, NOTE_MAX_ITEMS)
+    : [];
+
+  if (!title && !body && items.length === 0) {
+    throw Object.assign(new Error('یادداشت خالی است؛ عنوان یا متن بنویسید'), { code: 'VALIDATION_ERROR' });
+  }
+
+  return { title, kind, body, items, pinned: Boolean(input.pinned) };
+}
+
+export function createNote(input, admin) {
+  const notes = readCollection('notes');
+  const created = nowIso();
+
+  const note = {
+    id: makeId('note'),
+    authorId: admin?.id ?? 'system',
+    authorName: admin?.name || admin?.username || 'سیستم',
+    ...notePayload(input),
+    createdAt: created,
+    updatedAt: created,
+  };
+
+  notes.unshift(note);
+  writeCollection('notes', notes);
+  return note;
+}
+
+export function updateNote(id, input, admin) {
+  const adminId = admin?.id ?? 'system';
+  const notes = readCollection('notes');
+  const index = notes.findIndex((note) => note.id === id && note.authorId === adminId);
+  if (index === -1) return null;
+
+  notes[index] = {
+    ...notes[index],
+    ...notePayload({ ...notes[index], ...input }, notes[index]),
+    updatedAt: nowIso(),
+  };
+
+  writeCollection('notes', notes);
+  return notes[index];
+}
+
+export function deleteNote(id, admin) {
+  const adminId = admin?.id ?? 'system';
+  const notes = readCollection('notes');
+  const target = notes.find((note) => note.id === id && note.authorId === adminId);
+  if (!target) return null;
+
+  writeCollection('notes', notes.filter((note) => note.id !== id));
+  return target;
+}
+
+export function setNotePinned(id, pinned, admin) {
+  const adminId = admin?.id ?? 'system';
+  const notes = readCollection('notes');
+  const index = notes.findIndex((note) => note.id === id && note.authorId === adminId);
+  if (index === -1) return null;
+
+  notes[index] = { ...notes[index], pinned: Boolean(pinned), updatedAt: nowIso() };
+  writeCollection('notes', notes);
+  return notes[index];
+}
+
+/* تیک‌زدن یک آیتم چک‌لیست ویرایش محسوب نمی‌شود، پس `updatedAt` را بالا نمی‌برد */
+export function toggleNoteItem(id, itemId, admin) {
+  const adminId = admin?.id ?? 'system';
+  const notes = readCollection('notes');
+  const index = notes.findIndex((note) => note.id === id && note.authorId === adminId);
+  if (index === -1) return null;
+
+  const note = notes[index];
+  if (!(note.items ?? []).some((item) => item.id === itemId)) return null;
+
+  notes[index] = {
+    ...note,
+    items: note.items.map((item) => (item.id === itemId ? { ...item, done: !item.done } : item)),
+  };
+
+  writeCollection('notes', notes);
+  return notes[index];
 }
 
 /* ──────────────────────────────── رسانه ──────────────────────────────── */

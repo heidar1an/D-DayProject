@@ -20,17 +20,20 @@ import AdminBanners from './views/AdminBanners';
 import AdminUsers from './views/AdminUsers';
 import AdminSettings from './views/AdminSettings';
 import AdminLogs from './views/AdminLogs';
+import AdminNotes from './views/AdminNotes';
 import AdminProfile from './views/AdminProfile';
+import AnalyticsCenter from './analytics/AnalyticsCenter';
 import {
   Button, Spinner, ToastProvider, faDate, toFa, useToast,
 } from './adminShared';
 import {
-  IconArticle, IconBanner, IconDashboard, IconLog, IconLogout, IconMedia, IconMenu,
-  IconPage, IconSettings, IconTag, IconUser,
+  IconAnalytics, IconArticle, IconBanner, IconDashboard, IconLog, IconLogout, IconMedia,
+  IconMenu, IconNote, IconPage, IconSettings, IconTag, IconUser,
 } from './adminIcons';
 
 const SECTIONS = [
   { id: 'dashboard', label: 'داشبورد', icon: IconDashboard, permission: null },
+  { id: 'analytics', label: 'مرکز تحلیل', icon: IconAnalytics, permission: 'analytics.read' },
   { id: 'articles', label: 'مقالات', icon: IconArticle, permission: 'articles.read' },
   { id: 'categories', label: 'دسته‌بندی‌ها', icon: IconTag, permission: 'articles.read' },
   { id: 'pages', label: 'صفحات', icon: IconPage, permission: 'pages.read' },
@@ -39,11 +42,12 @@ const SECTIONS = [
   { id: 'users', label: 'کاربران و نقش‌ها', icon: IconUser, permission: 'users.read' },
   { id: 'settings', label: 'تنظیمات سایت', icon: IconSettings, permission: 'settings.read' },
   { id: 'logs', label: 'گزارش رویدادها', icon: IconLog, permission: 'logs.read' },
+  { id: 'notes', label: 'یادداشت‌ها', icon: IconNote, permission: 'notes.read' },
 ];
 
 const SECTION_IDS = new Set(SECTIONS.map((section) => section.id));
 
-/* `#admin` یا `#admin/articles` یا `#admin/articles/art-1234` */
+/* `#admin` یا `#admin/articles` یا `#admin/analytics/traffic` یا `#admin/articles/art-1234` */
 function parseHashView() {
   const hash = typeof window === 'undefined' ? '' : window.location.hash;
   const match = hash.match(/^#admin(?:\/([a-z-]+))?(?:\/([^/]+))?$/);
@@ -51,6 +55,11 @@ function parseHashView() {
 
   const section = match[1];
   if (!section || !SECTION_IDS.has(section)) return { name: 'dashboard', payload: null };
+
+  /* مرکز تحلیل: پاراگراف دوم نام تب است (`#admin/analytics/traffic`) */
+  if (section === 'analytics') {
+    return { name: 'analytics', payload: match[2] ? { tab: match[2] } : null };
+  }
 
   /* در بخش مقالات، پاراگراف دوم شناسهٔ مقاله برای ویرایش است */
   if (section === 'articles' && match[2]) return { name: 'article-editor', payload: { id: match[2] } };
@@ -78,7 +87,9 @@ function AdminShell({ admin, onExit, onLogout }) {
       ? `#admin/articles/${payload.id}`
       : name === 'page-editor' && payload?.id
         ? `#admin/pages/${payload.id}`
-        : `#admin/${name}`;
+        : name === 'analytics' && payload?.tab
+          ? `#admin/analytics/${payload.tab}`
+          : `#admin/${name}`;
 
     if (window.location.hash !== hash) {
       window.history.replaceState(window.history.state, '', hash);
@@ -106,7 +117,11 @@ function AdminShell({ admin, onExit, onLogout }) {
     const syncFromHash = () => {
       const next = parseHashView();
       setView((current) => (
-        current.name === next.name && current.payload?.id === next.payload?.id ? current : next
+        current.name === next.name
+        && current.payload?.id === next.payload?.id
+        && current.payload?.tab === next.payload?.tab
+          ? current
+          : next
       ));
     };
 
@@ -129,6 +144,14 @@ function AdminShell({ admin, onExit, onLogout }) {
 
   const renderView = () => {
     switch (view.name) {
+      case 'analytics':
+        return (
+          <AnalyticsCenter
+            admin={admin}
+            tab={view.payload?.tab ?? null}
+            onTabChange={(tab) => navigate('analytics', { tab })}
+          />
+        );
       case 'articles':
         return <AdminArticles {...editorProps} />;
       case 'article-editor':
@@ -149,6 +172,8 @@ function AdminShell({ admin, onExit, onLogout }) {
         return <AdminSettings {...editorProps} />;
       case 'logs':
         return <AdminLogs {...editorProps} />;
+      case 'notes':
+        return <AdminNotes {...editorProps} />;
       case 'profile':
         return <AdminProfile admin={admin} navigate={navigate} />;
       default:

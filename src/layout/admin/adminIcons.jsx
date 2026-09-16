@@ -43,6 +43,34 @@ export function IconPage(props) {
   );
 }
 
+export function IconNote(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M6 4.5h8.5L19 9v10.5H6z" />
+      <path d="M14.5 4.5V9H19" />
+      <path d="M9 13.5h6M9 16.5h3.5" />
+    </svg>
+  );
+}
+
+export function IconList(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M9.5 6.5h10M9.5 12h10M9.5 17.5h10" />
+      <path d="m4 6 1.3 1.3L7.5 5M4 11.5 5.3 12.8 7.5 10.5M4 17l1.3 1.3L7.5 16" />
+    </svg>
+  );
+}
+
+export function IconPin({ filled = false, ...props }) {
+  return (
+    <svg {...base} fill={filled ? 'currentColor' : 'none'} {...props}>
+      <path d="M9.5 3.5h5l-.7 6 3 2.5v1.5H5.2v-1.5l3-2.5z" />
+      <path d="M12 13.5v7" />
+    </svg>
+  );
+}
+
 export function IconMedia(props) {
   return (
     <svg {...base} {...props}>
@@ -252,6 +280,35 @@ export function IconEyeOff(props) {
       <path d="M9.5 9.6A2.8 2.8 0 0 0 12 14.8c.8 0 1.5-.3 2-.8" />
       <path d="M6.3 6.6C4 8.2 2.5 12 2.5 12S6 17.5 12 17.5c1.5 0 2.8-.3 4-.9" />
       <path d="M18.4 15c1.8-1.5 3.1-3 3.1-3S18 6.5 12 6.5c-.6 0-1.2.1-1.7.2" />
+    </svg>
+  );
+}
+
+/* مرکز تحلیل — میله‌های رو به رشد */
+export function IconAnalytics(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M4 19.5h16" />
+      <path d="M7 19.5v-6.5M12 19.5V6.5M17 19.5v-9.5" />
+    </svg>
+  );
+}
+
+/* لحظه‌ای — موج ضربان */
+export function IconPulse(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M3 12h3.5l2-5 3 10 2.5-5H21" />
+    </svg>
+  );
+}
+
+/* هوش مصنوعی — جرقه */
+export function IconSpark(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M12 4l1.7 4.3L18 10l-4.3 1.7L12 16l-1.7-4.3L6 10l4.3-1.7z" />
+      <path d="M18.5 16.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z" />
     </svg>
   );
 }

@@ -55,8 +55,11 @@ database/
   adminApi.js            هندلر کامل API (مستقل از فریم‌ورک) + جدول مسیرها
   adminApiPlugin.js      پلاگین ویت برای توسعه
   contentStore.js        لایهٔ داده: CRUD، RBAC، نشست، گزارش رویداد
+  analyticsStore.js      لایهٔ دادهٔ تحلیل: رویداد، سنجهٔ درخواست، سیستم، هشدار
+  analyticsEngine.js     موتور محاسبهٔ بخش ۱–۱۰ + ریاضیات مشترک
+  analyticsInsights.js   موتور محاسبهٔ بخش ۱۱–۱۶
   sanitizeHtml.js        پاک‌ساز HTML (تک‌نسخه، مشترک سرور و کلاینت)
-  adminApi.test.mjs      تست دودی ۱۱ سنجه‌ای بدون فریم‌ورک تست
+  adminApi.test.mjs      تست دودی بدون فریم‌ورک تست
   content/*.json         دادهٔ CMS (خودکار ساخته و seed می‌شود)
 
 public/uploads/          فایل‌های آپلودی پنل (در Build کپی می‌شوند)
@@ -64,8 +67,11 @@ public/uploads/          فایل‌های آپلودی پنل (در Build کپ�
 server.js                سرور پروداکشن
 
 src/services/admin/
-  adminService.js        تنها نقطهٔ تماس UI با API
+  adminService.js        تنها نقطهٔ تماس UI با API (شامل گروه `analytics`)
   sanitizeHtml.js        پل import پاک‌ساز برای کلاینت
+
+src/services/telemetry/
+  trafficTracker.js      ردیاب مرورگر — تنها منبع «بازدید واقعی» مرکز تحلیل
 
 src/layout/admin/
   AdminLayout.jsx        دروازهٔ احراز هویت + چیدمان + روتر داخلی
@@ -86,8 +92,20 @@ src/layout/admin/
     AdminUsers.jsx       کاربران و نقش‌ها
     AdminSettings.jsx    تنظیمات سایت
     AdminLogs.jsx        گزارش رویدادها
+    AdminNotes.jsx       یادداشت‌های شخصی (متن و چک‌لیست)
     AdminProfile.jsx     حساب من / تغییر رمز
+  analytics/             مرکز تحلیل — ۱۶ بخش (پیشوند an-)
+    README.md            مستندات کامل این زیرلایه
+    AnalyticsCenter.jsx  پوسته: تب‌ها، بازهٔ زمانی، خروجی، به‌روزرسانی زنده
+    analyticsCharts.jsx  کیت نمودار SVG بدون کتابخانه
+    analyticsKit.jsx     کارت سنجه، وضعیت، «نیازمند اتصال»، جدول، خروجی
+    analytics.css        استایل زیرلایه
+    sections/            بخش‌های ۱۶گانه (۵ فایل بر پایهٔ حوزه)
 ```
+
+> **مرکز تحلیل:** زیرلایهٔ `analytics/` یک سند مستقل دارد — `analytics/README.md`.
+> خلاصه: ۱۶ بخش روی دادهٔ واقعی پروژه، بدون هیچ عدد ساختگی؛ هر سنجه‌ای که منبعش
+> وصل نیست صریحاً «نیازمند اتصال» اعلام می‌شود.
 
 ---
 
@@ -124,6 +142,13 @@ PORT=4173
 > اگر `TAPESH_ADMIN_PASSWORD` تنظیم نشود، رمز پیش‌فرض `0135` استفاده می‌شود و پنل
 > پرچم «تغییر رمز لازم است» را در صفحهٔ «حساب من» نشان می‌دهد.
 
+**متغیرهای اختیاری مرکز تحلیل** (هیچ‌کدام اجباری نیست؛ هرکدام تنظیم شود بخش وابسته
+از حالت «نیازمند اتصال» به حالت فعال می‌رود): `GA_PROPERTY_ID`, `GA_CLIENT_EMAIL`,
+`GA_PRIVATE_KEY`, `GSC_SITE_URL`, `PAGESPEED_API_KEY`, `PAYMENT_PROVIDER`,
+`PAYMENT_API_KEY`, `LLM_API_KEY`, `LLM_MODEL`, `MONITORING_API_URL`,
+`MONITORING_API_KEY`, `ALERT_WEBHOOK_URL`, `ALERT_TELEGRAM_TOKEN`,
+`ALERT_TELEGRAM_CHAT` — همه در `.env.example` توضیح داده شده‌اند.
+
 ---
 
 ## ۴. مدل داده
@@ -137,10 +162,12 @@ PORT=4173
 | `media` | `media.json` | `id, filename, originalName, mimeType, size, url, altText, createdAt, uploadedBy` |
 | `banners` | `banners.json` | `id, title, subtitle, image, buttonText, buttonUrl, isActive, sortOrder, startDate, endDate` |
 | `activity` | `activity.json` | `id, userId, userName, action, entityType, entityId, entityLabel, metadata, ip, userAgent, createdAt` |
+| `notes` | `notes.json` | `id, authorId, authorName, title, kind: 'text'\|'checklist', body, items[{id,text,done}], pinned, createdAt, updatedAt` |
 | `settings` | `settings.json` | `siteName, siteDescription, logo, favicon, email, phone, address, social{}, seo{}, integrations{}, media{}, security{}` |
 
 **ارتباط‌ها:** `articles.category → categories.id` · `articles.createdBy → admins.id` ·
-`media.id → articles.cover` (به‌صورت URL) · `activity.userId → admins.id`
+`media.id → articles.cover` (به‌صورت URL) · `activity.userId → admins.id` ·
+`notes.authorId → admins.id`
 
 **وضعیت‌ها:** `draft` (پیش‌نویس) · `published` (منتشرشده) · `archived` (بایگانی)
 
@@ -201,7 +228,30 @@ GET/POST/PUT/DELETE  /api/admin/banners[/:id]
 GET/POST/PUT/DELETE  /api/admin/users[/:id]
 GET/PUT              /api/admin/settings
 GET                  /api/admin/logs    ?search&action&page&perPage
+
+GET    /api/admin/notes                  ?search&kind&sort   → { notes, stats }
+GET    /api/admin/notes/:id
+POST   /api/admin/notes
+PUT    /api/admin/notes/:id
+POST   /api/admin/notes/:id/pin          { pinned }
+POST   /api/admin/notes/:id/items/:itemId/toggle
+DELETE /api/admin/notes/:id
+
+GET    /api/admin/analytics/sources      وضعیت اتصال ۱۲ منبع داده
+GET    /api/admin/analytics/ping         پاسخ سبک برای مانیتورینگ بیرونی
+GET    /api/admin/analytics/<section>    ?range&from&to  → ۱۶ بخش تحلیل
+GET    /api/admin/analytics/export       ?section&range   → دادهٔ تخت برای CSV/Excel
+GET    /api/admin/analytics/alerts       ?range
+POST   /api/admin/analytics/alerts
+PUT    /api/admin/analytics/alerts/:id
+DELETE /api/admin/analytics/alerts/:id
+
+POST   /api/public/analytics/collect     تلمتری مرورگر (تنها مسیر عمومی غیر-GET)
 ```
+
+**یادداشت‌ها:** هر یادداشت به `authorId` نویسنده‌اش گره خورده و فهرست هر مدیر فقط
+یادداشت‌های خودش را برمی‌گرداند؛ `stats` هم در همان پاسخ می‌آید (کل، چک‌لیست‌ها،
+گلچین‌شده‌ها، آیتم‌های انجام‌شده) تا نمای پنل به درخواست دوم نیاز نداشته باشد.
 
 **آپلود:** `POST /api/admin/media` با بدنهٔ JSON شامل `originalName`, `mimeType`,
 `data` (base64). دلیل انتخاب JSON به‌جای multipart: بدون افزودن هیچ وابستگی‌ای
@@ -220,12 +270,18 @@ GET                  /api/admin/logs    ?search&action&page&perPage
 
 | نقش | دسترسی |
 |---|---|
-| `super-admin` | همهٔ ۲۵ دسترسی |
-| `admin` | همه‌چیز جز حذف کاربر |
-| `editor` | ایجاد/ویرایش/انتشار مقاله، بارگذاری رسانه، ویرایش صفحه |
+| `super-admin` | همهٔ دسترسی‌ها |
+| `admin` | همه‌چیز جز حذف کاربر و بخش‌های حساس تحلیل (کاربران، سئو، امنیت، درآمد) |
+| `editor` | ایجاد/ویرایش/انتشار مقاله، بارگذاری رسانه، ویرایش صفحه، یادداشت‌های خودش، فقط `analytics.read` |
 
 نمونهٔ Permissionها: `articles.create`, `articles.publish`, `media.upload`,
-`users.delete`, `settings.update`, `logs.read`
+`users.delete`, `settings.update`, `logs.read`, `notes.update`
+
+**دسترسی‌های مرکز تحلیل:** `analytics.read`, `analytics.users.read`,
+`analytics.seo.read`, `analytics.security.read`, `analytics.revenue.read`,
+`analytics.alerts.manage`, `analytics.export`
+
+جزئیات کامل در `analytics/README.md`.
 
 **قواعد محافظتی در سرور:**
 - آخرین مدیر کل فعال را نمی‌توان حذف، غیرفعال یا تنزل داد.
@@ -259,8 +315,12 @@ GET                  /api/admin/logs    ?search&action&page&perPage
 node database/adminApi.test.mjs
 ```
 
-۱۱ سنجه: ورود درست، رد رمز نادرست، رد بدون نشست، رد بدون CSRF، مجوزدهی نقش‌ها،
-پاک‌سازی XSS، صفحه‌بندی سمت سرور، رد MIME غیرمجاز، ثبت گزارش رویداد.
+۳۳ سنجه: ورود درست، رد رمز نادرست، رد بدون نشست، رد بدون CSRF، مجوزدهی نقش‌ها،
+پاک‌سازی XSS، صفحه‌بندی سمت سرور، رد MIME غیرمجاز، ثبت گزارش رویداد، اعتبارسنجی و
+CRUD یادداشت، تفکیک مالکیت یادداشت‌ها بین مدیران، پذیرش/رد تلمتری عمومی، مجوزدهی
+هر بخش تحلیل، حالت «نیازمند اتصال» درآمد، بازرسی واقعی امنیت و سئو، و CRUD هشدارها.
+
+بررسی سلامت رندر ۱۶ بخش تحلیل روی سرور نیز در `analytics/README.md` توضیح داده شده است.
 
 ---
 
@@ -277,8 +337,26 @@ node database/adminApi.test.mjs
 «حساب من» → تغییر رمز عبور. برای تغییر رمز پیش‌فرض، پیش از اولین اجرا
 `TAPESH_ADMIN_PASSWORD` را در محیط تنظیم کنید.
 
+**چگونه یادداشت بنویسم؟**
+بخش «یادداشت‌ها» → «یادداشت جدید» → حالت را روی «متنی» یا «چک‌لیست» بگذارید، عنوان و
+متن/آیتم‌ها را پر کنید و ذخیره کنید. تیک آیتم‌های چک‌لیست هم روی کارت و هم در مودال
+خورده می‌شود؛ «گلچین» یادداشت را بالای فهرست نگه می‌دارد. هر مدیر فقط یادداشت‌های
+خودش را می‌بیند.
+
+**مرکز تحلیل کجاست؟**
+`/#admin/analytics` — ۱۶ تب. نمای کلی در کمتر از ۳۰ ثانیه وضعیت تپش را نشان می‌دهد:
+یک جملهٔ خلاصه، سنجه‌های کلیدی با تغییر نسبت به بازهٔ قبل، روند روزانه، و فهرست
+کارهایی که به توجه نیاز دارند. برای دیدن دلیل هر عدد، «جزئیات» روی کارت سنجه را
+بزنید تا به بخش تخصصی همان سنجه بروید.
+
+**چرا بعضی بخش‌های تحلیل خالی‌اند؟**
+چون منبع داده‌شان وصل نیست و پنل عمداً هیچ عدد ساختگی نشان نمی‌دهد. در همان کادر،
+نام متغیرهای محیطی لازم نوشته شده است — بخش «منابع دادهٔ وصل‌نشده» در پایین هر بخش
+هم فهرست کامل را می‌دهد.
+
 **چگونه داده را از نو بسازم؟**
-`rm -rf database/content` و یک درخواست به پنل.
+`rm -rf database/content` و یک درخواست به پنل. توجه: با این کار **رویدادهای تحلیل هم
+پاک می‌شوند** و تلمتری از صفر شروع می‌کند.
 
 **چگونه Deploy کنم؟**
 `npm run build` سپس `npm run start`. مسیر `database/` باید قابل نوشتن باشد و
@@ -299,6 +377,9 @@ node database/adminApi.test.mjs
 | «درخواست از منبع نامعتبر رد شد» | توکن CSRF از دست رفته؛ صفحه را رفرش کنید |
 | فایل آپلود نمی‌شود | نوع MIME در allow-list نیست یا از سقف حجم گذشته است (تنظیمات → رسانه) |
 | تصویر آپلودی در Build دیده نمی‌شود | `public/uploads/` باید هنگام `npm run build` موجود باشد |
+| نمودارهای مرکز تحلیل خالی‌اند | رویدادی ثبت نشده؛ سایت را در مرورگر باز کنید تا ردیاب شروع کند |
+| بخشی از تحلیل «نیازمند اتصال» است | رفتار عمدی — منبع دادهٔ آن سرویس وصل نیست. جزئیات در `analytics/README.md` |
+| **کل پنل هر چند ثانیه یک‌بار رفرش می‌شود** | سرور در هر درخواست `database/content/*.json` را بازنویسی می‌کند و ویت هر نوشتن در ریشه را `full-reload` می‌کند. `server.watch.ignored` در `vite.config.js` این مسیرها را کنار گذاشته است؛ اگر پوشهٔ دادهٔ تازه‌ای اضافه شد، همان‌جا اضافه‌اش کنید |
 
 ---
 
@@ -312,12 +393,13 @@ node database/adminApi.test.mjs
 | ۴ دیتابیس (مدل، seed، نمایه) | ✅ |
 | ۵ Backend (احراز هویت، مجوز، API، اعتبارسنجی، گزارش) | ✅ |
 | ۶ رابط کاربری پنل | ✅ |
-| ۷ اتصال Frontend سایت به CMS | ⏳ فاز بعد |
-| ۸ بازبینی امنیتی نهایی | ⏳ فاز بعد |
-| ۹ تست یکپارچه | 🟡 تست API انجام شده؛ تست UI دستی |
-| ۱۰ مستندات نهایی | 🟡 همین سند |
+| ۷ مرکز تحلیل (۱۶ بخش، تلمتری، تحلیلگر، هشدار، خروجی) | ✅ |
+| ۸ اتصال Frontend سایت به CMS | ⏳ فاز بعد |
+| ۹ بازبینی امنیتی نهایی | ⏳ فاز بعد |
+| ۱۰ تست یکپارچه | 🟡 ۳۳ سنجهٔ API + رندر ۱۶ بخش تحلیل؛ تست تعاملی UI دستی |
+| ۱۱ مستندات نهایی | 🟡 همین سند + `analytics/README.md` |
 
-**فاز ۷ (کار بعدی):** سرویس `articlesService.js` طوری گسترش می‌یابد که مقاله‌های
+**فاز ۸ (کار بعدی):** سرویس `articlesService.js` طوری گسترش می‌یابد که مقاله‌های
 منتشرشدهٔ CMS را با مقاله‌های ایستای فعلی ادغام کند (CMS اولویت دارد) و
 `ArticlePage` در صورت وجود `contentHtml` همان را رندر کند. تغییرات فقط افزایشی
 است و در صورت نبود API، سایت دقیقاً مثل امروز کار می‌کند.

@@ -196,6 +196,90 @@ export const logs = {
   list: (params) => get(`/logs${toQuery(params)}`),
 };
 
+/* ──────────────────────────── یادداشت‌های پنل ──────────────────────────── */
+
+export const notes = {
+  list: (params) => get(`/notes${toQuery(params)}`),
+  get: (id) => get(`/notes/${encodeURIComponent(id)}`),
+  create: (payload) => post('/notes', payload),
+  update: (id, payload) => put(`/notes/${encodeURIComponent(id)}`, payload),
+  setPinned: (id, pinned) => post(`/notes/${encodeURIComponent(id)}/pin`, { pinned }),
+  toggleItem: (id, itemId) => post(`/notes/${encodeURIComponent(id)}/items/${encodeURIComponent(itemId)}/toggle`),
+  remove: (id) => del(`/notes/${encodeURIComponent(id)}`),
+};
+
+/* ───────────────────────────── مرکز تحلیل ─────────────────────────────
+ *
+ * ۱۶ بخش، هرکدام یک Endpoint با Permission مستقل. بخش‌های حساس (کاربران، SEO،
+ * مالی، امنیت) مجوز جدا دارند و به نقش غیرمجاز داده نمی‌شوند؛ کلاینت هم فقط
+ * بخش‌های مجاز را می‌سازد تا درخواست بی‌دلیل ۴۰۳ نرود.
+ *
+ * پارامتر بازه: `{ range, from, to }` — همان قرارداد سرور.
+ */
+
+/* برچسب بازه‌ها برای انتخابگر تاریخ — باید با RANGES سرور یکی بماند */
+export const ANALYTICS_RANGES = [
+  { key: 'today', label: 'امروز' },
+  { key: '7d', label: '۷ روز اخیر' },
+  { key: '30d', label: '۳۰ روز اخیر' },
+  { key: '90d', label: '۹۰ روز اخیر' },
+  { key: 'ytd', label: 'امسال' },
+  { key: 'custom', label: 'بازهٔ سفارشی' },
+];
+
+/*
+ * فهرست بخش‌ها — ترتیب همین آرایه، ترتیب منو و تب‌هاست. `permission` تعیین
+ * می‌کند چه کسی بخش را می‌بیند و `label` عنوان فارسی آن است.
+ */
+export const ANALYTICS_SECTIONS = [
+  { key: 'overview', label: 'نمای کلی', permission: 'analytics.read' },
+  { key: 'traffic', label: 'ترافیک', permission: 'analytics.read' },
+  { key: 'users', label: 'کاربران', permission: 'analytics.users.read' },
+  { key: 'education', label: 'آموزش', permission: 'analytics.read' },
+  { key: 'seo', label: 'سئو', permission: 'analytics.seo.read' },
+  { key: 'performance', label: 'عملکرد فنی', permission: 'analytics.read' },
+  { key: 'security', label: 'امنیت', permission: 'analytics.security.read' },
+  { key: 'revenue', label: 'درآمد', permission: 'analytics.revenue.read' },
+  { key: 'products', label: 'محصولات', permission: 'analytics.read' },
+  { key: 'content', label: 'محتوا', permission: 'analytics.read' },
+  { key: 'marketing', label: 'بازاریابی', permission: 'analytics.read' },
+  { key: 'system', label: 'سلامت سیستم', permission: 'analytics.read' },
+  { key: 'errors', label: 'خطاها', permission: 'analytics.read' },
+  { key: 'realtime', label: 'لحظه‌ای', permission: 'analytics.read' },
+  { key: 'alerts', label: 'هشدارها', permission: 'analytics.read' },
+  { key: 'ai', label: 'تحلیلگر هوشمند', permission: 'analytics.read' },
+];
+
+const rangeQuery = (params = {}) => toQuery({
+  range: params.range,
+  from: params.from,
+  to: params.to,
+});
+
+export const analytics = {
+  /* هر بخش: { section, range, data } */
+  section: (name, params) => get(`/analytics/${encodeURIComponent(name)}${rangeQuery(params)}`),
+
+  /* وضعیت اتصال منابع دادهٔ بیرونی + فهرست مجوزها */
+  sources: (options) => get('/analytics/sources', options),
+
+  /* Monitoring API — پاسخ سبک برای ابزارهای پایش */
+  ping: (options) => get('/analytics/ping', options),
+
+  /* دادهٔ تخت برای خروجی CSV/Excel — مجوز جدا دارد */
+  export: (name, params) => get(`/analytics/export${toQuery({ section: name, ...params })}`),
+
+  alerts: {
+    list: (params) => get(`/analytics/alerts${rangeQuery(params)}`),
+    create: (payload) => post('/analytics/alerts', payload),
+    update: (id, payload) => put(`/analytics/alerts/${encodeURIComponent(id)}`, payload),
+    remove: (id) => del(`/analytics/alerts/${encodeURIComponent(id)}`),
+  },
+
+  /* پاک‌سازی رویدادهای ثبت‌شده — ابزار توسعه */
+  reset: () => post('/analytics/reset'),
+};
+
 /* ───────────────────── خواندن فایل به‌صورت base64 (برای آپلود) ───────────────────── */
 
 export function readFileAsBase64(file) {
@@ -208,6 +292,6 @@ export function readFileAsBase64(file) {
 }
 
 export default {
-  auth, articles, categories, pages, media, banners, users, settings, logs,
-  getStats, getMeta, toQuery, readFileAsBase64, AdminApiError,
+  auth, articles, categories, pages, media, banners, users, settings, logs, notes,
+  analytics, getStats, getMeta, toQuery, readFileAsBase64, AdminApiError,
 };

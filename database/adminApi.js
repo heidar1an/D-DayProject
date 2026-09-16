@@ -28,6 +28,7 @@ import {
   createArticle,
   createBanner,
   createMedia,
+  createNote,
   createPage,
   createSession,
   dashboardStats,
@@ -36,10 +37,12 @@ import {
   deleteBanner,
   deleteCategory,
   deleteMedia,
+  deleteNote,
   deletePage,
   destroySession,
   ensureStore,
   getArticle,
+  getNote,
   getPage,
   getSession,
   hasPermission,
@@ -49,6 +52,7 @@ import {
   listBanners,
   listCategories,
   listMedia,
+  listNotes,
   listPages,
   logActivity,
   publicAdmin,
@@ -58,13 +62,53 @@ import {
   readSettings,
   saveCategory,
   setArticleStatus,
+  setNotePinned,
+  toggleNoteItem,
   updateAdmin,
   updateArticle,
   updateBanner,
   updateMedia,
+  updateNote,
   updatePage,
   writeSettings,
 } from './contentStore.js';
+
+import {
+  allowCollect,
+  clearEvents,
+  dataSources,
+  deleteAlert,
+  listAlerts,
+  recordApiRequest,
+  recordEvents,
+  recordFailedLogin,
+  requestMetrics,
+  saveAlert,
+  systemMetrics,
+} from './analyticsStore.js';
+
+import {
+  buildContext,
+  contentSection,
+  educationSection,
+  overviewSection,
+  performanceSection,
+  productsSection,
+  revenueSection,
+  securitySection,
+  seoSection,
+  trafficSection,
+  usersSection,
+} from './analyticsEngine.js';
+
+import {
+  aiSection,
+  alertsSection,
+  errorsSection,
+  marketingSection,
+  realtimeSection,
+  systemSection,
+} from './analyticsInsights.js';
 
 export const SESSION_COOKIE = 'tapesh_admin_session';
 export const CSRF_HEADER = 'x-tapesh-csrf';
@@ -217,6 +261,49 @@ function matchRoute(pathname, pattern) {
   return params;
 }
 
+/* ───────────────────────────── مرکز تحلیل ───────────────────────────── */
+
+/*
+ * هر بخش تحلیل یک Permission مستقل دارد تا دادهٔ حساس (کاربران، مالی، امنیتی)
+ * به نقش‌های غیرمجاز داده نشود. جدول‌محور تعریف شده تا افزودن بخش تازه یک خط باشد.
+ */
+const ANALYTICS_ROUTES = [
+  ['overview', 'analytics.read', overviewSection],
+  ['traffic', 'analytics.read', trafficSection],
+  ['users', 'analytics.users.read', usersSection],
+  ['education', 'analytics.read', educationSection],
+  ['seo', 'analytics.seo.read', seoSection],
+  ['performance', 'analytics.read', performanceSection],
+  ['security', 'analytics.security.read', securitySection],
+  ['revenue', 'analytics.revenue.read', revenueSection],
+  ['products', 'analytics.read', productsSection],
+  ['content', 'analytics.read', contentSection],
+  ['marketing', 'analytics.read', marketingSection],
+  ['system', 'analytics.read', systemSection],
+  ['errors', 'analytics.read', errorsSection],
+  ['realtime', 'analytics.read', realtimeSection],
+  ['alerts', 'analytics.read', alertsSection],
+  ['ai', 'analytics.read', aiSection],
+];
+
+const ANALYTICS_SECTION_MAP = Object.fromEntries(ANALYTICS_ROUTES.map(([name, , handler]) => [name, handler]));
+
+/* یک context برای هر درخواست — خواندن فایل‌ها تکرار نمی‌شود */
+function analyticsContext(ctx) {
+  return buildContext({
+    range: ctx.query.get('range') ?? '30d',
+    from: ctx.query.get('from') ?? null,
+    to: ctx.query.get('to') ?? null,
+  });
+}
+
+/* آیا درخواست روی HTTPS رسیده است؟ برای گزارش واقعی وضعیت امنیتی */
+function isSecureRequest(request) {
+  const proto = request.headers?.['x-forwarded-proto'];
+  if (typeof proto === 'string' && proto) return proto.split(',')[0].trim() === 'https';
+  return Boolean(request.socket?.encrypted);
+}
+
 /* [method, pattern, permission|null, handler] */
 const ROUTES = [
   /* احراز هویت */
@@ -229,9 +316,24 @@ const ROUTES = [
     const result = authenticate({ username, password });
 
     if (result.error === 'locked') {
+      recordFailedLogin({
+        username,
+        ip: clientIp(ctx.request),
+        userAgent: ctx.request.headers?.['user-agent'] ?? '',
+        reason: 'locked',
+      });
       fail('RATE_LIMITED', `تلاش‌های ناموفق زیاد بوده است؛ ${result.retryAfter} ثانیه دیگر تلاش کنید`);
     }
-    if (result.error) fail('INVALID_CREDENTIALS', 'نام کاربری یا رمز عبور نادرست است');
+    if (result.error) {
+      /* ورود ناموفق واقعی ثبت می‌شود تا مرکز امنیت دادهٔ واقعی داشته باشد */
+      recordFailedLogin({
+        username,
+        ip: clientIp(ctx.request),
+        userAgent: ctx.request.headers?.['user-agent'] ?? '',
+        reason: 'invalid-credentials',
+      });
+      fail('INVALID_CREDENTIALS', 'نام کاربری یا رمز عبور نادرست است');
+    }
 
     const session = createSession(result.admin.id, {
       userAgent: ctx.request.headers?.['user-agent'] ?? '',
@@ -573,6 +675,66 @@ const ROUTES = [
     return { deleted: admin.id };
   }],
 
+  /* یادداشت‌های پنل — دفترچهٔ شخصی هر مدیر (فقط یادداشت‌های خودش) */
+  ['GET', '/api/admin/notes', 'notes.read', async (ctx) => listNotes({
+    adminId: ctx.admin.id,
+    search: ctx.query.get('search') ?? '',
+    kind: ctx.query.get('kind') ?? 'all',
+    sort: ctx.query.get('sort') ?? 'updated',
+  })],
+
+  ['GET', '/api/admin/notes/:id', 'notes.read', async (ctx) => {
+    const note = getNote(ctx.params.id, ctx.admin.id);
+    if (!note) fail('NOT_FOUND', 'یادداشت پیدا نشد');
+    return { note };
+  }],
+
+  ['POST', '/api/admin/notes', 'notes.create', async (ctx) => {
+    const note = createNote(ctx.body, ctx.admin);
+    logActivity({
+      admin: ctx.admin, action: 'note.created', entityType: 'note',
+      entityId: note.id, entityLabel: note.title || 'یادداشت بی‌عنوان',
+      metadata: { kind: note.kind },
+      ip: clientIp(ctx.request),
+    });
+    return { note };
+  }],
+
+  ['PUT', '/api/admin/notes/:id', 'notes.update', async (ctx) => {
+    const note = updateNote(ctx.params.id, ctx.body, ctx.admin);
+    if (!note) fail('NOT_FOUND', 'یادداشت پیدا نشد');
+    logActivity({
+      admin: ctx.admin, action: 'note.updated', entityType: 'note',
+      entityId: note.id, entityLabel: note.title || 'یادداشت بی‌عنوان',
+      metadata: { kind: note.kind },
+      ip: clientIp(ctx.request),
+    });
+    return { note };
+  }],
+
+  ['POST', '/api/admin/notes/:id/pin', 'notes.update', async (ctx) => {
+    const note = setNotePinned(ctx.params.id, ctx.body.pinned, ctx.admin);
+    if (!note) fail('NOT_FOUND', 'یادداشت پیدا نشد');
+    return { note };
+  }],
+
+  ['POST', '/api/admin/notes/:id/items/:itemId/toggle', 'notes.update', async (ctx) => {
+    const note = toggleNoteItem(ctx.params.id, ctx.params.itemId, ctx.admin);
+    if (!note) fail('NOT_FOUND', 'آیتم چک‌لیست پیدا نشد');
+    return { note };
+  }],
+
+  ['DELETE', '/api/admin/notes/:id', 'notes.delete', async (ctx) => {
+    const note = deleteNote(ctx.params.id, ctx.admin);
+    if (!note) fail('NOT_FOUND', 'یادداشت پیدا نشد');
+    logActivity({
+      admin: ctx.admin, action: 'note.deleted', entityType: 'note',
+      entityId: note.id, entityLabel: note.title || 'یادداشت بی‌عنوان',
+      ip: clientIp(ctx.request),
+    });
+    return { deleted: note.id };
+  }],
+
   /* تنظیمات */
   ['GET', '/api/admin/settings', 'settings.read', async () => ({ settings: readSettings() })],
 
@@ -601,6 +763,100 @@ const ROUTES = [
     page: ctx.query.get('page') ?? 1,
     perPage: ctx.query.get('perPage') ?? 15,
   })],
+
+  /* ───────────────────────── مرکز تحلیل ───────────────────────── */
+
+  /* منابع داده — شفاف‌ترین بخش: کدام منبع وصل است و کدام نه */
+  ['GET', '/api/admin/analytics/sources', 'analytics.read', async () => ({
+    sources: dataSources(),
+    permissions: { ...PERMISSIONS },
+  })],
+
+  /* Monitoring API — برای ابزارهای مانیتورینگ بیرونی */
+  ['GET', '/api/admin/analytics/ping', 'analytics.read', async () => {
+    const system = systemMetrics();
+    const requests = requestMetrics();
+    return {
+      status: requests.errorRate >= 15 ? 'critical' : requests.errorRate >= 5 ? 'warn' : 'healthy',
+      uptimeSeconds: system.server.uptimeSeconds,
+      cpuPercent: system.cpu.usedPercent,
+      processRssMb: Math.round(system.memory.processRssBytes / 1048576),
+      memoryUsedPercent: system.memory.usedPercent,
+      diskUsedPercent: system.disk?.usedPercent ?? null,
+      api: { total: requests.total, errorRate: requests.errorRate, averageMs: requests.averageMs, rpm: requests.rpm },
+      checkedAt: new Date().toISOString(),
+    };
+  }],
+
+  /* هر بخش یک Route با Permission مستقل — بخش حساس به نقش غیرمجاز داده نمی‌شود */
+  ...ANALYTICS_ROUTES.map(([name, permission, handler]) => [
+    'GET',
+    `/api/admin/analytics/${name}`,
+    permission,
+    async (ctx) => {
+      const context = analyticsContext(ctx);
+      const data = await handler(context, { secure: isSecureRequest(ctx.request) });
+      return { section: name, range: context.resolved, data };
+    },
+  ]),
+
+  /* دادهٔ خروجی (Export) — یک پاسخ تخت برای CSV/Excel سمت کلاینت */
+  ['GET', '/api/admin/analytics/export', 'analytics.export', async (ctx) => {
+    const context = analyticsContext(ctx);
+    const section = String(ctx.query.get('section') ?? 'traffic');
+    const handler = ANALYTICS_SECTION_MAP[section];
+    if (!handler) fail('VALIDATION_ERROR', 'بخش خروجی نامعتبر است');
+
+    const data = await handler(context, { secure: isSecureRequest(ctx.request) });
+    return { section, range: context.resolved, data };
+  }],
+
+  /* هشدارها */
+  ['GET', '/api/admin/analytics/alerts', 'analytics.read', async (ctx) => {
+    const context = analyticsContext(ctx);
+    return alertsSection(context);
+  }],
+
+  ['POST', '/api/admin/analytics/alerts', 'analytics.alerts.manage', async (ctx) => {
+    const alert = saveAlert(ctx.body, null, ctx.admin);
+    logActivity({
+      admin: ctx.admin, action: 'alert.created', entityType: 'alert',
+      entityId: alert.id, entityLabel: alert.name,
+      metadata: { metric: alert.metric, threshold: alert.threshold },
+      ip: clientIp(ctx.request),
+    });
+    return { alert };
+  }],
+
+  ['PUT', '/api/admin/analytics/alerts/:id', 'analytics.alerts.manage', async (ctx) => {
+    const alert = saveAlert(ctx.body, ctx.params.id, ctx.admin);
+    if (!alert) fail('NOT_FOUND', 'هشدار پیدا نشد');
+    logActivity({
+      admin: ctx.admin, action: 'alert.updated', entityType: 'alert',
+      entityId: alert.id, entityLabel: alert.name, ip: clientIp(ctx.request),
+    });
+    return { alert };
+  }],
+
+  ['DELETE', '/api/admin/analytics/alerts/:id', 'analytics.alerts.manage', async (ctx) => {
+    const alert = deleteAlert(ctx.params.id);
+    if (!alert) fail('NOT_FOUND', 'هشدار پیدا نشد');
+    logActivity({
+      admin: ctx.admin, action: 'alert.deleted', entityType: 'alert',
+      entityId: alert.id, entityLabel: alert.name, ip: clientIp(ctx.request),
+    });
+    return { deleted: alert.id };
+  }],
+
+  /* پاک‌سازی رویدادها — ابزار توسعه، فقط برای مدیر کل */
+  ['POST', '/api/admin/analytics/reset', 'analytics.alerts.manage', async (ctx) => {
+    const result = clearEvents();
+    logActivity({
+      admin: ctx.admin, action: 'analytics.reset', entityType: 'analytics',
+      entityId: 'events', entityLabel: 'پاک‌سازی رویدادهای تحلیل', ip: clientIp(ctx.request),
+    });
+    return result;
+  }],
 ];
 
 /* [pattern, handler] — مسیرهای عمومی سایت، بدون احراز هویت */
@@ -621,6 +877,12 @@ const MUTATING = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 const PUBLIC_ADMIN_PATHS = new Set(['/api/admin/auth/login']);
 
 /*
+ * مسیرهایی که درخواست‌هایشان شمرده نمی‌شود: پنل هر ۱۰ ثانیه «لحظه‌ای» را
+ * می‌خواند؛ اگر این درخواست‌ها در سنجه‌ها بیایند، اندازه‌گیری خودش را آلوده می‌کند.
+ */
+const NOT_MEASURED_PREFIXES = ['/api/admin/analytics'];
+
+/*
  * خروجی: true اگر درخواست مدیریت شد، false اگر به لایهٔ بعدی (مثلاً فایل استاتیک) واگذار شود.
  */
 export async function handleApi(request, response) {
@@ -631,6 +893,9 @@ export async function handleApi(request, response) {
   const isPublicApi = pathname === '/api/public' || pathname.startsWith('/api/public/');
   if (!isAdminApi && !isPublicApi) return false;
 
+  const startedAt = Date.now();
+  let caught = null;
+
   response.setHeader('Referrer-Policy', 'same-origin');
 
   try {
@@ -638,6 +903,27 @@ export async function handleApi(request, response) {
 
     /* ── مسیرهای عمومی ── */
     if (isPublicApi) {
+      /* تلمتری مرورگر — تنها مسیر عمومی غیر-GET، با محدودیت نرخ */
+      if (pathname === '/api/public/analytics/collect') {
+        if (request.method !== 'POST') fail('VALIDATION_ERROR', 'این مسیر فقط POST می‌پذیرد');
+
+        const gate = allowCollect(clientIp(request));
+        if (!gate.allowed) {
+          fail('RATE_LIMITED', `درخواست بیش از حد مجاز؛ ${gate.retryAfter} ثانیه دیگر تلاش کنید`);
+        }
+
+        const body = await readBody(request, 64 * 1024);
+        const batch = Array.isArray(body?.events)
+          ? body.events.slice(0, 50)
+          : [body?.event].filter(Boolean);
+        if (!batch.length) fail('VALIDATION_ERROR', 'رویدادی ارسال نشد');
+
+        const userAgent = request.headers?.['user-agent'] ?? '';
+        const result = recordEvents(batch.map((event) => ({ ...event, userAgent: event.userAgent || userAgent })));
+        ok(response, result, 202);
+        return true;
+      }
+
       for (const [pattern, handler] of PUBLIC_ROUTES) {
         const params = matchRoute(pathname, pattern);
         if (!params) continue;
@@ -695,9 +981,20 @@ export async function handleApi(request, response) {
     ok(response, data);
     return true;
   } catch (error) {
+    caught = error;
     sendError(response, error);
     return true;
   } finally {
+    /* سنجهٔ واقعی درخواست — خطاها هم ثبت می‌شوند تا بخش «خطاها» داده داشته باشد */
+    if (!NOT_MEASURED_PREFIXES.some((prefix) => pathname.startsWith(prefix))) {
+      recordApiRequest({
+        path: pathname,
+        method: request.method,
+        status: response.statusCode,
+        durationMs: Date.now() - startedAt,
+        error: caught,
+      });
+    }
     clearExpiredSessions();
   }
 }

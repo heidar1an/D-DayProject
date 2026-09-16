@@ -438,7 +438,10 @@ export function useAsync(loader, deps = [], { immediate = true } = {}) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 
-  return { ...state, reload: run, setData: (data) => setState((current) => ({ ...current, data })) };
+  /* پایدار است تا در آرایهٔ وابستگی افکت‌ها قابل استفاده باشد */
+  const setData = useCallback((data) => setState((current) => ({ ...current, data })), []);
+
+  return { ...state, reload: run, setData };
 }
 
 /* تبدیل خطای سرور به نقشهٔ خطای هر فیلد برای فرم‌ها */

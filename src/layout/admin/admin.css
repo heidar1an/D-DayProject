@@ -1793,6 +1793,226 @@
   text-align: left;
 }
 
+/* ───────────────────────────── یادداشت‌ها ───────────────────────────── */
+
+.ad-notegrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 1rem;
+}
+
+.ad-notecard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1rem 1.05rem;
+  border-radius: var(--ad-radius);
+  background: var(--ad-surface-2);
+  border: 1px solid var(--ad-border);
+  transition: border-color 0.16s ease;
+}
+
+.ad-notecard:hover {
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.ad-notecard.is-pinned {
+  border-color: rgba(224, 180, 92, 0.35);
+}
+
+.ad-notecard__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.ad-notekind {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--ad-muted);
+}
+
+.ad-notekind--text { color: var(--ad-blue); }
+.ad-notekind--checklist { color: var(--ad-green); }
+
+.ad-notecard__title {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  text-align: right;
+  font-family: 'Doran', Tahoma, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ad-text);
+  cursor: pointer;
+  transition: color 0.16s ease;
+}
+
+.ad-notecard__title:hover {
+  color: var(--ad-accent);
+}
+
+.ad-notecard__body {
+  margin: 0;
+  color: var(--ad-muted);
+  font-size: 0.79rem;
+  line-height: 1.95;
+  white-space: pre-wrap;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+}
+
+.ad-notecheck {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.ad-notecheck li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.79rem;
+  line-height: 1.7;
+  color: #cfcfd4;
+}
+
+.ad-notecheck li.is-done,
+.ad-notecheck li span.is-done {
+  color: var(--ad-muted-2);
+  text-decoration: line-through;
+}
+
+.ad-notecheck__rest {
+  color: var(--ad-muted-2) !important;
+  font-size: 0.72rem !important;
+}
+
+.ad-notecheck__tick {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  margin-top: 0.1rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--ad-border);
+  background: transparent;
+  color: transparent;
+  cursor: pointer;
+  transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+}
+
+.ad-notecheck__tick:hover:not(:disabled) {
+  border-color: var(--ad-green);
+  color: rgba(97, 209, 146, 0.5);
+}
+
+.ad-notecheck__tick.is-done {
+  background: var(--ad-green-soft);
+  border-color: rgba(97, 209, 146, 0.5);
+  color: var(--ad-green);
+}
+
+.ad-notecheck__tick:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.ad-notecard__foot {
+  margin-top: auto;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--ad-border);
+}
+
+.ad-progress {
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.ad-progress__bar {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--ad-green);
+  transition: width 0.4s ease;
+}
+
+.ad-notecard__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  font-size: 0.68rem;
+  color: var(--ad-muted-2);
+}
+
+.ad-kindswitch {
+  display: inline-flex;
+  gap: 0.3rem;
+  padding: 0.25rem;
+  margin-bottom: 1rem;
+  border-radius: 0.9rem;
+  background: var(--ad-surface-2);
+  border: 1px solid var(--ad-border);
+}
+
+.ad-kindswitch__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 0;
+  border-radius: 0.7rem;
+  padding: 0.5rem 0.95rem;
+  background: transparent;
+  color: var(--ad-muted);
+  font-family: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.16s ease, color 0.16s ease;
+}
+
+.ad-kindswitch__item.is-active {
+  background: var(--ad-accent-soft);
+  color: #cbbcf5;
+}
+
+.ad-checklist {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.ad-checklist__row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.ad-checklist__row .ad-notecheck__tick {
+  margin-top: 0;
+}
+
+.ad-checklist__row .ad-input {
+  flex: 1;
+}
+
 /* ───────────────────────────── واکنش‌گرایی ───────────────────────────── */
 
 @media (max-width: 1100px) {

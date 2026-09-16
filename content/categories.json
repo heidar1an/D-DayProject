@@ -1,0 +1,52 @@
+[
+  {
+    "id": "basic-sciences",
+    "label": "علوم پایه",
+    "accent": "blue"
+  },
+  {
+    "id": "physiology",
+    "label": "فیزیولوژی",
+    "accent": "lavender"
+  },
+  {
+    "id": "anatomy",
+    "label": "آناتومی",
+    "accent": "purple"
+  },
+  {
+    "id": "biochemistry",
+    "label": "بیوشیمی",
+    "accent": "sky"
+  },
+  {
+    "id": "microbiology",
+    "label": "میکروب‌شناسی",
+    "accent": "green"
+  },
+  {
+    "id": "immunology",
+    "label": "ایمنی‌شناسی",
+    "accent": "mint"
+  },
+  {
+    "id": "pharmacology",
+    "label": "داروشناسی",
+    "accent": "copper"
+  },
+  {
+    "id": "study-skills",
+    "label": "مهارت‌های مطالعه",
+    "accent": "sage"
+  },
+  {
+    "id": "olympiad",
+    "label": "المپیاد",
+    "accent": "gold"
+  },
+  {
+    "id": "lifestyle",
+    "label": "سبک زندگی دانشجویی",
+    "accent": "mint"
+  }
+]

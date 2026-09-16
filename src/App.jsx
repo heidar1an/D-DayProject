@@ -40,7 +40,9 @@ function ArticlesRoute({ articleSlug }) {
 }
 import { getLatestArticles } from './services/articles/articlesService';
 import { clearStoredUser, getDisplayName, getStoredUser, loginUser, saveUserRecord } from './services/userStorage';
+import { identify, startTracking, trackLogin, trackLogout, trackSignup } from './services/telemetry/trafficTracker';
 import './layout/dashboard/dashboard.css';
+import './layout/admin/analytics/analytics.css';
 
 const productCards = [
   {
@@ -954,6 +956,20 @@ function App() {
   const [userData, setUserData] = useState(() => getStoredUser());
   const isOnline = useOnlineStatus();
 
+  /*
+   * ردیاب ترافیک — تنها منبع «بازدید واقعی» مرکز تحلیل در پنل.
+   * یک‌بار در کل عمر اپ روشن می‌شود (خودش idempotent است) و صفحهٔ اول را
+   * بی‌درنگ ثبت می‌کند. اگر کاربر Do-Not-Track بفرستد، هیچ‌چیز ثبت نمی‌شود.
+   */
+  useEffect(() => {
+    startTracking();
+  }, []);
+
+  /* هویت کاربر با ورود/خروج عوض می‌شود؛ فقط شبه‌نام یک‌طرفه به سرور می‌رود */
+  useEffect(() => {
+    identify(userData);
+  }, [userData]);
+
   const closeMenu = () => setMenuOpen(false);
   const openAuth = (event) => {
     event.preventDefault();
@@ -1213,6 +1229,8 @@ function App() {
 
   /* خروج از حساب: فقط سشن پاک می‌شود تا حساب کاربر برای ورود بعدی باقی بماند */
   const handleLogout = () => {
+    trackLogout();
+    identify(null);
     clearStoredUser();
     setUserData(null);
     window.history.replaceState(getRouteState('home'), '', getRouteUrl('home'));
@@ -1269,8 +1287,12 @@ function App() {
     return (
       <AuthPage
         onBack={closeAuth}
-        onLoginSuccess={openDashboard}
+        onLoginSuccess={(user) => {
+          trackLogin();
+          openDashboard(user);
+        }}
         onRegisterSuccess={(user) => {
+          trackSignup();
           setUserData(user);
           openOnboarding();
         }}
