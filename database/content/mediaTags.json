@@ -1,0 +1,167 @@
+[
+  {
+    "id": "tag-seed1",
+    "kind": "topic",
+    "label": "فیزیولوژی",
+    "slug": "فیزیولوژی",
+    "color": "#937fcd",
+    "description": "",
+    "usageCount": 3,
+    "createdAt": "2026-09-16T11:19:33.036Z",
+    "seed": true
+  },
+  {
+    "id": "tag-seed2",
+    "kind": "topic",
+    "label": "آناتومی",
+    "slug": "آناتومی",
+    "color": "#5b8cc7",
+    "description": "",
+    "usageCount": 3,
+    "createdAt": "2026-09-16T11:19:33.036Z",
+    "seed": true
+  },
+  {
+    "id": "tag-seed3",
+    "kind": "topic",
+    "label": "بیوشیمی",
+    "slug": "بیوشیمی",
+    "color": "#61d192",
+    "description": "",
+    "usageCount": 3,
+    "createdAt": "2026-09-16T11:19:33.036Z",
+    "seed": true
+  },
+  {
+    "id": "tag-seed4",
+    "kind": "topic",
+    "label": "باکتری‌شناسی",
+    "slug": "باکتریشناسی",
+    "color": "#e0b45c",
+    "description": "",
+    "usageCount": 3,
+    "createdAt": "2026-09-16T11:19:33.036Z",
+    "seed": true
+  },
+  {
+    "id": "tag-seed5",
+    "kind": "topic",
+    "label": "علوم پایه",
+    "slug": "علوم-پایه",
+    "color": "#ab8e7c",
+    "description": "",
+    "usageCount": 2,
+    "createdAt": "2026-09-16T11:19:33.036Z",
+    "seed": true
+  },
+  {
+    "id": "tag-seed6",
+    "kind": "topic",
+    "label": "آزمون",
+    "slug": "آزمون",
+    "color": "#e26d6d",
+    "description": "",
+    "usageCount": 2,
+    "createdAt": "2026-09-16T11:19:33.036Z",
+    "seed": true
+  },
+  {
+    "id": "tag-seed7",
+    "kind": "topic",
+    "label": "مطالعات پزشکی",
+    "slug": "مطالعات-پزشکی",
+    "color": "#7cbf8f",
+    "description": "",
+    "usageCount": 2,
+    "createdAt": "2026-09-16T11:19:33.036Z",
+    "seed": true
+  },
+  {
+    "id": "tag-seed8",
+    "kind": "topic",
+    "label": "زندگی دانشجویی",
+    "slug": "زندگی-دانشجویی",
+    "color": "#c39a6b",
+    "description": "",
+    "usageCount": 2,
+    "createdAt": "2026-09-16T11:19:33.036Z",
+    "seed": true
+  },
+  {
+    "id": "tag-seed9",
+    "kind": "topic",
+    "label": "اخبار تپش",
+    "slug": "اخبار-تپش",
+    "color": "#8f9aa8",
+    "description": "",
+    "usageCount": 2,
+    "createdAt": "2026-09-16T11:19:33.036Z",
+    "seed": true
+  },
+  {
+    "id": "tag-seed10",
+    "kind": "topic",
+    "label": "معرفی محصول",
+    "slug": "معرفی-محصول",
+    "color": "#d98b6a",
+    "description": "",
+    "usageCount": 2,
+    "createdAt": "2026-09-16T11:19:33.036Z",
+    "seed": true
+  },
+  {
+    "id": "tag-seed11",
+    "kind": "hashtag",
+    "label": "tapesh",
+    "slug": "tapesh",
+    "color": "",
+    "description": "",
+    "usageCount": 0,
+    "createdAt": "2026-09-16T11:19:33.036Z",
+    "seed": true
+  },
+  {
+    "id": "tag-seed12",
+    "kind": "hashtag",
+    "label": "علوم_پایه",
+    "slug": "علومپایه",
+    "color": "",
+    "description": "",
+    "usageCount": 0,
+    "createdAt": "2026-09-16T11:19:33.036Z",
+    "seed": true
+  },
+  {
+    "id": "tag-seed13",
+    "kind": "hashtag",
+    "label": "آزمون_علوم_پزشکی",
+    "slug": "آزمونعلومپزشکی",
+    "color": "",
+    "description": "",
+    "usageCount": 0,
+    "createdAt": "2026-09-16T11:19:33.036Z",
+    "seed": true
+  },
+  {
+    "id": "tag-seed14",
+    "kind": "hashtag",
+    "label": "فیزیولوژی",
+    "slug": "فیزیولوژی",
+    "color": "",
+    "description": "",
+    "usageCount": 0,
+    "createdAt": "2026-09-16T11:19:33.036Z",
+    "seed": true
+  },
+  {
+    "id": "tag-seed15",
+    "kind": "hashtag",
+    "label": "آناتومی",
+    "slug": "آناتومی",
+    "color": "",
+    "description": "",
+    "usageCount": 0,
+    "createdAt": "2026-09-16T11:19:33.036Z",
+    "seed": true
+  }
+]

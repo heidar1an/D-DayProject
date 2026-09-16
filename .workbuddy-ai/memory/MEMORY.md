@@ -1,113 +1,93 @@
-# تپش وب — یادداشت‌های بلندمدت پروژه
+# تپش وب — یادداشت بلندمدت پروژه
 
-## خواستهٔ همیشگی کاربر
-- تغییرات **درون ساختار مینیمال و کلی موجود** انجام شوند: بدون بازطراحی، بدون فایل/لایهٔ
-  اضافه، هم‌زبان و هم‌رنگ با بقیهٔ بخش‌ها. قبل از افزودن چیز جدید، الگوی موجود همان لایه را
-  پیدا کن و ادامه بده. خروجی عملی و قابل اجرا؛ توضیح کوتاه و مستقیم.
+## خواستهٔ کاربر
+تغییر **درون ساختار مینیمال موجود**: بدون بازطراحی، بدون فایل/لایهٔ اضافه، هم‌زبان و هم‌رنگ با بقیه.
+الگوی همان لایه را پیدا کن و ادامه بده. توضیح کوتاه و مستقیم.
 
 ## معماری
-- **جدایی داده از UI:** هر بخش سرویس خودش را در `src/services/<domain>/` دارد و کامپوننت‌های
-  لایه در `src/layout/dashboard/<domain>/`. امضاها طوری‌اند که با اتصال Backend فقط بدنهٔ
-  توابع به `fetch` تبدیل شود.
-- **ناوبری داشبورد روی hash است**؛ `src/layout/dashboard/dashboardRoute.jsx` تنها منبع حقیقت
-  «کدام بخش/لایه/نما» است: `#dashboard?s=<section>&l=<layer>&v=<JSON view>` یا
-  `#dashboard?s=…&o=settings&t=<tab>`. `DashboardLayout` هیچ state بولی لایه ندارد؛ همه از
-  `route` مشتق می‌شود. نتیجه: Back/Forward بین لایه‌ها کار می‌کند و رفرش همان‌جا می‌ماند.
-- **`useLayerRoute(layerId, initialView, { slot, volatile, screenOf })`** جای state داخلی نمای
-  هر لایه را گرفته (بانک تست، ویکی، هوش مصنوعی، دانش‌نما، آنالیتیکس، آزمون‌ها، درس‌ها، آناتومی).
-  - `initialView` باید **ثابت و خارج از کامپوننت** باشد.
-  - `screenOf` → تغییر صفحه = `push`، تغییر درون همان صفحه (فیلتر/تب/جست‌وجو) = `replace`.
-  - `volatile` → نماهای زمان‌اجرا (`live`، `lab`، `result`، `review`) هرگز در آدرس نمی‌نشینند.
-  - `slot` → لایه‌های تودرتو زیر یک کلید در همان view (مثلاً `view.anatomy`).
-  - نوشتن باید از `context.routeRef.current` بخواند (نه state همان رندر) وگرنه چند نوشتن
-    پشت‌سرهم در یک تیک گم می‌شود.
-- **`App.jsx`** هم `#dashboard?…` را مسیر داشبورد می‌شناسد و در `getRouteUrl('dashboard')` اگر
-  hash فعلی `#dashboard?` باشد همان را برمی‌گرداند.
-- **لایه‌های بزرگ README معماری دارند** (مثلاً `tests/bank/README.md`)؛ بعد از تغییر معماری
-  همان README را به‌روز کن.
-- **اعلان‌ها یک سطح واحد دارند:** لایهٔ `NotificationsSection` (زنگولهٔ هدر اصلی). کادر پروفایل
-  داشبورد و سربرگ لایهٔ لیگ اعلان جدا ندارند. منبع: `src/services/league/leagueService.js`.
+- جدایی داده از UI: سرویس `src/services/<domain>/`، لایه `src/layout/dashboard/<domain>/`.
+  امضاها طوری‌اند که اتصال Backend فقط بدنهٔ توابع را به `fetch` تبدیل کند.
+- **ناوبری داشبورد روی hash**؛ `dashboardRoute.jsx` تنها منبع حقیقت:
+  `#dashboard?s=<section>&l=<layer>&v=<JSON>` یا `&o=settings&t=<tab>`. `DashboardLayout` هیچ
+  state بولی لایه ندارد ⇒ Back/Forward و رفرش کار می‌کنند.
+- `useLayerRoute(layerId, initialView, {slot, volatile, screenOf})`: `initialView` ثابت و بیرون از
+  کامپوننت (نام `<DOMAIN>_VIEW`)؛ تغییر صفحه push، درون صفحه replace؛ `volatile`
+  (`live/lab/result/review`) در آدرس نمی‌نشیند؛ `slot` برای لایهٔ تودرتو (مثل `view.anatomy`).
+  نوشتن از `context.routeRef.current` بخواند نه state همان رندر.
+- اعلان‌ها یک سطح واحد: `NotificationsSection` (منبع `services/league/leagueService.js`).
+- لایه‌های بزرگ README معماری دارند — بعد از تغییر معماری به‌روزشان کن.
 
-## دفترچه مرور (`src/layout/dashboard/review/`)
-- سرتیتر هم‌سبک هیرو «درسنامهٔ جامع» (خط کوچک + خط بزرگ گرادیانی `#5b8cc7 → #937fcd`).
-- خلاصه‌های بالای صفحه **چیپ گرد** هستند (هم‌سبک `PathChip`)، نه کارت.
-- تقویم **شبکهٔ مربعی ماه شمسی** است (`monthStart` + `aspect-ratio:1`)؛ ماه شمسی بدون کتابخانه
-  با `Intl` (`fa-IR-u-ca-persian-nu-latn`). توضیح مراحل G پشت آیکون علامت سؤال.
+## درس‌ها و لینک عمیق
+- ۵ کارت `CATALOG_COURSES` در `CoursesSection.jsx`؛ نگاشت کارت→لایه در `DashboardLayout.jsx`
+  (`COURSE_LAYERS`). «مسیر سبز» فقط اسکرول می‌شود.
+- **هر جابه‌جایی صفحه باید هم کلید صفحه و هم `deep` را بنویسد**، وگرنه `view.X ?? deepLink.X`
+  همان صفحه را باز می‌کند (`setOpenSubject({subject, deep:null})`).
+- یادگیری آناتومی (`courses/learning/`): سه سطح overview→module→unit، مسیر در `view.anatomy`.
 
 ## دیزاین سیستم (تیره)
-- کارت `#242426`، متن اصلی سفید، کم‌رنگ `#8a8a8a`/`#9a9a9a`؛ سبز `#61D192`، بنفش `#937fcd`،
-  قرمز `#e26d6d`/`#ef9196`، طلایی `#e0b45c`.
-- فونت‌ها: `Pinar` متن، `Doran` تیتر؛ اعداد فارسی با `toFa`/`faNum`.
-- `--content-width: 80%`؛ `border-radius` بزرگ (۲ تا ۲.۵rem).
-- هر لایه CSS با پیشوند کلاس خودش (`tb-`, `an-`, `intl-`, `ad-`, …) و گارد
-  `prefers-reduced-motion`. انیمیشن ورود: `dashboard-layer-reveal` / `dash-stagger`.
-- در `@media (min-width: 701px)` داشبورد `height:100dvh; overflow:hidden` می‌گیرد؛ چیدمان‌های
-  عمودی را با `flex: n 1 0` نسبت بده، نه ارتفاع ثابت.
+- کارت `#242426`/`#282828`، متن سفید، کم‌رنگ `#8a8a8a`؛ سبز `#61D192`، بنفش `#937fcd`،
+  قرمز `#e26d6d`، طلایی `#e0b45c`، برند آبی `#5b8cc7`. فونت `Pinar` متن / `Doran` تیتر؛
+  اعداد فارسی `toFa`. `--content-width:80%`؛ radius ۲–۲.۵rem.
+- هر لایه CSS با پیشوند خودش (`tb-`,`an-`,`intl-`,`ad-`) + گارد `prefers-reduced-motion`.
+- در `min-width:701px` داشبورد `height:100dvh; overflow:hidden` ⇒ چیدمان عمودی با `flex:n 1 0`.
 
-## پنل مدیریت محتوا (CMS)
-- مسیر `/#admin` — ورود **مستقل** از حساب سایت؛ پیش‌فرض `0135`
-  (`TAPESH_ADMIN_USERNAME`/`TAPESH_ADMIN_PASSWORD`).
-- سرور: `database/contentStore.js` (داده + RBAC + نشست + audit) و `database/adminApi.js`
-  (هندلر مستقل از فریم‌ورک). همان هندلر در middleware ویت (`adminApiPlugin.js`) و در
-  `server.js` (پروداکشن) اجرا می‌شود. **هیچ وابستگی جدیدی اضافه نشده.**
-- داده در `database/content/*.json`، آپلودها در `public/uploads/`. پاک‌کردن `database/content`
-  = بازنشانی و seed مجدد. قرارداد پاسخ: `{success:true,data}` یا `{success:false,error:{code,message}}`.
-- امنیت: کوکی HttpOnly + SameSite=Strict + هدر `x-tapesh-csrf`، رمز scrypt+salt، پاک‌سازی HTML
-  با `database/sanitizeHtml.js` (تک‌نسخه، سرور و کلاینت).
-- UI: `src/layout/admin/**` با پیشوند `ad-`؛ روتر داخلی همان `view={name,payload}` و هم‌گام با
-  hash (`#admin/articles/art-xxx`).
-- **الگوی افزودن هر بخش تازه:** PERMISSIONS → COLLECTIONS/ensureStore → توابع دامنه → مسیر در
-  `adminApi.js` → `adminService.js` → `SECTIONS` و `renderView` در `AdminLayout` → کلاس‌های `ad-`.
-- تست: `node database/adminApi.test.mjs` (۳۳ سنجه). مستندات: `src/layout/admin/README.md`.
+## CMS و مرکز تحلیل
+- `/#admin`، ورود مستقل، پیش‌فرض `0135`. `database/contentStore.js` (داده+RBAC+نشست+audit) +
+  `adminApi.js` (هندلر مستقل از فریم‌ورک؛ دو میزبان `adminApiPlugin.js` و `server.js`).
+  داده در `database/content/*.json` — **نه** پوشهٔ ریشهٔ `content/` (کهنه). آپلود `public/uploads/`.
+  پاسخ `{success,data}` / `{success,error}`. **هیچ وابستگی جدید.** کوکی HttpOnly+SameSite=Strict+
+  هدر `x-tapesh-csrf`، scrypt، `database/sanitizeHtml.js` مشترک سرور و کلاینت.
+- الگوی بخش تازه: PERMISSIONS → COLLECTIONS → توابع دامنه → مسیر `adminApi.js` → `adminService.js`
+  → `SECTIONS`/`renderView` در `AdminLayout` → کلاس‌های `ad-`. تست `node database/adminApi.test.mjs`.
+- **اصل حاکم تحلیل: هیچ عدد ساختگی.** منبع وصل‌نشده → `NeedsConnection` + نام متغیر محیطی؛
+  `null` با `—` نه `0`. `analyticsStore.js` → `analyticsEngine.js`(۱–۱۰) + `analyticsInsights.js`(۱۱–۱۶)
+  → API → UI `an-`. تحلیلگر آماری است نه LLM (رگرسیون+R²، Z، بازهٔ اطمینان). `rootCause` **شیء** است.
+  هویت = شمارهٔ موبایل؛ ردیاب فقط شبه‌نام یک‌طرفهٔ FNV-1a می‌فرستد. `POST /api/admin/analytics/reset`
+  در UI نیست و رویدادهای واقعی را پاک می‌کند.
 
-## مرکز تحلیل (`/#admin/analytics`) — ۱۶ بخش
-- **اصل حاکم: هیچ عدد ساختگی.** هر سنجه‌ای که منبعش وصل نیست با `NeedsConnection` + نام دقیق
-  متغیر محیطی؛ `null` با `—` نمایش داده می‌شود نه `0`. این قاعده همیشه باید حفظ شود.
-- تفکیک لایه: داده `database/analyticsStore.js` (هیچ محاسبه‌ای نمی‌کند) → محاسبه
-  `analyticsEngine.js` (۱–۱۰) + `analyticsInsights.js` (۱۱–۱۶) → API در `adminApi.js` → UI در
-  `src/layout/admin/analytics/**` با پیشوند `an-`. تنها منبع «بازدید واقعی» ردیاب مرورگر
-  `src/services/telemetry/trafficTracker.js` است که در `App.jsx` یک‌بار روشن می‌شود.
-- **تحلیلگر آماری است، نه LLM:** روند با رگرسیون خطی + R²، ناهنجاری با امتیاز Z، ریشه‌یابی از
-  تفاضل نیمهٔ اول/دوم، پیش‌بینی با فاصلهٔ اطمینان. `LLM_API_KEY` فقط روایت متنی اضافه می‌کند.
-- `rootCause` در تحلیلگر **شیء** است (`{trafficChange, sources, page, errors, causes}`) نه رشته.
-- **حریم خصوصی:** هویت کاربر شمارهٔ موبایل است؛ ردیاب هرگز آن را نمی‌فرستد و شبه‌نام یک‌طرفهٔ
-  FNV-1a می‌فرستد. مسیرهای `#admin` ردیابی نمی‌شوند. با Do-Not-Track ردیاب روشن نمی‌شود.
-- **مجوزها:** هر بخش Permission مستقل (`analytics.read|users.read|seo.read|security.read|
-  revenue.read|alerts.manage|export`). کلاینت فقط تب‌های مجاز را می‌سازد ولی منبع حقیقت سرور است.
-- Poll «لحظه‌ای» هر ۱۰ ثانیه؛ مسیرهای `/api/admin/analytics/*` عمداً در
-  `NOT_MEASURED_PREFIXES` هستند تا خودسنجی، سنجه را آلوده نکند.
-- `POST /api/admin/analytics/reset` در UI نیست و کل رویدادهای واقعی را پاک می‌کند — با احتیاط.
-- مستندات: `src/layout/admin/analytics/README.md`.
+## انتشار در کانال‌ها (`/#admin/publishing`) — فاز ۱: بله
+- `database/publishers/<platform>.js` = آداپتور، تنها نقطهٔ تماس بیرونی. افزودن پلتفرم =
+  یک فایل در `publishers/` + یک سطر در `PUBLISH_PLATFORMS`.
+- **پیش‌نمایش = ارسال:** هر دو از یک تابع (`planBaleMessages`) می‌آیند، پس پیش‌نمایش سمت سرور
+  است نه بازسازی کلاینت. مدیا+متن ≤۱۰۰۰ = یک پیام با کپشن؛ >۱۰۰۰ = مدیا بی‌کپشن + متن کامل.
+  عکس `sendPhoto`، بقیه `sendDocument`؛ ۶۰۰ms مکث (سقف بله ۲ پیام/ثانیه به هر گفتگو).
+- **توکن‌ها در `database/publishing.secrets.json` با مجوز ۰۶۰۰** — بیرون از `content/`
+  (که بکاپ‌پذیر است)، در `.gitignore` و در `server.watch.ignored`. **هرگز در پاسخ API
+  برنمی‌گردد**؛ فقط `hasToken` + `tokenSource` (`channel|env|none`) + `tokenHint`.
+  ثبت توکن در audit بدون مقدار و بدون طول.
+- **بدون توکن هیچ درخواستی به بیرون نمی‌رود** → وضعیت `dry-run` با همان درخواستی که می‌رفت.
+  `PUBLISH_DRY_RUN=1` حالت سراسری. خطای یک کانال بقیه را متوقف نمی‌کند.
+- مجوزها: `publishing.read` / `publishing.send` / `publishing.channels.manage`.
+  `editor` ارسال دارد، مدیریت کانال و توکن ندارد.
+- بله: `tapi.bale.ai/bot<token>/<method>` (سازگار با تلگرام)، ربات از `@BotFather` بله،
+  `chat_id` کانال، ربات باید ادمین باشد. مستند کامل: `src/layout/admin/README.md` بخش ۸.
+- **تست اعتبار پیش از ذخیره:** `POST /publishing/test` با `{platform, token, chatId}` →
+  `testCredentials` دو بررسی جدا می‌دهد: توکن با `getMe`، دسترسی با **`getChat`** (اگر
+  ربات ادمین نباشد بله «chat not found» می‌دهد). خروجی `{ok, complete, bot, chat, checks[]}`
+  و هر check `{id, label, ok: true|false|null, message}`. مجوزش `channels.manage` است نه
+  `send`، چون توکن از بدنه می‌آید. **توکن و تست باید داخل خودِ مودال «کانال جدید» باشد،
+  نه مرحلهٔ جدا بعد از ساخت کانال** — کاربر همین را خواست.
+- تست: `node database/adminApi.test.mjs` (۶۱ سنجه؛ `BALE_BOT_TOKEN` را پاک می‌کند و برای
+  تست اعتبار `fetch` جعلی می‌گذارد تا هرگز به شبکه نزند) + هارنس jsdom. تست فقط رکوردهای
+  کانال تست را پاک می‌کند، نه کل لاگ.
 
-## تله‌های تأییدشدهٔ کد (اینها را دوباره نساز)
-- **ویت + دادهٔ زمان‌اجرا = حلقهٔ رفرش.** سرور در هر درخواست `database/content/*.json`،
-  `database/users.json` و `public/uploads/` را بازنویسی می‌کند. ویت هر نوشتن در ریشه را
-  می‌بیند و چون این فایل‌ها در گراف ماژول نیستند، **کل صفحه را `full-reload` می‌کند**
-  (`updateModules`: `needFullReload = modules.length === 0`). این یک حلقهٔ خودتقویت‌شونده
-  می‌سازد: رفرش → بوت → flush ردیاب → نوشتن → رفرش. **هر مسیر دادهٔ زمان‌اجرا باید در
-  `server.watch.ignored` در `vite.config.js` باشد.** (فقط در حالت توسعه؛ در `npm run start`
-  ناظری نیست.) تشخیص: شنوندهٔ `ws://localhost:5173/` با پروتکل `vite-hmr` + `fs.watch` روی ریشه.
-- **`useAsync(loader, deps)`** — ری‌اکت درایه‌های `deps` را با `Object.is` مقایسه می‌کند،
-  نه خود آرایه را؛ پس آرایهٔ تازه در هر رندر (`[activeTab, params, customReady]`) حلقه
-  نمی‌سازد **به شرطی که درایه‌ها پایدار باشند**. اگر شیئی/آرایه‌ای تازه در هر رندر داخل
-  deps بگذاری، همان حلقهٔ بی‌پایان fetch رخ می‌دهد.
-- هر اسکریپت آزمایشی که `clearEvents()` صدا بزند، **رویدادهای واقعی** را هم پاک می‌کند.
+## تله‌های تأییدشده (دوباره نساز)
+- **«هیچ کاری نمی‌کند» = اول هندلر را بخوان.** تابع صدا‌زده‌شدهٔ تعریف‌نشده در `onClick` ⇒
+  ReferenceError و توقف بقیهٔ هندلر، بی‌خطای UI. دو بار: `setAnatomyRoute`، `INTL_COURSES_VIEW`.
+  **ErrorBoundary وجود ندارد؛ خطای رندر یک لایه کل درخت را خالی می‌کند.**
+- **ویت + دادهٔ زمان‌اجرا = حلقهٔ رفرش.** هر مسیر داده‌ای که سرور بازنویسی می‌کند باید در
+  `server.watch.ignored` (`vite.config.js`) باشد. تشخیص: شنوندهٔ `ws://localhost:5173/` با `vite-hmr`.
+- `useAsync(loader, deps)` با `Object.is` ⇒ شیء/آرایهٔ تازه در هر رندر = حلقهٔ fetch.
+- هر اسکریپت آزمایشی که `clearEvents()` بزند، رویدادهای واقعی را هم پاک می‌کند.
+- **هارنس jsdom با React باندل‌شده کشته می‌شود** (۱.۲MB ⇒ `SIGTERM`/۱۳۷، بی‌خروجی). React را
+  `--external` بده. خروجی را به فایل بریز نه `tail` (بافر پایت با kill از دست می‌رود).
+  `onChange` چک‌باکس روی رویداد `click` می‌آید نه `change` ⇒ با `input.click()` تست کن.
+  `textContent` را در هر سنجه از نو بخوان و **هیچ ارجاع DOM را بین رندرها نگه ندار** (گره
+  کهنه ⇒ سنجهٔ غلط). و در درخت بزرگ، «setter پروتوتایپ + رویداد input» ممکن است
+  `onChange` را شلیک نکند ⇒ هندلر را از روی `el['__reactProps$…'].onChange(...)` صدا بزن.
+  جزئیات در اسکیل `react-layer-headless-verify`.
 
-## بررسی بدون مرورگر (تکرارشدنی)
-- مرورگر خودکار نصب نیست (نصب Chromium صدها مگابایت است). دو روش:
-- **رندر سرور (برای خطای زمان اجرا):** فایل موقت در **ریشهٔ پروژه** بساز و با
-  `--jsx=automatic --format=esm --platform=node` و
-  `--external:react --external:react-dom --external:react-dom/server --external:react/jsx-runtime`
-  باندل کن (خروجی باید داخل پروژه باشد تا `react-dom` حل شود؛ `--format=cjs` به‌خاطر
-  `import.meta.url` و top-level await شکست می‌خورد). این روش باگ `rootCause` را گرفت.
-- **jsdom (برای UI تعاملی):** esbuild bundle با `--format=cjs --define:process.env.NODE_ENV='"development"'`
-  (jsdom در `/Users/heidarian2/.workbuddy-ai/binaries/node/workspace` نصب است). globals را از
-  jsdom روی `globalThis` بگذار، `globalThis.fetch` را به dev server پروکسی کن و هدر `cookie`
-  را **کامل** بفرست (`tapesh_admin_session=<token>`) وگرنه `parseCookies` رد می‌کند.
-  برای input کنترل‌شده از `Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set`
-  + رویداد `input` استفاده کن.
-
-## نکات فنی
-- بیلد: `npm run build` **`dist/assets` را پاک می‌کند** و کاربر یک‌بار آن را رد کرده است. برای
-  بررسی سریع صحت از `./node_modules/.bin/esbuild <files> --loader:.jsx=jsx --outdir=/tmp/...`
-  یا `npm run dev` استفاده کن.
+## بررسی بدون مرورگر
+- **بیلد ممنوع:** `npm run build` پوشهٔ `dist/assets` را پاک می‌کند (کاربر رد کرده).
+- دو روش تکرارشدنی (رندر سرور با esbuild / jsdom تعاملی) در اسکیل
+  `react-layer-headless-verify` — همان را بخوان.

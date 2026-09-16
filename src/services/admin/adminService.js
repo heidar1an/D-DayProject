@@ -77,7 +77,7 @@ async function request(method, path, body, { signal } = {}) {
 const get = (path, options) => request('GET', path, undefined, options);
 const post = (path, body) => request('POST', path, body ?? {});
 const put = (path, body) => request('PUT', path, body ?? {});
-const del = (path) => request('DELETE', path, {});
+const del = (path, body = {}) => request('DELETE', path, body);
 
 /* ─────────────────────────── ساخت پارامترهای لیست ─────────────────────────── */
 
@@ -280,6 +280,201 @@ export const analytics = {
   reset: () => post('/analytics/reset'),
 };
 
+/* ───────────────────── انتشار در کانال‌های پیام‌رسان ─────────────────────
+ *
+ * نکتهٔ امنیتی: توکن ربات بله هیچ‌وقت از سرور برنمی‌گردد. این سرویس فقط
+ * `hasToken` و راهنمای ماسک‌شده (`tokenHint`) می‌گیرد و توکن را فقط یک‌بار،
+ * در همان درخواست ذخیره، به سرور می‌فرستد.
+ */
+
+export const publishing = {
+  /* کانال‌ها + آمار + تنظیمات پلتفرم‌ها (همه در یک درخواست) */
+  channels: () => get('/publishing/channels'),
+
+  createChannel: (payload) => post('/publishing/channels', payload),
+  updateChannel: (id, payload) => put(`/publishing/channels/${encodeURIComponent(id)}`, payload),
+  removeChannel: (id) => del(`/publishing/channels/${encodeURIComponent(id)}`),
+
+  /* توکن خالی = پاک‌کردن توکن ثبت‌شده */
+  setToken: (id, token) => post(`/publishing/channels/${encodeURIComponent(id)}/token`, { token }),
+  testChannel: (id) => post(`/publishing/channels/${encodeURIComponent(id)}/test`),
+
+  /*
+   * تست اعتبار پیش از ذخیره: توکن و دسترسی ربات به کانال را همان‌طور که در فرم
+   * نوشته شده بررسی می‌کند، بدون نیاز به وجود کانال. توکن فقط یک‌بار به سرور
+   * می‌رود و در پاسخ برنمی‌گردد.
+   */
+  testCredentials: (payload) => post('/publishing/test', payload),
+
+  /* پیش‌نمایش سمت سرور — بدون شبکه؛ تضمین می‌کند پیش‌نمایش = ارسال */
+  preview: (content) => post('/publishing/preview', content),
+
+  /* مقاله‌های منتشرشده و رسانه‌های تازه برای انتخاب محتوا */
+  targets: () => get('/publishing/targets'),
+
+  send: (payload) => post('/publishing/send', payload),
+  log: (params) => get(`/publishing/log${toQuery(params)}`),
+};
+
+/* ─────────────────── مرکز رسانه و فضای مجازی ───────────────────
+ *
+ * یک فضای‌نام برای همهٔ بخش‌های مرکز رسانه. قراردادها همان قرارداد پنل است:
+ * پاسخ `{ success, data }` و خطا به شکل `AdminApiError`.
+ *
+ * نکتهٔ امنیتی همان نکتهٔ انتشار است: توکن و کلید اپ (App ID/Secret) هرگز از
+ * سرور برنمی‌گردد. این سرویس فقط `hasToken`/`hasAppKeys` و راهنمای ماسک‌شده
+ * می‌گیرد و مقدار را فقط یک‌بار، در همان درخواست ذخیره، به سرور می‌فرستد.
+ */
+
+/* برچسب بازه‌ها — باید با MEDIA_RANGES سرور یکی بماند */
+export const MEDIA_RANGES = [
+  { key: 'today', label: 'امروز' },
+  { key: 'yesterday', label: 'دیروز' },
+  { key: '7d', label: '۷ روز اخیر' },
+  { key: '30d', label: '۳۰ روز اخیر' },
+  { key: '90d', label: '۳ ماه اخیر' },
+  { key: '180d', label: '۶ ماه اخیر' },
+  { key: '365d', label: 'یک سال اخیر' },
+  { key: 'custom', label: 'بازهٔ دلخواه' },
+];
+
+export const mediaCenter = {
+  /* فراداده: پلتفرم‌ها، وضعیت‌ها، نوع‌ها، نقش‌ها، بازه‌ها */
+  config: () => get('/media/config'),
+
+  /* شمارنده‌های سبک برای نشان‌های منو و هدر */
+  summary: () => get('/media/summary'),
+
+  /* داشبورد مرکزی */
+  overview: (params) => get(`/media/overview${rangeQuery(params)}`),
+
+  /* تحلیل: پلتفرم، اکانت، نوع محتوا، هشتگ و موضوع، قیف UTM */
+  analytics: (params = {}) => get(`/media/analytics${toQuery({
+    range: params.range,
+    from: params.from,
+    to: params.to,
+    compare: Array.isArray(params.compare) && params.compare.length ? params.compare.join(',') : undefined,
+  })}`),
+
+  /* جستجوی مرکزی روی همهٔ موجودیت‌ها */
+  search: (term) => get(`/media/search${toQuery({ term })}`),
+
+  /* گزارش آمادهٔ خروجی (سطرهای تخت + خلاصه) */
+  report: (params = {}) => get(`/media/report${toQuery(params)}`),
+
+  /* ── پلتفرم‌ها ── */
+  platforms: () => get('/media/platforms'),
+  savePlatform: (payload) => post('/media/platforms', payload),
+  removePlatform: (id) => del(`/media/platforms/${encodeURIComponent(id)}`),
+
+  /* ── اکانت‌ها و کانال‌ها ── */
+  accounts: (params) => get(`/media/accounts${toQuery(params)}`),
+  account: (id) => get(`/media/accounts/${encodeURIComponent(id)}`),
+  accountSeries: (id, params) => get(`/media/accounts/${encodeURIComponent(id)}/series${rangeQuery(params)}`),
+  createAccount: (payload) => post('/media/accounts', payload),
+  updateAccount: (id, payload) => put(`/media/accounts/${encodeURIComponent(id)}`, payload),
+  removeAccount: (id) => del(`/media/accounts/${encodeURIComponent(id)}`),
+
+  /* مقدار خالی = پاک‌کردن اعتبار ثبت‌شده */
+  setCredentials: (id, payload) => post(`/media/accounts/${encodeURIComponent(id)}/credentials`, payload),
+
+  /* تست اعتبار پیش از ذخیره — توکن از فرم می‌آید، اکانت لازم نیست */
+  testCredentials: (payload) => post('/media/accounts/test', payload),
+  testAccount: (id) => post(`/media/accounts/${encodeURIComponent(id)}/test`),
+  syncAccount: (id) => post(`/media/accounts/${encodeURIComponent(id)}/sync`),
+  syncAccounts: (platform) => post(`/media/accounts/sync${toQuery({ platform })}`),
+
+  /* ادغام کانال‌های انتشار موجود به‌عنوان اکانت رسانه */
+  importChannels: () => post('/media/accounts/import'),
+
+  /* ── محتوا ── */
+  contents: (params) => get(`/media/contents${toQuery(params)}`),
+  content: (id) => get(`/media/contents/${encodeURIComponent(id)}`),
+  contentAnalytics: (id) => get(`/media/contents/${encodeURIComponent(id)}/analytics`),
+  createContent: (payload) => post('/media/contents', payload),
+  updateContent: (id, payload) => put(`/media/contents/${encodeURIComponent(id)}`, payload),
+  removeContent: (id) => del(`/media/contents/${encodeURIComponent(id)}`),
+  setContentStatus: (id, status, note) => post(`/media/contents/${encodeURIComponent(id)}/status`, { status, note }),
+  submitContent: (id, payload) => post(`/media/contents/${encodeURIComponent(id)}/submit`, payload ?? {}),
+  approveContent: (id, note) => post(`/media/contents/${encodeURIComponent(id)}/approve`, { note }),
+  requestRevision: (id, payload) => post(`/media/contents/${encodeURIComponent(id)}/revision`, payload),
+  scheduleContent: (id, scheduledAt, note) => post(`/media/contents/${encodeURIComponent(id)}/schedule`, { scheduledAt, note }),
+  publishContent: (id, dryRun) => post(`/media/contents/${encodeURIComponent(id)}/publish`, { dryRun: dryRun === true }),
+  retryContent: (id) => post(`/media/contents/${encodeURIComponent(id)}/retry`),
+
+  /* پیش‌نمایش سمت سرور — بدون شبکه؛ تضمین می‌کند پیش‌نمایش = انتشار */
+  previewContent: (payload) => post('/media/contents/preview', payload),
+
+  calendar: (params) => get(`/media/calendar${toQuery(params)}`),
+  queue: () => get('/media/queue'),
+  runQueue: (limit) => post('/media/queue/run', { limit }),
+
+  /* ── کمپین‌ها ── */
+  campaigns: (params) => get(`/media/campaigns${toQuery(params)}`),
+  campaign: (id) => get(`/media/campaigns/${encodeURIComponent(id)}`),
+  createCampaign: (payload) => post('/media/campaigns', payload),
+  updateCampaign: (id, payload) => put(`/media/campaigns/${encodeURIComponent(id)}`, payload),
+  removeCampaign: (id) => del(`/media/campaigns/${encodeURIComponent(id)}`),
+
+  /* ── تیم رسانه ── */
+  team: (params) => get(`/media/team${toQuery(params)}`),
+  addMember: (payload) => post('/media/team', payload),
+  updateMember: (id, payload) => put(`/media/team/${encodeURIComponent(id)}`, payload),
+  removeMember: (id) => del(`/media/team/${encodeURIComponent(id)}`),
+
+  /* ── هشتگ و موضوع ── */
+  tags: (params) => get(`/media/tags${toQuery(params)}`),
+  addTag: (payload) => post('/media/tags', payload),
+  updateTag: (id, payload) => put(`/media/tags/${encodeURIComponent(id)}`, payload),
+  removeTag: (id) => del(`/media/tags/${encodeURIComponent(id)}`),
+
+  /* ── سنجه‌ها ── */
+  metrics: (params) => get(`/media/metrics${toQuery(params)}`),
+  saveMetrics: (payload) => post('/media/metrics', payload),
+  removeMetrics: (id) => del(`/media/metrics/${encodeURIComponent(id)}`),
+
+  /* ── کتابخانهٔ رسانه ── */
+  assets: (params) => get(`/media/assets${toQuery(params)}`),
+  updateAsset: (id, payload) => put(`/media/assets/${encodeURIComponent(id)}`, payload),
+  archiveAsset: (id, isArchived) => post(`/media/assets/${encodeURIComponent(id)}/archive`, { isArchived }),
+  removeAsset: (id, force) => del(`/media/assets/${encodeURIComponent(id)}`, { force }),
+
+  /* ── اینباکس ── */
+  inbox: (params) => get(`/media/inbox${toQuery(params)}`),
+  addInboxItem: (payload) => post('/media/inbox', payload),
+  setInboxStatus: (id, status) => post(`/media/inbox/${encodeURIComponent(id)}/status`, { status }),
+  assignInboxItem: (id, assignedToId) => post(`/media/inbox/${encodeURIComponent(id)}/assign`, { assignedToId }),
+  replyInboxItem: (id, text) => post(`/media/inbox/${encodeURIComponent(id)}/reply`, { text }),
+  removeInboxItem: (id) => del(`/media/inbox/${encodeURIComponent(id)}`),
+
+  /* ── رصد نام و کلیدواژه ── */
+  mentions: (params) => get(`/media/mentions${toQuery(params)}`),
+  listeningSummary: () => get('/media/mentions/summary'),
+  addMention: (payload) => post('/media/mentions', payload),
+  updateMention: (id, payload) => put(`/media/mentions/${encodeURIComponent(id)}`, payload),
+  removeMention: (id) => del(`/media/mentions/${encodeURIComponent(id)}`),
+
+  /* ── اعلان‌ها ── */
+  notifications: (params) => get(`/media/notifications${toQuery(params)}`),
+  refreshNotifications: () => post('/media/notifications/refresh'),
+  setNotification: (id, payload) => post(`/media/notifications/${encodeURIComponent(id)}`, payload),
+  markAllRead: () => post('/media/notifications/read-all'),
+
+  /* ── UTM ── */
+  utmLinks: (params) => get(`/media/utm${toQuery(params)}`),
+  previewUtm: (payload) => post('/media/utm/preview', payload),
+  addUtm: (payload) => post('/media/utm', payload),
+  updateUtm: (id, payload) => put(`/media/utm/${encodeURIComponent(id)}`, payload),
+  removeUtm: (id) => del(`/media/utm/${encodeURIComponent(id)}`),
+
+  /* ── گزارش رویدادها ── */
+  audit: (params) => get(`/media/audit${toQuery(params)}`),
+
+  /* ── دادهٔ نمونه ── */
+  clearDemo: () => post('/media/demo/clear'),
+  seedDemo: () => post('/media/demo/seed'),
+};
+
 /* ───────────────────── خواندن فایل به‌صورت base64 (برای آپلود) ───────────────────── */
 
 export function readFileAsBase64(file) {
@@ -293,5 +488,5 @@ export function readFileAsBase64(file) {
 
 export default {
   auth, articles, categories, pages, media, banners, users, settings, logs, notes,
-  analytics, getStats, getMeta, toQuery, readFileAsBase64, AdminApiError,
+  publishing, analytics, mediaCenter, getStats, getMeta, toQuery, readFileAsBase64, AdminApiError,
 };

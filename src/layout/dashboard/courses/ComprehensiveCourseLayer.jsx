@@ -187,7 +187,9 @@ export default function ComprehensiveCourseLayer({ onBack, userId = 'local-user'
   const openSubject = view.subject ?? (deepLink?.subject === 'anatomy' ? 'anatomy' : null);
   const anatomyRoute = view.anatomy ?? deepLinkToAnatomyRoute(deepLink);
   const setFilter = (next) => patchView({ filter: next });
-  const setOpenSubject = (next) => patchView({ subject: next });
+  /* ورود/خروج از صفحهٔ یک درس، لینک عمیق و مسیر داخلی آناتومی را هم صفر می‌کند؛
+     وگرنه بازگشت از لایهٔ یادگیری آناتومی دوباره همان‌جا باز می‌شد. */
+  const setOpenSubject = (next) => patchView({ subject: next, deep: null, anatomy: null });
   const [spotId, setSpotId] = useState(null);
   const gridRef = useRef(null);
   const cardRefs = useRef(new Map());
@@ -350,8 +352,8 @@ export default function ComprehensiveCourseLayer({ onBack, userId = 'local-user'
               spot={spotId === subject.id}
               registerRef={registerCard}
               onOpen={(subjectId) => {
+                /* فعلاً فقط آناتومی مسیر یادگیری (درس‌ها و مباحث) دارد؛ بقیه در همین شبکه می‌مانند */
                 if (subjectId !== 'anatomy') return;
-                setAnatomyRoute(null);
                 setOpenSubject(subjectId);
               }}
             />

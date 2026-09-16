@@ -20,11 +20,23 @@
  *  ۱۵) رد بخش‌های حساس (کاربران، مالی، امنیت) برای نقش غیرمجاز
  *  ۱۶) هشدارها: ساخت، اعتبارسنجی، فهرست و حذف
  *  ۱۷) Monitoring API
+ *  ۱۸) انتشار در کانال‌ها: اعتبارسنجی کانال و پلتفرم
+ *  ۱۹) کانال بدون توکن «آمادهٔ ارسال» نیست
+ *  ۲۰) توکن ربات هرگز در پاسخ API برنمی‌گردد
+ *  ۲۱) پیش‌نمایش پیام و رد محتوای خالی
+ *  ۲۲) بدون توکن هیچ درخواستی به بیرون نمی‌رود (ارسال آزمایشی)
+ *  ۲۳) تاریخچهٔ ارسال
+ *  ۲۴) مجوز جدا برای مدیریت کانال
+ *  ۲۵) منطق شکستن پیام (متن کوتاه/بلند + فایل)
+ *  ۲۶) تست اعتبار پیش از ذخیره: توکن + دسترسی ربات به کانال (با fetch جعلی)
  */
 
 import assert from 'node:assert/strict';
 
 import { handleApi } from './adminApi.js';
+import { readCollection, writeCollection } from './contentStore.js';
+import { planBaleMessages } from './publishers/bale.js';
+import { testCredentials } from './publishingStore.js';
 
 const ORIGIN = 'http://localhost';
 
@@ -265,11 +277,242 @@ await call('DELETE', `/api/admin/analytics/alerts/${savedAlert.id}`, { cookies, 
 const ping = await call('GET', '/api/admin/analytics/ping', { cookies });
 check('۱۷. Monitoring API وضعیت سرور را می‌دهد', ping.status === 200 && typeof ping.payload.data?.uptimeSeconds === 'number');
 
+/* ۱۸) انتشار در کانال‌ها — ساخت کانال، پنهان‌ماندن توکن، ارسال آزمایشی و مجوزها
+ *
+ * توکن محیطی عمداً پاک می‌شود تا تست قطعی بماند: اگر `BALE_BOT_TOKEN` روی ماشین
+ * ست باشد، مسیر ارسال واقعی می‌شد و تست به شبکه وابسته می‌شد.
+ */
+delete process.env.BALE_BOT_TOKEN;
+delete process.env.PUBLISH_DRY_RUN;
+
+const badChannel = await call('POST', '/api/admin/publishing/channels', {
+  cookies,
+  csrf,
+  body: { platform: 'bale', name: 'بی‌شناسه' },
+});
+check('۱۸. رد کانال بدون شناسه (chat_id)', badChannel.status === 400 && badChannel.payload.error?.code === 'VALIDATION_ERROR');
+
+const badPlatform = await call('POST', '/api/admin/publishing/channels', {
+  cookies,
+  csrf,
+  body: { platform: 'not-a-platform', name: 'تست', chatId: '@x' },
+});
+check('۱۸. رد پلتفرم پشتیبانی‌نشده', badPlatform.status === 400);
+
+const channelCreated = await call('POST', '/api/admin/publishing/channels', {
+  cookies,
+  csrf,
+  body: { platform: 'bale', name: 'کانال تست بله', chatId: '@tapesh_test', isActive: true },
+});
+const testChannel = channelCreated.payload.data?.channel;
+check('۱۸. ساخت کانال بله', channelCreated.status === 200 && testChannel?.platform === 'bale');
+
+const channelsAfterCreate = await call('GET', '/api/admin/publishing/channels', { cookies });
+check(
+  '۱۹. کانال تازه توکن ندارد و «آمادهٔ ارسال» نیست',
+  channelsAfterCreate.payload.data?.channels?.some((row) => row.id === testChannel.id && row.hasToken === false && row.isReady === false),
+);
+
+/* توکن هرگز نباید در پاسخ هیچ مسیری ظاهر شود */
+const tokenValue = '123456789:TEST-TOKEN-DO-NOT-LEAK';
+const tokenSet = await call('POST', `/api/admin/publishing/channels/${testChannel.id}/token`, {
+  cookies,
+  csrf,
+  body: { token: tokenValue },
+});
+check(
+  '۲۰. ثبت توکن و پنهان‌ماندن مقدار آن در پاسخ',
+  tokenSet.status === 200
+    && tokenSet.payload.data?.hasToken === true
+    && !JSON.stringify(tokenSet.payload).includes(tokenValue)
+    && tokenSet.payload.data?.tokenHint?.endsWith('LEAK'),
+);
+
+const channelsWithToken = await call('GET', '/api/admin/publishing/channels', { cookies });
+check(
+  '۲۰. فهرست کانال‌ها هم توکن کامل را برنمی‌گرداند',
+  channelsWithToken.status === 200
+    && !JSON.stringify(channelsWithToken.payload).includes(tokenValue)
+    && channelsWithToken.payload.data?.channels?.some((row) => row.id === testChannel.id && row.hasToken === true),
+);
+
+/* پاک‌کردن توکن، تا ارسال بعدی قطعاً آزمایشی و بدون شبکه بماند */
+const tokenCleared = await call('POST', `/api/admin/publishing/channels/${testChannel.id}/token`, {
+  cookies,
+  csrf,
+  body: { token: '' },
+});
+check('۲۰. پاک‌کردن توکن ثبت‌شده', tokenCleared.payload.data?.hasToken === false);
+
+const preview = await call('POST', '/api/admin/publishing/preview', {
+  cookies,
+  csrf,
+  body: { text: 'خط اول پیام\n\nخط دوم پیام', source: { type: 'custom' } },
+});
+check(
+  '۲۱. پیش‌نمایش یک پیام متنی می‌سازد',
+  preview.status === 200 && preview.payload.data?.steps?.length === 1 && preview.payload.data.steps[0].method === 'sendMessage',
+);
+
+const emptyPreview = await call('POST', '/api/admin/publishing/preview', { cookies, csrf, body: { text: '   ' } });
+check('۲۱. رد پیش‌نمایش خالی', emptyPreview.status === 400);
+
+const drySend = await call('POST', '/api/admin/publishing/send', {
+  cookies,
+  csrf,
+  body: { channelIds: [testChannel.id], content: { text: 'پیام آزمایشی تست' } },
+});
+check(
+  '۲۲. بدون توکن، ارسال به حالت آزمایشی می‌رود (بدون درخواست شبکه)',
+  drySend.status === 200 && drySend.payload.data?.dryRun === 1 && drySend.payload.data?.sent === 0,
+);
+
+const forcedDry = await call('POST', '/api/admin/publishing/send', {
+  cookies,
+  csrf,
+  body: { channelIds: [testChannel.id], content: { text: 'پیام آزمایشی اجباری' }, dryRun: true },
+});
+check('۲۲. ارسال آزمایشی اجباری هم ثبت می‌شود', forcedDry.payload.data?.dryRun === 1);
+
+const noTarget = await call('POST', '/api/admin/publishing/send', {
+  cookies,
+  csrf,
+  body: { channelIds: [], content: { text: 'بی‌مخاطب' } },
+});
+check('۲۲. رد ارسال بدون کانال', noTarget.status === 400);
+
+const publishLog = await call('GET', '/api/admin/publishing/log?perPage=5', { cookies });
+check(
+  '۲۳. تاریخچهٔ ارسال رکوردهای آزمایشی را نگه می‌دارد',
+  publishLog.status === 200
+    && publishLog.payload.data?.items?.some((row) => row.channelId === testChannel.id && row.status === 'dry-run'),
+);
+
+const editorChannels = await call('GET', '/api/admin/publishing/channels', { cookies: { tapesh_admin_session: editorToken } });
+check('۲۴. نویسنده فهرست کانال‌ها را می‌بیند', editorChannels.status === 200);
+
+const editorCreateChannel = await call('POST', '/api/admin/publishing/channels', {
+  cookies: { tapesh_admin_session: editorToken },
+  csrf: editorCsrf,
+  body: { platform: 'bale', name: 'کانال نویسنده', chatId: '@nope' },
+});
+check('۲۴. رد ساخت کانال توسط نقش غیرمجاز', editorCreateChannel.status === 403);
+
+const editorSetToken = await call('POST', `/api/admin/publishing/channels/${testChannel.id}/token`, {
+  cookies: { tapesh_admin_session: editorToken },
+  csrf: editorCsrf,
+  body: { token: 'x' },
+});
+check('۲۴. رد ثبت توکن توسط نقش غیرمجاز', editorSetToken.status === 403);
+
+/* ۲۵) منطق شکستن پیام — تابع خالص، بدون شبکه */
+const planShort = planBaleMessages({ text: 'کوتاه', media: { filename: 'a.png', kind: 'image' } });
+check('۲۵. مدیا + متن کوتاه = یک پیام با کپشن', planShort.length === 1 && planShort[0].caption === 'کوتاه');
+
+const planLong = planBaleMessages({ text: 'x'.repeat(1200), media: { filename: 'a.png', kind: 'image' } });
+check(
+  '۲۵. مدیا + متن بلند = مدیا بی‌کپشن، بعد متن کامل (بدون تکرار)',
+  planLong.length === 2 && planLong[0].caption === '' && planLong[1].text.length === 1200,
+);
+
+const planDocument = planBaleMessages({ text: '', media: { filename: 'a.pdf', kind: 'document' } });
+check('۲۵. فایل غیرتصویری با sendDocument می‌رود', planDocument.length === 1 && planDocument[0].method === 'sendDocument');
+
+/* ۲۶) تست اعتبار پیش از ذخیره — توکن + دسترسی ربات به کانال
+ *
+ * شبکه با یک `fetch` جعلی جایگزین می‌شود تا هم پاسخ بله شبیه‌سازی شود و هم اگر
+ * جایی ناخواسته درخواست واقعی زده شد، تست بترکد نه اینکه به اینترنت وابسته شود.
+ */
+const secretToken = '123456789:SECRET-MUST-NOT-LEAK';
+const fetchCalls = [];
+
+globalThis.fetch = async (url) => {
+  const method = String(url).split('/').pop();
+  fetchCalls.push(method);
+
+  if (method === 'getMe') {
+    return { ok: true, status: 200, json: async () => ({ ok: true, result: { id: 7, username: 'tapesh_bot', name: 'ربات تپش' } }) };
+  }
+  if (method === 'getChat') {
+    return { ok: true, status: 200, json: async () => ({ ok: true, result: { id: -100123, type: 'channel', title: 'کانال تپش', username: 'tapesh' } }) };
+  }
+  return { ok: false, status: 404, json: async () => ({ ok: false, description: 'not found' }) };
+};
+
+const direct = await testCredentials({ platform: 'bale', token: secretToken, chatId: '@tapesh' });
+check(
+  '۲۶. تست اعتبار، هم توکن و هم دسترسی کانال را تأیید می‌کند',
+  direct.ok === true && direct.complete === true
+    && direct.bot?.username === 'tapesh_bot' && direct.chat?.title === 'کانال تپش'
+    && direct.checks.every((check_) => check_.ok === true),
+);
+check('۲۶. نتیجهٔ تست هیچ‌جای توکن را لو نمی‌دهد', !JSON.stringify(direct).includes(secretToken));
+check('۲۶. هر دو متد getMe و getChat صدا زده شدند', fetchCalls.includes('getMe') && fetchCalls.includes('getChat'));
+
+/* بدون شناسهٔ کانال: توکن تأیید می‌شود ولی دسترسی «بررسی‌نشده» می‌ماند */
+const tokenOnly = await testCredentials({ platform: 'bale', token: secretToken, chatId: '' });
+check(
+  '۲۶. بدون شناسهٔ کانال، توکن تأیید و دسترسی «بررسی‌نشده» اعلام می‌شود',
+  tokenOnly.ok === true && tokenOnly.complete === false && tokenOnly.checks.some((check_) => check_.ok === null),
+);
+
+/* توکن نامعتبر → خطای روشن، و هیچ توکنی در خروجی */
+globalThis.fetch = async (url) => ({
+  ok: false,
+  status: 401,
+  json: async () => ({ ok: false, description: 'Unauthorized', error_code: 401 }),
+});
+const badToken = await testCredentials({ platform: 'bale', token: secretToken, chatId: '@tapesh' });
+check(
+  '۲۶. توکن نامعتبر خطای فارسی و روشن می‌دهد',
+  badToken.ok === false && badToken.checks[0].ok === false && !JSON.stringify(badToken).includes(secretToken),
+);
+
+/* ربات ادمین نیست → getChat خطا می‌دهد و کاربر باید بفهمد چرا */
+globalThis.fetch = async (url) => (String(url).endsWith('/getMe')
+  ? { ok: true, status: 200, json: async () => ({ ok: true, result: { id: 7, username: 'tapesh_bot', name: 'ربات تپش' } }) }
+  : { ok: false, status: 400, json: async () => ({ ok: false, description: 'Bad Request: chat not found' }) });
+
+const noAccess = await testCredentials({ platform: 'bale', token: secretToken, chatId: '@wrong' });
+check(
+  '۲۶. وقتی ربات به کانال دسترسی ندارد، دلیلش گفته می‌شود',
+  noAccess.ok === false && noAccess.bot !== null
+    && noAccess.checks.some((check_) => check_.id === 'chat' && check_.ok === false && /کانال/.test(check_.message)),
+);
+
+/* بدون توکن: هیچ درخواستی به بیرون نمی‌رود — fetch نباید حتی یک‌بار صدا زده شود */
+let networkHits = 0;
+globalThis.fetch = async () => { networkHits += 1; throw new Error('نباید درخواست شبکه‌ای زده شود'); };
+
+const noToken = await testCredentials({ platform: 'bale', token: '', chatId: '@tapesh' });
+check('۲۶. بدون توکن، تست اعتبار هیچ درخواست شبکه‌ای نمی‌زند', noToken.ok === false && networkHits === 0);
+
+const routeTest = await call('POST', '/api/admin/publishing/test', {
+  cookies,
+  csrf,
+  body: { platform: 'bale', token: '', chatId: '@tapesh' },
+});
+check('۲۶. مسیر تست اعتبار با توکن خالی، پاسخ روشن می‌دهد', routeTest.status === 200 && routeTest.payload.data?.ok === false);
+
+const editorTestRoute = await call('POST', '/api/admin/publishing/test', {
+  cookies: { tapesh_admin_session: editorToken },
+  csrf: editorCsrf,
+  body: { platform: 'bale', token: 'x', chatId: '@x' },
+});
+check('۲۶. رد تست اعتبار برای نقش غیرمجاز (چون توکن می‌گیرد)', editorTestRoute.status === 403);
+
 /* پاک‌سازی داده‌های تست */
 await call('POST', '/api/admin/analytics/reset', { cookies, csrf });
 await call('DELETE', `/api/admin/notes/${savedNote.id}`, { cookies, csrf });
 await call('DELETE', `/api/admin/articles/${article.id}`, { cookies, csrf });
 await call('DELETE', `/api/admin/users/${editor.payload.data.admin.id}`, { cookies, csrf });
+await call('DELETE', `/api/admin/publishing/channels/${testChannel.id}`, { cookies, csrf });
+
+/*
+ * رکوردهای تاریخچهٔ همین کانال تست پاک می‌شوند — و **فقط** همین‌ها.
+ * پاک‌کردن کل `publishLog` تاریخچهٔ واقعی کاربر را از بین می‌برد.
+ */
+writeCollection('publishLog', readCollection('publishLog').filter((row) => row.channelId !== testChannel.id));
 
 console.log('\nنتیجهٔ تست پنل مدیریت:');
 results.forEach((result) => console.log(`  ${result.pass ? '✓' : '✗'} ${result.name}`));

@@ -110,6 +110,101 @@ import {
   systemSection,
 } from './analyticsInsights.js';
 
+import {
+  createChannel,
+  deleteChannel,
+  listChannels,
+  listLog,
+  previewPublish,
+  publish,
+  publishingConfig,
+  publishingStats,
+  publishTargets,
+  setChannelToken,
+  testChannel,
+  testCredentials,
+  updateChannel,
+} from './publishingStore.js';
+
+import {
+  accountSeries,
+  approveContent,
+  archiveAsset,
+  assignInboxItem,
+  buildReport,
+  buildUtmUrl,
+  clearDemoData,
+  contentAnalytics,
+  contentCalendar,
+  createAccount,
+  createContent,
+  deleteAccount,
+  deleteAsset,
+  deleteCampaign,
+  deleteContent,
+  deleteInboxItem,
+  deleteMention,
+  deleteMetrics,
+  deletePlatform,
+  deleteTag,
+  deleteTeamMember,
+  deleteUtm,
+  ensureMediaStore,
+  getAccount,
+  getCampaign,
+  getContent,
+  importPublishChannels,
+  listAccounts,
+  listAssets,
+  listCampaigns,
+  listContents,
+  listInbox,
+  listMediaAudit,
+  listMentions,
+  listMetrics,
+  listNotifications,
+  listPlatforms,
+  listTags,
+  listTeam,
+  listUtm,
+  listeningSummary,
+  markAllNotificationsRead,
+  mediaAnalytics,
+  mediaConfig,
+  mediaOverview,
+  mediaSearch,
+  mediaSummary,
+  previewContent,
+  publishContent,
+  publishQueue,
+  refreshNotifications,
+  replyInboxItem,
+  requestContentRevision,
+  retryContent,
+  runSchedule,
+  saveCampaign,
+  saveInboxItem,
+  saveMention,
+  saveMetrics,
+  savePlatform,
+  saveTag,
+  saveTeamMember,
+  saveUtm,
+  scheduleContent,
+  setAccountCredentials,
+  setContentStatus,
+  setInboxStatus,
+  setNotificationState,
+  submitContentForReview,
+  syncAccount,
+  syncAllAccounts,
+  testAccountConnection,
+  testAccountDraft,
+  updateAccount,
+  updateAsset,
+  updateContent,
+} from './mediaStore.js';
+
 export const SESSION_COOKIE = 'tapesh_admin_session';
 export const CSRF_HEADER = 'x-tapesh-csrf';
 
@@ -123,6 +218,12 @@ const STATUS_BY_CODE = {
   UNSUPPORTED_MEDIA_TYPE: 415,
   PAYLOAD_TOO_LARGE: 413,
   RATE_LIMITED: 429,
+  /* انتشار در کانال‌ها — خطای سرویس بیرونی، نه خطای درخواست کاربر */
+  PUBLISH_NO_TOKEN: 409,
+  PUBLISH_UNAUTHORIZED: 502,
+  PUBLISH_UNREACHABLE: 502,
+  PUBLISH_TIMEOUT: 504,
+  PUBLISH_FAILED: 502,
   INTERNAL_ERROR: 500,
 };
 
@@ -764,6 +865,952 @@ const ROUTES = [
     perPage: ctx.query.get('perPage') ?? 15,
   })],
 
+  /* ─────────────────── انتشار در کانال‌های پیام‌رسان ───────────────────
+   *
+   * سه مجوز جدا:
+   *   publishing.read             → دیدن کانال‌ها، تاریخچه و پیش‌نمایش
+   *   publishing.send             → ارسال واقعی و تست اتصال
+   *   publishing.channels.manage  → ساخت/ویرایش/حذف کانال و ثبت توکن
+   *
+   * توکن ربات هرگز در پاسخ هیچ‌یک از این مسیرها برنمی‌گردد؛ فقط `hasToken`
+   * و یک راهنمای ماسک‌شده. ثبت توکن هم در گزارش رویدادها ثبت **نمی‌شود**
+   * (نه مقدارش، نه طولش).
+   */
+
+  ['GET', '/api/admin/publishing/overview', 'publishing.read', async () => ({
+    ...publishingConfig(),
+    stats: publishingStats(),
+  })],
+
+  ['GET', '/api/admin/publishing/channels', 'publishing.read', async () => ({
+    ...listChannels(),
+    stats: publishingStats(),
+    config: publishingConfig(),
+  })],
+
+  ['POST', '/api/admin/publishing/channels', 'publishing.channels.manage', async (ctx) => {
+    const channel = createChannel(ctx.body, ctx.admin);
+    logActivity({
+      admin: ctx.admin, action: 'channel.created', entityType: 'channel',
+      entityId: channel.id, entityLabel: channel.name,
+      metadata: { platform: channel.platform, chatId: channel.chatId },
+      ip: clientIp(ctx.request),
+    });
+    return { channel: listChannels().channels.find((row) => row.id === channel.id) };
+  }],
+
+  ['PUT', '/api/admin/publishing/channels/:id', 'publishing.channels.manage', async (ctx) => {
+    const channel = updateChannel(ctx.params.id, ctx.body, ctx.admin);
+    if (!channel) fail('NOT_FOUND', 'کانال پیدا نشد');
+
+    logActivity({
+      admin: ctx.admin, action: 'channel.updated', entityType: 'channel',
+      entityId: channel.id, entityLabel: channel.name,
+      metadata: { platform: channel.platform, isActive: channel.isActive !== false },
+      ip: clientIp(ctx.request),
+    });
+
+    return { channel: listChannels().channels.find((row) => row.id === channel.id) };
+  }],
+
+  ['DELETE', '/api/admin/publishing/channels/:id', 'publishing.channels.manage', async (ctx) => {
+    const channel = deleteChannel(ctx.params.id);
+    if (!channel) fail('NOT_FOUND', 'کانال پیدا نشد');
+
+    logActivity({
+      admin: ctx.admin, action: 'channel.deleted', entityType: 'channel',
+      entityId: channel.id, entityLabel: channel.name, ip: clientIp(ctx.request),
+    });
+
+    return { deleted: channel.id };
+  }],
+
+  ['POST', '/api/admin/publishing/channels/:id/token', 'publishing.channels.manage', async (ctx) => {
+    const result = setChannelToken(ctx.params.id, ctx.body.token);
+    if (!result) fail('NOT_FOUND', 'کانال پیدا نشد');
+
+    logActivity({
+      admin: ctx.admin,
+      action: result.hasToken ? 'channel.token-set' : 'channel.token-cleared',
+      entityType: 'channel',
+      entityId: ctx.params.id,
+      entityLabel: '',
+      /* فقط اینکه توکن ثبت/پاک شد — نه مقدار، نه طول، نه بخشی از آن */
+      metadata: { hasToken: result.hasToken },
+      ip: clientIp(ctx.request),
+    });
+
+    return result;
+  }],
+
+  ['POST', '/api/admin/publishing/channels/:id/test', 'publishing.send', async (ctx) => {
+    const result = await testChannel(ctx.params.id);
+    if (!result) fail('NOT_FOUND', 'کانال پیدا نشد');
+
+    if (result.ok) {
+      logActivity({
+        admin: ctx.admin, action: 'channel.tested', entityType: 'channel',
+        entityId: ctx.params.id, entityLabel: result.bot?.name ?? '',
+        metadata: { ok: true, complete: Boolean(result.complete) }, ip: clientIp(ctx.request),
+      });
+    }
+
+    return result;
+  }],
+
+  /*
+   * تست اعتبار **پیش از ذخیره کانال**. اینجا توکن از بدنهٔ درخواست می‌آید (چون
+   * هنوز کانالی وجود ندارد)، پس مجوزش `channels.manage` است نه `send` — کسی که
+   * اجازهٔ دیدن توکن را ندارد، نباید بتواند توکن دلخواه را هم تست کند.
+   *
+   * توکن نه در پاسخ برمی‌گردد، نه در گزارش رویدادها ثبت می‌شود.
+   */
+  ['POST', '/api/admin/publishing/test', 'publishing.channels.manage', async (ctx) => {
+    const result = await testCredentials({
+      platform: ctx.body.platform ?? 'bale',
+      token: ctx.body.token,
+      chatId: ctx.body.chatId,
+    });
+
+    logActivity({
+      admin: ctx.admin, action: 'channel.credentials-tested', entityType: 'channel',
+      entityId: null, entityLabel: String(ctx.body.chatId ?? '').slice(0, 120),
+      metadata: { ok: result.ok, complete: Boolean(result.complete) },
+      ip: clientIp(ctx.request),
+    });
+
+    return result;
+  }],
+
+  /* پیش‌نمایش — بدون هیچ درخواست شبکه‌ای؛ همان چیزی که ارسال می‌شود */
+  ['POST', '/api/admin/publishing/preview', 'publishing.read', async (ctx) => previewPublish(ctx.body)],
+
+  ['GET', '/api/admin/publishing/targets', 'publishing.read', async () => publishTargets()],
+
+  ['POST', '/api/admin/publishing/send', 'publishing.send', async (ctx) => {
+    const result = await publish({
+      channelIds: ctx.body.channelIds,
+      content: ctx.body.content,
+      admin: ctx.admin,
+      forceDryRun: ctx.body.dryRun === true,
+    });
+
+    logActivity({
+      admin: ctx.admin, action: 'publish.sent', entityType: 'publish',
+      entityId: result.results.map((row) => row.channelId).join(','),
+      entityLabel: result.results.map((row) => row.channelName).join('، ').slice(0, 200),
+      metadata: { sent: result.sent, failed: result.failed, dryRun: result.dryRun },
+      ip: clientIp(ctx.request),
+    });
+
+    return result;
+  }],
+
+  ['GET', '/api/admin/publishing/log', 'publishing.read', async (ctx) => listLog({
+    channelId: ctx.query.get('channelId') ?? 'all',
+    status: ctx.query.get('status') ?? 'all',
+    page: ctx.query.get('page') ?? 1,
+    perPage: ctx.query.get('perPage') ?? 15,
+  })],
+
+  /* ══════════════════ مرکز رسانه و فضای مجازی ══════════════════
+   *
+   * هشت مجوز، هرکدام برای یک کار:
+   *   media.read               → دیدن همهٔ نماها و تحلیل‌ها
+   *   media.content.manage     → ساخت/ویرایش/حذف محتوا، کمپین، هشتگ، فایل
+   *   media.content.review     → تأیید یا درخواست اصلاح
+   *   media.content.publish    → زمان‌بندی، انتشار و تلاش دوباره
+   *   media.platforms.manage   → پلتفرم، اکانت و کلید API
+   *   media.team.manage        → اعضای تیم رسانه
+   *   media.ops.manage         → اینباکس، رصد نام، UTM و اعلان‌ها
+   *   media.audit.read         → گزارش رویدادهای مرکز
+   *
+   * ترتیب مهم است: مسیرهای ثابت (`/accounts/test`، `/contents/preview`) باید
+   * **قبل** از مسیرهای پارامتری (`/accounts/:id`) بیایند، وگرنه `matchRoute`
+   * اولی را می‌گیرد و پارامتر «test» می‌شود.
+   *
+   * توکن و کلید اپ هرگز در پاسخ هیچ‌یک از این مسیرها برنمی‌گردد؛ فقط
+   * `hasToken`/`hasAppKeys` و راهنمای ماسک‌شده.
+   */
+
+  ['GET', '/api/admin/media/config', 'media.read', async () => mediaConfig()],
+  ['GET', '/api/admin/media/summary', 'media.read', async () => mediaSummary()],
+
+  ['GET', '/api/admin/media/overview', 'media.read', async (ctx) => mediaOverview({
+    range: ctx.query.get('range') ?? '30d',
+    from: ctx.query.get('from'),
+    to: ctx.query.get('to'),
+  })],
+
+  ['GET', '/api/admin/media/analytics', 'media.read', async (ctx) => mediaAnalytics({
+    range: ctx.query.get('range') ?? '30d',
+    from: ctx.query.get('from'),
+    to: ctx.query.get('to'),
+    compare: (ctx.query.get('compare') ?? '').split(',').filter(Boolean),
+  })],
+
+  ['GET', '/api/admin/media/search', 'media.read', async (ctx) => mediaSearch(ctx.query.get('term') ?? '')],
+
+  ['GET', '/api/admin/media/report', 'media.read', async (ctx) => buildReport({
+    kind: ctx.query.get('kind') ?? 'platform',
+    range: ctx.query.get('range') ?? '30d',
+    from: ctx.query.get('from'),
+    to: ctx.query.get('to'),
+    campaignId: ctx.query.get('campaignId'),
+    platform: ctx.query.get('platform'),
+    teamId: ctx.query.get('teamId'),
+  })],
+
+  /* ── پلتفرم‌ها ── */
+
+  ['GET', '/api/admin/media/platforms', 'media.read', async () => ({ platforms: listPlatforms() })],
+
+  ['POST', '/api/admin/media/platforms', 'media.platforms.manage', async (ctx) => {
+    const platform = savePlatform(ctx.body, ctx.admin);
+    logActivity({
+      admin: ctx.admin, action: 'media.platform.saved', entityType: 'media-platform',
+      entityId: platform.id, entityLabel: platform.label,
+      metadata: { isActive: platform.isActive, adapter: platform.adapter },
+      ip: clientIp(ctx.request),
+    });
+    return { platform };
+  }],
+
+  ['DELETE', '/api/admin/media/platforms/:id', 'media.platforms.manage', async (ctx) => {
+    const platform = deletePlatform(ctx.params.id, ctx.admin);
+    if (!platform) fail('NOT_FOUND', 'پلتفرم ثبت نشده است');
+    logActivity({
+      admin: ctx.admin, action: 'media.platform.removed', entityType: 'media-platform',
+      entityId: platform.id, entityLabel: platform.label, ip: clientIp(ctx.request),
+    });
+    return { deleted: platform.id };
+  }],
+
+  /* ── اکانت‌ها و کانال‌ها ── */
+
+  ['GET', '/api/admin/media/accounts', 'media.read', async (ctx) => ({
+    accounts: listAccounts({
+      platform: ctx.query.get('platform') ?? 'all',
+      kind: ctx.query.get('kind') ?? 'all',
+      active: ctx.query.get('active') ?? 'all',
+      search: ctx.query.get('search') ?? '',
+    }),
+  })],
+
+  ['POST', '/api/admin/media/accounts', 'media.platforms.manage', async (ctx) => {
+    const account = createAccount(ctx.body, ctx.admin);
+    logActivity({
+      admin: ctx.admin, action: 'media.account.created', entityType: 'media-account',
+      entityId: account.id, entityLabel: account.name,
+      metadata: { platform: account.platform, kind: account.kind },
+      ip: clientIp(ctx.request),
+    });
+    return { account };
+  }],
+
+  /*
+   * وارد کردن کانال‌های انتشار موجود به‌عنوان اکانت رسانه — همان ادغام بخشی که
+   * از قبل طراحی شده. توکن دوباره ثبت نمی‌شود؛ به همان کانال وصل می‌ماند.
+   */
+  ['POST', '/api/admin/media/accounts/import', 'media.platforms.manage', async (ctx) => {
+    const result = importPublishChannels(ctx.admin);
+    if (result.created) {
+      logActivity({
+        admin: ctx.admin, action: 'media.account.imported', entityType: 'media-account',
+        entityId: null, entityLabel: `${result.created} کانال انتشار`,
+        metadata: { created: result.created }, ip: clientIp(ctx.request),
+      });
+    }
+    return result;
+  }],
+
+  /* تست اعتبار پیش از ذخیره — توکن از بدنهٔ فرم می‌آید، پس مجوزش manage است */
+  ['POST', '/api/admin/media/accounts/test', 'media.platforms.manage', async (ctx) => {
+    const result = await testAccountDraft({
+      platform: ctx.body.platform,
+      token: ctx.body.token,
+      externalId: ctx.body.externalId,
+      appId: ctx.body.appId,
+    });
+
+    logActivity({
+      admin: ctx.admin, action: 'media.account.credentials-tested', entityType: 'media-account',
+      entityId: null, entityLabel: String(ctx.body.platform ?? '').slice(0, 40),
+      metadata: { ok: result.ok, complete: Boolean(result.complete) }, ip: clientIp(ctx.request),
+    });
+
+    return result;
+  }],
+
+  ['POST', '/api/admin/media/accounts/sync', 'media.platforms.manage', async (ctx) => {
+    const result = await syncAllAccounts({ platform: ctx.query.get('platform') ?? 'all', admin: ctx.admin });
+    logActivity({
+      admin: ctx.admin, action: 'media.accounts.synced', entityType: 'media-account',
+      entityId: null, entityLabel: 'همگام‌سازی همهٔ اکانت‌ها',
+      metadata: { synced: result.synced, manual: result.manual, noToken: result.noToken },
+      ip: clientIp(ctx.request),
+    });
+    return result;
+  }],
+
+  ['GET', '/api/admin/media/accounts/:id', 'media.read', async (ctx) => {
+    const account = listAccounts().find((row) => row.id === ctx.params.id);
+    if (!account) fail('NOT_FOUND', 'اکانت پیدا نشد');
+    return { account };
+  }],
+
+  ['GET', '/api/admin/media/accounts/:id/series', 'media.read', async (ctx) => {
+    const data = accountSeries(ctx.params.id, {
+      range: ctx.query.get('range') ?? '30d',
+      from: ctx.query.get('from'),
+      to: ctx.query.get('to'),
+    });
+    if (!data) fail('NOT_FOUND', 'اکانت پیدا نشد');
+    return data;
+  }],
+
+  ['PUT', '/api/admin/media/accounts/:id', 'media.platforms.manage', async (ctx) => {
+    const account = updateAccount(ctx.params.id, ctx.body, ctx.admin);
+    if (!account) fail('NOT_FOUND', 'اکانت پیدا نشد');
+    logActivity({
+      admin: ctx.admin, action: 'media.account.updated', entityType: 'media-account',
+      entityId: account.id, entityLabel: account.name,
+      metadata: { platform: account.platform, isActive: account.isActive },
+      ip: clientIp(ctx.request),
+    });
+    return { account };
+  }],
+
+  ['DELETE', '/api/admin/media/accounts/:id', 'media.platforms.manage', async (ctx) => {
+    const account = deleteAccount(ctx.params.id);
+    if (!account) fail('NOT_FOUND', 'اکانت پیدا نشد');
+    logActivity({
+      admin: ctx.admin, action: 'media.account.deleted', entityType: 'media-account',
+      entityId: account.id, entityLabel: account.name, ip: clientIp(ctx.request),
+    });
+    return { deleted: account.id };
+  }],
+
+  /* ثبت/پاک‌کردن اعتبار اکانت. مقدار هرگز در پاسخ یا در گزارش رویدادها نمی‌آید. */
+  ['POST', '/api/admin/media/accounts/:id/credentials', 'media.platforms.manage', async (ctx) => {
+    const result = setAccountCredentials(ctx.params.id, {
+      token: ctx.body.token,
+      appId: ctx.body.appId,
+      appSecret: ctx.body.appSecret,
+    });
+    if (!result) fail('NOT_FOUND', 'اکانت پیدا نشد');
+
+    logActivity({
+      admin: ctx.admin, action: 'media.account.credentials-set', entityType: 'media-account',
+      entityId: ctx.params.id, entityLabel: '',
+      /* فقط اینکه ثبت شد یا نه — نه مقدار، نه طول، نه بخشی از آن */
+      metadata: { hasToken: result.hasToken, hasAppKeys: result.hasAppKeys },
+      ip: clientIp(ctx.request),
+    });
+
+    return result;
+  }],
+
+  ['POST', '/api/admin/media/accounts/:id/test', 'media.platforms.manage', async (ctx) => {
+    const result = await testAccountConnection(ctx.params.id);
+    if (!result) fail('NOT_FOUND', 'اکانت پیدا نشد');
+
+    logActivity({
+      admin: ctx.admin, action: 'media.account.tested', entityType: 'media-account',
+      entityId: ctx.params.id, entityLabel: '',
+      metadata: { ok: result.ok, complete: Boolean(result.complete) }, ip: clientIp(ctx.request),
+    });
+
+    return result;
+  }],
+
+  ['POST', '/api/admin/media/accounts/:id/sync', 'media.platforms.manage', async (ctx) => {
+    const result = await syncAccount(ctx.params.id, { admin: ctx.admin });
+    if (!result) fail('NOT_FOUND', 'اکانت پیدا نشد');
+    return result;
+  }],
+
+  /* ── محتوا ── */
+
+  ['GET', '/api/admin/media/contents', 'media.read', async (ctx) => listContents({
+    search: ctx.query.get('search') ?? '',
+    status: ctx.query.get('status') ?? 'all',
+    platform: ctx.query.get('platform') ?? 'all',
+    accountId: ctx.query.get('accountId') ?? 'all',
+    campaignId: ctx.query.get('campaignId') ?? 'all',
+    contentType: ctx.query.get('contentType') ?? 'all',
+    authorId: ctx.query.get('authorId') ?? 'all',
+    from: ctx.query.get('from'),
+    to: ctx.query.get('to'),
+    sort: ctx.query.get('sort') ?? 'newest',
+    page: ctx.query.get('page') ?? 1,
+    perPage: ctx.query.get('perPage') ?? 20,
+  })],
+
+  ['GET', '/api/admin/media/calendar', 'media.read', async (ctx) => contentCalendar({
+    from: ctx.query.get('from'),
+    to: ctx.query.get('to'),
+  })],
+
+  ['GET', '/api/admin/media/queue', 'media.read', async () => publishQueue()],
+
+  /* پیش‌نمایش — بدون هیچ درخواست شبکه‌ای؛ همان چیزی که منتشر می‌شود */
+  ['POST', '/api/admin/media/contents/preview', 'media.read', async (ctx) => previewContent(ctx.body)],
+
+  ['POST', '/api/admin/media/queue/run', 'media.content.publish', async (ctx) => {
+    const result = await runSchedule({ admin: ctx.admin, limit: Number(ctx.body.limit) || 10 });
+
+    logActivity({
+      admin: ctx.admin, action: 'media.queue.ran', entityType: 'media-content',
+      entityId: null, entityLabel: `${result.processed} محتوا`,
+      metadata: { sent: result.sent, dryRun: result.dryRun, failed: result.failed },
+      ip: clientIp(ctx.request),
+    });
+
+    return result;
+  }],
+
+  ['GET', '/api/admin/media/contents/:id', 'media.read', async (ctx) => {
+    const content = getContent(ctx.params.id);
+    if (!content) fail('NOT_FOUND', 'محتوا پیدا نشد');
+    return { content };
+  }],
+
+  ['GET', '/api/admin/media/contents/:id/analytics', 'media.read', async (ctx) => {
+    const data = contentAnalytics(ctx.params.id);
+    if (!data) fail('NOT_FOUND', 'محتوا پیدا نشد');
+    return data;
+  }],
+
+  ['POST', '/api/admin/media/contents', 'media.content.manage', async (ctx) => {
+    const content = createContent(ctx.body, ctx.admin);
+    logActivity({
+      admin: ctx.admin, action: 'media.content.created', entityType: 'media-content',
+      entityId: content.id, entityLabel: content.title,
+      metadata: { platform: content.platform, contentType: content.contentType, status: content.status },
+      ip: clientIp(ctx.request),
+    });
+    return { content };
+  }],
+
+  ['PUT', '/api/admin/media/contents/:id', 'media.content.manage', async (ctx) => {
+    const content = updateContent(ctx.params.id, ctx.body, ctx.admin);
+    if (!content) fail('NOT_FOUND', 'محتوا پیدا نشد');
+    logActivity({
+      admin: ctx.admin, action: 'media.content.updated', entityType: 'media-content',
+      entityId: content.id, entityLabel: content.title,
+      metadata: { status: content.status }, ip: clientIp(ctx.request),
+    });
+    return { content };
+  }],
+
+  ['DELETE', '/api/admin/media/contents/:id', 'media.content.manage', async (ctx) => {
+    const content = deleteContent(ctx.params.id, ctx.admin);
+    if (!content) fail('NOT_FOUND', 'محتوا پیدا نشد');
+    logActivity({
+      admin: ctx.admin, action: 'media.content.deleted', entityType: 'media-content',
+      entityId: content.id, entityLabel: content.title, ip: clientIp(ctx.request),
+    });
+    return { deleted: content.id };
+  }],
+
+  /* تغییر وضعیت با اعتبارسنجی گذار — گذار غیرمجاز ۴۰۹ می‌دهد نه بی‌صدا */
+  ['POST', '/api/admin/media/contents/:id/status', 'media.content.manage', async (ctx) => {
+    const content = setContentStatus(ctx.params.id, String(ctx.body.status ?? ''), {
+      admin: ctx.admin,
+      note: ctx.body.note ?? '',
+    });
+    if (!content) fail('NOT_FOUND', 'محتوا پیدا نشد');
+
+    logActivity({
+      admin: ctx.admin, action: 'media.content.status-changed', entityType: 'media-content',
+      entityId: content.id, entityLabel: content.title,
+      metadata: { status: content.status }, ip: clientIp(ctx.request),
+    });
+
+    return { content };
+  }],
+
+  ['POST', '/api/admin/media/contents/:id/submit', 'media.content.manage', async (ctx) => {
+    const content = submitContentForReview(ctx.params.id, {
+      admin: ctx.admin,
+      reviewerId: ctx.body.reviewerId ?? null,
+      note: ctx.body.note ?? '',
+    });
+    if (!content) fail('NOT_FOUND', 'محتوا پیدا نشد');
+
+    logActivity({
+      admin: ctx.admin, action: 'media.content.submitted', entityType: 'media-content',
+      entityId: content.id, entityLabel: content.title, ip: clientIp(ctx.request),
+    });
+
+    return { content };
+  }],
+
+  ['POST', '/api/admin/media/contents/:id/approve', 'media.content.review', async (ctx) => {
+    const content = approveContent(ctx.params.id, { admin: ctx.admin, note: ctx.body.note ?? '' });
+    if (!content) fail('NOT_FOUND', 'محتوا پیدا نشد');
+
+    logActivity({
+      admin: ctx.admin, action: 'media.content.approved', entityType: 'media-content',
+      entityId: content.id, entityLabel: content.title, ip: clientIp(ctx.request),
+    });
+
+    return { content };
+  }],
+
+  /* درخواست اصلاح: دلیل، توضیح و زمان روی خود محتوا ثبت می‌شود */
+  ['POST', '/api/admin/media/contents/:id/revision', 'media.content.review', async (ctx) => {
+    const content = requestContentRevision(ctx.params.id, {
+      admin: ctx.admin,
+      reason: ctx.body.reason ?? '',
+      comment: ctx.body.comment ?? '',
+    });
+    if (!content) fail('NOT_FOUND', 'محتوا پیدا نشد');
+
+    logActivity({
+      admin: ctx.admin, action: 'media.content.revision-requested', entityType: 'media-content',
+      entityId: content.id, entityLabel: content.title,
+      metadata: { reason: content.rejection?.reason ?? '' }, ip: clientIp(ctx.request),
+    });
+
+    return { content };
+  }],
+
+  ['POST', '/api/admin/media/contents/:id/schedule', 'media.content.publish', async (ctx) => {
+    const content = scheduleContent(ctx.params.id, {
+      admin: ctx.admin,
+      scheduledAt: ctx.body.scheduledAt,
+      note: ctx.body.note ?? '',
+    });
+    if (!content) fail('NOT_FOUND', 'محتوا پیدا نشد');
+
+    logActivity({
+      admin: ctx.admin, action: 'media.content.scheduled', entityType: 'media-content',
+      entityId: content.id, entityLabel: content.title,
+      metadata: { scheduledAt: content.scheduledAt }, ip: clientIp(ctx.request),
+    });
+
+    return { content };
+  }],
+
+  ['POST', '/api/admin/media/contents/:id/publish', 'media.content.publish', async (ctx) => {
+    const result = await publishContent(ctx.params.id, {
+      admin: ctx.admin,
+      forceDryRun: ctx.body.dryRun === true,
+    });
+    if (!result) fail('NOT_FOUND', 'محتوا پیدا نشد');
+
+    logActivity({
+      admin: ctx.admin, action: `media.content.publish-${result.status}`, entityType: 'media-content',
+      entityId: ctx.params.id, entityLabel: result.content?.title ?? '',
+      metadata: { status: result.status }, ip: clientIp(ctx.request),
+    });
+
+    return result;
+  }],
+
+  ['POST', '/api/admin/media/contents/:id/retry', 'media.content.publish', async (ctx) => {
+    const result = await retryContent(ctx.params.id, { admin: ctx.admin });
+    if (!result) fail('NOT_FOUND', 'محتوا پیدا نشد');
+
+    logActivity({
+      admin: ctx.admin, action: `media.content.retry-${result.status}`, entityType: 'media-content',
+      entityId: ctx.params.id, entityLabel: result.content?.title ?? '',
+      metadata: { status: result.status }, ip: clientIp(ctx.request),
+    });
+
+    return result;
+  }],
+
+  /* ── کمپین‌ها ── */
+
+  ['GET', '/api/admin/media/campaigns', 'media.read', async (ctx) => ({
+    campaigns: listCampaigns({
+      search: ctx.query.get('search') ?? '',
+      status: ctx.query.get('status') ?? 'all',
+      platform: ctx.query.get('platform') ?? 'all',
+    }),
+  })],
+
+  ['GET', '/api/admin/media/campaigns/:id', 'media.read', async (ctx) => {
+    const campaign = getCampaign(ctx.params.id);
+    if (!campaign) fail('NOT_FOUND', 'کمپین پیدا نشد');
+    return { campaign };
+  }],
+
+  ['POST', '/api/admin/media/campaigns', 'media.content.manage', async (ctx) => {
+    const campaign = saveCampaign(ctx.body, ctx.admin);
+    logActivity({
+      admin: ctx.admin, action: 'media.campaign.created', entityType: 'media-campaign',
+      entityId: campaign.id, entityLabel: campaign.name,
+      metadata: { status: campaign.status }, ip: clientIp(ctx.request),
+    });
+    return { campaign };
+  }],
+
+  ['PUT', '/api/admin/media/campaigns/:id', 'media.content.manage', async (ctx) => {
+    const campaign = saveCampaign({ ...ctx.body, id: ctx.params.id }, ctx.admin);
+    if (!campaign) fail('NOT_FOUND', 'کمپین پیدا نشد');
+    logActivity({
+      admin: ctx.admin, action: 'media.campaign.updated', entityType: 'media-campaign',
+      entityId: campaign.id, entityLabel: campaign.name,
+      metadata: { status: campaign.status }, ip: clientIp(ctx.request),
+    });
+    return { campaign };
+  }],
+
+  ['DELETE', '/api/admin/media/campaigns/:id', 'media.content.manage', async (ctx) => {
+    const result = deleteCampaign(ctx.params.id);
+    if (!result) fail('NOT_FOUND', 'کمپین پیدا نشد');
+    logActivity({
+      admin: ctx.admin, action: 'media.campaign.deleted', entityType: 'media-campaign',
+      entityId: result.deleted, entityLabel: '',
+      metadata: { detachedContents: result.detachedContents }, ip: clientIp(ctx.request),
+    });
+    return result;
+  }],
+
+  /* ── تیم رسانه ── */
+
+  ['GET', '/api/admin/media/team', 'media.read', async (ctx) => ({
+    team: listTeam({
+      search: ctx.query.get('search') ?? '',
+      role: ctx.query.get('role') ?? 'all',
+      active: ctx.query.get('active') ?? 'all',
+    }),
+  })],
+
+  ['POST', '/api/admin/media/team', 'media.team.manage', async (ctx) => {
+    const member = saveTeamMember(ctx.body, ctx.admin);
+    logActivity({
+      admin: ctx.admin, action: 'media.team.added', entityType: 'media-team',
+      entityId: member.id, entityLabel: member.name,
+      metadata: { role: member.role }, ip: clientIp(ctx.request),
+    });
+    return { member };
+  }],
+
+  ['PUT', '/api/admin/media/team/:id', 'media.team.manage', async (ctx) => {
+    const member = saveTeamMember({ ...ctx.body, id: ctx.params.id }, ctx.admin);
+    if (!member) fail('NOT_FOUND', 'عضو تیم پیدا نشد');
+    logActivity({
+      admin: ctx.admin, action: 'media.team.updated', entityType: 'media-team',
+      entityId: member.id, entityLabel: member.name,
+      metadata: { role: member.role }, ip: clientIp(ctx.request),
+    });
+    return { member };
+  }],
+
+  ['DELETE', '/api/admin/media/team/:id', 'media.team.manage', async (ctx) => {
+    const result = deleteTeamMember(ctx.params.id);
+    if (!result) fail('NOT_FOUND', 'عضو تیم پیدا نشد');
+    logActivity({
+      admin: ctx.admin, action: 'media.team.removed', entityType: 'media-team',
+      entityId: result.deleted, entityLabel: '', ip: clientIp(ctx.request),
+    });
+    return result;
+  }],
+
+  /* ── هشتگ و موضوع ── */
+
+  ['GET', '/api/admin/media/tags', 'media.read', async (ctx) => ({
+    tags: listTags({ kind: ctx.query.get('kind') ?? 'all', search: ctx.query.get('search') ?? '' }),
+  })],
+
+  ['POST', '/api/admin/media/tags', 'media.content.manage', async (ctx) => {
+    const tag = saveTag(ctx.body, ctx.admin);
+    logActivity({
+      admin: ctx.admin, action: 'media.tag.created', entityType: 'media-tag',
+      entityId: tag.id, entityLabel: tag.label, metadata: { kind: tag.kind }, ip: clientIp(ctx.request),
+    });
+    return { tag };
+  }],
+
+  ['PUT', '/api/admin/media/tags/:id', 'media.content.manage', async (ctx) => {
+    const tag = saveTag({ ...ctx.body, id: ctx.params.id }, ctx.admin);
+    if (!tag) fail('NOT_FOUND', 'هشتگ یا موضوع پیدا نشد');
+    logActivity({
+      admin: ctx.admin, action: 'media.tag.updated', entityType: 'media-tag',
+      entityId: tag.id, entityLabel: tag.label, ip: clientIp(ctx.request),
+    });
+    return { tag };
+  }],
+
+  ['DELETE', '/api/admin/media/tags/:id', 'media.content.manage', async (ctx) => {
+    const result = deleteTag(ctx.params.id);
+    if (!result) fail('NOT_FOUND', 'هشتگ یا موضوع پیدا نشد');
+    logActivity({
+      admin: ctx.admin, action: 'media.tag.deleted', entityType: 'media-tag',
+      entityId: result.deleted, entityLabel: '', ip: clientIp(ctx.request),
+    });
+    return result;
+  }],
+
+  /* ── سنجه‌ها ── */
+
+  ['GET', '/api/admin/media/metrics', 'media.read', async (ctx) => ({
+    metrics: listMetrics({
+      accountId: ctx.query.get('accountId') ?? 'all',
+      platform: ctx.query.get('platform') ?? 'all',
+      from: ctx.query.get('from'),
+      to: ctx.query.get('to'),
+      limit: ctx.query.get('limit') ?? 400,
+    }),
+  })],
+
+  ['POST', '/api/admin/media/metrics', 'media.content.manage', async (ctx) => {
+    const metric = saveMetrics(ctx.body);
+    logActivity({
+      admin: ctx.admin, action: 'media.metrics.saved', entityType: 'media-account',
+      entityId: metric.accountId, entityLabel: metric.date,
+      metadata: { platform: metric.platform, source: metric.source }, ip: clientIp(ctx.request),
+    });
+    return { metric };
+  }],
+
+  ['DELETE', '/api/admin/media/metrics/:id', 'media.content.manage', async (ctx) => {
+    const result = deleteMetrics(ctx.params.id);
+    if (!result) fail('NOT_FOUND', 'رکورد سنجه پیدا نشد');
+    return result;
+  }],
+
+  /* ── کتابخانهٔ رسانه ── */
+
+  ['GET', '/api/admin/media/assets', 'media.read', async (ctx) => listAssets({
+    search: ctx.query.get('search') ?? '',
+    kind: ctx.query.get('kind') ?? 'all',
+    folder: ctx.query.get('folder') ?? 'all',
+    archived: ctx.query.get('archived') ?? 'all',
+    sort: ctx.query.get('sort') ?? 'newest',
+    page: ctx.query.get('page') ?? 1,
+    perPage: ctx.query.get('perPage') ?? 24,
+  })],
+
+  ['PUT', '/api/admin/media/assets/:id', 'media.content.manage', async (ctx) => {
+    const asset = updateAsset(ctx.params.id, ctx.body, ctx.admin);
+    if (!asset) fail('NOT_FOUND', 'فایل پیدا نشد');
+    logActivity({
+      admin: ctx.admin, action: 'media.asset.updated', entityType: 'media-asset',
+      entityId: asset.id, entityLabel: asset.originalName, ip: clientIp(ctx.request),
+    });
+    return { asset };
+  }],
+
+  ['POST', '/api/admin/media/assets/:id/archive', 'media.content.manage', async (ctx) => {
+    const asset = archiveAsset(ctx.params.id, ctx.body.isArchived !== false, ctx.admin);
+    if (!asset) fail('NOT_FOUND', 'فایل پیدا نشد');
+    return { asset };
+  }],
+
+  ['DELETE', '/api/admin/media/assets/:id', 'media.content.manage', async (ctx) => {
+    const result = deleteAsset(ctx.params.id, { force: ctx.body.force === true });
+    if (!result) fail('NOT_FOUND', 'فایل پیدا نشد');
+    logActivity({
+      admin: ctx.admin, action: 'media.asset.deleted', entityType: 'media-asset',
+      entityId: result.deleted, entityLabel: '',
+      metadata: { detachedFrom: result.detachedFrom }, ip: clientIp(ctx.request),
+    });
+    return result;
+  }],
+
+  /* ── اینباکس ── */
+
+  ['GET', '/api/admin/media/inbox', 'media.read', async (ctx) => listInbox({
+    platform: ctx.query.get('platform') ?? 'all',
+    accountId: ctx.query.get('accountId') ?? 'all',
+    status: ctx.query.get('status') ?? 'all',
+    kind: ctx.query.get('kind') ?? 'all',
+    assignedToId: ctx.query.get('assignedToId') ?? 'all',
+    search: ctx.query.get('search') ?? '',
+    page: ctx.query.get('page') ?? 1,
+    perPage: ctx.query.get('perPage') ?? 20,
+  })],
+
+  ['POST', '/api/admin/media/inbox', 'media.ops.manage', async (ctx) => {
+    const item = saveInboxItem(ctx.body, ctx.admin);
+    logActivity({
+      admin: ctx.admin, action: 'media.inbox.created', entityType: 'media-inbox',
+      entityId: item?.id ?? null, entityLabel: item?.authorName ?? '',
+      metadata: { platform: item?.platform, kind: item?.kind }, ip: clientIp(ctx.request),
+    });
+    return { item };
+  }],
+
+  ['POST', '/api/admin/media/inbox/:id/status', 'media.ops.manage', async (ctx) => {
+    const result = setInboxStatus(ctx.params.id, String(ctx.body.status ?? ''), ctx.admin);
+    if (!result) fail('NOT_FOUND', 'پیام پیدا نشد');
+    logActivity({
+      admin: ctx.admin, action: 'media.inbox.status-changed', entityType: 'media-inbox',
+      entityId: result.id, entityLabel: '', metadata: { status: result.status }, ip: clientIp(ctx.request),
+    });
+    return result;
+  }],
+
+  ['POST', '/api/admin/media/inbox/:id/assign', 'media.ops.manage', async (ctx) => {
+    const result = assignInboxItem(ctx.params.id, ctx.body.assignedToId ?? null, ctx.admin);
+    if (!result) fail('NOT_FOUND', 'پیام پیدا نشد');
+    logActivity({
+      admin: ctx.admin, action: 'media.inbox.assigned', entityType: 'media-inbox',
+      entityId: result.id, entityLabel: '', metadata: { assignedToId: result.assignedToId },
+      ip: clientIp(ctx.request),
+    });
+    return result;
+  }],
+
+  ['POST', '/api/admin/media/inbox/:id/reply', 'media.ops.manage', async (ctx) => {
+    const result = replyInboxItem(ctx.params.id, { text: ctx.body.text, admin: ctx.admin });
+    if (!result) fail('NOT_FOUND', 'پیام پیدا نشد');
+    logActivity({
+      admin: ctx.admin, action: 'media.inbox.replied', entityType: 'media-inbox',
+      entityId: result.id, entityLabel: '', ip: clientIp(ctx.request),
+    });
+    return result;
+  }],
+
+  ['DELETE', '/api/admin/media/inbox/:id', 'media.ops.manage', async (ctx) => {
+    const result = deleteInboxItem(ctx.params.id);
+    if (!result) fail('NOT_FOUND', 'پیام پیدا نشد');
+    return result;
+  }],
+
+  /* ── رصد نام و کلیدواژه ── */
+
+  ['GET', '/api/admin/media/mentions/summary', 'media.read', async () => listeningSummary()],
+
+  ['GET', '/api/admin/media/mentions', 'media.read', async (ctx) => ({
+    mentions: listMentions({
+      platform: ctx.query.get('platform') ?? 'all',
+      keyword: ctx.query.get('keyword') ?? 'all',
+      sentiment: ctx.query.get('sentiment') ?? 'all',
+      handled: ctx.query.get('handled') ?? 'all',
+      search: ctx.query.get('search') ?? '',
+    }),
+  })],
+
+  ['POST', '/api/admin/media/mentions', 'media.ops.manage', async (ctx) => {
+    const mention = saveMention(ctx.body, ctx.admin);
+    logActivity({
+      admin: ctx.admin, action: 'media.mention.created', entityType: 'media-mention',
+      entityId: mention?.id ?? null, entityLabel: mention?.keywordLabel ?? '',
+      metadata: { platform: mention?.platform }, ip: clientIp(ctx.request),
+    });
+    return { mention };
+  }],
+
+  ['PUT', '/api/admin/media/mentions/:id', 'media.ops.manage', async (ctx) => {
+    const mention = saveMention({ ...ctx.body, id: ctx.params.id }, ctx.admin);
+    if (!mention) fail('NOT_FOUND', 'منشن پیدا نشد');
+    return { mention };
+  }],
+
+  ['DELETE', '/api/admin/media/mentions/:id', 'media.ops.manage', async (ctx) => {
+    const result = deleteMention(ctx.params.id);
+    if (!result) fail('NOT_FOUND', 'منشن پیدا نشد');
+    return result;
+  }],
+
+  /* ── اعلان‌ها ── */
+
+  ['GET', '/api/admin/media/notifications', 'media.read', async (ctx) => listNotifications({
+    status: ctx.query.get('status') ?? 'all',
+    level: ctx.query.get('level') ?? 'all',
+  })],
+
+  /* بررسی دوره‌ای اعلان‌ها — فقط از دادهٔ موجود، بدون اعلان تزئینی */
+  ['POST', '/api/admin/media/notifications/refresh', 'media.read', async (ctx) => refreshNotifications()],
+
+  ['POST', '/api/admin/media/notifications/read-all', 'media.ops.manage', async (ctx) => {
+    const result = markAllNotificationsRead();
+    logActivity({
+      admin: ctx.admin, action: 'media.notifications.read-all', entityType: 'media-notification',
+      entityId: null, entityLabel: '', ip: clientIp(ctx.request),
+    });
+    return result;
+  }],
+
+  ['POST', '/api/admin/media/notifications/:id', 'media.ops.manage', async (ctx) => {
+    const notification = setNotificationState(ctx.params.id, {
+      isRead: ctx.body.isRead,
+      isArchived: ctx.body.isArchived,
+    });
+    if (!notification) fail('NOT_FOUND', 'اعلان پیدا نشد');
+    return { notification };
+  }],
+
+  /* ── UTM ── */
+
+  ['GET', '/api/admin/media/utm', 'media.read', async (ctx) => ({
+    links: listUtm({
+      campaignId: ctx.query.get('campaignId') ?? 'all',
+      platform: ctx.query.get('platform') ?? 'all',
+    }),
+  })],
+
+  /* ساخت آدرس بدون ذخیره — برای دیدن زندهٔ لینک در فرم */
+  ['POST', '/api/admin/media/utm/preview', 'media.read', async (ctx) => ({
+    url: buildUtmUrl(ctx.body),
+  })],
+
+  ['POST', '/api/admin/media/utm', 'media.ops.manage', async (ctx) => {
+    const link = saveUtm(ctx.body, ctx.admin);
+    logActivity({
+      admin: ctx.admin, action: 'media.utm.created', entityType: 'media-utm',
+      entityId: link?.id ?? null, entityLabel: link?.label ?? '',
+      metadata: { source: link?.source, medium: link?.medium }, ip: clientIp(ctx.request),
+    });
+    return { link };
+  }],
+
+  ['PUT', '/api/admin/media/utm/:id', 'media.ops.manage', async (ctx) => {
+    const link = saveUtm({ ...ctx.body, id: ctx.params.id }, ctx.admin);
+    if (!link) fail('NOT_FOUND', 'لینک پیدا نشد');
+    return { link };
+  }],
+
+  ['DELETE', '/api/admin/media/utm/:id', 'media.ops.manage', async (ctx) => {
+    const result = deleteUtm(ctx.params.id);
+    if (!result) fail('NOT_FOUND', 'لینک پیدا نشد');
+    return result;
+  }],
+
+  /* ── گزارش رویدادهای مرکز رسانه ── */
+
+  ['GET', '/api/admin/media/audit', 'media.audit.read', async (ctx) => listMediaAudit({
+    search: ctx.query.get('search') ?? '',
+    action: ctx.query.get('action') ?? 'all',
+    entityType: ctx.query.get('entityType') ?? 'all',
+    page: ctx.query.get('page') ?? 1,
+    perPage: ctx.query.get('perPage') ?? 20,
+  })],
+
+  /* ── دادهٔ نمونه ── */
+
+  /*
+   * پاک‌کردن **فقط** رکوردهای نمونه. دادهٔ واقعی دست‌نخورده می‌ماند، پس این
+   * عملیات بی‌خطر است و نیازی به تأیید دوم ندارد.
+   */
+  ['POST', '/api/admin/media/demo/clear', 'media.platforms.manage', async (ctx) => {
+    const result = clearDemoData();
+    logActivity({
+      admin: ctx.admin, action: 'media.demo.cleared', entityType: 'media-platform',
+      entityId: null, entityLabel: 'پاک‌سازی دادهٔ نمونه',
+      metadata: { removed: result.total }, ip: clientIp(ctx.request),
+    });
+    return result;
+  }],
+
+  /* بارگذاری دوبارهٔ دادهٔ نمونه — برای وقتی کاربر می‌خواهد دمو را ببیند */
+  ['POST', '/api/admin/media/demo/seed', 'media.platforms.manage', async (ctx) => {
+    const result = ensureMediaStore({ force: true });
+    logActivity({
+      admin: ctx.admin, action: 'media.demo.seeded', entityType: 'media-platform',
+      entityId: null, entityLabel: 'بارگذاری دادهٔ نمونه',
+      metadata: { counts: result.counts }, ip: clientIp(ctx.request),
+    });
+    return result;
+  }],
+
   /* ───────────────────────── مرکز تحلیل ───────────────────────── */
 
   /* منابع داده — شفاف‌ترین بخش: کدام منبع وصل است و کدام نه */
@@ -900,6 +1947,13 @@ export async function handleApi(request, response) {
 
   try {
     ensureStore();
+
+    /*
+     * مرکز رسانه فقط وقتی آماده‌سازی می‌شود که واقعاً کسی سراغش رفته باشد.
+     * `ensureMediaStore` یک‌بار دادهٔ نمونه را می‌سازد و بعد فقط یک فایل کوچک
+     * فراداده می‌خواند؛ ولی حتی همین هم نباید به قیمت هر درخواست پنل تمام شود.
+     */
+    if (pathname.startsWith('/api/admin/media')) ensureMediaStore();
 
     /* ── مسیرهای عمومی ── */
     if (isPublicApi) {

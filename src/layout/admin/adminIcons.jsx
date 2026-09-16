@@ -312,3 +312,159 @@ export function IconSpark(props) {
     </svg>
   );
 }
+
+/* انتشار در کانال — کاغذپران */
+export function IconSend(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M20.5 3.5 3.5 10.2l6.2 2.4 2.4 6.2z" />
+      <path d="M20.5 3.5 9.7 12.6" />
+    </svg>
+  );
+}
+
+/* ────────────────── مرکز رسانه و فضای مجازی ────────────────── */
+
+/* مرکز رسانه — موج پخش */
+export function IconBroadcast(props) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="12" cy="12" r="2.2" />
+      <path d="M8.4 8.4a5 5 0 0 0 0 7.2M15.6 15.6a5 5 0 0 0 0-7.2" />
+      <path d="M5.6 5.6a9 9 0 0 0 0 12.8M18.4 18.4a9 9 0 0 0 0-12.8" />
+    </svg>
+  );
+}
+
+/* تقویم محتوایی */
+export function IconCalendar(props) {
+  return (
+    <svg {...base} {...props}>
+      <rect x="3.5" y="5" width="17" height="15.5" rx="2.5" />
+      <path d="M3.5 9.6h17M8.2 3.5v3.2M15.8 3.5v3.2" />
+      <path d="M8 13.2h2M14 13.2h2M8 16.6h2M14 16.6h2" />
+    </svg>
+  );
+}
+
+/* کمپین — بلندگو */
+export function IconCampaign(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M4 10.2v3.6a1.6 1.6 0 0 0 1.6 1.6h1.6l7.6 4V4.6l-7.6 4H5.6A1.6 1.6 0 0 0 4 10.2z" />
+      <path d="M18.6 8.8a4.4 4.4 0 0 1 0 6.4" />
+    </svg>
+  );
+}
+
+/* اینباکس — صندوق پیام */
+export function IconInbox(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M3.5 13.2 5.6 5.4A1.8 1.8 0 0 1 7.3 4h9.4a1.8 1.8 0 0 1 1.7 1.4l2.1 7.8" />
+      <path d="M3.5 13.2h4l1.2 2.3h6.6l1.2-2.3h4v4.1a1.9 1.9 0 0 1-1.9 1.9H5.4a1.9 1.9 0 0 1-1.9-1.9z" />
+    </svg>
+  );
+}
+
+/* تیم رسانه — چند نفر */
+export function IconTeam(props) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="9.2" cy="8.6" r="3.1" />
+      <path d="M3.6 19.4a5.6 5.6 0 0 1 11.2 0" />
+      <path d="M16.4 6.2a3 3 0 0 1 0 5.6M17.6 19.4a5.4 5.4 0 0 0-1.6-3.8" />
+    </svg>
+  );
+}
+
+/* هشتگ و موضوع */
+export function IconHashtag(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M9.4 3.8 7.6 20.2M16.4 3.8l-1.8 16.4M4.2 8.8h15.6M3.4 15.2h15.6" />
+    </svg>
+  );
+}
+
+/* گزارش — سند با نمودار */
+export function IconReport(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M6.2 3.5h8.1l4 4v13H6.2z" />
+      <path d="M14 3.5v4.3h4.3" />
+      <path d="M9 17.2v-3.4M12 17.2v-6M15 17.2v-2" />
+    </svg>
+  );
+}
+
+/* ساعت / زمان‌بندی */
+export function IconClock(props) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="12" cy="12" r="8.3" />
+      <path d="M12 7.4V12l3.2 1.9" />
+    </svg>
+  );
+}
+
+/* هشدار — برای اعلان و خطای انتشار */
+export function IconWarning(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M12 4.4 21 19.6H3z" />
+      <path d="M12 9.6v4.2M12 16.9h.01" />
+    </svg>
+  );
+}
+
+/* آرشیو */
+export function IconArchive(props) {
+  return (
+    <svg {...base} {...props}>
+      <rect x="3.4" y="4.4" width="17.2" height="4.2" rx="1.4" />
+      <path d="M5.2 8.6v9.4a1.8 1.8 0 0 0 1.8 1.8h10a1.8 1.8 0 0 0 1.8-1.8V8.6" />
+      <path d="M10 12.4h4" />
+    </svg>
+  );
+}
+
+/* گفت‌وگو — پاسخ در اینباکس */
+export function IconMessage(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M20.5 12.6c0 4-3.8 7.2-8.5 7.2a9.8 9.8 0 0 1-2.6-.35L4.5 21l1.2-3.6a6.9 6.9 0 0 1-2.2-4.8c0-4 3.8-7.2 8.5-7.2s8.5 3.2 8.5 7.2z" />
+    </svg>
+  );
+}
+
+/* صف انتشار — لیست زمان‌بندی‌شده */
+export function IconQueue(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M4 6.4h11M4 12h11M4 17.6h7" />
+      <circle cx="18.4" cy="16.4" r="3" />
+      <path d="M18.4 15.1v1.4l1 .7" />
+    </svg>
+  );
+}
+
+/* UTM — برچسب پیوند */
+export function IconUtm(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M10.2 13.8a3.6 3.6 0 0 0 5.1 0l3-3a3.6 3.6 0 1 0-5.1-5.1L11.7 7" />
+      <path d="M13.8 10.2a3.6 3.6 0 0 0-5.1 0l-3 3a3.6 3.6 0 1 0 5.1 5.1L12.3 17" />
+    </svg>
+  );
+}
+
+/* روند صعودی — نرخ رشد */
+export function IconTrendUp(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M3.5 16.6 9 11l3.6 3.6L20.5 6.7" />
+      <path d="M15.4 6.7h5.1v5.1" />
+    </svg>
+  );
+}

@@ -43,6 +43,7 @@ import { clearStoredUser, getDisplayName, getStoredUser, loginUser, saveUserReco
 import { identify, startTracking, trackLogin, trackLogout, trackSignup } from './services/telemetry/trafficTracker';
 import './layout/dashboard/dashboard.css';
 import './layout/admin/analytics/analytics.css';
+import './layout/admin/media/media.css';
 
 const productCards = [
   {

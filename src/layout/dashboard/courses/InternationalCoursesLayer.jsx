@@ -5,6 +5,10 @@ import { LAYER_IDS, useLayerRoute } from '../dashboardRoute';
 const FA_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
 const toFa = (value) => String(value).replace(/\d/g, (digit) => FA_DIGITS[Number(digit)]);
 
+/* نمای پیش‌فرض لایه — کاتالوگ با فیلتر «همه دوره‌ها» و بدون دورهٔ باز.
+   باید ثابت و بیرون از کامپوننت بماند (قرارداد useLayerRoute). */
+const INTL_COURSES_VIEW = { filter: 'all', featured: false, courseId: null, deep: null };
+
 const FILTERS = [
   { id: 'all', label: 'همه دوره‌ها' },
   { id: 'medicine', label: 'پزشکی و سلامت' },
@@ -285,7 +289,8 @@ function DetailView({ course, onBack, onExit }) {
 export default function InternationalCoursesLayer({ onBack }) {
   /* صفحهٔ لایه (کاتالوگ ↔ جزئیات دوره) روی مسیر داشبورد می‌نشیند؛ متن کادر جست‌وجو محلی می‌ماند */
   const [view, , patchView] = useLayerRoute(LAYER_IDS.intlCourses, INTL_COURSES_VIEW, {
-    screenOf: (current) => (current?.courseId ? 'detail' : 'catalog'),
+    screenOf: (current) =>
+      current?.courseId || current?.deep?.courseId ? 'detail' : 'catalog',
   });
   const [query, setQuery] = useState('');
   /* لینک عمیق از «دوره‌های من»: مستقیم وارد جزئیات همان دوره می‌شود */
@@ -295,7 +300,9 @@ export default function InternationalCoursesLayer({ onBack }) {
   const showFeaturedOnly = view.featured ?? false;
   const setActiveFilter = (filter) => patchView({ filter });
   const setShowFeaturedOnly = () => patchView({ featured: !showFeaturedOnly });
-  const setSelectedCourse = (course) => patchView({ courseId: course?.id ?? null });
+  /* بازگشت از جزئیات باید deep را هم پاک کند، وگرنه courseId دوباره از لینک عمیق
+     خوانده می‌شود و همان دوره باز می‌ماند. */
+  const setSelectedCourse = (course) => patchView({ courseId: course?.id ?? null, deep: null });
 
   const filteredCourses = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase('fa');

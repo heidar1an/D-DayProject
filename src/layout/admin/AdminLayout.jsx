@@ -17,28 +17,32 @@ import AdminCategories from './views/AdminCategories';
 import AdminPages from './views/AdminPages';
 import AdminMedia from './views/AdminMedia';
 import AdminBanners from './views/AdminBanners';
+import AdminPublishing from './views/AdminPublishing';
 import AdminUsers from './views/AdminUsers';
 import AdminSettings from './views/AdminSettings';
 import AdminLogs from './views/AdminLogs';
 import AdminNotes from './views/AdminNotes';
 import AdminProfile from './views/AdminProfile';
 import AnalyticsCenter from './analytics/AnalyticsCenter';
+import MediaCenter, { MEDIA_TAB_IDS } from './media/MediaCenter';
 import {
   Button, Spinner, ToastProvider, faDate, toFa, useToast,
 } from './adminShared';
 import {
-  IconAnalytics, IconArticle, IconBanner, IconDashboard, IconLog, IconLogout, IconMedia,
-  IconMenu, IconNote, IconPage, IconSettings, IconTag, IconUser,
+  IconAnalytics, IconArticle, IconBanner, IconBroadcast, IconDashboard, IconLog, IconLogout, IconMedia,
+  IconMenu, IconNote, IconPage, IconSend, IconSettings, IconTag, IconUser,
 } from './adminIcons';
 
 const SECTIONS = [
   { id: 'dashboard', label: 'داشبورد', icon: IconDashboard, permission: null },
   { id: 'analytics', label: 'مرکز تحلیل', icon: IconAnalytics, permission: 'analytics.read' },
+  { id: 'media-center', label: 'مدیریت رسانه و فضای مجازی', icon: IconBroadcast, permission: 'media.read' },
   { id: 'articles', label: 'مقالات', icon: IconArticle, permission: 'articles.read' },
   { id: 'categories', label: 'دسته‌بندی‌ها', icon: IconTag, permission: 'articles.read' },
   { id: 'pages', label: 'صفحات', icon: IconPage, permission: 'pages.read' },
   { id: 'media', label: 'کتابخانهٔ رسانه', icon: IconMedia, permission: 'media.read' },
   { id: 'banners', label: 'بنرها', icon: IconBanner, permission: 'articles.read' },
+  { id: 'publishing', label: 'انتشار در کانال‌ها', icon: IconSend, permission: 'publishing.read' },
   { id: 'users', label: 'کاربران و نقش‌ها', icon: IconUser, permission: 'users.read' },
   { id: 'settings', label: 'تنظیمات سایت', icon: IconSettings, permission: 'settings.read' },
   { id: 'logs', label: 'گزارش رویدادها', icon: IconLog, permission: 'logs.read' },
@@ -59,6 +63,11 @@ function parseHashView() {
   /* مرکز تحلیل: پاراگراف دوم نام تب است (`#admin/analytics/traffic`) */
   if (section === 'analytics') {
     return { name: 'analytics', payload: match[2] ? { tab: match[2] } : null };
+  }
+
+  /* مرکز رسانه: پاراگراف دوم نام تب است (`#admin/media-center/overview`) */
+  if (section === 'media-center') {
+    return { name: 'media-center', payload: match[2] ? { tab: MEDIA_TAB_IDS.has(match[2]) ? match[2] : 'overview' } : null };
   }
 
   /* در بخش مقالات، پاراگراف دوم شناسهٔ مقاله برای ویرایش است */
@@ -89,7 +98,9 @@ function AdminShell({ admin, onExit, onLogout }) {
         ? `#admin/pages/${payload.id}`
         : name === 'analytics' && payload?.tab
           ? `#admin/analytics/${payload.tab}`
-          : `#admin/${name}`;
+          : name === 'media-center' && payload?.tab
+            ? `#admin/media-center/${payload.tab}`
+            : `#admin/${name}`;
 
     if (window.location.hash !== hash) {
       window.history.replaceState(window.history.state, '', hash);
@@ -152,6 +163,14 @@ function AdminShell({ admin, onExit, onLogout }) {
             onTabChange={(tab) => navigate('analytics', { tab })}
           />
         );
+      case 'media-center':
+        return (
+          <MediaCenter
+            admin={admin}
+            tab={view.payload?.tab ?? 'overview'}
+            onTabChange={(tab) => navigate('media-center', { tab })}
+          />
+        );
       case 'articles':
         return <AdminArticles {...editorProps} />;
       case 'article-editor':
@@ -166,6 +185,8 @@ function AdminShell({ admin, onExit, onLogout }) {
         return <AdminMedia {...editorProps} />;
       case 'banners':
         return <AdminBanners {...editorProps} />;
+      case 'publishing':
+        return <AdminPublishing {...editorProps} />;
       case 'users':
         return <AdminUsers {...editorProps} />;
       case 'settings':

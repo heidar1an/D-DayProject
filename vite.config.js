@@ -19,11 +19,17 @@ export default defineConfig({
    *
    * `ignored` به فهرست پیش‌فرض ویت **اضافه** می‌شود، پس کد بک‌اند
    * (`database/*.js`) همچنان زیر نظر می‌ماند و تغییرش سرور را ری‌استارت می‌کند.
+   *
+   * `publishing.secrets.json` هم همان‌جا نشسته چون توکن ربات‌های انتشار است و
+   * با هر ثبت/تغییر توکن بازنویسی می‌شود. `media.secrets.json` همان چیز برای
+   * کلیدهای اپ و توکن اکانت‌های مرکز رسانه است.
    */
   server: {
     watch: {
       ignored: [
         '**/database/content/**',
+        '**/database/publishing.secrets.json',
+        '**/database/media.secrets.json',
         '**/database/users.json',
         '**/public/uploads/**',
       ],

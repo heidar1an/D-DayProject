@@ -1,0 +1,175 @@
+[
+  {
+    "id": "cmp-seed1",
+    "name": "کمپین شروع ترم",
+    "description": "",
+    "goal": "افزایش ثبت‌نام دوره‌های علوم پایه در شروع ترم",
+    "status": "active",
+    "startAt": "2026-04-19",
+    "endAt": "2026-06-18",
+    "budget": 12000000,
+    "ownerId": "tm-seed1",
+    "platformIds": [
+      "instagram",
+      "telegram"
+    ],
+    "tagIds": [
+      "tag-seed1"
+    ],
+    "utmId": null,
+    "createdAt": "2026-09-16T11:19:33.036Z",
+    "updatedBy": "system",
+    "createdByName": "دادهٔ نمونه",
+    "seed": true
+  },
+  {
+    "id": "cmp-seed2",
+    "name": "کمپین علوم پایه",
+    "description": "",
+    "goal": "جذب مخاطب علاقه‌مند به علوم پایه",
+    "status": "active",
+    "startAt": "2026-05-01",
+    "endAt": "2026-07-05",
+    "budget": 8000000,
+    "ownerId": "tm-seed2",
+    "platformIds": [
+      "instagram",
+      "telegram",
+      "eitaa"
+    ],
+    "tagIds": [
+      "tag-seed1",
+      "tag-seed2"
+    ],
+    "utmId": null,
+    "createdAt": "2026-09-16T11:19:33.036Z",
+    "updatedBy": "system",
+    "createdByName": "دادهٔ نمونه",
+    "seed": true
+  },
+  {
+    "id": "cmp-seed3",
+    "name": "کمپین آزمون",
+    "description": "",
+    "goal": "معرفی آزمون‌های آزمایشی تپش",
+    "status": "active",
+    "startAt": "2026-05-13",
+    "endAt": "2026-07-22",
+    "budget": 15000000,
+    "ownerId": "tm-seed3",
+    "platformIds": [
+      "instagram",
+      "telegram",
+      "eitaa",
+      "bale"
+    ],
+    "tagIds": [
+      "tag-seed1",
+      "tag-seed2",
+      "tag-seed3"
+    ],
+    "utmId": null,
+    "createdAt": "2026-09-16T11:19:33.036Z",
+    "updatedBy": "system",
+    "createdByName": "دادهٔ نمونه",
+    "seed": true
+  },
+  {
+    "id": "cmp-seed4",
+    "name": "کمپین معرفی تپش",
+    "description": "",
+    "goal": "برندسازی و معرفی پلتفرم به دانشجویان تازه‌ورود",
+    "status": "active",
+    "startAt": "2026-05-25",
+    "endAt": "2026-08-08",
+    "budget": 6000000,
+    "ownerId": "tm-seed4",
+    "platformIds": [
+      "instagram",
+      "telegram"
+    ],
+    "tagIds": [
+      "tag-seed1"
+    ],
+    "utmId": null,
+    "createdAt": "2026-09-16T11:19:33.036Z",
+    "updatedBy": "system",
+    "createdByName": "دادهٔ نمونه",
+    "seed": true
+  },
+  {
+    "id": "cmp-seed5",
+    "name": "کمپین اشتراک ویژه",
+    "description": "",
+    "goal": "فروش اشتراک ویژه",
+    "status": "planned",
+    "startAt": "2026-06-06",
+    "endAt": "2026-08-25",
+    "budget": 20000000,
+    "ownerId": "tm-seed5",
+    "platformIds": [
+      "instagram",
+      "telegram",
+      "eitaa"
+    ],
+    "tagIds": [
+      "tag-seed1",
+      "tag-seed2"
+    ],
+    "utmId": null,
+    "createdAt": "2026-09-16T11:19:33.036Z",
+    "updatedBy": "system",
+    "createdByName": "دادهٔ نمونه",
+    "seed": true
+  },
+  {
+    "id": "cmp-seed6",
+    "name": "کمپین المپیاد",
+    "description": "",
+    "goal": "جذب دانشجویان المپیادی",
+    "status": "planned",
+    "startAt": "2026-06-18",
+    "endAt": "2026-09-11",
+    "budget": 5000000,
+    "ownerId": "tm-seed6",
+    "platformIds": [
+      "instagram",
+      "telegram",
+      "eitaa",
+      "bale"
+    ],
+    "tagIds": [
+      "tag-seed1",
+      "tag-seed2",
+      "tag-seed3"
+    ],
+    "utmId": null,
+    "createdAt": "2026-09-16T11:19:33.036Z",
+    "updatedBy": "system",
+    "createdByName": "دادهٔ نمونه",
+    "seed": true
+  },
+  {
+    "id": "cmp-seed7",
+    "name": "کمپین محتوای آموزشی",
+    "description": "",
+    "goal": "تولید مستمر محتوای آموزشی رایگان",
+    "status": "active",
+    "startAt": "2026-06-30",
+    "endAt": "2026-09-28",
+    "budget": 9000000,
+    "ownerId": "tm-seed1",
+    "platformIds": [
+      "instagram",
+      "telegram"
+    ],
+    "tagIds": [
+      "tag-seed1"
+    ],
+    "utmId": null,
+    "createdAt": "2026-09-16T11:19:33.036Z",
+    "updatedBy": "system",
+    "createdByName": "دادهٔ نمونه",
+    "seed": true
+  }
+]

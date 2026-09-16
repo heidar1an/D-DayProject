@@ -1,0 +1,84 @@
+[
+  {
+    "id": "pl-ss4ede4js",
+    "channelId": "ch-cgf90es69",
+    "channelName": "تپش",
+    "platform": "bale",
+    "platformLabel": "بله",
+    "tokenSource": "channel",
+    "status": "sent",
+    "error": "",
+    "reason": "",
+    "contentPreview": "سلام به دنبال کنندگان تپش. \nاین یک پیام آزمایشی جهت تست مرکز مدیریت محتوای تیم تپش میباشد.",
+    "source": {
+      "type": "custom",
+      "id": null,
+      "title": ""
+    },
+    "request": {
+      "api": "Bale Bot API",
+      "chatId": "@mytapesh",
+      "steps": [
+        {
+          "method": "sendPhoto",
+          "label": "ارسال تصویر",
+          "textLength": 90,
+          "hasMedia": true,
+          "mediaFilename": "mu47b9b1-d32dc90de8fa.png",
+          "mediaKind": "image"
+        }
+      ]
+    },
+    "messages": [
+      {
+        "method": "sendPhoto",
+        "label": "ارسال تصویر",
+        "messageId": 3
+      }
+    ],
+    "at": "2026-09-16T14:34:27.976Z",
+    "adminId": "adm-5e246f08",
+    "adminName": "مدیر تپش"
+  },
+  {
+    "id": "pl-d4lhizco7",
+    "channelId": "ch-cgf90es69",
+    "channelName": "تپش",
+    "platform": "bale",
+    "platformLabel": "بله",
+    "tokenSource": "channel",
+    "status": "sent",
+    "error": "",
+    "reason": "",
+    "contentPreview": "سلام به دنبال کنندگان تپش",
+    "source": {
+      "type": "custom",
+      "id": null,
+      "title": ""
+    },
+    "request": {
+      "api": "Bale Bot API",
+      "chatId": "@mytapesh",
+      "steps": [
+        {
+          "method": "sendMessage",
+          "label": "ارسال متن",
+          "textLength": 25,
+          "hasMedia": false,
+          "mediaFilename": null,
+          "mediaKind": null
+        }
+      ]
+    },
+    "messages": [
+      {
+        "method": "sendMessage",
+        "label": "ارسال متن",
+        "messageId": 2
+      }
+    ],
+    "at": "2026-09-16T14:29:11.911Z",
+    "adminId": "adm-5e246f08",
+    "adminName": "مدیر تپش"
+  }
+]

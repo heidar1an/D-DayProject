@@ -1,0 +1,62 @@
+[
+  {
+    "id": "instagram",
+    "label": "اینستاگرام تپش",
+    "isActive": true,
+    "description": "صفحهٔ اصلی تپش در اینستاگرام — محتوای آموزشی و معرفی دوره‌ها",
+    "logo": "",
+    "managerId": null,
+    "startedAt": "2025-07-23",
+    "notes": "",
+    "createdAt": "2026-09-16T11:19:33.036Z",
+    "updatedAt": "2026-09-16T11:19:33.036Z",
+    "createdBy": "system",
+    "createdByName": "دادهٔ نمونه",
+    "seed": true
+  },
+  {
+    "id": "telegram",
+    "label": "تلگرام تپش",
+    "isActive": true,
+    "description": "کانال اصلی اطلاع‌رسانی و فایل‌های آموزشی",
+    "logo": "",
+    "managerId": null,
+    "startedAt": "2025-07-23",
+    "notes": "",
+    "createdAt": "2026-09-16T11:19:33.036Z",
+    "updatedAt": "2026-09-16T11:19:33.036Z",
+    "createdBy": "system",
+    "createdByName": "دادهٔ نمونه",
+    "seed": true
+  },
+  {
+    "id": "eitaa",
+    "label": "ایتا تپش",
+    "isActive": true,
+    "description": "کانال ایتا برای کاربران داخلی",
+    "logo": "",
+    "managerId": null,
+    "startedAt": "2025-07-23",
+    "notes": "",
+    "createdAt": "2026-09-16T11:19:33.036Z",
+    "updatedAt": "2026-09-16T11:19:33.036Z",
+    "createdBy": "system",
+    "createdByName": "دادهٔ نمونه",
+    "seed": true
+  },
+  {
+    "id": "bale",
+    "label": "بله تپش",
+    "isActive": true,
+    "description": "کانال بله — ارسال از پنل انتشار",
+    "logo": "",
+    "managerId": null,
+    "startedAt": "2025-07-23",
+    "notes": "",
+    "createdAt": "2026-09-16T11:19:33.036Z",
+    "updatedAt": "2026-09-16T11:19:33.036Z",
+    "createdBy": "system",
+    "createdByName": "دادهٔ نمونه",
+    "seed": true
+  }
+]

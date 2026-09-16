@@ -3,3 +3,5 @@ dist
 .DS_Store
 .env
 vendor
+database/publishing.secrets.json
+database/media.secrets.json

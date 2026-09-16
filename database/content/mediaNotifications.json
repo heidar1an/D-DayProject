@@ -1,0 +1,93 @@
+[
+  {
+    "id": "ntf-a4o2lbhan",
+    "kind": "publish-dry-run",
+    "level": "warn",
+    "title": "انتشار آزمایشی ثبت شد",
+    "body": "«اطلاعیهٔ شروع ثبت‌نام دورهٔ علوم پایه» — توکن این اکانت ثبت نشده است",
+    "entityType": "media-content",
+    "entityId": "cnt-seed4",
+    "link": null,
+    "isRead": false,
+    "isArchived": false,
+    "at": "2026-09-16T11:21:07.151Z"
+  },
+  {
+    "id": "ntf-4x9u33hxk",
+    "kind": "campaign-ended",
+    "level": "info",
+    "title": "کمپین «کمپین معرفی تپش» به پایان رسید",
+    "body": "وضعیت کمپین را به «پایان‌یافته» تغییر دهید یا تمدید کنید.",
+    "entityType": "media-campaign",
+    "entityId": "cmp-seed4",
+    "link": null,
+    "isRead": false,
+    "isArchived": false,
+    "at": "2026-09-16T11:21:06.420Z"
+  },
+  {
+    "id": "ntf-9xixaqhtv",
+    "kind": "campaign-ended",
+    "level": "info",
+    "title": "کمپین «کمپین آزمون» به پایان رسید",
+    "body": "وضعیت کمپین را به «پایان‌یافته» تغییر دهید یا تمدید کنید.",
+    "entityType": "media-campaign",
+    "entityId": "cmp-seed3",
+    "link": null,
+    "isRead": false,
+    "isArchived": false,
+    "at": "2026-09-16T11:21:06.286Z"
+  },
+  {
+    "id": "ntf-nr3xuuhq8",
+    "kind": "campaign-ended",
+    "level": "info",
+    "title": "کمپین «کمپین علوم پایه» به پایان رسید",
+    "body": "وضعیت کمپین را به «پایان‌یافته» تغییر دهید یا تمدید کنید.",
+    "entityType": "media-campaign",
+    "entityId": "cmp-seed2",
+    "link": null,
+    "isRead": false,
+    "isArchived": false,
+    "at": "2026-09-16T11:21:06.153Z"
+  },
+  {
+    "id": "ntf-lg4tomhmh",
+    "kind": "campaign-ended",
+    "level": "info",
+    "title": "کمپین «کمپین شروع ترم» به پایان رسید",
+    "body": "وضعیت کمپین را به «پایان‌یافته» تغییر دهید یا تمدید کنید.",
+    "entityType": "media-campaign",
+    "entityId": "cmp-seed1",
+    "link": null,
+    "isRead": false,
+    "isArchived": false,
+    "at": "2026-09-16T11:21:06.019Z"
+  },
+  {
+    "id": "ntf-nq0a5khg9",
+    "kind": "content-publish-failed",
+    "level": "critical",
+    "title": "1 محتوا در انتشار ناموفق بود",
+    "body": "ریلز تکنیک مطالعهٔ فعال",
+    "entityType": "media-content",
+    "entityId": "failed-queue",
+    "link": null,
+    "isRead": false,
+    "isArchived": false,
+    "at": "2026-09-16T11:21:05.792Z"
+  },
+  {
+    "id": "ntf-3w6lgdhck",
+    "kind": "content-review-pending",
+    "level": "warn",
+    "title": "2 محتوا در انتظار تأیید است",
+    "body": "ویدئو تحلیل سوالات بیوشیمی، نظرسنجی انتخاب موضوع وبینار",
+    "entityType": "media-content",
+    "entityId": "review-queue",
+    "link": null,
+    "isRead": false,
+    "isArchived": false,
+    "at": "2026-09-16T11:21:05.659Z"
+  }
+]

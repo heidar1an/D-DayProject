@@ -1,0 +1,1531 @@
+[
+  {
+    "id": "cnt-seed1",
+    "title": "پوستر جمع‌بندی فیزیولوژی قلبی",
+    "caption": "پوستر جمع‌بندی فیزیولوژی قلبی\n\nمحتوای آموزشی تپش برای دانشجویان علوم پزشکی.",
+    "contentType": "post",
+    "platform": "instagram",
+    "accountId": "acc-seed1",
+    "campaignId": "cmp-seed1",
+    "tagIds": [
+      "tag-seed1"
+    ],
+    "hashtags": [
+      "tapesh",
+      "علومپایه"
+    ],
+    "mentions": [],
+    "links": [],
+    "cta": "برای مشاهدهٔ دوره به سایت تپش سر بزنید",
+    "assets": [
+      {
+        "mediaId": null,
+        "url": "",
+        "filename": "post-1",
+        "mimeType": "image/jpeg",
+        "kind": "image"
+      }
+    ],
+    "thumbnail": "",
+    "status": "published",
+    "scheduledAt": null,
+    "publishedAt": "2026-09-16T11:19:33.036Z",
+    "timezone": "Asia/Tehran",
+    "authorId": "tm-seed3",
+    "reviewerId": "tm-seed1",
+    "utmId": null,
+    "metrics": {
+      "views": 4095,
+      "reach": 2997,
+      "impressions": 3836,
+      "likes": 206,
+      "comments": 24,
+      "shares": 18,
+      "saves": 16,
+      "clicks": 33,
+      "engagement": 264,
+      "watchTime": null,
+      "avgWatchTime": null,
+      "completionRate": null,
+      "followersGained": 30,
+      "profileVisits": 120,
+      "websiteClicks": 33,
+      "conversions": 8
+    },
+    "publishResult": null,
+    "rejection": null,
+    "history": [
+      {
+        "at": "2026-09-16T11:19:33.036Z",
+        "byId": "system",
+        "byName": "دادهٔ نمونه",
+        "from": null,
+        "to": "published",
+        "action": "created",
+        "note": ""
+      }
+    ],
+    "notes": "",
+    "createdAt": "2026-09-14T11:19:33.036Z",
+    "updatedAt": "2026-09-16T11:19:33.036Z",
+    "createdBy": "system",
+    "createdByName": "دادهٔ نمونه",
+    "seed": true
+  },
+  {
+    "id": "cnt-seed2",
+    "title": "ریلز نکات طلایی آناتومی اندام فوقانی",
+    "caption": "ریلز نکات طلایی آناتومی اندام فوقانی\n\nمحتوای آموزشی تپش برای دانشجویان علوم پزشکی.",
+    "contentType": "reel",
+    "platform": "instagram",
+    "accountId": "acc-seed2",
+    "campaignId": "cmp-seed2",
+    "tagIds": [
+      "tag-seed2"
+    ],
+    "hashtags": [
+      "علومپایه",
+      "آزمونعلومپزشکی"
+    ],
+    "mentions": [],
+    "links": [],
+    "cta": "برای مشاهدهٔ دوره به سایت تپش سر بزنید",
+    "assets": [
+      {
+        "mediaId": null,
+        "url": "",
+        "filename": "reel-2",
+        "mimeType": "video/mp4",
+        "kind": "video"
+      }
+    ],
+    "thumbnail": "",
+    "status": "published",
+    "scheduledAt": null,
+    "publishedAt": "2026-09-12T11:19:33.036Z",
+    "timezone": "Asia/Tehran",
+    "authorId": "tm-seed4",
+    "reviewerId": "tm-seed1",
+    "utmId": null,
+    "metrics": {
+      "views": 6509,
+      "reach": 5278,
+      "impressions": 6756,
+      "likes": 158,
+      "comments": 18,
+      "shares": 14,
+      "saves": 12,
+      "clicks": 47,
+      "engagement": 203,
+      "watchTime": 2456,
+      "avgWatchTime": 16,
+      "completionRate": 66,
+      "followersGained": 82,
+      "profileVisits": 211,
+      "websiteClicks": 58,
+      "conversions": 6
+    },
+    "publishResult": null,
+    "rejection": null,
+    "history": [
+      {
+        "at": "2026-09-12T11:19:33.036Z",
+        "byId": "system",
+        "byName": "دادهٔ نمونه",
+        "from": null,
+        "to": "published",
+        "action": "created",
+        "note": ""
+      }
+    ],
+    "notes": "",
+    "createdAt": "2026-09-11T11:19:33.036Z",
+    "updatedAt": "2026-09-16T11:19:33.036Z",
+    "createdBy": "system",
+    "createdByName": "دادهٔ نمونه",
+    "seed": true
+  },
+  {
+    "id": "cnt-seed3",
+    "title": "اینفوگرافیک مسیر سوخت‌وساز",
+    "caption": "اینفوگرافیک مسیر سوخت‌وساز\n\nمحتوای آموزشی تپش برای دانشجویان علوم پزشکی.",
+    "contentType": "infographic",
+    "platform": "telegram",
+    "accountId": "acc-seed3",
+    "campaignId": "cmp-seed3",
+    "tagIds": [
+      "tag-seed3"
+    ],
+    "hashtags": [
+      "آزمونعلومپزشکی",
+      "فیزیولوژی"
+    ],
+    "mentions": [],
+    "links": [],
+    "cta": "برای مشاهدهٔ دوره به سایت تپش سر بزنید",
+    "assets": [
+      {
+        "mediaId": null,
+        "url": "",
+        "filename": "infographic-3",
+        "mimeType": "image/jpeg",
+        "kind": "image"
+      }
+    ],
+    "thumbnail": "",
+    "status": "published",
+    "scheduledAt": null,
+    "publishedAt": "2026-09-09T11:19:33.036Z",
+    "timezone": "Asia/Tehran",
+    "authorId": "tm-seed5",
+    "reviewerId": "tm-seed1",
+    "utmId": null,
+    "metrics": {
+      "views": 4614,
+      "reach": 3745,
+      "impressions": 4794,
+      "likes": 98,
+      "comments": 11,
+      "shares": 9,
+      "saves": 8,
+      "clicks": 95,
+      "engagement": 125,
+      "watchTime": null,
+      "avgWatchTime": null,
+      "completionRate": null,
+      "followersGained": 40,
+      "profileVisits": 150,
+      "websiteClicks": 40,
+      "conversions": 13
+    },
+    "publishResult": null,
+    "rejection": null,
+    "history": [
+      {
+        "at": "2026-09-09T11:19:33.036Z",
+        "byId": "system",
+        "byName": "دادهٔ نمونه",
+        "from": null,
+        "to": "published",
+        "action": "created",
+        "note": ""
+      }
+    ],
+    "notes": "",
+    "createdAt": "2026-09-08T11:19:33.036Z",
+    "updatedAt": "2026-09-16T11:19:33.036Z",
+    "createdBy": "system",
+    "createdByName": "دادهٔ نمونه",
+    "seed": true
+  },
+  {
+    "id": "cnt-seed4",
+    "title": "اطلاعیهٔ شروع ثبت‌نام دورهٔ علوم پایه",
+    "caption": "اطلاعیهٔ شروع ثبت‌نام دورهٔ علوم پایه\n\nمحتوای آموزشی تپش برای دانشجویان علوم پزشکی.",
+    "contentType": "announcement",
+    "platform": "telegram",
+    "accountId": "acc-seed4",
+    "campaignId": "cmp-seed4",
+    "tagIds": [
+      "tag-seed4"
+    ],
+    "hashtags": [
+      "tapesh",
+      "علومپایه"
+    ],
+    "mentions": [],
+    "links": [],
+    "cta": "برای مشاهدهٔ دوره به سایت تپش سر بزنید",
+    "assets": [],
+    "thumbnail": "",
+    "status": "scheduled",
+    "scheduledAt": "2026-09-16T11:04:33.036Z",
+    "publishedAt": null,
+    "timezone": "Asia/Tehran",
+    "authorId": "tm-seed6",
+    "reviewerId": "tm-seed1",
+    "utmId": null,
+    "metrics": null,
+    "publishResult": {
+      "status": "dry-run",
+      "via": "account",
+      "request": {
+        "endpoint": "telegram",
+        "target": "@tapesh_news",
+        "api": "Telegram Bot API",
+        "steps": [
+          {
+            "method": "sendMessage",
+            "label": "ارسال متن",
+            "textLength": 142,
+            "hasMedia": false,
+            "mediaFilename": null,
+            "mediaKind": null
+          }
+        ]
+      },
+      "reason": "توکن این اکانت ثبت نشده است",
+      "at": "2026-09-16T11:21:07.059Z"
+    },
+    "rejection": null,
+    "history": [
+      {
+        "at": "2026-09-16T11:19:33.036Z",
+        "byId": "system",
+        "byName": "دادهٔ نمونه",
+        "from": null,
+        "to": "scheduled",
+        "action": "created",
+        "note": ""
+      },
+      {
+        "at": "2026-09-16T11:21:07.059Z",
+        "byId": "adm-5e246f08",
+        "byName": "مدیر تپش",
+        "from": "scheduled",
+        "to": "scheduled",
+        "action": "publish-attempt",
+        "note": "آزمایشی: توکن این اکانت ثبت نشده است"
+      }
+    ],
+    "notes": "",
+    "createdAt": "2026-09-05T11:19:33.036Z",
+    "updatedAt": "2026-09-16T11:21:07.059Z",
+    "createdBy": "system",
+    "createdByName": "دادهٔ نمونه",
+    "seed": true
+  },
+  {
+    "id": "cnt-seed5",
+    "title": "استوری نظرسنجی منابع مطالعاتی",
+    "caption": "استوری نظرسنجی منابع مطالعاتی\n\nمحتوای آموزشی تپش برای دانشجویان علوم پزشکی.",
+    "contentType": "story",
+    "platform": "eitaa",
+    "accountId": "acc-seed5",
+    "campaignId": "cmp-seed5",
+    "tagIds": [
+      "tag-seed5"
+    ],
+    "hashtags": [
+      "علومپایه",
+      "آزمونعلومپزشکی"
+    ],
+    "mentions": [],
+    "links": [],
+    "cta": "برای مشاهدهٔ دوره به سایت تپش سر بزنید",
+    "assets": [
+      {
+        "mediaId": null,
+        "url": "",
+        "filename": "story-5",
+        "mimeType": "image/jpeg",
+        "kind": "image"
+      }
+    ],
+    "thumbnail": "",
+    "status": "draft",
+    "scheduledAt": null,
+    "publishedAt": null,
+    "timezone": "Asia/Tehran",
+    "authorId": "tm-seed1",
+    "reviewerId": "tm-seed1",
+    "utmId": null,
+    "metrics": null,
+    "publishResult": null,
+    "rejection": null,
+    "history": [
+      {
+        "at": "2026-09-16T11:19:33.036Z",
+        "byId": "system",
+        "byName": "دادهٔ نمونه",
+        "from": null,
+        "to": "draft",
+        "action": "created",
+        "note": ""
+      }
+    ],
+    "notes": "",
+    "createdAt": "2026-09-02T11:19:33.036Z",
+    "updatedAt": "2026-09-16T11:19:33.036Z",
+    "createdBy": "system",
+    "createdByName": "دادهٔ نمونه",
+    "seed": true
+  },
+  {
+    "id": "cnt-seed6",
+    "title": "ویدئو تحلیل سوالات بیوشیمی",
+    "caption": "ویدئو تحلیل سوالات بیوشیمی\n\nمحتوای آموزشی تپش برای دانشجویان علوم پزشکی.",
+    "contentType": "video",
+    "platform": "bale",
+    "accountId": "acc-seed6",
+    "campaignId": "cmp-seed6",
+    "tagIds": [
+      "tag-seed6"
+    ],
+    "hashtags": [
+      "آزمونعلومپزشکی",
+      "فیزیولوژی"
+    ],
+    "mentions": [],
+    "links": [],
+    "cta": "برای مشاهدهٔ دوره به سایت تپش سر بزنید",
+    "assets": [
+      {
+        "mediaId": null,
+        "url": "",
+        "filename": "video-6",
+        "mimeType": "video/mp4",
+        "kind": "video"
+      }
+    ],
+    "thumbnail": "",
+    "status": "review",
+    "scheduledAt": null,
+    "publishedAt": null,
+    "timezone": "Asia/Tehran",
+    "authorId": "tm-seed2",
+    "reviewerId": "tm-seed1",
+    "utmId": null,
+    "metrics": null,
+    "publishResult": null,
+    "rejection": null,
+    "history": [
+      {
+        "at": "2026-09-16T11:19:33.036Z",
+        "byId": "system",
+        "byName": "دادهٔ نمونه",
+        "from": null,
+        "to": "review",
+        "action": "created",
+        "note": ""
+      }
+    ],
+    "notes": "",
+    "createdAt": "2026-08-30T11:19:33.036Z",
+    "updatedAt": "2026-09-16T11:19:33.036Z",
+    "createdBy": "system",
+    "createdByName": "دادهٔ نمونه",
+    "seed": true
+  },
+  {
+    "id": "cnt-seed7",
+    "title": "کاروسل باکتری‌شناسی بالینی",
+    "caption": "کاروسل باکتری‌شناسی بالینی\n\nمحتوای آموزشی تپش برای دانشجویان علوم پزشکی.",
+    "contentType": "carousel",
+    "platform": "instagram",
+    "accountId": "acc-seed1",
+    "campaignId": "cmp-seed7",
+    "tagIds": [
+      "tag-seed7"
+    ],
+    "hashtags": [
+      "tapesh",
+      "علومپایه"
+    ],
+    "mentions": [],
+    "links": [],
+    "cta": "برای مشاهدهٔ دوره به سایت تپش سر بزنید",
+    "assets": [
+      {
+        "mediaId": null,
+        "url": "",
+        "filename": "carousel-7",
+        "mimeType": "image/jpeg",
+        "kind": "image"
+      }
+    ],
+    "thumbnail": "",
+    "status": "published",
+    "scheduledAt": null,
+    "publishedAt": "2026-08-28T11:19:33.036Z",
+    "timezone": "Asia/Tehran",
+    "authorId": "tm-seed3",
+    "reviewerId": "tm-seed1",
+    "utmId": null,
+    "metrics": {
+      "views": 4046,
+      "reach": 2718,
+      "impressions": 3479,
+      "likes": 197,
+      "comments": 23,
+      "shares": 18,
+      "saves": 15,
+      "clicks": 68,
+      "engagement": 252,
+      "watchTime": null,
+      "avgWatchTime": null,
+      "completionRate": null,
+      "followersGained": 14,
+      "profileVisits": 109,
+      "websiteClicks": 22,
+      "conversions": 17
+    },
+    "publishResult": null,
+    "rejection": null,
+    "history": [
+      {
+        "at": "2026-08-28T11:19:33.036Z",
+        "byId": "system",
+        "byName": "دادهٔ نمونه",
+        "from": null,
+        "to": "published",
+        "action": "created",
+        "note": ""
+      }
+    ],
+    "notes": "",
+    "createdAt": "2026-08-27T11:19:33.036Z",
+    "updatedAt": "2026-09-16T11:19:33.036Z",
+    "createdBy": "system",
+    "createdByName": "دادهٔ نمونه",
+    "seed": true
+  },
+  {
+    "id": "cnt-seed8",
+    "title": "پست معرفی دورهٔ آمادگی آزمون",
+    "caption": "پست معرفی دورهٔ آمادگی آزمون\n\nمحتوای آموزشی تپش برای دانشجویان علوم پزشکی.",
+    "contentType": "post",
+    "platform": "instagram",
+    "accountId": "acc-seed2",
+    "campaignId": "cmp-seed1",
+    "tagIds": [
+      "tag-seed8"
+    ],
+    "hashtags": [
+      "علومپایه",
+      "آزمونعلومپزشکی"
+    ],
+    "mentions": [],
+    "links": [],
+    "cta": "برای مشاهدهٔ دوره به سایت تپش سر بزنید",
+    "assets": [
+      {
+        "mediaId": null,
+        "url": "",
+        "filename": "post-8",
+        "mimeType": "image/jpeg",
+        "kind": "image"
+      }
+    ],
+    "thumbnail": "",
+    "status": "approved",
+    "scheduledAt": "2026-09-24T21:19:33.036Z",
+    "publishedAt": null,
+    "timezone": "Asia/Tehran",
+    "authorId": "tm-seed4",
+    "reviewerId": "tm-seed1",
+    "utmId": null,
+    "metrics": null,
+    "publishResult": null,
+    "rejection": null,
+    "history": [
+      {
+        "at": "2026-09-16T11:19:33.036Z",
+        "byId": "system",
+        "byName": "دادهٔ نمونه",
+        "from": null,
+        "to": "approved",
+        "action": "created",
+        "note": ""
+      }
+    ],
+    "notes": "",
+    "createdAt": "2026-08-24T11:19:33.036Z",
+    "updatedAt": "2026-09-16T11:19:33.036Z",
+    "createdBy": "system",
+    "createdByName": "دادهٔ نمونه",
+    "seed": true
+  },
+  {
+    "id": "cnt-seed9",
+    "title": "پادکست گفتگو با رتبهٔ برتر",
+    "caption": "پادکست گفتگو با رتبهٔ برتر\n\nمحتوای آموزشی تپش برای دانشجویان علوم پزشکی.",
+    "contentType": "podcast",
+    "platform": "telegram",
+    "accountId": "acc-seed3",
+    "campaignId": "cmp-seed2",
+    "tagIds": [
+      "tag-seed9"
+    ],
+    "hashtags": [
+      "آزمونعلومپزشکی",
+      "فیزیولوژی"
+    ],
+    "mentions": [],
+    "links": [],
+    "cta": "برای مشاهدهٔ دوره به سایت تپش سر بزنید",
+    "assets": [
+      {
+        "mediaId": null,
+        "url": "",
+        "filename": "podcast-9",
+        "mimeType": "audio/mpeg",
+        "kind": "audio"
+      }
+    ],
+    "thumbnail": "",
+    "status": "published",
+    "scheduledAt": null,
+    "publishedAt": "2026-08-22T11:19:33.036Z",
+    "timezone": "Asia/Tehran",
+    "authorId": "tm-seed5",
+    "reviewerId": "tm-seed1",
+    "utmId": null,
+    "metrics": {
+      "views": 5011,
+      "reach": 3733,
+      "impressions": 4778,
+      "likes": 162,
+      "comments": 19,
+      "shares": 15,
+      "saves": 12,
+      "clicks": 102,
+      "engagement": 208,
+      "watchTime": null,
+      "avgWatchTime": null,
+      "completionRate": null,
+      "followersGained": 67,
+      "profileVisits": 149,
+      "websiteClicks": 34,
+      "conversions": 9
+    },
+    "publishResult": null,
+    "rejection": null,
+    "history": [
+      {
+        "at": "2026-08-22T11:19:33.036Z",
+        "byId": "system",
+        "byName": "دادهٔ نمونه",
+        "from": null,
+        "to": "published",
+        "action": "created",
+        "note": ""
+      }
+    ],
+    "notes": "",
+    "createdAt": "2026-08-21T11:19:33.036Z",
+    "updatedAt": "2026-09-16T11:19:33.036Z",
+    "createdBy": "system",
+    "createdByName": "دادهٔ نمونه",
+    "seed": true
+  },
+  {
+    "id": "cnt-seed10",
+    "title": "کوییز آناتومی سر و گردن",
+    "caption": "کوییز آناتومی سر و گردن\n\nمحتوای آموزشی تپش برای دانشجویان علوم پزشکی.",
+    "contentType": "quiz",
+    "platform": "telegram",
+    "accountId": "acc-seed4",
+    "campaignId": "cmp-seed3",
+    "tagIds": [
+      "tag-seed10"
+    ],
+    "hashtags": [
+      "tapesh",
+      "علومپایه"
+    ],
+    "mentions": [],
+    "links": [],
+    "cta": "برای مشاهدهٔ دوره به سایت تپش سر بزنید",
+    "assets": [],
+    "thumbnail": "",
+    "status": "scheduled",
+    "scheduledAt": "2026-09-17T21:19:33.036Z",
+    "publishedAt": null,
+    "timezone": "Asia/Tehran",
+    "authorId": "tm-seed6",
+    "reviewerId": "tm-seed1",
+    "utmId": null,
+    "metrics": null,
+    "publishResult": null,
+    "rejection": null,
+    "history": [
+      {
+        "at": "2026-09-16T11:19:33.036Z",
+        "byId": "system",
+        "byName": "دادهٔ نمونه",
+        "from": null,
+        "to": "scheduled",
+        "action": "created",
+        "note": ""
+      }
+    ],
+    "notes": "",
+    "createdAt": "2026-08-18T11:19:33.036Z",
+    "updatedAt": "2026-09-16T11:19:33.036Z",
+    "createdBy": "system",
+    "createdByName": "دادهٔ نمونه",
+    "seed": true
+  },
+  {
+    "id": "cnt-seed11",
+    "title": "ترد نکات مرور سریع فیزیولوژی",
+    "caption": "ترد نکات مرور سریع فیزیولوژی\n\nمحتوای آموزشی تپش برای دانشجویان علوم پزشکی.",
+    "contentType": "thread",
+    "platform": "eitaa",
+    "accountId": "acc-seed5",
+    "campaignId": "cmp-seed4",
+    "tagIds": [
+      "tag-seed1"
+    ],
+    "hashtags": [
+      "علومپایه",
+      "آزمونعلومپزشکی"
+    ],
+    "mentions": [],
+    "links": [],
+    "cta": "برای مشاهدهٔ دوره به سایت تپش سر بزنید",
+    "assets": [],
+    "thumbnail": "",
+    "status": "draft",
+    "scheduledAt": null,
+    "publishedAt": null,
+    "timezone": "Asia/Tehran",
+    "authorId": "tm-seed1",
+    "reviewerId": "tm-seed1",
+    "utmId": null,
+    "metrics": null,
+    "publishResult": null,
+    "rejection": null,
+    "history": [
+      {
+        "at": "2026-09-16T11:19:33.036Z",
+        "byId": "system",
+        "byName": "دادهٔ نمونه",
+        "from": null,
+        "to": "draft",
+        "action": "created",
+        "note": ""
+      }
+    ],
+    "notes": "",
+    "createdAt": "2026-08-15T11:19:33.036Z",
+    "updatedAt": "2026-09-16T11:19:33.036Z",
+    "createdBy": "system",
+    "createdByName": "دادهٔ نمونه",
+    "seed": true
+  },
+  {
+    "id": "cnt-seed12",
+    "title": "پست زندگی دانشجویی — مدیریت زمان",
+    "caption": "پست زندگی دانشجویی — مدیریت زمان\n\nمحتوای آموزشی تپش برای دانشجویان علوم پزشکی.",
+    "contentType": "post",
+    "platform": "bale",
+    "accountId": "acc-seed6",
+    "campaignId": "cmp-seed5",
+    "tagIds": [
+      "tag-seed2"
+    ],
+    "hashtags": [
+      "آزمونعلومپزشکی",
+      "فیزیولوژی"
+    ],
+    "mentions": [],
+    "links": [],
+    "cta": "برای مشاهدهٔ دوره به سایت تپش سر بزنید",
+    "assets": [
+      {
+        "mediaId": null,
+        "url": "",
+        "filename": "post-12",
+        "mimeType": "image/jpeg",
+        "kind": "image"
+      }
+    ],
+    "thumbnail": "",
+    "status": "published",
+    "scheduledAt": null,
+    "publishedAt": "2026-08-13T11:19:33.036Z",
+    "timezone": "Asia/Tehran",
+    "authorId": "tm-seed2",
+    "reviewerId": "tm-seed1",
+    "utmId": null,
+    "metrics": {
+      "views": 5245,
+      "reach": 4335,
+      "impressions": 5549,
+      "likes": 243,
+      "comments": 28,
+      "shares": 22,
+      "saves": 19,
+      "clicks": 111,
+      "engagement": 312,
+      "watchTime": null,
+      "avgWatchTime": null,
+      "completionRate": null,
+      "followersGained": 104,
+      "profileVisits": 173,
+      "websiteClicks": 57,
+      "conversions": 9
+    },
+    "publishResult": null,
+    "rejection": null,
+    "history": [
+      {
+        "at": "2026-08-13T11:19:33.036Z",
+        "byId": "system",
+        "byName": "دادهٔ نمونه",
+        "from": null,
+        "to": "published",
+        "action": "created",
+        "note": ""
+      }
+    ],
+    "notes": "",
+    "createdAt": "2026-08-12T11:19:33.036Z",
+    "updatedAt": "2026-09-16T11:19:33.036Z",
+    "createdBy": "system",
+    "createdByName": "دادهٔ نمونه",
+    "seed": true
+  },
+  {
+    "id": "cnt-seed13",
+    "title": "ریلز پشت صحنهٔ تیم تپش",
+    "caption": "ریلز پشت صحنهٔ تیم تپش\n\nمحتوای آموزشی تپش برای دانشجویان علوم پزشکی.",
+    "contentType": "reel",
+    "platform": "instagram",
+    "accountId": "acc-seed1",
+    "campaignId": "cmp-seed6",
+    "tagIds": [
+      "tag-seed3"
+    ],
+    "hashtags": [
+      "tapesh",
+      "علومپایه"
+    ],
+    "mentions": [],
+    "links": [],
+    "cta": "برای مشاهدهٔ دوره به سایت تپش سر بزنید",
+    "assets": [
+      {
+        "mediaId": null,
+        "url": "",
+        "filename": "reel-13",
+        "mimeType": "video/mp4",
+        "kind": "video"
+      }
+    ],
+    "thumbnail": "",
+    "status": "published",
+    "scheduledAt": null,
+    "publishedAt": "2026-08-10T11:19:33.036Z",
+    "timezone": "Asia/Tehran",
+    "authorId": "tm-seed3",
+    "reviewerId": "tm-seed1",
+    "utmId": null,
+    "metrics": {
+      "views": 5740,
+      "reach": 4457,
+      "impressions": 5705,
+      "likes": 118,
+      "comments": 14,
+      "shares": 11,
+      "saves": 9,
+      "clicks": 90,
+      "engagement": 151,
+      "watchTime": 318,
+      "avgWatchTime": 40,
+      "completionRate": 29,
+      "followersGained": 109,
+      "profileVisits": 178,
+      "websiteClicks": 53,
+      "conversions": 13
+    },
+    "publishResult": null,
+    "rejection": null,
+    "history": [
+      {
+        "at": "2026-08-10T11:19:33.036Z",
+        "byId": "system",
+        "byName": "دادهٔ نمونه",
+        "from": null,
+        "to": "published",
+        "action": "created",
+        "note": ""
+      }
+    ],
+    "notes": "",
+    "createdAt": "2026-08-09T11:19:33.036Z",
+    "updatedAt": "2026-09-16T11:19:33.036Z",
+    "createdBy": "system",
+    "createdByName": "دادهٔ نمونه",
+    "seed": true
+  },
+  {
+    "id": "cnt-seed14",
+    "title": "اطلاعیهٔ آزمون آزمایشی هفتهٔ آینده",
+    "caption": "اطلاعیهٔ آزمون آزمایشی هفتهٔ آینده\n\nمحتوای آموزشی تپش برای دانشجویان علوم پزشکی.",
+    "contentType": "announcement",
+    "platform": "instagram",
+    "accountId": "acc-seed2",
+    "campaignId": "cmp-seed7",
+    "tagIds": [
+      "tag-seed4"
+    ],
+    "hashtags": [
+      "علومپایه",
+      "آزمونعلومپزشکی"
+    ],
+    "mentions": [],
+    "links": [],
+    "cta": "برای مشاهدهٔ دوره به سایت تپش سر بزنید",
+    "assets": [],
+    "thumbnail": "",
+    "status": "scheduled",
+    "scheduledAt": "2026-09-21T21:19:33.036Z",
+    "publishedAt": null,
+    "timezone": "Asia/Tehran",
+    "authorId": "tm-seed4",
+    "reviewerId": "tm-seed1",
+    "utmId": null,
+    "metrics": null,
+    "publishResult": null,
+    "rejection": null,
+    "history": [
+      {
+        "at": "2026-09-16T11:19:33.036Z",
+        "byId": "system",
+        "byName": "دادهٔ نمونه",
+        "from": null,
+        "to": "scheduled",
+        "action": "created",
+        "note": ""
+      }
+    ],
+    "notes": "",
+    "createdAt": "2026-08-06T11:19:33.036Z",
+    "updatedAt": "2026-09-16T11:19:33.036Z",
+    "createdBy": "system",
+    "createdByName": "دادهٔ نمونه",
+    "seed": true
+  },
+  {
+    "id": "cnt-seed15",
+    "title": "اینفوگرافیک مقایسهٔ منابع آناتومی",
+    "caption": "اینفوگرافیک مقایسهٔ منابع آناتومی\n\nمحتوای آموزشی تپش برای دانشجویان علوم پزشکی.",
+    "contentType": "infographic",
+    "platform": "telegram",
+    "accountId": "acc-seed3",
+    "campaignId": "cmp-seed1",
+    "tagIds": [
+      "tag-seed5"
+    ],
+    "hashtags": [
+      "آزمونعلومپزشکی",
+      "فیزیولوژی"
+    ],
+    "mentions": [],
+    "links": [],
+    "cta": "برای مشاهدهٔ دوره به سایت تپش سر بزنید",
+    "assets": [
+      {
+        "mediaId": null,
+        "url": "",
+        "filename": "infographic-15",
+        "mimeType": "image/jpeg",
+        "kind": "image"
+      }
+    ],
+    "thumbnail": "",
+    "status": "published",
+    "scheduledAt": null,
+    "publishedAt": "2026-08-04T11:19:33.036Z",
+    "timezone": "Asia/Tehran",
+    "authorId": "tm-seed5",
+    "reviewerId": "tm-seed1",
+    "utmId": null,
+    "metrics": {
+      "views": 4611,
+      "reach": 3560,
+      "impressions": 4557,
+      "likes": 240,
+      "comments": 28,
+      "shares": 22,
+      "saves": 18,
+      "clicks": 63,
+      "engagement": 308,
+      "watchTime": null,
+      "avgWatchTime": null,
+      "completionRate": null,
+      "followersGained": 1,
+      "profileVisits": 142,
+      "websiteClicks": 39,
+      "conversions": 2
+    },
+    "publishResult": null,
+    "rejection": null,
+    "history": [
+      {
+        "at": "2026-08-04T11:19:33.036Z",
+        "byId": "system",
+        "byName": "دادهٔ نمونه",
+        "from": null,
+        "to": "published",
+        "action": "created",
+        "note": ""
+      }
+    ],
+    "notes": "",
+    "createdAt": "2026-08-03T11:19:33.036Z",
+    "updatedAt": "2026-09-16T11:19:33.036Z",
+    "createdBy": "system",
+    "createdByName": "دادهٔ نمونه",
+    "seed": true
+  },
+  {
+    "id": "cnt-seed16",
+    "title": "پست معرفی اپلیکیشن تپش",
+    "caption": "پست معرفی اپلیکیشن تپش\n\nمحتوای آموزشی تپش برای دانشجویان علوم پزشکی.",
+    "contentType": "post",
+    "platform": "telegram",
+    "accountId": "acc-seed4",
+    "campaignId": "cmp-seed2",
+    "tagIds": [
+      "tag-seed6"
+    ],
+    "hashtags": [
+      "tapesh",
+      "علومپایه"
+    ],
+    "mentions": [],
+    "links": [],
+    "cta": "برای مشاهدهٔ دوره به سایت تپش سر بزنید",
+    "assets": [
+      {
+        "mediaId": null,
+        "url": "",
+        "filename": "post-16",
+        "mimeType": "image/jpeg",
+        "kind": "image"
+      }
+    ],
+    "thumbnail": "",
+    "status": "draft",
+    "scheduledAt": null,
+    "publishedAt": null,
+    "timezone": "Asia/Tehran",
+    "authorId": "tm-seed6",
+    "reviewerId": "tm-seed1",
+    "utmId": null,
+    "metrics": null,
+    "publishResult": null,
+    "rejection": null,
+    "history": [
+      {
+        "at": "2026-09-16T11:19:33.036Z",
+        "byId": "system",
+        "byName": "دادهٔ نمونه",
+        "from": null,
+        "to": "draft",
+        "action": "created",
+        "note": ""
+      }
+    ],
+    "notes": "",
+    "createdAt": "2026-07-31T11:19:33.036Z",
+    "updatedAt": "2026-09-16T11:19:33.036Z",
+    "createdBy": "system",
+    "createdByName": "دادهٔ نمونه",
+    "seed": true
+  },
+  {
+    "id": "cnt-seed17",
+    "title": "ویدئو حل تشریحی سوالات آزمون",
+    "caption": "ویدئو حل تشریحی سوالات آزمون\n\nمحتوای آموزشی تپش برای دانشجویان علوم پزشکی.",
+    "contentType": "video",
+    "platform": "eitaa",
+    "accountId": "acc-seed5",
+    "campaignId": "cmp-seed3",
+    "tagIds": [
+      "tag-seed7"
+    ],
+    "hashtags": [
+      "علومپایه",
+      "آزمونعلومپزشکی"
+    ],
+    "mentions": [],
+    "links": [],
+    "cta": "برای مشاهدهٔ دوره به سایت تپش سر بزنید",
+    "assets": [
+      {
+        "mediaId": null,
+        "url": "",
+        "filename": "video-17",
+        "mimeType": "video/mp4",
+        "kind": "video"
+      }
+    ],
+    "thumbnail": "",
+    "status": "published",
+    "scheduledAt": null,
+    "publishedAt": "2026-07-29T11:19:33.036Z",
+    "timezone": "Asia/Tehran",
+    "authorId": "tm-seed1",
+    "reviewerId": "tm-seed1",
+    "utmId": null,
+    "metrics": {
+      "views": 5503,
+      "reach": 4283,
+      "impressions": 5482,
+      "likes": 143,
+      "comments": 16,
+      "shares": 13,
+      "saves": 11,
+      "clicks": 116,
+      "engagement": 183,
+      "watchTime": 2653,
+      "avgWatchTime": 39,
+      "completionRate": 61,
+      "followersGained": 63,
+      "profileVisits": 171,
+      "websiteClicks": 27,
+      "conversions": 5
+    },
+    "publishResult": null,
+    "rejection": null,
+    "history": [
+      {
+        "at": "2026-07-29T11:19:33.036Z",
+        "byId": "system",
+        "byName": "دادهٔ نمونه",
+        "from": null,
+        "to": "published",
+        "action": "created",
+        "note": ""
+      }
+    ],
+    "notes": "",
+    "createdAt": "2026-07-28T11:19:33.036Z",
+    "updatedAt": "2026-09-16T11:19:33.036Z",
+    "createdBy": "system",
+    "createdByName": "دادهٔ نمونه",
+    "seed": true
+  },
+  {
+    "id": "cnt-seed18",
+    "title": "نظرسنجی انتخاب موضوع وبینار",
+    "caption": "نظرسنجی انتخاب موضوع وبینار\n\nمحتوای آموزشی تپش برای دانشجویان علوم پزشکی.",
+    "contentType": "poll",
+    "platform": "bale",
+    "accountId": "acc-seed6",
+    "campaignId": "cmp-seed4",
+    "tagIds": [
+      "tag-seed8"
+    ],
+    "hashtags": [
+      "آزمونعلومپزشکی",
+      "فیزیولوژی"
+    ],
+    "mentions": [],
+    "links": [],
+    "cta": "برای مشاهدهٔ دوره به سایت تپش سر بزنید",
+    "assets": [],
+    "thumbnail": "",
+    "status": "review",
+    "scheduledAt": null,
+    "publishedAt": null,
+    "timezone": "Asia/Tehran",
+    "authorId": "tm-seed2",
+    "reviewerId": "tm-seed1",
+    "utmId": null,
+    "metrics": null,
+    "publishResult": null,
+    "rejection": null,
+    "history": [
+      {
+        "at": "2026-09-16T11:19:33.036Z",
+        "byId": "system",
+        "byName": "دادهٔ نمونه",
+        "from": null,
+        "to": "review",
+        "action": "created",
+        "note": ""
+      }
+    ],
+    "notes": "",
+    "createdAt": "2026-07-25T11:19:33.036Z",
+    "updatedAt": "2026-09-16T11:19:33.036Z",
+    "createdBy": "system",
+    "createdByName": "دادهٔ نمونه",
+    "seed": true
+  },
+  {
+    "id": "cnt-seed19",
+    "title": "کاروسل خلاصهٔ ایمنی‌شناسی",
+    "caption": "کاروسل خلاصهٔ ایمنی‌شناسی\n\nمحتوای آموزشی تپش برای دانشجویان علوم پزشکی.",
+    "contentType": "carousel",
+    "platform": "instagram",
+    "accountId": "acc-seed1",
+    "campaignId": "cmp-seed5",
+    "tagIds": [
+      "tag-seed9"
+    ],
+    "hashtags": [
+      "tapesh",
+      "علومپایه"
+    ],
+    "mentions": [],
+    "links": [],
+    "cta": "برای مشاهدهٔ دوره به سایت تپش سر بزنید",
+    "assets": [
+      {
+        "mediaId": null,
+        "url": "",
+        "filename": "carousel-19",
+        "mimeType": "image/jpeg",
+        "kind": "image"
+      }
+    ],
+    "thumbnail": "",
+    "status": "published",
+    "scheduledAt": null,
+    "publishedAt": "2026-07-23T11:19:33.036Z",
+    "timezone": "Asia/Tehran",
+    "authorId": "tm-seed3",
+    "reviewerId": "tm-seed1",
+    "utmId": null,
+    "metrics": {
+      "views": 2474,
+      "reach": 2123,
+      "impressions": 2717,
+      "likes": 184,
+      "comments": 21,
+      "shares": 17,
+      "saves": 14,
+      "clicks": 20,
+      "engagement": 236,
+      "watchTime": null,
+      "avgWatchTime": null,
+      "completionRate": null,
+      "followersGained": 0,
+      "profileVisits": 85,
+      "websiteClicks": 18,
+      "conversions": 2
+    },
+    "publishResult": null,
+    "rejection": null,
+    "history": [
+      {
+        "at": "2026-07-23T11:19:33.036Z",
+        "byId": "system",
+        "byName": "دادهٔ نمونه",
+        "from": null,
+        "to": "published",
+        "action": "created",
+        "note": ""
+      }
+    ],
+    "notes": "",
+    "createdAt": "2026-07-22T11:19:33.036Z",
+    "updatedAt": "2026-09-16T11:19:33.036Z",
+    "createdBy": "system",
+    "createdByName": "دادهٔ نمونه",
+    "seed": true
+  },
+  {
+    "id": "cnt-seed20",
+    "title": "پست انگیزشی شروع ترم",
+    "caption": "پست انگیزشی شروع ترم\n\nمحتوای آموزشی تپش برای دانشجویان علوم پزشکی.",
+    "contentType": "post",
+    "platform": "instagram",
+    "accountId": "acc-seed2",
+    "campaignId": "cmp-seed6",
+    "tagIds": [
+      "tag-seed10"
+    ],
+    "hashtags": [
+      "علومپایه",
+      "آزمونعلومپزشکی"
+    ],
+    "mentions": [],
+    "links": [],
+    "cta": "برای مشاهدهٔ دوره به سایت تپش سر بزنید",
+    "assets": [
+      {
+        "mediaId": null,
+        "url": "",
+        "filename": "post-20",
+        "mimeType": "image/jpeg",
+        "kind": "image"
+      }
+    ],
+    "thumbnail": "",
+    "status": "approved",
+    "scheduledAt": "2026-09-18T21:19:33.036Z",
+    "publishedAt": null,
+    "timezone": "Asia/Tehran",
+    "authorId": "tm-seed4",
+    "reviewerId": "tm-seed1",
+    "utmId": null,
+    "metrics": null,
+    "publishResult": null,
+    "rejection": null,
+    "history": [
+      {
+        "at": "2026-09-16T11:19:33.036Z",
+        "byId": "system",
+        "byName": "دادهٔ نمونه",
+        "from": null,
+        "to": "approved",
+        "action": "created",
+        "note": ""
+      }
+    ],
+    "notes": "",
+    "createdAt": "2026-07-19T11:19:33.036Z",
+    "updatedAt": "2026-09-16T11:19:33.036Z",
+    "createdBy": "system",
+    "createdByName": "دادهٔ نمونه",
+    "seed": true
+  },
+  {
+    "id": "cnt-seed21",
+    "title": "پادکست مرور هفتگی اخبار پزشکی",
+    "caption": "پادکست مرور هفتگی اخبار پزشکی\n\nمحتوای آموزشی تپش برای دانشجویان علوم پزشکی.",
+    "contentType": "podcast",
+    "platform": "telegram",
+    "accountId": "acc-seed3",
+    "campaignId": "cmp-seed7",
+    "tagIds": [
+      "tag-seed1"
+    ],
+    "hashtags": [
+      "آزمونعلومپزشکی",
+      "فیزیولوژی"
+    ],
+    "mentions": [],
+    "links": [],
+    "cta": "برای مشاهدهٔ دوره به سایت تپش سر بزنید",
+    "assets": [
+      {
+        "mediaId": null,
+        "url": "",
+        "filename": "podcast-21",
+        "mimeType": "audio/mpeg",
+        "kind": "audio"
+      }
+    ],
+    "thumbnail": "",
+    "status": "published",
+    "scheduledAt": null,
+    "publishedAt": "2026-07-17T11:19:33.036Z",
+    "timezone": "Asia/Tehran",
+    "authorId": "tm-seed5",
+    "reviewerId": "tm-seed1",
+    "utmId": null,
+    "metrics": {
+      "views": 2106,
+      "reach": 1617,
+      "impressions": 2070,
+      "likes": 146,
+      "comments": 17,
+      "shares": 13,
+      "saves": 11,
+      "clicks": 22,
+      "engagement": 187,
+      "watchTime": null,
+      "avgWatchTime": null,
+      "completionRate": null,
+      "followersGained": 71,
+      "profileVisits": 65,
+      "websiteClicks": 9,
+      "conversions": 9
+    },
+    "publishResult": null,
+    "rejection": null,
+    "history": [
+      {
+        "at": "2026-07-17T11:19:33.036Z",
+        "byId": "system",
+        "byName": "دادهٔ نمونه",
+        "from": null,
+        "to": "published",
+        "action": "created",
+        "note": ""
+      }
+    ],
+    "notes": "",
+    "createdAt": "2026-07-16T11:19:33.036Z",
+    "updatedAt": "2026-09-16T11:19:33.036Z",
+    "createdBy": "system",
+    "createdByName": "دادهٔ نمونه",
+    "seed": true
+  },
+  {
+    "id": "cnt-seed22",
+    "title": "استوری معرفی دورهٔ المپیاد",
+    "caption": "استوری معرفی دورهٔ المپیاد\n\nمحتوای آموزشی تپش برای دانشجویان علوم پزشکی.",
+    "contentType": "story",
+    "platform": "telegram",
+    "accountId": "acc-seed4",
+    "campaignId": "cmp-seed1",
+    "tagIds": [
+      "tag-seed2"
+    ],
+    "hashtags": [
+      "tapesh",
+      "علومپایه"
+    ],
+    "mentions": [],
+    "links": [],
+    "cta": "برای مشاهدهٔ دوره به سایت تپش سر بزنید",
+    "assets": [
+      {
+        "mediaId": null,
+        "url": "",
+        "filename": "story-22",
+        "mimeType": "image/jpeg",
+        "kind": "image"
+      }
+    ],
+    "thumbnail": "",
+    "status": "draft",
+    "scheduledAt": null,
+    "publishedAt": null,
+    "timezone": "Asia/Tehran",
+    "authorId": "tm-seed6",
+    "reviewerId": "tm-seed1",
+    "utmId": null,
+    "metrics": null,
+    "publishResult": null,
+    "rejection": null,
+    "history": [
+      {
+        "at": "2026-09-16T11:19:33.036Z",
+        "byId": "system",
+        "byName": "دادهٔ نمونه",
+        "from": null,
+        "to": "draft",
+        "action": "created",
+        "note": ""
+      }
+    ],
+    "notes": "",
+    "createdAt": "2026-07-13T11:19:33.036Z",
+    "updatedAt": "2026-09-16T11:19:33.036Z",
+    "createdBy": "system",
+    "createdByName": "دادهٔ نمونه",
+    "seed": true
+  },
+  {
+    "id": "cnt-seed23",
+    "title": "ترد منابع پیشنهادی باکتری‌شناسی",
+    "caption": "ترد منابع پیشنهادی باکتری‌شناسی\n\nمحتوای آموزشی تپش برای دانشجویان علوم پزشکی.",
+    "contentType": "thread",
+    "platform": "eitaa",
+    "accountId": "acc-seed5",
+    "campaignId": "cmp-seed2",
+    "tagIds": [
+      "tag-seed3"
+    ],
+    "hashtags": [
+      "علومپایه",
+      "آزمونعلومپزشکی"
+    ],
+    "mentions": [],
+    "links": [],
+    "cta": "برای مشاهدهٔ دوره به سایت تپش سر بزنید",
+    "assets": [],
+    "thumbnail": "",
+    "status": "published",
+    "scheduledAt": null,
+    "publishedAt": "2026-07-11T11:19:33.036Z",
+    "timezone": "Asia/Tehran",
+    "authorId": "tm-seed1",
+    "reviewerId": "tm-seed1",
+    "utmId": null,
+    "metrics": {
+      "views": 3473,
+      "reach": 2022,
+      "impressions": 2588,
+      "likes": 73,
+      "comments": 8,
+      "shares": 7,
+      "saves": 6,
+      "clicks": 54,
+      "engagement": 93,
+      "watchTime": null,
+      "avgWatchTime": null,
+      "completionRate": null,
+      "followersGained": 41,
+      "profileVisits": 81,
+      "websiteClicks": 12,
+      "conversions": 2
+    },
+    "publishResult": null,
+    "rejection": null,
+    "history": [
+      {
+        "at": "2026-07-11T11:19:33.036Z",
+        "byId": "system",
+        "byName": "دادهٔ نمونه",
+        "from": null,
+        "to": "published",
+        "action": "created",
+        "note": ""
+      }
+    ],
+    "notes": "",
+    "createdAt": "2026-07-10T11:19:33.036Z",
+    "updatedAt": "2026-09-16T11:19:33.036Z",
+    "createdBy": "system",
+    "createdByName": "دادهٔ نمونه",
+    "seed": true
+  },
+  {
+    "id": "cnt-seed24",
+    "title": "ریلز تکنیک مطالعهٔ فعال",
+    "caption": "ریلز تکنیک مطالعهٔ فعال\n\nمحتوای آموزشی تپش برای دانشجویان علوم پزشکی.",
+    "contentType": "reel",
+    "platform": "bale",
+    "accountId": "acc-seed6",
+    "campaignId": "cmp-seed3",
+    "tagIds": [
+      "tag-seed4"
+    ],
+    "hashtags": [
+      "آزمونعلومپزشکی",
+      "فیزیولوژی"
+    ],
+    "mentions": [],
+    "links": [],
+    "cta": "برای مشاهدهٔ دوره به سایت تپش سر بزنید",
+    "assets": [
+      {
+        "mediaId": null,
+        "url": "",
+        "filename": "reel-24",
+        "mimeType": "video/mp4",
+        "kind": "video"
+      }
+    ],
+    "thumbnail": "",
+    "status": "failed",
+    "scheduledAt": null,
+    "publishedAt": null,
+    "timezone": "Asia/Tehran",
+    "authorId": "tm-seed2",
+    "reviewerId": "tm-seed1",
+    "utmId": null,
+    "metrics": null,
+    "publishResult": null,
+    "rejection": null,
+    "history": [
+      {
+        "at": "2026-09-16T11:19:33.036Z",
+        "byId": "system",
+        "byName": "دادهٔ نمونه",
+        "from": null,
+        "to": "failed",
+        "action": "created",
+        "note": ""
+      }
+    ],
+    "notes": "",
+    "createdAt": "2026-07-07T11:19:33.036Z",
+    "updatedAt": "2026-09-16T11:19:33.036Z",
+    "createdBy": "system",
+    "createdByName": "دادهٔ نمونه",
+    "seed": true
+  }
+]

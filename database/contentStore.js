@@ -5,8 +5,12 @@
  * فایل JSON روی دیسک + توابع دامنهٔ خالص. با مهاجرت به یک Backend واقعی، فقط بدنهٔ
  * همین توابع به کوئری دیتابیس تبدیل می‌شود و امضاها دست‌نخورده می‌مانند.
  *
- * مجموعه‌ها: admins | articles | categories | pages | media | banners | activity | notes
+ * مجموعه‌ها: admins | articles | categories | pages | media | banners | activity | notes |
+ *            events | alerts | publishChannels | publishLog
  * سند تکی: settings
+ *
+ * توکن ربات‌های انتشار در این پوشه ذخیره **نمی‌شود**؛ جای آن
+ * `database/publishing.secrets.json` است (خارج از محتوای سایت، با مجوز ۰۶۰۰).
  *
  * امنیت پیاده‌شده در این لایه:
  *   - رمز مدیر با scrypt + salt تصادفی ذخیره می‌شود (هرگز plain text).
@@ -44,6 +48,21 @@ export const PERMISSIONS = [
   'settings.read', 'settings.update',
   'logs.read',
   'notes.create', 'notes.read', 'notes.update', 'notes.delete',
+  /* انتشار در کانال‌ها — مدیریت کانال و توکن جدا از حق ارسال است */
+  'publishing.read', 'publishing.send', 'publishing.channels.manage',
+  /*
+   * مرکز رسانه و فضای مجازی — هفت مجوز مستقل.
+   * تفکیک عمدی است: کسی که محتوا می‌نویسد با کسی که تأیید می‌کند و کسی که
+   * توکن اپلیکیشن‌ها را می‌بیند یکی نیست.
+   */
+  'media.read',              /* ورود به مرکز، داشبورد، تحلیل، کتابخانه و گزارش */
+  'media.content.manage',    /* ساخت/ویرایش/حذف محتوا و کمپین */
+  'media.content.review',    /* تأیید یا درخواست اصلاح در گردش کار */
+  'media.content.publish',   /* زمان‌بندی، انتشار و تلاش دوباره */
+  'media.platforms.manage',  /* پلتفرم، اکانت و کلید API */
+  'media.team.manage',       /* اعضای تیم رسانه */
+  'media.ops.manage',        /* اینباکس، هشتگ/موضوع، UTM و اعلان‌ها */
+  'media.audit.read',        /* گزارش رویدادهای مرکز رسانه */
   /* مرکز تحلیل — تفکیک‌شده تا دادهٔ حساس به هر نقشی داده نشود */
   'analytics.read',
   'analytics.users.read',
@@ -85,6 +104,9 @@ export const ROLES = {
       'pages.read', 'pages.update',
       'media.upload', 'media.read', 'media.delete',
       'notes.create', 'notes.read', 'notes.update', 'notes.delete',
+      'publishing.read', 'publishing.send',
+      /* مرکز رسانه: می‌نویسد و منتشر می‌کند، ولی تأیید و کلید API دستش نیست */
+      'media.read', 'media.content.manage', 'media.content.publish', 'media.ops.manage',
       'analytics.read',
     ],
   },
@@ -108,7 +130,32 @@ export function hasPermission(admin, permission) {
 
 /* ───────────────────────────── ذخیره‌سازی پایه ───────────────────────────── */
 
-const COLLECTIONS = ['admins', 'articles', 'categories', 'pages', 'media', 'banners', 'activity', 'notes', 'events', 'alerts'];
+const COLLECTIONS = [
+  'admins', 'articles', 'categories', 'pages', 'media', 'banners', 'activity', 'notes',
+  'events', 'alerts', 'publishChannels', 'publishLog',
+  /*
+   * مرکز رسانه و فضای مجازی — ۱۲ مجموعهٔ مستقل.
+   * هر مجموعه یک Entity از مدل داده است؛ افزودن پلتفرم یا نوع محتوای تازه
+   * نیازی به مجموعهٔ جدید ندارد (در `mediaStore.js` سطر اضافه می‌شود).
+   */
+  'mediaPlatforms',   /* پلتفرم ثبت‌شده: اینستاگرام، تلگرام، ایتا، بله … */
+  'mediaAccounts',    /* اکانت/کانال زیر هر پلتفرم (سلسله‌مراتبی) */
+  'mediaContents',    /* محتوای رسانه‌ای + تاریخچهٔ گردش کار */
+  'mediaCampaigns',   /* کمپین‌ها */
+  'mediaTeam',        /* اعضای تیم رسانه */
+  'mediaTags',        /* هشتگ و موضوع (kind: hashtag | topic) */
+  'mediaMetrics',     /* عکس لحظه‌ای سنجه‌ها به تفکیک روز و اکانت */
+  'mediaInbox',       /* پیام‌ها و تعاملات */
+  'mediaMentions',    /* رصد نام و کلیدواژه */
+  'mediaNotifications', /* اعلان‌های داخلی */
+  'mediaUtm',         /* لینک‌های UTM ساخته‌شده */
+  'mediaMeta',        /* فرادادهٔ خود مرکز: نسخهٔ seed، وضعیت دادهٔ نمونه */
+  /*
+   * لاگ Audit مرکز رسانه مجموعهٔ جدا ندارد: رویدادها در همان `activity` ثبت
+   * می‌شوند (با entityTypeهایی مثل `media-content`) و بخش «گزارش رویدادها» فقط
+   * همان‌ها را فیلتر می‌کند. یک منبع حقیقت، دو نما — نه دو لاگ موازی.
+   */
+];
 
 const files = {
   settings: resolve(contentDir, 'settings.json'),
@@ -351,6 +398,8 @@ function ensureStore() {
   ensureFile(files.banners, seedBanners());
   ensureFile(files.activity, []);
   ensureFile(files.notes, []);
+  ensureFile(files.publishChannels, []);
+  ensureFile(files.publishLog, []);
   ensureFile(files.settings, DEFAULT_SETTINGS);
 }
 
