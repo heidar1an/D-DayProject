@@ -65,7 +65,7 @@ export default function BankSubject({ userId, scope, subjectId, subjectTitle = n
 
   const sectionButton = (isActive) =>
     `flex w-full cursor-pointer items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-right text-sm transition-colors ${
-      isActive ? 'bg-white/10 text-white' : 'text-[#bbb] hover:bg-white/[0.05] hover:text-white'
+      isActive ? 'bg-white/10 text-white' : 'text-[var(--muted)] hover:bg-white/[0.05] hover:text-white'
     }`;
 
   return (
@@ -73,10 +73,10 @@ export default function BankSubject({ userId, scope, subjectId, subjectTitle = n
       {/* ── مباحث درس ── */}
       <div className="order-2 lg:order-1">
         <header className="mb-5">
-          <h2 className="text-xl font-bold [font-family:'Doran',Tahoma,sans-serif] md:text-2xl">
+          <h2 className="text-xl font-bold [font-family:'Doran','Vazir',Tahoma,sans-serif] md:text-2xl">
             {activeSection === ALL_SECTIONS ? `مباحث ${subjectName}` : activeSection}
           </h2>
-          <p className="mt-2 text-[13px] leading-7 text-[#8a8a8a]">
+          <p className="mt-2 text-[13px] leading-7 text-[var(--faint)]">
             روی هر مبحث بزن تا مستقیم وارد حل تست شوی؛ آن‌جا با «سؤال قبلی / سؤال بعدی» می‌توانی بین سؤال‌ها بچرخی.
           </p>
         </header>
@@ -103,8 +103,8 @@ export default function BankSubject({ userId, scope, subjectId, subjectTitle = n
               return (
                 <section key={node.name} aria-label={node.name}>
                   <div className="mb-3 flex flex-wrap items-center gap-2">
-                    <h3 className="text-base font-bold [font-family:'Doran',Tahoma,sans-serif] md:text-lg">{node.name}</h3>
-                    <span className="rounded-full bg-white/8 px-2.5 py-1 text-[11.5px] text-[#aaa]">
+                    <h3 className="text-base font-bold [font-family:'Doran','Vazir',Tahoma,sans-serif] md:text-lg">{node.name}</h3>
+                    <span className="rounded-full bg-white/8 px-2.5 py-1 text-[11.5px] text-[var(--muted)]">
                       {toFa(sectionCount)} سؤال
                     </span>
                     <span className="h-px flex-1 bg-white/8" aria-hidden="true" />
@@ -112,7 +112,7 @@ export default function BankSubject({ userId, scope, subjectId, subjectTitle = n
                       type="button"
                       disabled={!sectionCount}
                       onClick={() => startTopic(node.name, null)}
-                      className="flex cursor-pointer items-center gap-1.5 rounded-full bg-[#61D192]/12 px-3.5 py-2 text-xs text-[#61D192] transition-colors hover:bg-[#61D192]/20 disabled:cursor-default disabled:opacity-40"
+                      className="flex cursor-pointer items-center gap-1.5 rounded-full bg-[#61D192]/12 px-3.5 py-2 text-xs text-[var(--green-ink)] transition-colors hover:bg-[#61D192]/20 disabled:cursor-default disabled:opacity-40"
                     >
                       <Icon name="play" className="h-3 w-3" />
                       تمرین از کل بخش
@@ -130,17 +130,17 @@ export default function BankSubject({ userId, scope, subjectId, subjectTitle = n
                           disabled={!count}
                           onClick={() => startTopic(node.name, topic)}
                           aria-label={`شروع حل تست ${label}`}
-                          className="group flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-white/8 bg-[#242426] px-4 py-3.5 text-right transition-all hover:-translate-y-0.5 hover:border-white/20 hover:bg-[#2a2a2c] disabled:cursor-default disabled:translate-y-0 disabled:opacity-40"
+                          className="group flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-white/8 bg-[var(--surface)] px-4 py-3.5 text-right transition-all hover:-translate-y-0.5 hover:border-white/20 hover:bg-[var(--surface-soft)] disabled:cursor-default disabled:translate-y-0 disabled:opacity-40"
                         >
                           <span className="min-w-0">
-                            <strong className="block truncate text-[15px] [font-family:'Doran',Tahoma,sans-serif] md:text-base">
+                            <strong className="block truncate text-[15px] [font-family:'Doran','Vazir',Tahoma,sans-serif] md:text-base">
                               {label}
                             </strong>
-                            <span className="text-xs text-[#8a8a8a]">
+                            <span className="text-xs text-[var(--faint)]">
                               {count ? `${toFa(count)} سؤال` : 'سؤالی ثبت نشده'}
                             </span>
                           </span>
-                          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-[#61D192]/12 text-[#61D192] transition-colors group-hover:bg-[#61D192] group-hover:text-[#12271a]">
+                          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-[#61D192]/12 text-[var(--green-ink)] transition-colors group-hover:bg-[var(--green-vivid)] group-hover:text-[#12271a]">
                             <Icon name="play" className="h-3.5 w-3.5" />
                           </span>
                         </button>
@@ -156,7 +156,7 @@ export default function BankSubject({ userId, scope, subjectId, subjectTitle = n
 
       {/* ── بخش‌های همین درس — سایدبار اختصاصی، سمت چپ ── */}
       <aside className="order-1 lg:order-2" aria-label={`بخش‌های ${subjectName}`}>
-        <div className="sticky top-6 rounded-[1.75rem] border border-white/8 bg-[#242426] p-5">
+        <div className="sticky top-6 rounded-[1.75rem] border border-white/8 bg-[var(--surface)] p-5">
           <div className="mb-4 flex items-center gap-2.5 border-b border-white/8 pb-4">
             <span
               className="h-2.5 w-2.5 shrink-0 rounded-full"
@@ -164,10 +164,10 @@ export default function BankSubject({ userId, scope, subjectId, subjectTitle = n
               aria-hidden="true"
             />
             <div className="min-w-0">
-              <strong className="block truncate text-base [font-family:'Doran',Tahoma,sans-serif]">
+              <strong className="block truncate text-base [font-family:'Doran','Vazir',Tahoma,sans-serif]">
                 {subjectName}
               </strong>
-              <span className="text-xs text-[#8a8a8a]">
+              <span className="text-xs text-[var(--faint)]">
                 {pool === null ? 'در حال شمارش…' : `${toFa(subjectTotal)} سؤال در بانک`}
               </span>
             </div>
@@ -182,7 +182,7 @@ export default function BankSubject({ userId, scope, subjectId, subjectTitle = n
                 className={sectionButton(activeSection === ALL_SECTIONS)}
               >
                 <span>همهٔ مباحث</span>
-                <span className="shrink-0 text-xs text-[#777]">{toFa(subjectTotal)}</span>
+                <span className="shrink-0 text-xs text-[var(--faint)]">{toFa(subjectTotal)}</span>
               </button>
             </li>
             {sections.map((node) => (
@@ -194,7 +194,7 @@ export default function BankSubject({ userId, scope, subjectId, subjectTitle = n
                   className={sectionButton(activeSection === node.name)}
                 >
                   <span className="truncate">{node.name}</span>
-                  <span className="shrink-0 text-xs text-[#777]">{toFa(countOf(node.name))}</span>
+                  <span className="shrink-0 text-xs text-[var(--faint)]">{toFa(countOf(node.name))}</span>
                 </button>
               </li>
             ))}

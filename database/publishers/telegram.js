@@ -28,6 +28,13 @@ const adapter = createTelegramLikeAdapter({
   tokenLabel: 'توکن ربات تلگرام',
   tokenHint: 'از @BotFather در تلگرام بگیرید (شکل: ۱۲۳۴۵۶:ABC…)',
   docsUrl: 'https://core.telegram.org/bots/api',
+  setupUrl: 'https://t.me/BotFather',
+  setupUrlLabel: 'باز کردن BotFather در تلگرام',
+  /*
+   * تلگرام کانال عمومی را به هر رباتی نشان می‌دهد، پس `getChat` به‌تنهایی ثابت
+   * نمی‌کند ربات می‌تواند پست بگذارد. با این پرچم، «اجازهٔ ارسال» جدا بررسی می‌شود.
+   */
+  probeAdmin: true,
   setupSteps: [
     'در تلگرام به @BotFather پیام بده → /newbot → نام و یوزرنیم → توکن را بگیر.',
     'کانال را باز کن → Manage Channel → Administrators → ربات را با اجازهٔ Post Messages ادمین کن.',

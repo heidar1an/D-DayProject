@@ -168,11 +168,11 @@ export function Skeleton({ className = '' }) {
 export function EmptyState({ icon = 'chart', title, note, action }) {
   return (
     <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-white/12 bg-white/[0.02] px-6 py-8 text-center">
-      <span className="grid h-11 w-11 place-items-center rounded-full bg-white/5 text-[#8a8a8a]">
+      <span className="grid h-11 w-11 place-items-center rounded-full bg-white/5 text-[var(--faint)]">
         <Icon name={icon} className="h-5 w-5" />
       </span>
-      <strong className="mt-1 text-[13.5px] [font-family:'Doran',Tahoma,sans-serif]">{title}</strong>
-      {note && <p className="max-w-md text-[12.5px] leading-6 text-[#8a8a8a]">{note}</p>}
+      <strong className="mt-1 text-[13.5px] [font-family:'Doran','Vazir',Tahoma,sans-serif]">{title}</strong>
+      {note && <p className="max-w-md text-[12.5px] leading-6 text-[var(--faint)]">{note}</p>}
       {action}
     </div>
   );
@@ -196,7 +196,7 @@ export function MasteryBadge({ mastery, compact = false }) {
 /* ── جهت روند — آیکن + عدد، نه فقط رنگ ── */
 export function TrendArrow({ direction, delta, className = '' }) {
   if (!direction) {
-    return <span className={`inline-flex items-center gap-1 text-[11px] text-[#777] ${className}`}>نمونهٔ کافی نیست</span>;
+    return <span className={`inline-flex items-center gap-1 text-[11px] text-[var(--faint)] ${className}`}>نمونهٔ کافی نیست</span>;
   }
   const up = direction === 'up';
   const flat = direction === 'flat';
@@ -214,7 +214,7 @@ export function TrendArrow({ direction, delta, className = '' }) {
 /* ── دلتای KPI نسبت به دورهٔ قبل ── */
 export function DeltaPill({ delta, goodDirection = 'up', suffix = '' }) {
   if (delta === null || delta === undefined || delta === 0) {
-    return <span className="text-[11px] text-[#777]">بدون تغییر نسبت به دورهٔ قبل</span>;
+    return <span className="text-[11px] text-[var(--faint)]">بدون تغییر نسبت به دورهٔ قبل</span>;
   }
   const improved = goodDirection === 'up' ? delta > 0 : delta < 0;
   const color = improved ? '#61D192' : '#e26d6d';
@@ -222,7 +222,7 @@ export function DeltaPill({ delta, goodDirection = 'up', suffix = '' }) {
     <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold" style={{ background: `${color}14`, color }}>
       <Icon name={delta > 0 ? 'trendUp' : 'trendDown'} className="h-3 w-3" />
       {`${delta > 0 ? '+' : '−'}${faNum(Math.abs(Math.round(delta * 10) / 10))}${suffix}`}
-      <span className="font-normal text-[#999]">نسبت به دورهٔ قبل</span>
+      <span className="font-normal text-[var(--faint)]">نسبت به دورهٔ قبل</span>
     </span>
   );
 }
@@ -257,15 +257,15 @@ export const errorTypeLabel = (type) => ERROR_TYPES[type]?.label ?? 'ثبت‌ن
 /* ── کارت پایهٔ بخش ── */
 export function Card({ title, icon, hint, action, children, className = '', ariaLabel }) {
   return (
-    <section className={`rounded-3xl border border-white/8 bg-[#242426] p-4 md:p-[18px] ${className}`} aria-label={ariaLabel ?? title}>
+    <section className={`rounded-3xl border border-white/8 bg-[var(--surface)] p-4 md:p-[18px] ${className}`} aria-label={ariaLabel ?? title}>
       {(title || action) && (
         <header className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <div>
-            <h2 className="flex items-center gap-2 text-[14.5px] font-bold [font-family:'Doran',Tahoma,sans-serif]">
-              {icon && <Icon name={icon} className="h-4 w-4 text-[#61D192]" />}
+            <h2 className="flex items-center gap-2 text-[14.5px] font-bold [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+              {icon && <Icon name={icon} className="h-4 w-4 text-[var(--green-ink)]" />}
               {title}
             </h2>
-            {hint && <p className="mt-1 max-w-3xl text-[11.5px] leading-5 text-[#8a8a8a]">{hint}</p>}
+            {hint && <p className="mt-1 max-w-3xl text-[11.5px] leading-5 text-[var(--faint)]">{hint}</p>}
           </div>
           {action}
         </header>
@@ -283,7 +283,7 @@ export function BarRow({ label, value, max = 100, accent = '#61D192', right, hin
     <Tag
       type={onClick ? 'button' : undefined}
       onClick={onClick}
-      className={`w-full text-right ${onClick ? 'an-row-click cursor-pointer rounded-2xl p-2 -m-2 transition-colors hover:bg-white/[0.04] focus-visible:outline-2 focus-visible:outline-[#61D192]' : ''}`}
+      className={`w-full text-right ${onClick ? 'an-row-click cursor-pointer rounded-2xl p-2 -m-2 transition-colors hover:bg-white/[0.04] focus-visible:outline-2 focus-visible:outline-[var(--green-vivid)]' : ''}`}
     >
       <div className="mb-1.5 flex items-baseline justify-between gap-2 text-[13px]">
         <span className="min-w-0 truncate">{label}</span>
@@ -292,7 +292,7 @@ export function BarRow({ label, value, max = 100, accent = '#61D192', right, hin
       <div className="an-bar" role="img" aria-label={hint ?? `${label}: ${value !== null && value !== undefined ? faNum(Math.round(value)) : 'بدون داده'}`}>
         <span className="an-bar__fill" style={{ width: `${width}%`, background: accent }} />
       </div>
-      {subLabel && <p className="mt-1 text-[11px] text-[#777]">{subLabel}</p>}
+      {subLabel && <p className="mt-1 text-[11px] text-[var(--faint)]">{subLabel}</p>}
     </Tag>
   );
 }
@@ -306,7 +306,7 @@ export function RingScore({ score, size = 132, stroke = 11, accent = '#61D192', 
   return (
     <div className="relative grid place-items-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="an-ring -rotate-90" role="img" aria-label={`${label ?? 'امتیاز'}: ${faNum(Math.round(progress))} از ۱۰۰`}>
-        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth={stroke} />
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="rgb(var(--wash-rgb) / 0.07)" strokeWidth={stroke} />
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -320,11 +320,11 @@ export function RingScore({ score, size = 132, stroke = 11, accent = '#61D192', 
         />
       </svg>
       <div className="absolute text-center">
-        <strong className="block text-2xl font-extrabold [font-family:'Doran',Tahoma,sans-serif]" style={{ color: accent }}>
+        <strong className="block text-2xl font-extrabold [font-family:'Doran','Vazir',Tahoma,sans-serif]" style={{ color: accent }}>
           {score === null || score === undefined ? '—' : faNum(Math.round(score))}
         </strong>
-        {label && <span className="text-[11px] text-[#999]">{label}</span>}
-        {sub && <span className="block text-[10px] text-[#777]">{sub}</span>}
+        {label && <span className="text-[11px] text-[var(--faint)]">{label}</span>}
+        {sub && <span className="block text-[10px] text-[var(--faint)]">{sub}</span>}
       </div>
     </div>
   );
@@ -362,7 +362,7 @@ export function TrendChart({
 
   if (valid.length < 2) {
     return (
-      <div className="grid place-items-center rounded-2xl border border-dashed border-white/10 py-10 text-sm text-[#777]" style={{ height }}>
+      <div className="grid place-items-center rounded-2xl border border-dashed border-white/10 py-10 text-sm text-[var(--faint)]" style={{ height }}>
         {emptyNote ?? 'دادهٔ کافی برای رسم این نمودار نیست'}
       </div>
     );
@@ -437,8 +437,8 @@ export function TrendChart({
         {/* خطوط راهنما + مقیاس محور عمودی */}
         {tickValues.map((value, index) => (
           <g key={`tick-${index}`}>
-            <line x1={padLeft} x2={width - padRight} y1={yOf(value)} y2={yOf(value)} stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
-            <text x={padLeft - 8} y={yOf(value) + 3.5} textAnchor="end" fontSize="10" fill="#777">
+            <line x1={padLeft} x2={width - padRight} y1={yOf(value)} y2={yOf(value)} stroke="rgb(var(--wash-rgb) / 0.07)" strokeWidth="1" />
+            <text x={padLeft - 8} y={yOf(value) + 3.5} textAnchor="end" fontSize="10" fill="var(--faint)">
               {faNum(Math.round(value))}
             </text>
           </g>
@@ -470,7 +470,7 @@ export function TrendChart({
             >
               <title>{event.title}</title>
             </line>
-            <circle cx={xOf(event.dayIndex)} cy={padTop - 8} r="3.2" fill="#e0b45c">
+            <circle cx={xOf(event.dayIndex)} cy={padTop - 8} r="3.2" fill="var(--gold-ink)">
               <title>{event.title}</title>
             </circle>
           </g>
@@ -521,13 +521,13 @@ export function TrendChart({
           <circle key={`dot-${point.key ?? point.index}`} cx={xOf(point.index)} cy={yOf(point.value)} r={points.length > 45 ? 1.6 : 2.5} fill={accent} fillOpacity="0.85" />
         ))}
 
-        {lastPoint && <circle cx={lastPoint.x} cy={lastPoint.y} r="4" fill={accent} stroke="#1b1b1e" strokeWidth="2" />}
+        {lastPoint && <circle cx={lastPoint.x} cy={lastPoint.y} r="4" fill={accent} stroke="var(--ink-deep)" strokeWidth="2" />}
 
         {/* خط راهنمای hover */}
         {hovered && (
           <g>
-            <line x1={xOf(hoverIndex)} x2={xOf(hoverIndex)} y1={padTop} y2={padTop + innerH} stroke="rgba(255,255,255,0.26)" strokeWidth="1" />
-            {hoveredHasValue && <circle cx={xOf(hoverIndex)} cy={yOf(hovered.value)} r="4.4" fill={accent} stroke="#1b1b1e" strokeWidth="2" />}
+            <line x1={xOf(hoverIndex)} x2={xOf(hoverIndex)} y1={padTop} y2={padTop + innerH} stroke="rgb(var(--wash-rgb) / 0.26)" strokeWidth="1" />
+            {hoveredHasValue && <circle cx={xOf(hoverIndex)} cy={yOf(hovered.value)} r="4.4" fill={accent} stroke="var(--ink-deep)" strokeWidth="2" />}
           </g>
         )}
       </svg>
@@ -539,18 +539,18 @@ export function TrendChart({
           className={`pointer-events-none absolute z-10 -translate-x-1/2 rounded-xl border border-white/12 bg-[#1b1b1e]/95 px-3 py-2 text-[11px] whitespace-nowrap shadow-xl ${hoverPlaceBelow ? 'translate-y-[22%]' : '-translate-y-[135%]'}`}
           style={{ left: `${Math.min(90, Math.max(10, hoverLeft))}%`, top: `${((hoveredHasValue ? yOf(hovered.value) : padTop) / height) * 100}%` }}
         >
-          <strong className="block text-[11.5px] text-[#eaf6ef]">{hovered.fullLabel ?? hovered.label}</strong>
+          <strong className="block text-[11.5px] text-[var(--white)]">{hovered.fullLabel ?? hovered.label}</strong>
           <span className="mt-0.5 block font-semibold" style={{ color: accent }}>
             {hoveredHasValue ? format(hovered.value) : 'بدون داده'}
           </span>
-          <span className="mt-0.5 block text-[10px] text-[#8a8a8a]">
+          <span className="mt-0.5 block text-[10px] text-[var(--faint)]">
             {faNum(hovered.count ?? 0)} تست در این روز
           </span>
         </div>
       )}
 
       {/* برچسب‌های محور افقی — هم‌جهت با نمودار (چپ: قدیمی‌ترین، راست: امروز) */}
-      <div className="relative mt-1 h-4 text-[10px] text-[#777]" dir="ltr">
+      <div className="relative mt-1 h-4 text-[10px] text-[var(--faint)]" dir="ltr">
         <span className="absolute" style={{ left: `${(padLeft / width) * 100}%` }}>
           {points[0]?.label}
         </span>
@@ -580,7 +580,7 @@ export function ColumnChart({ columns, height = 160, ariaLabel }) {
             <div className="w-full max-w-12 rounded-t-lg bg-white/[0.05]" style={{ height: Math.max(4, ratio * (height - 52)) }}>
               <div className="an-bar__fill h-full rounded-t-lg" style={{ width: '100%', background: column.accent, height: `${ratio * 100}%` }} />
             </div>
-            <span className="max-w-full truncate text-center text-[10.5px] leading-4 text-[#999]">{column.label}</span>
+            <span className="max-w-full truncate text-center text-[10.5px] leading-4 text-[var(--faint)]">{column.label}</span>
           </div>
         );
       })}
@@ -597,7 +597,7 @@ export function DonutChart({ segments, size = 150, stroke = 20, centerLabel, cen
   return (
     <div className="relative grid shrink-0 place-items-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90" role="img" aria-label={ariaLabel}>
-        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={stroke} />
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="rgb(var(--wash-rgb) / 0.06)" strokeWidth={stroke} />
         {total > 0 &&
           segments.map((segment) => {
             const fraction = segment.value / total;
@@ -622,8 +622,8 @@ export function DonutChart({ segments, size = 150, stroke = 20, centerLabel, cen
           })}
       </svg>
       <div className="absolute text-center">
-        <strong className={`block font-extrabold [font-family:'Doran',Tahoma,sans-serif] ${compact ? 'text-base' : 'text-xl'}`}>{centerLabel}</strong>
-        {centerSub && <span className={`block ${compact ? 'text-[9px]' : 'text-[10px]'} text-[#888]`}>{centerSub}</span>}
+        <strong className={`block font-extrabold [font-family:'Doran','Vazir',Tahoma,sans-serif] ${compact ? 'text-base' : 'text-xl'}`}>{centerLabel}</strong>
+        {centerSub && <span className={`block ${compact ? 'text-[9px]' : 'text-[10px]'} text-[var(--faint)]`}>{centerSub}</span>}
       </div>
     </div>
   );
@@ -652,9 +652,9 @@ export function InsightCard({ insight, onAction }) {
           <h3 className="text-[13.5px] font-bold" style={{ color: meta.accent }}>
             {insight.title}
           </h3>
-          <p className="mt-1 text-[12.5px] leading-6 text-[#c9c9c9]">{insight.description}</p>
+          <p className="mt-1 text-[12.5px] leading-6 text-[var(--muted)]">{insight.description}</p>
           {insight.evidence && (
-            <p className="an-evidence mt-2 text-[11px] text-[#8a8a8a]">
+            <p className="an-evidence mt-2 text-[11px] text-[var(--faint)]">
               <span className="an-evidence__tag">مستند</span>
               {insight.evidence}
             </p>
@@ -663,7 +663,7 @@ export function InsightCard({ insight, onAction }) {
             <button
               type="button"
               onClick={() => onAction?.(insight)}
-              className="mt-2.5 cursor-pointer rounded-xl bg-white/[0.06] px-3 py-1.5 text-[11.5px] font-semibold text-[#ddd] transition-colors hover:bg-white/[0.1] focus-visible:outline-2 focus-visible:outline-[#61D192]"
+              className="mt-2.5 cursor-pointer rounded-xl bg-white/[0.06] px-3 py-1.5 text-[11.5px] font-semibold text-[var(--muted)] transition-colors hover:bg-white/[0.1] focus-visible:outline-2 focus-visible:outline-[var(--green-vivid)]"
             >
               {insight.action ?? 'مشاهده'}
             </button>
@@ -677,15 +677,15 @@ export function InsightCard({ insight, onAction }) {
 /* ── کارت پیشنهاد (اقدام بعدی) ── */
 export function RecommendationCard({ recommendation, onRun }) {
   return (
-    <article className="an-rec flex items-center justify-between gap-3 rounded-2xl border border-white/8 bg-[#2a2a2d] p-4" aria-label={`پیشنهاد: ${recommendation.title}`}>
+    <article className="an-rec flex items-center justify-between gap-3 rounded-2xl border border-white/8 bg-[var(--surface-soft)] p-4" aria-label={`پیشنهاد: ${recommendation.title}`}>
       <div className="min-w-0">
-        <h3 className="text-[13.5px] font-bold text-[#eaf6ef]">{recommendation.title}</h3>
-        <p className="mt-1 text-[12px] leading-6 text-[#9a9a9a]">{recommendation.description}</p>
+        <h3 className="text-[13.5px] font-bold text-[var(--white)]">{recommendation.title}</h3>
+        <p className="mt-1 text-[12px] leading-6 text-[var(--faint)]">{recommendation.description}</p>
       </div>
       <button
         type="button"
         onClick={() => onRun?.(recommendation)}
-        className="shrink-0 cursor-pointer rounded-xl bg-[#61D192] px-3.5 py-2 text-[12px] font-bold text-[#12271a] transition-colors hover:bg-[#5ac187] focus-visible:outline-2 focus-visible:outline-white"
+        className="shrink-0 cursor-pointer rounded-xl bg-[var(--green-vivid)] px-3.5 py-2 text-[12px] font-bold text-[#12271a] transition-colors hover:bg-[var(--green-bright)] focus-visible:outline-2 focus-visible:outline-white"
       >
         {recommendation.actionLabel}
       </button>
@@ -711,7 +711,7 @@ export function Modal({ open, onClose, title, children, width = 'min(28rem, 100%
       aria-label={title}
       onClick={onClose}
     >
-      <div className="an-pop rounded-[1.8rem] border border-white/10 bg-[#222225] p-6" style={{ width }} onClick={(event) => event.stopPropagation()}>
+      <div className="an-pop rounded-[1.8rem] border border-white/10 bg-[var(--surface)] p-6" style={{ width }} onClick={(event) => event.stopPropagation()}>
         {children}
       </div>
     </div>

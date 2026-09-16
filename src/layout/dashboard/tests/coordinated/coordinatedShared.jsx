@@ -167,7 +167,7 @@ export function TypeBadge({ type, className = '' }) {
   return (
     <span
       className={`exm-badge exm-badge--plain ${className}`}
-      style={{ background: 'rgba(255,255,255,0.05)', color: '#c9c9c9' }}
+      style={{ background: 'rgb(var(--wash-rgb) / 0.05)', color: 'var(--muted)' }}
     >
       {data.label}
     </span>
@@ -270,11 +270,11 @@ export function Skeleton({ className = '' }) {
 export function EmptyState({ icon = 'calendar', title, note, action }) {
   return (
     <div className="flex flex-col items-center gap-2 rounded-[2rem] border border-dashed border-white/12 bg-white/[0.02] px-6 py-10 text-center">
-      <span className="grid h-12 w-12 place-items-center rounded-full bg-white/5 text-[#8a8a8a]">
+      <span className="grid h-12 w-12 place-items-center rounded-full bg-white/5 text-[var(--faint)]">
         <Icon name={icon} className="h-6 w-6" />
       </span>
-      <strong className="mt-1 [font-family:'Doran',Tahoma,sans-serif]">{title}</strong>
-      {note && <p className="max-w-sm text-sm leading-6 text-[#8a8a8a]">{note}</p>}
+      <strong className="mt-1 [font-family:'Doran','Vazir',Tahoma,sans-serif]">{title}</strong>
+      {note && <p className="max-w-sm text-sm leading-6 text-[var(--faint)]">{note}</p>}
       {action}
     </div>
   );

@@ -39,11 +39,11 @@ export default function StepPurpose({ draft, update, catalog }) {
                   <Icon name={purpose.icon} className="h-5 w-5" />
                 </span>
                 <span>
-                  <strong className="block text-[13px] [font-family:'Doran',Tahoma,sans-serif]">{purpose.label}</strong>
-                  <span className="mt-0.5 block text-[11px] leading-5 text-[#8a8a8a]">{purpose.description}</span>
+                  <strong className="block text-[13px] [font-family:'Doran','Vazir',Tahoma,sans-serif]">{purpose.label}</strong>
+                  <span className="mt-0.5 block text-[11px] leading-5 text-[var(--faint)]">{purpose.description}</span>
                 </span>
                 {active && (
-                  <span className="flex items-center gap-1 text-[10.5px] text-[#61D192]">
+                  <span className="flex items-center gap-1 text-[10.5px] text-[var(--green-ink)]">
                     <Icon name="check" className="h-3 w-3" strokeWidth={3} />
                     انتخاب شد
                   </span>
@@ -56,22 +56,22 @@ export default function StepPurpose({ draft, update, catalog }) {
         {/* پیش‌نمایش پروفایل ضعف برای هدف «رفع نقاط ضعف» */}
         {draft.purpose === 'weakness' && catalog?.weakTopics?.length > 0 && (
           <div className="ex-enter mt-4 rounded-2xl border border-[#e26d6d]/25 bg-[#e26d6d]/[0.06] p-4">
-            <p className="flex items-center gap-1.5 text-[12px] font-bold text-[#ef9196]">
+            <p className="flex items-center gap-1.5 text-[12px] font-bold text-[var(--red-ink)]">
               <Icon name="chart" className="h-3.5 w-3.5" />
               بر اساس عملکردت، این مباحث ضعیف‌اند:
             </p>
             <div className="mt-2.5 flex flex-wrap gap-1.5">
               {catalog.weakTopics.slice(0, 6).map((entry) => (
-                <span key={entry.path} className="rounded-full bg-white/6 px-3 py-1.5 text-[11px] text-[#ccc]">
+                <span key={entry.path} className="rounded-full bg-white/6 px-3 py-1.5 text-[11px] text-[var(--muted)]">
                   {entry.subtopic ? `${entry.topic} › ${entry.subtopic}` : entry.topic}
-                  <strong className="ms-1.5 text-[#ef9196]">{toFa(entry.accuracy)}٪</strong>
+                  <strong className="ms-1.5 text-[var(--red-ink)]">{toFa(entry.accuracy)}٪</strong>
                 </span>
               ))}
             </div>
           </div>
         )}
         {draft.purpose === 'weakness' && catalog && !catalog.hasPerformance && (
-          <p className="mt-4 rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-[11.5px] leading-6 text-[#8a8a8a]">
+          <p className="mt-4 rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-[11.5px] leading-6 text-[var(--faint)]">
             هنوز عملکرد ثبت‌شده‌ای نداری — بعد از چند تست، تپش نقاط ضعفت را می‌شناسد و همین هدف دقیق‌تر پیشنهاد می‌شود.
           </p>
         )}

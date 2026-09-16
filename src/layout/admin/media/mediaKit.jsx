@@ -671,7 +671,7 @@ export function exportReport(format, report) {
       .map((row) => `<tr><td>${escape(row.label)}</td><td>${escape(row.value)}</td></tr>`).join('');
 
     const html = `<html dir="rtl"><head><meta charset="utf-8" />
-      <style>body{font-family:Tahoma,sans-serif;direction:rtl}
+      <style>body{font-family:'Vazir',Tahoma,sans-serif;direction:rtl}
       h1{font-size:15px}h3{font-size:13px;color:#555}
       table{border-collapse:collapse;font-size:12px}
       th,td{border:1px solid #999;padding:4px 8px;text-align:right}
@@ -703,7 +703,7 @@ export function exportReport(format, report) {
   doc.write(`<!doctype html><html dir="rtl"><head><meta charset="utf-8" /><title>${escape(title)}</title>
     <style>
       @page { size: A4 landscape; margin: 14mm; }
-      body { font-family: Tahoma, sans-serif; direction: rtl; color: #111; }
+      body { font-family: 'Vazir', Tahoma, sans-serif; direction: rtl; color: #111; }
       h1 { font-size: 16px; margin: 0 0 4px; }
       .meta { color: #666; font-size: 11px; margin-bottom: 14px; }
       ul { padding-inline-start: 18px; font-size: 12px; }

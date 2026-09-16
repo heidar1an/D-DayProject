@@ -45,16 +45,16 @@ const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 function ErrorState({ onRetry }) {
   return (
-    <div className="rounded-[2.5rem] bg-[#282828] p-10 text-center">
-      <span className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full bg-[#ff6969]/12 text-[#ff6969]">
+    <div className="rounded-[2.5rem] bg-[var(--surface-soft)] p-10 text-center">
+      <span className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full bg-[#ff6969]/12 text-[var(--red-ink)]">
         <Icon name="warn" size={26} />
       </span>
-      <strong className="block text-lg [font-family:'Doran',Tahoma,sans-serif]">یادداشت‌ها همین لحظه در دسترس نیستند</strong>
-      <p className="mt-2 text-sm text-[#8a8a8a]">اتصالت را چک کن و دوباره تلاش کن.</p>
+      <strong className="block text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]">یادداشت‌ها همین لحظه در دسترس نیستند</strong>
+      <p className="mt-2 text-sm text-[var(--faint)]">اتصالت را چک کن و دوباره تلاش کن.</p>
       <button
         type="button"
         onClick={onRetry}
-        className="mt-5 cursor-pointer rounded-xl bg-[#5b8cc7] px-6 py-2.5 text-sm text-white transition-transform hover:-translate-y-0.5 [font-family:'Doran',Tahoma,sans-serif]"
+        className="mt-5 cursor-pointer rounded-xl bg-[var(--blue-bright)] px-6 py-2.5 text-sm text-white transition-transform hover:-translate-y-0.5 [font-family:'Doran','Vazir',Tahoma,sans-serif]"
       >
         تلاش دوباره
       </button>
@@ -70,7 +70,7 @@ function NoteCard({ note, onOpen, onTogglePin, onEdit, onDelete }) {
   return (
     <article
       onClick={() => onOpen(note)}
-      className="nt-card relative flex cursor-pointer flex-col overflow-hidden rounded-[2rem] border border-white/6 bg-[#282828] p-5 transition-colors hover:border-white/12"
+      className="nt-card relative flex cursor-pointer flex-col overflow-hidden rounded-[2rem] border border-white/6 bg-[var(--surface-soft)] p-5 transition-colors hover:border-white/12"
     >
       <span className="absolute inset-y-0 start-0 w-1" style={{ background: color }} aria-hidden="true" />
 
@@ -90,7 +90,7 @@ function NoteCard({ note, onOpen, onTogglePin, onEdit, onDelete }) {
             aria-pressed={note.pinned}
             aria-label={note.pinned ? 'خروج از گلچین' : 'افزودن به گلچین'}
             className={`grid h-8 w-8 cursor-pointer place-items-center rounded-lg transition-colors ${
-              note.pinned ? 'bg-[#e0b45c]/15 text-[#e0b45c]' : 'text-[#5c5c5c] hover:bg-white/[0.06] hover:text-white'
+              note.pinned ? 'bg-[#e0b45c]/15 text-[var(--gold-ink)]' : 'text-[var(--ghost)] hover:bg-white/[0.06] hover:text-white'
             }`}
           >
             <Icon name={note.pinned ? 'pinFilled' : 'pin'} size={14} />
@@ -102,7 +102,7 @@ function NoteCard({ note, onOpen, onTogglePin, onEdit, onDelete }) {
               onEdit(note);
             }}
             aria-label="ویرایش یادداشت"
-            className="grid h-8 w-8 cursor-pointer place-items-center rounded-lg text-[#5c5c5c] transition-colors hover:bg-white/[0.06] hover:text-white"
+            className="grid h-8 w-8 cursor-pointer place-items-center rounded-lg text-[var(--ghost)] transition-colors hover:bg-white/[0.06] hover:text-white"
           >
             <Icon name="edit" size={14} />
           </button>
@@ -113,12 +113,12 @@ function NoteCard({ note, onOpen, onTogglePin, onEdit, onDelete }) {
       </div>
 
       <button type="button" onClick={() => onOpen(note)} className="mt-3 cursor-pointer text-right">
-        <h3 className="text-base leading-7 transition-colors hover:text-[#9cc0e8] [font-family:'Doran',Tahoma,sans-serif]">
+        <h3 className="text-base leading-7 transition-colors hover:text-[var(--blue-soft-ink)] [font-family:'Doran','Vazir',Tahoma,sans-serif]">
           {note.title || 'یادداشت بی‌عنوان'}
         </h3>
       </button>
 
-      <p className="mt-2 flex-1 text-xs leading-6 text-[#8a8a8a]">{buildSnippet(note)}</p>
+      <p className="mt-2 flex-1 text-xs leading-6 text-[var(--faint)]">{buildSnippet(note)}</p>
 
       {metrics.type === 'progress' && metrics.total > 0 && (
         <div className="mt-3 flex items-center gap-2.5">
@@ -130,16 +130,16 @@ function NoteCard({ note, onOpen, onTogglePin, onEdit, onDelete }) {
             aria-valuemax={100}
             aria-label="پیشرفت چک‌لیست"
           >
-            <span className="block h-full rounded-full bg-[#77b787] transition-[width] duration-500" style={{ width: `${metrics.percent}%` }} />
+            <span className="block h-full rounded-full bg-[var(--green-bright)] transition-[width] duration-500" style={{ width: `${metrics.percent}%` }} />
           </div>
-          <span className="text-[10px] text-[#6d6d6d]">
+          <span className="text-[10px] text-[var(--ghost)]">
             {toFa(metrics.done)}/{toFa(metrics.total)}
           </span>
         </div>
       )}
 
       {metrics.type === 'count' && (
-        <p className="mt-3 flex items-center gap-1.5 text-[10px] text-[#6d6d6d]">
+        <p className="mt-3 flex items-center gap-1.5 text-[10px] text-[var(--ghost)]">
           <Icon name={metrics.icon} size={12} />
           {toFa(metrics.count)} {metrics.unit}
           {metrics.columns ? ` · ${toFa(metrics.columns)} ستون` : ''}
@@ -152,14 +152,14 @@ function NoteCard({ note, onOpen, onTogglePin, onEdit, onDelete }) {
             <TagPill key={tag} tag={tag} accent={tagAccent(tag)} />
           ))}
           {note.tags.length > 3 && (
-            <span className="rounded-full bg-white/[0.05] px-2.5 py-0.5 text-[10px] text-[#6d6d6d]">
+            <span className="rounded-full bg-white/[0.05] px-2.5 py-0.5 text-[10px] text-[var(--ghost)]">
               +{toFa(note.tags.length - 3)}
             </span>
           )}
         </div>
       )}
 
-      <footer className="mt-3 border-t border-white/5 pt-3 text-[10px] text-[#5c5c5c]">
+      <footer className="mt-3 border-t border-white/5 pt-3 text-[10px] text-[var(--ghost)]">
         آخرین ویرایش {relativeEditedAt(note.updatedAt)}
       </footer>
     </article>
@@ -191,7 +191,7 @@ function TagBrowser({ groups, activeTag, onSelect }) {
         <span className="flex flex-wrap items-center gap-2">
           <Icon name="folder" size={14} />
           دسته‌بندی تگ‌ها
-          <span className="text-[10px] font-normal text-[#6d6d6d]">
+          <span className="text-[10px] font-normal text-[var(--ghost)]">
             {toFa(total)} تگ در {toFa(groups.length)} دسته
           </span>
         </span>
@@ -211,7 +211,7 @@ function TagBrowser({ groups, activeTag, onSelect }) {
               className={`cursor-pointer rounded-full border px-3.5 py-1.5 text-xs transition-colors ${
                 !activeTag
                   ? 'border-white/25 bg-white/[0.1] text-white'
-                  : 'border-white/8 bg-white/[0.03] text-[#8a8a8a] hover:bg-white/[0.06]'
+                  : 'border-white/8 bg-white/[0.03] text-[var(--faint)] hover:bg-white/[0.06]'
               }`}
             >
               همهٔ تگ‌ها
@@ -459,7 +459,7 @@ export default function NotesSection({ userData }) {
      در آن فریم (و حالت خطا) اسکلت/خطا نشان بده، نه رندر فهرست. */
   if (notes === null) {
     return (
-      <main dir="rtl" className="dash-stagger mx-auto w-[var(--content-width)] bg-black py-8 text-white md:py-10 [font-family:'Pinar',Tahoma,sans-serif]">
+      <main dir="rtl" className="dash-stagger mx-auto w-[var(--content-width)] bg-black py-8 text-white md:py-10 [font-family:'Pinar','Vazir',Tahoma,sans-serif]">
         {error ? <ErrorState onRetry={retry} /> : <SkeletonHome />}
       </main>
     );
@@ -468,7 +468,7 @@ export default function NotesSection({ userData }) {
   return (
     <main
       dir="rtl"
-      className="dash-stagger mx-auto w-[var(--content-width)] bg-black py-8 text-white md:py-10 [font-family:'Pinar',Tahoma,sans-serif]"
+      className="dash-stagger mx-auto w-[var(--content-width)] bg-black py-8 text-white md:py-10 [font-family:'Pinar','Vazir',Tahoma,sans-serif]"
     >
       {mode === 'note' ? (
         <NoteDetail
@@ -532,7 +532,7 @@ export default function NotesSection({ userData }) {
                 <button
                   type="button"
                   onClick={() => setEditor({ note: null, saving: false })}
-                  className="mt-3 cursor-pointer rounded-xl bg-[#5b8cc7] px-5 py-2.5 text-xs font-bold text-white transition-transform hover:-translate-y-0.5 [font-family:'Doran',Tahoma,sans-serif]"
+                  className="mt-3 cursor-pointer rounded-xl bg-[var(--blue-bright)] px-5 py-2.5 text-xs font-bold text-white transition-transform hover:-translate-y-0.5 [font-family:'Doran','Vazir',Tahoma,sans-serif]"
                 >
                   ساخت اولین یادداشت
                 </button>
@@ -544,7 +544,7 @@ export default function NotesSection({ userData }) {
               <section className="space-y-3" aria-label="جست‌وجو و فیلتر یادداشت‌ها">
                 <div className="flex flex-wrap items-center gap-2">
                   <div className="relative min-w-56 flex-1">
-                    <span className="pointer-events-none absolute inset-y-0 start-4 grid place-items-center text-[#5c5c5c]">
+                    <span className="pointer-events-none absolute inset-y-0 start-4 grid place-items-center text-[var(--ghost)]">
                       <Icon name="search" size={15} />
                     </span>
                     <input
@@ -553,7 +553,7 @@ export default function NotesSection({ userData }) {
                       onChange={(event) => setQuery(event.target.value)}
                       placeholder="در عنوان، متن، تگ‌ها و آیتم‌ها جست‌وجو کن…"
                       aria-label="جست‌وجو در یادداشت‌ها"
-                      className="w-full rounded-2xl border border-white/8 bg-[#282828] py-3 pe-4 ps-11 text-sm text-white outline-none transition-colors placeholder:text-[#5c5c5c] focus:border-[#5b8cc7]/60"
+                      className="w-full rounded-2xl border border-white/8 bg-[var(--surface-soft)] py-3 pe-4 ps-11 text-sm text-white outline-none transition-colors placeholder:text-[var(--ghost)] focus:border-[#5b8cc7]/60"
                     />
                   </div>
 
@@ -562,15 +562,15 @@ export default function NotesSection({ userData }) {
                     <select
                       value={sort}
                       onChange={(event) => setSort(event.target.value)}
-                      className="cursor-pointer appearance-none rounded-2xl border border-white/8 bg-[#282828] py-3 pe-10 ps-4 text-xs text-[#aaa] outline-none transition-colors focus:border-[#5b8cc7]/60"
+                      className="cursor-pointer appearance-none rounded-2xl border border-white/8 bg-[var(--surface-soft)] py-3 pe-10 ps-4 text-xs text-[var(--muted)] outline-none transition-colors focus:border-[#5b8cc7]/60"
                     >
                       {SORT_OPTIONS.map((option) => (
-                        <option key={option.id} value={option.id} className="bg-[#282828]">
+                        <option key={option.id} value={option.id} className="bg-[var(--surface-soft)]">
                           {option.label}
                         </option>
                       ))}
                     </select>
-                    <span className="pointer-events-none absolute inset-y-0 end-3.5 grid place-items-center text-[#5c5c5c]" aria-hidden="true">
+                    <span className="pointer-events-none absolute inset-y-0 end-3.5 grid place-items-center text-[var(--ghost)]" aria-hidden="true">
                       ▾
                     </span>
                   </label>
@@ -585,7 +585,7 @@ export default function NotesSection({ userData }) {
                       className={`cursor-pointer rounded-full border px-3.5 py-1.5 text-xs transition-colors ${
                         subjectFilter === 'all'
                           ? 'border-white/25 bg-white/[0.1] text-white'
-                          : 'border-white/8 bg-white/[0.03] text-[#8a8a8a] hover:bg-white/[0.06]'
+                          : 'border-white/8 bg-white/[0.03] text-[var(--faint)] hover:bg-white/[0.06]'
                       }`}
                     >
                       همه
@@ -600,7 +600,7 @@ export default function NotesSection({ userData }) {
                         style={
                           subjectFilter === subject.id
                             ? { background: `${subject.accent}2e`, borderColor: `${subject.accent}66`, color: subject.accent }
-                            : { borderColor: 'rgba(255,255,255,0.08)', color: '#8a8a8a' }
+                            : { borderColor: 'rgb(var(--line-rgb) / 0.08)', color: 'var(--faint)' }
                         }
                       >
                         {subject.label}
@@ -622,7 +622,7 @@ export default function NotesSection({ userData }) {
                     <button
                       type="button"
                       onClick={resetFilters}
-                      className="mt-3 cursor-pointer rounded-xl bg-white/[0.06] px-5 py-2.5 text-xs text-[#aaa] transition-colors hover:bg-white/[0.1] hover:text-white"
+                      className="mt-3 cursor-pointer rounded-xl bg-white/[0.06] px-5 py-2.5 text-xs text-[var(--muted)] transition-colors hover:bg-white/[0.1] hover:text-white"
                     >
                       پاک‌کردن فیلترها
                     </button>
@@ -632,7 +632,7 @@ export default function NotesSection({ userData }) {
                 <>
                   {pinnedNotes.length > 0 && (
                     <section aria-label="گلچین‌شده‌ها" className="space-y-3">
-                      <h2 className="flex items-center gap-2 text-sm text-[#e0b45c] [font-family:'Doran',Tahoma,sans-serif]">
+                      <h2 className="flex items-center gap-2 text-sm text-[var(--gold-ink)] [font-family:'Doran','Vazir',Tahoma,sans-serif]">
                         <Icon name="pinFilled" size={14} />
                         گلچین‌شده‌ها
                       </h2>
@@ -642,10 +642,10 @@ export default function NotesSection({ userData }) {
 
                   <section aria-label="همهٔ یادداشت‌ها" className="space-y-3">
                     {(pinnedNotes.length > 0 || isFiltering) && (
-                      <h2 className="flex flex-wrap items-center gap-2 text-sm text-[#8a8a8a] [font-family:'Doran',Tahoma,sans-serif]">
+                      <h2 className="flex flex-wrap items-center gap-2 text-sm text-[var(--faint)] [font-family:'Doran','Vazir',Tahoma,sans-serif]">
                         {isFiltering ? 'نتیجه‌های دیگر' : 'همهٔ یادداشت‌ها'}
                         {tagFilter && (
-                          <span className="flex items-center gap-1.5 text-[11px] text-[#6d6d6d]">
+                          <span className="flex items-center gap-1.5 text-[11px] text-[var(--ghost)]">
                             با تگ
                             <TagPill tag={tagFilter} accent={tagAccent(tagFilter)} />
                           </span>

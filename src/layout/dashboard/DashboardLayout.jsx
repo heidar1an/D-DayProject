@@ -347,13 +347,13 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
                 <section
                   dir="rtl"
                   aria-label={settingsTabLabels[settingsTab]}
-                  className="mx-auto w-[var(--content-width)] py-8 text-white md:py-10 [font-family:'Pinar',Tahoma,sans-serif]"
+                  className="mx-auto w-[var(--content-width)] py-8 text-white md:py-10 [font-family:'Pinar','Vazir',Tahoma,sans-serif]"
                 >
-                  <div className="dash-stagger rounded-[2.5rem] bg-[#282828] p-10 text-center md:rounded-[3rem] md:p-14">
-                    <h2 className="text-2xl text-[#b99a86] md:text-3xl [font-family:'Doran',Tahoma,sans-serif]">
+                  <div className="dash-stagger rounded-[2.5rem] bg-[var(--surface-soft)] p-10 text-center md:rounded-[3rem] md:p-14">
+                    <h2 className="text-2xl text-[var(--copper-ink)] md:text-3xl [font-family:'Doran','Vazir',Tahoma,sans-serif]">
                       {settingsTabLabels[settingsTab]}
                     </h2>
-                    <p className="mt-4 text-[#aaa]">این بخش به‌زودی اضافه می‌شود.</p>
+                    <p className="mt-4 text-[var(--muted)]">این بخش به‌زودی اضافه می‌شود.</p>
                   </div>
                 </section>
               )}

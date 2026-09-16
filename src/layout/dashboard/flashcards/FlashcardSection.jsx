@@ -45,16 +45,16 @@ const VIEWS = [
 
 function ErrorState({ onRetry }) {
   return (
-    <div className="rounded-[2.5rem] bg-[#282828] p-10 text-center">
-      <span className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full bg-[#ff6969]/12 text-[#ff6969]">
+    <div className="rounded-[2.5rem] bg-[var(--surface-soft)] p-10 text-center">
+      <span className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full bg-[#ff6969]/12 text-[var(--red-ink)]">
         <Icon name="warn" className="h-7 w-7" />
       </span>
-      <strong className="block text-lg [font-family:'Doran',Tahoma,sans-serif]">فلش‌کارت‌ها همین لحظه در دسترس نیستند</strong>
-      <p className="mt-2 text-sm text-[#8a8a8a]">اتصالت را چک کن و دوباره تلاش کن.</p>
+      <strong className="block text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]">فلش‌کارت‌ها همین لحظه در دسترس نیستند</strong>
+      <p className="mt-2 text-sm text-[var(--faint)]">اتصالت را چک کن و دوباره تلاش کن.</p>
       <button
         type="button"
         onClick={onRetry}
-        className="mt-5 cursor-pointer rounded-xl bg-[#5b8cc7] px-6 py-2.5 text-sm text-white transition-transform hover:-translate-y-0.5 [font-family:'Doran',Tahoma,sans-serif]"
+        className="mt-5 cursor-pointer rounded-xl bg-[var(--blue-bright)] px-6 py-2.5 text-sm text-white transition-transform hover:-translate-y-0.5 [font-family:'Doran','Vazir',Tahoma,sans-serif]"
       >
         تلاش دوباره
       </button>
@@ -102,24 +102,24 @@ function LibraryView({ userData, onChanged }) {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm leading-7 text-[#8a8a8a]">
+      <p className="text-sm leading-7 text-[var(--faint)]">
         دک‌های رسمی تپش توسط تیم آموزشی ساخته و به‌روزرسانی می‌شوند؛ هر دِک را که اضافه کنی، کارت‌هایش وارد چرخهٔ مرور هوشمند تو می‌شوند.
       </p>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {data.decks.map((deck) => (
           <article
             key={deck.id}
-            className="flex flex-col rounded-[2rem] border border-white/6 bg-[#282828] p-5 transition-colors hover:border-white/12"
+            className="flex flex-col rounded-[2rem] border border-white/6 bg-[var(--surface-soft)] p-5 transition-colors hover:border-white/12"
           >
             <div className="flex items-start justify-between gap-3">
               <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl" style={{ background: `${deck.cover}1f`, color: deck.cover }}>
                 <Icon name="cards" className="h-5 w-5" />
               </span>
-              {deck.added && <span className="rounded-full bg-[#77b787]/12 px-2.5 py-1 text-[10px] text-[#9ed3ab]">اضافه شد</span>}
+              {deck.added && <span className="rounded-full bg-[#77b787]/12 px-2.5 py-1 text-[10px] text-[var(--green-soft-ink)]">اضافه شد</span>}
             </div>
-            <h3 className="mt-3 text-base [font-family:'Doran',Tahoma,sans-serif]">{deck.title}</h3>
-            <p className="mt-1.5 flex-1 text-xs leading-6 text-[#8a8a8a]">{deck.description}</p>
-            <div className="mt-3 flex flex-wrap items-center gap-1.5 text-[10px] text-[#6d6d6d]">
+            <h3 className="mt-3 text-base [font-family:'Doran','Vazir',Tahoma,sans-serif]">{deck.title}</h3>
+            <p className="mt-1.5 flex-1 text-xs leading-6 text-[var(--faint)]">{deck.description}</p>
+            <div className="mt-3 flex flex-wrap items-center gap-1.5 text-[10px] text-[var(--ghost)]">
               <span className="rounded-full bg-white/5 px-2.5 py-1">{deck.level}</span>
               <span className="rounded-full bg-white/5 px-2.5 py-1">{faNum(deck.cardCount)} کارت</span>
               <span className="rounded-full bg-white/5 px-2.5 py-1">به‌روزرسانی: {toFa(new Date(deck.updatedAt).toLocaleDateString('fa-IR'))}</span>
@@ -128,8 +128,8 @@ function LibraryView({ userData, onChanged }) {
               type="button"
               onClick={() => toggle(deck)}
               aria-pressed={deck.added}
-              className={`mt-4 cursor-pointer rounded-xl px-4 py-2.5 text-xs font-bold transition-colors [font-family:'Doran',Tahoma,sans-serif] ${
-                deck.added ? 'bg-white/8 text-[#aaa] hover:bg-[#ef9196]/15 hover:text-[#ef9196]' : 'bg-[#5b8cc7] text-white hover:-translate-y-0.5 transition-transform'
+              className={`mt-4 cursor-pointer rounded-xl px-4 py-2.5 text-xs font-bold transition-colors [font-family:'Doran','Vazir',Tahoma,sans-serif] ${
+                deck.added ? 'bg-white/8 text-[var(--muted)] hover:bg-[#ef9196]/15 hover:text-[var(--red-ink)]' : 'bg-[var(--blue-bright)] text-white hover:-translate-y-0.5 transition-transform'
               }`}
             >
               {deck.added ? 'حذف از دِک‌های من' : 'افزودن به دِک‌های من'}
@@ -161,11 +161,11 @@ function MyDecksView({ userData, overview, onOpenDeck, onCreateDeck, onEditDeck,
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-sm text-[#8a8a8a]">{toFa(decks.length)} دِک در مجموعهٔ تو</p>
+        <p className="text-sm text-[var(--faint)]">{toFa(decks.length)} دِک در مجموعهٔ تو</p>
         <button
           type="button"
           onClick={onCreateDeck}
-          className="flex cursor-pointer items-center gap-2 rounded-xl bg-[#5b8cc7] px-4 py-2.5 text-xs font-bold text-white transition-transform hover:-translate-y-0.5 [font-family:'Doran',Tahoma,sans-serif]"
+          className="flex cursor-pointer items-center gap-2 rounded-xl bg-[var(--blue-bright)] px-4 py-2.5 text-xs font-bold text-white transition-transform hover:-translate-y-0.5 [font-family:'Doran','Vazir',Tahoma,sans-serif]"
         >
           <Icon name="plus" className="h-3.5 w-3.5" />
           ساخت دِک
@@ -174,17 +174,17 @@ function MyDecksView({ userData, overview, onOpenDeck, onCreateDeck, onEditDeck,
 
       {decks.length === 0 ? (
         <div className="rounded-[2rem] border border-dashed border-white/12 bg-white/[0.02] px-6 py-14 text-center">
-          <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-white/5 text-[#8a8a8a]">
+          <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-white/5 text-[var(--faint)]">
             <Icon name="layers" className="h-6 w-6" />
           </span>
-          <strong className="mt-3 block [font-family:'Doran',Tahoma,sans-serif]">هنوز دِکی نداری</strong>
-          <p className="mx-auto mt-1.5 max-w-sm text-sm leading-6 text-[#8a8a8a]">
+          <strong className="mt-3 block [font-family:'Doran','Vazir',Tahoma,sans-serif]">هنوز دِکی نداری</strong>
+          <p className="mx-auto mt-1.5 max-w-sm text-sm leading-6 text-[var(--faint)]">
             یک دِک بساز یا از کتابخانهٔ رسمی تپش اضافه کن تا مرور هوشمند شروع شود.
           </p>
           <button
             type="button"
             onClick={onCreateDeck}
-            className="mt-4 cursor-pointer rounded-xl bg-[#5b8cc7] px-5 py-2.5 text-xs font-bold text-white [font-family:'Doran',Tahoma,sans-serif]"
+            className="mt-4 cursor-pointer rounded-xl bg-[var(--blue-bright)] px-5 py-2.5 text-xs font-bold text-white [font-family:'Doran','Vazir',Tahoma,sans-serif]"
           >
             ساخت دِک
           </button>
@@ -192,7 +192,7 @@ function MyDecksView({ userData, overview, onOpenDeck, onCreateDeck, onEditDeck,
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {decks.map((deck) => (
-            <article key={deck.id} className="flex flex-col rounded-[2rem] border border-white/6 bg-[#282828] p-5 transition-colors hover:border-white/12">
+            <article key={deck.id} className="flex flex-col rounded-[2rem] border border-white/6 bg-[var(--surface-soft)] p-5 transition-colors hover:border-white/12">
               <div className="flex items-start justify-between gap-3">
                 <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl" style={{ background: `${deck.cover}1f`, color: deck.cover }}>
                   <Icon name="cards" className="h-5 w-5" />
@@ -201,25 +201,25 @@ function MyDecksView({ userData, overview, onOpenDeck, onCreateDeck, onEditDeck,
               </div>
 
               <button type="button" onClick={() => onOpenDeck(deck.id)} className="mt-3 cursor-pointer text-right">
-                <h3 className="text-base [font-family:'Doran',Tahoma,sans-serif] transition-colors hover:text-[#9cc0e8]">{deck.title}</h3>
+                <h3 className="text-base [font-family:'Doran','Vazir',Tahoma,sans-serif] transition-colors hover:text-[var(--blue-soft-ink)]">{deck.title}</h3>
               </button>
-              <p className="mt-1 flex-1 text-xs text-[#6d6d6d]">
+              <p className="mt-1 flex-1 text-xs text-[var(--ghost)]">
                 {faNum(deck.cardCount)} کارت
                 {deck.byTapesh ? ' · توسط تپش' : ''}
               </p>
 
               <div className="mt-3 flex flex-wrap items-center gap-1.5 text-[10px]">
-                {deck.due > 0 && <span className="rounded-full bg-[#e26d6d]/12 px-2.5 py-1 text-[#ef9196]">امروز {faNum(deck.due)} مرور</span>}
-                {deck.new > 0 && <span className="rounded-full bg-[#5b8cc7]/12 px-2.5 py-1 text-[#9cc0e8]">{faNum(deck.new)} جدید</span>}
-                {deck.learning > 0 && <span className="rounded-full bg-[#e0b45c]/12 px-2.5 py-1 text-[#e0b45c]">{faNum(deck.learning)} یادگیری</span>}
-                {deck.mastered > 0 && <span className="rounded-full bg-[#77b787]/12 px-2.5 py-1 text-[#9ed3ab]">{faNum(deck.mastered)} مسلط</span>}
+                {deck.due > 0 && <span className="rounded-full bg-[#e26d6d]/12 px-2.5 py-1 text-[var(--red-ink)]">امروز {faNum(deck.due)} مرور</span>}
+                {deck.new > 0 && <span className="rounded-full bg-[#5b8cc7]/12 px-2.5 py-1 text-[var(--blue-soft-ink)]">{faNum(deck.new)} جدید</span>}
+                {deck.learning > 0 && <span className="rounded-full bg-[#e0b45c]/12 px-2.5 py-1 text-[var(--gold-ink)]">{faNum(deck.learning)} یادگیری</span>}
+                {deck.mastered > 0 && <span className="rounded-full bg-[#77b787]/12 px-2.5 py-1 text-[var(--green-soft-ink)]">{faNum(deck.mastered)} مسلط</span>}
               </div>
 
               <div className="mt-4 flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => onStartReview({ mode: 'deck', deckId: deck.id, label: deck.title })}
-                  className="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-[#5b8cc7] px-4 py-2.5 text-xs font-bold text-white transition-transform hover:-translate-y-0.5 [font-family:'Doran',Tahoma,sans-serif]"
+                  className="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-[var(--blue-bright)] px-4 py-2.5 text-xs font-bold text-white transition-transform hover:-translate-y-0.5 [font-family:'Doran','Vazir',Tahoma,sans-serif]"
                 >
                   <Icon name="play" className="h-3.5 w-3.5" />
                   مرور
@@ -227,7 +227,7 @@ function MyDecksView({ userData, overview, onOpenDeck, onCreateDeck, onEditDeck,
                 <button
                   type="button"
                   onClick={() => onOpenDeck(deck.id)}
-                  className="cursor-pointer rounded-xl bg-white/8 px-4 py-2.5 text-xs text-[#aaa] transition-colors hover:bg-white/15 hover:text-white"
+                  className="cursor-pointer rounded-xl bg-white/8 px-4 py-2.5 text-xs text-[var(--muted)] transition-colors hover:bg-white/15 hover:text-white"
                 >
                   مشاهده
                 </button>
@@ -236,7 +236,7 @@ function MyDecksView({ userData, overview, onOpenDeck, onCreateDeck, onEditDeck,
                     type="button"
                     onClick={() => onEditDeck(deck)}
                     aria-label={`ویرایش دِک ${deck.title}`}
-                    className="grid h-9 w-9 shrink-0 cursor-pointer place-items-center rounded-xl text-[#6d6d6d] transition-colors hover:bg-white/5 hover:text-white"
+                    className="grid h-9 w-9 shrink-0 cursor-pointer place-items-center rounded-xl text-[var(--ghost)] transition-colors hover:bg-white/5 hover:text-white"
                   >
                     <Icon name="edit" className="h-4 w-4" />
                   </button>
@@ -264,24 +264,24 @@ function TodayView({ overview, onOpenDeck, onStartReview, onCreateDeck, onAccept
       >
         <div className="flex flex-wrap items-center justify-between gap-6">
           <div className="min-w-0">
-            <h2 className="text-2xl [font-family:'Doran',Tahoma,sans-serif] md:text-3xl">امروز چی رو مرور کنیم؟</h2>
+            <h2 className="text-2xl [font-family:'Doran','Vazir',Tahoma,sans-serif] md:text-3xl">امروز چی رو مرور کنیم؟</h2>
 
             {hasDue ? (
               <>
-                <p className="mt-3 text-sm leading-7 text-[#aaa]">
-                  <strong className="text-2xl text-white [font-family:'Doran',Tahoma,sans-serif]">{faNum(today.total)}</strong>
+                <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
+                  <strong className="text-2xl text-white [font-family:'Doran','Vazir',Tahoma,sans-serif]">{faNum(today.total)}</strong>
                   {' '}کارت برای امروز —{' '}
-                  <span className="text-[#9cc0e8]">{faNum(today.new)} جدید</span>،{' '}
-                  <span className="text-[#e0b45c]">{faNum(today.plan.review)} مرور</span>
-                  {today.plan.weak > 0 && <> و <span className="text-[#ef9196]">{faNum(today.plan.weak)} کارت ضعیف</span></>}
+                  <span className="text-[var(--blue-soft-ink)]">{faNum(today.new)} جدید</span>،{' '}
+                  <span className="text-[var(--gold-ink)]">{faNum(today.plan.review)} مرور</span>
+                  {today.plan.weak > 0 && <> و <span className="text-[var(--red-ink)]">{faNum(today.plan.weak)} کارت ضعیف</span></>}
                 </p>
-                <p className="mt-2 inline-flex items-center gap-1.5 text-xs text-[#8a8a8a]">
+                <p className="mt-2 inline-flex items-center gap-1.5 text-xs text-[var(--faint)]">
                   <Icon name="clock" className="h-3.5 w-3.5" />
                   زمان تخمینی: ~{toFa(today.estimatedMinutes)} دقیقه
                 </p>
               </>
             ) : (
-              <p className="mt-3 max-w-md text-sm leading-7 text-[#aaa]">
+              <p className="mt-3 max-w-md text-sm leading-7 text-[var(--muted)]">
                 برای امروز مروری نداری. می‌توانی کارت‌های جدید را شروع کنی یا یک مرور آزاد بزنی.
               </p>
             )}
@@ -292,7 +292,7 @@ function TodayView({ overview, onOpenDeck, onStartReview, onCreateDeck, onAccept
               <button
                 type="button"
                 onClick={() => onStartReview({ mode: 'today', label: 'برنامهٔ امروز' })}
-                className="flex cursor-pointer items-center justify-center gap-2.5 rounded-2xl bg-[#5b8cc7] px-10 py-4 text-base font-bold text-white shadow-[0_16px_36px_-14px_rgba(91,140,199,0.7)] transition-transform hover:-translate-y-0.5 [font-family:'Doran',Tahoma,sans-serif]"
+                className="flex cursor-pointer items-center justify-center gap-2.5 rounded-2xl bg-[var(--blue-bright)] px-10 py-4 text-base font-bold text-white shadow-[0_16px_36px_-14px_rgba(91,140,199,0.7)] transition-transform hover:-translate-y-0.5 [font-family:'Doran','Vazir',Tahoma,sans-serif]"
               >
                 <Icon name="play" className="h-5 w-5" />
                 شروع مرور
@@ -302,7 +302,7 @@ function TodayView({ overview, onOpenDeck, onStartReview, onCreateDeck, onAccept
                 <button
                   type="button"
                   onClick={() => onStartReview({ mode: 'deck', deckId: null, label: 'کارت‌های جدید' })}
-                  className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl bg-[#5b8cc7] px-8 py-3.5 text-sm font-bold text-white transition-transform hover:-translate-y-0.5 [font-family:'Doran',Tahoma,sans-serif]"
+                  className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl bg-[var(--blue-bright)] px-8 py-3.5 text-sm font-bold text-white transition-transform hover:-translate-y-0.5 [font-family:'Doran','Vazir',Tahoma,sans-serif]"
                 >
                   <Icon name="zap" className="h-4 w-4" />
                   شروع کارت‌های جدید
@@ -310,14 +310,14 @@ function TodayView({ overview, onOpenDeck, onStartReview, onCreateDeck, onAccept
                 <button
                   type="button"
                   onClick={() => onStartReview({ mode: 'cram', label: 'مرور آزاد' })}
-                  className="cursor-pointer rounded-2xl bg-white/8 px-8 py-2.5 text-xs text-[#aaa] transition-colors hover:bg-white/15 hover:text-white"
+                  className="cursor-pointer rounded-2xl bg-white/8 px-8 py-2.5 text-xs text-[var(--muted)] transition-colors hover:bg-white/15 hover:text-white"
                 >
                   مرور آزاد
                 </button>
               </>
             )}
             {counts.totalCards > 0 && (
-              <p className="text-center text-[11px] text-[#6d6d6d]">{faNum(counts.totalCards)} کارت در مجموعهٔ تو</p>
+              <p className="text-center text-[11px] text-[var(--ghost)]">{faNum(counts.totalCards)} کارت در مجموعهٔ تو</p>
             )}
           </div>
         </div>
@@ -325,14 +325,14 @@ function TodayView({ overview, onOpenDeck, onStartReview, onCreateDeck, onAccept
         {/* آمار مینیمال */}
         <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
           {[
-            { label: 'برای مرور', value: faNum(counts.dueToday), color: '#ef9196' },
-            { label: 'کارت جدید', value: faNum(counts.newCards), color: '#5b8cc7' },
-            { label: 'در حال یادگیری', value: faNum(counts.learning), color: '#e0b45c' },
-            { label: 'تسلط‌یافته', value: faNum(counts.mastered), color: '#77b787' },
+            { label: 'برای مرور', value: faNum(counts.dueToday), color: 'var(--red-ink)' },
+            { label: 'کارت جدید', value: faNum(counts.newCards), color: 'var(--blue-ink)' },
+            { label: 'در حال یادگیری', value: faNum(counts.learning), color: 'var(--gold-ink)' },
+            { label: 'تسلط‌یافته', value: faNum(counts.mastered), color: 'var(--green-ink)' },
           ].map((stat) => (
             <div key={stat.label} className="rounded-2xl border border-white/6 bg-black/25 px-4 py-3.5 text-center">
-              <strong className="block text-xl [font-family:'Doran',Tahoma,sans-serif]" style={{ color: stat.color }}>{stat.value}</strong>
-              <span className="mt-0.5 block text-[11px] text-[#8a8a8a]">{stat.label}</span>
+              <strong className="block text-xl [font-family:'Doran','Vazir',Tahoma,sans-serif]" style={{ color: stat.color }}>{stat.value}</strong>
+              <span className="mt-0.5 block text-[11px] text-[var(--faint)]">{stat.label}</span>
             </div>
           ))}
         </div>
@@ -340,34 +340,34 @@ function TodayView({ overview, onOpenDeck, onStartReview, onCreateDeck, onAccept
 
       <div className="grid gap-5 xl:grid-cols-2">
         {/* پیشرفت + استریک */}
-        <section aria-label="پیشرفت کلی" className="rounded-[2.5rem] bg-[#282828] p-5 md:p-7">
-          <h2 className="text-lg [font-family:'Doran',Tahoma,sans-serif]">پیشرفت تو</h2>
+        <section aria-label="پیشرفت کلی" className="rounded-[2.5rem] bg-[var(--surface-soft)] p-5 md:p-7">
+          <h2 className="text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]">پیشرفت تو</h2>
           <div className="mt-5 flex flex-wrap items-center gap-6">
-            <MasteryRing value={counts.mastery} size={104} stroke={8} color="#5b8cc7" label="تسلط" />
+            <MasteryRing value={counts.mastery} size={104} stroke={8} color="var(--blue-ink)" label="تسلط" />
             <div className="flex-1 space-y-3 text-sm">
               <p className="flex items-center justify-between gap-3">
-                <span className="inline-flex items-center gap-2 text-[#aaa]">
-                  <Icon name="flame" className="h-4 w-4 text-[#ef9196]" />
+                <span className="inline-flex items-center gap-2 text-[var(--muted)]">
+                  <Icon name="flame" className="h-4 w-4 text-[var(--red-ink)]" />
                   استریک مطالعه
                 </span>
                 <strong>{toFa(streak)} روز</strong>
               </p>
               <p className="flex items-center justify-between gap-3">
-                <span className="text-[#aaa]">دقت پاسخ‌ها</span>
+                <span className="text-[var(--muted)]">دقت پاسخ‌ها</span>
                 <strong>{toFa(performance.accuracy)}٪</strong>
               </p>
               <p className="flex items-center justify-between gap-3">
-                <span className="text-[#aaa]">ماندگاری حافظه</span>
+                <span className="text-[var(--muted)]">ماندگاری حافظه</span>
                 <strong>{toFa(performance.retention)}٪</strong>
               </p>
               <p className="flex items-center justify-between gap-3">
-                <span className="text-[#aaa]">گلچین‌شده‌ها</span>
+                <span className="text-[var(--muted)]">گلچین‌شده‌ها</span>
                 <strong>{faNum(counts.bookmarked)}</strong>
               </p>
               <button
                 type="button"
                 onClick={onOpenStats}
-                className="cursor-pointer text-xs text-[#5b8cc7] transition-colors hover:text-[#9cc0e8]"
+                className="cursor-pointer text-xs text-[var(--blue-ink)] transition-colors hover:text-[var(--blue-soft-ink)]"
               >
                 آمار کامل ←
               </button>
@@ -376,15 +376,15 @@ function TodayView({ overview, onOpenDeck, onStartReview, onCreateDeck, onAccept
         </section>
 
         {/* مباحث ضعیف */}
-        <section aria-label="مباحث ضعیف" className="rounded-[2.5rem] bg-[#282828] p-5 md:p-7">
-          <h2 className="text-lg [font-family:'Doran',Tahoma,sans-serif]">مباحث ضعیف‌تر</h2>
+        <section aria-label="مباحث ضعیف" className="rounded-[2.5rem] bg-[var(--surface-soft)] p-5 md:p-7">
+          <h2 className="text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]">مباحث ضعیف‌تر</h2>
           {weakTopics.length ? (
             <ul className="mt-4 space-y-3">
               {weakTopics.slice(0, 3).map((topic) => {
                 const weak = topic.mastery < 45;
                 return (
                   <li key={topic.topicId} className="flex items-center gap-3">
-                    <span className={`h-2 w-2 shrink-0 rounded-full ${weak ? 'bg-[#ef9196]' : 'bg-[#e0b45c]'}`} aria-hidden="true" />
+                    <span className={`h-2 w-2 shrink-0 rounded-full ${weak ? 'bg-[var(--rose)]' : 'bg-[var(--gold)]'}`} aria-hidden="true" />
                     <span className="min-w-0 flex-1 truncate text-sm">{topic.topicId}</span>
                     <div className="h-1.5 w-24 overflow-hidden rounded-full bg-white/8">
                       <span className="block h-full rounded-full" style={{ width: `${topic.mastery}%`, background: weak ? '#ef9196' : '#e0b45c' }} />
@@ -395,13 +395,13 @@ function TodayView({ overview, onOpenDeck, onStartReview, onCreateDeck, onAccept
               })}
             </ul>
           ) : (
-            <p className="mt-4 text-sm leading-7 text-[#8a8a8a]">بعد از چند جلسه مرور، اینجا مباحثی که نیاز به تکرار دارند را نشانت می‌دهیم.</p>
+            <p className="mt-4 text-sm leading-7 text-[var(--faint)]">بعد از چند جلسه مرور، اینجا مباحثی که نیاز به تکرار دارند را نشانت می‌دهیم.</p>
           )}
           {weakTopics.length > 0 && (
             <button
               type="button"
               onClick={() => onStartReview({ mode: 'weak', label: 'مباحث ضعیف' })}
-              className="mt-5 cursor-pointer rounded-xl bg-[#ef9196]/12 px-5 py-2.5 text-xs text-[#ef9196] transition-colors hover:bg-[#ef9196]/20"
+              className="mt-5 cursor-pointer rounded-xl bg-[#ef9196]/12 px-5 py-2.5 text-xs text-[var(--red-ink)] transition-colors hover:bg-[#ef9196]/20"
             >
               مرور مباحث ضعیف
             </button>
@@ -411,17 +411,17 @@ function TodayView({ overview, onOpenDeck, onStartReview, onCreateDeck, onAccept
 
       {/* پیشنهادهای هوشمند */}
       {suggestions.length > 0 && (
-        <section aria-label="پیشنهادهای هوشمند" className="rounded-[2.5rem] bg-[#282828] p-5 md:p-7">
-          <h2 className="text-lg [font-family:'Doran',Tahoma,sans-serif]">پیشنهاد تپش</h2>
-          <p className="mt-1 text-xs text-[#6d6d6d]">بر اساس رفتار مرور و اشتباهات تو</p>
+        <section aria-label="پیشنهادهای هوشمند" className="rounded-[2.5rem] bg-[var(--surface-soft)] p-5 md:p-7">
+          <h2 className="text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]">پیشنهاد تپش</h2>
+          <p className="mt-1 text-xs text-[var(--ghost)]">بر اساس رفتار مرور و اشتباهات تو</p>
           <div className="mt-4 grid gap-3 md:grid-cols-3">
             {suggestions.map((suggestion) => (
-              <div key={suggestion.id} className="flex flex-col rounded-2xl border border-white/6 bg-[#2a2a2a] p-4">
+              <div key={suggestion.id} className="flex flex-col rounded-2xl border border-white/6 bg-[var(--surface-soft)] p-4">
                 <span className="grid h-9 w-9 place-items-center rounded-xl" style={{ background: `${suggestion.accent}1a`, color: suggestion.accent }}>
                   <Icon name={suggestion.icon} className="h-4.5 w-4.5" />
                 </span>
                 <p className="mt-3 text-sm leading-6">{suggestion.title}</p>
-                <p className="mt-1 flex-1 text-[11px] leading-5 text-[#8a8a8a]">{suggestion.note}</p>
+                <p className="mt-1 flex-1 text-[11px] leading-5 text-[var(--faint)]">{suggestion.note}</p>
                 <button
                   type="button"
                   onClick={() => onAcceptSuggestion(suggestion)}
@@ -437,10 +437,10 @@ function TodayView({ overview, onOpenDeck, onStartReview, onCreateDeck, onAccept
       )}
 
       {/* دک‌ها — پیش‌نمایش سریع */}
-      <section aria-label="دک‌های من" className="rounded-[2.5rem] bg-[#282828] p-5 md:p-7">
+      <section aria-label="دک‌های من" className="rounded-[2.5rem] bg-[var(--surface-soft)] p-5 md:p-7">
         <header className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg [font-family:'Doran',Tahoma,sans-serif]">دک‌های تو</h2>
-          <button type="button" onClick={onOpenDeck} className="cursor-pointer text-xs text-[#937fcd] transition-colors hover:text-[#c9bdf0]">
+          <h2 className="text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]">دک‌های تو</h2>
+          <button type="button" onClick={onOpenDeck} className="cursor-pointer text-xs text-[var(--purple-ink)] transition-colors hover:text-[var(--purple-soft-ink)]">
             همهٔ دک‌ها
           </button>
         </header>
@@ -452,17 +452,17 @@ function TodayView({ overview, onOpenDeck, onStartReview, onCreateDeck, onAccept
                 <button
                   type="button"
                   onClick={() => onOpenDeck(deck.id)}
-                  className="w-full cursor-pointer rounded-2xl border border-white/6 bg-[#2a2a2a] p-4 text-right transition-colors hover:border-white/15"
+                  className="w-full cursor-pointer rounded-2xl border border-white/6 bg-[var(--surface-soft)] p-4 text-right transition-colors hover:border-white/15"
                 >
                   <div className="flex items-center gap-3">
                     <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: deck.cover }} aria-hidden="true" />
                     <span className="min-w-0 flex-1 truncate text-sm">{deck.title}</span>
-                    {deck.due > 0 && <span className="shrink-0 text-[11px] text-[#ef9196]">{faNum(deck.due)}</span>}
+                    {deck.due > 0 && <span className="shrink-0 text-[11px] text-[var(--red-ink)]">{faNum(deck.due)}</span>}
                   </div>
                   <div className="mt-2.5 h-1 overflow-hidden rounded-full bg-white/8">
                     <span className="block h-full rounded-full" style={{ width: `${deck.mastery}%`, background: deck.cover }} />
                   </div>
-                  <p className="mt-1.5 text-[10px] text-[#6d6d6d]">
+                  <p className="mt-1.5 text-[10px] text-[var(--ghost)]">
                     {faNum(deck.cardCount)} کارت · تسلط {toFa(deck.mastery)}٪
                   </p>
                 </button>
@@ -471,11 +471,11 @@ function TodayView({ overview, onOpenDeck, onStartReview, onCreateDeck, onAccept
           </ul>
         ) : (
           <div className="rounded-2xl border border-dashed border-white/12 px-5 py-8 text-center">
-            <p className="text-sm text-[#8a8a8a]">هنوز دکی نداری؛ اولین دکت را بساز.</p>
+            <p className="text-sm text-[var(--faint)]">هنوز دکی نداری؛ اولین دکت را بساز.</p>
             <button
               type="button"
               onClick={onCreateDeck}
-              className="mt-3 cursor-pointer rounded-xl bg-[#5b8cc7] px-5 py-2.5 text-xs font-bold text-white [font-family:'Doran',Tahoma,sans-serif]"
+              className="mt-3 cursor-pointer rounded-xl bg-[var(--blue-bright)] px-5 py-2.5 text-xs font-bold text-white [font-family:'Doran','Vazir',Tahoma,sans-serif]"
             >
               ساخت دِک
             </button>
@@ -578,7 +578,7 @@ export default function FlashcardSection({ userData }) {
   /* ── در حال مرور: فقط یادگیری ── */
   if (reviewConfig) {
     return (
-      <section dir="rtl" aria-label="مرور فلش‌کارت" className="mx-auto w-[var(--content-width)] py-8 text-white md:py-10 [font-family:'Pinar',Tahoma,sans-serif]">
+      <section dir="rtl" aria-label="مرور فلش‌کارت" className="mx-auto w-[var(--content-width)] py-8 text-white md:py-10 [font-family:'Pinar','Vazir',Tahoma,sans-serif]">
         <ReviewSession
           userData={userData}
           config={reviewConfig}
@@ -597,19 +597,19 @@ export default function FlashcardSection({ userData }) {
   }
 
   return (
-    <section dir="rtl" aria-label="فلش‌کارت تپش" className="mx-auto w-[var(--content-width)] py-8 text-white md:py-10 [font-family:'Pinar',Tahoma,sans-serif]">
+    <section dir="rtl" aria-label="فلش‌کارت تپش" className="mx-auto w-[var(--content-width)] py-8 text-white md:py-10 [font-family:'Pinar','Vazir',Tahoma,sans-serif]">
       {/* سربرگ لایه */}
       <header className="dash-stagger mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl text-[#5b8cc7] [font-family:'Doran',Tahoma,sans-serif] md:text-4xl">فلش‌کارت</h1>
-          <p className="mt-2 text-sm text-[#aaa]">مرور هوشمند با فاصله‌گذاری علمی — دقیقاً وقتی که حافظه نیاز به تکرار دارد.</p>
+          <h1 className="text-3xl text-[var(--blue-ink)] [font-family:'Doran','Vazir',Tahoma,sans-serif] md:text-4xl">فلش‌کارت</h1>
+          <p className="mt-2 text-sm text-[var(--muted)]">مرور هوشمند با فاصله‌گذاری علمی — دقیقاً وقتی که حافظه نیاز به تکرار دارد.</p>
         </div>
         <button
           type="button"
           onClick={() => setCardEditor({ open: true, card: null, deckId: null })}
-          className="flex cursor-pointer items-center gap-2 rounded-2xl bg-[#282828] px-5 py-3 text-sm transition-all hover:-translate-y-0.5 hover:bg-[#2e2e30] [font-family:'Doran',Tahoma,sans-serif]"
+          className="flex cursor-pointer items-center gap-2 rounded-2xl bg-[var(--surface-soft)] px-5 py-3 text-sm transition-all hover:-translate-y-0.5 hover:bg-[var(--surface-soft)] [font-family:'Doran','Vazir',Tahoma,sans-serif]"
         >
-          <Icon name="plus" className="h-4 w-4 text-[#9cc0e8]" />
+          <Icon name="plus" className="h-4 w-4 text-[var(--blue-soft-ink)]" />
           ساخت کارت
         </button>
       </header>
@@ -625,8 +625,8 @@ export default function FlashcardSection({ userData }) {
               setView(item.id);
               setOpenDeckId(null);
             }}
-            className={`flex shrink-0 cursor-pointer items-center gap-2 rounded-full px-4 py-2.5 text-sm transition-colors [font-family:'Doran',Tahoma,sans-serif] ${
-              view === item.id ? 'bg-[#5b8cc7] text-white' : 'text-[#aaa] hover:bg-white/5 hover:text-white'
+            className={`flex shrink-0 cursor-pointer items-center gap-2 rounded-full px-4 py-2.5 text-sm transition-colors [font-family:'Doran','Vazir',Tahoma,sans-serif] ${
+              view === item.id ? 'bg-[var(--blue-bright)] text-white' : 'text-[var(--muted)] hover:bg-white/5 hover:text-white'
             }`}
           >
             <Icon name={item.icon} className="h-4 w-4" />
@@ -706,8 +706,8 @@ export default function FlashcardSection({ userData }) {
       {/* توست */}
       {toast && (
         <div className="fc-toast pointer-events-none fixed inset-x-0 bottom-6 z-50 flex justify-center" aria-live="polite">
-          <div className="fc-card-face flex items-center gap-2.5 rounded-full border border-[#5b8cc7]/40 bg-[#1b2530]/95 px-5 py-3 text-sm shadow-[0_18px_40px_-14px_rgba(0,0,0,0.9)] backdrop-blur">
-            <Icon name="check" className="h-4 w-4 text-[#9ed3ab]" />
+          <div className="fc-card-face flex items-center gap-2.5 rounded-full border border-[#5b8cc7]/40 bg-[#1b2530]/95 px-5 py-3 text-sm shadow-[0_18px_40px_-14px_rgb(var(--shadow-rgb) / 0.9)] backdrop-blur">
+            <Icon name="check" className="h-4 w-4 text-[var(--green-soft-ink)]" />
             {toast}
           </div>
         </div>

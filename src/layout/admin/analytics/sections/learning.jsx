@@ -85,7 +85,7 @@ export function EducationSection({ data }) {
         <LineChart
           labels={series.map((point) => point.label)}
           series={[
-            { key: 'tests', label: 'تست انجام‌شده', values: series.map((point) => point.tests), color: '#937fcd' },
+            { key: 'tests', label: 'تست انجام‌شده', values: series.map((point) => point.tests), color: 'var(--purple-ink)' },
           ]}
           height={240}
         />

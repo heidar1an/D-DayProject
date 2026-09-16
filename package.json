@@ -7,7 +7,12 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "start": "node server.js"
+    "start": "node server.js",
+    "theme:check": "node scripts/theme-verify.mjs && node scripts/theme-contrast.mjs && node scripts/tailwind-probe.mjs && node scripts/verify-render.mjs",
+    "theme:verify": "node scripts/theme-verify.mjs",
+    "theme:contrast": "node scripts/theme-contrast.mjs",
+    "theme:tailwind": "node scripts/tailwind-probe.mjs",
+    "theme:render": "node scripts/verify-render.mjs"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",

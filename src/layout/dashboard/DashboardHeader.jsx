@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import Brand from './Brand';
+import ThemeToggle from '../ThemeToggle';
 import settingsIcon from '../../../images/icons/icons8-setting-500.png';
 
 const FA_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
@@ -82,8 +83,16 @@ export default function DashboardHeader({
   }, [activeSection, isOverlayOpen]);
 
   return (
-    /* هدر داشبورد اولین بار که پنل باز می‌شود، با همان انیمیشن نرم لایه‌ها از بالا ظاهر می‌شود */
-    <header className="dashboard-header dashboard-layer-reveal--down">
+    /*
+     * هدر داشبورد عمداً هیچ انیمیشن ورودی ندارد.
+     *
+     * قبلاً کلاس `dashboard-layer-reveal--down` داشت (۷۲۰ms سُرخوردن از ۱۸px-
+     * بالا با محو شدن). چون هدر chromeِ ثابت است و بین لایه‌ها جابه‌جا نمی‌شود،
+     * آن انیمیشن فقط باعث می‌شد هنگام عوض کردن لایه‌های تست، هدر «بپرد»:
+     * محتوای لایه زیر هدر نیمه‌شفاف از پایین سُر می‌خورد و لبهٔ بلورِ هدر تکان
+     * می‌خورد. حالا هدر ثابت و توپُر است و فقط محتوای لایه انیمیشن دارد.
+     */
+    <header className="dashboard-header">
       <div className="dashboard-header__inner">
         <Brand />
 
@@ -161,6 +170,8 @@ export default function DashboardHeader({
             onClick={onSettingsToggle}>
             <img src={settingsIcon} alt="" />
           </button>
+
+          <ThemeToggle className="dashboard-header__theme" />
         </div>
       </div>
     </header>

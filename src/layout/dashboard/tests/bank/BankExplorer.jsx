@@ -56,7 +56,7 @@ function CheckboxGroup({ title, options, selected, onChange }) {
   };
   return (
     <fieldset>
-      <legend className="mb-2 text-xs font-bold text-[#bbb] [font-family:'Doran',Tahoma,sans-serif]">{title}</legend>
+      <legend className="mb-2 text-xs font-bold text-[var(--muted)] [font-family:'Doran','Vazir',Tahoma,sans-serif]">{title}</legend>
       <div className="space-y-1.5">
         {options.map((option) => (
           <label
@@ -64,17 +64,17 @@ function CheckboxGroup({ title, options, selected, onChange }) {
             className={`flex cursor-pointer items-center gap-2.5 rounded-xl border px-3 py-2 text-[13px] transition-colors ${
               selected.includes(option.value)
                 ? 'border-[#61D192]/40 bg-[#61D192]/[0.07] text-white'
-                : 'border-transparent text-[#bbb] hover:bg-white/[0.04]'
+                : 'border-transparent text-[var(--muted)] hover:bg-white/[0.04]'
             }`}
           >
             <input
               type="checkbox"
               checked={selected.includes(option.value)}
               onChange={() => toggle(option.value)}
-              className="h-3.5 w-3.5 accent-[#61D192]"
+              className="h-3.5 w-3.5 accent-[var(--green-ink)]"
             />
             <span className="flex-1">{option.label}</span>
-            {option.count != null && <span className="text-[11px] text-[#777]">{toFa(option.count)}</span>}
+            {option.count != null && <span className="text-[11px] text-[var(--faint)]">{toFa(option.count)}</span>}
           </label>
         ))}
       </div>
@@ -89,7 +89,7 @@ function ChipGroup({ title, options, selected, onChange }) {
   };
   return (
     <fieldset>
-      <legend className="mb-2 text-xs font-bold text-[#bbb] [font-family:'Doran',Tahoma,sans-serif]">{title}</legend>
+      <legend className="mb-2 text-xs font-bold text-[var(--muted)] [font-family:'Doran','Vazir',Tahoma,sans-serif]">{title}</legend>
       <div className="flex flex-wrap gap-1.5">
         {options.map((option) => (
           <button
@@ -99,8 +99,8 @@ function ChipGroup({ title, options, selected, onChange }) {
             aria-pressed={selected.includes(option.value)}
             className={`cursor-pointer rounded-full border px-3 py-1.5 text-xs transition-colors ${
               selected.includes(option.value)
-                ? 'border-[#61D192]/50 bg-[#61D192]/12 text-[#7ee0ac]'
-                : 'border-white/10 bg-white/[0.03] text-[#aaa] hover:border-white/25'
+                ? 'border-[#61D192]/50 bg-[#61D192]/12 text-[var(--green-soft-ink)]'
+                : 'border-white/10 bg-white/[0.03] text-[var(--muted)] hover:border-white/25'
             }`}
           >
             {option.label}
@@ -174,25 +174,25 @@ function FilterPanel({ filters, setFilters, subjectsMeta, saved, onApplySaved, o
 
       {/* سال — بازه از/تا */}
       <fieldset>
-        <legend className="mb-2 text-xs font-bold text-[#bbb] [font-family:'Doran',Tahoma,sans-serif]">سال</legend>
+        <legend className="mb-2 text-xs font-bold text-[var(--muted)] [font-family:'Doran','Vazir',Tahoma,sans-serif]">سال</legend>
         <div className="flex items-center gap-2">
           <select
             value={filters.yearFrom ?? ''}
             onChange={(event) => patch({ yearFrom: event.target.value ? Number(event.target.value) : null })}
             aria-label="از سال"
-            className="w-full cursor-pointer rounded-xl border border-white/10 bg-[#2a2a2a] px-2.5 py-2 text-[13px] text-white focus:border-[#61D192]/50 focus:outline-none"
+            className="w-full cursor-pointer rounded-xl border border-white/10 bg-[var(--surface-soft)] px-2.5 py-2 text-[13px] text-white focus:border-[#61D192]/50 focus:outline-none"
           >
             <option value="">از ابتدا</option>
             {BANK_YEARS.map((year) => (
               <option key={year} value={year}>{toFa(year)}</option>
             ))}
           </select>
-          <span className="text-[#666]">تا</span>
+          <span className="text-[var(--ghost)]">تا</span>
           <select
             value={filters.yearTo ?? ''}
             onChange={(event) => patch({ yearTo: event.target.value ? Number(event.target.value) : null })}
             aria-label="تا سال"
-            className="w-full cursor-pointer rounded-xl border border-white/10 bg-[#2a2a2a] px-2.5 py-2 text-[13px] text-white focus:border-[#61D192]/50 focus:outline-none"
+            className="w-full cursor-pointer rounded-xl border border-white/10 bg-[var(--surface-soft)] px-2.5 py-2 text-[13px] text-white focus:border-[#61D192]/50 focus:outline-none"
           >
             <option value="">انتها</option>
             {BANK_YEARS.map((year) => (
@@ -229,7 +229,7 @@ function FilterPanel({ filters, setFilters, subjectsMeta, saved, onApplySaved, o
       />
 
       <fieldset>
-        <legend className="mb-2 text-xs font-bold text-[#bbb] [font-family:'Doran',Tahoma,sans-serif]">وضعیت من</legend>
+        <legend className="mb-2 text-xs font-bold text-[var(--muted)] [font-family:'Doran','Vazir',Tahoma,sans-serif]">وضعیت من</legend>
         <div className="grid grid-cols-2 gap-1.5">
           {STATUS_OPTIONS.map((option) => (
             <button
@@ -238,7 +238,7 @@ function FilterPanel({ filters, setFilters, subjectsMeta, saved, onApplySaved, o
               onClick={() => patch({ status: option.value })}
               aria-pressed={filters.status === option.value}
               className={`cursor-pointer rounded-xl px-2.5 py-2 text-xs transition-colors ${
-                filters.status === option.value ? 'bg-[#937fcd] font-bold text-white' : 'bg-white/5 text-[#aaa] hover:bg-white/10'
+                filters.status === option.value ? 'bg-[var(--purple-bright)] font-bold text-white' : 'bg-white/5 text-[var(--muted)] hover:bg-white/10'
               }`}
             >
               {option.label}
@@ -250,18 +250,18 @@ function FilterPanel({ filters, setFilters, subjectsMeta, saved, onApplySaved, o
       {/* فیلترهای ذخیره‌شده */}
       <div className="border-t border-white/8 pt-4">
         <div className="mb-2 flex items-center justify-between">
-          <legend className="text-xs font-bold text-[#bbb] [font-family:'Doran',Tahoma,sans-serif]">آزمون‌های من</legend>
+          <legend className="text-xs font-bold text-[var(--muted)] [font-family:'Doran','Vazir',Tahoma,sans-serif]">آزمون‌های من</legend>
           <button
             type="button"
             onClick={onSaveCurrent}
-            className="flex cursor-pointer items-center gap-1 text-[11px] text-[#61D192] transition-colors hover:text-[#7ee0ac]"
+            className="flex cursor-pointer items-center gap-1 text-[11px] text-[var(--green-ink)] transition-colors hover:text-[var(--green-soft-ink)]"
           >
             <Icon name="plus" className="h-3 w-3" />
             ذخیرهٔ فیلتر فعلی
           </button>
         </div>
         {!saved.length ? (
-          <p className="text-[11px] leading-5 text-[#777]">ترکیب فیلتر موردعلاقه‌ات را ذخیره کن تا همیشه همین‌جا باشد.</p>
+          <p className="text-[11px] leading-5 text-[var(--faint)]">ترکیب فیلتر موردعلاقه‌ات را ذخیره کن تا همیشه همین‌جا باشد.</p>
         ) : (
           <ul className="space-y-1.5">
             {saved.map((preset) => (
@@ -277,7 +277,7 @@ function FilterPanel({ filters, setFilters, subjectsMeta, saved, onApplySaved, o
                   type="button"
                   onClick={() => onDeleteSaved(preset.id)}
                   aria-label={`حذف ${preset.name}`}
-                  className="cursor-pointer rounded-lg p-1.5 text-[#777] transition-colors hover:bg-[#e26d6d]/10 hover:text-[#ef9196]"
+                  className="cursor-pointer rounded-lg p-1.5 text-[var(--faint)] transition-colors hover:bg-[#e26d6d]/10 hover:text-[var(--red-ink)]"
                 >
                   <Icon name="trash" className="h-3.5 w-3.5" />
                 </button>
@@ -295,28 +295,28 @@ function QuestionResultCard({ entry, onSolve, onToggleBookmark }) {
   const { question, userStat, bookmarked } = entry;
   const subject = SUBJECTS.find((item) => item.id === question.subject);
   const statusBadge = !userStat
-    ? { label: 'جدید', className: 'bg-white/6 text-[#9a9a9a]' }
+    ? { label: 'جدید', className: 'bg-white/6 text-[var(--faint)]' }
     : userStat.lastCorrect
-      ? { label: 'حل‌شده ✓', className: 'bg-[#61D192]/12 text-[#61D192]' }
-      : { label: 'غلط‌زده', className: 'bg-[#e26d6d]/12 text-[#ef9196]' };
+      ? { label: 'حل‌شده ✓', className: 'bg-[#61D192]/12 text-[var(--green-ink)]' }
+      : { label: 'غلط‌زده', className: 'bg-[#e26d6d]/12 text-[var(--red-ink)]' };
 
   return (
-    <article className="group rounded-[1.75rem] border border-white/8 bg-[#242426] p-5 transition-colors hover:border-white/16">
+    <article className="group rounded-[1.75rem] border border-white/8 bg-[var(--surface)] p-5 transition-colors hover:border-white/16">
       <header className="flex flex-wrap items-center gap-2">
         <span className="flex items-center gap-1.5 text-xs font-bold" style={{ color: subject?.accent }}>
           <span className="h-2 w-2 rounded-full" style={{ background: subject?.accent }} aria-hidden="true" />
           {subject?.name}
         </span>
-        <span className="text-[11px] text-[#777]">{question.topicPath.join(' › ')}</span>
+        <span className="text-[11px] text-[var(--faint)]">{question.topicPath.join(' › ')}</span>
         <span className="ms-auto flex items-center gap-1.5">
           <span className={`rounded-full px-2.5 py-1 text-[10px] ${statusBadge.className}`}>{statusBadge.label}</span>
           <DifficultyBadge difficulty={question.difficulty} />
         </span>
       </header>
 
-      <p className="mt-3 line-clamp-2 text-[14px] leading-7 text-[#e3e3e3]">{question.stem}</p>
+      <p className="mt-3 line-clamp-2 text-[14px] leading-7 text-[var(--muted)]">{question.stem}</p>
 
-      <footer className="mt-4 flex flex-wrap items-center gap-2 text-[11px] text-[#8a8a8a]">
+      <footer className="mt-4 flex flex-wrap items-center gap-2 text-[11px] text-[var(--faint)]">
         <TypeBadge type={question.type} />
         <BankKindBadge kind={bankKindOf(question)} />
         <TrackBadge track={trackOf(question)} />
@@ -337,7 +337,7 @@ function QuestionResultCard({ entry, onSolve, onToggleBookmark }) {
             aria-pressed={bookmarked}
             aria-label={bookmarked ? 'حذف از نشان‌شده‌ها' : 'افزودن به نشان‌شده‌ها'}
             className={`cursor-pointer rounded-xl p-2 transition-colors ${
-              bookmarked ? 'bg-[#e26d6d]/15 text-[#ef9196]' : 'bg-white/5 text-[#777] hover:text-white'
+              bookmarked ? 'bg-[#e26d6d]/15 text-[var(--red-ink)]' : 'bg-white/5 text-[var(--faint)] hover:text-white'
             }`}
           >
             <Icon name={bookmarked ? 'heartFilled' : 'heart'} className="h-3.5 w-3.5" />
@@ -345,7 +345,7 @@ function QuestionResultCard({ entry, onSolve, onToggleBookmark }) {
           <button
             type="button"
             onClick={() => onSolve(question.id)}
-            className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#61D192]/12 px-3.5 py-2 text-[11px] font-bold text-[#61D192] transition-all hover:-translate-y-0.5 hover:bg-[#61D192]/20"
+            className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#61D192]/12 px-3.5 py-2 text-[11px] font-bold text-[var(--green-ink)] transition-all hover:-translate-y-0.5 hover:bg-[#61D192]/20"
           >
             <Icon name="play" className="h-3 w-3" />
             حل
@@ -510,14 +510,14 @@ export default function BankExplorer({
       {/* نوار ابزار */}
       <div className="mb-5 flex flex-wrap items-center gap-2">
         <div className="relative min-w-52 flex-1">
-          <Icon name="search" className="pointer-events-none absolute right-3.5 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-[#777]" />
+          <Icon name="search" className="pointer-events-none absolute right-3.5 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-[var(--faint)]" />
           <input
             type="search"
             value={filters.search}
             onChange={(event) => setFilters((prev) => ({ ...prev, search: event.target.value }))}
             placeholder="جستجو در متن سؤال، مبحث یا درس…"
             aria-label="جستجو در نتایج"
-            className="w-full rounded-2xl border border-white/8 bg-[#2a2a2a] py-3 pe-4 ps-11 text-sm text-white placeholder:text-[#666] focus:border-[#61D192]/50 focus:outline-none"
+            className="w-full rounded-2xl border border-white/8 bg-[var(--surface-soft)] py-3 pe-4 ps-11 text-sm text-white placeholder:text-[var(--ghost)] focus:border-[#61D192]/50 focus:outline-none"
           />
         </div>
         <button
@@ -527,7 +527,7 @@ export default function BankExplorer({
         >
           <Icon name="filter" className="h-4 w-4" />
           فیلترها
-          {hasAnyFilter && <span className="grid h-5 w-5 place-items-center rounded-full bg-[#61D192] text-[10px] font-bold text-[#12271a]">{toFa(activeFilterCount(filters))}</span>}
+          {hasAnyFilter && <span className="grid h-5 w-5 place-items-center rounded-full bg-[var(--green-vivid)] text-[10px] font-bold text-[#12271a]">{toFa(activeFilterCount(filters))}</span>}
         </button>
       </div>
 
@@ -543,7 +543,7 @@ export default function BankExplorer({
           <button
             type="button"
             onClick={() => setFilters(normalizeFilters({}))}
-            className="cursor-pointer rounded-full px-3 py-1.5 text-xs text-[#888] transition-colors hover:text-[#ef9196]"
+            className="cursor-pointer rounded-full px-3 py-1.5 text-xs text-[var(--faint)] transition-colors hover:text-[var(--red-ink)]"
           >
             حذف همهٔ فیلترها
           </button>
@@ -553,7 +553,7 @@ export default function BankExplorer({
       <div className="grid gap-6 lg:grid-cols-[276px_minmax(0,1fr)]">
         {/* سایدبار دسکتاپ */}
         <aside className="hidden lg:block">
-          <div className="sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto rounded-[1.75rem] border border-white/8 bg-[#242426] p-5" aria-label="پنل فیلتر">
+          <div className="sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto rounded-[1.75rem] border border-white/8 bg-[var(--surface)] p-5" aria-label="پنل فیلتر">
             {panel}
           </div>
         </aside>
@@ -561,7 +561,7 @@ export default function BankExplorer({
         {/* نتایج */}
         <div>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm text-[#9a9a9a]" role="status">
+            <p className="text-sm text-[var(--faint)]" role="status">
               {loading ? 'در حال جستجو…' : hasAnyFilter ? `${faNum(total)} سؤال با این ترکیب پیدا شد` : `${faNum(total)} سؤال در بانک`}
             </p>
             <div className="flex flex-wrap gap-2">
@@ -569,7 +569,7 @@ export default function BankExplorer({
                 type="button"
                 disabled={!total}
                 onClick={() => onStartPractice(filters)}
-                className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#61D192] px-4 py-2.5 text-xs font-bold text-[#12271a] transition-all hover:-translate-y-0.5 disabled:cursor-default disabled:opacity-40 disabled:translate-y-0"
+                className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[var(--green-vivid)] px-4 py-2.5 text-xs font-bold text-[#12271a] transition-all hover:-translate-y-0.5 disabled:cursor-default disabled:opacity-40 disabled:translate-y-0"
               >
                 <Icon name="play" className="h-3.5 w-3.5" />
                 تمرین از این نتایج
@@ -578,7 +578,7 @@ export default function BankExplorer({
                 type="button"
                 disabled={!total}
                 onClick={() => onStartExam(filters)}
-                className="flex cursor-pointer items-center gap-1.5 rounded-xl border border-[#937fcd]/40 bg-[#937fcd]/10 px-4 py-2.5 text-xs font-bold text-[#c9bdf0] transition-all hover:-translate-y-0.5 disabled:cursor-default disabled:opacity-40 disabled:translate-y-0"
+                className="flex cursor-pointer items-center gap-1.5 rounded-xl border border-[#937fcd]/40 bg-[#937fcd]/10 px-4 py-2.5 text-xs font-bold text-[var(--purple-soft-ink)] transition-all hover:-translate-y-0.5 disabled:cursor-default disabled:opacity-40 disabled:translate-y-0"
               >
                 <Icon name="timer" className="h-3.5 w-3.5" />
                 آزمون از این نتایج
@@ -601,7 +601,7 @@ export default function BankExplorer({
                 <button
                   type="button"
                   onClick={() => setFilters(normalizeFilters({}))}
-                  className="mt-3 cursor-pointer rounded-xl bg-[#61D192] px-5 py-2.5 text-sm font-bold text-[#12271a]"
+                  className="mt-3 cursor-pointer rounded-xl bg-[var(--green-vivid)] px-5 py-2.5 text-sm font-bold text-[#12271a]"
                 >
                   حذف همهٔ فیلترها
                 </button>
@@ -641,7 +641,7 @@ export default function BankExplorer({
           <div className="tb-drawer__scrim" onClick={() => setDrawerOpen(false)} aria-hidden="true" />
           <div className="tb-drawer" role="dialog" aria-label="فیلترها">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-sm [font-family:'Doran',Tahoma,sans-serif]">فیلترها</h3>
+              <h3 className="text-sm [font-family:'Doran','Vazir',Tahoma,sans-serif]">فیلترها</h3>
               <button type="button" onClick={() => setDrawerOpen(false)} aria-label="بستن" className="cursor-pointer rounded-lg bg-white/6 p-1.5">
                 <Icon name="x" className="h-4 w-4" />
               </button>
@@ -653,8 +653,8 @@ export default function BankExplorer({
 
       {/* مودال ذخیرهٔ فیلتر */}
       <Modal open={saveOpen} onClose={() => setSaveOpen(false)} title="ذخیرهٔ فیلتر">
-        <h3 className="text-base [font-family:'Doran',Tahoma,sans-serif]">ذخیره به‌عنوان «آزمون من»</h3>
-        <p className="mt-1.5 text-xs leading-6 text-[#8a8a8a]">
+        <h3 className="text-base [font-family:'Doran','Vazir',Tahoma,sans-serif]">ذخیره به‌عنوان «آزمون من»</h3>
+        <p className="mt-1.5 text-xs leading-6 text-[var(--faint)]">
           {faNum(total)} سؤال با این ترکیب پیدا می‌شود. اسم دلخواه بده تا در پنل فیلترها همیشه در دسترس باشد.
         </p>
         <input
@@ -662,7 +662,7 @@ export default function BankExplorer({
           value={presetName}
           onChange={(event) => setPresetName(event.target.value)}
           placeholder="مثلاً: فیزیو قلب سخت ۱۴۰۲-۱۴۰۵"
-          className="mt-4 w-full rounded-xl border border-white/10 bg-[#2a2a2a] px-3.5 py-2.5 text-sm text-white placeholder:text-[#666] focus:border-[#61D192]/50 focus:outline-none"
+          className="mt-4 w-full rounded-xl border border-white/10 bg-[var(--surface-soft)] px-3.5 py-2.5 text-sm text-white placeholder:text-[var(--ghost)] focus:border-[#61D192]/50 focus:outline-none"
           autoFocus
         />
         <div className="mt-4 flex gap-2">
@@ -670,7 +670,7 @@ export default function BankExplorer({
             type="button"
             onClick={handleSavePreset}
             disabled={!presetName.trim()}
-            className="flex-1 cursor-pointer rounded-xl bg-[#61D192] px-4 py-2.5 text-sm font-bold text-[#12271a] transition-transform hover:-translate-y-0.5 disabled:cursor-default disabled:opacity-50"
+            className="flex-1 cursor-pointer rounded-xl bg-[var(--green-vivid)] px-4 py-2.5 text-sm font-bold text-[#12271a] transition-transform hover:-translate-y-0.5 disabled:cursor-default disabled:opacity-50"
           >
             ذخیره
           </button>

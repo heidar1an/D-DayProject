@@ -21,7 +21,7 @@ function PathChip({ icon, accent = '#61D192', title, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="group flex shrink-0 cursor-pointer snap-start items-center gap-2 whitespace-nowrap rounded-full border border-white/8 bg-[#242426] px-4 py-2.5 text-[13px] text-[#ddd] transition-colors hover:border-white/20 hover:bg-[#2a2a2c] hover:text-white"
+      className="group flex shrink-0 cursor-pointer snap-start items-center gap-2 whitespace-nowrap rounded-full border border-white/8 bg-[var(--surface)] px-4 py-2.5 text-[13px] text-[var(--muted)] transition-colors hover:border-white/20 hover:bg-[var(--surface-soft)] hover:text-white"
     >
       <Icon name={icon} className="h-4 w-4 shrink-0" style={{ color: accent }} />
       {title}
@@ -38,7 +38,7 @@ function SubjectTile({ subject, onOpen }) {
       type="button"
       onClick={onOpen}
       aria-label={`${subject.title} — ${toFa(subject.questionCount)} تست در بانک`}
-      className="group relative flex aspect-square w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-[1.75rem] border border-white/8 bg-[#242426] px-3.5 py-5 text-center transition-all duration-200 hover:-translate-y-0.5 hover:border-white/16 hover:bg-[#2a2a2c]"
+      className="group relative flex aspect-square w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-[1.75rem] border border-white/8 bg-[var(--surface)] px-3.5 py-5 text-center transition-all duration-200 hover:-translate-y-0.5 hover:border-white/16 hover:bg-[var(--surface-soft)]"
     >
       {/* هالهٔ رنگی درس — همان حس کارت‌های درسنامه، بدون تصویر */}
       <span
@@ -48,13 +48,13 @@ function SubjectTile({ subject, onOpen }) {
       />
 
       <h3
-        className="relative text-2xl font-bold leading-9 [font-family:'Doran',Tahoma,sans-serif] md:text-3xl md:leading-10"
+        className="relative text-2xl font-bold leading-9 [font-family:'Doran','Vazir',Tahoma,sans-serif] md:text-3xl md:leading-10"
         style={{ color: subject.accent }}
       >
         {subject.title}
       </h3>
 
-      <p className="relative mt-2 text-xs text-[#9a9a9a] md:text-[13px]">
+      <p className="relative mt-2 text-xs text-[var(--faint)] md:text-[13px]">
         {toFa(subject.lessons)} درسنامه · {toFa(subject.questionCount)} تست
       </p>
 
@@ -76,7 +76,7 @@ function SubjectTile({ subject, onOpen }) {
 export function SubjectPicker({ overview, onPick }) {
   return (
     <div>
-      <p className="mb-4 text-sm text-[#9a9a9a]">درس را انتخاب کن تا سؤال‌های همان درس باز شود.</p>
+      <p className="mb-4 text-sm text-[var(--faint)]">درس را انتخاب کن تا سؤال‌های همان درس باز شود.</p>
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
         {overview.subjects.map((subject) => (
           <button
@@ -84,15 +84,15 @@ export function SubjectPicker({ overview, onPick }) {
             type="button"
             disabled={subject.questionCount === 0}
             onClick={() => onPick(subject.id)}
-            className={`group flex items-center justify-between gap-2 rounded-2xl border border-white/8 bg-[#242426] px-4 py-3.5 text-right transition-colors ${
-              subject.questionCount ? 'cursor-pointer hover:border-white/20 hover:bg-[#2a2a2c]' : 'cursor-default opacity-45'
+            className={`group flex items-center justify-between gap-2 rounded-2xl border border-white/8 bg-[var(--surface)] px-4 py-3.5 text-right transition-colors ${
+              subject.questionCount ? 'cursor-pointer hover:border-white/20 hover:bg-[var(--surface-soft)]' : 'cursor-default opacity-45'
             }`}
           >
             <span className="flex min-w-0 items-center gap-2.5">
               <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: subject.accent }} aria-hidden="true" />
-              <span className="truncate text-[13.5px] font-bold [font-family:'Doran',Tahoma,sans-serif]">{subject.name}</span>
+              <span className="truncate text-[13.5px] font-bold [font-family:'Doran','Vazir',Tahoma,sans-serif]">{subject.name}</span>
             </span>
-            <span className="shrink-0 text-[11px] text-[#888]">
+            <span className="shrink-0 text-[11px] text-[var(--faint)]">
               {subject.questionCount ? `${toFa(subject.questionCount)} سؤال` : 'به‌زودی'}
             </span>
           </button>
@@ -113,7 +113,7 @@ function ScopeOption({ icon, title, hint, count, accent, active, onClick }) {
       className={`flex cursor-pointer items-center gap-2.5 rounded-2xl border px-3.5 py-2.5 text-right transition-colors ${
         active
           ? 'text-white'
-          : 'border-white/8 bg-white/[0.02] text-[#bbb] hover:border-white/20 hover:bg-white/[0.06]'
+          : 'border-white/8 bg-white/[0.02] text-[var(--muted)] hover:border-white/20 hover:bg-white/[0.06]'
       }`}
       style={active ? { borderColor: `${accent}80`, background: `${accent}1f` } : undefined}
     >
@@ -125,8 +125,8 @@ function ScopeOption({ icon, title, hint, count, accent, active, onClick }) {
         <Icon name={icon} className="h-4 w-4" />
       </span>
       <span className="min-w-0 flex-1">
-        <strong className="block truncate text-[13px] [font-family:'Doran',Tahoma,sans-serif]">{title}</strong>
-        <span className="text-[10.5px] text-[#8a8a8a]">{count != null ? `${toFa(count)} سؤال` : hint}</span>
+        <strong className="block truncate text-[13px] [font-family:'Doran','Vazir',Tahoma,sans-serif]">{title}</strong>
+        <span className="text-[10.5px] text-[var(--faint)]">{count != null ? `${toFa(count)} سؤال` : hint}</span>
       </span>
       {active && <Icon name="check" className="h-4 w-4 shrink-0" style={{ color: accent }} />}
     </button>
@@ -137,8 +137,8 @@ function ScopeOption({ icon, title, hint, count, accent, active, onClick }) {
 function ScopeAxis({ label, icon, options, value, onPick, all }) {
   return (
     <div>
-      <div className="mb-2 flex items-center gap-1.5 text-[11.5px] text-[#8a8a8a]">
-        <Icon name={icon} className="h-3.5 w-3.5" style={{ color: '#61D192' }} />
+      <div className="mb-2 flex items-center gap-1.5 text-[11.5px] text-[var(--faint)]">
+        <Icon name={icon} className="h-3.5 w-3.5" style={{ color: 'var(--green-ink)' }} />
         {label}
       </div>
       <div className="grid gap-2 sm:grid-cols-3">
@@ -180,15 +180,15 @@ export function BankScopeSwitcher({ scope, onScopeChange, banks = [], tracks = [
   return (
     <section
       aria-label="انتخاب بانک تست"
-      className="dash-stagger rounded-[2rem] border border-white/8 bg-[#242426] p-5 md:p-6"
+      className="dash-stagger rounded-[2rem] border border-white/8 bg-[var(--surface)] p-5 md:p-6"
     >
       <header className="mb-4 flex flex-wrap items-end justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="text-base font-bold [font-family:'Doran',Tahoma,sans-serif] md:text-lg">
+          <h2 className="text-base font-bold [font-family:'Doran','Vazir',Tahoma,sans-serif] md:text-lg">
             بانک تست را انتخاب کن
           </h2>
-          <p className="mt-1.5 text-[12.5px] leading-6 text-[#8a8a8a]">
-            تست‌ها یا <b className="text-[#c9bdf0]">کشوری</b>‌اند یا <b className="text-[#7ee0ac]">تألیفی</b>؛ رشته هم
+          <p className="mt-1.5 text-[12.5px] leading-6 text-[var(--faint)]">
+            تست‌ها یا <b className="text-[var(--purple-soft-ink)]">کشوری</b>‌اند یا <b className="text-[var(--green-soft-ink)]">تألیفی</b>؛ رشته هم
             علوم پایهٔ پزشکی یا دندان‌پزشکی. این انتخاب، دامنهٔ همهٔ بخش‌های بانک را تعیین می‌کند.
           </p>
         </div>
@@ -355,13 +355,13 @@ export default function BankHome({ overview, scope, onScopeChange, onNavigate })
       {/* ── سربرگ: هم‌اندازه و هم‌فونت هیرو «درسنامهٔ جامع» — خط کوچک + خط بزرگ گرادیانی ── */}
       <header className="dash-stagger flex justify-center pt-[clamp(30px,5.5vh,60px)] pb-2.5 text-center">
         <div className="min-w-0 flex-1">
-          <h1 className="flex flex-col items-center gap-1.5 [font-family:'Doran',Tahoma,sans-serif]">
-            <span className="text-[clamp(1.4rem,2.8vw,2.1rem)] font-medium text-[#d6d6d6]">بانک تست</span>
-            <span className="text-[clamp(3rem,6.8vw,5.1rem)] font-extrabold leading-[1.3] text-[#61D192]">
+          <h1 className="flex flex-col items-center gap-1.5 [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+            <span className="text-[clamp(1.4rem,2.8vw,2.1rem)] font-medium text-[var(--muted)]">بانک تست</span>
+            <span className="text-[clamp(3rem,6.8vw,5.1rem)] font-extrabold leading-[1.3] text-[var(--green-ink)]">
               علوم پایه
             </span>
           </h1>
-          <p className="mx-auto mt-3.5 max-w-[620px] text-[clamp(0.95rem,1.4vw,1.1rem)] leading-[2] text-[#b9b9b9]">
+          <p className="mx-auto mt-3.5 max-w-[620px] text-[clamp(0.95rem,1.4vw,1.1rem)] leading-[2] text-[var(--muted)]">
             بانک تست کشوری و تألیفی علوم پایه — پزشکی و دندان‌پزشکی، به همراه ابزارهای نوین تحلیل
           </p>
         </div>

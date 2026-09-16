@@ -211,14 +211,14 @@ export default function ExamRoom({ userData, exam, attempt, questions, onFinishe
         {/* ── هدر آزمون ── */}
         <header className="sticky top-0 z-20 -mx-1 mb-6 flex flex-wrap items-center gap-3 bg-[#101012]/95 px-1 py-3 backdrop-blur">
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-bold text-white [font-family:'Doran',Tahoma,sans-serif]">{exam.title}</p>
-            <p className="mt-0.5 text-[11px] text-[#8a8a8a]">
+            <p className="truncate text-sm font-bold text-white [font-family:'Doran','Vazir',Tahoma,sans-serif]">{exam.title}</p>
+            <p className="mt-0.5 text-[11px] text-[var(--faint)]">
               سؤال {toFa(currentIndex + 1)} از {toFa(total)} • {faNum(stats.answered)} پاسخ داده‌شده
             </p>
           </div>
 
           {!isOnline && (
-            <span className="flex items-center gap-1.5 rounded-full bg-[#e0b45c]/12 px-3 py-2 text-[11px] text-[#e0b45c]">
+            <span className="flex items-center gap-1.5 rounded-full bg-[#e0b45c]/12 px-3 py-2 text-[11px] text-[var(--gold-ink)]">
               <Icon name="wifi" className="h-3.5 w-3.5" />
               اتصال قطع است — پاسخ‌ها در همین دستگاه ذخیره می‌شود
             </span>
@@ -232,7 +232,7 @@ export default function ExamRoom({ userData, exam, attempt, questions, onFinishe
           <button
             type="button"
             onClick={() => setShowExitModal(true)}
-            className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-white/[0.06] px-3.5 py-2.5 text-xs text-[#aaa] transition-colors hover:bg-white/[0.1] hover:text-white"
+            className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-white/[0.06] px-3.5 py-2.5 text-xs text-[var(--muted)] transition-colors hover:bg-white/[0.1] hover:text-white"
           >
             <Icon name="logout" className="h-4 w-4" />
             <span className="hidden sm:inline">خروج</span>
@@ -247,11 +247,11 @@ export default function ExamRoom({ userData, exam, attempt, questions, onFinishe
           {/* ── ستون سؤال ── */}
           <div>
             <div className="exm-question" key={currentQuestion.id}>
-              <div className="mb-4 flex flex-wrap items-center gap-2 text-[11px] text-[#8a8a8a]">
+              <div className="mb-4 flex flex-wrap items-center gap-2 text-[11px] text-[var(--faint)]">
                 <span className="rounded-full bg-white/[0.05] px-2.5 py-1">{currentQuestion.subject}</span>
                 <span className="rounded-full bg-white/[0.05] px-2.5 py-1">{currentQuestion.topic}</span>
                 {isMarked && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-[#e0b45c]/12 px-2.5 py-1 text-[#e0b45c]">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[#e0b45c]/12 px-2.5 py-1 text-[var(--gold-ink)]">
                     <Icon name="flag" className="h-3 w-3" />
                     برای مرور علامت خورده
                   </span>
@@ -283,7 +283,7 @@ export default function ExamRoom({ userData, exam, attempt, questions, onFinishe
                 type="button"
                 onClick={() => go(currentIndex - 1)}
                 disabled={currentIndex === 0}
-                className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-white/[0.06] px-4 py-2.5 text-xs text-[#ccc] transition-colors hover:bg-white/[0.1] disabled:cursor-default disabled:opacity-35"
+                className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-white/[0.06] px-4 py-2.5 text-xs text-[var(--muted)] transition-colors hover:bg-white/[0.1] disabled:cursor-default disabled:opacity-35"
               >
                 <Icon name="back" className="h-4 w-4" />
                 سؤال قبلی
@@ -292,7 +292,7 @@ export default function ExamRoom({ userData, exam, attempt, questions, onFinishe
                 type="button"
                 onClick={() => go(currentIndex + 1)}
                 disabled={currentIndex === total - 1}
-                className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-white/[0.06] px-4 py-2.5 text-xs text-[#ccc] transition-colors hover:bg-white/[0.1] disabled:cursor-default disabled:opacity-35"
+                className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-white/[0.06] px-4 py-2.5 text-xs text-[var(--muted)] transition-colors hover:bg-white/[0.1] disabled:cursor-default disabled:opacity-35"
               >
                 سؤال بعدی
                 <Icon name="back" className="h-4 w-4 rotate-180" />
@@ -303,7 +303,7 @@ export default function ExamRoom({ userData, exam, attempt, questions, onFinishe
                   onClick={toggleMark}
                   aria-pressed={isMarked}
                   className={`flex cursor-pointer items-center gap-1.5 rounded-xl px-4 py-2.5 text-xs transition-colors ${
-                    isMarked ? 'bg-[#e0b45c]/15 text-[#e0b45c]' : 'bg-white/[0.06] text-[#ccc] hover:bg-white/[0.1]'
+                    isMarked ? 'bg-[#e0b45c]/15 text-[var(--gold-ink)]' : 'bg-white/[0.06] text-[var(--muted)] hover:bg-white/[0.1]'
                   }`}
                 >
                   <Icon name="flag" className="h-4 w-4" />
@@ -313,7 +313,7 @@ export default function ExamRoom({ userData, exam, attempt, questions, onFinishe
               <button
                 type="button"
                 onClick={() => setShowSubmitModal(true)}
-                className="mr-auto flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#61D192] px-5 py-2.5 text-xs font-bold text-[#0d1f16] transition-colors hover:bg-[#74dd9f]"
+                className="mr-auto flex cursor-pointer items-center gap-1.5 rounded-xl bg-[var(--green-vivid)] px-5 py-2.5 text-xs font-bold text-[#0d1f16] transition-colors hover:bg-[#74dd9f]"
               >
                 <Icon name="check" className="h-4 w-4" />
                 پایان و ثبت آزمون
@@ -322,13 +322,13 @@ export default function ExamRoom({ userData, exam, attempt, questions, onFinishe
           </div>
 
           {/* ── Navigator دسکتاپ ── */}
-          <aside className="hidden rounded-[1.6rem] border border-white/[0.07] bg-[#1a1a1d] p-4 lg:sticky lg:top-24 lg:block">
-            <h2 className="mb-3 flex items-center gap-2 text-xs font-bold text-white [font-family:'Doran',Tahoma,sans-serif]">
-              <Icon name="grid" className="h-4 w-4 text-[#937fcd]" />
+          <aside className="hidden rounded-[1.6rem] border border-white/[0.07] bg-[var(--background)] p-4 lg:sticky lg:top-24 lg:block">
+            <h2 className="mb-3 flex items-center gap-2 text-xs font-bold text-white [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+              <Icon name="grid" className="h-4 w-4 text-[var(--purple-ink)]" />
               نقشهٔ سؤال‌ها
             </h2>
             {navigatorGrid}
-            <ul className="mt-4 space-y-2 border-t border-white/[0.07] pt-3 text-[10.5px] text-[#8a8a8a]">
+            <ul className="mt-4 space-y-2 border-t border-white/[0.07] pt-3 text-[10.5px] text-[var(--faint)]">
               <li className="flex items-center gap-2">
                 <span className="h-3 w-3 rounded bg-[#61D192]/50" aria-hidden="true" />
                 پاسخ داده‌شده ({faNum(stats.answered)})
@@ -369,7 +369,7 @@ export default function ExamRoom({ userData, exam, attempt, questions, onFinishe
         <button
           type="button"
           onClick={() => setShowNavigator(true)}
-          className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-white/[0.07] py-2.5 text-xs text-[#ccc]"
+          className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-white/[0.07] py-2.5 text-xs text-[var(--muted)]"
         >
           <Icon name="grid" className="h-4 w-4" />
           نقشهٔ سؤال‌ها ({faNum(stats.answered)}/{toFa(total)})
@@ -377,7 +377,7 @@ export default function ExamRoom({ userData, exam, attempt, questions, onFinishe
         <button
           type="button"
           onClick={() => setShowSubmitModal(true)}
-          className="rounded-xl bg-[#61D192] px-4 py-2.5 text-xs font-bold text-[#0d1f16]"
+          className="rounded-xl bg-[var(--green-vivid)] px-4 py-2.5 text-xs font-bold text-[#0d1f16]"
         >
           ثبت
         </button>
@@ -389,13 +389,13 @@ export default function ExamRoom({ userData, exam, attempt, questions, onFinishe
           <div className="exm-drawer" role="dialog" aria-label="نقشهٔ سؤال‌ها">
             <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-white/15" aria-hidden="true" />
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-sm font-bold text-white [font-family:'Doran',Tahoma,sans-serif]">نقشهٔ سؤال‌ها</h2>
-              <button type="button" onClick={() => setShowNavigator(false)} className="cursor-pointer text-xs text-[#8a8a8a]">
+              <h2 className="text-sm font-bold text-white [font-family:'Doran','Vazir',Tahoma,sans-serif]">نقشهٔ سؤال‌ها</h2>
+              <button type="button" onClick={() => setShowNavigator(false)} className="cursor-pointer text-xs text-[var(--faint)]">
                 بستن
               </button>
             </div>
             {navigatorGrid}
-            <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-[10.5px] text-[#8a8a8a]">
+            <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-[10.5px] text-[var(--faint)]">
               <li className="flex items-center gap-1.5">
                 <span className="h-3 w-3 rounded bg-[#61D192]/50" aria-hidden="true" />
                 پاسخ داده‌شده
@@ -417,26 +417,26 @@ export default function ExamRoom({ userData, exam, attempt, questions, onFinishe
       {showSubmitModal && (
         <div className="exm-modal__scrim" role="dialog" aria-modal="true" aria-label="ثبت نهایی آزمون">
           <div className="exm-modal space-y-5">
-            <h2 className="text-lg text-white [font-family:'Doran',Tahoma,sans-serif]">
+            <h2 className="text-lg text-white [font-family:'Doran','Vazir',Tahoma,sans-serif]">
               آیا از ثبت نهایی آزمون اطمینان دارید؟
             </h2>
             <div className="space-y-2.5 rounded-2xl bg-black/30 p-4 text-sm">
-              <div className="flex items-center justify-between text-[#ccc]">
+              <div className="flex items-center justify-between text-[var(--muted)]">
                 <span>پاسخ داده‌شده</span>
-                <strong className="text-[#61D192]">{faNum(stats.answered)} از {toFa(total)}</strong>
+                <strong className="text-[var(--green-ink)]">{faNum(stats.answered)} از {toFa(total)}</strong>
               </div>
-              <div className="flex items-center justify-between text-[#ccc]">
+              <div className="flex items-center justify-between text-[var(--muted)]">
                 <span>بی‌پاسخ</span>
                 <strong>{faNum(stats.unanswered)}</strong>
               </div>
               {stats.marked > 0 && (
-                <div className="flex items-center justify-between text-[#ccc]">
+                <div className="flex items-center justify-between text-[var(--muted)]">
                   <span>علامت‌گذاری‌شده برای مرور</span>
-                  <strong className="text-[#e0b45c]">{faNum(stats.marked)}</strong>
+                  <strong className="text-[var(--gold-ink)]">{faNum(stats.marked)}</strong>
                 </div>
               )}
               {exam.rules?.negativeMarking < 0 && stats.unanswered > 0 && (
-                <p className="border-t border-white/[0.07] pt-2.5 text-[11.5px] leading-6 text-[#9a9a9a]">
+                <p className="border-t border-white/[0.07] pt-2.5 text-[11.5px] leading-6 text-[var(--faint)]">
                   سؤال‌های بی‌پاسخ نمرهٔ منفی ندارند؛ پاسخ غلط {faNum(Math.abs(exam.rules.negativeMarking))} نمرهٔ منفی دارد.
                 </p>
               )}
@@ -446,14 +446,14 @@ export default function ExamRoom({ userData, exam, attempt, questions, onFinishe
                 type="button"
                 disabled={submitting}
                 onClick={handleSubmit}
-                className="flex-1 cursor-pointer rounded-2xl bg-[#61D192] py-3 text-sm font-bold text-[#0d1f16] transition-colors hover:bg-[#74dd9f] disabled:opacity-50"
+                className="flex-1 cursor-pointer rounded-2xl bg-[var(--green-vivid)] py-3 text-sm font-bold text-[#0d1f16] transition-colors hover:bg-[#74dd9f] disabled:opacity-50"
               >
                 {submitting ? 'در حال ثبت…' : 'ثبت نهایی'}
               </button>
               <button
                 type="button"
                 onClick={() => setShowSubmitModal(false)}
-                className="cursor-pointer rounded-2xl bg-white/[0.06] px-5 py-3 text-sm text-[#aaa] transition-colors hover:bg-white/[0.1] hover:text-white"
+                className="cursor-pointer rounded-2xl bg-white/[0.06] px-5 py-3 text-sm text-[var(--muted)] transition-colors hover:bg-white/[0.1] hover:text-white"
               >
                 بازگشت به آزمون
               </button>
@@ -466,22 +466,22 @@ export default function ExamRoom({ userData, exam, attempt, questions, onFinishe
       {showExitModal && (
         <div className="exm-modal__scrim" role="dialog" aria-modal="true" aria-label="خروج از محیط آزمون">
           <div className="exm-modal space-y-4">
-            <h2 className="text-lg text-white [font-family:'Doran',Tahoma,sans-serif]">از محیط آزمون خارج می‌شوی؟</h2>
-            <p className="text-[13px] leading-7 text-[#b5b5b5]">
+            <h2 className="text-lg text-white [font-family:'Doran','Vazir',Tahoma,sans-serif]">از محیط آزمون خارج می‌شوی؟</h2>
+            <p className="text-[13px] leading-7 text-[var(--muted)]">
               زمان آزمون ادامه دارد و پاسخ‌هایت تا این لحظه ذخیره شده است؛ از همان‌جا که رفتی می‌توانی ادامه بدهی.
             </p>
             <div className="flex gap-3">
               <button
                 type="button"
                 onClick={onExit}
-                className="flex-1 cursor-pointer rounded-2xl bg-[#e26d6d] py-3 text-sm font-bold text-[#2a1010] transition-colors hover:bg-[#ea7f7f]"
+                className="flex-1 cursor-pointer rounded-2xl bg-[var(--red)] py-3 text-sm font-bold text-[#2a1010] transition-colors hover:bg-[var(--red)]"
               >
                 خروج و ادامه بعداً
               </button>
               <button
                 type="button"
                 onClick={() => setShowExitModal(false)}
-                className="cursor-pointer rounded-2xl bg-white/[0.06] px-5 py-3 text-sm text-[#aaa] transition-colors hover:bg-white/[0.1] hover:text-white"
+                className="cursor-pointer rounded-2xl bg-white/[0.06] px-5 py-3 text-sm text-[var(--muted)] transition-colors hover:bg-white/[0.1] hover:text-white"
               >
                 ماندن در آزمون
               </button>

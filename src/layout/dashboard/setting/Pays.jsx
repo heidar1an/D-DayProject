@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
 
 const headingClass =
-  "text-lg md:text-xl [font-family:'Doran',Tahoma,sans-serif]";
+  "text-lg md:text-xl [font-family:'Doran','Vazir',Tahoma,sans-serif]";
 
 const tableHeadClass =
-  "pb-3 text-xs font-normal text-[#b99a86] [font-family:'Doran',Tahoma,sans-serif]";
+  "pb-3 text-xs font-normal text-[var(--copper-ink)] [font-family:'Doran','Vazir',Tahoma,sans-serif]";
 
 // ساختار هر تراکنش: { id, title, amount, date, reference, status }
 // status: 'paid' | 'unpaid' | 'pending'
@@ -46,7 +46,7 @@ function ReceiptIcon() {
       viewBox="0 0 24 24"
       className="h-6 w-6"
       fill="none"
-      stroke="#8a8a8a"
+      stroke="var(--faint)"
       strokeWidth="1.5"
       aria-hidden="true"
     >
@@ -59,10 +59,10 @@ function ReceiptIcon() {
 function EmptyState({ message }) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-3 rounded-3xl border border-dashed border-white/10 px-6 py-10 text-center">
-      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#1d1d1d]">
+      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--background)]">
         <ReceiptIcon />
       </span>
-      <p className="max-w-[220px] text-sm leading-6 text-[#999]">{message}</p>
+      <p className="max-w-[220px] text-sm leading-6 text-[var(--faint)]">{message}</p>
     </div>
   );
 }
@@ -88,14 +88,14 @@ function TransactionsTable({ items, actionLabel }) {
             >
               <td className="py-3 pl-3">{item.title}</td>
               <td className="whitespace-nowrap py-3">{formatAmount(item.amount)}</td>
-              <td className="whitespace-nowrap py-3 text-[#bbb]">{item.date}</td>
-              <td className="py-3 text-[#bbb]" dir="ltr">
+              <td className="whitespace-nowrap py-3 text-[var(--muted)]">{item.date}</td>
+              <td className="py-3 text-[var(--muted)]" dir="ltr">
                 {item.reference}
               </td>
               <td className="py-3">
                 <button
                   type="button"
-                  className="rounded-full border border-[#b99a86]/40 px-4 py-1.5 text-xs text-[#b99a86] transition-colors duration-200 hover:bg-[#b99a86] hover:text-white"
+                  className="rounded-full border border-[#b99a86]/40 px-4 py-1.5 text-xs text-[var(--copper-ink)] transition-colors duration-200 hover:bg-[var(--copper)] hover:text-white"
                 >
                   {actionLabel}
                 </button>
@@ -123,7 +123,7 @@ export default function Pays({ transactions = [] }) {
     <section
       dir="rtl"
       aria-label="تراکنش ها"
-      className="dash-stagger mx-auto w-[var(--content-width)] py-8 text-white md:py-10 [font-family:'Pinar',Tahoma,sans-serif]"
+      className="dash-stagger mx-auto w-[var(--content-width)] py-8 text-white md:py-10 [font-family:'Pinar','Vazir',Tahoma,sans-serif]"
     >
       <div className="grid gap-5 md:grid-cols-3 md:gap-6">
         {transactionGroups.map((group) => {
@@ -132,7 +132,7 @@ export default function Pays({ transactions = [] }) {
           return (
             <article
               key={group.id}
-              className="flex min-h-[300px] flex-col rounded-[2.5rem] bg-[#282828] p-6 md:p-8"
+              className="flex min-h-[300px] flex-col rounded-[2.5rem] bg-[var(--surface-soft)] p-6 md:p-8"
             >
               <header className="flex items-center gap-3">
                 <span
@@ -141,7 +141,7 @@ export default function Pays({ transactions = [] }) {
                   aria-hidden="true"
                 />
                 <h3 className={`flex-1 ${headingClass}`}>{group.label}</h3>
-                <span className="whitespace-nowrap rounded-full bg-[#1d1d1d] px-3 py-1 text-xs text-[#999]">
+                <span className="whitespace-nowrap rounded-full bg-[var(--background)] px-3 py-1 text-xs text-[var(--faint)]">
                   {toPersianCount(items.length)} تراکنش
                 </span>
               </header>

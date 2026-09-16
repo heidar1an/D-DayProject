@@ -400,7 +400,7 @@ export default function TestBankLayer({ userData, onBack }) {
     <section
       dir="rtl"
       aria-label="بانک تست علوم پایه"
-      className="mx-auto w-[var(--content-width)] py-8 text-white [font-family:'Pinar',Tahoma,sans-serif] md:py-10"
+      className="mx-auto w-[var(--content-width)] py-8 text-white [font-family:'Pinar','Vazir',Tahoma,sans-serif] md:py-10"
     >
       {/* سربرگ لایه */}
       <header className="mb-6 flex items-center justify-between gap-3">
@@ -409,7 +409,7 @@ export default function TestBankLayer({ userData, onBack }) {
             type="button"
             onClick={handleBack}
             aria-label={view.name === 'live' ? 'خروج از محیط حل' : 'بازگشت'}
-            className={`flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#282828] py-2.5 text-xs text-[#aaa] transition-colors hover:bg-[#333] hover:text-white ${
+            className={`flex cursor-pointer items-center gap-1.5 rounded-xl bg-[var(--surface-soft)] py-2.5 text-xs text-[var(--muted)] transition-colors hover:bg-[var(--surface-strong)] hover:text-white ${
               view.name === 'live' ? 'px-2.5' : 'px-3.5'
             }`}
           >
@@ -421,7 +421,7 @@ export default function TestBankLayer({ userData, onBack }) {
           <button
             type="button"
             onClick={onBack}
-            className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#282828] px-3.5 py-2.5 text-xs text-[#aaa] transition-colors hover:bg-[#333] hover:text-white"
+            className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[var(--surface-soft)] px-3.5 py-2.5 text-xs text-[var(--muted)] transition-colors hover:bg-[var(--surface-strong)] hover:text-white"
           >
             <Icon name="back" className="h-3.5 w-3.5" />
             بازگشت به تست
@@ -430,8 +430,8 @@ export default function TestBankLayer({ userData, onBack }) {
         {/* سمت راست: برچسب نما (جز خانه/محیط حل/مباحث درس) + دامنهٔ فعال */}
         <span className="flex items-center gap-2.5">
           {!['home', 'live', 'subject'].includes(view.name) && (
-            <span className="flex items-center gap-1.5 text-xs text-[#8a8a8a]">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#61D192]" aria-hidden="true" />
+            <span className="flex items-center gap-1.5 text-xs text-[var(--faint)]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--green-vivid)]" aria-hidden="true" />
               {VIEW_LABELS[view.name] ?? 'بانک تست'}
             </span>
           )}
@@ -453,7 +453,7 @@ export default function TestBankLayer({ userData, onBack }) {
       )}
 
       {!busy && error && (
-        <div className="mb-4 flex items-center gap-2 rounded-2xl bg-[#e26d6d]/10 px-4 py-3 text-sm text-[#e26d6d]" role="alert">
+        <div className="mb-4 flex items-center gap-2 rounded-2xl bg-[#e26d6d]/10 px-4 py-3 text-sm text-[var(--red-ink)]" role="alert">
           <Icon name="alert" className="h-4 w-4" />
           {error}
         </div>
@@ -466,7 +466,7 @@ export default function TestBankLayer({ userData, onBack }) {
       )}
 
       {!busy && view.name === 'subjects' && (
-        <div className="dashboard-layer-reveal rounded-[2rem] border border-white/8 bg-[#242426] p-5 md:p-7">
+        <div className="dashboard-layer-reveal rounded-[2rem] border border-white/8 bg-[var(--surface)] p-5 md:p-7">
           <SubjectPicker overview={overview} onPick={(subjectId) => go('browse', { filters: { subjectIds: [subjectId] } })} />
         </div>
       )}
@@ -604,7 +604,7 @@ export default function TestBankLayer({ userData, onBack }) {
           title="کارنامه‌ای برای نمایش نیست"
           note="این کارنامه پیدا نشد یا حذف شده است."
           action={
-            <button type="button" onClick={() => go('home')} className="mt-3 cursor-pointer rounded-xl bg-[#61D192] px-5 py-2.5 text-sm font-bold text-[#12271a]">
+            <button type="button" onClick={() => go('home')} className="mt-3 cursor-pointer rounded-xl bg-[var(--green-vivid)] px-5 py-2.5 text-sm font-bold text-[#12271a]">
               بازگشت به خانهٔ بانک
             </button>
           }

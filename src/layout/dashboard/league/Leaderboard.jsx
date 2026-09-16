@@ -48,15 +48,15 @@ export function PodiumCard({ entry, place, metric }) {
     >
       <RankChip rank={place} size="lg" />
       <UserAvatar avatar={avatarOf(entry)} size={isCenter ? 62 : 48} />
-      <strong className="mt-1 line-clamp-1 text-sm [font-family:'Doran',Tahoma,sans-serif]">
+      <strong className="mt-1 line-clamp-1 text-sm [font-family:'Doran','Vazir',Tahoma,sans-serif]">
         {entry.name}
       </strong>
       {!metric && (
-        <span className="line-clamp-1 text-[11px] text-[#8a8a8a]">{entry.university}</span>
+        <span className="line-clamp-1 text-[11px] text-[var(--faint)]">{entry.university}</span>
       )}
       <span className="inline-flex items-center gap-1.5 text-sm text-white/90">
         {metric?.icon === 'users' ? (
-          <Icon name="users" className="h-4 w-4 text-[#77b787]" />
+          <Icon name="users" className="h-4 w-4 text-[var(--green-ink)]" />
         ) : (
           <IconHeart className="h-4 w-4" />
         )}
@@ -73,23 +73,23 @@ export function LeaderRow({ entry, metric }) {
       className={`flex items-center gap-3 rounded-2xl border px-4 py-3 transition-colors ${
         entry.isYou
           ? 'border-[#e26d6d]/40 bg-[#e26d6d]/[0.08]'
-          : 'border-white/6 bg-[#2a2a2a] hover:bg-[#303030]'
+          : 'border-white/6 bg-[var(--surface-soft)] hover:bg-[var(--surface-soft)]'
       }`}
     >
       <RankChip rank={entry.rank} />
       <UserAvatar avatar={avatarOf(entry)} size={40} isYou={entry.isYou} />
       <span className="min-w-0 flex-1">
-        <strong className="block truncate text-sm [font-family:'Doran',Tahoma,sans-serif]">
+        <strong className="block truncate text-sm [font-family:'Doran','Vazir',Tahoma,sans-serif]">
           {entry.name}
-          {entry.isYou && <span className="mr-2 text-xs font-normal text-[#ef9196]">(شما)</span>}
+          {entry.isYou && <span className="mr-2 text-xs font-normal text-[var(--red-ink)]">(شما)</span>}
         </strong>
         {entry.university && (
-          <span className="block truncate text-[11px] text-[#8a8a8a]">{entry.university}</span>
+          <span className="block truncate text-[11px] text-[var(--faint)]">{entry.university}</span>
         )}
       </span>
       <span className="flex shrink-0 items-center gap-1.5 text-sm text-white/90">
         {metric?.icon === 'users' ? (
-          <Icon name="users" className="h-4 w-4 text-[#77b787]" />
+          <Icon name="users" className="h-4 w-4 text-[var(--green-ink)]" />
         ) : (
           <IconHeart className="h-4 w-4" />
         )}
@@ -167,9 +167,9 @@ export default function Leaderboard({ me }) {
         : { rank: data?.meRank, label: ME_UNIVERSITY, value: 1187420 };
 
   return (
-    <section aria-label="جدول رتبه‌بندی لیگ" className="rounded-[2.5rem] bg-[#282828] p-5 md:p-8">
+    <section aria-label="جدول رتبه‌بندی لیگ" className="rounded-[2.5rem] bg-[var(--surface-soft)] p-5 md:p-8">
       <header className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-lg text-white md:text-xl [font-family:'Doran',Tahoma,sans-serif]">
+        <h2 className="text-lg text-white md:text-xl [font-family:'Doran','Vazir',Tahoma,sans-serif]">
           جدول رتبه‌بندی
         </h2>
 
@@ -181,8 +181,8 @@ export default function Leaderboard({ me }) {
               role="tab"
               aria-selected={scope === item.id}
               onClick={() => setScope(item.id)}
-              className={`shrink-0 cursor-pointer rounded-full px-4 py-2 text-sm transition-colors [font-family:'Doran',Tahoma,sans-serif] ${
-                scope === item.id ? 'bg-[#937fcd] text-white' : 'text-[#aaa] hover:text-white'
+              className={`shrink-0 cursor-pointer rounded-full px-4 py-2 text-sm transition-colors [font-family:'Doran','Vazir',Tahoma,sans-serif] ${
+                scope === item.id ? 'bg-[var(--purple-bright)] text-white' : 'text-[var(--muted)] hover:text-white'
               }`}
             >
               {item.label}
@@ -193,7 +193,7 @@ export default function Leaderboard({ me }) {
 
       {scope === 'universities' && (
         <div className="mb-5 flex flex-wrap items-center gap-2">
-          <span className="text-xs text-[#8a8a8a]">معیار رتبه‌بندی:</span>
+          <span className="text-xs text-[var(--faint)]">معیار رتبه‌بندی:</span>
           {METRICS.map((item) => (
             <button
               key={item.id}
@@ -202,8 +202,8 @@ export default function Leaderboard({ me }) {
               onClick={() => setMetric(item.id)}
               className={`flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 text-xs transition-colors ${
                 metric === item.id
-                  ? 'bg-[#937fcd]/25 text-[#c9bdf0]'
-                  : 'bg-white/5 text-[#aaa] hover:bg-white/10'
+                  ? 'bg-[#937fcd]/25 text-[var(--purple-soft-ink)]'
+                  : 'bg-white/5 text-[var(--muted)] hover:bg-white/10'
               }`}
             >
               {item.icon === 'users' ? (
@@ -247,7 +247,7 @@ export default function Leaderboard({ me }) {
             <button
               type="button"
               onClick={loadMore}
-              className="mt-4 w-full cursor-pointer rounded-2xl border border-white/10 bg-white/[0.03] py-3 text-sm text-[#aaa] transition-colors hover:bg-white/[0.07] hover:text-white"
+              className="mt-4 w-full cursor-pointer rounded-2xl border border-white/10 bg-white/[0.03] py-3 text-sm text-[var(--muted)] transition-colors hover:bg-white/[0.07] hover:text-white"
             >
               نمایش ۱۰ نفر بعدی
             </button>
@@ -258,12 +258,12 @@ export default function Leaderboard({ me }) {
       {/* نوار چسبان کاربر — همیشه جایگاه خودش را می‌بیند */}
       {!loading && meSticky.rank && (
         <div className="sticky bottom-3 z-10 mt-4">
-          <div className="rounded-2xl border border-[#e26d6d]/35 bg-[#1e1a1a]/95 p-3 shadow-[0_18px_40px_-18px_rgba(0,0,0,0.9)] backdrop-blur">
+          <div className="rounded-2xl border border-[#e26d6d]/35 bg-[#1e1a1a]/95 p-3 shadow-[0_18px_40px_-18px_rgb(var(--shadow-rgb) / 0.9)] backdrop-blur">
             <div className="flex items-center gap-3">
               <RankChip rank={meSticky.rank} />
-              <span className="flex-1 text-sm [font-family:'Doran',Tahoma,sans-serif]">
+              <span className="flex-1 text-sm [font-family:'Doran','Vazir',Tahoma,sans-serif]">
                 {meSticky.label}
-                <span className="mr-2 text-xs font-normal text-[#8a8a8a]">جایگاه تو</span>
+                <span className="mr-2 text-xs font-normal text-[var(--faint)]">جایگاه تو</span>
               </span>
               {meSticky.value && (
                 <span className="flex items-center gap-1.5 text-sm text-white">
@@ -274,8 +274,8 @@ export default function Leaderboard({ me }) {
             </div>
             {meSticky.gap > 0 && (
               <div className="mt-2.5 flex items-center gap-3">
-                <ProgressBar value={meSticky.value ?? 0} max={meSticky.value + meSticky.gap} color="#e26d6d" height={6} className="flex-1" />
-                <span className="shrink-0 text-xs text-[#ef9196]">
+                <ProgressBar value={meSticky.value ?? 0} max={meSticky.value + meSticky.gap} color="var(--red-ink)" height={6} className="flex-1" />
+                <span className="shrink-0 text-xs text-[var(--red-ink)]">
                   {faNum(meSticky.gap)} قلب تا رتبه {toFa(meSticky.gapRank)}
                 </span>
               </div>

@@ -277,7 +277,7 @@ export default function InternationalExamsLayer({ userData, onBack }) {
     <section
       dir="rtl"
       aria-label="آزمون‌های بین‌الملل"
-      className="intl-layer mx-auto w-[var(--content-width)] py-8 text-white md:py-10 [font-family:'Pinar',Tahoma,sans-serif]"
+      className="intl-layer mx-auto w-[var(--content-width)] py-8 text-white md:py-10 [font-family:'Pinar','Vazir',Tahoma,sans-serif]"
     >
       {/* سربرگ لایه با دکمهٔ بازگشت */}
       <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
@@ -286,21 +286,21 @@ export default function InternationalExamsLayer({ userData, onBack }) {
             <button
               type="button"
               onClick={() => (backTarget === 'home' ? go({ name: 'home' }) : onBack?.())}
-              className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#282828] px-3.5 py-2.5 text-xs transition-colors hover:bg-[#333]"
+              className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[var(--surface-soft)] px-3.5 py-2.5 text-xs transition-colors hover:bg-[var(--surface-strong)]"
             >
               <Icon name="back" className="h-3.5 w-3.5" />
               بازگشت
             </button>
           )}
           {view.name === 'lab' && (
-            <span className="text-xs text-[#8a8a8a]">محیط حل سؤال — پیشرفتت همان لحظه ذخیره می‌شود</span>
+            <span className="text-xs text-[var(--faint)]">محیط حل سؤال — پیشرفتت همان لحظه ذخیره می‌شود</span>
           )}
         </div>
         {view.name === 'home' && (
           <button
             type="button"
             onClick={onBack}
-            className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#282828] px-3.5 py-2.5 text-xs text-[#aaa] transition-colors hover:bg-[#333] hover:text-white"
+            className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[var(--surface-soft)] px-3.5 py-2.5 text-xs text-[var(--muted)] transition-colors hover:bg-[var(--surface-strong)] hover:text-white"
           >
             <Icon name="back" className="h-3.5 w-3.5" />
             بازگشت به تست
@@ -317,8 +317,8 @@ export default function InternationalExamsLayer({ userData, onBack }) {
               type="button"
               aria-current={view.name === item.id ? 'page' : undefined}
               onClick={() => go({ name: item.id })}
-              className={`flex shrink-0 cursor-pointer items-center gap-2 rounded-full px-4 py-2.5 text-sm transition-colors [font-family:'Doran',Tahoma,sans-serif] ${
-                view.name === item.id ? 'bg-[#937fcd] text-white' : 'text-[#aaa] hover:bg-white/5 hover:text-white'
+              className={`flex shrink-0 cursor-pointer items-center gap-2 rounded-full px-4 py-2.5 text-sm transition-colors [font-family:'Doran','Vazir',Tahoma,sans-serif] ${
+                view.name === item.id ? 'bg-[var(--purple-bright)] text-white' : 'text-[var(--muted)] hover:bg-white/5 hover:text-white'
               }`}
             >
               <Icon name={item.icon} className="h-4 w-4" />
@@ -384,7 +384,7 @@ export default function InternationalExamsLayer({ userData, onBack }) {
 
       {/* پیشرفت کلی ریز در سربرگ لایه */}
       {view.name === 'home' && overview && (
-        <p className="mt-8 text-center text-[11px] text-[#666]">
+        <p className="mt-8 text-center text-[11px] text-[var(--ghost)]">
           تا الان {toFa(overview.stats.totalAnswers)} پاسخ در آزمون‌های بین‌الملل ثبت کرده‌ای؛ ادامه بده.
         </p>
       )}

@@ -7,7 +7,7 @@ import groupExam from "../../../images/pictures/groupExam.png";
 import universalExam from "../../../images/pictures/universalExam.png";
 import testBank from "../../../images/pictures/testBank.jpg";
 
-const doranFont = "[font-family:'Doran',Tahoma,sans-serif]";
+const doranFont = "[font-family:'Doran','Vazir',Tahoma,sans-serif]";
 
 export default function TestsSection({ onOpenAnalytics, onOpenInternational, onOpenCoordinated, onOpenTestBank }) {
   const examCards = [
@@ -66,7 +66,7 @@ export default function TestsSection({ onOpenAnalytics, onOpenInternational, onO
               onOpenTestBank?.();
             }
           }}
-          className="lg:col-span-6 lg:min-h-0 relative w-full h-150 lg:h-auto rounded-[2.5rem] overflow-hidden group cursor-pointer focus-visible:outline-2 focus-visible:outline-[#61D192]"
+          className="lg:col-span-6 lg:min-h-0 relative w-full h-150 lg:h-auto rounded-[2.5rem] overflow-hidden group cursor-pointer focus-visible:outline-2 focus-visible:outline-[var(--green-vivid)]"
         >
 
           {/* TODO: عکس پس‌زمینه فرم و گوشی پزشکی */}
@@ -79,12 +79,12 @@ export default function TestsSection({ onOpenAnalytics, onOpenInternational, onO
           <div className="absolute inset-0 bg-linear-to-t from-black via-black/60 to-transparent"></div>
 
           <div className="absolute bottom-10 left-0 right-0 flex flex-col items-center text-center px-4">
-            <h2 className={`text-[#61D192] text-3xl md:text-4xl font-extrabold mb-8 leading-tight ${doranFont}`}>
+            <h2 className={`text-[var(--green-ink)] text-3xl md:text-4xl font-extrabold mb-8 leading-tight ${doranFont}`}>
               بانک تست علوم پایه و<br />
               تست های تالیفی اختصاصی
             </h2>
 
-            <span className="bg-[#2F3034] text-[#61D192] px-10 py-3 rounded-2xl text-lg font-bold transition-colors group-hover:bg-[#3f4045]">
+            <span className="bg-[var(--surface-strong)] text-[var(--green-ink)] px-10 py-3 rounded-2xl text-lg font-bold transition-colors group-hover:bg-[var(--surface-strong)]">
               بزن بریم
             </span>
           </div>
@@ -110,10 +110,10 @@ export default function TestsSection({ onOpenAnalytics, onOpenInternational, onO
                     }
                   : undefined
               }
-              className="bg-[#242426] rounded-[2.5rem] p-6 flex items-center justify-between gap-4 cursor-pointer hover:bg-[#2e2e30] transition-colors duration-300 h-40 lg:h-auto lg:min-h-0 lg:flex-1 overflow-hidden"
+              className="bg-[var(--surface)] rounded-[2.5rem] p-6 flex items-center justify-between gap-4 cursor-pointer hover:bg-[var(--surface-soft)] transition-colors duration-300 h-40 lg:h-auto lg:min-h-0 lg:flex-1 overflow-hidden"
             >
               <div className="flex-1">
-                <h3 className={`text-[#61D192] text-2xl font-bold mb-2 ${doranFont}`}>{card.title}</h3>
+                <h3 className={`text-[var(--green-ink)] text-2xl font-bold mb-2 ${doranFont}`}>{card.title}</h3>
                 <p className="text-gray-300 text-base leading-relaxed">{card.description}</p>
               </div>
 

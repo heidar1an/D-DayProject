@@ -19,15 +19,15 @@
 }
 
 .tb-badge--plain {
-  border-color: rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.05);
-  color: #c9c9c9;
+  border-color: rgb(var(--line-rgb) / 0.08);
+  background: rgb(var(--wash-rgb) / 0.05);
+  color: var(--muted);
 }
 
 /* ─────────────── اسکلت ─────────────── */
 .tb-sk {
   border-radius: 1.25rem;
-  background: linear-gradient(100deg, rgba(255, 255, 255, 0.05) 40%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.05) 60%);
+  background: linear-gradient(100deg, rgb(var(--wash-rgb) / 0.05) 40%, rgb(var(--wash-rgb) / 0.1) 50%, rgb(var(--wash-rgb) / 0.05) 60%);
   background-size: 200% 100%;
   animation: tb-sk-shimmer 1.4s linear infinite;
 }
@@ -45,7 +45,7 @@
   border-radius: 999px;
   border: 1px solid rgba(147, 127, 205, 0.4);
   background: rgba(147, 127, 205, 0.12);
-  color: #cfc4f2;
+  color: var(--purple-soft-ink);
   padding: 0.3rem 0.8rem;
   font-size: 12px;
   white-space: nowrap;
@@ -58,7 +58,7 @@
 }
 
 .tb-chip:focus-visible {
-  outline: 2px solid #61D192;
+  outline: 2px solid var(--green-vivid);
   outline-offset: 2px;
 }
 
@@ -77,7 +77,7 @@
 }
 
 .tb-option:focus-visible {
-  outline: 2px solid #61D192;
+  outline: 2px solid var(--green-vivid);
   outline-offset: 2px;
 }
 
@@ -88,27 +88,27 @@
   width: 2.1rem;
   height: 2.1rem;
   border-radius: 0.8rem;
-  background: rgba(255, 255, 255, 0.07);
-  color: #aaa;
+  background: rgb(var(--wash-rgb) / 0.07);
+  color: var(--muted);
   font-size: 0.85rem;
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-weight: 700;
   transition: inherit;
 }
 
 .tb-option__index.is-selected {
-  background: #937fcd;
-  color: #fff;
+  background: var(--purple-bright);
+  color: var(--white);
 }
 
 .tb-option__index.is-correct {
   background: rgba(97, 209, 146, 0.25);
-  color: #61D192;
+  color: var(--green-ink);
 }
 
 .tb-option__index.is-wrong {
   background: rgba(226, 109, 109, 0.25);
-  color: #ef9196;
+  color: var(--red-ink);
 }
 
 /* ─────────────── ناویگیتور سؤال‌ها ─────────────── */
@@ -122,46 +122,46 @@
   position: relative;
   height: 2.5rem;
   border-radius: 0.75rem;
-  border: 1.5px solid rgba(255, 255, 255, 0.09);
-  background: rgba(255, 255, 255, 0.03);
-  color: #999;
+  border: 1.5px solid rgb(var(--line-rgb) / 0.09);
+  background: rgb(var(--wash-rgb) / 0.03);
+  color: var(--faint);
   font-size: 0.8rem;
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   cursor: pointer;
   transition: border-color 0.14s ease, background 0.14s ease, color 0.14s ease;
 }
 
 .tb-navchip:hover {
-  border-color: rgba(255, 255, 255, 0.3);
-  color: #fff;
+  border-color: rgb(var(--line-rgb) / 0.3);
+  color: var(--white);
 }
 
 .tb-navchip:focus-visible {
-  outline: 2px solid #61D192;
+  outline: 2px solid var(--green-vivid);
   outline-offset: 1px;
 }
 
 .tb-navchip.is-answered {
   background: rgba(97, 209, 146, 0.14);
   border-color: rgba(97, 209, 146, 0.45);
-  color: #61D192;
+  color: var(--green-ink);
 }
 
 .tb-navchip.is-wrong {
   background: rgba(226, 109, 109, 0.13);
   border-color: rgba(226, 109, 109, 0.45);
-  color: #ef9196;
+  color: var(--red-ink);
 }
 
 .tb-navchip.is-current {
-  border-color: #fff;
-  color: #fff;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.16);
+  border-color: var(--border-solid);
+  color: var(--white);
+  box-shadow: 0 0 0 2px rgb(var(--shadow-rgb) / calc(0.16 * var(--shadow-scale)));
 }
 
 .tb-navchip.is-marked {
   border-color: rgba(224, 180, 92, 0.55);
-  color: #e0b45c;
+  color: var(--gold-ink);
 }
 
 .tb-navchip.is-answered.is-marked,
@@ -176,8 +176,8 @@
   width: 12px;
   height: 12px;
   border-radius: 999px;
-  background: #e0b45c;
-  border: 2px solid #1b1b1e;
+  background: var(--gold);
+  border: 2px solid var(--border-solid);
 }
 
 /* ─────────────── تایمر ─────────────── */
@@ -187,10 +187,10 @@
   gap: 0.5rem;
   border-radius: 999px;
   padding: 0.5rem 1.05rem;
-  background: rgba(255, 255, 255, 0.05);
-  color: #bbb;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  font-family: 'Doran', Tahoma, sans-serif;
+  background: rgb(var(--wash-rgb) / 0.05);
+  color: var(--muted);
+  border: 1px solid rgb(var(--line-rgb) / 0.09);
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: 1rem;
   font-variant-numeric: tabular-nums;
   transition: background 0.5s ease, color 0.5s ease, border-color 0.5s ease;
@@ -198,13 +198,13 @@
 
 .tb-timer--warn {
   background: rgba(224, 180, 92, 0.12);
-  color: #e0b45c;
+  color: var(--gold-ink);
   border-color: rgba(224, 180, 92, 0.35);
 }
 
 .tb-timer--danger {
   background: rgba(226, 109, 109, 0.13);
-  color: #e26d6d;
+  color: var(--red-ink);
   border-color: rgba(226, 109, 109, 0.4);
 }
 
@@ -214,8 +214,8 @@
   inset: 0;
   z-index: 80;
   overflow-y: auto;
-  background: #101012;
-  color: #f3f3f3;
+  background: var(--background);
+  color: var(--white);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -275,9 +275,9 @@
   max-height: 78vh;
   overflow-y: auto;
   border-radius: 1.8rem 1.8rem 0 0;
-  background: #1b1b1e;
-  border-top: 1px solid rgba(255, 255, 255, 0.09);
-  box-shadow: 0 -18px 50px rgba(0, 0, 0, 0.55);
+  background: var(--background);
+  border-top: 1px solid rgb(var(--line-rgb) / 0.09);
+  box-shadow: 0 -18px 50px rgb(var(--shadow-rgb) / calc(0.55 * var(--shadow-scale)));
   padding: 1.1rem 1.2rem calc(1.2rem + env(safe-area-inset-bottom));
   animation: tb-drawer-up 0.22s ease;
 }
@@ -291,7 +291,7 @@
   position: fixed;
   inset: 0;
   z-index: 85;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgb(var(--shadow-rgb) / 0.6);
 }
 
 /* ─────────────── مودال‌ها ─────────────── */
@@ -317,7 +317,7 @@
 .tb-bar {
   height: 9px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.07);
+  background: rgb(var(--wash-rgb) / 0.07);
   overflow: hidden;
 }
 

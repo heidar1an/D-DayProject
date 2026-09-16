@@ -22,8 +22,8 @@ function ModeButton({ mode, active, note, onClick }) {
         active ? 'border-[#61D192]/60 bg-[#61D192]/[0.07]' : 'border-white/8 bg-white/[0.02] hover:border-white/20'
       }`}
     >
-      <strong className="block text-[12.5px] [font-family:'Doran',Tahoma,sans-serif]">{MODE_LABELS[mode]}</strong>
-      <span className="mt-1 block text-[10.5px] leading-5 text-[#8a8a8a]">{note}</span>
+      <strong className="block text-[12.5px] [font-family:'Doran','Vazir',Tahoma,sans-serif]">{MODE_LABELS[mode]}</strong>
+      <span className="mt-1 block text-[10.5px] leading-5 text-[var(--faint)]">{note}</span>
     </button>
   );
 }
@@ -63,7 +63,7 @@ export default function StepSettings({ draft, update, availability }) {
               onClick={() => update({ questionCount: count })}
               aria-pressed={draft.questionCount === count}
               className={`cursor-pointer rounded-xl px-4 py-2 text-sm transition-colors ${
-                draft.questionCount === count ? 'bg-[#61D192] font-bold text-[#12271a]' : 'bg-white/6 text-[#bbb] hover:bg-white/12'
+                draft.questionCount === count ? 'bg-[var(--green-vivid)] font-bold text-[#12271a]' : 'bg-white/6 text-[var(--muted)] hover:bg-white/12'
               }`}
             >
               {toFa(count)}
@@ -76,21 +76,21 @@ export default function StepSettings({ draft, update, availability }) {
             value={draft.questionCount}
             onChange={(event) => update({ questionCount: Math.max(1, Number(event.target.value) || 1) })}
             aria-label="تعداد دلخواه سؤال"
-            className="w-20 rounded-xl border border-white/10 bg-[#2a2a2a] px-2 py-2 text-center text-sm text-white focus:border-[#61D192]/50 focus:outline-none"
+            className="w-20 rounded-xl border border-white/10 bg-[var(--surface-soft)] px-2 py-2 text-center text-sm text-white focus:border-[#61D192]/50 focus:outline-none"
           />
         </div>
 
-        <p className="mt-3.5 rounded-xl bg-white/[0.03] px-3.5 py-2.5 text-[11.5px] leading-6 text-[#9a9a9a]" aria-live="polite">
+        <p className="mt-3.5 rounded-xl bg-white/[0.03] px-3.5 py-2.5 text-[11.5px] leading-6 text-[var(--faint)]" aria-live="polite">
           {availability === null ? (
             'در حال بررسی مخزن…'
           ) : availableTotal === 0 ? (
-            <span className="text-[#e26d6d]">با این فیلترها تستی در دسترس نیست؛ دامنه یا فیلترها را بازتر کن.</span>
+            <span className="text-[var(--red-ink)]">با این فیلترها تستی در دسترس نیست؛ دامنه یا فیلترها را بازتر کن.</span>
           ) : (
             <>
               از {faNum(availableTotal)} تستِ در دسترس این دامنه،{' '}
-              <strong className="text-[#61D192]">{faNum(Math.min(draft.questionCount, availableTotal))} تست</strong> برای آزمون تو انتخاب می‌شود.
+              <strong className="text-[var(--green-ink)]">{faNum(Math.min(draft.questionCount, availableTotal))} تست</strong> برای آزمون تو انتخاب می‌شود.
               {overRequest && (
-                <span className="mt-1 block text-[#e0b45c]">
+                <span className="mt-1 block text-[var(--gold-ink)]">
                   درخواستت بیشتر از مخزن است — تعداد را کم کن یا مباحث بیشتری اضافه کن.
                 </span>
               )}
@@ -122,7 +122,7 @@ export default function StepSettings({ draft, update, availability }) {
               onClick={() => update({ statuses: { ...draft.statuses, base: option.id } })}
               aria-pressed={draft.statuses.base === option.id}
               className={`cursor-pointer rounded-xl px-3.5 py-2 text-xs transition-colors ${
-                draft.statuses.base === option.id ? 'bg-[#5b8cc7] font-bold text-white' : 'bg-white/6 text-[#aaa] hover:bg-white/12'
+                draft.statuses.base === option.id ? 'bg-[var(--blue-bright)] font-bold text-white' : 'bg-white/6 text-[var(--muted)] hover:bg-white/12'
               }`}
             >
               {option.label}
@@ -142,10 +142,10 @@ export default function StepSettings({ draft, update, availability }) {
             const value = quotaOf(quota.status);
             return (
               <div key={quota.status} className="flex items-center justify-between gap-3 rounded-xl bg-white/[0.03] px-3.5 py-2.5">
-                <label htmlFor={`quota-${quota.status}`} className="flex items-center gap-2 text-[12px] text-[#ccc]">
+                <label htmlFor={`quota-${quota.status}`} className="flex items-center gap-2 text-[12px] text-[var(--muted)]">
                   <span className="h-2 w-2 rounded-full" style={{ background: quota.accent }} aria-hidden="true" />
                   {quota.label}
-                  <span className="text-[10px] text-[#777]">({toFa(available)} موجود)</span>
+                  <span className="text-[10px] text-[var(--faint)]">({toFa(available)} موجود)</span>
                 </label>
                 <div className="flex items-center gap-1.5">
                   <button
@@ -164,7 +164,7 @@ export default function StepSettings({ draft, update, availability }) {
                     value={value}
                     disabled={!available}
                     onChange={(event) => setQuota(quota.status, Math.max(0, Number(event.target.value) || 0))}
-                    className="h-7 w-14 rounded-lg border border-white/10 bg-[#2a2a2a] text-center text-xs text-white focus:border-[#61D192]/50 focus:outline-none disabled:opacity-40"
+                    className="h-7 w-14 rounded-lg border border-white/10 bg-[var(--surface-soft)] text-center text-xs text-white focus:border-[#61D192]/50 focus:outline-none disabled:opacity-40"
                   />
                   <button
                     type="button"
@@ -180,7 +180,7 @@ export default function StepSettings({ draft, update, availability }) {
             );
           })}
           {!draft.statuses.quotas.length && (
-            <p className="text-[10.5px] text-[#666]">بدون سهمیه — باقیِ ترکیب آزادانه از کل دامنه انتخاب می‌شود.</p>
+            <p className="text-[10.5px] text-[var(--ghost)]">بدون سهمیه — باقیِ ترکیب آزادانه از کل دامنه انتخاب می‌شود.</p>
           )}
         </div>
       </SectionCard>
@@ -199,7 +199,7 @@ export default function StepSettings({ draft, update, availability }) {
               onClick={() => update({ durationMode: option.id })}
               aria-pressed={draft.durationMode === option.id}
               className={`cursor-pointer rounded-xl px-3.5 py-2 text-xs transition-colors ${
-                draft.durationMode === option.id ? 'bg-[#b99a86] font-bold text-white' : 'bg-white/6 text-[#aaa] hover:bg-white/12'
+                draft.durationMode === option.id ? 'bg-[var(--copper)] font-bold text-white' : 'bg-white/6 text-[var(--muted)] hover:bg-white/12'
               }`}
             >
               {option.label}
@@ -215,7 +215,7 @@ export default function StepSettings({ draft, update, availability }) {
                 onClick={() => update({ durationMinutes: minutes })}
                 aria-pressed={draft.durationMinutes === minutes}
                 className={`cursor-pointer rounded-xl px-3.5 py-2 text-xs transition-colors ${
-                  draft.durationMinutes === minutes ? 'bg-[#b99a86] font-bold text-white' : 'bg-white/6 text-[#bbb] hover:bg-white/12'
+                  draft.durationMinutes === minutes ? 'bg-[var(--copper)] font-bold text-white' : 'bg-white/6 text-[var(--muted)] hover:bg-white/12'
                 }`}
               >
                 {toFa(minutes)} دقیقه
@@ -223,7 +223,7 @@ export default function StepSettings({ draft, update, availability }) {
             ))}
           </div>
         )}
-        <p className="mt-3 text-[11px] leading-5 text-[#777]">
+        <p className="mt-3 text-[11px] leading-5 text-[var(--faint)]">
           {suggestedMinutes
             ? `پیشنهاد سیستم از میانگین زمان واقعی پاسخ‌دهندگان به همین تست‌ها حساب می‌شود.`
             : 'با انتخاب دامنه، زمان پیشنهادی بر اساس آمار واقعی مخزن محاسبه می‌شود.'}
@@ -241,7 +241,7 @@ export default function StepSettings({ draft, update, availability }) {
         <div className="mt-4 space-y-3 border-t border-white/8 pt-4">
           {(draft.mode === 'practice' || draft.mode === 'review') && (
             <div>
-              <p className="mb-2 text-[11px] text-[#8a8a8a]">نمایش پاسخ در حین تمرین</p>
+              <p className="mb-2 text-[11px] text-[var(--faint)]">نمایش پاسخ در حین تمرین</p>
               <div className="flex flex-wrap gap-1.5">
                 {[
                   { id: 'full', label: 'پاسخ + توضیح تشریحی' },
@@ -253,7 +253,7 @@ export default function StepSettings({ draft, update, availability }) {
                     onClick={() => update({ feedback: option.id })}
                     aria-pressed={draft.feedback === option.id}
                     className={`cursor-pointer rounded-xl px-3.5 py-2 text-xs transition-colors ${
-                      draft.feedback === option.id ? 'bg-[#937fcd] font-bold text-white' : 'bg-white/6 text-[#aaa] hover:bg-white/12'
+                      draft.feedback === option.id ? 'bg-[var(--purple-bright)] font-bold text-white' : 'bg-white/6 text-[var(--muted)] hover:bg-white/12'
                     }`}
                   >
                     {option.label}
@@ -266,13 +266,13 @@ export default function StepSettings({ draft, update, availability }) {
             <label className="flex cursor-pointer items-center justify-between gap-3 rounded-xl bg-white/[0.03] px-3.5 py-3">
               <span>
                 <strong className="block text-[12.5px]">نمرهٔ منفی ۳/۱−</strong>
-                <span className="mt-0.5 block text-[10.5px] text-[#8a8a8a]">سبک آزمون وزارت بهداشت؛ هر ۴ غلط، یک صحیح کم می‌کند.</span>
+                <span className="mt-0.5 block text-[10.5px] text-[var(--faint)]">سبک آزمون وزارت بهداشت؛ هر ۴ غلط، یک صحیح کم می‌کند.</span>
               </span>
               <input
                 type="checkbox"
                 checked={draft.negativeMarking}
                 onChange={(event) => update({ negativeMarking: event.target.checked })}
-                className="h-5 w-5 cursor-pointer accent-[#937fcd]"
+                className="h-5 w-5 cursor-pointer accent-[var(--purple-ink)]"
               />
             </label>
           )}
@@ -280,23 +280,23 @@ export default function StepSettings({ draft, update, availability }) {
       </SectionCard>
 
       {/* فیلترهای پیشرفته — آکاردئون */}
-      <details className="rounded-[2rem] border border-white/8 bg-[#242426] p-5 xl:col-span-2">
+      <details className="rounded-[2rem] border border-white/8 bg-[var(--surface)] p-5 xl:col-span-2">
         <summary className="flex cursor-pointer list-none items-center justify-between gap-2">
           <span className="flex items-center gap-2.5">
-            <span className="grid h-9 w-9 place-items-center rounded-2xl bg-[#77b787]/14 text-[#77b787]">
+            <span className="grid h-9 w-9 place-items-center rounded-2xl bg-[#77b787]/14 text-[var(--green-ink)]">
               <Icon name="filter" className="h-4.5 w-4.5" />
             </span>
             <span>
-              <strong className="text-sm [font-family:'Doran',Tahoma,sans-serif]">فیلترهای پیشرفته</strong>
-              <span className="mt-0.5 block text-[11px] text-[#8a8a8a]">نوع سؤال، منبع، سال و جستجو — اختیاری</span>
+              <strong className="text-sm [font-family:'Doran','Vazir',Tahoma,sans-serif]">فیلترهای پیشرفته</strong>
+              <span className="mt-0.5 block text-[11px] text-[var(--faint)]">نوع سؤال، منبع، سال و جستجو — اختیاری</span>
             </span>
           </span>
-          <Icon name="chevron" className="h-4 w-4 text-[#777]" />
+          <Icon name="chevron" className="h-4 w-4 text-[var(--faint)]" />
         </summary>
 
         <div className="mt-5 grid gap-5 border-t border-white/8 pt-5 sm:grid-cols-2">
           <fieldset>
-            <legend className="mb-2 text-[11px] font-bold text-[#bbb]">نوع سؤال</legend>
+            <legend className="mb-2 text-[11px] font-bold text-[var(--muted)]">نوع سؤال</legend>
             <div className="flex flex-wrap gap-1.5">
               {Object.entries(QUESTION_TYPES).map(([type, meta]) => (
                 <button
@@ -315,8 +315,8 @@ export default function StepSettings({ draft, update, availability }) {
                   aria-pressed={draft.advanced.types.includes(type)}
                   className={`cursor-pointer rounded-full border px-3 py-1.5 text-[11px] transition-colors ${
                     draft.advanced.types.includes(type)
-                      ? 'border-[#77b787]/50 bg-[#77b787]/12 text-[#a8d8b5]'
-                      : 'border-white/10 bg-white/[0.03] text-[#aaa] hover:border-white/25'
+                      ? 'border-[#77b787]/50 bg-[#77b787]/12 text-[var(--green-ink)]'
+                      : 'border-white/10 bg-white/[0.03] text-[var(--muted)] hover:border-white/25'
                   }`}
                 >
                   {meta.label}
@@ -326,7 +326,7 @@ export default function StepSettings({ draft, update, availability }) {
           </fieldset>
 
           <fieldset>
-            <legend className="mb-2 text-[11px] font-bold text-[#bbb]">منبع</legend>
+            <legend className="mb-2 text-[11px] font-bold text-[var(--muted)]">منبع</legend>
             <div className="flex flex-wrap gap-1.5">
               {Object.entries(SOURCES).map(([source, meta]) => (
                 <button
@@ -347,7 +347,7 @@ export default function StepSettings({ draft, update, availability }) {
                   style={
                     draft.advanced.sources.includes(source)
                       ? { borderColor: `${meta.accent}66`, background: `${meta.accent}14`, color: meta.accent }
-                      : { borderColor: 'rgba(255,255,255,0.1)', color: '#aaa' }
+                      : { borderColor: 'rgb(var(--line-rgb) / 0.1)', color: 'var(--muted)' }
                   }
                 >
                   {meta.label}
@@ -357,7 +357,7 @@ export default function StepSettings({ draft, update, availability }) {
           </fieldset>
 
           <fieldset>
-            <legend className="mb-2 text-[11px] font-bold text-[#bbb]">بازهٔ سال</legend>
+            <legend className="mb-2 text-[11px] font-bold text-[var(--muted)]">بازهٔ سال</legend>
             <div className="flex items-center gap-2">
               {[
                 { key: 'yearFrom', label: 'از' },
@@ -372,7 +372,7 @@ export default function StepSettings({ draft, update, availability }) {
                     })
                   }
                   aria-label={`${bound.label} سال`}
-                  className="w-full cursor-pointer rounded-xl border border-white/10 bg-[#2a2a2a] px-3 py-2.5 text-sm text-white focus:border-[#61D192]/50 focus:outline-none"
+                  className="w-full cursor-pointer rounded-xl border border-white/10 bg-[var(--surface-soft)] px-3 py-2.5 text-sm text-white focus:border-[#61D192]/50 focus:outline-none"
                 >
                   <option value="">بدون محدودیت</option>
                   {BANK_YEARS.map((year) => (
@@ -386,13 +386,13 @@ export default function StepSettings({ draft, update, availability }) {
           </fieldset>
 
           <fieldset>
-            <legend className="mb-2 text-[11px] font-bold text-[#bbb]">جستجو در متن سؤال</legend>
+            <legend className="mb-2 text-[11px] font-bold text-[var(--muted)]">جستجو در متن سؤال</legend>
             <input
               type="search"
               value={draft.advanced.search ?? ''}
               onChange={(event) => update({ advanced: { ...draft.advanced, search: event.target.value } })}
               placeholder="مثلاً «پتانسیل عمل»"
-              className="w-full rounded-xl border border-white/10 bg-[#2a2a2a] px-3.5 py-2.5 text-sm text-white placeholder:text-[#666] focus:border-[#61D192]/50 focus:outline-none"
+              className="w-full rounded-xl border border-white/10 bg-[var(--surface-soft)] px-3.5 py-2.5 text-sm text-white placeholder:text-[var(--ghost)] focus:border-[#61D192]/50 focus:outline-none"
             />
           </fieldset>
         </div>

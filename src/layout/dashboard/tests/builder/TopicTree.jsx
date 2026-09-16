@@ -24,15 +24,15 @@ function BranchRow({ branch, topicPaths, onToggle }) {
           onClick={() => setOpen((prev) => !prev)}
           aria-expanded={open}
           aria-label={open ? `بستن ${branch.name}` : `باز کردن ${branch.name}`}
-          className="cursor-pointer rounded-lg p-1.5 text-[#777] transition-colors hover:bg-white/6 hover:text-white"
+          className="cursor-pointer rounded-lg p-1.5 text-[var(--faint)] transition-colors hover:bg-white/6 hover:text-white"
         >
           <Icon name="chevron" className={`h-3.5 w-3.5 transition-transform ${open ? '' : '-rotate-90'}`} />
         </button>
-        <button type="button" className={`ex-check flex-1 !border-transparent !bg-transparent ${isSelfSelected ? '!text-[#7ee0ac]' : ''}`} aria-pressed={isSelfSelected} onClick={() => onToggle(branch.name)}>
+        <button type="button" className={`ex-check flex-1 !border-transparent !bg-transparent ${isSelfSelected ? '!text-[var(--green-soft-ink)]' : ''}`} aria-pressed={isSelfSelected} onClick={() => onToggle(branch.name)}>
           <span className="ex-check__box" aria-hidden="true">
             {isSelfSelected && <Icon name="check" className="h-3 w-3" strokeWidth={3} />}
           </span>
-          <span className="text-[13px] font-bold [font-family:'Doran',Tahoma,sans-serif]">{branch.name}</span>
+          <span className="text-[13px] font-bold [font-family:'Doran','Vazir',Tahoma,sans-serif]">{branch.name}</span>
           <span className="ex-check__count">{toFa(branch.count)} تست</span>
         </button>
       </div>
@@ -63,7 +63,7 @@ function BranchRow({ branch, topicPaths, onToggle }) {
 export default function TopicTree({ topicTree, subjectIds, topicPaths, onChange }) {
   if (!subjectIds.length) {
     return (
-      <p className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-4 py-6 text-center text-xs leading-6 text-[#777]">
+      <p className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-4 py-6 text-center text-xs leading-6 text-[var(--faint)]">
         اول حداقل یک درس انتخاب کن تا درخت مبحث‌هایش اینجا باز شود.
       </p>
     );
@@ -89,7 +89,7 @@ export default function TopicTree({ topicTree, subjectIds, topicPaths, onChange 
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-[11px] text-[#8a8a8a]">
+        <p className="text-[11px] text-[var(--faint)]">
           {selectedVisible.length
             ? `${toFa(selectedVisible.length)} گره انتخاب شده از ${toFa(visibleNodes.length)}`
             : 'مبحثی انتخاب نشده — کل درس‌های انتخابی در آزمون می‌آیند.'}
@@ -104,7 +104,7 @@ export default function TopicTree({ topicTree, subjectIds, topicPaths, onChange 
               key={action.label}
               type="button"
               onClick={action.onClick}
-              className="cursor-pointer rounded-lg bg-white/6 px-3 py-1.5 text-[11px] text-[#bbb] transition-colors hover:bg-white/12 hover:text-white"
+              className="cursor-pointer rounded-lg bg-white/6 px-3 py-1.5 text-[11px] text-[var(--muted)] transition-colors hover:bg-white/12 hover:text-white"
             >
               {action.label}
             </button>

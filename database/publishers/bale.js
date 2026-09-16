@@ -77,13 +77,27 @@ function friendlyDescription(raw, status) {
   if (haystack.includes('chat not found') || haystack.includes('peer_id_invalid')) {
     return 'کانال پیدا نشد؛ شناسهٔ کانال را بررسی کنید (مثل @tapesh یا شناسهٔ عددی)';
   }
-  if (haystack.includes('not enough rights') || haystack.includes('chat_admin_required') || haystack.includes('not enough permission')) {
-    return 'ربات در این کانال ادمین نیست یا اجازهٔ ارسال پست ندارد';
-  }
   if (haystack.includes('bot was blocked') || haystack.includes('user is deactivated')) {
     return 'ربات توسط گیرنده مسدود شده است';
   }
-  if (haystack.includes('unauthorized') || haystack.includes('invalid token') || status === 401 || status === 403) {
+  /*
+   * «ربات عضو/ادمین نیست» باید پیش از بررسی توکن بیاید: بله و تلگرام برای کمبود
+   * دسترسی هم کد ۴۰۳ می‌دهند — همان کدی که برای توکن باطل می‌دهند. اگر ۴۰۳
+   * بی‌قید «توکن نامعتبر» ترجمه شود، کاربری که فقط باید ربات را ادمین کانال کند،
+   * دنبال توکن تازه می‌رود.
+   */
+  if (
+    haystack.includes('not a member')
+    || haystack.includes('not enough rights')
+    || haystack.includes('chat_admin_required')
+    || haystack.includes('not enough permission')
+    || haystack.includes('chat_write_forbidden')
+    || haystack.includes('member list is inaccessible')
+    || haystack.includes('forbidden')
+  ) {
+    return 'ربات در این کانال عضو یا ادمین نیست؛ آن را با اجازهٔ ارسال پست ادمین کنید';
+  }
+  if (status === 401 || haystack.includes('unauthorized') || haystack.includes('invalid token')) {
     return 'توکن ربات بله نامعتبر است یا باطل شده';
   }
   if (haystack.includes('wrong file identifier') || haystack.includes('file is too big')) {
@@ -140,7 +154,10 @@ async function callMethod(token, method, { json, form } = {}) {
 
   if (payload.ok === false) {
     const description = friendlyDescription(payload.description, response.status);
-    const code = response.status === 401 || response.status === 403 ? 'PUBLISH_UNAUTHORIZED' : 'PUBLISH_FAILED';
+    /* ۴۰۳ کد «دسترسی» است نه «توکن باطل» — کد خطا هم باید همین را بگوید */
+    const code = response.status === 401 ? 'PUBLISH_UNAUTHORIZED'
+      : response.status === 403 ? 'PUBLISH_FORBIDDEN'
+        : 'PUBLISH_FAILED';
     throw publishError(description, code, {
       httpStatus: response.status,
       platformCode: payload.error_code ?? null,

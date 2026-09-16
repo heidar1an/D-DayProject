@@ -5,6 +5,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import * as api from '../../../../../services/referencesApi';
+import { getTheme } from '../../../../../services/theme/themeService';
 
 const ReaderContext = createContext(null);
 
@@ -20,6 +21,16 @@ export const DEFAULT_SETTINGS = {
   width: 'normal', // narrow | normal | wide
   theme: 'dark', // light | dark | sepia
 };
+
+/*
+ * تم پیش‌فرض مطالعه از تم خود سایت می‌آید تا کسی که سایت را روشن کرده
+ * با باز کردن یک مرجع، غافلگیر نشود. انتخاب صریح کاربر در تنظیمات مطالعه
+ * همیشه برنده است، چون از state ذخیره‌شده روی این پیش‌فرض می‌نشیند.
+ * «سپیا» فقط انتخاب دستی است و پیش‌فرض هیچ‌وقت نمی‌شود.
+ */
+function readerDefaults() {
+  return { ...DEFAULT_SETTINGS, theme: getTheme() === 'light' ? 'light' : 'dark' };
+}
 
 export const HIGHLIGHT_COLORS = ['yellow', 'green', 'blue', 'pink'];
 
@@ -44,7 +55,7 @@ export function ReaderProvider({ reference, initialPosition, onExit, children })
   );
 
   /* داده‌های کاربر */
-  const [settings, setSettings] = useState(DEFAULT_SETTINGS);
+  const [settings, setSettings] = useState(readerDefaults);
   const [highlights, setHighlights] = useState([]);
   const [notes, setNotes] = useState([]);
   const [bookmarks, setBookmarks] = useState([]);
@@ -73,7 +84,7 @@ export function ReaderProvider({ reference, initialPosition, onExit, children })
     let alive = true;
     api.loadReaderState(reference.id).then((state) => {
       if (!alive) return;
-      setSettings({ ...DEFAULT_SETTINGS, ...(state.settings ?? {}) });
+      setSettings({ ...readerDefaults(), ...(state.settings ?? {}) });
       setHighlights(state.highlights);
       setNotes(state.notes);
       setBookmarks(state.bookmarks);

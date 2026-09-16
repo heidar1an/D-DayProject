@@ -68,12 +68,12 @@ export function ExamListView({ exams, onOpenExam, onBack }) {
               key={exam.examId}
               type="button"
               onClick={() => onOpenExam?.(exam.examId)}
-              className="w-full cursor-pointer rounded-2xl border border-white/8 bg-[#2a2a2d] p-4 text-right transition-colors hover:border-white/20 focus-visible:outline-2 focus-visible:outline-[#61D192]"
+              className="w-full cursor-pointer rounded-2xl border border-white/8 bg-[var(--surface-soft)] p-4 text-right transition-colors hover:border-white/20 focus-visible:outline-2 focus-visible:outline-[var(--green-vivid)]"
             >
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="min-w-0">
                   <h3 className="truncate text-[14px] font-bold">{exam.title}</h3>
-                  <p className="mt-0.5 text-[11.5px] text-[#777]">
+                  <p className="mt-0.5 text-[11.5px] text-[var(--faint)]">
                     {formatFullDate(exam.submittedAt)}
                     {exam.durationMinutes ? ` · ${toFa(exam.durationMinutes)} دقیقه` : ''}
                     {` · ${faNum(exam.total)} سؤال`}
@@ -84,23 +84,23 @@ export function ExamListView({ exams, onOpenExam, onBack }) {
                 <div className="flex items-center gap-4">
                   {exam.percentile !== null && exam.percentile !== undefined && (
                     <div className="text-center">
-                      <strong className="block text-[15px] text-[#937fcd]">{faNum(exam.percentile)}</strong>
-                      <span className="text-[10px] text-[#777]">صدک</span>
+                      <strong className="block text-[15px] text-[var(--purple-ink)]">{faNum(exam.percentile)}</strong>
+                      <span className="text-[10px] text-[var(--faint)]">صدک</span>
                     </div>
                   )}
                   {exam.rank !== null && exam.rank !== undefined && (
                     <div className="text-center">
-                      <strong className="block text-[15px] text-[#e0b45c]">{faNum(exam.rank)}</strong>
-                      <span className="text-[10px] text-[#777]">رتبه</span>
+                      <strong className="block text-[15px] text-[var(--gold-ink)]">{faNum(exam.rank)}</strong>
+                      <span className="text-[10px] text-[var(--faint)]">رتبه</span>
                     </div>
                   )}
                   <RingScore score={exam.percentage} size={64} stroke={7} accent={exam.percentage >= 70 ? '#61D192' : exam.percentage >= 50 ? '#e0b45c' : '#e26d6d'} />
                 </div>
               </div>
-              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11.5px] text-[#999]">
-                <span className="text-[#61D192]">درست {faNum(exam.correct)}</span>
-                <span className="text-[#e26d6d]">غلط {faNum(exam.wrong)}</span>
-                <span className="text-[#8a8a8a]">نزده {faNum(exam.unansweredCount)}</span>
+              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11.5px] text-[var(--faint)]">
+                <span className="text-[var(--green-ink)]">درست {faNum(exam.correct)}</span>
+                <span className="text-[var(--red-ink)]">غلط {faNum(exam.wrong)}</span>
+                <span className="text-[var(--faint)]">نزده {faNum(exam.unansweredCount)}</span>
                 <span>میانگین زمان {formatSeconds(exam.averageTime)}</span>
               </div>
             </button>
@@ -147,25 +147,25 @@ export function ExamDetailView({ detail, onBack, onOpenQuestion }) {
       <Card className="dashboard-layer-reveal" ariaLabel={`خلاصهٔ آزمون ${exam.title}`}>
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h2 className="text-xl font-extrabold [font-family:'Doran',Tahoma,sans-serif]">{exam.title}</h2>
-            <p className="mt-1 text-[12px] text-[#999]">
+            <h2 className="text-xl font-extrabold [font-family:'Doran','Vazir',Tahoma,sans-serif]">{exam.title}</h2>
+            <p className="mt-1 text-[12px] text-[var(--faint)]">
               {formatFullDate(exam.submittedAt)}
               {exam.durationMinutes ? ` · ${toFa(exam.durationMinutes)} دقیقه` : ''}
               {` · ${faNum(exam.total)} سؤال`}
               {exam.subtitle ? ` — ${exam.subtitle}` : ''}
             </p>
             <div className="mt-2 flex flex-wrap gap-2 text-[11.5px]">
-              {exam.rank !== null && exam.rank !== undefined && <span className="an-status" style={{ background: 'rgba(224,180,92,0.12)', color: '#e0b45c' }}>رتبه {faNum(exam.rank)}</span>}
-              {exam.percentile !== null && exam.percentile !== undefined && <span className="an-status" style={{ background: 'rgba(147,127,205,0.12)', color: '#937fcd' }}>صدک {faNum(exam.percentile)}</span>}
-              {exam.timedOut && <span className="an-status" style={{ background: 'rgba(226,109,109,0.12)', color: '#e26d6d' }}>پایان زمان</span>}
+              {exam.rank !== null && exam.rank !== undefined && <span className="an-status" style={{ background: 'rgba(224,180,92,0.12)', color: 'var(--gold-ink)' }}>رتبه {faNum(exam.rank)}</span>}
+              {exam.percentile !== null && exam.percentile !== undefined && <span className="an-status" style={{ background: 'rgba(147,127,205,0.12)', color: 'var(--purple-ink)' }}>صدک {faNum(exam.percentile)}</span>}
+              {exam.timedOut && <span className="an-status" style={{ background: 'rgba(226,109,109,0.12)', color: 'var(--red-ink)' }}>پایان زمان</span>}
             </div>
           </div>
           <div className="flex items-center gap-5">
             <div className="text-center">
-              <strong className="block text-2xl font-extrabold [font-family:'Doran',Tahoma,sans-serif]" style={{ color: exam.percentage >= 70 ? '#61D192' : exam.percentage >= 50 ? '#e0b45c' : '#e26d6d' }}>
+              <strong className="block text-2xl font-extrabold [font-family:'Doran','Vazir',Tahoma,sans-serif]" style={{ color: exam.percentage >= 70 ? '#61D192' : exam.percentage >= 50 ? '#e0b45c' : '#e26d6d' }}>
                 {formatPercent(exam.percentage)}
               </strong>
-              <span className="text-[10.5px] text-[#777]">درصد نهایی</span>
+              <span className="text-[10.5px] text-[var(--faint)]">درصد نهایی</span>
             </div>
             <BackButton onClick={onBack} label="بازگشت به آزمون‌ها" />
           </div>
@@ -189,10 +189,10 @@ export function ExamDetailView({ detail, onBack, onOpenQuestion }) {
               stroke={17}
             />
             <div className="space-y-2 text-[12.5px]">
-              <p className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-[#61D192]" />درست: <strong>{faNum(exam.correct)}</strong></p>
-              <p className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-[#e26d6d]" />غلط: <strong>{faNum(exam.wrong)}</strong></p>
-              <p className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-[#6b6b6b]" />بی‌پاسخ: <strong>{faNum(exam.unansweredCount)}</strong></p>
-              <p className="pt-1 text-[11.5px] text-[#888]">میانگین زمان هر سؤال: {formatSeconds(exam.averageTime)}</p>
+              <p className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-[var(--green-vivid)]" />درست: <strong>{faNum(exam.correct)}</strong></p>
+              <p className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-[var(--red)]" />غلط: <strong>{faNum(exam.wrong)}</strong></p>
+              <p className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-[var(--light-fill)]" />بی‌پاسخ: <strong>{faNum(exam.unansweredCount)}</strong></p>
+              <p className="pt-1 text-[11.5px] text-[var(--faint)]">میانگین زمان هر سؤال: {formatSeconds(exam.averageTime)}</p>
             </div>
           </div>
         </Card>
@@ -206,9 +206,9 @@ export function ExamDetailView({ detail, onBack, onOpenQuestion }) {
 
       {/* نکتهٔ تحلیلی آزمون */}
       {errors.totalWrong > 0 && errors.distribution.length > 0 && (
-        <div className="rounded-2xl bg-white/[0.03] px-4 py-3 text-[12.5px] leading-6 text-[#c9c9c9] dashboard-layer-reveal">
-          <Icon name="spark" className="ml-1.5 inline h-4 w-4 -translate-y-0.5 text-[#61D192]" />
-          بیشترین غلط‌های این آزمون از نوع <strong className="text-[#e0b45c]">{errorTypeLabel(errors.distribution[0].type)}</strong> بوده‌اند ({faNum(errors.distribution[0].count)} مورد از {faNum(errors.totalWrong)} غلط).
+        <div className="rounded-2xl bg-white/[0.03] px-4 py-3 text-[12.5px] leading-6 text-[var(--muted)] dashboard-layer-reveal">
+          <Icon name="spark" className="ml-1.5 inline h-4 w-4 -translate-y-0.5 text-[var(--green-ink)]" />
+          بیشترین غلط‌های این آزمون از نوع <strong className="text-[var(--gold-ink)]">{errorTypeLabel(errors.distribution[0].type)}</strong> بوده‌اند ({faNum(errors.distribution[0].count)} مورد از {faNum(errors.totalWrong)} غلط).
           {exam.unansweredCount > 0 && exam.unansweredCount >= 3 && ' همچنین تعداد بی‌پاسخ‌ها نشان می‌دهد مدیریت زمان در انتهای آزمون فشار داشته.'}
         </div>
       )}
@@ -253,7 +253,7 @@ export function ExamDetailView({ detail, onBack, onOpenQuestion }) {
                     <td data-label="موضوع"><span className="max-w-[220px] truncate">{question.topicPath.join(' › ')}</span></td>
                     <td data-label="پاسخ تو">{lastAttempt && lastAttempt.selected !== null ? toFa(['A', 'B', 'C', 'D'][lastAttempt.selected] ?? lastAttempt.selected + 1) : '—'}</td>
                     <td data-label="وضعیت">
-                      <span className="an-status" style={{ background: lastAttempt.correct ? 'rgba(97,209,146,0.13)' : lastAttempt.correct === false ? 'rgba(226,109,109,0.12)' : 'rgba(255,255,255,0.05)', color: lastAttempt.correct ? '#61D192' : lastAttempt.correct === false ? '#e26d6d' : '#999' }}>
+                      <span className="an-status" style={{ background: lastAttempt.correct ? 'rgba(97,209,146,0.13)' : lastAttempt.correct === false ? 'rgba(226,109,109,0.12)' : 'rgb(var(--wash-rgb) / 0.05)', color: lastAttempt.correct ? '#61D192' : lastAttempt.correct === false ? '#e26d6d' : '#999' }}>
                         {lastAttempt.correct ? 'درست' : lastAttempt.correct === false ? 'غلط' : 'بی‌پاسخ'}
                       </span>
                     </td>
@@ -261,15 +261,15 @@ export function ExamDetailView({ detail, onBack, onOpenQuestion }) {
                     <td data-label="اطمینان">{lastAttempt.confidence ? { high: 'مطمئن', medium: 'نیمه', low: 'نامطمئن' }[lastAttempt.confidence] : '—'}</td>
                     <td data-label="سختی"><DifficultyBadge difficulty={question.difficulty} compact /></td>
                     <td data-label="نوع خطا">{lastAttempt.correct === false ? errorTypeLabel(lastAttempt.errorType) : '—'}</td>
-                    <td data-label=""><Icon name="eye" className="h-4 w-4 text-[#777]" /></td>
+                    <td data-label=""><Icon name="eye" className="h-4 w-4 text-[var(--faint)]" /></td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
-          {filteredQuestions.length === 0 && <p className="py-6 text-center text-[12px] text-[#777]">سؤالی با این وضعیت در آزمون نیست.</p>}
+          {filteredQuestions.length === 0 && <p className="py-6 text-center text-[12px] text-[var(--faint)]">سؤالی با این وضعیت در آزمون نیست.</p>}
         </div>
-        <p className="mt-3 text-[11px] text-[#777]">برای دیدن صورت سؤال و تحلیل کامل، روی هر ردیف بزن.</p>
+        <p className="mt-3 text-[11px] text-[var(--faint)]">برای دیدن صورت سؤال و تحلیل کامل، روی هر ردیف بزن.</p>
       </Card>
     </div>
   );
@@ -280,7 +280,7 @@ function BackButton({ onClick, label = 'بازگشت' }) {
     <button
       type="button"
       onClick={onClick}
-      className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#282828] px-3.5 py-2.5 text-xs text-[#aaa] transition-colors hover:bg-[#333] hover:text-white focus-visible:outline-2 focus-visible:outline-[#61D192]"
+      className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[var(--surface-soft)] px-3.5 py-2.5 text-xs text-[var(--muted)] transition-colors hover:bg-[var(--surface-strong)] hover:text-white focus-visible:outline-2 focus-visible:outline-[var(--green-vivid)]"
     >
       <Icon name="back" className="h-3.5 w-3.5" />
       {label}

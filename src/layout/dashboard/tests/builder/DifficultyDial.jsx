@@ -46,7 +46,7 @@ export default function DifficultyDial({ difficulty, onChange, availability }) {
               className={`flex cursor-pointer items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs transition-colors disabled:cursor-default disabled:opacity-35 ${
                 !isMixed && difficulty.level === level
                   ? 'font-bold text-white'
-                  : 'bg-white/6 text-[#aaa] hover:bg-white/12 hover:text-white'
+                  : 'bg-white/6 text-[var(--muted)] hover:bg-white/12 hover:text-white'
               }`}
               style={!isMixed && difficulty.level === level ? { background: LEVEL_ACCENTS[level] } : undefined}
             >
@@ -60,7 +60,7 @@ export default function DifficultyDial({ difficulty, onChange, availability }) {
           onClick={setMixed}
           aria-pressed={isMixed}
           className={`flex cursor-pointer items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs transition-colors ${
-            isMixed ? 'bg-[#937fcd] font-bold text-white' : 'bg-white/6 text-[#aaa] hover:bg-white/12 hover:text-white'
+            isMixed ? 'bg-[var(--purple-bright)] font-bold text-white' : 'bg-white/6 text-[var(--muted)] hover:bg-white/12 hover:text-white'
           }`}
         >
           <Icon name="layers" className="h-3.5 w-3.5" />
@@ -112,13 +112,13 @@ export default function DifficultyDial({ difficulty, onChange, availability }) {
 
           {/* پریست‌های توزیع */}
           <div className="flex flex-wrap items-center gap-1.5 border-t border-white/8 pt-3">
-            <span className="text-[11px] text-[#8a8a8a]">الگوهای آماده:</span>
+            <span className="text-[11px] text-[var(--faint)]">الگوهای آماده:</span>
             {DISTRIBUTION_PRESETS.map((preset) => (
               <button
                 key={preset.id}
                 type="button"
                 onClick={() => setDistribution(preset.distribution)}
-                className="cursor-pointer rounded-full bg-white/6 px-3 py-1.5 text-[11px] text-[#bbb] transition-colors hover:bg-white/12 hover:text-white"
+                className="cursor-pointer rounded-full bg-white/6 px-3 py-1.5 text-[11px] text-[var(--muted)] transition-colors hover:bg-white/12 hover:text-white"
               >
                 {preset.label}
               </button>

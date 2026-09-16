@@ -22,11 +22,11 @@ import {
 function InfoItem({ icon, label, value }) {
   return (
     <div className="rounded-2xl bg-white/[0.03] p-3.5">
-      <dt className="flex items-center gap-1.5 text-[11px] text-[#7a7a7a]">
+      <dt className="flex items-center gap-1.5 text-[11px] text-[var(--faint)]">
         <Icon name={icon} className="h-3.5 w-3.5" />
         {label}
       </dt>
-      <dd className="mt-1.5 text-[13px] font-semibold leading-6 text-[#e3e3e3]">{value}</dd>
+      <dd className="mt-1.5 text-[13px] font-semibold leading-6 text-[var(--muted)]">{value}</dd>
     </div>
   );
 }
@@ -119,7 +119,7 @@ export default function ExamDetail({ exam, onRegister, onCancelRegistration, onS
   return (
     <div className="dash-stagger space-y-6">
       {/* ── سربرگ آزمون ── */}
-      <header className="relative overflow-hidden rounded-[2.2rem] border border-white/[0.07] bg-[#242426] p-6 md:p-8">
+      <header className="relative overflow-hidden rounded-[2.2rem] border border-white/[0.07] bg-[var(--surface)] p-6 md:p-8">
         <div
           className="absolute -right-20 -top-24 h-60 w-60 rounded-full blur-3xl"
           style={{ background: `${exam.accent}14` }}
@@ -132,13 +132,13 @@ export default function ExamDetail({ exam, onRegister, onCancelRegistration, onS
             <DifficultyBadge difficulty={exam.difficulty} />
           </div>
 
-          <h1 className="text-2xl leading-snug text-white md:text-[1.7rem] [font-family:'Doran',Tahoma,sans-serif]">
+          <h1 className="text-2xl leading-snug text-white md:text-[1.7rem] [font-family:'Doran','Vazir',Tahoma,sans-serif]">
             {exam.title}
           </h1>
 
-          <p className="max-w-2xl text-sm leading-7 text-[#a5a5a5]">{exam.description}</p>
+          <p className="max-w-2xl text-sm leading-7 text-[var(--muted)]">{exam.description}</p>
 
-          <p className="text-xs text-[#8a8a8a]">
+          <p className="text-xs text-[var(--faint)]">
             برگزارکننده: {exam.organizer} • {typeMeta.label}
             {exam.universities && exam.universities.length > 0 && (
               <>
@@ -165,11 +165,11 @@ export default function ExamDetail({ exam, onRegister, onCancelRegistration, onS
           </section>
 
           {/* ── مباحث ── */}
-          <section aria-label="مباحث آزمون" className="rounded-[1.6rem] border border-white/[0.06] bg-[#242426] p-5">
-            <h2 className="text-sm text-white [font-family:'Doran',Tahoma,sans-serif]">مباحث پوشش داده‌شده</h2>
+          <section aria-label="مباحث آزمون" className="rounded-[1.6rem] border border-white/[0.06] bg-[var(--surface)] p-5">
+            <h2 className="text-sm text-white [font-family:'Doran','Vazir',Tahoma,sans-serif]">مباحث پوشش داده‌شده</h2>
             <div className="mt-3 flex flex-wrap gap-2">
               {exam.topics.map((topic) => (
-                <span key={topic} className="rounded-full bg-white/[0.05] px-3 py-1.5 text-xs text-[#c9c9c9]">
+                <span key={topic} className="rounded-full bg-white/[0.05] px-3 py-1.5 text-xs text-[var(--muted)]">
                   {topic}
                 </span>
               ))}
@@ -177,15 +177,15 @@ export default function ExamDetail({ exam, onRegister, onCancelRegistration, onS
           </section>
 
           {/* ── قوانین ── */}
-          <section aria-label="قوانین آزمون" className="rounded-[1.6rem] border border-white/[0.06] bg-[#242426] p-5">
-            <h2 className="flex items-center gap-2 text-sm text-white [font-family:'Doran',Tahoma,sans-serif]">
-              <Icon name="shield" className="h-4 w-4 text-[#61D192]" />
+          <section aria-label="قوانین آزمون" className="rounded-[1.6rem] border border-white/[0.06] bg-[var(--surface)] p-5">
+            <h2 className="flex items-center gap-2 text-sm text-white [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+              <Icon name="shield" className="h-4 w-4 text-[var(--green-ink)]" />
               قوانین آزمون
             </h2>
             <ul className="mt-3 space-y-2.5">
               {ruleItems.map((rule, index) => (
-                <li key={index} className="flex items-start gap-2.5 text-[13px] leading-6 text-[#b5b5b5]">
-                  <Icon name={rule.icon} className="mt-1 h-3.5 w-3.5 shrink-0 text-[#7a7a7a]" />
+                <li key={index} className="flex items-start gap-2.5 text-[13px] leading-6 text-[var(--muted)]">
+                  <Icon name={rule.icon} className="mt-1 h-3.5 w-3.5 shrink-0 text-[var(--faint)]" />
                   {rule.text}
                 </li>
               ))}
@@ -195,18 +195,18 @@ export default function ExamDetail({ exam, onRegister, onCancelRegistration, onS
 
         {/* ── ستون اقدام (CTA) ── */}
         <aside className="space-y-4 lg:sticky lg:top-4">
-          <div className="space-y-4 rounded-[1.8rem] border border-white/[0.07] bg-[#242426] p-5">
+          <div className="space-y-4 rounded-[1.8rem] border border-white/[0.07] bg-[var(--surface)] p-5">
             {/* Countdown برای آزمون‌های آینده و منتظر نتایج */}
             {(user.status === 'REGISTRATION_OPEN' || user.status === 'UPCOMING' || user.status === 'REGISTRATION_CLOSED') && (
               <div className="space-y-3 rounded-2xl bg-black/30 p-4 text-center">
-                <p className="text-xs text-[#9a9a9a]">شروع آزمون در:</p>
+                <p className="text-xs text-[var(--faint)]">شروع آزمون در:</p>
                 <ExamCountdown targetTs={exam.startTime} compact />
               </div>
             )}
 
             {user.status === 'LIVE' && (
-              <div className="flex items-center justify-center gap-2 rounded-2xl bg-[#e26d6d]/10 p-3.5 text-sm font-bold text-[#e26d6d]">
-                <span className="h-2 w-2 animate-pulse rounded-full bg-[#e26d6d]" aria-hidden="true" />
+              <div className="flex items-center justify-center gap-2 rounded-2xl bg-[#e26d6d]/10 p-3.5 text-sm font-bold text-[var(--red-ink)]">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-[var(--red)]" aria-hidden="true" />
                 آزمون همین حالا در حال برگزاری است
               </div>
             )}
@@ -219,7 +219,7 @@ export default function ExamDetail({ exam, onRegister, onCancelRegistration, onS
                 className={`flex w-full items-center justify-center gap-2 rounded-2xl px-6 py-3.5 text-sm font-bold transition-colors ${
                   primaryCta.disabled ? 'cursor-default opacity-70' : 'cursor-pointer hover:brightness-110'
                 }`}
-                style={{ background: primaryCta.accent, color: '#0d0d0d' }}
+                style={{ background: primaryCta.accent, color: 'var(--ink-deep)' }}
               >
                 <Icon name={primaryCta.icon} className="h-4 w-4" />
                 {primaryCta.label}
@@ -230,27 +230,27 @@ export default function ExamDetail({ exam, onRegister, onCancelRegistration, onS
               <button
                 type="button"
                 onClick={onCancelRegistration}
-                className="w-full cursor-pointer rounded-xl py-2 text-[11px] text-[#8a8a8a] transition-colors hover:text-[#e26d6d]"
+                className="w-full cursor-pointer rounded-xl py-2 text-[11px] text-[var(--faint)] transition-colors hover:text-[var(--red-ink)]"
               >
                 لغو ثبت‌نام
               </button>
             )}
 
             {user.status === 'REGISTRATION_OPEN' && !user.registered && (
-              <p className="text-center text-[11px] text-[#7a7a7a]">
+              <p className="text-center text-[11px] text-[var(--faint)]">
                 مهلت ثبت‌نام تا {formatFullDate(exam.registrationDeadline)} — ساعت {formatTime(exam.registrationDeadline)}
               </p>
             )}
 
             {user.status === 'REGISTRATION_CLOSED' && (
-              <div className="flex items-start gap-2 rounded-2xl bg-[#e0b45c]/10 p-3.5 text-xs leading-6 text-[#e0b45c]">
+              <div className="flex items-start gap-2 rounded-2xl bg-[#e0b45c]/10 p-3.5 text-xs leading-6 text-[var(--gold-ink)]">
                 <Icon name="warn" className="mt-0.5 h-4 w-4 shrink-0" />
                 ثبت‌نام این آزمون بسته است؛ برای آزمون‌های بعدی در همین صفحه به‌موقع اطلاع‌رسانی می‌شود.
               </div>
             )}
 
             {user.status === 'FINISHED' && (
-              <div className="flex items-start gap-2 rounded-2xl bg-white/[0.04] p-3.5 text-xs leading-6 text-[#9a9a9a]">
+              <div className="flex items-start gap-2 rounded-2xl bg-white/[0.04] p-3.5 text-xs leading-6 text-[var(--faint)]">
                 <Icon name="info" className="mt-0.5 h-4 w-4 shrink-0" />
                 {exam.resultReleaseAt
                   ? `کارنامه‌ها در حال پردازش است و ${formatFullDate(exam.resultReleaseAt)} — ساعت ${formatTime(exam.resultReleaseAt)} اعلام می‌شود.`
@@ -259,35 +259,35 @@ export default function ExamDetail({ exam, onRegister, onCancelRegistration, onS
             )}
 
             {user.status === 'CANCELLED' && (
-              <div className="flex items-start gap-2 rounded-2xl bg-[#e26d6d]/10 p-3.5 text-xs leading-6 text-[#e26d6d]">
+              <div className="flex items-start gap-2 rounded-2xl bg-[#e26d6d]/10 p-3.5 text-xs leading-6 text-[var(--red-ink)]">
                 <Icon name="alert" className="mt-0.5 h-4 w-4 shrink-0" />
                 این آزمون لغو شده است.
               </div>
             )}
 
             {user.activeAttemptId && (
-              <div className="flex items-center justify-between gap-2 rounded-2xl bg-white/[0.04] px-4 py-3 text-xs text-[#c9c9c9]">
+              <div className="flex items-center justify-between gap-2 rounded-2xl bg-white/[0.04] px-4 py-3 text-xs text-[var(--muted)]">
                 <span>آزمون نیمه‌کاره داری</span>
-                <span className="text-[#61D192]">
+                <span className="text-[var(--green-ink)]">
                   {faNum(user.activeProgress.answeredCount)} از {faNum(user.activeProgress.totalQuestions)} پاسخ داده‌شده
                 </span>
               </div>
             )}
 
             {/* آمار شرکت‌کنندگان */}
-            <div className="flex items-center justify-between border-t border-white/[0.06] pt-3.5 text-xs text-[#8a8a8a]">
+            <div className="flex items-center justify-between border-t border-white/[0.06] pt-3.5 text-xs text-[var(--faint)]">
               <span className="inline-flex items-center gap-1.5">
                 <Icon name="users" className="h-4 w-4" />
                 {user.status === 'FINISHED' || user.status === 'RESULTS_AVAILABLE' ? 'شرکت‌کننده' : 'ثبت‌نام‌کننده'}
               </span>
-              <strong className="text-[#ddd]">{faNum(exam.participantsCount || 0)} نفر</strong>
+              <strong className="text-[var(--muted)]">{faNum(exam.participantsCount || 0)} نفر</strong>
             </div>
           </div>
 
           {/* گره به چرخهٔ یادگیری: برای آزمون‌های موضوعی منابع مرتبط پیشنهاد می‌شود */}
           {exam.resultReady && (
-            <div className="rounded-[1.6rem] border border-white/[0.06] bg-[#242426] p-5 text-center">
-              <p className="text-xs leading-6 text-[#9a9a9a]">
+            <div className="rounded-[1.6rem] border border-white/[0.06] bg-[var(--surface)] p-5 text-center">
+              <p className="text-xs leading-6 text-[var(--faint)]">
                 کارنامه‌ات آماده است؛ مرور سؤال به سؤال و افزودن نکته‌ها به فلش‌کارت از داخل کارنامه انجام می‌شود.
               </p>
             </div>
@@ -299,23 +299,23 @@ export default function ExamDetail({ exam, onRegister, onCancelRegistration, onS
       {showRegisterModal && (
         <div className="exm-modal__scrim" role="dialog" aria-modal="true" aria-label="ثبت‌نام در آزمون">
           <div className="exm-modal space-y-4">
-            <h2 className="text-lg text-white [font-family:'Doran',Tahoma,sans-serif]">ثبت‌نام در آزمون</h2>
-            <p className="text-[13px] leading-7 text-[#b5b5b5]">
+            <h2 className="text-lg text-white [font-family:'Doran','Vazir',Tahoma,sans-serif]">ثبت‌نام در آزمون</h2>
+            <p className="text-[13px] leading-7 text-[var(--muted)]">
               <strong className="text-white">{exam.title}</strong>
               <br />
               {formatWeekday(exam.startTime)} {formatFullDate(exam.startTime)} — ساعت {formatTime(exam.startTime)}
             </p>
-            <ul className="space-y-2 rounded-2xl bg-black/30 p-4 text-xs leading-6 text-[#9a9a9a]">
+            <ul className="space-y-2 rounded-2xl bg-black/30 p-4 text-xs leading-6 text-[var(--faint)]">
               <li>• با ثبت‌نام، یادآور آزمون به اعلان‌های داشبورد اضافه می‌شود.</li>
               <li>• حضور در آزمون رایگان است و فقط یک بار امکان شرکت دارد.</li>
               <li>• قوانین آزمون در همین صفحه را می‌پذیرم.</li>
             </ul>
-            <label className="flex cursor-pointer items-start gap-2.5 text-xs leading-6 text-[#ccc]">
+            <label className="flex cursor-pointer items-start gap-2.5 text-xs leading-6 text-[var(--muted)]">
               <input
                 type="checkbox"
                 checked={rulesAccepted}
                 onChange={(event) => setRulesAccepted(event.target.checked)}
-                className="mt-1 h-4 w-4 accent-[#61D192]"
+                className="mt-1 h-4 w-4 accent-[var(--green-ink)]"
               />
               قوانین آزمون را خوانده‌ام و می‌پذیرم.
             </label>
@@ -324,7 +324,7 @@ export default function ExamDetail({ exam, onRegister, onCancelRegistration, onS
                 type="button"
                 disabled={!rulesAccepted}
                 onClick={handleRegister}
-                className={`flex-1 rounded-2xl bg-[#61D192] py-3 text-sm font-bold text-[#0d1f16] transition-all ${
+                className={`flex-1 rounded-2xl bg-[var(--green-vivid)] py-3 text-sm font-bold text-[#0d1f16] transition-all ${
                   rulesAccepted ? 'cursor-pointer hover:bg-[#74dd9f]' : 'cursor-not-allowed opacity-40'
                 }`}
               >
@@ -333,7 +333,7 @@ export default function ExamDetail({ exam, onRegister, onCancelRegistration, onS
               <button
                 type="button"
                 onClick={() => setShowRegisterModal(false)}
-                className="cursor-pointer rounded-2xl bg-white/[0.06] px-5 py-3 text-sm text-[#aaa] transition-colors hover:bg-white/[0.1] hover:text-white"
+                className="cursor-pointer rounded-2xl bg-white/[0.06] px-5 py-3 text-sm text-[var(--muted)] transition-colors hover:bg-white/[0.1] hover:text-white"
               >
                 انصراف
               </button>

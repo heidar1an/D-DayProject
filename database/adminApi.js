@@ -221,6 +221,8 @@ const STATUS_BY_CODE = {
   /* انتشار در کانال‌ها — خطای سرویس بیرونی، نه خطای درخواست کاربر */
   PUBLISH_NO_TOKEN: 409,
   PUBLISH_UNAUTHORIZED: 502,
+  /* ۴۰۳ یعنی «دسترسی ندارد» (ربات ادمین نیست) — نه توکن باطل */
+  PUBLISH_FORBIDDEN: 502,
   PUBLISH_UNREACHABLE: 502,
   PUBLISH_TIMEOUT: 504,
   PUBLISH_FAILED: 502,

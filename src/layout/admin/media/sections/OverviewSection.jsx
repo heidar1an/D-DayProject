@@ -49,21 +49,21 @@ export default function OverviewSection({ config, range, openTab }) {
 
   const reachSeries = useMemo(
     () => [
-      { key: 'reach', label: 'Reach', color: '#937fcd', values: (data?.series?.daily ?? []).map((row) => row.reach ?? 0) },
+      { key: 'reach', label: 'Reach', color: 'var(--purple-ink)', values: (data?.series?.daily ?? []).map((row) => row.reach ?? 0) },
     ],
     [data],
   );
 
   const engagementSeries = useMemo(
     () => [
-      { key: 'engagement', label: 'Engagement', color: '#61d192', values: (data?.series?.daily ?? []).map((row) => row.engagement ?? 0) },
+      { key: 'engagement', label: 'Engagement', color: 'var(--green-ink)', values: (data?.series?.daily ?? []).map((row) => row.engagement ?? 0) },
     ],
     [data],
   );
 
   const publishSeries = useMemo(
     () => [
-      { key: 'published', label: 'منتشرشده', color: '#937fcd', values: (data?.series?.contentTimeline ?? []).map((row) => row.published ?? 0) },
+      { key: 'published', label: 'منتشرشده', color: 'var(--purple-ink)', values: (data?.series?.contentTimeline ?? []).map((row) => row.published ?? 0) },
     ],
     [data],
   );
@@ -204,8 +204,8 @@ export default function OverviewSection({ config, range, openTab }) {
           description={`روزانه، ${data.range.label}`}
           actions={(
             <span className="mc-legend">
-              <span><i style={{ background: '#937fcd' }} />Reach</span>
-              <span><i style={{ background: '#61d192' }} />Engagement</span>
+              <span><i style={{ background: 'var(--purple-bright)' }} />Reach</span>
+              <span><i style={{ background: 'var(--green-vivid)' }} />Engagement</span>
             </span>
           )}
         >
@@ -299,7 +299,7 @@ export default function OverviewSection({ config, range, openTab }) {
       {/* ─── انواع محتوا، قیف و صف ─── */}
       <div className="mc-grid mc-grid--2">
         <Panel title="انواع محتوا" description="کدام قالب بیشترین دسترسی را می‌سازد">
-          <BarList rows={typeRows} color="#5b8cc7" />
+          <BarList rows={typeRows} color="var(--blue-ink)" />
         </Panel>
 
         <Panel

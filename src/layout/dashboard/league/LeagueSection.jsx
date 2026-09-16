@@ -59,16 +59,16 @@ function useCountdown(endsAt) {
 
 function LeagueErrorState({ onRetry }) {
   return (
-    <div className="rounded-[2.5rem] bg-[#282828] p-10 text-center">
-      <span className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full bg-[#ff6969]/12 text-[#ff6969]">
+    <div className="rounded-[2.5rem] bg-[var(--surface-soft)] p-10 text-center">
+      <span className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full bg-[#ff6969]/12 text-[var(--red-ink)]">
         <Icon name="warn" className="h-7 w-7" />
       </span>
-      <strong className="block text-lg [font-family:'Doran',Tahoma,sans-serif]">لیگ این لحظه در دسترس نیست</strong>
-      <p className="mt-2 text-sm text-[#8a8a8a]">اتصالت را چک کن و دوباره تلاش کن.</p>
+      <strong className="block text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]">لیگ این لحظه در دسترس نیست</strong>
+      <p className="mt-2 text-sm text-[var(--faint)]">اتصالت را چک کن و دوباره تلاش کن.</p>
       <button
         type="button"
         onClick={onRetry}
-        className="mt-5 cursor-pointer rounded-xl bg-[#937fcd] px-6 py-2.5 text-sm text-white transition-transform hover:-translate-y-0.5 [font-family:'Doran',Tahoma,sans-serif]"
+        className="mt-5 cursor-pointer rounded-xl bg-[var(--purple-bright)] px-6 py-2.5 text-sm text-white transition-transform hover:-translate-y-0.5 [font-family:'Doran','Vazir',Tahoma,sans-serif]"
       >
         تلاش دوباره
       </button>
@@ -96,7 +96,7 @@ function LeagueLadder({ tiers, currentTier, meRank }) {
             <span
               key={tier.id}
               className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs ${
-                isCurrent ? 'font-bold' : 'text-[#8a8a8a]'
+                isCurrent ? 'font-bold' : 'text-[var(--faint)]'
               }`}
               style={
                 isCurrent
@@ -111,9 +111,9 @@ function LeagueLadder({ tiers, currentTier, meRank }) {
           );
         })}
       </div>
-      <p className="mt-3 text-[11px] leading-5 text-[#8a8a8a]">
-        پایان فصل: <span className="text-[#9ed3ab]">۳ نفر اول صعود</span> می‌کنند،{' '}
-        <span className="text-[#ef9196]">۳ نفر آخر سقوط</span> — جایگاهت همین حالا: رتبهٔ {toFa(meRank)} {currentTier.name}.
+      <p className="mt-3 text-[11px] leading-5 text-[var(--faint)]">
+        پایان فصل: <span className="text-[var(--green-soft-ink)]">۳ نفر اول صعود</span> می‌کنند،{' '}
+        <span className="text-[var(--red-ink)]">۳ نفر آخر سقوط</span> — جایگاهت همین حالا: رتبهٔ {toFa(meRank)} {currentTier.name}.
       </p>
     </div>
   );
@@ -142,45 +142,45 @@ function Overview({ overview, onOpenView }) {
       <div className="grid gap-6 xl:grid-cols-2">
         {/* فاصله تا رتبه بعدی */}
         <section aria-label="تا رتبه بعدی" className="rounded-[2.5rem] border border-[#e26d6d]/30 bg-gradient-to-l from-[#e26d6d]/10 to-transparent p-5 md:p-7">
-          <h2 className="flex items-center gap-2 text-lg [font-family:'Doran',Tahoma,sans-serif]">
-            <Icon name="up" className="h-5 w-5 text-[#ef9196]" />
+          <h2 className="flex items-center gap-2 text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+            <Icon name="up" className="h-5 w-5 text-[var(--red-ink)]" />
             رتبه بعدی نزدیک است!
           </h2>
           <div className="mt-4 flex items-center gap-4">
-            <span className="grid h-16 w-16 shrink-0 place-items-center rounded-3xl bg-[#e26d6d]/15 text-2xl text-[#ef9196] [font-family:'Doran',Tahoma,sans-serif]">
+            <span className="grid h-16 w-16 shrink-0 place-items-center rounded-3xl bg-[#e26d6d]/15 text-2xl text-[var(--red-ink)] [font-family:'Doran','Vazir',Tahoma,sans-serif]">
               #{toFa(overview.nextRank.rank)}
             </span>
             <div className="min-w-0 flex-1">
-              <p className="text-sm leading-6 text-[#e6e6e6]">
-                فقط <strong className="text-[#ef9196]">{faNum(overview.nextRank.gap)} قلب</strong> تا ورود به رتبهٔ {toFa(overview.nextRank.rank)}!
+              <p className="text-sm leading-6 text-[var(--white)]">
+                فقط <strong className="text-[var(--red-ink)]">{faNum(overview.nextRank.gap)} قلب</strong> تا ورود به رتبهٔ {toFa(overview.nextRank.rank)}!
               </p>
-              <ProgressBar value={overview.me.hearts} max={overview.me.hearts + overview.nextRank.gap} color="#e26d6d" height={8} className="mt-3" />
+              <ProgressBar value={overview.me.hearts} max={overview.me.hearts + overview.nextRank.gap} color="var(--red-ink)" height={8} className="mt-3" />
             </div>
           </div>
           <button
             type="button"
             onClick={() => onOpenView('challenges')}
-            className="mt-5 cursor-pointer rounded-xl bg-[#e26d6d]/15 px-4 py-2 text-xs text-[#ef9196] transition-colors hover:bg-[#e26d6d]/25"
+            className="mt-5 cursor-pointer rounded-xl bg-[#e26d6d]/15 px-4 py-2 text-xs text-[var(--red-ink)] transition-colors hover:bg-[#e26d6d]/25"
           >
             چالش‌های امروز را ببین
           </button>
         </section>
 
         {/* رویدادهای زنده */}
-        <section aria-label="رویدادهای زنده" className="rounded-[2.5rem] bg-[#282828] p-5 md:p-7">
-          <h2 className="flex items-center gap-2 text-lg [font-family:'Doran',Tahoma,sans-serif]">
-            <i className="lg-live-dot inline-block h-2 w-2 rounded-full bg-[#77b787]" />
+        <section aria-label="رویدادهای زنده" className="rounded-[2.5rem] bg-[var(--surface-soft)] p-5 md:p-7">
+          <h2 className="flex items-center gap-2 text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+            <i className="lg-live-dot inline-block h-2 w-2 rounded-full bg-[var(--green-bright)]" />
             رویدادهای زنده
           </h2>
           <ul className="mt-4 space-y-2.5">
             {overview.liveEvents.map((event) => (
-              <li key={event.id} className="flex items-center gap-3 rounded-2xl border border-white/6 bg-[#2a2a2a] px-4 py-3">
+              <li key={event.id} className="flex items-center gap-3 rounded-2xl border border-white/6 bg-[var(--surface-soft)] px-4 py-3">
                 <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl" style={{ background: `${event.accent}1f`, color: event.accent }}>
                   <Icon name={event.status === 'live' ? 'flame' : 'calendar'} className="h-4.5 w-4.5" />
                 </span>
                 <span className="min-w-0 flex-1">
                   <strong className="block truncate text-sm">{event.title}</strong>
-                  <span className="block truncate text-[11px] text-[#8a8a8a]">{event.note}</span>
+                  <span className="block truncate text-[11px] text-[var(--faint)]">{event.note}</span>
                 </span>
                 <span className="shrink-0 rounded-full px-2.5 py-1 text-[10px]" style={{ background: `${event.accent}14`, color: event.accent }}>
                   {event.leftLabel}
@@ -193,13 +193,13 @@ function Overview({ overview, onOpenView }) {
 
       <div className="grid gap-6 xl:grid-cols-2">
         {/* خلاصهٔ جدول */}
-        <section aria-label="خلاصه جدول رتبه‌بندی" className="rounded-[2.5rem] bg-[#282828] p-5 md:p-7">
+        <section aria-label="خلاصه جدول رتبه‌بندی" className="rounded-[2.5rem] bg-[var(--surface-soft)] p-5 md:p-7">
           <header className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg [font-family:'Doran',Tahoma,sans-serif]">سران جدول دانشگاهت</h2>
+            <h2 className="text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]">سران جدول دانشگاهت</h2>
             <button
               type="button"
               onClick={() => onOpenView('board')}
-              className="cursor-pointer text-xs text-[#937fcd] transition-colors hover:text-[#c9bdf0]"
+              className="cursor-pointer text-xs text-[var(--purple-ink)] transition-colors hover:text-[var(--purple-soft-ink)]"
             >
               جدول کامل
             </button>
@@ -224,13 +224,13 @@ function Overview({ overview, onOpenView }) {
         </section>
 
         {/* چالش‌های امروز + هفتگی */}
-        <section aria-label="چالش‌های در جریان" className="rounded-[2.5rem] bg-[#282828] p-5 md:p-7">
+        <section aria-label="چالش‌های در جریان" className="rounded-[2.5rem] bg-[var(--surface-soft)] p-5 md:p-7">
           <header className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg [font-family:'Doran',Tahoma,sans-serif]">امروز چیکار می‌تونی بکنی؟</h2>
+            <h2 className="text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]">امروز چیکار می‌تونی بکنی؟</h2>
             <button
               type="button"
               onClick={() => onOpenView('challenges')}
-              className="cursor-pointer text-xs text-[#937fcd] transition-colors hover:text-[#c9bdf0]"
+              className="cursor-pointer text-xs text-[var(--purple-ink)] transition-colors hover:text-[var(--purple-soft-ink)]"
             >
               همهٔ چالش‌ها
             </button>
@@ -240,8 +240,8 @@ function Overview({ overview, onOpenView }) {
             {challenges.loading
               ? Array.from({ length: 2 }, (_, index) => <Skeleton key={index} className="h-16 rounded-2xl" />)
               : dailies.map((challenge) => (
-                  <div key={challenge.id} className="flex items-center gap-3 rounded-2xl border border-white/6 bg-[#2a2a2a] px-4 py-3">
-                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#937fcd]/15 text-[#b3a3e8]">
+                  <div key={challenge.id} className="flex items-center gap-3 rounded-2xl border border-white/6 bg-[var(--surface-soft)] px-4 py-3">
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#937fcd]/15 text-[var(--purple-soft-ink)]">
                       <Icon name={challenge.icon} className="h-4.5 w-4.5" />
                     </span>
                     <span className="min-w-0 flex-1">
@@ -254,14 +254,14 @@ function Overview({ overview, onOpenView }) {
 
             {weekly && (
               <div className="flex items-center gap-3 rounded-2xl border border-[#e0b45c]/25 bg-[#e0b45c]/[0.05] px-4 py-3">
-                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#e0b45c]/15 text-[#e0b45c]">
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#e0b45c]/15 text-[var(--gold-ink)]">
                   <Icon name="trophy" className="h-4.5 w-4.5" />
                 </span>
                 <span className="min-w-0 flex-1">
                   <strong className="block truncate text-sm">هفتگی: {weekly.title}</strong>
-                  <ProgressBar value={weekly.progress} max={weekly.goal} color="#e0b45c" height={5} className="mt-1.5" />
+                  <ProgressBar value={weekly.progress} max={weekly.goal} color="var(--gold-ink)" height={5} className="mt-1.5" />
                 </span>
-                <span className="shrink-0 text-xs text-[#aaa]">{toFa(weekly.progress)}/{toFa(weekly.goal)}</span>
+                <span className="shrink-0 text-xs text-[var(--muted)]">{toFa(weekly.progress)}/{toFa(weekly.goal)}</span>
               </div>
             )}
           </div>
@@ -273,18 +273,18 @@ function Overview({ overview, onOpenView }) {
         <UniversityCard overview={overview} />
 
         {/* فید فعالیت */}
-        <section aria-label="فید فعالیت" className="rounded-[2.5rem] bg-[#282828] p-5 md:p-7">
-          <h2 className="mb-4 text-lg [font-family:'Doran',Tahoma,sans-serif]">این ساعت در تپش</h2>
+        <section aria-label="فید فعالیت" className="rounded-[2.5rem] bg-[var(--surface-soft)] p-5 md:p-7">
+          <h2 className="mb-4 text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]">این ساعت در تپش</h2>
           <ul className="space-y-2.5">
             {overview.activity.map((item) => (
-              <li key={item.id} className="flex items-center gap-3 rounded-2xl border border-white/6 bg-[#2a2a2a] px-4 py-3">
+              <li key={item.id} className="flex items-center gap-3 rounded-2xl border border-white/6 bg-[var(--surface-soft)] px-4 py-3">
                 <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: item.accent }} />
                 <span className="min-w-0 flex-1 text-sm">{item.text}</span>
-                <span className="shrink-0 text-[11px] text-[#8a8a8a]">{item.time}</span>
+                <span className="shrink-0 text-[11px] text-[var(--faint)]">{item.time}</span>
               </li>
             ))}
           </ul>
-          <p className="mt-3 text-[11px] text-[#6d6d6d]">فقط فعالیت‌های عمومی نمایش داده می‌شود؛ تنظیماتش در پروفایل است.</p>
+          <p className="mt-3 text-[11px] text-[var(--ghost)]">فقط فعالیت‌های عمومی نمایش داده می‌شود؛ تنظیماتش در پروفایل است.</p>
         </section>
       </div>
     </div>
@@ -299,10 +299,10 @@ function UniversityCard({ overview }) {
   if (board.loading || !uni) return <Skeleton className="h-56 rounded-[2.5rem]" />;
 
   return (
-    <section aria-label="شناسنامهٔ دانشگاه" className="rounded-[2.5rem] bg-[#282828] p-5 md:p-7">
+    <section aria-label="شناسنامهٔ دانشگاه" className="rounded-[2.5rem] bg-[var(--surface-soft)] p-5 md:p-7">
       <header className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg [font-family:'Doran',Tahoma,sans-serif]">دانشگاه تو</h2>
-        <span className="rounded-full bg-[#5b8cc7]/15 px-3 py-1 text-xs text-[#9cc0e8]">رتبهٔ #{toFa(uni.rank)} کشور</span>
+        <h2 className="text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]">دانشگاه تو</h2>
+        <span className="rounded-full bg-[#5b8cc7]/15 px-3 py-1 text-xs text-[var(--blue-soft-ink)]">رتبهٔ #{toFa(uni.rank)} کشور</span>
       </header>
       <strong className="block text-base">{uni.name}</strong>
       <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -312,18 +312,18 @@ function UniversityCard({ overview }) {
           { label: 'میانگین قلب', value: faNum(uni.avg) },
           { label: 'رتبهٔ فصل', value: `#${toFa(overview.me.seasonRank)}` },
         ].map((stat) => (
-          <div key={stat.label} className="rounded-2xl border border-white/6 bg-[#2a2a2a] p-3 text-center">
+          <div key={stat.label} className="rounded-2xl border border-white/6 bg-[var(--surface-soft)] p-3 text-center">
             {stat.heart ? (
               <IconHeart className="mx-auto mb-1 h-4 w-4" />
             ) : (
-              <Icon name="users" className="mx-auto mb-1 h-4 w-4 text-[#77b787]" />
+              <Icon name="users" className="mx-auto mb-1 h-4 w-4 text-[var(--green-ink)]" />
             )}
-            <strong className="block text-base [font-family:'Doran',Tahoma,sans-serif]">{stat.value}</strong>
-            <span className="text-[11px] text-[#8a8a8a]">{stat.label}</span>
+            <strong className="block text-base [font-family:'Doran','Vazir',Tahoma,sans-serif]">{stat.value}</strong>
+            <span className="text-[11px] text-[var(--faint)]">{stat.label}</span>
           </div>
         ))}
       </div>
-      <p className="mt-4 text-[11px] leading-5 text-[#8a8a8a]">
+      <p className="mt-4 text-[11px] leading-5 text-[var(--faint)]">
         رتبهٔ دانشگاه با میانگین و نرخ مشارکت هم قابل محاسبه است؛ این معیارها به‌زودی از پنل مدیریت تنظیم می‌شوند.
       </p>
     </section>
@@ -365,14 +365,14 @@ export default function LeagueSection({ userData }) {
     : null;
 
   return (
-    <section dir="rtl" aria-label="لیگ تپش" className="mx-auto w-[var(--content-width)] py-8 text-white md:py-10 [font-family:'Pinar',Tahoma,sans-serif]">
+    <section dir="rtl" aria-label="لیگ تپش" className="mx-auto w-[var(--content-width)] py-8 text-white md:py-10 [font-family:'Pinar','Vazir',Tahoma,sans-serif]">
       {/* سربرگ لایه */}
       <header className="mb-8 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl text-[#937fcd] md:text-4xl [font-family:'Doran',Tahoma,sans-serif]">لیگ تپش</h1>
+          <h1 className="text-3xl text-[var(--purple-ink)] md:text-4xl [font-family:'Doran','Vazir',Tahoma,sans-serif]">لیگ تپش</h1>
           {overview && (
-            <p className="mt-2 flex flex-wrap items-center gap-2 text-sm text-[#aaa]">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#937fcd]/12 px-3 py-1 text-xs text-[#c9bdf0]">
+            <p className="mt-2 flex flex-wrap items-center gap-2 text-sm text-[var(--muted)]">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#937fcd]/12 px-3 py-1 text-xs text-[var(--purple-soft-ink)]">
                 فصل {toFa(overview.season.number)} · «{overview.season.name}»
               </span>
               <span className="lg-countdown text-xs">
@@ -390,14 +390,14 @@ export default function LeagueSection({ userData }) {
         <div className="space-y-6">
           {/* هیرو: در چند ثانیه اول جواب همه‌چیز اینجاست */}
           <div className="dash-stagger space-y-4">
-            <div className="rounded-[2.5rem] bg-[#282828] p-5 md:p-8">
+            <div className="rounded-[2.5rem] bg-[var(--surface-soft)] p-5 md:p-8">
               <div className="flex flex-wrap items-center gap-5">
                 <UserAvatar avatar={me.avatar} size={84} isYou />
                 <div className="min-w-0">
-                  <h2 className="text-2xl [font-family:'Doran',Tahoma,sans-serif]">{me.name}</h2>
-                  <p className="mt-1 text-sm text-[#aaa]">{me.university}</p>
+                  <h2 className="text-2xl [font-family:'Doran','Vazir',Tahoma,sans-serif]">{me.name}</h2>
+                  <p className="mt-1 text-sm text-[var(--muted)]">{me.university}</p>
                   {me.title && (
-                    <span className="mt-2 inline-block rounded-full bg-[#937fcd]/15 px-3 py-1 text-xs text-[#c9bdf0]">
+                    <span className="mt-2 inline-block rounded-full bg-[#937fcd]/15 px-3 py-1 text-xs text-[var(--purple-soft-ink)]">
                       {me.title}
                     </span>
                   )}
@@ -409,29 +409,29 @@ export default function LeagueSection({ userData }) {
                       <IconHeart className="h-8 w-8" />
                     </span>
                     <span>
-                      <strong className="block text-2xl leading-7 [font-family:'Doran',Tahoma,sans-serif]">{faNum(hearts)}</strong>
-                      <span className="text-xs text-[#8a8a8a]">قلب</span>
+                      <strong className="block text-2xl leading-7 [font-family:'Doran','Vazir',Tahoma,sans-serif]">{faNum(hearts)}</strong>
+                      <span className="text-xs text-[var(--faint)]">قلب</span>
                     </span>
                   </div>
 
                   <div>
-                    <strong className="block text-2xl leading-7 text-[#e0b45c] [font-family:'Doran',Tahoma,sans-serif]">
+                    <strong className="block text-2xl leading-7 text-[var(--gold-ink)] [font-family:'Doran','Vazir',Tahoma,sans-serif]">
                       #{toFa(me.rank)}
                     </strong>
-                    <span className="text-xs text-[#8a8a8a]">رتبه در دانشگاه</span>
+                    <span className="text-xs text-[var(--faint)]">رتبه در دانشگاه</span>
                   </div>
 
                   <div>
-                    <strong className="flex items-center gap-1.5 text-2xl leading-7 [font-family:'Doran',Tahoma,sans-serif]">
-                      <Icon name="flame" className="h-6 w-6 text-[#ef9196]" />
+                    <strong className="flex items-center gap-1.5 text-2xl leading-7 [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+                      <Icon name="flame" className="h-6 w-6 text-[var(--red-ink)]" />
                       {toFa(me.streak)}
                     </strong>
-                    <span className="text-xs text-[#8a8a8a]">روز استریک</span>
+                    <span className="text-xs text-[var(--faint)]">روز استریک</span>
                   </div>
 
                   <div>
                     <TierBadge tier={me.tier} />
-                    <p className="mt-1.5 text-xs text-[#8a8a8a]">سطح {toFa(overview.levelProgress.level)} · {toFa(overview.levelProgress.step)}/{toFa(overview.levelProgress.stepMax)} تا سطح بعد</p>
+                    <p className="mt-1.5 text-xs text-[var(--faint)]">سطح {toFa(overview.levelProgress.level)} · {toFa(overview.levelProgress.step)}/{toFa(overview.levelProgress.stepMax)} تا سطح بعد</p>
                     <ProgressBar value={overview.levelProgress.step} max={overview.levelProgress.stepMax} height={5} className="mt-1.5 w-40" />
                   </div>
                 </div>
@@ -449,10 +449,10 @@ export default function LeagueSection({ userData }) {
                 type="button"
                 aria-current={activeView === view.id ? 'page' : undefined}
                 onClick={() => setActiveView(view.id)}
-                className={`flex shrink-0 cursor-pointer items-center gap-2 rounded-full px-4 py-2.5 text-sm transition-colors [font-family:'Doran',Tahoma,sans-serif] ${
+                className={`flex shrink-0 cursor-pointer items-center gap-2 rounded-full px-4 py-2.5 text-sm transition-colors [font-family:'Doran','Vazir',Tahoma,sans-serif] ${
                   activeView === view.id
-                    ? 'bg-[#937fcd] text-white'
-                    : 'text-[#aaa] hover:bg-white/5 hover:text-white'
+                    ? 'bg-[var(--purple-bright)] text-white'
+                    : 'text-[var(--muted)] hover:bg-white/5 hover:text-white'
                 }`}
               >
                 <Icon name={view.icon} className="h-4 w-4" />
@@ -477,13 +477,13 @@ export default function LeagueSection({ userData }) {
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className="lg-toast flex items-center gap-2.5 rounded-full border border-[#e26d6d]/40 bg-[#26191b]/95 px-5 py-3 text-sm shadow-[0_18px_40px_-14px_rgba(0,0,0,0.9)] backdrop-blur"
+            className="lg-toast flex items-center gap-2.5 rounded-full border border-[#e26d6d]/40 bg-[#26191b]/95 px-5 py-3 text-sm shadow-[0_18px_40px_-14px_rgb(var(--shadow-rgb) / 0.9)] backdrop-blur"
           >
             <span className="lg-heart-pop">
               <IconHeart className="h-5 w-5" />
             </span>
-            <strong className="text-[#ef9196]">+{faNum(toast.amount)} قلب</strong>
-            <span className="text-[#aaa]">· {toast.label}</span>
+            <strong className="text-[var(--red-ink)]">+{faNum(toast.amount)} قلب</strong>
+            <span className="text-[var(--muted)]">· {toast.label}</span>
           </div>
         ))}
       </div>

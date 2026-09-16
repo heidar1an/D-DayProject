@@ -34,12 +34,12 @@ import QuestionExplanation from './QuestionExplanation';
 function OptionButton({ option, state, onSelect, langMode, disabled }) {
   const skin =
     state === 'correct'
-      ? 'border-[#77b787]/45 bg-[#77b787]/[0.09] text-[#e6e6e6]'
+      ? 'border-[#77b787]/45 bg-[#77b787]/[0.09] text-[var(--white)]'
       : state === 'wrong'
-        ? 'border-[#e26d6d]/45 bg-[#e26d6d]/[0.08] text-[#e6e6e6]'
+        ? 'border-[#e26d6d]/45 bg-[#e26d6d]/[0.08] text-[var(--white)]'
         : state === 'selected'
           ? 'border-[#937fcd]/70 bg-[#937fcd]/[0.12] text-white'
-          : 'border-white/8 bg-[#2a2a2a] text-[#d9d9d9] hover:border-white/20 hover:bg-[#303030]';
+          : 'border-white/8 bg-[var(--surface-soft)] text-[var(--muted)] hover:border-white/20 hover:bg-[var(--surface-soft)]';
 
   return (
     <button
@@ -50,14 +50,14 @@ function OptionButton({ option, state, onSelect, langMode, disabled }) {
       aria-pressed={state === 'selected' || state === 'correct' || state === 'wrong'}
     >
       <span
-        className={`mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-xl text-sm font-bold [font-family:'Doran',Tahoma,sans-serif] ${
+        className={`mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-xl text-sm font-bold [font-family:'Doran','Vazir',Tahoma,sans-serif] ${
           state === 'correct'
-            ? 'bg-[#77b787]/25 text-[#9ed3ab]'
+            ? 'bg-[#77b787]/25 text-[var(--green-soft-ink)]'
             : state === 'wrong'
-              ? 'bg-[#e26d6d]/25 text-[#ef9196]'
+              ? 'bg-[#e26d6d]/25 text-[var(--red-ink)]'
               : state === 'selected'
                 ? 'bg-[#937fcd]/30 text-white'
-                : 'bg-white/6 text-[#8a8a8a]'
+                : 'bg-white/6 text-[var(--faint)]'
         }`}
         aria-hidden="true"
       >
@@ -70,13 +70,13 @@ function OptionButton({ option, state, onSelect, langMode, disabled }) {
           </span>
         )}
         {langMode !== 'en' && (
-          <span className={`block text-[14px] leading-6 ${langMode === 'dual' ? 'mt-1.5 text-[#bdbdbd]' : ''}`}>
+          <span className={`block text-[14px] leading-6 ${langMode === 'dual' ? 'mt-1.5 text-[var(--muted)]' : ''}`}>
             {option.fa}
           </span>
         )}
       </span>
-      {state === 'correct' && <Icon name="check" className="mt-1 h-4.5 w-4.5 shrink-0 text-[#9ed3ab]" />}
-      {state === 'wrong' && <Icon name="x" className="mt-1 h-4.5 w-4.5 shrink-0 text-[#ef9196]" />}
+      {state === 'correct' && <Icon name="check" className="mt-1 h-4.5 w-4.5 shrink-0 text-[var(--green-soft-ink)]" />}
+      {state === 'wrong' && <Icon name="x" className="mt-1 h-4.5 w-4.5 shrink-0 text-[var(--red-ink)]" />}
     </button>
   );
 }
@@ -95,7 +95,7 @@ function QuestionNavigator({ questions, currentIndex, answers, bookmarks, filter
           onClick={() => onFilter(null)}
           aria-pressed={filter === null}
           className={`cursor-pointer rounded-full px-3 py-1.5 text-[11px] transition-colors ${
-            filter === null ? 'bg-[#937fcd] text-white' : 'bg-white/5 text-[#aaa] hover:text-white'
+            filter === null ? 'bg-[var(--purple-bright)] text-white' : 'bg-white/5 text-[var(--muted)] hover:text-white'
           }`}
         >
           همه
@@ -107,7 +107,7 @@ function QuestionNavigator({ questions, currentIndex, answers, bookmarks, filter
             onClick={() => onFilter(level)}
             aria-pressed={filter === level}
             className={`cursor-pointer rounded-full px-3 py-1.5 text-[11px] transition-colors ${
-              filter === level ? 'bg-[#937fcd] text-white' : 'bg-white/5 text-[#aaa] hover:text-white'
+              filter === level ? 'bg-[var(--purple-bright)] text-white' : 'bg-white/5 text-[var(--muted)] hover:text-white'
             }`}
           >
             {difficultyLabel(level)}
@@ -130,19 +130,19 @@ function QuestionNavigator({ questions, currentIndex, answers, bookmarks, filter
                 answer ? (answer.isCorrect ? '، صحیح' : '، غلط') : '، حل‌نشده'
               }${isBookmarked ? '، گلچین‌شده' : ''}`}
               aria-current={isCurrent ? 'step' : undefined}
-              className={`relative grid h-10 place-items-center cursor-pointer rounded-xl border text-sm [font-family:'Doran',Tahoma,sans-serif] transition-colors ${
+              className={`relative grid h-10 place-items-center cursor-pointer rounded-xl border text-sm [font-family:'Doran','Vazir',Tahoma,sans-serif] transition-colors ${
                 isCurrent
-                  ? 'border-[#937fcd] bg-[#937fcd]/25 text-white'
+                  ? 'border-[var(--purple-bright)] bg-[#937fcd]/25 text-white'
                   : answer?.isCorrect
-                    ? 'border-[#77b787]/35 bg-[#77b787]/12 text-[#9ed3ab]'
+                    ? 'border-[#77b787]/35 bg-[#77b787]/12 text-[var(--green-soft-ink)]'
                     : answer && !answer.isCorrect
-                      ? 'border-[#e26d6d]/35 bg-[#e26d6d]/12 text-[#ef9196]'
-                      : 'border-white/8 bg-white/[0.04] text-[#aaa] hover:border-white/25'
+                      ? 'border-[#e26d6d]/35 bg-[#e26d6d]/12 text-[var(--red-ink)]'
+                      : 'border-white/8 bg-white/[0.04] text-[var(--muted)] hover:border-white/25'
               }`}
             >
               {toFa(index + 1)}
               {isBookmarked && (
-                <span className="absolute -left-1 -top-1 grid h-4 w-4 place-items-center rounded-full bg-[#232323] text-[#ef9196]" aria-hidden="true">
+                <span className="absolute -left-1 -top-1 grid h-4 w-4 place-items-center rounded-full bg-[var(--surface)] text-[var(--red-ink)]" aria-hidden="true">
                   <Icon name="heart" className="h-2.5 w-2.5" strokeWidth={2.4} />
                 </span>
               )}
@@ -151,7 +151,7 @@ function QuestionNavigator({ questions, currentIndex, answers, bookmarks, filter
         })}
       </div>
 
-      <ul className="mt-4 space-y-2 border-t border-white/8 pt-3 text-[11px] text-[#8a8a8a]">
+      <ul className="mt-4 space-y-2 border-t border-white/8 pt-3 text-[11px] text-[var(--faint)]">
         <li className="flex items-center gap-2">
           <span className="h-2.5 w-2.5 rounded-md bg-[#77b787]/60" aria-hidden="true" /> صحیح
         </li>
@@ -216,16 +216,16 @@ function AddToCollectionPopover({ userId, questionId, onClose }) {
   return (
     <div
       ref={popRef}
-      className="intl-pop absolute left-0 top-full z-30 mt-2 w-[min(19rem,calc(100vw-3rem))] rounded-3xl border border-white/10 bg-[#232323] p-3 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.85)]"
+      className="intl-pop absolute left-0 top-full z-30 mt-2 w-[min(19rem,calc(100vw-3rem))] rounded-3xl border border-white/10 bg-[var(--surface)] p-3 shadow-[0_24px_60px_-20px_rgb(var(--shadow-rgb) / 0.85)]"
       role="dialog"
       aria-label="افزودن سؤال به مجموعه"
     >
-      <p className="px-1.5 py-1.5 text-[13px] [font-family:'Doran',Tahoma,sans-serif]">افزودن به مجموعه</p>
+      <p className="px-1.5 py-1.5 text-[13px] [font-family:'Doran','Vazir',Tahoma,sans-serif]">افزودن به مجموعه</p>
 
       {!collections ? (
-        <p className="px-1.5 py-3 text-xs text-[#8a8a8a]">در حال بارگذاری مجموعه‌ها…</p>
+        <p className="px-1.5 py-3 text-xs text-[var(--faint)]">در حال بارگذاری مجموعه‌ها…</p>
       ) : collections.length === 0 ? (
-        <p className="px-1.5 py-2 text-xs leading-5 text-[#8a8a8a]">هنوز مجموعه‌ای نساخته‌ای؛ اولین مجموعه‌ات را بساز.</p>
+        <p className="px-1.5 py-2 text-xs leading-5 text-[var(--faint)]">هنوز مجموعه‌ای نساخته‌ای؛ اولین مجموعه‌ات را بساز.</p>
       ) : (
         <ul className="max-h-44 space-y-1 overflow-y-auto">
           {collections.map((collection) => {
@@ -237,11 +237,11 @@ function AddToCollectionPopover({ userId, questionId, onClose }) {
                   disabled={isAdded}
                   onClick={() => handleAdd(collection)}
                   className={`flex w-full cursor-pointer items-center justify-between gap-2 rounded-2xl px-3 py-2.5 text-[13px] transition-colors ${
-                    isAdded ? 'bg-[#77b787]/10 text-[#9ed3ab]' : 'text-[#d9d9d9] hover:bg-white/5'
+                    isAdded ? 'bg-[#77b787]/10 text-[var(--green-soft-ink)]' : 'text-[var(--muted)] hover:bg-white/5'
                   }`}
                 >
                   <span className="flex min-w-0 items-center gap-2">
-                    <Icon name="layers" className="h-4 w-4 shrink-0 text-[#937fcd]" />
+                    <Icon name="layers" className="h-4 w-4 shrink-0 text-[var(--purple-ink)]" />
                     <span className="truncate">{collection.name}</span>
                   </span>
                   {isAdded ? (
@@ -249,7 +249,7 @@ function AddToCollectionPopover({ userId, questionId, onClose }) {
                       <Icon name="check" className="h-3.5 w-3.5" /> اضافه شد
                     </span>
                   ) : (
-                    <Icon name="plus" className="h-3.5 w-3.5 shrink-0 text-[#8a8a8a]" />
+                    <Icon name="plus" className="h-3.5 w-3.5 shrink-0 text-[var(--faint)]" />
                   )}
                 </button>
               </li>
@@ -264,7 +264,7 @@ function AddToCollectionPopover({ userId, questionId, onClose }) {
           value={note}
           onChange={(event) => setNote(event.target.value)}
           placeholder="یادداشت اختیاری برای این سؤال"
-          className="w-full rounded-xl border border-white/8 bg-[#2a2a2a] px-3 py-2 text-xs text-white placeholder:text-[#666] focus:border-[#937fcd]/50 focus:outline-none"
+          className="w-full rounded-xl border border-white/8 bg-[var(--surface-soft)] px-3 py-2 text-xs text-white placeholder:text-[var(--ghost)] focus:border-[#937fcd]/50 focus:outline-none"
         />
         <div className="mt-2 flex gap-2">
           <input
@@ -272,13 +272,13 @@ function AddToCollectionPopover({ userId, questionId, onClose }) {
             value={newName}
             onChange={(event) => setNewName(event.target.value)}
             placeholder="مجموعهٔ جدید…"
-            className="min-w-0 flex-1 rounded-xl border border-white/8 bg-[#2a2a2a] px-3 py-2 text-xs text-white placeholder:text-[#666] focus:border-[#937fcd]/50 focus:outline-none"
+            className="min-w-0 flex-1 rounded-xl border border-white/8 bg-[var(--surface-soft)] px-3 py-2 text-xs text-white placeholder:text-[var(--ghost)] focus:border-[#937fcd]/50 focus:outline-none"
           />
           <button
             type="button"
             onClick={handleCreate}
             disabled={!newName.trim() || creating}
-            className="cursor-pointer rounded-xl bg-[#937fcd] px-3 py-2 text-xs text-white transition-transform hover:-translate-y-0.5 disabled:cursor-default disabled:opacity-50"
+            className="cursor-pointer rounded-xl bg-[var(--purple-bright)] px-3 py-2 text-xs text-white transition-transform hover:-translate-y-0.5 disabled:cursor-default disabled:opacity-50"
           >
             ساخت
           </button>
@@ -304,16 +304,16 @@ function ReportDialog({ questionId, onClose }) {
   return (
     <div className="intl-fade fixed inset-0 z-50 grid place-items-center bg-black/70 p-4" role="dialog" aria-modal="true" aria-label="گزارش مشکل سؤال" onClick={onClose}>
       <div
-        className="intl-pop w-[min(24rem,100%)] rounded-[2rem] border border-white/10 bg-[#282828] p-6"
+        className="intl-pop w-[min(24rem,100%)] rounded-[2rem] border border-white/10 bg-[var(--surface-soft)] p-6"
         onClick={(event) => event.stopPropagation()}
       >
         {sent ? (
           <div className="py-4 text-center">
-            <span className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-full bg-[#77b787]/15 text-[#9ed3ab]">
+            <span className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-full bg-[#77b787]/15 text-[var(--green-soft-ink)]">
               <Icon name="check" className="h-6 w-6" />
             </span>
-            <strong className="block [font-family:'Doran',Tahoma,sans-serif]">گزارشت ثبت شد</strong>
-            <p className="mt-1.5 text-sm leading-6 text-[#8a8a8a]">تیم محتوای تپش بررسی می‌کند؛ ممنون که کمک می‌کنی بانک سؤال بهتر شود.</p>
+            <strong className="block [font-family:'Doran','Vazir',Tahoma,sans-serif]">گزارشت ثبت شد</strong>
+            <p className="mt-1.5 text-sm leading-6 text-[var(--faint)]">تیم محتوای تپش بررسی می‌کند؛ ممنون که کمک می‌کنی بانک سؤال بهتر شود.</p>
             <button
               type="button"
               onClick={onClose}
@@ -324,18 +324,18 @@ function ReportDialog({ questionId, onClose }) {
           </div>
         ) : (
           <>
-            <h3 className="flex items-center gap-2 text-base [font-family:'Doran',Tahoma,sans-serif]">
-              <Icon name="flag" className="h-4.5 w-4.5 text-[#e0b45c]" />
+            <h3 className="flex items-center gap-2 text-base [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+              <Icon name="flag" className="h-4.5 w-4.5 text-[var(--gold-ink)]" />
               گزارش مشکل سؤال
             </h3>
-            <p className="mt-1.5 text-xs text-[#8a8a8a]">شناسه سؤال: {questionId}</p>
+            <p className="mt-1.5 text-xs text-[var(--faint)]">شناسه سؤال: {questionId}</p>
             <fieldset className="mt-4 space-y-1.5">
               <legend className="sr-only">دلیل گزارش</legend>
               {REPORT_REASONS.map((item) => (
                 <label
                   key={item}
                   className={`flex cursor-pointer items-center gap-2.5 rounded-xl border px-3.5 py-2.5 text-[13px] transition-colors ${
-                    reason === item ? 'border-[#937fcd]/60 bg-[#937fcd]/10 text-white' : 'border-white/8 text-[#bbb] hover:border-white/20'
+                    reason === item ? 'border-[#937fcd]/60 bg-[#937fcd]/10 text-white' : 'border-white/8 text-[var(--muted)] hover:border-white/20'
                   }`}
                 >
                   <input
@@ -344,7 +344,7 @@ function ReportDialog({ questionId, onClose }) {
                     value={item}
                     checked={reason === item}
                     onChange={() => setReason(item)}
-                    className="accent-[#937fcd]"
+                    className="accent-[var(--purple-ink)]"
                   />
                   {item}
                 </label>
@@ -357,7 +357,7 @@ function ReportDialog({ questionId, onClose }) {
                   trackEvent('question_reported', { questionId, reason });
                   setSent(true);
                 }}
-                className="flex-1 cursor-pointer rounded-xl bg-[#937fcd] px-4 py-2.5 text-sm font-bold transition-transform hover:-translate-y-0.5"
+                className="flex-1 cursor-pointer rounded-xl bg-[var(--purple-bright)] px-4 py-2.5 text-sm font-bold transition-transform hover:-translate-y-0.5"
               >
                 ارسال گزارش
               </button>
@@ -479,7 +479,7 @@ export default function QuestionLab({ userData, exam, questions, attempt, onExit
         title="سؤالی برای نمایش نیست"
         note="این آزمون فعلاً بدون سؤال است."
         action={
-          <button type="button" onClick={onExit} className="mt-3 cursor-pointer rounded-xl bg-[#937fcd] px-5 py-2 text-sm">
+          <button type="button" onClick={onExit} className="mt-3 cursor-pointer rounded-xl bg-[var(--purple-bright)] px-5 py-2 text-sm">
             بازگشت
           </button>
         }
@@ -490,7 +490,7 @@ export default function QuestionLab({ userData, exam, questions, attempt, onExit
   return (
     <div className="intl-layer relative" dir="rtl">
       {/* ── نوار بالای محیط حل ── */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-[1.75rem] border border-white/8 bg-[#282828] px-4 py-3 md:px-5">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-[1.75rem] border border-white/8 bg-[var(--surface-soft)] px-4 py-3 md:px-5">
         <div className="flex min-w-0 items-center gap-3">
           <button
             type="button"
@@ -501,8 +501,8 @@ export default function QuestionLab({ userData, exam, questions, attempt, onExit
             خروج
           </button>
           <div className="min-w-0">
-            <strong className="block truncate text-sm [font-family:'Doran',Tahoma,sans-serif]">{examMeta.title}</strong>
-            <span className="text-[11px] text-[#8a8a8a]">
+            <strong className="block truncate text-sm [font-family:'Doran','Vazir',Tahoma,sans-serif]">{examMeta.title}</strong>
+            <span className="text-[11px] text-[var(--faint)]">
               {exam?.shortName ?? 'آزمون بین‌الملل'} · {toFa(answeredCount)} از {toFa(questions.length)} پاسخ داده شده
             </span>
           </div>
@@ -511,7 +511,7 @@ export default function QuestionLab({ userData, exam, questions, attempt, onExit
         <div className="flex items-center gap-2">
           <span
             className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm [font-variant-numeric:tabular-nums] ${
-              remaining !== null && remaining < 300 ? 'bg-[#e26d6d]/15 text-[#ef9196]' : 'bg-white/6 text-[#bbb]'
+              remaining !== null && remaining < 300 ? 'bg-[#e26d6d]/15 text-[var(--red-ink)]' : 'bg-white/6 text-[var(--muted)]'
             }`}
             aria-label={`زمان سپری‌شده: ${formatClock(elapsed)}`}
           >
@@ -522,7 +522,7 @@ export default function QuestionLab({ userData, exam, questions, attempt, onExit
             type="button"
             onClick={finish}
             disabled={submitting}
-            className="cursor-pointer rounded-xl bg-[#937fcd] px-4 py-2 text-xs font-bold transition-transform hover:-translate-y-0.5 disabled:opacity-60"
+            className="cursor-pointer rounded-xl bg-[var(--purple-bright)] px-4 py-2 text-xs font-bold transition-transform hover:-translate-y-0.5 disabled:opacity-60"
           >
             پایان و تحلیل
           </button>
@@ -531,17 +531,17 @@ export default function QuestionLab({ userData, exam, questions, attempt, onExit
 
       {/* نوار پیشرفت */}
       <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/8" role="progressbar" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100}>
-        <div className="intl-progress-fill h-full rounded-full bg-gradient-to-l from-[#937fcd] to-[#937fcd]/70" style={{ width: `${progress}%` }} />
+        <div className="intl-progress-fill h-full rounded-full bg-gradient-to-l from-[var(--purple-bright)] to-[#937fcd]/70" style={{ width: `${progress}%` }} />
       </div>
 
       <div className="mt-5 grid gap-6 pb-28 lg:grid-cols-[minmax(0,1fr)_290px] lg:pb-0">
         {/* ── ستون سؤال ── */}
         <div>
-          <div key={question.id} className="intl-question-in rounded-[2rem] border border-white/8 bg-[#282828] p-5 md:p-7">
+          <div key={question.id} className="intl-question-in rounded-[2rem] border border-white/8 bg-[var(--surface-soft)] p-5 md:p-7">
             {/* سربرگ سؤال */}
             <header className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-full bg-[#937fcd]/15 px-3 py-1 text-xs text-[#c9bdf0] [font-family:'Doran',Tahoma,sans-serif]">
+                <span className="rounded-full bg-[#937fcd]/15 px-3 py-1 text-xs text-[var(--purple-soft-ink)] [font-family:'Doran','Vazir',Tahoma,sans-serif]">
                   سؤال {toFa(currentIndex + 1)} / {toFa(questions.length)}
                 </span>
                 <SampleTag />
@@ -554,7 +554,7 @@ export default function QuestionLab({ userData, exam, questions, attempt, onExit
                   onClick={handleBookmark}
                   aria-pressed={bookmarks.includes(question.id)}
                   className={`flex cursor-pointer items-center gap-1.5 rounded-xl px-3 py-2 text-xs transition-colors ${
-                    bookmarks.includes(question.id) ? 'bg-[#e26d6d]/15 text-[#ef9196]' : 'bg-white/6 text-[#aaa] hover:text-white'
+                    bookmarks.includes(question.id) ? 'bg-[#e26d6d]/15 text-[var(--red-ink)]' : 'bg-white/6 text-[var(--muted)] hover:text-white'
                   }`}
                 >
                   <Icon name="heart" className={`h-4 w-4 ${bookmarks.includes(question.id) ? '' : 'opacity-60'}`} strokeWidth={bookmarks.includes(question.id) ? 2.2 : 1.7} />
@@ -566,7 +566,7 @@ export default function QuestionLab({ userData, exam, questions, attempt, onExit
                     type="button"
                     onClick={() => setCollectionPop((prev) => !prev)}
                     aria-expanded={collectionPop}
-                    className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-white/6 px-3 py-2 text-xs text-[#aaa] transition-colors hover:text-white"
+                    className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-white/6 px-3 py-2 text-xs text-[var(--muted)] transition-colors hover:text-white"
                   >
                     <Icon name="layers" className="h-4 w-4" />
                     <span className="hidden sm:inline">افزودن به مجموعه</span>
@@ -580,7 +580,7 @@ export default function QuestionLab({ userData, exam, questions, attempt, onExit
                   type="button"
                   onClick={() => setReportOpen(true)}
                   aria-label="گزارش مشکل این سؤال"
-                  className="cursor-pointer rounded-xl bg-white/6 p-2 text-[#aaa] transition-colors hover:text-white"
+                  className="cursor-pointer rounded-xl bg-white/6 p-2 text-[var(--muted)] transition-colors hover:text-white"
                 >
                   <Icon name="flag" className="h-4 w-4" />
                 </button>
@@ -626,7 +626,7 @@ export default function QuestionLab({ userData, exam, questions, attempt, onExit
                 type="button"
                 onClick={handleSubmitAnswer}
                 disabled={selected == null || submitting}
-                className="mt-5 w-full cursor-pointer rounded-2xl bg-[#937fcd] py-3 text-sm font-bold transition-all hover:-translate-y-0.5 hover:bg-[#a08fd8] disabled:cursor-default disabled:translate-y-0 disabled:bg-white/8 disabled:text-[#777]"
+                className="mt-5 w-full cursor-pointer rounded-2xl bg-[var(--purple-bright)] py-3 text-sm font-bold transition-all hover:-translate-y-0.5 hover:bg-[var(--purple-bright)] disabled:cursor-default disabled:translate-y-0 disabled:bg-white/8 disabled:text-[var(--faint)]"
               >
                 {submitting ? 'در حال ثبت…' : selected == null ? 'یک گزینه را انتخاب کن' : 'ثبت پاسخ'}
               </button>
@@ -635,15 +635,15 @@ export default function QuestionLab({ userData, exam, questions, attempt, onExit
             {/* پاسخ شما / صحیح */}
             {revealed && (
               <div className="intl-reveal mt-4 flex flex-wrap items-center gap-2 text-[13px]">
-                <span className="rounded-full bg-white/6 px-3 py-1.5 text-[#bbb]">
+                <span className="rounded-full bg-white/6 px-3 py-1.5 text-[var(--muted)]">
                   پاسخ شما: <strong className="text-white">{answer?.selectedAnswer}</strong>
                 </span>
-                <span className="rounded-full bg-[#77b787]/12 px-3 py-1.5 text-[#9ed3ab]">
+                <span className="rounded-full bg-[#77b787]/12 px-3 py-1.5 text-[var(--green-soft-ink)]">
                   پاسخ صحیح: <strong>{question.correctAnswer}</strong>
                 </span>
                 <span
                   className={`rounded-full px-3 py-1.5 font-bold ${
-                    answer?.isCorrect ? 'bg-[#77b787]/15 text-[#9ed3ab]' : 'bg-[#e26d6d]/12 text-[#ef9196]'
+                    answer?.isCorrect ? 'bg-[#77b787]/15 text-[var(--green-soft-ink)]' : 'bg-[#e26d6d]/12 text-[var(--red-ink)]'
                   }`}
                 >
                   {answer?.isCorrect ? 'صحیح' : 'نادرست'}
@@ -670,7 +670,7 @@ export default function QuestionLab({ userData, exam, questions, attempt, onExit
                 type="button"
                 onClick={finish}
                 disabled={submitting}
-                className="cursor-pointer rounded-xl bg-[#77b787] px-5 py-2.5 text-sm font-bold text-[#12271a] transition-transform hover:-translate-y-0.5 disabled:opacity-60"
+                className="cursor-pointer rounded-xl bg-[var(--green-bright)] px-5 py-2.5 text-sm font-bold text-[#12271a] transition-transform hover:-translate-y-0.5 disabled:opacity-60"
               >
                 پایان آزمون و مشاهدهٔ تحلیل
               </button>
@@ -678,7 +678,7 @@ export default function QuestionLab({ userData, exam, questions, attempt, onExit
               <button
                 type="button"
                 onClick={() => goTo(currentIndex + 1)}
-                className="cursor-pointer rounded-xl bg-[#937fcd] px-5 py-2.5 text-sm font-bold transition-transform hover:-translate-y-0.5"
+                className="cursor-pointer rounded-xl bg-[var(--purple-bright)] px-5 py-2.5 text-sm font-bold transition-transform hover:-translate-y-0.5"
               >
                 سؤال بعدی
               </button>
@@ -688,9 +688,9 @@ export default function QuestionLab({ userData, exam, questions, attempt, onExit
 
         {/* ── نویگیتور دسکتاپ ── */}
         <aside className="hidden lg:block">
-          <div className="sticky top-6 rounded-[1.75rem] border border-white/8 bg-[#282828] p-4">
-            <h3 className="mb-3 flex items-center gap-2 text-sm [font-family:'Doran',Tahoma,sans-serif]">
-              <Icon name="grid" className="h-4 w-4 text-[#937fcd]" />
+          <div className="sticky top-6 rounded-[1.75rem] border border-white/8 bg-[var(--surface-soft)] p-4">
+            <h3 className="mb-3 flex items-center gap-2 text-sm [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+              <Icon name="grid" className="h-4 w-4 text-[var(--purple-ink)]" />
               نقشهٔ سؤال‌ها
             </h3>
             <QuestionNavigator
@@ -703,7 +703,7 @@ export default function QuestionLab({ userData, exam, questions, attempt, onExit
               onJump={goTo}
             />
             <div className="mt-4 border-t border-white/8 pt-3">
-              <p className="mb-2 text-[11px] text-[#8a8a8a]">زبان سؤال</p>
+              <p className="mb-2 text-[11px] text-[var(--faint)]">زبان سؤال</p>
               <LanguageToggle value={langMode} onChange={setLangMode} className="w-full" />
             </div>
           </div>
@@ -718,13 +718,13 @@ export default function QuestionLab({ userData, exam, questions, attempt, onExit
             onClick={() => setNavigatorOpen(true)}
             className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-white/8 px-3.5 py-2.5 text-xs"
           >
-            <Icon name="grid" className="h-4 w-4 text-[#937fcd]" />
+            <Icon name="grid" className="h-4 w-4 text-[var(--purple-ink)]" />
             نقشه
           </button>
           <button
             type="button"
             onClick={() => setFilterOpen(true)}
-            className="cursor-pointer rounded-xl bg-white/8 p-2.5 text-[#aaa]"
+            className="cursor-pointer rounded-xl bg-white/8 p-2.5 text-[var(--muted)]"
             aria-label="فیلتر سطح سختی"
           >
             <Icon name="filter" className="h-4 w-4" />
@@ -734,7 +734,7 @@ export default function QuestionLab({ userData, exam, questions, attempt, onExit
             type="button"
             onClick={() => (isLast ? finish() : goTo(currentIndex + 1))}
             disabled={submitting}
-            className="shrink-0 cursor-pointer rounded-xl bg-[#937fcd] px-4 py-2.5 text-xs font-bold disabled:opacity-60"
+            className="shrink-0 cursor-pointer rounded-xl bg-[var(--purple-bright)] px-4 py-2.5 text-xs font-bold disabled:opacity-60"
           >
             {isLast ? 'پایان' : 'بعدی'}
           </button>
@@ -745,13 +745,13 @@ export default function QuestionLab({ userData, exam, questions, attempt, onExit
       {navigatorOpen && (
         <div className="intl-fade fixed inset-0 z-50 bg-black/70 lg:hidden" onClick={() => setNavigatorOpen(false)}>
           <div
-            className="intl-sheet absolute inset-x-0 bottom-0 max-h-[75vh] overflow-y-auto rounded-t-[2rem] border-t border-white/10 bg-[#282828] p-5 pb-8"
+            className="intl-sheet absolute inset-x-0 bottom-0 max-h-[75vh] overflow-y-auto rounded-t-[2rem] border-t border-white/10 bg-[var(--surface-soft)] p-5 pb-8"
             onClick={(event) => event.stopPropagation()}
             role="dialog"
             aria-label="نقشهٔ سؤال‌ها"
           >
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-sm [font-family:'Doran',Tahoma,sans-serif]">نقشهٔ سؤال‌ها</h3>
+              <h3 className="text-sm [font-family:'Doran','Vazir',Tahoma,sans-serif]">نقشهٔ سؤال‌ها</h3>
               <button type="button" onClick={() => setNavigatorOpen(false)} aria-label="بستن" className="cursor-pointer rounded-lg bg-white/6 p-1.5">
                 <Icon name="x" className="h-4 w-4" />
               </button>
@@ -773,13 +773,13 @@ export default function QuestionLab({ userData, exam, questions, attempt, onExit
       {filterOpen && (
         <div className="intl-fade fixed inset-0 z-50 bg-black/70 lg:hidden" onClick={() => setFilterOpen(false)}>
           <div
-            className="intl-sheet absolute inset-x-0 bottom-0 rounded-t-[2rem] border-t border-white/10 bg-[#282828] p-5 pb-8"
+            className="intl-sheet absolute inset-x-0 bottom-0 rounded-t-[2rem] border-t border-white/10 bg-[var(--surface-soft)] p-5 pb-8"
             onClick={(event) => event.stopPropagation()}
             role="dialog"
             aria-label="فیلتر سطح سختی"
           >
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-sm [font-family:'Doran',Tahoma,sans-serif]">فیلتر سطح سختی</h3>
+              <h3 className="text-sm [font-family:'Doran','Vazir',Tahoma,sans-serif]">فیلتر سطح سختی</h3>
               <button type="button" onClick={() => setFilterOpen(false)} aria-label="بستن" className="cursor-pointer rounded-lg bg-white/6 p-1.5">
                 <Icon name="x" className="h-4 w-4" />
               </button>
@@ -792,7 +792,7 @@ export default function QuestionLab({ userData, exam, questions, attempt, onExit
                   setFilterOpen(false);
                 }}
                 aria-pressed={filter === null}
-                className={`cursor-pointer rounded-xl px-3 py-2.5 text-sm ${filter === null ? 'bg-[#937fcd] text-white' : 'bg-white/6 text-[#bbb]'}`}
+                className={`cursor-pointer rounded-xl px-3 py-2.5 text-sm ${filter === null ? 'bg-[var(--purple-bright)] text-white' : 'bg-white/6 text-[var(--muted)]'}`}
               >
                 همه سؤال‌ها
               </button>
@@ -805,7 +805,7 @@ export default function QuestionLab({ userData, exam, questions, attempt, onExit
                     setFilterOpen(false);
                   }}
                   aria-pressed={filter === level}
-                  className={`cursor-pointer rounded-xl px-3 py-2.5 text-sm ${filter === level ? 'bg-[#937fcd] text-white' : 'bg-white/6 text-[#bbb]'}`}
+                  className={`cursor-pointer rounded-xl px-3 py-2.5 text-sm ${filter === level ? 'bg-[var(--purple-bright)] text-white' : 'bg-white/6 text-[var(--muted)]'}`}
                 >
                   {difficultyLabel(level)}
                 </button>

@@ -20,13 +20,13 @@ import {
 } from '../../../services/notes/notesService';
 import { AIAssist, Icon, Modal, TagPill, toFa } from './notesShared';
 
-const labelClass = 'mb-2 block text-xs text-[#8a8a8a]';
+const labelClass = 'mb-2 block text-xs text-[var(--faint)]';
 const fieldClass =
-  'w-full rounded-xl border border-white/8 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-[#5c5c5c] focus:border-[#5b8cc7]/60 focus:bg-white/[0.06]';
+  'w-full rounded-xl border border-white/8 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-[var(--ghost)] focus:border-[#5b8cc7]/60 focus:bg-white/[0.06]';
 const smallBtnClass =
-  'flex cursor-pointer items-center gap-1.5 rounded-xl bg-white/[0.05] px-4 py-2 text-xs text-[#aaa] transition-colors hover:bg-white/[0.09] hover:text-white';
+  'flex cursor-pointer items-center gap-1.5 rounded-xl bg-white/[0.05] px-4 py-2 text-xs text-[var(--muted)] transition-colors hover:bg-white/[0.09] hover:text-white';
 const removeBtnClass =
-  'grid h-7 w-7 shrink-0 cursor-pointer place-items-center rounded-lg bg-white/[0.04] text-[#8a8a8a] transition-colors hover:bg-[#e26d6d]/15 hover:text-[#ef9196] disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-white/[0.04] disabled:hover:text-[#8a8a8a]';
+  'grid h-7 w-7 shrink-0 cursor-pointer place-items-center rounded-lg bg-white/[0.04] text-[var(--faint)] transition-colors hover:bg-[#e26d6d]/15 hover:text-[var(--red-ink)] disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-white/[0.04] disabled:hover:text-[var(--faint)]';
 
 const uid = (prefix) => `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
 
@@ -289,10 +289,10 @@ export default function NoteEditor({ open, note, tagGroups = [], saving = false,
                 role="radio"
                 aria-checked={kind === option.id}
                 onClick={() => changeKind(option.id)}
-                className={`flex cursor-pointer items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-xs font-bold transition-colors [font-family:'Doran',Tahoma,sans-serif] ${
+                className={`flex cursor-pointer items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-xs font-bold transition-colors [font-family:'Doran','Vazir',Tahoma,sans-serif] ${
                   kind === option.id
-                    ? 'border-[#5b8cc7]/70 bg-[#5b8cc7]/15 text-[#9cc0e8]'
-                    : 'border-white/8 bg-white/[0.03] text-[#8a8a8a] hover:bg-white/[0.06]'
+                    ? 'border-[#5b8cc7]/70 bg-[#5b8cc7]/15 text-[var(--blue-soft-ink)]'
+                    : 'border-white/8 bg-white/[0.03] text-[var(--faint)] hover:bg-white/[0.06]'
                 }`}
               >
                 <Icon name={option.icon} size={14} />
@@ -300,12 +300,12 @@ export default function NoteEditor({ open, note, tagGroups = [], saving = false,
               </button>
             ))}
           </div>
-          <p className="mt-2 text-[10px] leading-6 text-[#5c5c5c]">{activeKind.hint}</p>
+          <p className="mt-2 text-[10px] leading-6 text-[var(--ghost)]">{activeKind.hint}</p>
         </div>
 
         {/* تپش هوشمند روی همهٔ متن‌ها */}
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#937fcd]/25 bg-[#937fcd]/[0.07] p-3.5">
-          <span className="flex items-center gap-2 text-[11px] text-[#b6a6e6]">
+          <span className="flex items-center gap-2 text-[11px] text-[var(--purple-soft-ink)]">
             <Icon name="wand" size={14} />
             تپش هوشمند می‌تواند همهٔ متن‌های این یادداشت را یک‌جا بازنویسی کند.
           </span>
@@ -318,7 +318,7 @@ export default function NoteEditor({ open, note, tagGroups = [], saving = false,
           </div>
         </div>
         {aiNotice && (
-          <p role="status" className="rounded-xl bg-[#77b787]/10 px-4 py-2.5 text-xs text-[#9ed3ab]">
+          <p role="status" className="rounded-xl bg-[#77b787]/10 px-4 py-2.5 text-xs text-[var(--green-soft-ink)]">
             {aiNotice}
           </p>
         )}
@@ -353,7 +353,7 @@ export default function NoteEditor({ open, note, tagGroups = [], saving = false,
                     onClick={() => updateItem(item.id, { done: !item.done })}
                     className={`mt-1 grid h-7 w-7 shrink-0 cursor-pointer place-items-center rounded-lg border transition-colors ${
                       item.done
-                        ? 'border-[#77b787]/70 bg-[#77b787]/20 text-[#9ed3ab]'
+                        ? 'border-[#77b787]/70 bg-[#77b787]/20 text-[var(--green-soft-ink)]'
                         : 'border-white/12 bg-white/[0.03] text-transparent hover:border-white/25'
                     }`}
                   >
@@ -393,7 +393,7 @@ export default function NoteEditor({ open, note, tagGroups = [], saving = false,
               {pairs.map((pair, index) => (
                 <div key={pair.id} className="rounded-2xl border border-white/8 bg-white/[0.02] p-3.5">
                   <div className="mb-2.5 flex items-center justify-between">
-                    <span className="text-[10px] text-[#6d6d6d]">پرسش {toFa(index + 1)}</span>
+                    <span className="text-[10px] text-[var(--ghost)]">پرسش {toFa(index + 1)}</span>
                     <button
                       type="button"
                       aria-label="حذف پرسش"
@@ -440,7 +440,7 @@ export default function NoteEditor({ open, note, tagGroups = [], saving = false,
               <div className="space-y-2">
                 {table.columns.map((column, index) => (
                   <div key={column.id} className="flex items-center gap-2">
-                    <span className="w-14 shrink-0 text-[10px] text-[#5c5c5c]">ستون {toFa(index + 1)}</span>
+                    <span className="w-14 shrink-0 text-[10px] text-[var(--ghost)]">ستون {toFa(index + 1)}</span>
                     <input
                       className={fieldClass}
                       value={column.label}
@@ -473,7 +473,7 @@ export default function NoteEditor({ open, note, tagGroups = [], saving = false,
                 {table.rows.map((row, index) => (
                   <div key={row.id} className="rounded-2xl border border-white/8 bg-white/[0.02] p-3.5">
                     <div className="mb-2.5 flex items-center justify-between">
-                      <span className="text-[10px] text-[#6d6d6d]">ردیف {toFa(index + 1)}</span>
+                      <span className="text-[10px] text-[var(--ghost)]">ردیف {toFa(index + 1)}</span>
                       <button type="button" aria-label="حذف ردیف" onClick={() => removeRow(row.id)} className={removeBtnClass}>
                         <Icon name="close" size={13} />
                       </button>
@@ -481,7 +481,7 @@ export default function NoteEditor({ open, note, tagGroups = [], saving = false,
                     <div className="grid gap-2.5 md:grid-cols-2">
                       {table.columns.map((column) => (
                         <div key={column.id} className="space-y-1.5">
-                          <label className="block text-[10px] text-[#5c5c5c]" htmlFor={`nt-cell-${row.id}-${column.id}`}>
+                          <label className="block text-[10px] text-[var(--ghost)]" htmlFor={`nt-cell-${row.id}-${column.id}`}>
                             {column.label || 'بی‌عنوان'}
                           </label>
                           <input
@@ -523,7 +523,7 @@ export default function NoteEditor({ open, note, tagGroups = [], saving = false,
                 className={`cursor-pointer rounded-full border px-3.5 py-1.5 text-xs transition-colors ${
                   subjectId === subject.id
                     ? 'border-transparent text-white'
-                    : 'border-white/8 bg-white/[0.03] text-[#8a8a8a] hover:bg-white/[0.06]'
+                    : 'border-white/8 bg-white/[0.03] text-[var(--faint)] hover:bg-white/[0.06]'
                 }`}
                 style={subjectId === subject.id ? { background: `${subject.accent}2e`, borderColor: `${subject.accent}66`, color: subject.accent } : undefined}
               >
@@ -557,14 +557,14 @@ export default function NoteEditor({ open, note, tagGroups = [], saving = false,
               }}
               placeholder="تگ بنویس و Enter بزن"
             />
-            <button type="button" onClick={() => addTag()} className="shrink-0 cursor-pointer rounded-xl bg-white/[0.06] px-4 text-xs text-[#aaa] transition-colors hover:bg-white/[0.1] hover:text-white">
+            <button type="button" onClick={() => addTag()} className="shrink-0 cursor-pointer rounded-xl bg-white/[0.06] px-4 text-xs text-[var(--muted)] transition-colors hover:bg-white/[0.1] hover:text-white">
               افزودن
             </button>
           </div>
 
           {suggestions.length > 0 && (
             <div className="mt-3">
-              <span className="mb-2 block text-[10px] text-[#5c5c5c]">تگ‌ها به تفکیک دسته:</span>
+              <span className="mb-2 block text-[10px] text-[var(--ghost)]">تگ‌ها به تفکیک دسته:</span>
               <div className="max-h-44 space-y-2.5 overflow-y-auto rounded-2xl border border-white/8 bg-white/[0.02] p-3">
                 {suggestions.map((group) => (
                   <div key={group.id} className="nt-taggroup" style={{ '--accent': group.accent }}>
@@ -610,11 +610,11 @@ export default function NoteEditor({ open, note, tagGroups = [], saving = false,
             type="button"
             aria-pressed={hasSource}
             onClick={() => setHasSource((current) => !current)}
-            className="flex cursor-pointer items-center gap-2 text-xs text-[#aaa] transition-colors hover:text-white"
+            className="flex cursor-pointer items-center gap-2 text-xs text-[var(--muted)] transition-colors hover:text-white"
           >
             <span
               className={`grid h-5 w-5 place-items-center rounded-md border transition-colors ${
-                hasSource ? 'border-[#5b8cc7]/70 bg-[#5b8cc7]/20 text-[#9cc0e8]' : 'border-white/15 text-transparent'
+                hasSource ? 'border-[#5b8cc7]/70 bg-[#5b8cc7]/20 text-[var(--blue-soft-ink)]' : 'border-white/15 text-transparent'
               }`}
             >
               <Icon name="check" size={11} />
@@ -631,7 +631,7 @@ export default function NoteEditor({ open, note, tagGroups = [], saving = false,
                 onChange={(event) => setSourceType(event.target.value)}
               >
                 {SOURCE_TYPES.map((type) => (
-                  <option key={type.id} value={type.id} className="bg-[#232323]">
+                  <option key={type.id} value={type.id} className="bg-[var(--surface)]">
                     {type.label}
                   </option>
                 ))}
@@ -648,7 +648,7 @@ export default function NoteEditor({ open, note, tagGroups = [], saving = false,
 
         {/* خطا و دکمه‌ها */}
         {error && (
-          <p role="alert" className="rounded-xl bg-[#e26d6d]/10 px-4 py-2.5 text-xs text-[#ef9196]">
+          <p role="alert" className="rounded-xl bg-[#e26d6d]/10 px-4 py-2.5 text-xs text-[var(--red-ink)]">
             {error}
           </p>
         )}
@@ -657,14 +657,14 @@ export default function NoteEditor({ open, note, tagGroups = [], saving = false,
           <button
             type="button"
             onClick={onClose}
-            className="cursor-pointer rounded-xl bg-white/[0.05] px-5 py-2.5 text-xs text-[#aaa] transition-colors hover:bg-white/[0.09] hover:text-white"
+            className="cursor-pointer rounded-xl bg-white/[0.05] px-5 py-2.5 text-xs text-[var(--muted)] transition-colors hover:bg-white/[0.09] hover:text-white"
           >
             انصراف
           </button>
           <button
             type="submit"
             disabled={saving}
-            className="flex cursor-pointer items-center gap-2 rounded-xl bg-[#5b8cc7] px-6 py-2.5 text-xs font-bold text-white transition-transform hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-60 [font-family:'Doran',Tahoma,sans-serif]"
+            className="flex cursor-pointer items-center gap-2 rounded-xl bg-[var(--blue-bright)] px-6 py-2.5 text-xs font-bold text-white transition-transform hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-60 [font-family:'Doran','Vazir',Tahoma,sans-serif]"
           >
             {saving && (
               <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-hidden="true" />

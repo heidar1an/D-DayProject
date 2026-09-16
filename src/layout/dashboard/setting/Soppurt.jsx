@@ -80,7 +80,7 @@ const ChevronDownIcon = ({ className }) => (
 
 /* قرص‌های ستون راست: موضوع پیام و دسته بندی */
 const pillClass =
-  'h-20 w-full rounded-full border border-[#8a8a8a] bg-transparent pr-16 pl-8 text-xl text-white outline-none transition-colors duration-200 placeholder:text-white focus:border-[#b99a86]';
+  'h-20 w-full rounded-full border border-[var(--border-solid)] bg-transparent pr-16 pl-8 text-xl text-white outline-none transition-colors duration-200 placeholder:text-white focus:border-[var(--copper)]';
 
 export default function Soppurt() {
   const [subject, setSubject] = useState('');
@@ -124,23 +124,23 @@ export default function Soppurt() {
     <section
       dir="rtl"
       aria-label="راهنما و پشتیبانی"
-      className="dash-stagger mx-auto w-[var(--content-width)] py-8 text-white md:py-10 [font-family:'Pinar',Tahoma,sans-serif]"
+      className="dash-stagger mx-auto w-[var(--content-width)] py-8 text-white md:py-10 [font-family:'Pinar','Vazir',Tahoma,sans-serif]"
     >
       {/* عنوان بخش */}
       <header className="flex items-center gap-5">
         <LifeBuoyIcon className="h-11 w-11 shrink-0 text-white md:h-12 md:w-12" />
-        <h2 className="m-0 text-3xl font-extrabold leading-none md:text-4xl [font-family:'Doran',Tahoma,sans-serif]">
+        <h2 className="m-0 text-3xl font-extrabold leading-none md:text-4xl [font-family:'Doran','Vazir',Tahoma,sans-serif]">
           راهنمای و پشتیبانی
         </h2>
       </header>
 
-      <p className="mt-5 text-lg leading-9 text-[#f2f2f2] md:text-xl md:leading-10">
+      <p className="mt-5 text-lg leading-9 text-[var(--white)] md:text-xl md:leading-10">
         برای دریافت دفترچه راهنما میتوانید{' '}
         <a
           href="#"
           onClick={(event) => event.preventDefault()}
           title="دفترچه راهنما"
-          className="text-[#b99a86] transition-colors duration-200 hover:text-[#d4b8a4]"
+          className="text-[var(--copper-ink)] transition-colors duration-200 hover:text-[var(--gold-ink)]"
         >
           اینجا
         </a>{' '}
@@ -198,7 +198,7 @@ export default function Soppurt() {
           <button
             type="button"
             onClick={handleAiDraft}
-            className="mt-auto flex h-20 items-center justify-center gap-4 rounded-full bg-[#a5a0d6] px-6 text-xl font-medium text-white shadow-lg transition-colors duration-200 hover:bg-[#908bc6]"
+            className="mt-auto flex h-20 items-center justify-center gap-4 rounded-full bg-[var(--purple-bright)] px-6 text-xl font-medium text-white shadow-lg transition-colors duration-200 hover:bg-[var(--purple-bright)]"
           >
             <SparklesIcon className="h-6 w-6 shrink-0" />
             نوشتن با هوش مصنوعی
@@ -206,9 +206,9 @@ export default function Soppurt() {
         </div>
 
         {/* کادر ادیتور متن */}
-        <div className="flex min-h-[520px] flex-col rounded-[2.5rem] border border-[#8a8a8a] bg-[#141414] p-6 md:min-h-[560px] md:p-7">
+        <div className="flex min-h-[520px] flex-col rounded-[2.5rem] border border-[var(--border-solid)] bg-[var(--background)] p-6 md:min-h-[560px] md:p-7">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5 text-[#d9d9d9]">
+            <div className="flex items-center gap-2.5 text-[var(--muted)]">
               <PenLineIcon className="h-5 w-5" />
               <span className="text-lg">ادیتور متن</span>
             </div>
@@ -223,13 +223,13 @@ export default function Soppurt() {
             value={message}
             onChange={(event) => setMessage(event.target.value)}
             placeholder="متن پیام خود را اینجا بنویسید..."
-            className="mt-4 min-h-0 flex-1 resize-none bg-transparent text-lg leading-8 text-white outline-none placeholder:text-[#6f6f6f]"
+            className="mt-4 min-h-0 flex-1 resize-none bg-transparent text-lg leading-8 text-white outline-none placeholder:text-[var(--faint)]"
           />
 
           {status && (
             <p
               className={`mb-3 text-sm ${
-                status.type === 'success' ? 'text-[#b99a86]' : 'text-[#d98a8a]'
+                status.type === 'success' ? 'text-[var(--copper-ink)]' : 'text-[var(--red-ink)]'
               }`}
             >
               {status.text}
@@ -239,7 +239,7 @@ export default function Soppurt() {
           <div className="flex justify-end">
             <button
               type="submit"
-              className="flex items-center gap-3 rounded-full border border-[#e5e5e5] px-7 py-3 text-lg transition-colors duration-200 hover:bg-white hover:text-black"
+              className="flex items-center gap-3 rounded-full border border-[var(--border-solid)] px-7 py-3 text-lg transition-colors duration-200 hover:bg-white hover:text-black"
             >
               ارسال کردن
               <SendIcon className="h-5 w-5 -scale-x-100" />

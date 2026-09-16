@@ -239,7 +239,7 @@ export const difficultyLabel = (difficulty) => DIFFICULTY_META[difficulty]?.labe
 export function SampleTag({ className = '' }) {
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full bg-white/6 px-2 py-0.5 text-[10px] text-[#9a9a9a] ${className}`}
+      className={`inline-flex items-center gap-1 rounded-full bg-white/6 px-2 py-0.5 text-[10px] text-[var(--faint)] ${className}`}
       title="سؤال‌های این بخش نمونهٔ آموزشی تالیفی تپش هستند، نه سؤال رسمی آزمون"
     >
       <Icon name="spark" className="h-3 w-3" />
@@ -264,8 +264,8 @@ export function LanguageToggle({ value, onChange, className = '' }) {
           type="button"
           aria-pressed={value === mode.id}
           onClick={() => onChange(mode.id)}
-          className={`cursor-pointer rounded-full px-3 py-1.5 text-xs transition-colors [font-family:'Doran',Tahoma,sans-serif] ${
-            value === mode.id ? 'bg-[#937fcd] text-white' : 'text-[#aaa] hover:text-white'
+          className={`cursor-pointer rounded-full px-3 py-1.5 text-xs transition-colors [font-family:'Doran','Vazir',Tahoma,sans-serif] ${
+            value === mode.id ? 'bg-[var(--purple-bright)] text-white' : 'text-[var(--muted)] hover:text-white'
           }`}
         >
           {mode.label}
@@ -283,11 +283,11 @@ export function Skeleton({ className = '' }) {
 export function EmptyState({ icon = 'spark', title, note, action }) {
   return (
     <div className="flex flex-col items-center gap-2 rounded-[2rem] border border-dashed border-white/12 bg-white/[0.02] px-6 py-10 text-center">
-      <span className="grid h-12 w-12 place-items-center rounded-full bg-white/5 text-[#8a8a8a]">
+      <span className="grid h-12 w-12 place-items-center rounded-full bg-white/5 text-[var(--faint)]">
         <Icon name={icon} className="h-6 w-6" />
       </span>
-      <strong className="mt-1 [font-family:'Doran',Tahoma,sans-serif]">{title}</strong>
-      {note && <p className="max-w-sm text-sm leading-6 text-[#8a8a8a]">{note}</p>}
+      <strong className="mt-1 [font-family:'Doran','Vazir',Tahoma,sans-serif]">{title}</strong>
+      {note && <p className="max-w-sm text-sm leading-6 text-[var(--faint)]">{note}</p>}
       {action}
     </div>
   );

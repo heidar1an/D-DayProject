@@ -27,17 +27,17 @@ function SubjectCard({ subject, selected, onToggle }) {
       <span className="flex items-center justify-between gap-2">
         <span className="flex min-w-0 items-center gap-2">
           <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: subject.accent }} aria-hidden="true" />
-          <strong className="truncate text-[13.5px] [font-family:'Doran',Tahoma,sans-serif]">{subject.name}</strong>
+          <strong className="truncate text-[13.5px] [font-family:'Doran','Vazir',Tahoma,sans-serif]">{subject.name}</strong>
         </span>
         {selected && (
-          <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-[#61D192] text-[#12271a]">
+          <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-[var(--green-vivid)] text-[#12271a]">
             <Icon name="check" className="h-3 w-3" strokeWidth={3} />
           </span>
         )}
       </span>
       <span className="flex flex-wrap gap-1.5 text-[10px]">
-        <span className="rounded-full bg-white/6 px-2 py-0.5 text-[#bbb]">{toFa(subject.questionCount)} تست</span>
-        {subject.solvedCount > 0 && <span className="rounded-full bg-white/6 px-2 py-0.5 text-[#bbb]">{toFa(subject.solvedCount)} حل‌شده</span>}
+        <span className="rounded-full bg-white/6 px-2 py-0.5 text-[var(--muted)]">{toFa(subject.questionCount)} تست</span>
+        {subject.solvedCount > 0 && <span className="rounded-full bg-white/6 px-2 py-0.5 text-[var(--muted)]">{toFa(subject.solvedCount)} حل‌شده</span>}
         {subject.accuracy !== null && (
           <span className="rounded-full px-2 py-0.5" style={{ background: 'rgba(97,209,146,0.1)', color: subject.accuracy >= 60 ? '#61D192' : '#ef9196' }}>
             دقت {toFa(subject.accuracy)}٪
@@ -132,20 +132,20 @@ export default function StepScope({ draft, update, catalog }) {
       </SectionCard>
 
       {/* قلاب شبکهٔ دانش */}
-      <div className="rounded-[2rem] border border-white/8 bg-[#242426] p-5">
+      <div className="rounded-[2rem] border border-white/8 bg-[var(--surface)] p-5">
         <label className="flex cursor-pointer items-center justify-between gap-3">
           <span className="flex min-w-0 items-start gap-3">
             <span
               className={`mt-0.5 grid h-5.5 w-5.5 shrink-0 place-items-center rounded-lg transition-colors ${
-                relatedOpen ? 'bg-[#937fcd] text-white' : 'border border-white/20 bg-white/5 text-transparent'
+                relatedOpen ? 'bg-[var(--purple-bright)] text-white' : 'border border-white/20 bg-white/5 text-transparent'
               }`}
               aria-hidden="true"
             >
               <Icon name="check" className="h-3.5 w-3.5" strokeWidth={3} />
             </span>
             <span>
-              <strong className="block text-[13px] [font-family:'Doran',Tahoma,sans-serif]">مباحث مرتبط را نیز پیشنهاد بده</strong>
-              <span className="mt-0.5 block text-[11px] leading-5 text-[#8a8a8a]">
+              <strong className="block text-[13px] [font-family:'Doran','Vazir',Tahoma,sans-serif]">مباحث مرتبط را نیز پیشنهاد بده</strong>
+              <span className="mt-0.5 block text-[11px] leading-5 text-[var(--faint)]">
                 از شبکهٔ دانش تپش، مبحث‌های مرتبط با انتخابت (والد/فرزند/هم‌پوشان محتوایی) پیشنهاد می‌شود.
               </span>
             </span>
@@ -161,9 +161,9 @@ export default function StepScope({ draft, update, catalog }) {
         {relatedOpen && (
           <div className="ex-enter mt-4 border-t border-white/8 pt-4">
             {!draft.topicPaths.length ? (
-              <p className="text-[11.5px] text-[#777]">برای پیشنهاد مرتبط‌ها، اول چند مبحث انتخاب کن.</p>
+              <p className="text-[11.5px] text-[var(--faint)]">برای پیشنهاد مرتبط‌ها، اول چند مبحث انتخاب کن.</p>
             ) : loadingRelated ? (
-              <p className="text-[11.5px] text-[#777]">در حال بررسی شبکهٔ دانش…</p>
+              <p className="text-[11.5px] text-[var(--faint)]">در حال بررسی شبکهٔ دانش…</p>
             ) : availableRelated.length ? (
               <div className="flex flex-wrap gap-2">
                 {availableRelated.map((item) => (
@@ -171,7 +171,7 @@ export default function StepScope({ draft, update, catalog }) {
                     key={item.topic}
                     type="button"
                     onClick={() => update({ topicPaths: [...draft.topicPaths, item.topic] })}
-                    className="flex cursor-pointer items-center gap-1.5 rounded-full border border-[#937fcd]/40 bg-[#937fcd]/10 px-3.5 py-2 text-[11.5px] text-[#cfc4f2] transition-colors hover:bg-[#937fcd]/20"
+                    className="flex cursor-pointer items-center gap-1.5 rounded-full border border-[#937fcd]/40 bg-[#937fcd]/10 px-3.5 py-2 text-[11.5px] text-[var(--purple-soft-ink)] transition-colors hover:bg-[#937fcd]/20"
                   >
                     <Icon name="plus" className="h-3 w-3" />
                     {item.topic}
@@ -180,7 +180,7 @@ export default function StepScope({ draft, update, catalog }) {
                 ))}
               </div>
             ) : (
-              <p className="text-[11.5px] text-[#777]">مبحث مرتبط جدیدی پیدا نشد — انتخابت از الان هم پوشش خوبی دارد.</p>
+              <p className="text-[11.5px] text-[var(--faint)]">مبحث مرتبط جدیدی پیدا نشد — انتخابت از الان هم پوشش خوبی دارد.</p>
             )}
           </div>
         )}

@@ -209,7 +209,7 @@ export default function BuilderWizard({ userId, catalog: catalogProp = null, ini
       <Stepper current={step} maxReached={maxReached} onStepClick={goStep} />
 
       {prefillNote && (
-        <p className="flex items-start gap-2.5 rounded-2xl border border-[#e26d6d]/30 bg-[#e26d6d]/[0.07] px-4 py-3 text-[12.5px] leading-6 text-[#ef9196]">
+        <p className="flex items-start gap-2.5 rounded-2xl border border-[#e26d6d]/30 bg-[#e26d6d]/[0.07] px-4 py-3 text-[12.5px] leading-6 text-[var(--red-ink)]">
           <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-[#e26d6d]/20 text-[10px] font-bold">!</span>
           {prefillNote}
         </p>
@@ -235,7 +235,7 @@ export default function BuilderWizard({ userId, catalog: catalogProp = null, ini
           nextHint={nextHint}
           nextLabel={step === 3 ? 'مرور نهایی' : step === 2 ? 'ساخت Blueprint' : 'مرحلهٔ بعد'}
         >
-          <span className="hidden text-[11px] text-[#777] sm:block">
+          <span className="hidden text-[11px] text-[var(--faint)] sm:block">
             مرحلهٔ {toFa(step + 1)} از {toFa(5)}
           </span>
         </WizardNav>

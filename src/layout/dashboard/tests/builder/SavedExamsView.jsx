@@ -29,16 +29,16 @@ function ExamRow({ exam, onAttempt, onOpenResult, onRegenerate, onDelete }) {
   const lastAccent = last ? (last.percentage >= 60 ? '#61D192' : '#ef9196') : '#8a8a8a';
 
   return (
-    <li className="rounded-[1.75rem] border border-white/8 bg-[#242426] p-5">
+    <li className="rounded-[1.75rem] border border-white/8 bg-[var(--surface)] p-5">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-[14.5px] font-bold [font-family:'Doran',Tahoma,sans-serif]">{exam.title}</h3>
-            <span className="rounded-full bg-white/6 px-2.5 py-0.5 text-[10px] text-[#aaa]">
+            <h3 className="text-[14.5px] font-bold [font-family:'Doran','Vazir',Tahoma,sans-serif]">{exam.title}</h3>
+            <span className="rounded-full bg-white/6 px-2.5 py-0.5 text-[10px] text-[var(--muted)]">
               {exam.attemptCount ? `${toFa(exam.attemptCount)} تلاش` : 'شروع‌نشده'}
             </span>
           </div>
-          <p className="mt-1.5 text-[11px] text-[#8a8a8a]">
+          <p className="mt-1.5 text-[11px] text-[var(--faint)]">
             {faNum(exam.questionCount)} سؤال
             {exam.durationMinutes ? ` · ${toFa(exam.durationMinutes)} دقیقه` : ' · بدون محدودیت'}
             {exam.topics.length ? ` · ${exam.topics.join('، ')}${exam.topicCount > 4 ? '…' : ''}` : ''}
@@ -51,10 +51,10 @@ function ExamRow({ exam, onAttempt, onOpenResult, onRegenerate, onDelete }) {
           {exam.trend.length > 0 && <TrendBars trend={exam.trend} />}
           {last && (
             <div className="text-center">
-              <strong className="block text-xl [font-family:'Doran',Tahoma,sans-serif]" style={{ color: lastAccent }}>
+              <strong className="block text-xl [font-family:'Doran','Vazir',Tahoma,sans-serif]" style={{ color: lastAccent }}>
                 {toFa(last.percentage)}٪
               </strong>
-              <span className="text-[10px] text-[#8a8a8a]">آخرین تلاش</span>
+              <span className="text-[10px] text-[var(--faint)]">آخرین تلاش</span>
             </div>
           )}
         </div>
@@ -64,7 +64,7 @@ function ExamRow({ exam, onAttempt, onOpenResult, onRegenerate, onDelete }) {
         <button
           type="button"
           onClick={() => onAttempt(exam)}
-          className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#61D192] px-4 py-2.5 text-xs font-bold text-[#12271a] transition-all hover:-translate-y-0.5 hover:bg-[#7ee0ac]"
+          className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[var(--green-vivid)] px-4 py-2.5 text-xs font-bold text-[#12271a] transition-all hover:-translate-y-0.5 hover:bg-[var(--green-vivid)]"
         >
           <Icon name="play" className="h-3.5 w-3.5" />
           {exam.attemptCount ? 'تلاش دوباره' : 'شروع آزمون'}
@@ -73,7 +73,7 @@ function ExamRow({ exam, onAttempt, onOpenResult, onRegenerate, onDelete }) {
           <button
             type="button"
             onClick={() => onOpenResult(last.sessionId)}
-            className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-white/6 px-4 py-2.5 text-xs text-[#ccc] transition-colors hover:bg-white/12"
+            className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-white/6 px-4 py-2.5 text-xs text-[var(--muted)] transition-colors hover:bg-white/12"
           >
             <Icon name="eye" className="h-3.5 w-3.5" />
             کارنامهٔ آخر
@@ -82,7 +82,7 @@ function ExamRow({ exam, onAttempt, onOpenResult, onRegenerate, onDelete }) {
         <button
           type="button"
           onClick={() => onRegenerate(exam)}
-          className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-white/6 px-4 py-2.5 text-xs text-[#ccc] transition-colors hover:bg-white/12"
+          className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-white/6 px-4 py-2.5 text-xs text-[var(--muted)] transition-colors hover:bg-white/12"
           title="همین تنظیمات با سؤال‌های تازه"
         >
           <Icon name="dice" className="h-3.5 w-3.5" />
@@ -92,7 +92,7 @@ function ExamRow({ exam, onAttempt, onOpenResult, onRegenerate, onDelete }) {
           type="button"
           onClick={() => onDelete(exam)}
           aria-label={`حذف ${exam.title}`}
-          className="ms-auto cursor-pointer rounded-xl bg-white/6 p-2.5 text-[#999] transition-colors hover:bg-[#e26d6d]/15 hover:text-[#ef9196]"
+          className="ms-auto cursor-pointer rounded-xl bg-white/6 p-2.5 text-[var(--faint)] transition-colors hover:bg-[#e26d6d]/15 hover:text-[var(--red-ink)]"
         >
           <Icon name="trash" className="h-4 w-4" />
         </button>
@@ -138,7 +138,7 @@ export default function SavedExamsView({ userId, onAttempt, onOpenResult, onRege
           <button
             type="button"
             onClick={onBackToBuilder}
-            className="mt-3 cursor-pointer rounded-xl bg-[#61D192] px-5 py-2.5 text-sm font-bold text-[#12271a] transition-transform hover:-translate-y-0.5"
+            className="mt-3 cursor-pointer rounded-xl bg-[var(--green-vivid)] px-5 py-2.5 text-sm font-bold text-[#12271a] transition-transform hover:-translate-y-0.5"
           >
             ساختن اولین آزمون
           </button>
@@ -150,15 +150,15 @@ export default function SavedExamsView({ userId, onAttempt, onOpenResult, onRege
   return (
     <div className="ex-enter space-y-3">
       <header className="flex items-center justify-between gap-3">
-        <h2 className="flex items-center gap-2 text-lg font-bold [font-family:'Doran',Tahoma,sans-serif]">
-          <Icon name="card" className="h-5 w-5 text-[#937fcd]" />
+        <h2 className="flex items-center gap-2 text-lg font-bold [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+          <Icon name="card" className="h-5 w-5 text-[var(--purple-ink)]" />
           آزمون‌های من
-          <span className="rounded-full bg-white/6 px-2.5 py-0.5 text-xs text-[#aaa]">{toFa(data.length)}</span>
+          <span className="rounded-full bg-white/6 px-2.5 py-0.5 text-xs text-[var(--muted)]">{toFa(data.length)}</span>
         </h2>
         <button
           type="button"
           onClick={onBackToBuilder}
-          className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#61D192] px-4 py-2.5 text-xs font-bold text-[#12271a] transition-all hover:-translate-y-0.5"
+          className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[var(--green-vivid)] px-4 py-2.5 text-xs font-bold text-[#12271a] transition-all hover:-translate-y-0.5"
         >
           <Icon name="plus" className="h-3.5 w-3.5" />
           آزمون جدید
@@ -179,11 +179,11 @@ export default function SavedExamsView({ userId, onAttempt, onOpenResult, onRege
       </ul>
 
       <Modal open={Boolean(pendingDelete)} onClose={() => setPendingDelete(null)} title="حذف آزمون" width="min(24rem, 100%)">
-        <h3 className="flex items-center gap-2 text-base [font-family:'Doran',Tahoma,sans-serif]">
-          <Icon name="trash" className="h-5 w-5 text-[#ef9196]" />
+        <h3 className="flex items-center gap-2 text-base [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+          <Icon name="trash" className="h-5 w-5 text-[var(--red-ink)]" />
           این آزمون حذف شود؟
         </h3>
-        <p className="mt-2 text-sm leading-6 text-[#9a9a9a]">
+        <p className="mt-2 text-sm leading-6 text-[var(--faint)]">
           «{pendingDelete?.title}» و تاریخچهٔ {toFa(pendingDelete?.attemptCount ?? 0)} تلاشش حذف می‌شود؛ کارنامه‌های سشن‌ها در تاریخچهٔ بانک می‌مانند.
         </p>
         <div className="mt-5 flex gap-2">
@@ -191,7 +191,7 @@ export default function SavedExamsView({ userId, onAttempt, onOpenResult, onRege
             type="button"
             onClick={confirmDelete}
             disabled={deleting}
-            className="flex-1 cursor-pointer rounded-xl bg-[#e26d6d] px-4 py-2.5 text-sm font-bold text-white transition-transform hover:-translate-y-0.5 disabled:opacity-60"
+            className="flex-1 cursor-pointer rounded-xl bg-[var(--red)] px-4 py-2.5 text-sm font-bold text-white transition-transform hover:-translate-y-0.5 disabled:opacity-60"
           >
             {deleting ? 'در حال حذف…' : 'حذف کن'}
           </button>

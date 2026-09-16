@@ -428,7 +428,7 @@ export default function GraphView({
               const state = edgeState(edge);
               const accent =
                 state === 'normal' || state === 'dim'
-                  ? 'rgba(255,255,255,0.16)'
+                  ? 'rgb(var(--wash-rgb) / 0.16)'
                   : courseAccent(primaryCourse(nodeById.get(edge.target))) ;
               const isDim = state === 'dim' || nodeFadedByFilter(nodeById.get(edge.source)) || nodeFadedByFilter(nodeById.get(edge.target));
               const isDirected = ['causes', 'produces', 'activates', 'leads_to', 'part_of', 'regulates'].includes(edge.type);
@@ -439,7 +439,7 @@ export default function GraphView({
                     y1={from.y}
                     x2={to.x}
                     y2={to.y}
-                    stroke={isDim ? 'rgba(255,255,255,0.05)' : accent}
+                    stroke={isDim ? 'rgb(var(--wash-rgb) / 0.05)' : accent}
                     strokeWidth={state === 'hover' ? 2.4 : state === 'neighbor' ? 2 : 1.4}
                     markerEnd={isDirected && !isDim ? `url(#kn-arrow-${state === 'normal' ? 'base' : 'hot'})` : undefined}
                   />
@@ -490,7 +490,7 @@ export default function GraphView({
                   </g>
                   {status !== 'unstarted' ? (
                     <g transform={`translate(${radius * 0.72},${-radius * 0.72})`}>
-                      <circle r={3.6} fill={statusAccent(status)} stroke="#181818" strokeWidth="1.4" />
+                      <circle r={3.6} fill={statusAccent(status)} stroke="var(--ink-deep)" strokeWidth="1.4" />
                     </g>
                   ) : null}
                   <g transform={`translate(0,${radius + 12}) scale(${labelScale})`}>
@@ -514,10 +514,10 @@ export default function GraphView({
 
         <defs>
           <marker id="kn-arrow-base" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-            <path d="M0 0.8 L7 4 L0 7.2" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="1.4" />
+            <path d="M0 0.8 L7 4 L0 7.2" fill="none" stroke="rgb(var(--wash-rgb) / 0.4)" strokeWidth="1.4" />
           </marker>
           <marker id="kn-arrow-hot" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
-            <path d="M0 0.8 L7 4 L0 7.2" fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth="1.4" />
+            <path d="M0 0.8 L7 4 L0 7.2" fill="none" stroke="rgb(var(--wash-rgb) / 0.85)" strokeWidth="1.4" />
           </marker>
         </defs>
       </svg>

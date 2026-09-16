@@ -294,11 +294,11 @@ export function Skeleton({ className = '' }) {
 export function EmptyState({ icon = 'search', title, note, action }) {
   return (
     <div className="flex flex-col items-center gap-2 rounded-[2rem] border border-dashed border-white/12 bg-white/[0.02] px-6 py-12 text-center">
-      <span className="grid h-12 w-12 place-items-center rounded-full bg-white/5 text-[#8a8a8a]">
+      <span className="grid h-12 w-12 place-items-center rounded-full bg-white/5 text-[var(--faint)]">
         <Icon name={icon} className="h-6 w-6" />
       </span>
-      <strong className="mt-1 [font-family:'Doran',Tahoma,sans-serif]">{title}</strong>
-      {note && <p className="max-w-sm text-sm leading-6 text-[#8a8a8a]">{note}</p>}
+      <strong className="mt-1 [font-family:'Doran','Vazir',Tahoma,sans-serif]">{title}</strong>
+      {note && <p className="max-w-sm text-sm leading-6 text-[var(--faint)]">{note}</p>}
       {action}
     </div>
   );
@@ -351,7 +351,7 @@ export function Modal({ open, onClose, title, children, width = 'min(28rem, 100%
       aria-label={title}
       onClick={onClose}
     >
-      <div className="tb-pop rounded-[1.8rem] border border-white/10 bg-[#222225] p-6" style={{ width }} onClick={(event) => event.stopPropagation()}>
+      <div className="tb-pop rounded-[1.8rem] border border-white/10 bg-[var(--surface)] p-6" style={{ width }} onClick={(event) => event.stopPropagation()}>
         {children}
       </div>
     </div>
@@ -362,16 +362,16 @@ export function Modal({ open, onClose, title, children, width = 'min(28rem, 100%
 
 function Axis({ x0 = 34, y0 = 150, width = 268, height = 120, xLabel, yLabel }) {
   return (
-    <g stroke="rgba(255,255,255,0.35)" strokeWidth="1.4" strokeLinecap="round">
+    <g stroke="rgb(var(--wash-rgb) / 0.35)" strokeWidth="1.4" strokeLinecap="round">
       <line x1={x0} y1={y0} x2={x0 + width} y2={y0} />
       <line x1={x0} y1={y0} x2={x0} y2={y0 - height} />
       {xLabel && (
-        <text x={x0 + width} y={y0 + 14} fill="#8a8a8a" fontSize="10" textAnchor="end" stroke="none">
+        <text x={x0 + width} y={y0 + 14} fill="var(--faint)" fontSize="10" textAnchor="end" stroke="none">
           {xLabel}
         </text>
       )}
       {yLabel && (
-        <text x={x0 - 8} y={y0 - height - 6} fill="#8a8a8a" fontSize="10" textAnchor="start" stroke="none">
+        <text x={x0 - 8} y={y0 - height - 6} fill="var(--faint)" fontSize="10" textAnchor="start" stroke="none">
           {yLabel}
         </text>
       )}
@@ -388,7 +388,7 @@ const FIGURES = {
       <path
         d="M44 150 C50 149 54 148 58 146 L66 42 C68 36 72 36 76 42 C82 52 86 56 96 58 C118 62 132 60 142 62 L156 116 C160 132 168 140 180 146 L200 150"
         fill="none"
-        stroke="#61D192"
+        stroke="var(--green-ink)"
         strokeWidth="2.4"
         strokeLinecap="round"
       />
@@ -396,13 +396,13 @@ const FIGURES = {
       <path
         d="M44 138 C56 136 68 132 80 126 C94 119 104 110 116 96 C128 82 138 68 152 52 C160 43 172 38 186 42 C200 47 210 62 220 84 C228 102 240 122 258 136 L276 146"
         fill="none"
-        stroke="#937fcd"
+        stroke="var(--purple-ink)"
         strokeWidth="2.4"
         strokeDasharray="none"
         strokeLinecap="round"
       />
-      <text x="210" y="34" fill="#61D192" fontSize="11" fontWeight="700">A — میوکارد بطنی</text>
-      <text x="52" y="60" fill="#c9bdf0" fontSize="11" fontWeight="700">B — گره SA</text>
+      <text x="210" y="34" fill="var(--green-ink)" fontSize="11" fontWeight="700">A — میوکارد بطنی</text>
+      <text x="52" y="60" fill="var(--purple-soft-ink)" fontSize="11" fontWeight="700">B — گره SA</text>
     </svg>
   ),
 
@@ -411,16 +411,16 @@ const FIGURES = {
     <svg viewBox="0 0 320 180" role="img" aria-label="منحنی تفکیک اکسی‌هموگلوبین">
       <Axis xLabel="PO₂ (mmHg)" yLabel="اشباع %" />
       {/* هاشور Vmax/2 و P50 */}
-      <line x1="84" y1="150" x2="84" y2="90" stroke="#e0b45c" strokeWidth="1.2" strokeDasharray="4 3" />
-      <line x1="124" y1="150" x2="124" y2="90" stroke="#e0b45c" strokeWidth="1.2" strokeDasharray="4 3" />
-      <line x1="34" y1="90" x2="124" y2="90" stroke="rgba(255,255,255,0.25)" strokeWidth="1" strokeDasharray="3 3" />
-      <text x="80" y="163" fill="#e0b45c" fontSize="10" textAnchor="middle">P50</text>
-      <text x="128" y="163" fill="#e0b45c" fontSize="10" textAnchor="middle">P50′</text>
+      <line x1="84" y1="150" x2="84" y2="90" stroke="var(--gold-ink)" strokeWidth="1.2" strokeDasharray="4 3" />
+      <line x1="124" y1="150" x2="124" y2="90" stroke="var(--gold-ink)" strokeWidth="1.2" strokeDasharray="4 3" />
+      <line x1="34" y1="90" x2="124" y2="90" stroke="rgb(var(--wash-rgb) / 0.25)" strokeWidth="1" strokeDasharray="3 3" />
+      <text x="80" y="163" fill="var(--gold-ink)" fontSize="10" textAnchor="middle">P50</text>
+      <text x="128" y="163" fill="var(--gold-ink)" fontSize="10" textAnchor="middle">P50′</text>
       {/* منحنی نرمال */}
       <path
         d="M34 148 C60 146 76 136 88 112 C98 92 104 62 116 44 C124 34 134 32 144 32 L190 32"
         fill="none"
-        stroke="#61D192"
+        stroke="var(--green-ink)"
         strokeWidth="2.4"
         strokeLinecap="round"
       />
@@ -428,13 +428,13 @@ const FIGURES = {
       <path
         d="M34 149 C68 148 92 140 108 120 C122 102 130 74 146 52 C156 40 168 36 180 36 L216 36"
         fill="none"
-        stroke="#ef9196"
+        stroke="var(--red-ink)"
         strokeWidth="2.4"
         strokeDasharray="6 4"
         strokeLinecap="round"
       />
-      <text x="196" y="26" fill="#61D192" fontSize="10.5" fontWeight="700">سالم</text>
-      <text x="222" y="46" fill="#ef9196" fontSize="10.5" fontWeight="700">تب (به راست)</text>
+      <text x="196" y="26" fill="var(--green-ink)" fontSize="10.5" fontWeight="700">سالم</text>
+      <text x="222" y="46" fill="var(--red-ink)" fontSize="10.5" fontWeight="700">تب (به راست)</text>
     </svg>
   ),
 
@@ -443,22 +443,22 @@ const FIGURES = {
     <svg viewBox="0 0 320 180" role="img" aria-label="منحنی سرعت سوبسترای آنزیم و Km">
       <Axis xLabel="[S]" yLabel="v" />
       {/* خط Vmax مجانب */}
-      <line x1="34" y1="36" x2="302" y2="36" stroke="rgba(255,255,255,0.22)" strokeWidth="1" strokeDasharray="3 3" />
-      <text x="60" y="30" fill="#8a8a8a" fontSize="10">Vmax</text>
-      <line x1="34" y1="93" x2="118" y2="93" stroke="rgba(255,255,255,0.22)" strokeWidth="1" strokeDasharray="3 3" />
-      <text x="46" y="88" fill="#8a8a8a" fontSize="10">½Vmax</text>
+      <line x1="34" y1="36" x2="302" y2="36" stroke="rgb(var(--wash-rgb) / 0.22)" strokeWidth="1" strokeDasharray="3 3" />
+      <text x="60" y="30" fill="var(--faint)" fontSize="10">Vmax</text>
+      <line x1="34" y1="93" x2="118" y2="93" stroke="rgb(var(--wash-rgb) / 0.22)" strokeWidth="1" strokeDasharray="3 3" />
+      <text x="46" y="88" fill="var(--faint)" fontSize="10">½Vmax</text>
       {/* منحنی */}
       <path
         d="M34 150 C44 122 54 104 66 92 C82 76 98 66 118 60 C142 52 170 44 202 41 C230 38 260 37 292 36.5"
         fill="none"
-        stroke="#61D192"
+        stroke="var(--green-ink)"
         strokeWidth="2.4"
         strokeLinecap="round"
       />
       {/* Km روی محور X */}
-      <line x1="118" y1="150" x2="118" y2="93" stroke="#e0b45c" strokeWidth="1.2" strokeDasharray="4 3" />
-      <circle cx="118" cy="93" r="3.4" fill="#e0b45c" />
-      <text x="118" y="163" fill="#e0b45c" fontSize="10.5" textAnchor="middle" fontWeight="700">Km</text>
+      <line x1="118" y1="150" x2="118" y2="93" stroke="var(--gold-ink)" strokeWidth="1.2" strokeDasharray="4 3" />
+      <circle cx="118" cy="93" r="3.4" fill="var(--gold-ink)" />
+      <text x="118" y="163" fill="var(--gold-ink)" fontSize="10.5" textAnchor="middle" fontWeight="700">Km</text>
     </svg>
   ),
 };
@@ -467,9 +467,9 @@ export function QuestionFigure({ name }) {
   const renderer = FIGURES[name];
   if (!renderer) return null;
   return (
-    <figure className="mt-5 overflow-hidden rounded-2xl border border-white/8 bg-[#1d1d20] p-4">
+    <figure className="mt-5 overflow-hidden rounded-2xl border border-white/8 bg-[var(--surface)] p-4">
       <div className="mx-auto w-full max-w-md">{renderer()}</div>
-      <figcaption className="mt-2 text-center text-[11px] text-[#777]">شکل سؤال</figcaption>
+      <figcaption className="mt-2 text-center text-[11px] text-[var(--faint)]">شکل سؤال</figcaption>
     </figure>
   );
 }
@@ -478,14 +478,14 @@ export function QuestionFigure({ name }) {
 export function OptionButton({ option, index, state = 'idle', onSelect, disabled }) {
   const skin =
     state === 'correct'
-      ? 'bg-[#61D192]/[0.13] text-[#eaf6ef]'
+      ? 'bg-[#61D192]/[0.13] text-[var(--white)]'
       : state === 'wrong'
-        ? 'bg-[#e26d6d]/[0.12] text-[#f3e2e2]'
+        ? 'bg-[#e26d6d]/[0.12] text-[var(--white)]'
         : state === 'selected'
           ? 'bg-[#937fcd]/[0.18] text-white'
           : state === 'muted'
-            ? 'bg-white/[0.015] text-[#8a8a8a]'
-            : 'bg-white/[0.045] text-[#d9d9d9] hover:bg-white/[0.08]';
+            ? 'bg-white/[0.015] text-[var(--faint)]'
+            : 'bg-white/[0.045] text-[var(--muted)] hover:bg-white/[0.08]';
 
   return (
     <button
@@ -502,8 +502,8 @@ export function OptionButton({ option, index, state = 'idle', onSelect, disabled
         {toFa(['A', 'B', 'C', 'D'][index] ?? index + 1)}
       </span>
       <span className="min-w-0 flex-1 text-[14.5px] leading-7">{option}</span>
-      {state === 'correct' && <Icon name="check" className="mt-1.5 h-4.5 w-4.5 shrink-0 text-[#61D192]" />}
-      {state === 'wrong' && <Icon name="x" className="mt-1.5 h-4.5 w-4.5 shrink-0 text-[#ef9196]" />}
+      {state === 'correct' && <Icon name="check" className="mt-1.5 h-4.5 w-4.5 shrink-0 text-[var(--green-ink)]" />}
+      {state === 'wrong' && <Icon name="x" className="mt-1.5 h-4.5 w-4.5 shrink-0 text-[var(--red-ink)]" />}
     </button>
   );
 }

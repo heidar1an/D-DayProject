@@ -159,7 +159,7 @@ function LessonRail({ title, subtitle, ariaLabel, spaced = false, bodyClassName 
     <>
       <header className={`mb-6 flex items-end justify-between gap-4 text-right md:mb-8 ${spaced ? 'mt-16 md:mt-24' : ''}`}>
         <div>
-          <h2 className="text-2xl text-[#5b8cc7] md:text-4xl [font-family:'Doran',Tahoma,sans-serif]">
+          <h2 className="text-2xl text-[var(--blue-ink)] md:text-4xl [font-family:'Doran','Vazir',Tahoma,sans-serif]">
             {title}
           </h2>
           <p className="mt-2 text-sm text-white md:text-base">{subtitle}</p>
@@ -219,7 +219,7 @@ function TodayLessonCard({ lesson, onOpen }) {
       type="button"
       onClick={() => onOpen(target)}
       aria-label={`${subject.title} — شروع درس`}
-      className="group relative aspect-[3/4] w-[248px] shrink-0 cursor-pointer snap-start overflow-hidden rounded-[2.25rem] border border-white/10 bg-[#22262e] text-right transition duration-200 hover:-translate-y-1 hover:ring-1 hover:ring-[#5b8cc7] md:w-[304px] md:rounded-[2.75rem]"
+      className="group relative aspect-[3/4] w-[248px] shrink-0 cursor-pointer snap-start overflow-hidden rounded-[2.25rem] border border-white/10 bg-[var(--blue-deep)] text-right transition duration-200 hover:-translate-y-1 hover:ring-1 hover:ring-[var(--blue-bright)] md:w-[304px] md:rounded-[2.75rem]"
     >
       {subject.image && (
         <img
@@ -229,7 +229,7 @@ function TodayLessonCard({ lesson, onOpen }) {
           className="absolute inset-0 h-full w-full object-cover opacity-55 transition duration-500 group-hover:scale-[1.06] group-hover:opacity-75"
         />
       )}
-      <span className="absolute inset-0 bg-gradient-to-t from-[#0b0d12] via-[#0b0d12]/60 to-[#0b0d12]/10" />
+      <span className="absolute inset-0 bg-gradient-to-t from-[var(--blue-deep)] via-[#0b0d12]/60 to-[#0b0d12]/10" />
 
       {tag && (
         <span className="absolute top-4 right-4 rounded-full px-3 py-1.5 text-xs text-white backdrop-blur-sm" style={{ backgroundColor: `${subject.accent}d9` }}>
@@ -238,7 +238,7 @@ function TodayLessonCard({ lesson, onOpen }) {
       )}
 
       <span className="absolute inset-x-0 bottom-0 flex flex-col gap-2 p-5 md:p-6">
-        <strong className="line-clamp-2 text-xl leading-9 text-white [font-family:'Doran',Tahoma,sans-serif] md:text-2xl md:leading-10">
+        <strong className="line-clamp-2 text-xl leading-9 text-white [font-family:'Doran','Vazir',Tahoma,sans-serif] md:text-2xl md:leading-10">
           {subject.title}
         </strong>
         <span className="flex items-center gap-2 text-xs text-white/70">
@@ -247,7 +247,7 @@ function TodayLessonCard({ lesson, onOpen }) {
           {toFa(lesson.tests)} تست
         </span>
 
-        <span className="mt-1 flex items-center gap-1.5 text-sm text-white/85 [font-family:'Doran',Tahoma,sans-serif]">
+        <span className="mt-1 flex items-center gap-1.5 text-sm text-white/85 [font-family:'Doran','Vazir',Tahoma,sans-serif]">
           از الان شروع کن
           <ChevronIcon direction="left" className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
         </span>
@@ -267,7 +267,7 @@ function MiniLessonCard({ subject, onOpen }) {
       type="button"
       onClick={() => onOpen(subject.id)}
       aria-label={`میکرو درسنامه ${subject.title}`}
-      className="group relative flex aspect-[3/4] w-[236px] shrink-0 cursor-pointer snap-start flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-[#12141a] p-5 text-right transition duration-200 hover:-translate-y-1 hover:border-white/25 md:w-[276px] md:rounded-[2.25rem] md:p-6"
+      className="group relative flex aspect-[3/4] w-[236px] shrink-0 cursor-pointer snap-start flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-[var(--blue-deep)] p-5 text-right transition duration-200 hover:-translate-y-1 hover:border-white/25 md:w-[276px] md:rounded-[2.25rem] md:p-6"
       style={{ '--accent': subject.accent }}
     >
       <span
@@ -279,7 +279,7 @@ function MiniLessonCard({ subject, onOpen }) {
       {/* سربرگ: برچسب «سه سوته» */}
       <span className="relative flex items-center justify-between">
         <span
-          className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] md:text-[11px] [font-family:'Doran',Tahoma,sans-serif]"
+          className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] md:text-[11px] [font-family:'Doran','Vazir',Tahoma,sans-serif]"
           style={{ backgroundColor: `${subject.accent}26`, color: subject.accent }}
         >
           <BoltIcon className="h-3 w-3" />
@@ -303,7 +303,7 @@ function MiniLessonCard({ subject, onOpen }) {
 
       {/* پانوشت: نام درس، زمان و پیشرفت */}
       <span className="relative mt-5 flex flex-col gap-2.5 border-t border-white/10 pt-3.5">
-        <strong className="text-lg leading-7 text-white [font-family:'Doran',Tahoma,sans-serif] md:text-xl md:leading-8">
+        <strong className="text-lg leading-7 text-white [font-family:'Doran','Vazir',Tahoma,sans-serif] md:text-xl md:leading-8">
           {subject.title}
         </strong>
 
@@ -361,7 +361,7 @@ export default function CoursesSection({ onOpenCourse, onOpenAllCourses }) {
       type="button"
       onClick={onOpenAllCourses}
       aria-label="مشاهده همه دوره‌های من"
-      className="group flex shrink-0 cursor-pointer items-center gap-2 rounded-full border border-[#5b8cc7]/40 bg-gradient-to-l from-[#3c6ea5]/30 to-[#2e4b75]/30 px-4 py-2 text-xs text-[#9cc0e8] backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-[#5b8cc7] hover:text-white hover:shadow-[0_0_24px_rgba(91,140,199,0.28)] md:px-5 md:py-2.5 md:text-sm [font-family:'Doran',Tahoma,sans-serif]"
+      className="group flex shrink-0 cursor-pointer items-center gap-2 rounded-full border border-[#5b8cc7]/40 bg-gradient-to-l from-[#3c6ea5]/30 to-[#2e4b75]/30 px-4 py-2 text-xs text-[var(--blue-soft-ink)] backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--blue-bright)] hover:text-white hover:shadow-[0_0_24px_rgba(91,140,199,0.28)] md:px-5 md:py-2.5 md:text-sm [font-family:'Doran','Vazir',Tahoma,sans-serif]"
     >
       <span
         aria-hidden="true"
@@ -382,7 +382,7 @@ export default function CoursesSection({ onOpenCourse, onOpenAllCourses }) {
     <section
       dir="rtl"
       aria-label="دوره ها"
-      className="dash-stagger mx-auto w-[var(--content-width)] min-h-[calc(100vh-7rem)] bg-black py-8 text-white md:py-10 [font-family:'Pinar',Tahoma,sans-serif]"
+      className="dash-stagger mx-auto w-[var(--content-width)] min-h-[calc(100vh-7rem)] bg-black py-8 text-white md:py-10 [font-family:'Pinar','Vazir',Tahoma,sans-serif]"
     >
       {/* ── ۱) دوره‌های من: دروس درحال انجام در یک ردیف افقی با فلش اسکرول ── */}
       {hasStartedCourses ? (
@@ -406,7 +406,7 @@ export default function CoursesSection({ onOpenCourse, onOpenAllCourses }) {
         <section className="mb-10 md:mb-12" aria-label="دوره‌های من">
           <header className="flex flex-wrap items-end justify-between gap-4 text-right">
             <div>
-              <h2 className="text-2xl text-[#5b8cc7] md:text-4xl [font-family:'Doran',Tahoma,sans-serif]">
+              <h2 className="text-2xl text-[var(--blue-ink)] md:text-4xl [font-family:'Doran','Vazir',Tahoma,sans-serif]">
                 دوره‌های من
               </h2>
               <p className="mt-2 text-sm text-white md:text-base">
@@ -426,7 +426,7 @@ export default function CoursesSection({ onOpenCourse, onOpenAllCourses }) {
               key={course.id}
               type="button"
               onClick={() => handleOpenCatalog(course.id)}
-              className="group relative flex min-h-[200px] cursor-pointer flex-col items-center justify-between overflow-hidden rounded-[2rem] bg-[#242424] px-4 py-5 text-center transition duration-200 hover:-translate-y-0.5 hover:bg-[#2d2d2d] hover:ring-1 hover:ring-white/20 md:min-h-[300px] md:rounded-[2.5rem] md:px-5 md:py-8"
+              className="group relative flex min-h-[200px] cursor-pointer flex-col items-center justify-between overflow-hidden rounded-[2rem] bg-[var(--surface)] px-4 py-5 text-center transition duration-200 hover:-translate-y-0.5 hover:bg-[var(--surface-soft)] hover:ring-1 hover:ring-white/20 md:min-h-[300px] md:rounded-[2.5rem] md:px-5 md:py-8"
               style={{ '--accent': course.accent }}
             >
               <span
@@ -449,12 +449,12 @@ export default function CoursesSection({ onOpenCourse, onOpenAllCourses }) {
 
               <span className="relative flex w-full flex-col items-center gap-1.5">
                 <span
-                  className="block text-sm leading-6 md:text-xl md:leading-9 [font-family:'Doran',Tahoma,sans-serif]"
+                  className="block text-sm leading-6 md:text-xl md:leading-9 [font-family:'Doran','Vazir',Tahoma,sans-serif]"
                   style={{ color: course.accent }}
                 >
                   {course.title}
                 </span>
-                <span className="block text-[10px] leading-5 text-[#9a9a9a] md:text-xs md:leading-6">
+                <span className="block text-[10px] leading-5 text-[var(--faint)] md:text-xs md:leading-6">
                   {course.tagline}
                 </span>
               </span>
@@ -464,12 +464,12 @@ export default function CoursesSection({ onOpenCourse, onOpenAllCourses }) {
       </section>
 
       {/* ── آگهی پرو ── */}
-      <aside className="relative overflow-hidden rounded-[2.5rem] border border-[#e0b45c]/20 bg-[#15171c] md:rounded-[3rem]">
+      <aside className="relative overflow-hidden rounded-[2.5rem] border border-[#e0b45c]/20 bg-[var(--blue-deep)] md:rounded-[3rem]">
         {/* هالهٔ نرم طلایی */}
         <span
           aria-hidden="true"
           className="pointer-events-none absolute -top-32 left-1/2 h-64 w-[42rem] -translate-x-1/2 rounded-full opacity-[0.18] blur-3xl"
-          style={{ background: 'radial-gradient(50% 50% at 50% 50%, #e0b45c, transparent 72%)' }}
+          style={{ background: 'radial-gradient(50% 50% at 50% 50%, var(--gold), transparent 72%)' }}
         />
 
         {/* الگوی مینیمال: کمان‌های نازک */}
@@ -478,7 +478,7 @@ export default function CoursesSection({ onOpenCourse, onOpenAllCourses }) {
           viewBox="0 0 260 260"
           className="pointer-events-none absolute -bottom-24 -left-20 h-[280px] w-[280px] opacity-[0.13] md:-bottom-32 md:-left-24 md:h-[380px] md:w-[380px]"
         >
-          <g fill="none" stroke="#e0b45c" strokeWidth="1">
+          <g fill="none" stroke="var(--gold-ink)" strokeWidth="1">
             <circle cx="130" cy="130" r="52" />
             <circle cx="130" cy="130" r="84" />
             <circle cx="130" cy="130" r="116" />
@@ -487,12 +487,12 @@ export default function CoursesSection({ onOpenCourse, onOpenAllCourses }) {
 
         <div className="relative flex flex-col items-center gap-8 px-6 py-10 text-center md:flex-row md:items-center md:justify-between md:gap-12 md:px-14 md:py-12 md:text-right">
           <div className="flex flex-col items-center md:items-start">
-            <span className="flex items-center gap-2 rounded-full border border-[#e0b45c]/30 bg-[#e0b45c]/10 px-3.5 py-1.5 text-[11px] text-[#e0b45c] md:text-xs [font-family:'Doran',Tahoma,sans-serif]">
+            <span className="flex items-center gap-2 rounded-full border border-[#e0b45c]/30 bg-[#e0b45c]/10 px-3.5 py-1.5 text-[11px] text-[var(--gold-ink)] md:text-xs [font-family:'Doran','Vazir',Tahoma,sans-serif]">
               <SparkIcon className="h-3.5 w-3.5" />
               پرو تپش
             </span>
 
-            <h2 className="mt-4 text-2xl leading-9 text-white md:mt-5 md:text-[2rem] md:leading-[3rem] [font-family:'Doran',Tahoma,sans-serif]">
+            <h2 className="mt-4 text-2xl leading-9 text-white md:mt-5 md:text-[2rem] md:leading-[3rem] [font-family:'Doran','Vazir',Tahoma,sans-serif]">
               همین حالا اشتراک پرو تپش را تهیه کنید
             </h2>
 
@@ -502,7 +502,7 @@ export default function CoursesSection({ onOpenCourse, onOpenAllCourses }) {
 
             <button
               type="button"
-              className="mt-7 cursor-pointer rounded-2xl bg-[#e0b45c] px-7 py-3 text-sm text-[#1c1508] transition duration-200 hover:-translate-y-0.5 hover:brightness-110 md:mt-8 md:rounded-[1.25rem] md:px-9 md:py-3.5 md:text-base [font-family:'Doran',Tahoma,sans-serif]"
+              className="mt-7 cursor-pointer rounded-2xl bg-[var(--gold)] px-7 py-3 text-sm text-[#1c1508] transition duration-200 hover:-translate-y-0.5 hover:brightness-110 md:mt-8 md:rounded-[1.25rem] md:px-9 md:py-3.5 md:text-base [font-family:'Doran','Vazir',Tahoma,sans-serif]"
             >
               اشتراک پرو را از اینجا دریافت کنید
             </button>
@@ -512,14 +512,14 @@ export default function CoursesSection({ onOpenCourse, onOpenAllCourses }) {
           <div aria-hidden="true" className="relative grid h-32 w-32 shrink-0 place-items-center md:h-44 md:w-44">
             <span
               className="absolute inset-0 rounded-full opacity-30 blur-2xl"
-              style={{ background: 'radial-gradient(50% 50% at 50% 50%, #e0b45c, transparent 70%)' }}
+              style={{ background: 'radial-gradient(50% 50% at 50% 50%, var(--gold), transparent 70%)' }}
             />
             <svg viewBox="0 0 160 160" className="relative h-full w-full">
-              <circle cx="80" cy="80" r="62" fill="none" stroke="#e0b45c" strokeOpacity="0.22" strokeWidth="1" />
-              <circle cx="80" cy="80" r="48" fill="none" stroke="#e0b45c" strokeOpacity="0.35" strokeWidth="1" strokeDasharray="3 7" />
+              <circle cx="80" cy="80" r="62" fill="none" stroke="var(--gold-ink)" strokeOpacity="0.22" strokeWidth="1" />
+              <circle cx="80" cy="80" r="48" fill="none" stroke="var(--gold-ink)" strokeOpacity="0.35" strokeWidth="1" strokeDasharray="3 7" />
               <path
                 d="M80 50c3.4 18.6 11 26.2 29.6 29.6C91 83 83.4 90.6 80 109.2 76.6 90.6 69 83 50.4 79.6 69 76.2 76.6 68.6 80 50z"
-                fill="#e0b45c"
+                fill="var(--gold-ink)"
                 fillOpacity="0.9"
               />
             </svg>
@@ -563,9 +563,9 @@ export default function CoursesSection({ onOpenCourse, onOpenAllCourses }) {
       <button
         id="green-path-section"
         type="button"
-        className="flex min-h-[220px] w-full cursor-pointer items-center justify-center rounded-[2.5rem] bg-[#465c4d] px-6 py-16 transition duration-200 hover:bg-[#3d5244] md:min-h-[280px] md:rounded-[3rem] md:py-20"
+        className="flex min-h-[220px] w-full cursor-pointer items-center justify-center rounded-[2.5rem] bg-[var(--green)] px-6 py-16 transition duration-200 hover:bg-[var(--green-deep)] md:min-h-[280px] md:rounded-[3rem] md:py-20"
       >
-        <span className="text-base text-white md:text-lg [font-family:'Doran',Tahoma,sans-serif]">
+        <span className="text-base text-white md:text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]">
           مسیر سبز
         </span>
       </button>

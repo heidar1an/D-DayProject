@@ -10,6 +10,7 @@
 import { useState } from 'react';
 
 import { auth } from '../../services/admin/adminService';
+import ThemeToggle from '../ThemeToggle';
 import { Button, Field, Input } from './adminShared';
 import { IconLock, IconShield, IconUser } from './adminIcons';
 
@@ -47,6 +48,8 @@ export default function AdminLogin({ onSuccess }) {
       <div className="ad-login__backdrop" aria-hidden="true" />
 
       <form className="ad-login__card" onSubmit={submit}>
+        <ThemeToggle className="ad-login__theme" />
+
         <header className="ad-login__head">
           <span className="ad-login__mark" aria-hidden="true">
             <IconShield width={26} height={26} />

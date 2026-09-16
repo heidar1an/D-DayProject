@@ -9,6 +9,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { auth, getMeta } from '../../services/admin/adminService';
+import ThemeToggle from '../ThemeToggle';
 import AdminLogin from './AdminLogin';
 import AdminDashboard from './views/AdminDashboard';
 import AdminArticles from './views/AdminArticles';
@@ -51,6 +52,24 @@ const SECTIONS = [
 
 const SECTION_IDS = new Set(SECTIONS.map((section) => section.id));
 
+/*
+ * زیرنمایش‌هایی که شناسه‌شان با بخش مادرشان یکی نیست.
+ *
+ * قبلاً تشخیص آیتم فعال با پیشوند انجام می‌شد (`view.name.startsWith('media-')`)
+ * و همین باعث یک باگ می‌شد: `media-center` با `media-` شروع می‌شود، پس باز کردن
+ * «مدیریت رسانه و فضای مجازی» آیتم «کتابخانهٔ رسانه» را هم هم‌زمان فعال می‌کرد.
+ * نگاشت صریح جای حدس پیشوندی را می‌گیرد.
+ */
+const SECTION_SUBVIEWS = {
+  'article-editor': 'articles',
+  'page-editor': 'pages',
+};
+
+/* نام هر نمایش → شناسهٔ بخشی که به آن تعلق دارد */
+function sectionOf(viewName) {
+  return SECTION_SUBVIEWS[viewName] ?? viewName;
+}
+
 /* `#admin` یا `#admin/articles` یا `#admin/analytics/traffic` یا `#admin/articles/art-1234` */
 function parseHashView() {
   const hash = typeof window === 'undefined' ? '' : window.location.hash;
@@ -76,7 +95,14 @@ function parseHashView() {
   return { name: section, payload: null };
 }
 
-function AdminShell({ admin, onExit, onLogout }) {
+/*
+ * پوستهٔ پنل بعد از احراز هویت.
+ *
+ * به‌صورت named export می‌آید تا در بررسی بدون مرورگر بتوان همین پوسته را با یک
+ * مدیر جعلی رندر کرد و چیدمان/وضعیت فعال سایدبار را سنجید — بدون رد شدن از
+ * `AdminLayout` که برای پر شدن نشست به افکت (و در نتیجه DOM) نیاز دارد.
+ */
+export function AdminShell({ admin, onExit, onLogout }) {
   const notify = useToast();
   const [view, setView] = useState(() => parseHashView());
   const [meta, setMeta] = useState(null);
@@ -142,7 +168,7 @@ function AdminShell({ admin, onExit, onLogout }) {
 
   /* اگر کاربر مستقیماً روی بخشی بدون دسترسی نشسته باشد، به داشبورد برگردد */
   useEffect(() => {
-    const section = SECTIONS.find((item) => item.id === view.name);
+    const section = SECTIONS.find((item) => item.id === sectionOf(view.name));
     if (section && !can(section.permission)) navigate('dashboard');
   }, [view.name, can, navigate]);
 
@@ -226,7 +252,7 @@ function AdminShell({ admin, onExit, onLogout }) {
         <nav className="ad-nav" aria-label="بخش‌های پنل">
           {visibleSections.map((section) => {
             const Icon = section.icon;
-            const isActive = view.name === section.id || view.name.startsWith(`${section.id}-`);
+            const isActive = sectionOf(view.name) === section.id;
 
             return (
               <button
@@ -276,6 +302,8 @@ function AdminShell({ admin, onExit, onLogout }) {
           </div>
 
           <div className="ad-header__user">
+            <ThemeToggle className="ad-header__theme" />
+
             <span className="ad-avatar" aria-hidden="true">{(admin.name || admin.username).slice(0, 1)}</span>
             <span className="ad-header__userinfo">
               <strong>{admin.name || admin.username}</strong>

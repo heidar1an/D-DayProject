@@ -49,8 +49,8 @@ function CreateCollectionForm({ userId, onCreated, onCancel }) {
         submit();
       }}
     >
-      <h3 className="flex items-center gap-2 text-sm [font-family:'Doran',Tahoma,sans-serif]">
-        <Icon name="plus" className="h-4 w-4 text-[#c9bdf0]" />
+      <h3 className="flex items-center gap-2 text-sm [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+        <Icon name="plus" className="h-4 w-4 text-[var(--purple-soft-ink)]" />
         ساخت مجموعهٔ جدید
       </h3>
       <div className="mt-4 space-y-3">
@@ -61,7 +61,7 @@ function CreateCollectionForm({ userId, onCreated, onCancel }) {
           placeholder="نام مجموعه؛ مثلاً «اشتباهات فیزیولوژی»"
           autoFocus
           maxLength={60}
-          className="w-full rounded-xl border border-white/8 bg-[#2a2a2a] px-3.5 py-2.5 text-sm text-white placeholder:text-[#666] focus:border-[#937fcd]/60 focus:outline-none"
+          className="w-full rounded-xl border border-white/8 bg-[var(--surface-soft)] px-3.5 py-2.5 text-sm text-white placeholder:text-[var(--ghost)] focus:border-[#937fcd]/60 focus:outline-none"
         />
         <input
           type="text"
@@ -69,14 +69,14 @@ function CreateCollectionForm({ userId, onCreated, onCancel }) {
           onChange={(event) => setDescription(event.target.value)}
           placeholder="توضیح کوتاه (اختیاری)"
           maxLength={120}
-          className="w-full rounded-xl border border-white/8 bg-[#2a2a2a] px-3.5 py-2.5 text-xs text-white placeholder:text-[#666] focus:border-[#937fcd]/60 focus:outline-none"
+          className="w-full rounded-xl border border-white/8 bg-[var(--surface-soft)] px-3.5 py-2.5 text-xs text-white placeholder:text-[var(--ghost)] focus:border-[#937fcd]/60 focus:outline-none"
         />
       </div>
       <div className="mt-4 flex gap-2">
         <button
           type="submit"
           disabled={!name.trim() || saving}
-          className="cursor-pointer rounded-xl bg-[#937fcd] px-5 py-2.5 text-sm font-bold transition-transform hover:-translate-y-0.5 disabled:cursor-default disabled:opacity-50"
+          className="cursor-pointer rounded-xl bg-[var(--purple-bright)] px-5 py-2.5 text-sm font-bold transition-transform hover:-translate-y-0.5 disabled:cursor-default disabled:opacity-50"
         >
           {saving ? 'در حال ساخت…' : 'ساخت مجموعه'}
         </button>
@@ -101,17 +101,17 @@ function CollectionDetail({ userId, collection, onBack, onRefresh, onStart, onOp
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-[2rem] border border-white/8 bg-[#282828] p-5">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-[2rem] border border-white/8 bg-[var(--surface-soft)] p-5">
         <div className="flex min-w-0 items-center gap-3.5">
-          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#937fcd]/15 text-[#c9bdf0]">
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#937fcd]/15 text-[var(--purple-soft-ink)]">
             <Icon name="layers" className="h-5 w-5" />
           </span>
           <div className="min-w-0">
-            <h2 className="truncate text-base [font-family:'Doran',Tahoma,sans-serif]">{collection.name}</h2>
-            <p className="text-[11px] text-[#8a8a8a]">
+            <h2 className="truncate text-base [font-family:'Doran','Vazir',Tahoma,sans-serif]">{collection.name}</h2>
+            <p className="text-[11px] text-[var(--faint)]">
               {faNum(collection.questionIds.length)} سؤال · ساخته‌شده {relativeTime(collection.createdAt)}
             </p>
-            {collection.description && <p className="mt-0.5 truncate text-xs text-[#9a9a9a]">{collection.description}</p>}
+            {collection.description && <p className="mt-0.5 truncate text-xs text-[var(--faint)]">{collection.description}</p>}
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -119,7 +119,7 @@ function CollectionDetail({ userId, collection, onBack, onRefresh, onStart, onOp
             type="button"
             onClick={() => onStart(collection)}
             disabled={collection.questionIds.length === 0}
-            className="cursor-pointer rounded-xl bg-[#937fcd] px-4 py-2.5 text-xs font-bold transition-transform hover:-translate-y-0.5 disabled:opacity-40"
+            className="cursor-pointer rounded-xl bg-[var(--purple-bright)] px-4 py-2.5 text-xs font-bold transition-transform hover:-translate-y-0.5 disabled:opacity-40"
           >
             حل این مجموعه
           </button>
@@ -146,17 +146,17 @@ function CollectionDetail({ userId, collection, onBack, onRefresh, onStart, onOp
       ) : (
         <ul className="space-y-2.5">
           {collection.questions.map((question, index) => (
-            <li key={question.id} className="flex items-start gap-3 rounded-2xl border border-white/6 bg-[#2a2a2a] px-4 py-3.5">
-              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-white/5 text-xs text-[#aaa]">
+            <li key={question.id} className="flex items-start gap-3 rounded-2xl border border-white/6 bg-[var(--surface-soft)] px-4 py-3.5">
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-white/5 text-xs text-[var(--muted)]">
                 {toFa(index + 1)}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="line-clamp-2 text-[13.5px] leading-6 text-[#e6e6e6]" dir="ltr">
+                <p className="line-clamp-2 text-[13.5px] leading-6 text-[var(--white)]" dir="ltr">
                   {question.stem}
                 </p>
                 <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                   <DifficultyBadge difficulty={question.difficulty} />
-                  <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] text-[#9a9a9a]">{question.topic.fa}</span>
+                  <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] text-[var(--faint)]">{question.topic.fa}</span>
                 </div>
               </div>
               <button
@@ -164,7 +164,7 @@ function CollectionDetail({ userId, collection, onBack, onRefresh, onStart, onOp
                 onClick={() => handleRemove(question.id)}
                 disabled={removingId === question.id}
                 aria-label={`حذف سؤال ${toFa(index + 1)} از مجموعه`}
-                className="shrink-0 cursor-pointer rounded-lg p-2 text-[#777] transition-colors hover:bg-[#e26d6d]/15 hover:text-[#ef9196]"
+                className="shrink-0 cursor-pointer rounded-lg p-2 text-[var(--faint)] transition-colors hover:bg-[#e26d6d]/15 hover:text-[var(--red-ink)]"
               >
                 <Icon name="trash" className="h-4 w-4" />
               </button>
@@ -220,13 +220,13 @@ export default function CollectionsView({ userData, onStartCollection, onOpenBui
     <div className="space-y-5">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg [font-family:'Doran',Tahoma,sans-serif]">مجموعه‌های من</h2>
-          <p className="mt-1 text-xs text-[#8a8a8a]">سؤال‌های گلچین‌شده‌ات را دسته‌بندی کن و از دلشان آزمون بساز.</p>
+          <h2 className="text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]">مجموعه‌های من</h2>
+          <p className="mt-1 text-xs text-[var(--faint)]">سؤال‌های گلچین‌شده‌ات را دسته‌بندی کن و از دلشان آزمون بساز.</p>
         </div>
         <button
           type="button"
           onClick={() => setCreating(true)}
-          className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#937fcd] px-4 py-2.5 text-xs font-bold transition-transform hover:-translate-y-0.5"
+          className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[var(--purple-bright)] px-4 py-2.5 text-xs font-bold transition-transform hover:-translate-y-0.5"
         >
           <Icon name="plus" className="h-4 w-4" />
           ساخت مجموعهٔ جدید
@@ -244,7 +244,7 @@ export default function CollectionsView({ userData, onStartCollection, onOpenBui
             <button
               type="button"
               onClick={() => setCreating(true)}
-              className="mt-3 cursor-pointer rounded-xl bg-[#937fcd] px-5 py-2.5 text-sm font-bold"
+              className="mt-3 cursor-pointer rounded-xl bg-[var(--purple-bright)] px-5 py-2.5 text-sm font-bold"
             >
               اولین مجموعه را بساز
             </button>
@@ -255,17 +255,17 @@ export default function CollectionsView({ userData, onStartCollection, onOpenBui
           {collections.map((collection) => (
             <div
               key={collection.id}
-              className={`group flex flex-col rounded-[2rem] border border-white/8 bg-[#282828] p-5 transition-all duration-300 hover:-translate-y-1 hover:border-white/20 ${
+              className={`group flex flex-col rounded-[2rem] border border-white/8 bg-[var(--surface-soft)] p-5 transition-all duration-300 hover:-translate-y-1 hover:border-white/20 ${
                 deletingId === collection.id ? 'opacity-40' : ''
               }`}
             >
               <button type="button" onClick={() => setSelectedId(collection.id)} className="cursor-pointer text-right">
-                <span className="grid h-11 w-11 place-items-center rounded-2xl bg-[#937fcd]/15 text-[#c9bdf0]">
+                <span className="grid h-11 w-11 place-items-center rounded-2xl bg-[#937fcd]/15 text-[var(--purple-soft-ink)]">
                   <Icon name="layers" className="h-5 w-5" />
                 </span>
-                <strong className="mt-3.5 block text-base [font-family:'Doran',Tahoma,sans-serif]">{collection.name}</strong>
-                {collection.description && <p className="mt-1 line-clamp-2 text-xs leading-5 text-[#8a8a8a]">{collection.description}</p>}
-                <p className="mt-2.5 text-[11px] text-[#777]">
+                <strong className="mt-3.5 block text-base [font-family:'Doran','Vazir',Tahoma,sans-serif]">{collection.name}</strong>
+                {collection.description && <p className="mt-1 line-clamp-2 text-xs leading-5 text-[var(--faint)]">{collection.description}</p>}
+                <p className="mt-2.5 text-[11px] text-[var(--faint)]">
                   {faNum(collection.questionIds.length)} سؤال · {relativeTime(collection.createdAt)}
                 </p>
               </button>
@@ -274,7 +274,7 @@ export default function CollectionsView({ userData, onStartCollection, onOpenBui
                   type="button"
                   onClick={() => onStartCollection(collection)}
                   disabled={collection.questionIds.length === 0}
-                  className="cursor-pointer rounded-lg bg-[#937fcd]/15 px-3 py-1.5 text-xs text-[#c9bdf0] transition-colors hover:bg-[#937fcd]/25 disabled:opacity-40"
+                  className="cursor-pointer rounded-lg bg-[#937fcd]/15 px-3 py-1.5 text-xs text-[var(--purple-soft-ink)] transition-colors hover:bg-[#937fcd]/25 disabled:opacity-40"
                 >
                   شروع حل سؤال
                 </button>
@@ -287,7 +287,7 @@ export default function CollectionsView({ userData, onStartCollection, onOpenBui
                     refresh();
                   }}
                   aria-label={`حذف مجموعه ${collection.name}`}
-                  className="cursor-pointer rounded-lg p-2 text-[#777] transition-colors hover:bg-[#e26d6d]/15 hover:text-[#ef9196]"
+                  className="cursor-pointer rounded-lg p-2 text-[var(--faint)] transition-colors hover:bg-[#e26d6d]/15 hover:text-[var(--red-ink)]"
                 >
                   <Icon name="trash" className="h-4 w-4" />
                 </button>
@@ -297,7 +297,7 @@ export default function CollectionsView({ userData, onStartCollection, onOpenBui
         </div>
       )}
 
-      <p className="flex items-center gap-2 rounded-2xl bg-white/[0.03] px-4 py-3 text-[11px] leading-5 text-[#8a8a8a]">
+      <p className="flex items-center gap-2 rounded-2xl bg-white/[0.03] px-4 py-3 text-[11px] leading-5 text-[var(--faint)]">
         <Icon name="spark" className="h-3.5 w-3.5 shrink-0" />
         سؤال‌های گلچین‌شده ولی بدون مجموعه در «آزمون‌ساز» هم قابل استفاده‌اند.
         <SampleTag className="hidden sm:inline-flex" />

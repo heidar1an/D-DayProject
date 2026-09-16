@@ -11,13 +11,13 @@ export { EmptyState, ProgressBar, Skeleton, faNum, toFa };
 
 /* رنگ هر حالت یادگیری — از پالت فعلی تپش، بدون رنگ جدید */
 export const STATE_STYLES = {
-  new: { color: '#5b8cc7', bg: 'rgba(91,140,199,0.12)' },
-  learning: { color: '#e0b45c', bg: 'rgba(224,180,92,0.12)' },
-  review: { color: '#937fcd', bg: 'rgba(147,127,205,0.14)' },
-  relearning: { color: '#ef9196', bg: 'rgba(239,145,150,0.12)' },
-  mastered: { color: '#77b787', bg: 'rgba(119,183,135,0.13)' },
-  suspended: { color: '#8a8a8a', bg: 'rgba(138,138,138,0.12)' },
-  archived: { color: '#8a8a8a', bg: 'rgba(138,138,138,0.12)' },
+  new: { color: 'var(--blue-ink)', bg: 'rgba(91,140,199,0.12)' },
+  learning: { color: 'var(--gold-ink)', bg: 'rgba(224,180,92,0.12)' },
+  review: { color: 'var(--purple-ink)', bg: 'rgba(147,127,205,0.14)' },
+  relearning: { color: 'var(--red-ink)', bg: 'rgba(239,145,150,0.12)' },
+  mastered: { color: 'var(--green-ink)', bg: 'rgba(119,183,135,0.13)' },
+  suspended: { color: 'var(--faint)', bg: 'rgb(var(--ink-rgb) / 0.12)' },
+  archived: { color: 'var(--faint)', bg: 'rgb(var(--ink-rgb) / 0.12)' },
 };
 
 /* آیکن‌های اختصاصی فلش‌کارت */
@@ -154,7 +154,7 @@ export function MasteryRing({ value = 0, size = 56, stroke = 5, color = '#5b8cc7
   return (
     <span className="relative inline-grid place-items-center" style={{ width: size, height: size }} role="img" aria-label={`تسلط ${toFa(clamped)} درصد`}>
       <svg width={size} height={size} className="-rotate-90" aria-hidden="true">
-        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth={stroke} />
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="rgb(var(--wash-rgb) / 0.08)" strokeWidth={stroke} />
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -168,9 +168,9 @@ export function MasteryRing({ value = 0, size = 56, stroke = 5, color = '#5b8cc7
           style={{ transition: 'stroke-dashoffset 700ms ease' }}
         />
       </svg>
-      <span className="absolute text-center [font-family:'Doran',Tahoma,sans-serif]" style={{ fontSize: size * 0.24 }}>
+      <span className="absolute text-center [font-family:'Doran','Vazir',Tahoma,sans-serif]" style={{ fontSize: size * 0.24 }}>
         {toFa(clamped)}
-        <span className="block text-[9px] text-[#8a8a8a]" style={{ fontSize: size * 0.15 }}>{label ?? '٪'}</span>
+        <span className="block text-[9px] text-[var(--faint)]" style={{ fontSize: size * 0.15 }}>{label ?? '٪'}</span>
       </span>
     </span>
   );
@@ -192,14 +192,14 @@ export function Modal({ open, onClose, title, children, wide = false }) {
   return (
     <div className="fixed inset-0 z-[70] grid place-items-center p-4" role="dialog" aria-modal="true" aria-label={title}>
       <button type="button" aria-label="بستن" className="absolute inset-0 cursor-default bg-black/75 backdrop-blur-sm" onClick={onClose} />
-      <div className={`fc-modal relative max-h-[88vh] w-full overflow-y-auto rounded-[2rem] border border-white/10 bg-[#232323] p-6 shadow-[0_32px_80px_-24px_rgba(0,0,0,0.9)] md:p-8 ${wide ? 'max-w-2xl' : 'max-w-lg'}`}>
+      <div className={`fc-modal relative max-h-[88vh] w-full overflow-y-auto rounded-[2rem] border border-white/10 bg-[var(--surface)] p-6 shadow-[0_32px_80px_-24px_rgb(var(--shadow-rgb) / 0.9)] md:p-8 ${wide ? 'max-w-2xl' : 'max-w-lg'}`}>
         <header className="mb-5 flex items-center justify-between gap-3">
-          <h2 className="text-lg [font-family:'Doran',Tahoma,sans-serif]">{title}</h2>
+          <h2 className="text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]">{title}</h2>
           <button
             type="button"
             onClick={onClose}
             aria-label="بستن"
-            className="grid h-9 w-9 cursor-pointer place-items-center rounded-xl bg-white/5 text-[#aaa] transition-colors hover:bg-white/10 hover:text-white"
+            className="grid h-9 w-9 cursor-pointer place-items-center rounded-xl bg-white/5 text-[var(--muted)] transition-colors hover:bg-white/10 hover:text-white"
           >
             <Icon name="close" className="h-4 w-4" />
           </button>
@@ -251,7 +251,7 @@ export function renderCloze(text, { revealed = false, highlight = false } = {}) 
 /* برچسب کوچک اطلاعاتی */
 export function InfoChip({ icon, children, className = '' }) {
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full bg-white/5 px-3 py-1.5 text-xs text-[#aaa] ${className}`}>
+    <span className={`inline-flex items-center gap-1.5 rounded-full bg-white/5 px-3 py-1.5 text-xs text-[var(--muted)] ${className}`}>
       {icon && <Icon name={icon} className="h-3.5 w-3.5" />}
       {children}
     </span>

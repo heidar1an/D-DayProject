@@ -30,7 +30,7 @@ export function IconHeart({ className = 'h-[18px] w-[18px]', ariaLabel }) {
         d="M12 21c-.4 0-.8-.15-1.1-.42C9.5 19.4 3 14.1 3 9.3 3 6.4 5.2 4 8 4c1.6 0 3.1.8 4 2.1C12.9 4.8 14.4 4 16 4c2.8 0 5 2.4 5 5.3 0 4.8-6.5 10.1-7.9 11.28-.3.27-.7.42-1.1.42z"
       />
       <path
-        fill="#ffffff"
+        fill="var(--white)"
         opacity="0.35"
         d="M7.6 6.2c-1.2.4-2.1 1.6-2.2 2.9 0 .4-.5.5-.7.1-.3-.8-.2-1.9.4-2.7.6-.9 1.6-1.4 2.4-1.4.4 0 .5.5.1.7z"
       />
@@ -149,7 +149,7 @@ export function Icon({ name, className = 'h-[18px] w-[18px]', strokeWidth = 1.9,
 }
 
 /* ── آواتار گرد با حلقهٔ رنگی ── */
-export function UserAvatar({ avatar, size = 44, ringColor = 'rgba(255,255,255,0.14)', isYou = false }) {
+export function UserAvatar({ avatar, size = 44, ringColor = 'rgb(var(--wash-rgb) / 0.14)', isYou = false }) {
   const src = avatarSrc(avatar) ?? fallbackAvatarSrc();
   return (
     <span
@@ -174,8 +174,8 @@ export function RankChip({ rank, size = 'md' }) {
   const pad = size === 'lg' ? 'h-9 min-w-9 text-base' : 'h-7 min-w-7 text-xs';
   return (
     <span
-      className={`grid ${pad} shrink-0 place-items-center rounded-xl [font-family:'Doran',Tahoma,sans-serif] ${
-        medal ? 'text-[#1c1c1c]' : 'bg-white/5 text-[#aaa]'
+      className={`grid ${pad} shrink-0 place-items-center rounded-xl [font-family:'Doran','Vazir',Tahoma,sans-serif] ${
+        medal ? 'text-[var(--ink-deep)]' : 'bg-white/5 text-[var(--muted)]'
       }`}
       style={medal ? { background: `linear-gradient(150deg, ${medal}, ${medal}bb)` } : undefined}
     >
@@ -222,7 +222,7 @@ export function ProgressBar({ value, max, color = '#937fcd', height = 8, classNa
 export function HeartReward({ amount, size = 'md' }) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full bg-[#e26d6d]/12 text-[#ef9196] ${
+      className={`inline-flex items-center gap-1.5 rounded-full bg-[#e26d6d]/12 text-[var(--red-ink)] ${
         size === 'lg' ? 'px-3.5 py-1.5 text-base' : 'px-2.5 py-1 text-xs'
       }`}
       style={{ boxShadow: 'inset 0 0 0 1px rgba(226,109,109,0.35)' }}
@@ -237,11 +237,11 @@ export function HeartReward({ amount, size = 'md' }) {
 export function EmptyState({ icon = 'spark', title, note, action }) {
   return (
     <div className="flex flex-col items-center gap-2 rounded-[2rem] border border-dashed border-white/12 bg-white/[0.02] px-6 py-10 text-center">
-      <span className="grid h-12 w-12 place-items-center rounded-full bg-white/5 text-[#8a8a8a]">
+      <span className="grid h-12 w-12 place-items-center rounded-full bg-white/5 text-[var(--faint)]">
         <Icon name={icon} className="h-6 w-6" />
       </span>
-      <strong className="mt-1 [font-family:'Doran',Tahoma,sans-serif]">{title}</strong>
-      {note && <p className="max-w-sm text-sm leading-6 text-[#8a8a8a]">{note}</p>}
+      <strong className="mt-1 [font-family:'Doran','Vazir',Tahoma,sans-serif]">{title}</strong>
+      {note && <p className="max-w-sm text-sm leading-6 text-[var(--faint)]">{note}</p>}
       {action}
     </div>
   );

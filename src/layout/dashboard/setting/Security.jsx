@@ -12,13 +12,13 @@ function loadStoredSettings() {
 }
 
 const sectionTitleClass =
-  'm-0 text-3xl font-bold text-white md:text-4xl [font-family:\'Doran\',Tahoma,sans-serif]';
+  'm-0 text-3xl font-bold text-white md:text-4xl [font-family:\'Doran\',\'Vazir\',Tahoma,sans-serif]';
 
 const rowLabelClass =
-  'm-0 text-xl font-medium text-white md:text-2xl [font-family:\'Pinar\',Tahoma,sans-serif]';
+  'm-0 text-xl font-medium text-white md:text-2xl [font-family:\'Pinar\',\'Vazir\',Tahoma,sans-serif]';
 
 const inputClass =
-  'h-14 w-full max-w-[420px] rounded-full border border-[#666] bg-transparent px-6 text-white outline-none transition-colors duration-200 [font-family:\'Pinar\',Tahoma,sans-serif] focus:border-[#b99a86]';
+  'h-14 w-full max-w-[420px] rounded-full border border-[var(--border-solid)] bg-transparent px-6 text-white outline-none transition-colors duration-200 [font-family:\'Pinar\',\'Vazir\',Tahoma,sans-serif] focus:border-[var(--copper)]';
 
 /* کلید روشن/خاموش مطابق طرح: خاموش = قاب سفید و کاب سفید سمت چپ،
    روشن = پس‌زمینه سفید و کاب تیره سمت راست */
@@ -36,7 +36,7 @@ function ToggleSwitch({ checked, onChange, label }) {
     >
       <span
         className={`absolute top-1/2 h-10 w-10 -translate-y-1/2 rounded-full duration-300 transition-[inset-inline-start] ${
-          checked ? 'bg-[#141414]' : 'bg-white'
+          checked ? 'bg-[var(--background)]' : 'bg-white'
         }`}
         style={{ insetInlineStart: checked ? '6px' : 'calc(100% - 46px)' }}
       />
@@ -91,7 +91,7 @@ export default function Security() {
     <section
       dir="rtl"
       aria-label="امنیت"
-      className="dash-stagger mx-auto w-[var(--content-width)] py-8 text-white md:py-10 [font-family:'Pinar',Tahoma,sans-serif]"
+      className="dash-stagger mx-auto w-[var(--content-width)] py-8 text-white md:py-10 [font-family:'Pinar','Vazir',Tahoma,sans-serif]"
     >
       <h2 className={sectionTitleClass}>اشتراک گذاری اطلاعات</h2>
 
@@ -165,16 +165,16 @@ export default function Security() {
         </div>
 
         {error && (
-          <p role="alert" className="m-0 text-[#ff6969]">
+          <p role="alert" className="m-0 text-[var(--red-ink)]">
             {error}
           </p>
         )}
-        {isSaved && <p className="m-0 text-[#67ba85]">رمز عبور با موفقیت تغییر کرد.</p>}
+        {isSaved && <p className="m-0 text-[var(--green-ink)]">رمز عبور با موفقیت تغییر کرد.</p>}
 
         <div className="mt-2 flex items-center gap-4">
           <button
             type="submit"
-            className="cursor-pointer rounded-full bg-[#b99a86] px-10 py-3.5 text-white transition-colors duration-200 hover:bg-[#a3826e] md:text-lg [font-family:'Doran',Tahoma,sans-serif]"
+            className="cursor-pointer rounded-full bg-[var(--copper)] px-10 py-3.5 text-white transition-colors duration-200 hover:bg-[var(--copper)] md:text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]"
           >
             تغییر رمز عبور
           </button>

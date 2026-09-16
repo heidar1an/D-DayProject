@@ -15,7 +15,7 @@ import {
 function ExplanationSection({ icon, title, accent, children }) {
   return (
     <section className="itl-ex-section">
-      <h4 className="flex items-center gap-2 text-sm [font-family:'Doran',Tahoma,sans-serif]" style={{ color: accent }}>
+      <h4 className="flex items-center gap-2 text-sm [font-family:'Doran','Vazir',Tahoma,sans-serif]" style={{ color: accent }}>
         <Icon name={icon} className="h-4 w-4" />
         {title}
       </h4>
@@ -36,7 +36,7 @@ function TeachMeLesson({ lesson, onClose }) {
   return (
     <div className="intl-reveal mt-3 rounded-2xl border border-[#937fcd]/35 bg-[#937fcd]/[0.07] p-4" role="region" aria-label="مینی درس این سؤال">
       <div className="flex items-center justify-between">
-        <strong className="flex items-center gap-2 text-sm text-[#c9bdf0] [font-family:'Doran',Tahoma,sans-serif]">
+        <strong className="flex items-center gap-2 text-sm text-[var(--purple-soft-ink)] [font-family:'Doran','Vazir',Tahoma,sans-serif]">
           <Icon name="spark" className="h-4 w-4" />
           مینی‌درس این سؤال
         </strong>
@@ -44,7 +44,7 @@ function TeachMeLesson({ lesson, onClose }) {
           type="button"
           onClick={onClose}
           aria-label="بستن مینی درس"
-          className="cursor-pointer rounded-lg p-1 text-[#8a8a8a] transition-colors hover:text-white"
+          className="cursor-pointer rounded-lg p-1 text-[var(--faint)] transition-colors hover:text-white"
         >
           <Icon name="x" className="h-4 w-4" />
         </button>
@@ -52,17 +52,17 @@ function TeachMeLesson({ lesson, onClose }) {
       <ul className="mt-3 space-y-3">
         {rows.map((row) => (
           <li key={row.title} className="flex gap-3">
-            <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-[#937fcd]/15 text-[#c9bdf0]">
+            <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-[#937fcd]/15 text-[var(--purple-soft-ink)]">
               <Icon name={row.icon} className="h-3.5 w-3.5" />
             </span>
             <span className="min-w-0">
-              <strong className="block text-xs text-[#c9bdf0]">{row.title}</strong>
-              <span className="mt-0.5 block text-[13px] leading-6 text-[#d9d9d9]">{row.body}</span>
+              <strong className="block text-xs text-[var(--purple-soft-ink)]">{row.title}</strong>
+              <span className="mt-0.5 block text-[13px] leading-6 text-[var(--muted)]">{row.body}</span>
             </span>
           </li>
         ))}
       </ul>
-      <p className="mt-3 border-t border-white/8 pt-2.5 text-[11px] leading-5 text-[#777]">
+      <p className="mt-3 border-t border-white/8 pt-2.5 text-[11px] leading-5 text-[var(--faint)]">
         این درس از ساختار سؤال ساخته شده؛ بعداً به دستیار هوشمند تپش وصل می‌شود تا شخصی‌تر شود.
       </p>
     </div>
@@ -91,10 +91,10 @@ export default function QuestionExplanation({
   };
 
   return (
-    <div className="itl-ex-panel intl-reveal rounded-[1.75rem] border border-white/8 bg-[#232323] p-5 md:p-6" dir="rtl">
+    <div className="itl-ex-panel intl-reveal rounded-[1.75rem] border border-white/8 bg-[var(--surface)] p-5 md:p-6" dir="rtl">
       <header className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="flex items-center gap-2 text-base [font-family:'Doran',Tahoma,sans-serif]">
-          <Icon name="book" className="h-4.5 w-4.5 text-[#937fcd]" />
+        <h3 className="flex items-center gap-2 text-base [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+          <Icon name="book" className="h-4.5 w-4.5 text-[var(--purple-ink)]" />
           تحلیل سؤال
         </h3>
         <div className="flex flex-wrap items-center gap-1.5">
@@ -105,9 +105,9 @@ export default function QuestionExplanation({
 
       {/* چرا پاسخ صحیح صحیح است؟ */}
       <ExplanationSection icon="check" title="چرا این گزینه؟" accent="#77b787">
-        {showFa && <p className="text-[13.5px] leading-7 text-[#e6e6e6]">{question.explanation.fa}</p>}
+        {showFa && <p className="text-[13.5px] leading-7 text-[var(--white)]">{question.explanation.fa}</p>}
         {showEn && (
-          <p className={`text-[13px] leading-6 text-[#a8a8a8] ${showFa ? 'mt-2' : ''}`} dir="ltr">
+          <p className={`text-[13px] leading-6 text-[var(--muted)] ${showFa ? 'mt-2' : ''}`} dir="ltr">
             {question.explanation.en}
           </p>
         )}
@@ -132,16 +132,16 @@ export default function QuestionExplanation({
               >
                 <div className="flex items-start gap-2.5">
                   <span
-                    className={`grid h-6 w-6 shrink-0 place-items-center rounded-lg text-xs font-bold [font-family:'Doran',Tahoma,sans-serif] ${
-                      isCorrect ? 'bg-[#77b787]/20 text-[#9ed3ab]' : isSelectedWrong ? 'bg-[#e26d6d]/20 text-[#ef9196]' : 'bg-white/6 text-[#8a8a8a]'
+                    className={`grid h-6 w-6 shrink-0 place-items-center rounded-lg text-xs font-bold [font-family:'Doran','Vazir',Tahoma,sans-serif] ${
+                      isCorrect ? 'bg-[#77b787]/20 text-[var(--green-soft-ink)]' : isSelectedWrong ? 'bg-[#e26d6d]/20 text-[var(--red-ink)]' : 'bg-white/6 text-[var(--faint)]'
                     }`}
                   >
                     {option.key}
                   </span>
                   <span className="min-w-0">
-                    {showFa && <span className="block text-[13px] leading-6 text-[#d9d9d9]">{question.optionExplanations[option.key]?.fa}</span>}
+                    {showFa && <span className="block text-[13px] leading-6 text-[var(--muted)]">{question.optionExplanations[option.key]?.fa}</span>}
                     {showEn && (
-                      <span className={`block text-[12px] leading-5 text-[#9a9a9a] ${showFa ? 'mt-1' : ''}`} dir="ltr">
+                      <span className={`block text-[12px] leading-5 text-[var(--faint)] ${showFa ? 'mt-1' : ''}`} dir="ltr">
                         {question.optionExplanations[option.key]?.en}
                       </span>
                     )}
@@ -158,8 +158,8 @@ export default function QuestionExplanation({
         <ExplanationSection icon="target" title="نکات کلیدی برای آزمون" accent="#e0b45c">
           <ul className="space-y-2">
             {question.keyLearningPoints.map((point, index) => (
-              <li key={index} className="flex gap-2.5 text-[13px] leading-6 text-[#d9d9d9]">
-                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#e0b45c]" aria-hidden="true" />
+              <li key={index} className="flex gap-2.5 text-[13px] leading-6 text-[var(--muted)]">
+                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--gold)]" aria-hidden="true" />
                 {point}
               </li>
             ))}
@@ -170,7 +170,7 @@ export default function QuestionExplanation({
       {/* نکتهٔ بالینی (Clinical Pearl) */}
       {question.clinicalPearl && (
         <ExplanationSection icon="flame" title="نکتهٔ بالینی" accent="#ef9196">
-          <p className="rounded-xl border border-[#e26d6d]/20 bg-[#e26d6d]/[0.05] px-3.5 py-3 text-[13px] leading-7 text-[#e6e6e6]">
+          <p className="rounded-xl border border-[#e26d6d]/20 bg-[#e26d6d]/[0.05] px-3.5 py-3 text-[13px] leading-7 text-[var(--white)]">
             {question.clinicalPearl}
           </p>
         </ExplanationSection>
@@ -179,7 +179,7 @@ export default function QuestionExplanation({
       {/* اشتباه رایج */}
       {question.commonMistake && !compact && (
         <ExplanationSection icon="alert" title="اشتباه رایج" accent="#ef9196">
-          <p className="text-[13px] leading-7 text-[#c9c9c9]">{question.commonMistake}</p>
+          <p className="text-[13px] leading-7 text-[var(--muted)]">{question.commonMistake}</p>
         </ExplanationSection>
       )}
 
@@ -187,7 +187,7 @@ export default function QuestionExplanation({
       <button
         type="button"
         onClick={requestLesson}
-        className="mt-1 inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#937fcd]/15 px-4 py-2.5 text-sm text-[#c9bdf0] transition-transform hover:-translate-y-0.5 [font-family:'Doran',Tahoma,sans-serif]"
+        className="mt-1 inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#937fcd]/15 px-4 py-2.5 text-sm text-[var(--purple-soft-ink)] transition-transform hover:-translate-y-0.5 [font-family:'Doran','Vazir',Tahoma,sans-serif]"
       >
         <Icon name="spark" className="h-4 w-4" />
         {teachLoading ? 'در حال آماده‌سازی...' : 'این سؤال را یادم بده'}
@@ -195,7 +195,7 @@ export default function QuestionExplanation({
       {teachMe && <TeachMeLesson lesson={teachMe} onClose={() => setTeachMe(null)} />}
 
       {/* متادیتا: ثانویه و کم‌رنگ — هرگز بر متن سؤال غلبه نکند */}
-      <footer className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-white/6 pt-3 text-[11px] text-[#777]">
+      <footer className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-white/6 pt-3 text-[11px] text-[var(--faint)]">
         {exam && <span>آزمون: {exam.shortName}</span>}
         <span>موضوع: {question.topic.fa}</span>
         {question.reference && (

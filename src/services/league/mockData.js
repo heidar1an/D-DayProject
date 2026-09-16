@@ -18,13 +18,13 @@ export function avatarForSeed(seed) {
 
 /* ── Entity: League (سطوح لیگ) — رنگ‌ها از پالت تپش اقتباس شده‌اند ── */
 export const LEAGUE_TIERS = [
-  { id: 'bronze',    name: 'برنزی',     min: 0,     max: 4999,   color: '#ab8e7c', icon: 'shield' },
-  { id: 'silver',    name: 'نقره‌ای',   min: 5000,  max: 9999,   color: '#b9c2cc', icon: 'shield' },
-  { id: 'gold',      name: 'طلایی',     min: 10000, max: 17999,  color: '#e0b45c', icon: 'shield-star' },
-  { id: 'platinum',  name: 'پلاتینیوم', min: 18000, max: 26999,  color: '#9cc0e8', icon: 'shield-star' },
-  { id: 'diamond',   name: 'الماسی',    min: 27000, max: 39999,  color: '#937fcd', icon: 'diamond' },
-  { id: 'master',    name: 'استادی',    min: 40000, max: 59999,  color: '#77b787', icon: 'diamond' },
-  { id: 'grandmaster', name: 'اسطوره',  min: 60000, max: null,   color: '#e26d6d', icon: 'crown' },
+  { id: 'bronze',    name: 'برنزی',     min: 0,     max: 4999,   color: 'var(--copper-ink)', icon: 'shield' },
+  { id: 'silver',    name: 'نقره‌ای',   min: 5000,  max: 9999,   color: 'var(--muted)', icon: 'shield' },
+  { id: 'gold',      name: 'طلایی',     min: 10000, max: 17999,  color: 'var(--gold-ink)', icon: 'shield-star' },
+  { id: 'platinum',  name: 'پلاتینیوم', min: 18000, max: 26999,  color: 'var(--blue-soft-ink)', icon: 'shield-star' },
+  { id: 'diamond',   name: 'الماسی',    min: 27000, max: 39999,  color: 'var(--purple-ink)', icon: 'diamond' },
+  { id: 'master',    name: 'استادی',    min: 40000, max: 59999,  color: 'var(--green-ink)', icon: 'diamond' },
+  { id: 'grandmaster', name: 'اسطوره',  min: 60000, max: null,   color: 'var(--red-ink)', icon: 'crown' },
 ];
 
 /* ── Entity: User (لایهٔ لیگ) — مقدار پیش‌فرض؛ با پروفایل واقعی کاربر merge می‌شود ── */
@@ -230,10 +230,10 @@ export const ACHIEVEMENT_CATEGORIES = [
 ];
 
 export const RARITY = {
-  common: { label: 'معمولی', color: '#b9c2cc' },
-  rare: { label: 'کمیاب', color: '#5b8cc7' },
-  epic: { label: 'حماسی', color: '#937fcd' },
-  legendary: { label: 'افسانه‌ای', color: '#e0b45c' },
+  common: { label: 'معمولی', color: 'var(--muted)' },
+  rare: { label: 'کمیاب', color: 'var(--blue-ink)' },
+  epic: { label: 'حماسی', color: 'var(--purple-ink)' },
+  legendary: { label: 'افسانه‌ای', color: 'var(--gold-ink)' },
 };
 
 /* ── Entity: Title ── */
@@ -248,10 +248,10 @@ export const TITLES = [
 
 /* ── Entity: Reward ── */
 export const REWARDS = [
-  { id: 'r1', kind: 'badge', label: 'نشان فصل طلایی', note: 'پایان فصل ۱ در جمع ۳ نفر برتر', color: '#e0b45c', owned: false },
-  { id: 'r2', kind: 'frame', label: 'قاب پروفایل «شعله»', note: 'ریوارد استریک ۲۱ روزه', color: '#e26d6d', owned: true },
-  { id: 'r3', kind: 'avatar', label: 'آواتار ویژهٔ «قلب تپنده»', note: 'ریوارد دستاورد حماسی', color: '#937fcd', owned: true },
-  { id: 'r4', kind: 'access', label: 'چالش‌های ویژهٔ پلاتینیوم', note: 'با صعود به لیگ پلاتینیوم', color: '#9cc0e8', owned: false },
+  { id: 'r1', kind: 'badge', label: 'نشان فصل طلایی', note: 'پایان فصل ۱ در جمع ۳ نفر برتر', color: 'var(--gold-ink)', owned: false },
+  { id: 'r2', kind: 'frame', label: 'قاب پروفایل «شعله»', note: 'ریوارد استریک ۲۱ روزه', color: 'var(--red-ink)', owned: true },
+  { id: 'r3', kind: 'avatar', label: 'آواتار ویژهٔ «قلب تپنده»', note: 'ریوارد دستاورد حماسی', color: 'var(--purple-ink)', owned: true },
+  { id: 'r4', kind: 'access', label: 'چالش‌های ویژهٔ پلاتینیوم', note: 'با صعود به لیگ پلاتینیوم', color: 'var(--blue-soft-ink)', owned: false },
 ];
 
 /* ── Entity: HeartTransaction — هر قلب قابل ردیابی است (پایهٔ Anti-Cheat و Analytics) ── */

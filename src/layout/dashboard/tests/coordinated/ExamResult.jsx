@@ -22,7 +22,7 @@ function ScoreRing({ percentage, accent }) {
 
   return (
     <svg viewBox="0 0 128 128" className="exm-ring h-36 w-36" role="img" aria-label={`${toFa(percentage)} درصد`}>
-      <circle cx="64" cy="64" r={RING_RADIUS} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="10" />
+      <circle cx="64" cy="64" r={RING_RADIUS} fill="none" stroke="rgb(var(--wash-rgb) / 0.08)" strokeWidth="10" />
       <circle
         cx="64"
         cy="64"
@@ -35,10 +35,10 @@ function ScoreRing({ percentage, accent }) {
         strokeDashoffset={RING_CIRCUMFERENCE * (1 - progress / 100)}
         transform="rotate(-90 64 64)"
       />
-      <text x="64" y="60" textAnchor="middle" fill="#fff" fontSize="26" fontWeight="700" fontFamily="Doran, Tahoma, sans-serif">
+      <text x="64" y="60" textAnchor="middle" fill="var(--white)" fontSize="26" fontWeight="700" fontFamily="Doran, 'Vazir', Tahoma, sans-serif">
         {toFa(percentage)}
       </text>
-      <text x="64" y="80" textAnchor="middle" fill="#8a8a8a" fontSize="11" fontFamily="Pinar, Tahoma, sans-serif">
+      <text x="64" y="80" textAnchor="middle" fill="var(--faint)" fontSize="11" fontFamily="Pinar, 'Vazir', Tahoma, sans-serif">
         درصد
       </text>
     </svg>
@@ -48,10 +48,10 @@ function ScoreRing({ percentage, accent }) {
 function StatChip({ label, value, accent = '#ddd' }) {
   return (
     <div className="flex-1 rounded-2xl bg-white/[0.03] p-3.5 text-center">
-      <strong className="block text-lg [font-family:'Doran',Tahoma,sans-serif]" style={{ color: accent }}>
+      <strong className="block text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]" style={{ color: accent }}>
         {value}
       </strong>
-      <span className="mt-0.5 block text-[11px] text-[#8a8a8a]">{label}</span>
+      <span className="mt-0.5 block text-[11px] text-[var(--faint)]">{label}</span>
     </div>
   );
 }
@@ -64,9 +64,9 @@ function SubjectBars({ subjects }) {
       {subjects.map((subject) => (
         <div key={subject.subject}>
           <div className="mb-1.5 flex items-center justify-between text-xs">
-            <span className="text-[#ccc]">{subject.subject}</span>
+            <span className="text-[var(--muted)]">{subject.subject}</span>
             <span className="flex items-center gap-2">
-              <span className="text-[11px] text-[#8a8a8a]">
+              <span className="text-[11px] text-[var(--faint)]">
                 {faNum(subject.correct)} صحیح از {faNum(subject.total)}
               </span>
               <strong style={{ color: subjectAccent(subject.percent) }}>{toFa(subject.percent)}٪</strong>
@@ -90,13 +90,13 @@ export default function ExamResult({ variant, exam, result, reward, releaseAt, r
       <button
         type="button"
         onClick={onBack}
-        className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#282828] px-3.5 py-2.5 text-xs text-[#aaa] transition-colors hover:bg-[#333] hover:text-white"
+        className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[var(--surface-soft)] px-3.5 py-2.5 text-xs text-[var(--muted)] transition-colors hover:bg-[var(--surface-strong)] hover:text-white"
       >
         <Icon name="back" className="h-3.5 w-3.5" />
         بازگشت به آزمون‌ها
       </button>
       {exam && (
-        <span className="mr-auto flex flex-wrap items-center gap-2 text-xs text-[#8a8a8a]">
+        <span className="mr-auto flex flex-wrap items-center gap-2 text-xs text-[var(--faint)]">
           {formatFullDate(exam.startTime)}
           <TypeBadge type={exam.type} />
           <StatusBadge status={computeExamStatus(exam)} size="sm" />
@@ -110,12 +110,12 @@ export default function ExamResult({ variant, exam, result, reward, releaseAt, r
     return (
       <div className="dash-stagger space-y-6">
         {header}
-        <div className="flex flex-col items-center gap-3 rounded-[2.2rem] border border-white/[0.07] bg-[#242426] p-10 text-center">
-          <span className="grid h-14 w-14 place-items-center rounded-full bg-[#937fcd]/12 text-[#937fcd]">
+        <div className="flex flex-col items-center gap-3 rounded-[2.2rem] border border-white/[0.07] bg-[var(--surface)] p-10 text-center">
+          <span className="grid h-14 w-14 place-items-center rounded-full bg-[#937fcd]/12 text-[var(--purple-ink)]">
             <Icon name="clock" className="h-7 w-7" />
           </span>
-          <h1 className="text-lg text-white [font-family:'Doran',Tahoma,sans-serif]">نتایج شما در حال پردازش است</h1>
-          <p className="max-w-md text-sm leading-7 text-[#9a9a9a]">
+          <h1 className="text-lg text-white [font-family:'Doran','Vazir',Tahoma,sans-serif]">نتایج شما در حال پردازش است</h1>
+          <p className="max-w-md text-sm leading-7 text-[var(--faint)]">
             کارنامه و رتبهٔ شما بعد از تطبیق با شرکت‌کنندگان سراسری اعلام می‌شود
             {releaseAt ? ` — حدوداً ${formatFullDate(releaseAt)} ساعت ${formatTime(releaseAt)}` : ''}.
           </p>
@@ -129,15 +129,15 @@ export default function ExamResult({ variant, exam, result, reward, releaseAt, r
     return (
       <div className="dash-stagger space-y-6">
         {header}
-        <div className="space-y-6 rounded-[2.2rem] border border-white/[0.07] bg-[#242426] p-6 md:p-8">
+        <div className="space-y-6 rounded-[2.2rem] border border-white/[0.07] bg-[var(--surface)] p-6 md:p-8">
           <div className="flex flex-col items-center gap-2 text-center">
-            <span className="grid h-14 w-14 place-items-center rounded-full bg-white/[0.05] text-[#8a8a8a]">
+            <span className="grid h-14 w-14 place-items-center rounded-full bg-white/[0.05] text-[var(--faint)]">
               <Icon name="info" className="h-7 w-7" />
             </span>
-            <h1 className="text-lg text-white [font-family:'Doran',Tahoma,sans-serif]">
+            <h1 className="text-lg text-white [font-family:'Doran','Vazir',Tahoma,sans-serif]">
               در این آزمون شرکت نکرده‌ای
             </h1>
-            <p className="max-w-md text-sm leading-7 text-[#9a9a9a]">
+            <p className="max-w-md text-sm leading-7 text-[var(--faint)]">
               برای دیدن کارنامهٔ شخصی باید در آزمون شرکت کنی؛ آمار کلی آزمون‌دهندگان پایین قابل مشاهده است.
             </p>
           </div>
@@ -165,19 +165,19 @@ export default function ExamResult({ variant, exam, result, reward, releaseAt, r
       {header}
 
       {/* ── خلاصهٔ نمره ── */}
-      <section className="relative overflow-hidden rounded-[2.2rem] border border-white/[0.07] bg-[#242426] p-6 md:p-8">
+      <section className="relative overflow-hidden rounded-[2.2rem] border border-white/[0.07] bg-[var(--surface)] p-6 md:p-8">
         <div className="absolute -left-24 -top-28 h-64 w-64 rounded-full bg-[#937fcd]/10 blur-3xl" aria-hidden="true" />
         <div className="relative flex flex-col items-center gap-6 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-5">
             <ScoreRing percentage={result.percentage} accent="#937fcd" />
             <div className="space-y-2.5">
-              <h1 className="text-lg leading-snug text-white [font-family:'Doran',Tahoma,sans-serif]">{result.examTitle}</h1>
-              <p className="text-xs text-[#8a8a8a]">
+              <h1 className="text-lg leading-snug text-white [font-family:'Doran','Vazir',Tahoma,sans-serif]">{result.examTitle}</h1>
+              <p className="text-xs text-[var(--faint)]">
                 کارنامهٔ {formatFullDate(result.submittedAt)}
                 {result.reason === 'timeout' && ' • ثبت خودکار با پایان زمان'}
               </p>
               {reward && (
-                <p className="flex items-center gap-1.5 text-xs text-[#e26d6d]">
+                <p className="flex items-center gap-1.5 text-xs text-[var(--red-ink)]">
                   <HeartReward amount={reward.hearts} size="sm" />
                   بابت شرکت در آزمون گرفتی
                 </p>
@@ -195,9 +195,9 @@ export default function ExamResult({ variant, exam, result, reward, releaseAt, r
       </section>
 
       {/* ── رتبه و مقایسهٔ جامعهٔ آماری ── */}
-      <section aria-label="مقایسه با شرکت‌کنندگان" className="rounded-[2rem] border border-white/[0.07] bg-[#242426] p-6 md:p-8">
-        <h2 className="flex items-center gap-2 text-base text-white [font-family:'Doran',Tahoma,sans-serif]">
-          <Icon name="medal" className="h-5 w-5 text-[#e0b45c]" />
+      <section aria-label="مقایسه با شرکت‌کنندگان" className="rounded-[2rem] border border-white/[0.07] bg-[var(--surface)] p-6 md:p-8">
+        <h2 className="flex items-center gap-2 text-base text-white [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+          <Icon name="medal" className="h-5 w-5 text-[var(--gold-ink)]" />
           جایگاه تو بین شرکت‌کنندگان
         </h2>
 
@@ -210,7 +210,7 @@ export default function ExamResult({ variant, exam, result, reward, releaseAt, r
           <StatChip label="بالاترین نمره" value={`${toFa(result.community.topPercent)}٪`} accent="#937fcd" />
         </div>
 
-        <p className="mt-4 text-xs leading-6 text-[#8a8a8a]">
+        <p className="mt-4 text-xs leading-6 text-[var(--faint)]">
           {result.percentage >= result.community.averagePercent
             ? `از میانگین شرکت‌کنندگان (${toFa(result.community.averagePercent)}٪) بالاتری؛ همین مسیر را نگه دار.`
             : `میانگین شرکت‌کنندگان ${toFa(result.community.averagePercent)}٪ است — با مرور مباحث پایین، در آزمون بعدی از آن عبور می‌کنی.`}
@@ -218,9 +218,9 @@ export default function ExamResult({ variant, exam, result, reward, releaseAt, r
       </section>
 
       {/* ── تحلیل عملکرد بر اساس درس ── */}
-      <section aria-label="تحلیل عملکرد" className="rounded-[2rem] border border-white/[0.07] bg-[#242426] p-6 md:p-8">
-        <h2 className="flex items-center gap-2 text-base text-white [font-family:'Doran',Tahoma,sans-serif]">
-          <Icon name="chart" className="h-5 w-5 text-[#61D192]" />
+      <section aria-label="تحلیل عملکرد" className="rounded-[2rem] border border-white/[0.07] bg-[var(--surface)] p-6 md:p-8">
+        <h2 className="flex items-center gap-2 text-base text-white [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+          <Icon name="chart" className="h-5 w-5 text-[var(--green-ink)]" />
           عملکرد به تفکیک درس
         </h2>
 
@@ -230,16 +230,16 @@ export default function ExamResult({ variant, exam, result, reward, releaseAt, r
 
         {strong && weak && strong !== weak && (
           <div className="mt-6 grid gap-3 md:grid-cols-2">
-            <div className="flex items-start gap-2.5 rounded-2xl bg-[#61D192]/8 p-4 text-xs leading-6 text-[#a8d8bc]">
-              <Icon name="spark" className="mt-0.5 h-4 w-4 shrink-0 text-[#61D192]" />
+            <div className="flex items-start gap-2.5 rounded-2xl bg-[#61D192]/8 p-4 text-xs leading-6 text-[var(--green-ink)]">
+              <Icon name="spark" className="mt-0.5 h-4 w-4 shrink-0 text-[var(--green-ink)]" />
               <span>
-                <strong className="text-[#61D192]">نقطهٔ قوت:</strong> {strong.subject} با {toFa(strong.percent)}٪ — این درس را حفظ کن.
+                <strong className="text-[var(--green-ink)]">نقطهٔ قوت:</strong> {strong.subject} با {toFa(strong.percent)}٪ — این درس را حفظ کن.
               </span>
             </div>
-            <div className="flex items-start gap-2.5 rounded-2xl bg-[#e26d6d]/8 p-4 text-xs leading-6 text-[#dbb0b0]">
-              <Icon name="warn" className="mt-0.5 h-4 w-4 shrink-0 text-[#e26d6d]" />
+            <div className="flex items-start gap-2.5 rounded-2xl bg-[#e26d6d]/8 p-4 text-xs leading-6 text-[var(--red-soft-ink)]">
+              <Icon name="warn" className="mt-0.5 h-4 w-4 shrink-0 text-[var(--red-ink)]" />
               <span>
-                <strong className="text-[#e26d6d]">نیازمند مرور:</strong> {weak.subject} با {toFa(weak.percent)}٪ — از مرور سؤال‌ها شروع کن.
+                <strong className="text-[var(--red-ink)]">نیازمند مرور:</strong> {weak.subject} با {toFa(weak.percent)}٪ — از مرور سؤال‌ها شروع کن.
               </span>
             </div>
           </div>
@@ -248,14 +248,14 @@ export default function ExamResult({ variant, exam, result, reward, releaseAt, r
 
       {/* ── اقدام بعدی: مرور سؤال به سؤال ── */}
       <section className="flex flex-col items-center gap-4 rounded-[2rem] border border-dashed border-white/12 bg-white/[0.02] p-6 text-center">
-        <p className="max-w-md text-sm leading-7 text-[#9a9a9a]">
+        <p className="max-w-md text-sm leading-7 text-[var(--faint)]">
           آزمون پایان یادگیری نیست؛ از پاسخ‌هایت درس بساز — مرور سؤال به سؤال با توضیح کامل و افزودن نکته‌ها به فلش‌کارت.
         </p>
         <div className="flex flex-wrap justify-center gap-3">
           <button
             type="button"
             onClick={onReview}
-            className="flex cursor-pointer items-center gap-2 rounded-2xl bg-[#937fcd] px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-[#a390da]"
+            className="flex cursor-pointer items-center gap-2 rounded-2xl bg-[var(--purple-bright)] px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-[var(--purple-bright)]"
           >
             <Icon name="card" className="h-4 w-4" />
             مرور سؤال به سؤال
@@ -263,7 +263,7 @@ export default function ExamResult({ variant, exam, result, reward, releaseAt, r
           <button
             type="button"
             onClick={onBack}
-            className="cursor-pointer rounded-2xl bg-white/[0.06] px-6 py-3 text-sm text-[#ccc] transition-colors hover:bg-white/[0.1] hover:text-white"
+            className="cursor-pointer rounded-2xl bg-white/[0.06] px-6 py-3 text-sm text-[var(--muted)] transition-colors hover:bg-white/[0.1] hover:text-white"
           >
             بازگشت به آزمون‌ها
           </button>

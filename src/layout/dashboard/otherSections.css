@@ -14,8 +14,8 @@
   gap: 16px;
   margin: 0 auto;
   padding: 20px 0 32px;
-  color: #fff;
-  font-family: 'Pinar', Tahoma, sans-serif;
+  color: var(--white);
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
 }
 
 .other-sections__ai {
@@ -31,7 +31,7 @@
   width: 100%;
   height: clamp(180px, 22vh, 230px);
   border-radius: 2.5rem;
-  background: #242426;
+  background: var(--surface);
 }
 
 .other-sections__grid {
@@ -50,11 +50,11 @@
   overflow: hidden;
   width: 100%;
   min-height: 132px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgb(var(--line-rgb) / 0.05);
   border-radius: 2.5rem;
-  background: #242426;
+  background: var(--surface);
   padding: 20px 22px;
-  color: #fff;
+  color: var(--white);
   text-align: start;
   cursor: pointer;
   transition: border-color 220ms ease, background-color 220ms ease,
@@ -83,8 +83,8 @@
 
 .other-card:hover {
   border-color: var(--card-line-strong);
-  background: #28282c;
-  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.22);
+  background: var(--surface-soft);
+  box-shadow: 0 18px 42px rgb(var(--shadow-rgb) / calc(0.22 * var(--shadow-scale)));
   transform: translateY(-3px);
 }
 
@@ -116,7 +116,7 @@
 
 .other-card:hover .other-card__badge {
   background: var(--card-accent);
-  color: #191817;
+  color: var(--ink-deep);
   transform: translateY(-2px);
 }
 
@@ -129,15 +129,15 @@
 }
 
 .other-card__title {
-  color: #f4f4f6;
-  font-family: 'Doran', Tahoma, sans-serif;
+  color: var(--white);
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: 1.08rem;
   font-weight: 700;
   line-height: 1.45;
 }
 
 .other-card__desc {
-  color: #8d8d95;
+  color: var(--faint);
   font-size: 0.78rem;
   line-height: 1.85;
 }
@@ -157,14 +157,14 @@
 
 .other-card:hover .other-card__arrow {
   background: var(--card-accent);
-  color: #191817;
+  color: var(--ink-deep);
   transform: translateX(-3px);
 }
 
 /* ── رنگ اختصاصی هر کارت (از پالت پروژه) ─────────────────────────────────── */
 
 .other-card--blue {
-  --card-accent: #5b8cc7;
+  --card-accent: var(--blue-bright);
   --card-soft: rgba(91, 140, 199, 0.14);
   --card-line: rgba(91, 140, 199, 0.28);
   --card-line-strong: rgba(91, 140, 199, 0.5);
@@ -172,7 +172,7 @@
 }
 
 .other-card--green {
-  --card-accent: #77b787;
+  --card-accent: var(--green-bright);
   --card-soft: rgba(119, 183, 135, 0.14);
   --card-line: rgba(119, 183, 135, 0.28);
   --card-line-strong: rgba(119, 183, 135, 0.5);
@@ -180,7 +180,7 @@
 }
 
 .other-card--brown {
-  --card-accent: #ab8e7c;
+  --card-accent: var(--brown-bright);
   --card-soft: rgba(171, 142, 124, 0.15);
   --card-line: rgba(171, 142, 124, 0.3);
   --card-line-strong: rgba(171, 142, 124, 0.55);
@@ -188,7 +188,7 @@
 }
 
 .other-card--gold {
-  --card-accent: #e0b45c;
+  --card-accent: var(--gold);
   --card-soft: rgba(224, 180, 92, 0.13);
   --card-line: rgba(224, 180, 92, 0.26);
   --card-line-strong: rgba(224, 180, 92, 0.5);

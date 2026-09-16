@@ -341,14 +341,14 @@ export function Modal({ open, onClose, title, children, wide = false }) {
   return (
     <div className="fixed inset-0 z-[70] grid place-items-center p-4" role="dialog" aria-modal="true" aria-label={title}>
       <button type="button" aria-label="بستن" className="absolute inset-0 cursor-default bg-black/75 backdrop-blur-sm" onClick={onClose} />
-      <div className={`nt-modal relative max-h-[88vh] w-full overflow-y-auto rounded-[2rem] border border-white/10 bg-[#232323] p-6 shadow-[0_32px_80px_-24px_rgba(0,0,0,0.9)] md:p-8 ${wide ? 'max-w-2xl' : 'max-w-lg'}`}>
+      <div className={`nt-modal relative max-h-[88vh] w-full overflow-y-auto rounded-[2rem] border border-white/10 bg-[var(--surface)] p-6 shadow-[0_32px_80px_-24px_rgb(var(--shadow-rgb) / 0.9)] md:p-8 ${wide ? 'max-w-2xl' : 'max-w-lg'}`}>
         <header className="mb-5 flex items-center justify-between gap-3">
-          <h2 className="text-lg [font-family:'Doran',Tahoma,sans-serif]">{title}</h2>
+          <h2 className="text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]">{title}</h2>
           <button
             type="button"
             onClick={onClose}
             aria-label="بستن"
-            className="grid h-9 w-9 cursor-pointer place-items-center rounded-xl bg-white/5 text-[#aaa] transition-colors hover:bg-white/10 hover:text-white"
+            className="grid h-9 w-9 cursor-pointer place-items-center rounded-xl bg-white/5 text-[var(--muted)] transition-colors hover:bg-white/10 hover:text-white"
           >
             <Icon name="close" size={16} />
           </button>

@@ -152,7 +152,7 @@ export default function AnalyticsLayer({ userData, onBack }) {
     <section
       dir="rtl"
       aria-label="تحلیل عملکرد تست‌ها"
-      className="mx-auto w-[var(--content-width)] py-8 text-white [font-family:'Pinar',Tahoma,sans-serif] md:py-10"
+      className="mx-auto w-[var(--content-width)] py-8 text-white [font-family:'Pinar','Vazir',Tahoma,sans-serif] md:py-10"
     >
       {/* سربرگ لایه */}
       <header className="mb-6 flex items-center justify-between gap-3">
@@ -160,7 +160,7 @@ export default function AnalyticsLayer({ userData, onBack }) {
           <button
             type="button"
             onClick={handleBack}
-            className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#282828] px-3.5 py-2.5 text-xs text-[#aaa] transition-colors hover:bg-[#333] hover:text-white"
+            className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[var(--surface-soft)] px-3.5 py-2.5 text-xs text-[var(--muted)] transition-colors hover:bg-[var(--surface-strong)] hover:text-white"
           >
             <Icon name="back" className="h-3.5 w-3.5" />
             بازگشت
@@ -169,14 +169,14 @@ export default function AnalyticsLayer({ userData, onBack }) {
           <button
             type="button"
             onClick={onBack}
-            className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#282828] px-3.5 py-2.5 text-xs text-[#aaa] transition-colors hover:bg-[#333] hover:text-white"
+            className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[var(--surface-soft)] px-3.5 py-2.5 text-xs text-[var(--muted)] transition-colors hover:bg-[var(--surface-strong)] hover:text-white"
           >
             <Icon name="back" className="h-3.5 w-3.5" />
             بازگشت به تست
           </button>
         )}
-        <span className="flex items-center gap-1.5 text-xs text-[#8a8a8a]">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#61D192]" aria-hidden="true" />
+        <span className="flex items-center gap-1.5 text-xs text-[var(--faint)]">
+          <span className="h-1.5 w-1.5 rounded-full bg-[var(--green-vivid)]" aria-hidden="true" />
           {VIEW_LABELS[view.name] ?? 'تحلیل عملکرد'}
         </span>
       </header>
@@ -265,7 +265,7 @@ export default function AnalyticsLayer({ userData, onBack }) {
       )}
 
       {!busy && view.name === 'exam-detail' && !examDetail && (
-        <EmptyState icon="alert" title="کارنامهٔ این آزمون پیدا نشد" note="شاید در این بازه فیلتر شده باشد." action={<button type="button" onClick={() => go('exams')} className="mt-3 cursor-pointer rounded-xl bg-[#61D192] px-5 py-2.5 text-sm font-bold text-[#12271a]">بازگشت به آزمون‌ها</button>} />
+        <EmptyState icon="alert" title="کارنامهٔ این آزمون پیدا نشد" note="شاید در این بازه فیلتر شده باشد." action={<button type="button" onClick={() => go('exams')} className="mt-3 cursor-pointer rounded-xl bg-[var(--green-vivid)] px-5 py-2.5 text-sm font-bold text-[#12271a]">بازگشت به آزمون‌ها</button>} />
       )}
 
       {!busy && BEHAVIOR_VIEWS.includes(view.name) && bundle && (
@@ -283,9 +283,9 @@ export default function AnalyticsLayer({ userData, onBack }) {
 
       {/* توست اطلاع‌رسانی اقدام‌های بین‌بخشی */}
       {toast && (
-        <div className="an-fade fixed bottom-6 left-1/2 z-[96] -translate-x-1/2 rounded-2xl border border-white/10 bg-[#2a2a2d] px-5 py-3 text-[12.5px] text-[#ddd] shadow-2xl" role="status">
+        <div className="an-fade fixed bottom-6 left-1/2 z-[96] -translate-x-1/2 rounded-2xl border border-white/10 bg-[var(--surface-soft)] px-5 py-3 text-[12.5px] text-[var(--muted)] shadow-2xl" role="status">
           {toast}
-          <button type="button" onClick={() => setToast(null)} className="mr-3 cursor-pointer text-[#777] transition-colors hover:text-white" aria-label="بستن">
+          <button type="button" onClick={() => setToast(null)} className="mr-3 cursor-pointer text-[var(--faint)] transition-colors hover:text-white" aria-label="بستن">
             <Icon name="x" className="h-3.5 w-3.5" />
           </button>
         </div>
@@ -318,7 +318,7 @@ function QuestionsView({ questions, onOpenQuestion, onBack }) {
         className="dashboard-layer-reveal"
       >
         {struggling.length === 0 ? (
-          <p className="text-[12.5px] text-[#8a8a8a]">الگوی مشکل تکرارشونده پیدا نشد — وضعیت سؤال‌هایت سالم است.</p>
+          <p className="text-[12.5px] text-[var(--faint)]">الگوی مشکل تکرارشونده پیدا نشد — وضعیت سؤال‌هایت سالم است.</p>
         ) : (
           <div className="space-y-2.5">
             {struggling.slice(0, 8).map((question) => (
@@ -326,16 +326,16 @@ function QuestionsView({ questions, onOpenQuestion, onBack }) {
                 key={question.questionId}
                 type="button"
                 onClick={() => onOpenQuestion?.(question)}
-                className="flex w-full cursor-pointer items-center justify-between gap-3 rounded-2xl border border-white/8 bg-[#2a2a2d] p-3.5 text-right transition-colors hover:border-white/20 focus-visible:outline-2 focus-visible:outline-[#61D192]"
+                className="flex w-full cursor-pointer items-center justify-between gap-3 rounded-2xl border border-white/8 bg-[var(--surface-soft)] p-3.5 text-right transition-colors hover:border-white/20 focus-visible:outline-2 focus-visible:outline-[var(--green-vivid)]"
               >
                 <div className="min-w-0">
                   <h3 className="truncate text-[12.5px]">{question.timeline[0]?.stem ?? 'سؤال بانک تست'}</h3>
-                  <p className="mt-0.5 text-[11px] text-[#777]">
+                  <p className="mt-0.5 text-[11px] text-[var(--faint)]">
                     {question.topicPath.join(' › ')} · {faNum(question.attemptCount)} تلاش · {faNum(question.wrongCount)} غلط
                     {question.errorTypes.length ? ` · ${question.errorTypes.map((type) => ({ KNOWLEDGE_GAP: 'خلأ دانشی', MEMORY_FAILURE: 'یادآوری ناموفق', CARELESS_MISTAKE: 'بی‌دقتی', UNCERTAIN_GUESS: 'حدس' })[type] ?? 'خطای دیگر').join('، ')}` : ''}
                   </p>
                 </div>
-                <Icon name="chevronLeft" className="h-4 w-4 shrink-0 text-[#555]" />
+                <Icon name="chevronLeft" className="h-4 w-4 shrink-0 text-[var(--ghost)]" />
               </button>
             ))}
           </div>
@@ -377,7 +377,7 @@ function QuestionsView({ questions, onOpenQuestion, onBack }) {
               {sorted.slice(0, 40).map((question) => (
                 <tr key={question.questionId} tabIndex={0} onClick={() => onOpenQuestion?.(question)} onKeyDown={(event) => event.key === 'Enter' && onOpenQuestion?.(question)}>
                   <td data-label="سؤال"><span className="line-clamp-1 max-w-[300px]">{question.timeline[0]?.stem ?? '—'}</span></td>
-                  <td data-label="درس/مبحث"><span className="max-w-[180px] truncate text-[#aaa]">{question.topicPath.join(' › ')}</span></td>
+                  <td data-label="درس/مبحث"><span className="max-w-[180px] truncate text-[var(--muted)]">{question.topicPath.join(' › ')}</span></td>
                   <td data-label="تلاش">{faNum(question.attemptCount)}</td>
                   <td data-label="دقت"><strong style={{ color: (question.accuracy ?? 0) >= 70 ? '#61D192' : (question.accuracy ?? 0) >= 50 ? '#e0b45c' : '#e26d6d' }}>{question.accuracy === null ? '—' : `${faNum(Math.round(question.accuracy))}٪`}</strong></td>
                   <td data-label="زمان">{question.averageTime ? `${faNum(question.averageTime)} ثانیه` : '—'}</td>
@@ -401,7 +401,7 @@ function BackButton({ onClick, label = 'بازگشت' }) {
     <button
       type="button"
       onClick={onClick}
-      className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#282828] px-3.5 py-2.5 text-xs text-[#aaa] transition-colors hover:bg-[#333] hover:text-white focus-visible:outline-2 focus-visible:outline-[#61D192]"
+      className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[var(--surface-soft)] px-3.5 py-2.5 text-xs text-[var(--muted)] transition-colors hover:bg-[var(--surface-strong)] hover:text-white focus-visible:outline-2 focus-visible:outline-[var(--green-vivid)]"
     >
       <Icon name="back" className="h-3.5 w-3.5" />
       {label}

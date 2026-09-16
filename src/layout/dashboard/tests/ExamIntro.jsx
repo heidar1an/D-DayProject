@@ -17,25 +17,25 @@ import {
 /* ردیف یک سؤال در بانک سؤال */
 function QuestionRow({ question, index, state, onPractice }) {
   const statusChip = state?.lastResult === 'correct'
-    ? { label: 'صحیح', cls: 'bg-[#77b787]/12 text-[#9ed3ab]' }
+    ? { label: 'صحیح', cls: 'bg-[#77b787]/12 text-[var(--green-soft-ink)]' }
     : state?.lastResult === 'incorrect'
-      ? { label: state.attempts > 1 ? 'غلط تکراری' : 'غلط', cls: 'bg-[#e26d6d]/12 text-[#ef9196]' }
-      : { label: 'جدید', cls: 'bg-white/6 text-[#8a8a8a]' };
+      ? { label: state.attempts > 1 ? 'غلط تکراری' : 'غلط', cls: 'bg-[#e26d6d]/12 text-[var(--red-ink)]' }
+      : { label: 'جدید', cls: 'bg-white/6 text-[var(--faint)]' };
 
   return (
-    <li className="flex items-center gap-3 rounded-2xl border border-white/6 bg-[#2a2a2a] px-4 py-3">
-      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white/5 text-sm text-[#aaa] [font-family:'Doran',Tahoma,sans-serif]">
+    <li className="flex items-center gap-3 rounded-2xl border border-white/6 bg-[var(--surface-soft)] px-4 py-3">
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white/5 text-sm text-[var(--muted)] [font-family:'Doran','Vazir',Tahoma,sans-serif]">
         {toFa(index + 1)}
       </span>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[13.5px] leading-6 text-[#e6e6e6]" dir="ltr">
+        <p className="truncate text-[13.5px] leading-6 text-[var(--white)]" dir="ltr">
           {question.stem}
         </p>
         <div className="mt-1 flex flex-wrap items-center gap-1.5">
           <DifficultyBadge difficulty={question.difficulty} />
-          <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] text-[#9a9a9a]">{question.topic.fa}</span>
+          <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] text-[var(--faint)]">{question.topic.fa}</span>
           {state?.bookmarked && (
-            <span className="flex items-center gap-1 rounded-full bg-[#e26d6d]/12 px-2 py-0.5 text-[10px] text-[#ef9196]">
+            <span className="flex items-center gap-1 rounded-full bg-[#e26d6d]/12 px-2 py-0.5 text-[10px] text-[var(--red-ink)]">
               <Icon name="heart" className="h-2.5 w-2.5" /> گلچین
             </span>
           )}
@@ -45,7 +45,7 @@ function QuestionRow({ question, index, state, onPractice }) {
       <button
         type="button"
         onClick={() => onPractice(question.id)}
-        className="shrink-0 cursor-pointer rounded-xl bg-[#937fcd]/15 px-3.5 py-2 text-xs text-[#c9bdf0] transition-colors hover:bg-[#937fcd]/25"
+        className="shrink-0 cursor-pointer rounded-xl bg-[#937fcd]/15 px-3.5 py-2 text-xs text-[var(--purple-soft-ink)] transition-colors hover:bg-[#937fcd]/25"
       >
         حل سؤال
       </button>
@@ -75,7 +75,7 @@ export default function ExamIntro({ exam, questions, states, loading, onStartAll
   return (
     <div className="dash-stagger space-y-5">
       {/* سربرگ شناسنامهٔ آزمون */}
-      <section className="rounded-[2.5rem] border border-white/8 bg-[#282828] p-6 md:p-8" aria-label={`شناسنامهٔ آزمون ${exam.shortName}`}>
+      <section className="rounded-[2.5rem] border border-white/8 bg-[var(--surface-soft)] p-6 md:p-8" aria-label={`شناسنامهٔ آزمون ${exam.shortName}`}>
         <div className="flex flex-wrap items-start gap-5">
           <span
             className="grid h-16 w-16 shrink-0 place-items-center rounded-3xl"
@@ -85,29 +85,29 @@ export default function ExamIntro({ exam, questions, states, loading, onStartAll
           </span>
 
           <div className="min-w-0 flex-1">
-            <h1 className="text-2xl [font-family:'Doran',Tahoma,sans-serif]" style={{ color: exam.accent }}>
+            <h1 className="text-2xl [font-family:'Doran','Vazir',Tahoma,sans-serif]" style={{ color: exam.accent }}>
               {exam.shortName}
             </h1>
-            <p className="mt-0.5 text-xs text-[#8a8a8a]" dir="ltr">
+            <p className="mt-0.5 text-xs text-[var(--faint)]" dir="ltr">
               {exam.name}
             </p>
-            <p className="mt-1.5 text-sm text-[#d9d9d9]">{exam.nameFa}</p>
+            <p className="mt-1.5 text-sm text-[var(--muted)]">{exam.nameFa}</p>
 
             <div className="mt-3 flex flex-wrap gap-1.5">
-              <span className="rounded-full bg-white/5 px-3 py-1 text-[11px] text-[#aaa]">
+              <span className="rounded-full bg-white/5 px-3 py-1 text-[11px] text-[var(--muted)]">
                 <Icon name="globe" className="me-1 inline h-3 w-3" />
                 {exam.country}
               </span>
-              <span className="rounded-full bg-white/5 px-3 py-1 text-[11px] text-[#aaa]">{exam.organization}</span>
-              <span className="rounded-full bg-white/5 px-3 py-1 text-[11px] text-[#aaa]">سطح: {exam.level}</span>
+              <span className="rounded-full bg-white/5 px-3 py-1 text-[11px] text-[var(--muted)]">{exam.organization}</span>
+              <span className="rounded-full bg-white/5 px-3 py-1 text-[11px] text-[var(--muted)]">سطح: {exam.level}</span>
               <SampleTag className="ms-auto" />
             </div>
           </div>
         </div>
 
-        <p className="mt-5 max-w-2xl text-[13.5px] leading-7 text-[#a8a8a8]">{exam.descriptionFa}</p>
+        <p className="mt-5 max-w-2xl text-[13.5px] leading-7 text-[var(--muted)]">{exam.descriptionFa}</p>
 
-        <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-white/6 pt-4 text-xs text-[#8a8a8a]">
+        <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-white/6 pt-4 text-xs text-[var(--faint)]">
           <span className="flex items-center gap-1.5">
             <Icon name="book" className="h-3.5 w-3.5" />
             {faNum(exam.questionCount)} سؤال در تپش
@@ -126,12 +126,12 @@ export default function ExamIntro({ exam, questions, states, loading, onStartAll
           <button
             type="button"
             onClick={onStartAll}
-            className="cursor-pointer rounded-2xl bg-[#937fcd] px-6 py-3 text-sm font-bold transition-transform hover:-translate-y-0.5 [font-family:'Doran',Tahoma,sans-serif]"
+            className="cursor-pointer rounded-2xl bg-[var(--purple-bright)] px-6 py-3 text-sm font-bold transition-transform hover:-translate-y-0.5 [font-family:'Doran','Vazir',Tahoma,sans-serif]"
           >
             شروع حل سؤال
           </button>
           {difficultyBreakdown.map((entry) => (
-            <span key={entry.level} className="rounded-full bg-white/5 px-3 py-2 text-[11px] text-[#8a8a8a]">
+            <span key={entry.level} className="rounded-full bg-white/5 px-3 py-2 text-[11px] text-[var(--faint)]">
               <DifficultyBadge difficulty={entry.level} className="!bg-transparent !px-0" />
               <span className="ms-1">× {toFa(entry.count)}</span>
             </span>
@@ -141,15 +141,15 @@ export default function ExamIntro({ exam, questions, states, loading, onStartAll
 
       {/* بخش‌های آزمون (Step / Part) */}
       <section aria-label="بخش‌های آزمون">
-        <h2 className="mb-3 text-base [font-family:'Doran',Tahoma,sans-serif]">بخش‌های آزمون</h2>
+        <h2 className="mb-3 text-base [font-family:'Doran','Vazir',Tahoma,sans-serif]">بخش‌های آزمون</h2>
         <div className="grid gap-3 md:grid-cols-2">
           {exam.sectionCounts.map((section) => (
-            <div key={section.id} className="flex items-center justify-between gap-3 rounded-[1.75rem] border border-white/6 bg-[#282828] p-4 md:p-5">
+            <div key={section.id} className="flex items-center justify-between gap-3 rounded-[1.75rem] border border-white/6 bg-[var(--surface-soft)] p-4 md:p-5">
               <div className="min-w-0">
-                <strong className="block text-sm [font-family:'Doran',Tahoma,sans-serif]">
-                  {section.name} <span className="text-[#8a8a8a]">· {section.nameFa}</span>
+                <strong className="block text-sm [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+                  {section.name} <span className="text-[var(--faint)]">· {section.nameFa}</span>
                 </strong>
-                <p className="mt-1 truncate text-[11px] text-[#8a8a8a]">
+                <p className="mt-1 truncate text-[11px] text-[var(--faint)]">
                   {section.focus} · {faNum(section.questionCount)} سؤال
                 </p>
               </div>
@@ -157,7 +157,7 @@ export default function ExamIntro({ exam, questions, states, loading, onStartAll
                 type="button"
                 onClick={() => onStartSection(section.id)}
                 disabled={section.questionCount === 0}
-                className="shrink-0 cursor-pointer rounded-xl bg-[#937fcd]/15 px-3.5 py-2 text-xs text-[#c9bdf0] transition-colors hover:bg-[#937fcd]/25 disabled:cursor-default disabled:opacity-40"
+                className="shrink-0 cursor-pointer rounded-xl bg-[#937fcd]/15 px-3.5 py-2 text-xs text-[var(--purple-soft-ink)] transition-colors hover:bg-[#937fcd]/25 disabled:cursor-default disabled:opacity-40"
               >
                 حل این بخش
               </button>
@@ -169,10 +169,10 @@ export default function ExamIntro({ exam, questions, states, loading, onStartAll
       {/* بانک سؤال */}
       <section aria-labelledby="exam-bank-title">
         <header className="mb-3 flex items-center justify-between">
-          <h2 id="exam-bank-title" className="text-base [font-family:'Doran',Tahoma,sans-serif]">
+          <h2 id="exam-bank-title" className="text-base [font-family:'Doran','Vazir',Tahoma,sans-serif]">
             بانک سؤال
           </h2>
-          <span className="text-[11px] text-[#8a8a8a]">وضعیت هر سؤال برای خودت ثبت می‌شود</span>
+          <span className="text-[11px] text-[var(--faint)]">وضعیت هر سؤال برای خودت ثبت می‌شود</span>
         </header>
 
         {questions.length === 0 ? (

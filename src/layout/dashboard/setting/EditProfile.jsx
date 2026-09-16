@@ -5,12 +5,12 @@ import AvatarPicker from './avatar/AvatarPicker';
 import { avatarSrc } from './avatar/avatarOptions';
 
 const inputClass =
-  'w-full rounded-2xl border border-transparent bg-[#1d1d1d] py-3.5 pl-5 pr-12 text-white outline-none transition-colors duration-200 placeholder:text-[#777] focus:border-[#b99a86] [font-family:\'Pinar\',Tahoma,sans-serif]';
+  'w-full rounded-2xl border border-transparent bg-[var(--background)] py-3.5 pl-5 pr-12 text-white outline-none transition-colors duration-200 placeholder:text-[var(--faint)] focus:border-[var(--copper)] [font-family:\'Pinar\',\'Vazir\',Tahoma,sans-serif]';
 
 const selectClass = `${inputClass} cursor-pointer appearance-none pl-10`;
 
 const labelClass =
-  'mb-2 block text-right text-sm text-[#b99a86] [font-family:\'Doran\',Tahoma,sans-serif]';
+  'mb-2 block text-right text-sm text-[var(--copper-ink)] [font-family:\'Doran\',\'Vazir\',Tahoma,sans-serif]';
 
 const universityOptions = [
   'دانشگاه علوم پزشکی تهران',
@@ -159,7 +159,7 @@ const LogoutIcon = ({ className }) => (
 function FieldIcon({ icon: Icon }) {
   return (
     <span
-      className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#8a7d73] transition-colors duration-200 group-focus-within:text-[#b99a86]"
+      className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[var(--gold-ink)] transition-colors duration-200 group-focus-within:text-[var(--copper-ink)]"
       aria-hidden="true"
     >
       <Icon />
@@ -184,7 +184,7 @@ function FormField({ id, label, icon, children }) {
 function SelectChevron() {
   return (
     <span
-      className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#8a7d73]"
+      className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[var(--gold-ink)]"
       aria-hidden="true"
     >
       <ChevronDownIcon />
@@ -195,10 +195,10 @@ function SelectChevron() {
 function SectionTitle({ icon: Icon, title }) {
   return (
     <div className="flex items-center gap-3">
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#b99a86]/15 text-[#b99a86]">
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#b99a86]/15 text-[var(--copper-ink)]">
         <Icon />
       </span>
-      <h3 className="text-lg text-white md:text-xl [font-family:'Doran',Tahoma,sans-serif]">
+      <h3 className="text-lg text-white md:text-xl [font-family:'Doran','Vazir',Tahoma,sans-serif]">
         {title}
       </h3>
     </div>
@@ -258,13 +258,13 @@ export default function EditProfile({ userData, onUserDataChange, onLogout }) {
     <section
       dir="rtl"
       aria-label="ویرایش پروفایل"
-      className="dash-stagger mx-auto w-[var(--content-width)] py-8 text-white md:py-10 [font-family:'Pinar',Tahoma,sans-serif]"
+      className="dash-stagger mx-auto w-[var(--content-width)] py-8 text-white md:py-10 [font-family:'Pinar','Vazir',Tahoma,sans-serif]"
     >
-      <form onSubmit={handleSubmit} className="rounded-[2.5rem] bg-[#282828] p-8 md:rounded-[3rem] md:p-12">
+      <form onSubmit={handleSubmit} className="rounded-[2.5rem] bg-[var(--surface-soft)] p-8 md:rounded-[3rem] md:p-12">
         <header className="flex items-center gap-5">
           {/* جای آواتار: پیش‌نمایش آواتار انتخاب‌شده یا نمای پیش‌فرض */}
           <div className="relative shrink-0">
-            <span className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-[#b99a86]/30 bg-[#b99a86]/15 text-[#b99a86] md:h-28 md:w-28">
+            <span className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-[#b99a86]/30 bg-[#b99a86]/15 text-[var(--copper-ink)] md:h-28 md:w-28">
               {avatarSrc(form.avatar) ? (
                 <img
                   src={avatarSrc(form.avatar)}
@@ -280,16 +280,16 @@ export default function EditProfile({ userData, onUserDataChange, onLogout }) {
               onClick={() => setIsPickerOpen(true)}
               aria-label="انتخاب آواتار"
               title="انتخاب آواتار"
-              className="absolute bottom-0 left-0 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-[#b99a86] text-white shadow-[0_4px_12px_rgba(0,0,0,0.4)] transition-colors duration-200 hover:bg-[#a3826e]"
+              className="absolute bottom-0 left-0 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-[var(--copper)] text-white shadow-[0_4px_12px_rgb(var(--shadow-rgb) / 0.4)] transition-colors duration-200 hover:bg-[var(--copper)]"
             >
               <PaletteIcon className="h-4 w-4" />
             </button>
           </div>
           <div>
-            <h2 className="text-2xl text-white md:text-3xl [font-family:'Doran',Tahoma,sans-serif]">
+            <h2 className="text-2xl text-white md:text-3xl [font-family:'Doran','Vazir',Tahoma,sans-serif]">
               ویرایش پروفایل
             </h2>
-            <p className="mt-1 text-sm text-[#999]">مشخصات کاربری</p>
+            <p className="mt-1 text-sm text-[var(--faint)]">مشخصات کاربری</p>
           </div>
         </header>
 
@@ -372,7 +372,7 @@ export default function EditProfile({ userData, onUserDataChange, onLogout }) {
             <button
               type="button"
               onClick={() => onLogout?.()}
-              className="mt-8 flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-red-500/40 py-3.5 text-red-400 transition-colors duration-200 hover:border-red-500/70 hover:bg-red-500/10 md:text-lg [font-family:'Doran',Tahoma,sans-serif]"
+              className="mt-8 flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-red-500/40 py-3.5 text-red-400 transition-colors duration-200 hover:border-red-500/70 hover:bg-red-500/10 md:text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]"
             >
               <LogoutIcon className="h-5 w-5" />
               خروج از حساب کاربری
@@ -503,19 +503,19 @@ export default function EditProfile({ userData, onUserDataChange, onLogout }) {
         <div className="mt-10 flex flex-wrap items-center gap-4">
           <button
             type="submit"
-            className="cursor-pointer rounded-full bg-[#b99a86] px-10 py-3.5 text-white transition-colors duration-200 hover:bg-[#a3826e] md:text-lg [font-family:'Doran',Tahoma,sans-serif]"
+            className="cursor-pointer rounded-full bg-[var(--copper)] px-10 py-3.5 text-white transition-colors duration-200 hover:bg-[var(--copper)] md:text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]"
           >
             ذخیره تغییرات
           </button>
           <button
             type="button"
             onClick={handleCancel}
-            className="cursor-pointer rounded-full border border-white/15 px-10 py-3.5 text-[#ccc] transition-colors duration-200 hover:border-[#b99a86]/60 hover:text-white md:text-lg [font-family:'Doran',Tahoma,sans-serif]"
+            className="cursor-pointer rounded-full border border-white/15 px-10 py-3.5 text-[var(--muted)] transition-colors duration-200 hover:border-[#b99a86]/60 hover:text-white md:text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]"
           >
             انصراف
           </button>
           {isSaved && (
-            <span className="flex items-center gap-1.5 text-sm text-[#67ba85]">
+            <span className="flex items-center gap-1.5 text-sm text-[var(--green-ink)]">
               <CheckIcon className="h-4 w-4" />
               تغییرات ذخیره شد.
             </span>

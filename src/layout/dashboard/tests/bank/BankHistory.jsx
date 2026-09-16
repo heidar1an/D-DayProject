@@ -32,13 +32,13 @@ export default function BankHistory({ userId, onNavigate, onOpenResult }) {
 
   const listSection = (title, icon, rows, onOpen) => (
     <section className="mt-6" aria-label={title}>
-      <h3 className="mb-3 flex items-center gap-2 text-sm font-bold [font-family:'Doran',Tahoma,sans-serif]">
-        <Icon name={icon} className="h-4 w-4 text-[#61D192]" />
+      <h3 className="mb-3 flex items-center gap-2 text-sm font-bold [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+        <Icon name={icon} className="h-4 w-4 text-[var(--green-ink)]" />
         {title}
-        <span className="rounded-full bg-white/6 px-2 py-0.5 text-[10px] text-[#aaa]">{toFa(rows.length)}</span>
+        <span className="rounded-full bg-white/6 px-2 py-0.5 text-[10px] text-[var(--muted)]">{toFa(rows.length)}</span>
       </h3>
       {rows.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-white/10 px-4 py-4 text-xs text-[#777]">
+        <p className="rounded-2xl border border-dashed border-white/10 px-4 py-4 text-xs text-[var(--faint)]">
           فعلاً خالی است.
         </p>
       ) : (
@@ -48,13 +48,13 @@ export default function BankHistory({ userId, onNavigate, onOpenResult }) {
               <button
                 type="button"
                 onClick={() => onOpen(question.id)}
-                className="flex w-full cursor-pointer items-center justify-between gap-3 rounded-2xl border border-white/8 bg-[#242426] px-4 py-3.5 text-right transition-colors hover:border-white/16"
+                className="flex w-full cursor-pointer items-center justify-between gap-3 rounded-2xl border border-white/8 bg-[var(--surface)] px-4 py-3.5 text-right transition-colors hover:border-white/16"
               >
                 <span className="min-w-0">
-                  <span className="block truncate text-[13px] text-[#ddd]">{question.stem}</span>
-                  <span className="text-[11px] text-[#777]">{question.topicPath.join(' › ')}</span>
+                  <span className="block truncate text-[13px] text-[var(--muted)]">{question.stem}</span>
+                  <span className="text-[11px] text-[var(--faint)]">{question.topicPath.join(' › ')}</span>
                 </span>
-                <Icon name="chevron" className="h-4 w-4 shrink-0 -rotate-90 text-[#666]" />
+                <Icon name="chevron" className="h-4 w-4 shrink-0 -rotate-90 text-[var(--ghost)]" />
               </button>
             </li>
           ))}
@@ -65,7 +65,7 @@ export default function BankHistory({ userId, onNavigate, onOpenResult }) {
 
   return (
     <div>
-      <h2 className="mb-5 text-xl font-bold [font-family:'Doran',Tahoma,sans-serif]">تاریخچهٔ تست‌زدن</h2>
+      <h2 className="mb-5 text-xl font-bold [font-family:'Doran','Vazir',Tahoma,sans-serif]">تاریخچهٔ تست‌زدن</h2>
 
       {data.items.length === 0 ? (
         <EmptyState
@@ -76,14 +76,14 @@ export default function BankHistory({ userId, onNavigate, onOpenResult }) {
             <button
               type="button"
               onClick={() => onNavigate('home')}
-              className="mt-3 cursor-pointer rounded-xl bg-[#61D192] px-5 py-2.5 text-sm font-bold text-[#12271a]"
+              className="mt-3 cursor-pointer rounded-xl bg-[var(--green-vivid)] px-5 py-2.5 text-sm font-bold text-[#12271a]"
             >
               شروع تمرین
             </button>
           }
         />
       ) : (
-        <ul className="divide-y divide-white/6 overflow-hidden rounded-[1.75rem] border border-white/8 bg-[#242426]">
+        <ul className="divide-y divide-white/6 overflow-hidden rounded-[1.75rem] border border-white/8 bg-[var(--surface)]">
           {data.items.map((item) => (
             <li key={item.id}>
               <button
@@ -94,22 +94,22 @@ export default function BankHistory({ userId, onNavigate, onOpenResult }) {
                 <span className="flex min-w-0 items-center gap-3">
                   <span
                     className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl ${
-                      item.mode === 'exam' ? 'bg-[#937fcd]/15 text-[#c9bdf0]' : 'bg-[#61D192]/12 text-[#61D192]'
+                      item.mode === 'exam' ? 'bg-[#937fcd]/15 text-[var(--purple-soft-ink)]' : 'bg-[#61D192]/12 text-[var(--green-ink)]'
                     }`}
                   >
                     <Icon name={item.mode === 'exam' ? 'timer' : 'book'} className="h-4.5 w-4.5" />
                   </span>
                   <span className="min-w-0">
-                    <strong className="block truncate text-[13.5px] [font-family:'Doran',Tahoma,sans-serif]">{item.title}</strong>
-                    <span className="text-[11px] text-[#8a8a8a]">
+                    <strong className="block truncate text-[13.5px] [font-family:'Doran','Vazir',Tahoma,sans-serif]">{item.title}</strong>
+                    <span className="text-[11px] text-[var(--faint)]">
                       {MODE_LABEL[item.mode] ?? item.mode} · {faNum(item.correct)} صحیح از {faNum(item.total)} · {formatAgo(item.submittedAt)}
                     </span>
                   </span>
                 </span>
                 {item.percentage !== null && (
                   <span
-                    className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-bold [font-family:'Doran',Tahoma,sans-serif] ${
-                      item.percentage >= 60 ? 'bg-[#61D192]/12 text-[#61D192]' : 'bg-[#e26d6d]/12 text-[#ef9196]'
+                    className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-bold [font-family:'Doran','Vazir',Tahoma,sans-serif] ${
+                      item.percentage >= 60 ? 'bg-[#61D192]/12 text-[var(--green-ink)]' : 'bg-[#e26d6d]/12 text-[var(--red-ink)]'
                     }`}
                   >
                     {toFa(item.percentage)}٪

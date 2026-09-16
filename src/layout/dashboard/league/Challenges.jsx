@@ -27,40 +27,40 @@ function ChallengeCard({ challenge, step, onProgress }) {
   return (
     <article
       className={`flex flex-col gap-3 rounded-[1.75rem] border p-5 transition-colors ${
-        done ? 'border-[#77b787]/40 bg-[#77b787]/[0.06]' : 'border-white/8 bg-[#2a2a2a] hover:bg-[#303030]'
+        done ? 'border-[#77b787]/40 bg-[#77b787]/[0.06]' : 'border-white/8 bg-[var(--surface-soft)] hover:bg-[var(--surface-soft)]'
       }`}
     >
       <div className="flex items-start gap-3">
         <span
           className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl ${
-            done ? 'bg-[#77b787]/15 text-[#77b787]' : 'bg-[#937fcd]/15 text-[#b3a3e8]'
+            done ? 'bg-[#77b787]/15 text-[var(--green-ink)]' : 'bg-[#937fcd]/15 text-[var(--purple-soft-ink)]'
           }`}
         >
           <Icon name={done ? 'check' : challenge.icon} className="h-5 w-5" />
         </span>
         <div className="min-w-0 flex-1">
-          <h3 className="text-[15px] leading-6 [font-family:'Doran',Tahoma,sans-serif]">{challenge.title}</h3>
-          <p className="text-xs text-[#8a8a8a]">{challenge.note}</p>
+          <h3 className="text-[15px] leading-6 [font-family:'Doran','Vazir',Tahoma,sans-serif]">{challenge.title}</h3>
+          <p className="text-xs text-[var(--faint)]">{challenge.note}</p>
         </div>
         <HeartReward amount={challenge.reward} />
       </div>
 
       <div className="flex items-center gap-3">
         <ProgressBar value={challenge.progress} max={challenge.goal} color={done ? '#77b787' : '#937fcd'} className="flex-1" />
-        <span className="shrink-0 text-xs text-[#aaa]">
+        <span className="shrink-0 text-xs text-[var(--muted)]">
           {toFa(challenge.progress)} / {toFa(challenge.goal)}
         </span>
       </div>
 
       {done ? (
-        <p className="rounded-xl bg-[#77b787]/10 py-2 text-center text-xs text-[#9ed3ab]">
+        <p className="rounded-xl bg-[#77b787]/10 py-2 text-center text-xs text-[var(--green-soft-ink)]">
           تمام شد! {faNum(challenge.reward)} قلب گرفتی ✨
         </p>
       ) : (
         <button
           type="button"
           onClick={() => onProgress(challenge.id, step)}
-          className="cursor-pointer rounded-xl bg-white/5 py-2 text-xs text-[#c9c9c9] transition-colors hover:bg-[#937fcd]/25 hover:text-white"
+          className="cursor-pointer rounded-xl bg-white/5 py-2 text-xs text-[var(--muted)] transition-colors hover:bg-[#937fcd]/25 hover:text-white"
         >
           ثبت ادامهٔ پیشرفت
         </button>
@@ -72,19 +72,19 @@ function ChallengeCard({ challenge, step, onProgress }) {
 
 function BattleCard({ battle, onJoin }) {
   return (
-    <article className="rounded-[1.75rem] border border-white/8 bg-[#2a2a2a] p-5 transition-colors hover:bg-[#303030]">
+    <article className="rounded-[1.75rem] border border-white/8 bg-[var(--surface-soft)] p-5 transition-colors hover:bg-[var(--surface-soft)]">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-start gap-3">
-          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#e26d6d]/12 text-[#ef9196]">
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#e26d6d]/12 text-[var(--red-ink)]">
             <Icon name="swords" className="h-5 w-5" />
           </span>
           <div>
-            <h3 className="text-[15px] [font-family:'Doran',Tahoma,sans-serif]">{battle.title}</h3>
-            <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#8a8a8a]">
+            <h3 className="text-[15px] [font-family:'Doran','Vazir',Tahoma,sans-serif]">{battle.title}</h3>
+            <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--faint)]">
               <span>{toFa(battle.questions)} سؤال</span>
               <span>{faNum(battle.participants)} شرکت‌کننده</span>
               <span className="inline-flex items-center gap-1">
-                <i className={`lg-live-dot inline-block h-1.5 w-1.5 rounded-full ${battle.endsLabel.includes('شروع') ? 'bg-[#e0b45c]' : 'bg-[#77b787]'}`} />
+                <i className={`lg-live-dot inline-block h-1.5 w-1.5 rounded-full ${battle.endsLabel.includes('شروع') ? 'bg-[var(--gold)]' : 'bg-[var(--green-bright)]'}`} />
                 {battle.endsLabel}
               </span>
             </p>
@@ -96,10 +96,10 @@ function BattleCard({ battle, onJoin }) {
             type="button"
             onClick={() => onJoin(battle)}
             aria-pressed={battle.joined}
-            className={`cursor-pointer rounded-xl px-4 py-2 text-sm transition-colors [font-family:'Doran',Tahoma,sans-serif] ${
+            className={`cursor-pointer rounded-xl px-4 py-2 text-sm transition-colors [font-family:'Doran','Vazir',Tahoma,sans-serif] ${
               battle.joined
-                ? 'bg-[#77b787]/20 text-[#9ed3ab]'
-                : 'bg-gradient-to-l from-[#8a76c8] to-[#6f5fae] text-white hover:from-[#937fcd] hover:to-[#7f6dbd]'
+                ? 'bg-[#77b787]/20 text-[var(--green-soft-ink)]'
+                : 'bg-gradient-to-l from-[var(--purple-bright)] to-[var(--purple-bright)] text-white hover:from-[var(--purple-bright)] hover:to-[var(--purple-bright)]'
             }`}
           >
             {battle.joined ? 'شرکت کردی ✓' : 'شرکت می‌کنم'}
@@ -115,17 +115,17 @@ function BattleCard({ battle, onJoin }) {
                 <RankDot rank={index + 1} />
                 {row.name}
               </span>
-              <span className="text-xs text-[#aaa]">{faNum(row.score)}</span>
+              <span className="text-xs text-[var(--muted)]">{faNum(row.score)}</span>
             </li>
           ))}
         </ol>
       )}
 
       {battle.type === 'university' && !battle.podium && (
-        <div className="mt-4 flex items-center justify-center gap-4 rounded-2xl bg-black/25 py-4 [font-family:'Doran',Tahoma,sans-serif]">
-          <span className="text-sm text-[#c9bdf0]">قم</span>
-          <span className="rounded-full bg-[#937fcd]/20 px-3 py-1 text-xs text-[#c9bdf0]">در برابر</span>
-          <span className="text-sm text-[#9cc0e8]">تهران</span>
+        <div className="mt-4 flex items-center justify-center gap-4 rounded-2xl bg-black/25 py-4 [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+          <span className="text-sm text-[var(--purple-soft-ink)]">قم</span>
+          <span className="rounded-full bg-[#937fcd]/20 px-3 py-1 text-xs text-[var(--purple-soft-ink)]">در برابر</span>
+          <span className="text-sm text-[var(--blue-soft-ink)]">تهران</span>
         </div>
       )}
     </article>
@@ -136,8 +136,8 @@ function RankDot({ rank }) {
   const colors = { 1: '#e0b45c', 2: '#b9c2cc', 3: '#ab8e7c' };
   return (
     <span
-      className="grid h-5 w-5 shrink-0 place-items-center rounded-md text-[10px] font-bold text-[#1c1c1c]"
-      style={{ background: colors[rank] ?? 'rgba(255,255,255,0.1)', color: colors[rank] ? '#1c1c1c' : '#aaa' }}
+      className="grid h-5 w-5 shrink-0 place-items-center rounded-md text-[10px] font-bold text-[var(--ink-deep)]"
+      style={{ background: colors[rank] ?? 'rgb(var(--wash-rgb) / 0.1)', color: colors[rank] ? '#1c1c1c' : '#aaa' }}
     >
       {toFa(rank)}
     </span>
@@ -148,11 +148,11 @@ function DuelCard({ duel, me }) {
   return (
     <article className="relative overflow-hidden rounded-[1.75rem] border border-[#937fcd]/30 bg-gradient-to-l from-[#937fcd]/12 via-transparent to-[#e26d6d]/10 p-5 md:p-6">
       <header className="mb-4 flex items-center justify-between">
-        <h3 className="flex items-center gap-2 text-[15px] [font-family:'Doran',Tahoma,sans-serif]">
-          <Icon name="swords" className="h-4.5 w-4.5 text-[#c9bdf0]" />
+        <h3 className="flex items-center gap-2 text-[15px] [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+          <Icon name="swords" className="h-4.5 w-4.5 text-[var(--purple-soft-ink)]" />
           دوئل دوستانه
         </h3>
-        <span className="rounded-full bg-[#e0b45c]/15 px-3 py-1 text-[11px] text-[#e0b45c]">نسخهٔ آزمایشی</span>
+        <span className="rounded-full bg-[#e0b45c]/15 px-3 py-1 text-[11px] text-[var(--gold-ink)]">نسخهٔ آزمایشی</span>
       </header>
 
       <div className="flex items-center justify-between gap-3">
@@ -162,12 +162,12 @@ function DuelCard({ duel, me }) {
         </div>
 
         <div className="flex flex-col items-center gap-1.5">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#e26d6d]/15 px-3 py-1 text-xs text-[#ef9196]">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#e26d6d]/15 px-3 py-1 text-xs text-[var(--red-ink)]">
             <IconHeart className="h-3.5 w-3.5" />
             دوئل {faNum(duel.stake)} قلبی
           </span>
-          <span className="text-2xl [font-family:'Doran',Tahoma,sans-serif] text-[#c9bdf0]">VS</span>
-          <span className="text-xs text-[#8a8a8a]">{toFa(duel.questions)} سؤال · برنده +{faNum(duel.winnerReward)} / بازنده +{faNum(duel.loserReward)}</span>
+          <span className="text-2xl [font-family:'Doran','Vazir',Tahoma,sans-serif] text-[var(--purple-soft-ink)]">VS</span>
+          <span className="text-xs text-[var(--faint)]">{toFa(duel.questions)} سؤال · برنده +{faNum(duel.winnerReward)} / بازنده +{faNum(duel.loserReward)}</span>
         </div>
 
         <div className="flex flex-col items-center gap-2 text-center">
@@ -250,10 +250,10 @@ export default function Challenges({ me, onEarnHearts }) {
 
   return (
     <div className="space-y-6">
-      <section aria-label="چالش‌های امروز" className="rounded-[2.5rem] bg-[#282828] p-5 md:p-8">
+      <section aria-label="چالش‌های امروز" className="rounded-[2.5rem] bg-[var(--surface-soft)] p-5 md:p-8">
         <header className="mb-5 flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-lg text-white md:text-xl [font-family:'Doran',Tahoma,sans-serif]">چالش‌های امروز</h2>
-          <span className="text-xs text-[#8a8a8a]">هر روز تازه می‌شوند؛ جا ننداز.</span>
+          <h2 className="text-lg text-white md:text-xl [font-family:'Doran','Vazir',Tahoma,sans-serif]">چالش‌های امروز</h2>
+          <span className="text-xs text-[var(--faint)]">هر روز تازه می‌شوند؛ جا ننداز.</span>
         </header>
         <div className="grid gap-4 md:grid-cols-2">
           {daily.map((challenge) => (
@@ -268,21 +268,21 @@ export default function Challenges({ me, onEarnHearts }) {
       </section>
 
       {weekly && (
-        <section aria-label="چالش هفتگی" className="rounded-[2.5rem] border border-[#e0b45c]/25 bg-gradient-to-l from-[#e0b45c]/10 via-[#282828] to-[#282828] p-5 md:p-8">
+        <section aria-label="چالش هفتگی" className="rounded-[2.5rem] border border-[#e0b45c]/25 bg-gradient-to-l from-[#e0b45c]/10 via-[var(--surface-soft)] to-[var(--surface-soft)] p-5 md:p-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-start gap-4">
-            <span className="grid h-14 w-14 shrink-0 place-items-center rounded-3xl bg-[#e0b45c]/15 text-[#e0b45c]">
+            <span className="grid h-14 w-14 shrink-0 place-items-center rounded-3xl bg-[#e0b45c]/15 text-[var(--gold-ink)]">
               <Icon name="trophy" className="h-7 w-7" />
             </span>
             <div>
-              <p className="text-xs text-[#8a8a8a]">چالش هفتگی</p>
-              <h2 className="text-xl [font-family:'Doran',Tahoma,sans-serif]">{weekly.title}</h2>
-              <p className="mt-1 max-w-md text-sm leading-6 text-[#aaa]">{weekly.note}</p>
+              <p className="text-xs text-[var(--faint)]">چالش هفتگی</p>
+              <h2 className="text-xl [font-family:'Doran','Vazir',Tahoma,sans-serif]">{weekly.title}</h2>
+              <p className="mt-1 max-w-md text-sm leading-6 text-[var(--muted)]">{weekly.note}</p>
             </div>
           </div>
           <div className="flex flex-col items-start gap-2 md:items-end">
             <HeartReward amount={weekly.reward} size="lg" />
-            <span className="inline-flex items-center gap-1.5 text-xs text-[#e0b45c]">
+            <span className="inline-flex items-center gap-1.5 text-xs text-[var(--gold-ink)]">
               <Icon name="star" className="h-3.5 w-3.5" />
               {weekly.achievement}
             </span>
@@ -290,29 +290,29 @@ export default function Challenges({ me, onEarnHearts }) {
         </div>
 
         <div className="mt-5 flex items-center gap-4">
-          <ProgressBar value={weekly.progress} max={weekly.goal} color="#e0b45c" height={10} className="flex-1" />
-          <span className="shrink-0 text-sm text-[#aaa]">
+          <ProgressBar value={weekly.progress} max={weekly.goal} color="var(--gold-ink)" height={10} className="flex-1" />
+          <span className="shrink-0 text-sm text-[var(--muted)]">
             {toFa(weekly.progress)} / {toFa(weekly.goal)}
           </span>
           {weekly.progress < weekly.goal ? (
             <button
               type="button"
               onClick={handleWeeklyProgress}
-              className="shrink-0 cursor-pointer rounded-xl bg-[#e0b45c]/15 px-4 py-2 text-xs text-[#e0b45c] transition-colors hover:bg-[#e0b45c]/25"
+              className="shrink-0 cursor-pointer rounded-xl bg-[#e0b45c]/15 px-4 py-2 text-xs text-[var(--gold-ink)] transition-colors hover:bg-[#e0b45c]/25"
             >
               +۱۰ سؤال فیزیولوژی
             </button>
           ) : (
-            <span className="shrink-0 rounded-xl bg-[#77b787]/15 px-4 py-2 text-xs text-[#9ed3ab]">کامل شد!</span>
+            <span className="shrink-0 rounded-xl bg-[#77b787]/15 px-4 py-2 text-xs text-[var(--green-soft-ink)]">کامل شد!</span>
           )}
         </div>
       </section>
       )}
 
-      <section aria-label="نبردهای رقابتی" className="rounded-[2.5rem] bg-[#282828] p-5 md:p-8">
+      <section aria-label="نبردهای رقابتی" className="rounded-[2.5rem] bg-[var(--surface-soft)] p-5 md:p-8">
         <header className="mb-5 flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-lg text-white md:text-xl [font-family:'Doran',Tahoma,sans-serif]">نبردهای فعال</h2>
-          <span className="text-xs text-[#8a8a8a]">تکی، دانشگاهی یا با دوستانت</span>
+          <h2 className="text-lg text-white md:text-xl [font-family:'Doran','Vazir',Tahoma,sans-serif]">نبردهای فعال</h2>
+          <span className="text-xs text-[var(--faint)]">تکی، دانشگاهی یا با دوستانت</span>
         </header>
         <div className="space-y-4">
           {battles.map((battle) => (

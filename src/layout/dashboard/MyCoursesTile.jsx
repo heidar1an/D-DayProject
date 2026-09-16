@@ -67,7 +67,7 @@ export function CourseKindLegend({ className = '' }) {
           >
             <span className="myc-filter__dot" />
             <KindIcon name={kind.icon} className="h-3 w-3" style={{ color: kind.accent }} />
-            <span className="[font-family:'Doran',Tahoma,sans-serif]">{kind.label}</span>
+            <span className="[font-family:'Doran','Vazir',Tahoma,sans-serif]">{kind.label}</span>
           </span>
         );
       })}

@@ -34,7 +34,7 @@ function QualityHints({ front, back, type, options }) {
 
   if (!hints.length) return null;
   return (
-    <ul className="space-y-1.5 rounded-2xl border border-[#e0b45c]/25 bg-[#e0b45c]/[0.06] px-4 py-3 text-xs leading-5 text-[#e0b45c]" aria-live="polite">
+    <ul className="space-y-1.5 rounded-2xl border border-[#e0b45c]/25 bg-[#e0b45c]/[0.06] px-4 py-3 text-xs leading-5 text-[var(--gold-ink)]" aria-live="polite">
       {hints.map((hint) => (
         <li key={hint} className="flex items-start gap-2">
           <Icon name="spark" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
@@ -181,15 +181,15 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
                 type === item.id ? 'border-[#5b8cc7]/60 bg-[#5b8cc7]/10' : 'border-white/10 bg-white/[0.03] hover:border-white/20'
               }`}
             >
-              <span className={`block text-sm font-bold ${type === item.id ? 'text-[#9cc0e8]' : 'text-[#e6e6e6]'}`}>{item.label}</span>
-              <span className="block text-[10px] text-[#8a8a8a]">{item.note}</span>
+              <span className={`block text-sm font-bold ${type === item.id ? 'text-[var(--blue-soft-ink)]' : 'text-[var(--white)]'}`}>{item.label}</span>
+              <span className="block text-[10px] text-[var(--faint)]">{item.note}</span>
             </button>
           ))}
         </div>
 
         {/* صورت کارت */}
         <div>
-          <label htmlFor="fc-front" className="mb-2 block text-xs text-[#aaa]">صورت کارت {type === 'cloze' && <span className="text-[#6d6d6d]">— بخش‌های «جای خالی» در مرور مخفی می‌شوند</span>}</label>
+          <label htmlFor="fc-front" className="mb-2 block text-xs text-[var(--muted)]">صورت کارت {type === 'cloze' && <span className="text-[var(--ghost)]">— بخش‌های «جای خالی» در مرور مخفی می‌شوند</span>}</label>
           <textarea
             id="fc-front"
             ref={frontRef}
@@ -197,13 +197,13 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
             onChange={(event) => setFront(event.target.value)}
             rows={3}
             placeholder={type === 'cloze' ? 'هورمون {{c1::ADH}} باعث بازجذب آب می‌شود.' : 'مهم‌ترین تنظیم‌کننده ضربان قلب چیست؟'}
-            className="w-full resize-none rounded-2xl border border-white/10 bg-black/30 p-4 text-sm leading-7 outline-none transition-colors placeholder:text-[#555] focus:border-[#5b8cc7]/50"
+            className="w-full resize-none rounded-2xl border border-white/10 bg-black/30 p-4 text-sm leading-7 outline-none transition-colors placeholder:text-[var(--ghost)] focus:border-[#5b8cc7]/50"
           />
           {type === 'cloze' && (
             <button
               type="button"
               onClick={addCloze}
-              className="mt-2 cursor-pointer rounded-xl bg-white/5 px-3.5 py-1.5 text-xs text-[#9cc0e8] transition-colors hover:bg-white/10"
+              className="mt-2 cursor-pointer rounded-xl bg-white/5 px-3.5 py-1.5 text-xs text-[var(--blue-soft-ink)] transition-colors hover:bg-white/10"
             >
               جای خالی از متن انتخابی
             </button>
@@ -213,7 +213,7 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
         {/* گزینه‌های MCQ */}
         {type === 'mcq' && (
           <div>
-            <p className="mb-2 text-xs text-[#aaa]">گزینه‌ها — دایرهٔ کنار هر گزینه = صحیح</p>
+            <p className="mb-2 text-xs text-[var(--muted)]">گزینه‌ها — دایرهٔ کنار هر گزینه = صحیح</p>
             <div className="space-y-2">
               {options.map((option, index) => (
                 <div key={index} className="flex items-center gap-2">
@@ -223,7 +223,7 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
                     aria-label={option.correct ? 'گزینه صحیح' : 'علامت‌گذاری به‌عنوان صحیح'}
                     aria-pressed={option.correct}
                     className={`grid h-6 w-6 shrink-0 cursor-pointer place-items-center rounded-full border transition-colors ${
-                      option.correct ? 'border-[#77b787] bg-[#77b787]/20 text-[#9ed3ab]' : 'border-white/20 text-transparent hover:border-white/40'
+                      option.correct ? 'border-[var(--green-bright)] bg-[#77b787]/20 text-[var(--green-soft-ink)]' : 'border-white/20 text-transparent hover:border-white/40'
                     }`}
                   >
                     <Icon name="check" className="h-3.5 w-3.5" />
@@ -232,14 +232,14 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
                     value={option.text}
                     onChange={(event) => setOptions(options.map((item, i) => (i === index ? { ...item, text: event.target.value } : item)))}
                     placeholder={`گزینهٔ ${toFa(index + 1)}`}
-                    className="min-w-0 flex-1 rounded-xl border border-white/10 bg-black/30 px-3.5 py-2.5 text-sm outline-none transition-colors placeholder:text-[#555] focus:border-[#5b8cc7]/50"
+                    className="min-w-0 flex-1 rounded-xl border border-white/10 bg-black/30 px-3.5 py-2.5 text-sm outline-none transition-colors placeholder:text-[var(--ghost)] focus:border-[#5b8cc7]/50"
                   />
                   {options.length > 2 && (
                     <button
                       type="button"
                       onClick={() => setOptions(options.filter((_, i) => i !== index))}
                       aria-label="حذف گزینه"
-                      className="grid h-8 w-8 shrink-0 cursor-pointer place-items-center rounded-lg text-[#8a8a8a] transition-colors hover:bg-white/5 hover:text-[#ef9196]"
+                      className="grid h-8 w-8 shrink-0 cursor-pointer place-items-center rounded-lg text-[var(--faint)] transition-colors hover:bg-white/5 hover:text-[var(--red-ink)]"
                     >
                       <Icon name="close" className="h-3.5 w-3.5" />
                     </button>
@@ -251,7 +251,7 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
               <button
                 type="button"
                 onClick={() => setOptions([...options, { text: '', correct: false }])}
-                className="mt-2 cursor-pointer rounded-xl bg-white/5 px-3.5 py-1.5 text-xs text-[#aaa] transition-colors hover:bg-white/10"
+                className="mt-2 cursor-pointer rounded-xl bg-white/5 px-3.5 py-1.5 text-xs text-[var(--muted)] transition-colors hover:bg-white/10"
               >
                 + گزینه
               </button>
@@ -262,14 +262,14 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
         {/* پاسخ */}
         {type !== 'mcq' && (
           <div>
-            <label htmlFor="fc-back" className="mb-2 block text-xs text-[#aaa]">پاسخ</label>
+            <label htmlFor="fc-back" className="mb-2 block text-xs text-[var(--muted)]">پاسخ</label>
             <textarea
               id="fc-back"
               value={back}
               onChange={(event) => setBack(event.target.value)}
               rows={3}
               placeholder={type === 'cloze' ? 'توضیح تکمیلی (اختیاری)' : 'فعالیت پاراسمپاتیک از طریق عصب واگ…'}
-              className="w-full resize-none rounded-2xl border border-white/10 bg-black/30 p-4 text-sm leading-7 outline-none transition-colors placeholder:text-[#555] focus:border-[#5b8cc7]/50"
+              className="w-full resize-none rounded-2xl border border-white/10 bg-black/30 p-4 text-sm leading-7 outline-none transition-colors placeholder:text-[var(--ghost)] focus:border-[#5b8cc7]/50"
             />
           </div>
         )}
@@ -278,14 +278,14 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
         {/* توضیح MCQ */}
         {type === 'mcq' && (
           <div>
-            <label htmlFor="fc-expl" className="mb-2 block text-xs text-[#aaa]">توضیح پاسخ</label>
+            <label htmlFor="fc-expl" className="mb-2 block text-xs text-[var(--muted)]">توضیح پاسخ</label>
             <textarea
               id="fc-expl"
               value={back}
               onChange={(event) => setBack(event.target.value)}
               rows={2}
               placeholder="چرا این گزینه صحیح است؟"
-              className="w-full resize-none rounded-2xl border border-white/10 bg-black/30 p-4 text-sm leading-7 outline-none transition-colors placeholder:text-[#555] focus:border-[#5b8cc7]/50"
+              className="w-full resize-none rounded-2xl border border-white/10 bg-black/30 p-4 text-sm leading-7 outline-none transition-colors placeholder:text-[var(--ghost)] focus:border-[#5b8cc7]/50"
             />
           </div>
         )}
@@ -293,29 +293,29 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
         {/* راهنما */}
         {type === 'basic-hint' && (
           <div>
-            <label htmlFor="fc-hint" className="mb-2 block text-xs text-[#aaa]">راهنما (اختیاری)</label>
+            <label htmlFor="fc-hint" className="mb-2 block text-xs text-[var(--muted)]">راهنما (اختیاری)</label>
             <input
               id="fc-hint"
               value={hint}
               onChange={(event) => setHint(event.target.value)}
               placeholder="سرنخ کوچک، نه پاسخ"
-              className="w-full rounded-xl border border-white/10 bg-black/30 px-4 py-2.5 text-sm outline-none transition-colors placeholder:text-[#555] focus:border-[#5b8cc7]/50"
+              className="w-full rounded-xl border border-white/10 bg-black/30 px-4 py-2.5 text-sm outline-none transition-colors placeholder:text-[var(--ghost)] focus:border-[#5b8cc7]/50"
             />
           </div>
         )}
 
         {/* تگ‌ها */}
         <div>
-          <label htmlFor="fc-tag" className="mb-2 block text-xs text-[#aaa]">تگ‌ها</label>
+          <label htmlFor="fc-tag" className="mb-2 block text-xs text-[var(--muted)]">تگ‌ها</label>
           <div className="flex flex-wrap items-center gap-1.5">
             {tags.map((tag) => (
-              <span key={tag} className="inline-flex items-center gap-1.5 rounded-full bg-white/5 px-3 py-1.5 text-xs text-[#aaa]">
+              <span key={tag} className="inline-flex items-center gap-1.5 rounded-full bg-white/5 px-3 py-1.5 text-xs text-[var(--muted)]">
                 #{tag}
                 <button
                   type="button"
                   onClick={() => setTags(tags.filter((item) => item !== tag))}
                   aria-label={`حذف تگ ${tag}`}
-                  className="cursor-pointer text-[#6d6d6d] hover:text-[#ef9196]"
+                  className="cursor-pointer text-[var(--ghost)] hover:text-[var(--red-ink)]"
                 >
                   <Icon name="close" className="h-3 w-3" />
                 </button>
@@ -333,7 +333,7 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
               }}
               onBlur={addTag}
               placeholder="قلب، HighYield، اشتباهات…"
-              className="min-w-32 flex-1 rounded-xl border border-white/10 bg-black/30 px-3.5 py-2 text-xs outline-none transition-colors placeholder:text-[#555] focus:border-[#5b8cc7]/50"
+              className="min-w-32 flex-1 rounded-xl border border-white/10 bg-black/30 px-3.5 py-2 text-xs outline-none transition-colors placeholder:text-[var(--ghost)] focus:border-[#5b8cc7]/50"
             />
           </div>
         </div>
@@ -344,7 +344,7 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
             type="button"
             onClick={() => setShowAdvanced((prev) => !prev)}
             aria-expanded={showAdvanced}
-            className="flex w-full cursor-pointer items-center justify-between rounded-2xl bg-white/[0.03] px-4 py-3 text-xs text-[#aaa] transition-colors hover:text-white"
+            className="flex w-full cursor-pointer items-center justify-between rounded-2xl bg-white/[0.03] px-4 py-3 text-xs text-[var(--muted)] transition-colors hover:text-white"
           >
             گزینه‌های پیشرفته
             <Icon name="chevron" className={`h-4 w-4 transition-transform ${showAdvanced ? '-rotate-90' : 'rotate-90'}`} />
@@ -354,7 +354,7 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
             <div className="fc-card-face mt-2 space-y-3 rounded-2xl border border-white/8 p-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label htmlFor="fc-deck" className="mb-1.5 block text-[11px] text-[#8a8a8a]">دِک</label>
+                  <label htmlFor="fc-deck" className="mb-1.5 block text-[11px] text-[var(--faint)]">دِک</label>
                   <select
                     id="fc-deck"
                     value={deckId}
@@ -362,23 +362,23 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
                     className="w-full cursor-pointer rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm outline-none focus:border-[#5b8cc7]/50"
                   >
                     {deckOptions.map((deck) => (
-                      <option key={deck.id} value={deck.id} className="bg-[#232323]">
+                      <option key={deck.id} value={deck.id} className="bg-[var(--surface)]">
                         {deck.title}
                       </option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label htmlFor="fc-subject" className="mb-1.5 block text-[11px] text-[#8a8a8a]">درس</label>
+                  <label htmlFor="fc-subject" className="mb-1.5 block text-[11px] text-[var(--faint)]">درس</label>
                   <select
                     id="fc-subject"
                     value={subjectId}
                     onChange={(event) => setSubjectId(event.target.value)}
                     className="w-full cursor-pointer rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm outline-none focus:border-[#5b8cc7]/50"
                   >
-                    <option value="" className="bg-[#232323]">—</option>
+                    <option value="" className="bg-[var(--surface)]">—</option>
                     {SUBJECTS.map((subject) => (
-                      <option key={subject.id} value={subject.id} className="bg-[#232323]">{subject.title}</option>
+                      <option key={subject.id} value={subject.id} className="bg-[var(--surface)]">{subject.title}</option>
                     ))}
                   </select>
                 </div>
@@ -386,24 +386,24 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label htmlFor="fc-topic" className="mb-1.5 block text-[11px] text-[#8a8a8a]">مبحث</label>
+                  <label htmlFor="fc-topic" className="mb-1.5 block text-[11px] text-[var(--faint)]">مبحث</label>
                   <input
                     id="fc-topic"
                     value={topic}
                     onChange={(event) => setTopic(event.target.value)}
                     placeholder="cardiac-cycle"
-                    className="w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm outline-none transition-colors placeholder:text-[#555] focus:border-[#5b8cc7]/50"
+                    className="w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm outline-none transition-colors placeholder:text-[var(--ghost)] focus:border-[#5b8cc7]/50"
                   />
                 </div>
                 <div>
-                  <label htmlFor="fc-image" className="mb-1.5 block text-[11px] text-[#8a8a8a]">آدرس تصویر (اختیاری)</label>
+                  <label htmlFor="fc-image" className="mb-1.5 block text-[11px] text-[var(--faint)]">آدرس تصویر (اختیاری)</label>
                   <input
                     id="fc-image"
                     value={imageUrl}
                     onChange={(event) => setImageUrl(event.target.value)}
                     placeholder="https://…"
                     dir="ltr"
-                    className="w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm outline-none transition-colors placeholder:text-[#555] focus:border-[#5b8cc7]/50"
+                    className="w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm outline-none transition-colors placeholder:text-[var(--ghost)] focus:border-[#5b8cc7]/50"
                   />
                 </div>
               </div>
@@ -414,7 +414,7 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label htmlFor="fc-source-type" className="mb-1.5 block text-[11px] text-[#8a8a8a]">نوع منبع</label>
+                  <label htmlFor="fc-source-type" className="mb-1.5 block text-[11px] text-[var(--faint)]">نوع منبع</label>
                   <select
                     id="fc-source-type"
                     value={sourceType}
@@ -422,18 +422,18 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
                     className="w-full cursor-pointer rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm outline-none focus:border-[#5b8cc7]/50"
                   >
                     {SOURCE_TYPES.map((item) => (
-                      <option key={item.id} value={item.id} className="bg-[#232323]">{item.label}</option>
+                      <option key={item.id} value={item.id} className="bg-[var(--surface)]">{item.label}</option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label htmlFor="fc-source-title" className="mb-1.5 block text-[11px] text-[#8a8a8a]">عنوان منبع</label>
+                  <label htmlFor="fc-source-title" className="mb-1.5 block text-[11px] text-[var(--faint)]">عنوان منبع</label>
                   <input
                     id="fc-source-title"
                     value={sourceTitle}
                     onChange={(event) => setSourceTitle(event.target.value)}
                     placeholder="کتاب Guyton — فصل ۹"
-                    className="w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm outline-none transition-colors placeholder:text-[#555] focus:border-[#5b8cc7]/50"
+                    className="w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm outline-none transition-colors placeholder:text-[var(--ghost)] focus:border-[#5b8cc7]/50"
                   />
                 </div>
               </div>
@@ -442,20 +442,20 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
         </div>
 
         {quality}
-        {error && <p className="text-xs text-[#ef9196]" role="alert">{error}</p>}
+        {error && <p className="text-xs text-[var(--red-ink)]" role="alert">{error}</p>}
 
         <div className="flex items-center justify-end gap-2.5 pt-1">
           <button
             type="button"
             onClick={onClose}
-            className="cursor-pointer rounded-xl px-5 py-2.5 text-sm text-[#aaa] transition-colors hover:text-white"
+            className="cursor-pointer rounded-xl px-5 py-2.5 text-sm text-[var(--muted)] transition-colors hover:text-white"
           >
             انصراف
           </button>
           <button
             type="button"
             onClick={handleSave}
-            className="cursor-pointer rounded-xl bg-[#5b8cc7] px-6 py-2.5 text-sm font-bold text-white transition-transform hover:-translate-y-0.5 [font-family:'Doran',Tahoma,sans-serif]"
+            className="cursor-pointer rounded-xl bg-[var(--blue-bright)] px-6 py-2.5 text-sm font-bold text-white transition-transform hover:-translate-y-0.5 [font-family:'Doran','Vazir',Tahoma,sans-serif]"
           >
             {card ? 'ذخیره' : 'افزودن کارت'}
           </button>

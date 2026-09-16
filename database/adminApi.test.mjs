@@ -29,6 +29,9 @@
  *  ۲۴) مجوز جدا برای مدیریت کانال
  *  ۲۵) منطق شکستن پیام (متن کوتاه/بلند + فایل)
  *  ۲۶) تست اعتبار پیش از ذخیره: توکن + دسترسی ربات به کانال (با fetch جعلی)
+ *  ۲۷) آداپتور ایتا: sendFile/file، نبود getChat، سنجهٔ null، شناسهٔ عددی، و توصیف پلتفرم
+ *  ۲۸) ۴۰۳ «ربات ادمین نیست» است نه «توکن باطل» (ترجمهٔ درست خطای دسترسی)
+ *  ۲۹) تلگرام: «کانال دیده می‌شود» با «ربات اجازهٔ ارسال دارد» یکی نیست
  */
 
 import assert from 'node:assert/strict';
@@ -36,7 +39,10 @@ import assert from 'node:assert/strict';
 import { handleApi } from './adminApi.js';
 import { readCollection, writeCollection } from './contentStore.js';
 import { planBaleMessages } from './publishers/bale.js';
-import { testCredentials } from './publishingStore.js';
+import { eitaaPlanMessages, sendToEitaa } from './publishers/eitaa.js';
+import { platformMetrics } from './publishers/index.js';
+import { sendToTelegram } from './publishers/telegram.js';
+import { publishingConfig, testCredentials } from './publishingStore.js';
 
 const ORIGIN = 'http://localhost';
 
@@ -285,6 +291,21 @@ check('۱۷. Monitoring API وضعیت سرور را می‌دهد', ping.status
 delete process.env.BALE_BOT_TOKEN;
 delete process.env.PUBLISH_DRY_RUN;
 
+/*
+ * پاک‌سازی باقی‌ماندهٔ اجراهای قبلی.
+ *
+ * اگر اجرای قبلی وسط کار بترکد (یک `assert` بیفتد)، بلوک پاک‌سازی انتهای فایل
+ * اجرا نمی‌شود و کانال تست در پنل واقعی جا می‌ماند. پس پیش از ساخت، هر کانال
+ * هم‌نام قبلی حذف می‌شود تا اجراها روی هم انبار نشوند.
+ */
+const STALE_TEST_CHANNEL = 'کانال تست بله';
+const beforeCreate = await call('GET', '/api/admin/publishing/channels', { cookies });
+for (const row of beforeCreate.payload.data?.channels ?? []) {
+  if (row.name === STALE_TEST_CHANNEL) {
+    await call('DELETE', `/api/admin/publishing/channels/${row.id}`, { cookies, csrf });
+  }
+}
+
 const badChannel = await call('POST', '/api/admin/publishing/channels', {
   cookies,
   csrf,
@@ -500,6 +521,254 @@ const editorTestRoute = await call('POST', '/api/admin/publishing/test', {
   body: { platform: 'bale', token: 'x', chatId: '@x' },
 });
 check('۲۶. رد تست اعتبار برای نقش غیرمجاز (چون توکن می‌گیرد)', editorTestRoute.status === 403);
+
+/* ۲۷) آداپتور ایتا — قرارداد خودش، نه قرارداد تلگرام
+ *
+ * ایتایار چهار تفاوت واقعی با تلگرام دارد و این تست‌ها همان‌ها را قفل می‌کنند:
+ *   ۱) ارسال فایل با `sendFile` و پارامتر `file` می‌رود (نه sendPhoto/sendDocument)
+ *   ۲) هیچ متد خواندنی برای مقصد وجود ندارد ⇒ `getChat` نباید هرگز صدا زده شود
+ *   ۳) سنجهٔ دنبال‌کننده وجود ندارد ⇒ `null` بدون هیچ درخواست شبکه‌ای
+ *   ۴) شناسهٔ کانال باید **عددی** باشد؛ یوزرنیم پیدا می‌شود ولی ارسال با آن ۴۰۳ می‌دهد
+ */
+const eitaaCalls = [];
+
+globalThis.fetch = async (url, init) => {
+  eitaaCalls.push({ url: String(url), body: init?.body });
+  return {
+    ok: true,
+    status: 200,
+    json: async () => ({
+      ok: true,
+      result: { id: 523958, first_name: 'امیرحسین', last_name: 'حیدریان', username: 'heidar1an', message_id: 42 },
+    }),
+  };
+};
+
+/* ارسال باید بترکد؛ متن خطا چیزی است که کاربر می‌بیند */
+async function sendEitaaError(payload) {
+  try {
+    await sendToEitaa(payload);
+    return '';
+  } catch (error) {
+    return `${error.message} ${error.code}`;
+  }
+}
+
+/* شناسهٔ عددی → توکن تأیید می‌شود، مقصد «بررسی‌نشده» می‌ماند */
+const eitaaNumeric = await testCredentials({ platform: 'eitaa', token: secretToken, chatId: '11252784' });
+check(
+  '۲۷. تست ایتا با شناسهٔ عددی: توکن تأیید و مقصد «بررسی‌نشده» می‌ماند',
+  eitaaNumeric.ok === true && eitaaNumeric.complete === true
+    && eitaaNumeric.bot?.username === 'heidar1an'
+    && eitaaNumeric.checks.some((check_) => check_.id === 'target' && check_.ok === null),
+);
+
+/*
+ * یوزرنیم → رد قطعی پیش از ذخیره.
+ *
+ * این باگ واقعی کاربر بود: `chat_id=mytapesh` را گذاشته بود و ارسال با
+ * «Forbidden: user not access of channel chat» می‌افتاد، چون ایتایار یوزرنیم را
+ * پیدا می‌کند ولی مجوز ارسال فقط به شناسهٔ عددی گره خورده است. حالا همان‌جا و
+ * پیش از ذخیره گفته می‌شود.
+ */
+const eitaaUsername = await testCredentials({ platform: 'eitaa', token: secretToken, chatId: 'mytapesh' });
+check(
+  '۲۷. تست ایتا با یوزرنیم پیش از ذخیره رد می‌شود و به شناسهٔ عددی راهنمایی می‌کند',
+  eitaaUsername.ok === true && eitaaUsername.complete === false
+    && eitaaUsername.checks.some((check_) => check_.id === 'target' && check_.ok === false && /عددی/.test(check_.message)),
+);
+
+check(
+  '۲۷. ایتا هرگز getChat یا getChatMemberCount صدا نمی‌زند (در API وجود ندارند)',
+  eitaaCalls.length === 2 && eitaaCalls.every((row) => /\/getMe$/.test(row.url)),
+);
+check(
+  '۲۷. نتیجهٔ تست ایتا توکن را لو نمی‌دهد',
+  !JSON.stringify(eitaaNumeric).includes(secretToken) && !JSON.stringify(eitaaUsername).includes(secretToken),
+);
+
+/* متن آزاد → یک پیام sendMessage با بدنهٔ JSON */
+eitaaCalls.length = 0;
+const eitaaText = await sendToEitaa({ token: secretToken, target: 'mytapesh', text: 'سلام تپش', media: null, options: {} });
+check(
+  '۲۷. ارسال متن ایتا با sendMessage و chat_id می‌رود',
+  /\/sendMessage$/.test(eitaaCalls[0].url)
+    && JSON.parse(eitaaCalls[0].body).chat_id === 'mytapesh'
+    && JSON.parse(eitaaCalls[0].body).text === 'سلام تپش'
+    && eitaaText.messages[0].messageId === 42,
+);
+
+/* فایل + متن کوتاه → یک sendFile با caption و پارامتر `file` */
+eitaaCalls.length = 0;
+const eitaaMedia = await sendToEitaa({
+  token: secretToken,
+  target: 'mytapesh',
+  text: 'کوتاه',
+  media: { buffer: Buffer.from('png-bytes'), filename: 'a.png', mimeType: 'image/png', kind: 'image' },
+  options: { title: 'عنوان تست' },
+});
+check(
+  '۲۷. فایل ایتا با sendFile و پارامتر file و caption می‌رود',
+  /\/sendFile$/.test(eitaaCalls[0].url)
+    && eitaaCalls[0].body instanceof FormData
+    && eitaaCalls[0].body.get('file') !== null
+    && eitaaCalls[0].body.get('caption') === 'کوتاه'
+    && eitaaCalls[0].body.get('chat_id') === 'mytapesh'
+    && eitaaCalls[0].body.get('title') === 'عنوان تست'
+    && eitaaMedia.messages.length === 1,
+);
+
+/* متن بلند + فایل → فایل بی‌کپشن، بعد متن کامل (بدون تکرار) */
+const eitaaPlanLong = eitaaPlanMessages({ text: 'x'.repeat(1200), media: { filename: 'a.png', kind: 'image' } });
+check(
+  '۲۷. متن بلند ایتا: فایل بی‌کپشن بعد متن کامل',
+  eitaaPlanLong.length === 2 && eitaaPlanLong[0].method === 'sendFile'
+    && eitaaPlanLong[0].caption === '' && eitaaPlanLong[1].method === 'sendMessage',
+);
+
+/* سنجه: ایتایار عدد نمی‌دهد، پس null برمی‌گردد و هیچ درخواستی نمی‌رود */
+eitaaCalls.length = 0;
+const eitaaMetric = await platformMetrics({ platform: 'eitaa', token: secretToken, target: 'mytapesh' });
+check('۲۷. سنجهٔ ایتا null است و هیچ درخواست شبکه‌ای نمی‌زند', eitaaMetric === null && eitaaCalls.length === 0);
+
+/* توکن نامعتبر ایتا → پیام فارسی روشن، بدون توکن در خروجی */
+globalThis.fetch = async () => ({
+  ok: false,
+  status: 401,
+  json: async () => ({ ok: false, error_code: 401, description: 'Unauthorized' }),
+});
+const eitaaBadToken = await testCredentials({ platform: 'eitaa', token: secretToken, chatId: 'mytapesh' });
+check(
+  '۲۷. توکن نامعتبر ایتا پیام فارسی روشن می‌دهد',
+  eitaaBadToken.ok === false && /ایتایار/.test(eitaaBadToken.checks[0].message)
+    && !JSON.stringify(eitaaBadToken).includes(secretToken),
+);
+
+/*
+ * ۴۰۳ «user not access of channel chat» — خطای واقعیِ کاربر با یوزرنیم.
+ * پیام باید کاربر را به شناسهٔ عددی ببرد، نه به «توکن را عوض کن».
+ */
+globalThis.fetch = async () => ({
+  ok: false,
+  status: 403,
+  json: async () => ({ ok: false, error_code: 403, description: 'Forbidden: user not access of channel chat' }),
+});
+const eitaaNoAccess = await sendEitaaError({
+  token: secretToken, target: 'mytapesh', text: 'سلام', media: null, options: {},
+});
+check(
+  '۲۷. خطای «user not access» ایتا کاربر را به شناسهٔ عددی راهنمایی می‌کند',
+  /عددی/.test(eitaaNoAccess) && /PUBLISH_FORBIDDEN/.test(eitaaNoAccess) && !/توکن نامعتبر/.test(eitaaNoAccess),
+);
+
+/* پنل باید ایتا و تلگرام را با فیلدهای درستشان بشناسد */const eitaaConfig = publishingConfig().platforms.find((row) => row.id === 'eitaa');
+const telegramConfig = publishingConfig().platforms.find((row) => row.id === 'telegram');
+check(
+  '۲۷. پنل ایتا را با برچسب و راهنمای خودش می‌شناسد و سنجه ندارد',
+  eitaaConfig?.tokenLabel === 'توکن ایتایار' && eitaaConfig.metrics.length === 0
+    && eitaaConfig.capabilities.metrics === false && Boolean(eitaaConfig.setupUrl),
+);
+check(
+  '۲۷. پنل تلگرام را با BotFather می‌شناسد و سنجهٔ دنبال‌کننده دارد',
+  telegramConfig?.tokenEnv === 'TELEGRAM_BOT_TOKEN' && telegramConfig.metrics.includes('followers')
+    && telegramConfig.setupUrl === 'https://t.me/BotFather',
+);
+
+/*
+ * گارد ضدّ لو رفتن توکن در متن راهنما.
+ *
+ * وسوسه‌اش زیاد است که در «شکل توکن» یک نمونهٔ واقعی نوشته شود؛ ولی اگر آن نمونه
+ * از توکن خودِ کاربر کپی شده باشد، دو بخش اول توکنش در پاسخ API پنل و در مرورگر
+ * می‌افتد. پس هیچ متن راهنمای پلتفرمی نباید الگوی توکن واقعی داشته باشد.
+ */
+const platformHelpText = JSON.stringify(publishingConfig().platforms);
+check(
+  '۲۷. راهنمای پلتفرم‌ها فقط جای‌نگهدار دارد، نه نمونهٔ واقعی توکن',
+  !/bot\d{3,}:[0-9a-f]{8,}/i.test(platformHelpText) && !/\d{8,}:[A-Za-z0-9_-]{25,}/.test(platformHelpText),
+);
+
+/* ۲۸) ۴۰۳ یعنی «ربات ادمین نیست»، نه «توکن باطل»
+ *
+ * تلگرام و بله برای کمبود دسترسی هم ۴۰۳ می‌دهند. ترجمهٔ قبلی هر ۴۰۳ را «توکن
+ * نامعتبر» می‌خواند و همین باعث شد خطای واقعی («ربات عضو کانال نیست») در پنل
+ * به‌شکل «توکن را عوض کن» دیده شود — یعنی کاربر دنبال جای اشتباهی می‌رفت.
+ */
+globalThis.fetch = async (url) => (String(url).endsWith('/getMe')
+  ? { ok: true, status: 200, json: async () => ({ ok: true, result: { id: 7, username: 'mytapeshBot', name: 'tapeshbot' } }) }
+  : { ok: false, status: 403, json: async () => ({ ok: false, error_code: 403, description: 'Forbidden: bot is not a member of the channel chat' }) });
+
+/* ارسال باید بترکد؛ متن خطا چیزی است که کاربر می‌بیند */
+async function sendErrorText(payload) {
+  try {
+    await sendToTelegram(payload);
+    return '';
+  } catch (error) {
+    return `${error.message} ${error.code}`;
+  }
+}
+
+const notMember = await sendErrorText({
+  token: secretToken, target: '@mytapesh', text: 'سلام', media: null, options: {},
+});
+check(
+  '۲۸. خطای ۴۰۳ تلگرام «ربات ادمین نیست» ترجمه می‌شود، نه «توکن باطل»',
+  /ادمین/.test(notMember) && !/توکن/.test(notMember) && /PUBLISH_FORBIDDEN/.test(notMember),
+);
+
+/* همان پیام با کد ۴۰۱ باید واقعاً «توکن نامعتبر» بماند */
+globalThis.fetch = async () => ({
+  ok: false, status: 401, json: async () => ({ ok: false, error_code: 401, description: 'Unauthorized' }),
+});
+const trulyBadToken = await sendErrorText({
+  token: secretToken, target: '@mytapesh', text: 'سلام', media: null, options: {},
+});
+check(
+  '۲۸. خطای ۴۰۱ همچنان «توکن نامعتبر» می‌ماند',
+  /توکن/.test(trulyBadToken) && /PUBLISH_UNAUTHORIZED/.test(trulyBadToken),
+);
+
+/*
+ * ۲۹) تلگرام: «کانال دیده می‌شود» ≠ «ربات اجازهٔ ارسال دارد»
+ *
+ * کانال عمومی را هر رباتی با `getChat` می‌بیند، حتی اگر اصلاً عضو نباشد. پنل قبلاً
+ * از همین تیک سبز می‌ساخت و می‌گفت «آمادهٔ ارسال است»، ولی ارسال با
+ * `Forbidden: bot is not a member of the channel chat` می‌افتاد. حالا «اجازهٔ ارسال»
+ * جدا با `getChatAdministrators` بررسی می‌شود.
+ */
+function telegramFetch({ adminsOk }) {
+  return async (url) => {
+    const method = String(url).split('/').pop();
+    if (method === 'getMe') {
+      return { ok: true, status: 200, json: async () => ({ ok: true, result: { id: 8697284788, username: 'mytapeshBot', first_name: 'tapeshbot' } }) };
+    }
+    if (method === 'getChat') {
+      return { ok: true, status: 200, json: async () => ({ ok: true, result: { id: -1001392410731, type: 'channel', title: 'myTapesh', username: 'myTapesh' } }) };
+    }
+    if (method === 'getChatAdministrators') {
+      return adminsOk
+        ? { ok: true, status: 200, json: async () => ({ ok: true, result: [{ user: { id: 8697284788, is_bot: true }, status: 'administrator' }] }) }
+        : { ok: false, status: 400, json: async () => ({ ok: false, error_code: 400, description: 'Bad Request: member list is inaccessible' }) };
+    }
+    return { ok: false, status: 404, json: async () => ({ ok: false, description: 'not found' }) };
+  };
+}
+
+globalThis.fetch = telegramFetch({ adminsOk: true });
+const tgAdmin = await testCredentials({ platform: 'telegram', token: secretToken, chatId: '@mytapesh' });
+check(
+  '۲۹. تلگرام با ربات ادمین: هر سه بررسی سبز است',
+  tgAdmin.complete === true && tgAdmin.checks.length === 3
+    && tgAdmin.checks.every((check_) => check_.ok === true),
+);
+
+globalThis.fetch = telegramFetch({ adminsOk: false });
+const tgNotAdmin = await testCredentials({ platform: 'telegram', token: secretToken, chatId: '@mytapesh' });
+check(
+  '۲۹. تلگرام با ربات غیرادمین: «کانال دیده می‌شود» ولی «اجازهٔ ارسال» رد می‌شود',
+  tgNotAdmin.complete === false && tgNotAdmin.ok === false
+    && tgNotAdmin.checks.some((check_) => check_.id === 'target' && check_.ok === true)
+    && tgNotAdmin.checks.some((check_) => check_.id === 'admin' && check_.ok === false && /ادمین/.test(check_.message)),
+);
 
 /* پاک‌سازی داده‌های تست */
 await call('POST', '/api/admin/analytics/reset', { cookies, csrf });

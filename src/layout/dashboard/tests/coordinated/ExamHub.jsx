@@ -61,7 +61,7 @@ function ExamRow({ exam, onOpen }) {
     <button
       type="button"
       onClick={() => onOpen(exam.slug)}
-      className="group flex w-full cursor-pointer items-center gap-4 rounded-[1.6rem] border border-white/[0.06] bg-[#242426] p-4 text-right transition-colors hover:border-white/[0.14] hover:bg-[#2a2a2d] md:p-5"
+      className="group flex w-full cursor-pointer items-center gap-4 rounded-[1.6rem] border border-white/[0.06] bg-[var(--surface)] p-4 text-right transition-colors hover:border-white/[0.14] hover:bg-[var(--surface-soft)] md:p-5"
       aria-label={`${exam.title} — ${cta.label}`}
     >
       <span
@@ -73,12 +73,12 @@ function ExamRow({ exam, onOpen }) {
 
       <span className="min-w-0 flex-1">
         <span className="flex flex-wrap items-center gap-2">
-          <strong className="truncate text-[15px] text-white md:text-base [font-family:'Doran',Tahoma,sans-serif]">
+          <strong className="truncate text-[15px] text-white md:text-base [font-family:'Doran','Vazir',Tahoma,sans-serif]">
             {exam.title}
           </strong>
           <StatusBadge status={exam.status} size="sm" />
         </span>
-        <span className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#9a9a9a]">
+        <span className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--faint)]">
           <span className="inline-flex items-center gap-1">
             <Icon name="calendar" className="h-3.5 w-3.5" />
             {formatShortDate(exam.startTime)}، {formatTime(exam.startTime)}
@@ -106,7 +106,7 @@ function ExamRow({ exam, onOpen }) {
       >
         {cta.label}
       </span>
-      <Icon name="back" className="h-4 w-4 shrink-0 text-[#6a6a6a] transition-colors group-hover:text-white sm:hidden" />
+      <Icon name="back" className="h-4 w-4 shrink-0 text-[var(--ghost)] transition-colors group-hover:text-white sm:hidden" />
     </button>
   );
 }
@@ -174,10 +174,10 @@ export default function ExamHub({ exams, onOpenExam, onQuickStart }) {
     <div className="space-y-8">
       {/* ── سربرگ و فلسفه ── */}
       <header className="dash-stagger space-y-2">
-        <h1 className="text-2xl text-white md:text-[1.7rem] [font-family:'Doran',Tahoma,sans-serif]">
+        <h1 className="text-2xl text-white md:text-[1.7rem] [font-family:'Doran','Vazir',Tahoma,sans-serif]">
           آزمون‌های هماهنگ
         </h1>
-        <p className="max-w-2xl text-sm leading-7 text-[#9a9a9a]">
+        <p className="max-w-2xl text-sm leading-7 text-[var(--faint)]">
           آزمون‌هایی که تیم تپش طراحی و سراسر کشور هم‌زمان برگزار می‌کند؛ با کارنامه،
           تراز و مقایسهٔ عملکرد. سنجیدن، اولین قدم بهتر شدن است.
         </p>
@@ -187,7 +187,7 @@ export default function ExamHub({ exams, onOpenExam, onQuickStart }) {
       {liveExam && (
         <section
           aria-label="آزمون در حال برگزاری"
-          className="dash-stagger relative overflow-hidden rounded-[2.2rem] border border-[#e26d6d]/30 bg-[#242426] p-6 md:p-8"
+          className="dash-stagger relative overflow-hidden rounded-[2.2rem] border border-[#e26d6d]/30 bg-[var(--surface)] p-6 md:p-8"
         >
           <div className="absolute -left-20 -top-24 h-64 w-64 rounded-full bg-[#e26d6d]/10 blur-3xl" aria-hidden="true" />
           <div className="relative flex flex-wrap items-start justify-between gap-4">
@@ -196,10 +196,10 @@ export default function ExamHub({ exams, onOpenExam, onQuickStart }) {
                 <StatusBadge status="LIVE" />
                 <TypeBadge type={liveExam.type} />
               </div>
-              <h2 className="text-xl text-white md:text-2xl [font-family:'Doran',Tahoma,sans-serif]">
+              <h2 className="text-xl text-white md:text-2xl [font-family:'Doran','Vazir',Tahoma,sans-serif]">
                 {liveExam.title}
               </h2>
-              <p className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[#9a9a9a]">
+              <p className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[var(--faint)]">
                 <span>تا {formatTime(liveExam.endTime)} ادامه دارد</span>
                 <span>{faNum(liveExam.effectiveQuestionCount)} سؤال</span>
                 <span className="inline-flex items-center gap-1">
@@ -211,7 +211,7 @@ export default function ExamHub({ exams, onOpenExam, onQuickStart }) {
             <button
               type="button"
               onClick={() => onOpenExam(liveExam.slug)}
-              className="flex cursor-pointer items-center gap-2 rounded-2xl bg-[#e26d6d] px-6 py-3 text-sm font-bold text-[#2a1010] transition-colors hover:bg-[#ea7f7f]"
+              className="flex cursor-pointer items-center gap-2 rounded-2xl bg-[var(--red)] px-6 py-3 text-sm font-bold text-[#2a1010] transition-colors hover:bg-[var(--red)]"
             >
               <Icon name="play" className="h-4 w-4" />
               {liveExam.activeAttemptId ? 'ادامه آزمون' : 'ورود به آزمون'}
@@ -224,13 +224,13 @@ export default function ExamHub({ exams, onOpenExam, onQuickStart }) {
       {featuredExam && (
         <section
           aria-label="آزمون بعدی"
-          className="dash-stagger relative overflow-hidden rounded-[2.2rem] border border-white/[0.07] bg-[#242426] p-6 md:p-8"
+          className="dash-stagger relative overflow-hidden rounded-[2.2rem] border border-white/[0.07] bg-[var(--surface)] p-6 md:p-8"
         >
           <div className="absolute -right-24 -top-28 h-72 w-72 rounded-full bg-[#61D192]/10 blur-3xl" aria-hidden="true" />
           <div className="relative grid gap-6 lg:grid-cols-[1.25fr_1fr] lg:items-center">
             <div className="space-y-4">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#61D192]/12 px-3 py-1 text-[11px] font-bold text-[#61D192]">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#61D192]/12 px-3 py-1 text-[11px] font-bold text-[var(--green-ink)]">
                   <Icon name="spark" className="h-3.5 w-3.5" />
                   آزمون بعدی تپش
                 </span>
@@ -238,11 +238,11 @@ export default function ExamHub({ exams, onOpenExam, onQuickStart }) {
                 <TypeBadge type={featuredExam.type} />
               </div>
 
-              <h2 className="text-2xl leading-snug text-white md:text-[1.65rem] [font-family:'Doran',Tahoma,sans-serif]">
+              <h2 className="text-2xl leading-snug text-white md:text-[1.65rem] [font-family:'Doran','Vazir',Tahoma,sans-serif]">
                 {featuredExam.title}
               </h2>
 
-              <p className="max-w-xl text-sm leading-7 text-[#a5a5a5]">{featuredExam.description}</p>
+              <p className="max-w-xl text-sm leading-7 text-[var(--muted)]">{featuredExam.description}</p>
 
               <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-4">
                 {[
@@ -252,25 +252,25 @@ export default function ExamHub({ exams, onOpenExam, onQuickStart }) {
                   { label: 'تعداد سؤال', value: `${faNum(featuredExam.questionCount)} سؤال` },
                 ].map((item) => (
                   <div key={item.label}>
-                    <dt className="text-[11px] text-[#7a7a7a]">{item.label}</dt>
-                    <dd className="mt-0.5 text-[13px] font-semibold text-[#ddd]">{item.value}</dd>
+                    <dt className="text-[11px] text-[var(--faint)]">{item.label}</dt>
+                    <dd className="mt-0.5 text-[13px] font-semibold text-[var(--muted)]">{item.value}</dd>
                   </div>
                 ))}
               </dl>
             </div>
 
             <div className="flex flex-col items-center gap-4 rounded-[1.8rem] bg-black/30 p-5">
-              <p className="text-xs text-[#9a9a9a]">شروع آزمون در:</p>
+              <p className="text-xs text-[var(--faint)]">شروع آزمون در:</p>
               <ExamCountdown targetTs={featuredExam.startTime} />
               <button
                 type="button"
                 onClick={() => onOpenExam(featuredExam.slug)}
-                className="mt-1 flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-[#61D192] px-6 py-3 text-sm font-bold text-[#0d1f16] transition-colors hover:bg-[#74dd9f]"
+                className="mt-1 flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-[var(--green-vivid)] px-6 py-3 text-sm font-bold text-[#0d1f16] transition-colors hover:bg-[#74dd9f]"
               >
                 {featuredExam.registered ? 'مشاهده جزئیات آزمون' : 'ثبت‌نام در آزمون'}
                 <Icon name="back" className="h-4 w-4" />
               </button>
-              <p className="text-[11px] text-[#7a7a7a]">
+              <p className="text-[11px] text-[var(--faint)]">
                 تاکنون {faNum(featuredExam.participantsCount)} نفر ثبت‌نام کرده‌اند
               </p>
             </div>
@@ -284,21 +284,21 @@ export default function ExamHub({ exams, onOpenExam, onQuickStart }) {
           {quizzes.map((quiz) => (
             <div
               key={quiz.id}
-              className="flex items-center justify-between gap-4 rounded-[1.6rem] border border-white/[0.06] bg-[#242426] p-5"
+              className="flex items-center justify-between gap-4 rounded-[1.6rem] border border-white/[0.06] bg-[var(--surface)] p-5"
             >
               <div className="min-w-0 space-y-1.5">
                 <div className="flex flex-wrap items-center gap-2">
-                  <strong className="text-[15px] text-white [font-family:'Doran',Tahoma,sans-serif]">{quiz.title}</strong>
+                  <strong className="text-[15px] text-white [font-family:'Doran','Vazir',Tahoma,sans-serif]">{quiz.title}</strong>
                   <StatusBadge status={quiz.status} size="sm" />
                 </div>
-                <p className="text-xs text-[#9a9a9a]">
+                <p className="text-xs text-[var(--faint)]">
                   {faNum(quiz.effectiveQuestionCount)} سؤال • {formatDuration(quiz.duration)} • بدون ثبت‌نام
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => onQuickStart(quiz.slug)}
-                className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-xl bg-[#61D192]/15 px-4 py-2.5 text-xs font-bold text-[#61D192] transition-colors hover:bg-[#61D192]/25"
+                className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-xl bg-[#61D192]/15 px-4 py-2.5 text-xs font-bold text-[var(--green-ink)] transition-colors hover:bg-[#61D192]/25"
               >
                 <Icon name="play" className="h-3.5 w-3.5" />
                 شروع سریع
@@ -311,23 +311,23 @@ export default function ExamHub({ exams, onOpenExam, onQuickStart }) {
       {/* ── Timeline آزمون‌های آینده ── */}
       {timelineMonths.length > 0 && (
         <section aria-label="تقویم آزمون‌های آینده" className="dash-stagger space-y-3">
-          <h2 className="flex items-center gap-2 text-base text-white [font-family:'Doran',Tahoma,sans-serif]">
-            <Icon name="calendar" className="h-4.5 w-4.5 text-[#937fcd]" />
+          <h2 className="flex items-center gap-2 text-base text-white [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+            <Icon name="calendar" className="h-4.5 w-4.5 text-[var(--purple-ink)]" />
             تقویم آزمون‌ها
           </h2>
           <div className="flex gap-3 overflow-x-auto pb-1">
             {timelineMonths.map(([month, items]) => (
-              <div key={month} className="min-w-[15rem] flex-1 space-y-2 rounded-[1.4rem] bg-[#242426] p-4">
-                <p className="text-xs font-bold text-[#937fcd]">{month}</p>
+              <div key={month} className="min-w-[15rem] flex-1 space-y-2 rounded-[1.4rem] bg-[var(--surface)] p-4">
+                <p className="text-xs font-bold text-[var(--purple-ink)]">{month}</p>
                 {items.map((exam) => (
                   <button
                     key={exam.id}
                     type="button"
                     onClick={() => onOpenExam(exam.slug)}
-                    className="flex w-full cursor-pointer items-center justify-between gap-2 rounded-xl bg-white/[0.03] px-3 py-2.5 text-right text-xs text-[#ccc] transition-colors hover:bg-white/[0.07]"
+                    className="flex w-full cursor-pointer items-center justify-between gap-2 rounded-xl bg-white/[0.03] px-3 py-2.5 text-right text-xs text-[var(--muted)] transition-colors hover:bg-white/[0.07]"
                   >
                     <span className="truncate">{exam.shortName}</span>
-                    <span className="shrink-0 text-[11px] text-[#8a8a8a]">{formatShortDate(exam.startTime)}</span>
+                    <span className="shrink-0 text-[11px] text-[var(--faint)]">{formatShortDate(exam.startTime)}</span>
                   </button>
                 ))}
               </div>
@@ -346,8 +346,8 @@ export default function ExamHub({ exams, onOpenExam, onQuickStart }) {
                 type="button"
                 aria-pressed={statusFilter === filter.id}
                 onClick={() => setStatusFilter(filter.id)}
-                className={`cursor-pointer rounded-full px-4 py-2 text-xs transition-colors [font-family:'Doran',Tahoma,sans-serif] ${
-                  statusFilter === filter.id ? 'bg-[#61D192] text-[#0d1f16]' : 'bg-[#242426] text-[#aaa] hover:bg-[#2e2e30] hover:text-white'
+                className={`cursor-pointer rounded-full px-4 py-2 text-xs transition-colors [font-family:'Doran','Vazir',Tahoma,sans-serif] ${
+                  statusFilter === filter.id ? 'bg-[var(--green-vivid)] text-[#0d1f16]' : 'bg-[var(--surface)] text-[var(--muted)] hover:bg-[var(--surface-soft)] hover:text-white'
                 }`}
               >
                 {filter.label}
@@ -359,23 +359,23 @@ export default function ExamHub({ exams, onOpenExam, onQuickStart }) {
               value={typeFilter}
               onChange={(event) => setTypeFilter(event.target.value)}
               aria-label="فیلتر نوع آزمون"
-              className="cursor-pointer rounded-xl border border-white/[0.08] bg-[#242426] px-3.5 py-2.5 text-xs text-[#ccc] outline-none focus:border-[#61D192]/50"
+              className="cursor-pointer rounded-xl border border-white/[0.08] bg-[var(--surface)] px-3.5 py-2.5 text-xs text-[var(--muted)] outline-none focus:border-[#61D192]/50"
             >
               {typeOptions.map((option) => (
-                <option key={option.id} value={option.id} className="bg-[#242426]">
+                <option key={option.id} value={option.id} className="bg-[var(--surface)]">
                   {option.label}
                 </option>
               ))}
             </select>
             <label className="relative">
-              <Icon name="search" className="absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7a7a7a]" />
+              <Icon name="search" className="absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--faint)]" />
               <input
                 type="search"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="جست‌وجوی آزمون…"
                 aria-label="جست‌وجوی آزمون"
-                className="w-full rounded-xl border border-white/[0.08] bg-[#242426] py-2.5 pr-10 pl-3 text-xs text-white placeholder:text-[#666] outline-none focus:border-[#61D192]/50 sm:w-56"
+                className="w-full rounded-xl border border-white/[0.08] bg-[var(--surface)] py-2.5 pr-10 pl-3 text-xs text-white placeholder:text-[var(--ghost)] outline-none focus:border-[#61D192]/50 sm:w-56"
               />
             </label>
           </div>

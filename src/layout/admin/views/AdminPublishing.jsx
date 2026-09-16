@@ -50,6 +50,46 @@ function articleText(article, siteUrl) {
   return parts.join('\n\n');
 }
 
+/* ─────────────────── حکم «تست اتصال» پیش از ذخیره ───────────────────
+ *
+ * خالص و بیرون از کامپوننت تا قابل تست باشد.
+ *
+ * `complete` یعنی «هر چیزی که قابل بررسی بود درست بود» — نه «همه‌چیز تأیید شد».
+ * بعضی پلتفرم‌ها (ایتا) اصلاً متد بررسی کانال ندارند و آن بررسی با `ok: null`
+ * برمی‌گردد. آن حالت باید کهربایی دیده شود، نه سبز؛ وگرنه کاربر فکر می‌کند
+ * دسترسی کانال تأیید شده و اولین ارسال واقعی غافلگیرش می‌کند.
+ */
+export function testVerdict(result) {
+  if (!result) return null;
+
+  const unverified = (result.checks ?? []).filter((check) => check.ok === null).length;
+
+  if (!result.complete) {
+    return {
+      tone: 'is-warn',
+      unverified,
+      text: result.ok ? 'توکن درست است، ولی شناسهٔ کانال تأیید نشد' : 'اتصال برقرار نشد',
+    };
+  }
+
+  if (unverified) {
+    return {
+      tone: 'is-warn',
+      unverified,
+      text: 'توکن تأیید شد. این پلتفرم امکان بررسی کانال را از API نمی‌دهد؛ تأیید نهایی با اولین ارسال واقعی است.',
+    };
+  }
+
+  return { tone: 'is-ok', unverified: 0, text: 'آمادهٔ ارسال است — توکن و دسترسی کانال تأیید شد' };
+}
+
+/* برچسب دکمهٔ ذخیره — باید بگوید دقیقاً چه چیزی تأیید نشده */
+export function saveLabelFor(token, result) {
+  if (!String(token ?? '').trim()) return 'ذخیره';
+  if (!result?.complete) return 'ذخیره (تست‌نشده)';
+  return testVerdict(result).unverified ? 'ذخیره (کانال بررسی‌نشده)' : 'ذخیره';
+}
+
 /* ───────────────────────────── کارت ارسال ───────────────────────────── */
 
 function ComposeCard({ channels, targets, config, admin, onSent }) {
@@ -97,7 +137,19 @@ function ComposeCard({ channels, targets, config, admin, onSent }) {
   };
 
   /* پیش‌نمایش سرور — با تأخیر کوتاه تا با هر کلید تایپ درخواست نرود */
-  const previewKey = JSON.stringify({ text, url: media?.url ?? null, sourceId });
+  /*
+   * پیام‌بندی هر پلتفرم فرق دارد (ایتا فایل را با `sendFile` می‌فرستد، بله با
+   * `sendPhoto`/`sendDocument`). پس پیش‌نمایش باید پلتفرم کانال انتخاب‌شده را
+   * بداند، وگرنه «پیش‌نمایش = ارسال» می‌شکند.
+   */
+  const selectedPlatforms = useMemo(
+    () => [...new Set(selected.map((id) => channels.find((row) => row.id === id)?.platform).filter(Boolean))],
+    [selected, channels],
+  );
+  const previewPlatform = selectedPlatforms[0] ?? channels[0]?.platform ?? 'bale';
+  const platformName = (id) => config?.platforms?.find((row) => row.id === id)?.label ?? id;
+
+  const previewKey = JSON.stringify({ text, url: media?.url ?? null, sourceId, previewPlatform });
 
   useEffect(() => {
     if (!text.trim() && !media?.url) { setPreview(null); return undefined; }
@@ -105,6 +157,7 @@ function ComposeCard({ channels, targets, config, admin, onSent }) {
     let alive = true;
     const timer = window.setTimeout(() => {
       publishingApi.preview({
+        platform: previewPlatform,
         text,
         media,
         source: sourceId === 'custom' ? { type: 'custom' } : { type: sourceId.split(':')[0], id: sourceId.split(':')[1] ?? null },
@@ -165,7 +218,7 @@ function ComposeCard({ channels, targets, config, admin, onSent }) {
       {!channels.length ? (
         <EmptyState
           title="هنوز کانالی ثبت نشده است"
-          description="اول در کارت «کانال‌ها» یک کانال بله بسازید و توکن ربات را ثبت کنید."
+          description="اول در کارت «کانال‌ها» یک کانال بسازید و توکن رباتش را ثبت کنید."
         />
       ) : null}
 
@@ -247,7 +300,11 @@ function ComposeCard({ channels, targets, config, admin, onSent }) {
             <header>
               <IconSend width={15} height={15} />
               <strong>پیش‌نمایش</strong>
-              <span>همین پیام‌ها فرستاده می‌شوند</span>
+              <span>
+                {selectedPlatforms.length > 1
+                  ? `برای «${platformName(previewPlatform)}» — پیام‌بندی بقیهٔ پلتفرم‌ها ممکن است فرق کند`
+                  : 'همین پیام‌ها فرستاده می‌شوند'}
+              </span>
             </header>
 
             {preview?.steps?.length ? (
@@ -332,6 +389,12 @@ function ChannelsCard({ channels, config, admin, onChanged }) {
   const platforms = config?.platforms ?? [];
   const platformOf = (id) => platforms.find((row) => row.id === id) ?? platforms[0];
 
+  /*
+   * حکم و برچسب دکمه از توابع خالص بالا می‌آیند تا قابل تست باشند.
+   */
+  const draftVerdict = testVerdict(testState.result);
+  const saveLabel = saveLabelFor(dialog?.form.token, testState.result);
+
   const setField = (key, value) => setDialog((current) => ({ ...current, form: { ...current.form, [key]: value } }));
 
   const openDialog = (mode, form) => {
@@ -410,9 +473,14 @@ function ChannelsCard({ channels, config, admin, onChanged }) {
     setTesting(channel.id);
     try {
       const data = await publishingApi.testChannel(channel.id);
-      const failed = (data.checks ?? []).find((check) => check.ok === false);
-      if (data.complete) notify(`اتصال سالم است — ${data.checks?.[0]?.message ?? ''}`);
-      else notify(failed?.message ?? 'توکن درست است ولی دسترسی به کانال تأیید نشد', 'error');
+      const checks = data.checks ?? [];
+      const failed = checks.find((check) => check.ok === false);
+      const unverified = checks.find((check) => check.ok === null);
+
+      if (!data.complete) notify(failed?.message ?? 'توکن درست است ولی شناسهٔ کانال تأیید نشد', 'error');
+      else if (unverified) notify(`توکن تأیید شد — ${unverified.message}`);
+      else notify(`اتصال سالم است — ${checks[0]?.message ?? ''}`);
+
       onChanged();
     } catch (error) {
       notify(error.message, 'error');
@@ -461,7 +529,7 @@ function ChannelsCard({ channels, config, admin, onChanged }) {
         empty={channels.length === 0 ? (
           <EmptyState
             title="کانالی ثبت نشده است"
-            description="یک کانال بله بساز، توکن ربات را بگذار و همان‌جا تست کن — همه در یک مودال."
+            description="یک کانال بساز، توکن رباتش را بگذار و همان‌جا تست کن — همه در یک مودال."
             action={can('publishing.channels.manage') ? (
               <Button onClick={() => openDialog('create', { ...EMPTY_CHANNEL })}>
                 <IconPlus width={16} height={16} />
@@ -551,9 +619,7 @@ function ChannelsCard({ channels, config, admin, onChanged }) {
         footer={(
           <>
             <Button variant="ghost" onClick={() => setDialog(null)}>انصراف</Button>
-            <Button onClick={submit} loading={busy}>
-              {dialog?.form.token?.trim() && !testState.result?.complete ? 'ذخیره (تست‌نشده)' : 'ذخیره'}
-            </Button>
+            <Button onClick={submit} loading={busy}>{saveLabel}</Button>
           </>
         )}
       >
@@ -568,14 +634,14 @@ function ChannelsCard({ channels, config, admin, onChanged }) {
                     <li key={index}>{step}</li>
                   ))}
                 </ol>
-                {platformOf(dialog.form.platform)?.botFatherUrl ? (
+                {platformOf(dialog.form.platform)?.setupUrl ? (
                   <a
                     className="ad-pub-guide__link"
-                    href={platformOf(dialog.form.platform).botFatherUrl}
+                    href={platformOf(dialog.form.platform).setupUrl}
                     target="_blank"
                     rel="noreferrer"
                   >
-                    باز کردن BotFather در بله
+                    {platformOf(dialog.form.platform).setupUrlLabel || 'باز کردن پنل پلتفرم'}
                   </a>
                 ) : null}
               </details>
@@ -655,13 +721,7 @@ function ChannelsCard({ channels, config, admin, onChanged }) {
 
                 {testState.result ? (
                   <>
-                    <div className={`ad-pub-verdict ${testState.result.complete ? 'is-ok' : 'is-warn'}`}>
-                      {testState.result.complete
-                        ? 'آمادهٔ ارسال است — توکن و دسترسی کانال تأیید شد'
-                        : testState.result.ok
-                          ? 'توکن درست است، ولی دسترسی به کانال تأیید نشد'
-                          : 'اتصال برقرار نشد'}
-                    </div>
+                    <div className={`ad-pub-verdict ${draftVerdict.tone}`}>{draftVerdict.text}</div>
 
                     <ul className="ad-pub-checks">
                       {(testState.result.checks ?? []).map((check) => (

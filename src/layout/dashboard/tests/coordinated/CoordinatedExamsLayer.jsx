@@ -223,7 +223,7 @@ export default function CoordinatedExamsLayer({ userData, onBack }) {
     <section
       dir="rtl"
       aria-label="آزمون‌های هماهنگ تپش"
-      className="mx-auto w-[var(--content-width)] py-8 text-white md:py-10 [font-family:'Pinar',Tahoma,sans-serif]"
+      className="mx-auto w-[var(--content-width)] py-8 text-white md:py-10 [font-family:'Pinar','Vazir',Tahoma,sans-serif]"
     >
       {/* سربرگ لایه */}
       <header className="mb-6 flex items-center justify-between gap-3">
@@ -231,7 +231,7 @@ export default function CoordinatedExamsLayer({ userData, onBack }) {
           <button
             type="button"
             onClick={onBack}
-            className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#282828] px-3.5 py-2.5 text-xs text-[#aaa] transition-colors hover:bg-[#333] hover:text-white"
+            className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[var(--surface-soft)] px-3.5 py-2.5 text-xs text-[var(--muted)] transition-colors hover:bg-[var(--surface-strong)] hover:text-white"
           >
             <Icon name="back" className="h-3.5 w-3.5" />
             بازگشت به تست
@@ -241,13 +241,13 @@ export default function CoordinatedExamsLayer({ userData, onBack }) {
             <button
               type="button"
               onClick={handleBack}
-              className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#282828] px-3.5 py-2.5 text-xs transition-colors hover:bg-[#333]"
+              className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[var(--surface-soft)] px-3.5 py-2.5 text-xs transition-colors hover:bg-[var(--surface-strong)]"
             >
               <Icon name="back" className="h-3.5 w-3.5" />
               {view.name === 'review' ? 'بازگشت به کارنامه' : 'بازگشت'}
             </button>
-            <span className="flex items-center gap-1.5 text-xs text-[#8a8a8a]">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#61D192]" aria-hidden="true" />
+            <span className="flex items-center gap-1.5 text-xs text-[var(--faint)]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--green-vivid)]" aria-hidden="true" />
               پلتفرم آزمون تپش
             </span>
           </>
@@ -262,7 +262,7 @@ export default function CoordinatedExamsLayer({ userData, onBack }) {
       )}
 
       {!busy && error && (
-        <div className="mb-4 flex items-center gap-2 rounded-2xl bg-[#e26d6d]/10 px-4 py-3 text-sm text-[#e26d6d]" role="alert">
+        <div className="mb-4 flex items-center gap-2 rounded-2xl bg-[#e26d6d]/10 px-4 py-3 text-sm text-[var(--red-ink)]" role="alert">
           <Icon name="alert" className="h-4 w-4" />
           {error}
         </div>

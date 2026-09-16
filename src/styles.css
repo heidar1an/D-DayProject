@@ -48,28 +48,270 @@
   font-display: swap;
 }
 
+/*
+ * وزیر — فونت پشتیبان پروژه.
+ *
+ * اگر یکی از دو فونت اصلی (Pinar / Doran) به هر دلیلی بارگذاری نشود، مرورگر
+ * از این فونت استفاده می‌کند نه از Tahoma. به همین دلیل در انتهای همهٔ
+ * زنجیره‌های font-family پروژه، بعد از فونت اصلی و قبل از Tahoma نشسته است.
+ */
+@font-face {
+  font-family: 'Vazir';
+  src: url('../fonts/vazir/Vazirmatn-VF[wght].woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/*
+ * ══════════════════════════════════════════════════════════════════════════
+ * توکن‌های تم — تنها منبع رنگ در پروژه
+ * ══════════════════════════════════════════════════════════════════════════
+ *
+ * قرارداد نام‌گذاری:
+ *   سطوح  : --deep (فرورفته‌ترین) → --background → --surface → --surface-soft → --surface-strong
+ *   متن   : --white (اصلی) → --muted → --faint → --ghost (کم‌رنگ‌ترین)
+ *   اکسنت : --blue / --purple / --green / --gold / --copper / --red / --orange
+ *            پرکننده‌اند و در هر دو تم یکسان می‌مانند.
+ *           --*-ink  همان رنگ برای متن است؛ در تم روشن تیره می‌شود تا روی زمینهٔ
+ *                    روشن خوانا بماند.
+ *           --*-deep همان رنگ برای پنل‌های تیره است؛ در تم روشن روشن می‌شود تا
+ *                    متن تیرهٔ تم روشن رویش خوانا باشد.
+ *   شفاف  : --wash-rgb / --line-rgb / --ink-rgb / --shadow-rgb پایهٔ رنگ
+ *            لایه‌های نیمه‌شفاف‌اند، پس `rgb(var(--wash-rgb) / 0.05)` در تم تیره
+ *            روشن‌کننده و در تم روشن تیره‌کننده است.
+ *
+ * هیچ لایه‌ای رنگ ثابت تعریف نمی‌کند؛ فقط این نام‌ها را مصرف می‌کند.
+ */
+
 :root {
-  color: #ffffff;
-  background: #181818;
-  font-family: 'Pinar', Tahoma, sans-serif;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
+  color-scheme: dark;
+
+  /* ── سطوح ── */
+  --deep: #000000;
   --background: #181818;
-  --surface: #252525;
-  --surface-soft: #292929;
+  --surface: #242426;
+  --surface-soft: #282828;
+  --surface-strong: #333333;
+
+  /* ── متن ── */
   --white: #ffffff;
   --muted: #d0d0d0;
+  --faint: #8a8a8a;
+  --ghost: #707070;
+  /* مرکب تیرهٔ عمدی (متن روی دکمهٔ روشن، برچسب روی تصویر) — در هر دو تم تیره */
+  --ink-deep: #111114;
+
+  /* ── پرکننده‌های روشن و ثابت ── */
+  --pure: #ffffff;
+  --light-fill: #d4d4d4;
+  --light-fill-soft: #efefef;
+
+  /* ── خط ── */
+  --border-solid: #3f3f47;
+
+  /* ── پایهٔ رنگ لایه‌های نیمه‌شفاف ──
+     wash  = تینت کم‌آلفا (۰ تا ~۰٫۲): در تم تیره روشن‌کننده، در تم روشن تیره‌کننده.
+     scrim = پردهٔ توپُر از جنس «سطح»: در تم تیره سیاه، در تم روشن سفید.
+             برای پنل‌های شیشه‌ای و پس‌زمینهٔ کارت‌هایی که باید با تم برگردند.
+     shadow = هر چیزی که باید همیشه تیره بماند: سایه، drop-shadow، پردهٔ پشت
+              مودال و روکش تیره‌کنندهٔ روی تصویر. سایهٔ سفید معنا ندارد. */
+  --wash-rgb: 255 255 255;
+  --scrim-rgb: 0 0 0;
+  --line-rgb: 255 255 255;
+  --ink-rgb: 255 255 255;
+  --shadow-rgb: 0 0 0;
+  --shadow-scale: 1;
+
+  /* ── آیکون‌های تک‌فام (PNG سیاه که با فیلتر سفید می‌شدند) ── */
+  --icon-filter: brightness(0) invert(1);
+
+  /* ── اکسنت‌ها: پرکننده ── */
   --blue: #2e4b75;
   --blue-bright: #5b8cc7;
   --green: #465c4d;
   --green-bright: #77b787;
+  --green-vivid: #61d192;
   --brown: #604e42;
   --brown-bright: #ab8e7c;
+  --copper: #b99a86;
   --purple: #574c80;
   --purple-bright: #937fcd;
-  --black: #282828;
+  --gold: #e0b45c;
+  --orange: #ff9717;
+  --red: #e26d6d;
+  --rose: #ef9196;
   --form-error: #ff6969;
+
+  /* ── اکسنت‌ها: متن ── */
+  --blue-ink: #5b8cc7;
+  --blue-soft-ink: #9cc0e8;
+  --green-ink: #61d192;
+  --green-soft-ink: #9ed3ab;
+  --purple-ink: #937fcd;
+  --purple-soft-ink: #c9bdf0;
+  --gold-ink: #e0b45c;
+  --gold-soft-ink: #e6c98a;
+  --copper-ink: #b99a86;
+  --copper-soft-ink: #d4b8a4;
+  --red-ink: #ef9196;
+  --red-soft-ink: #f3b8b8;
+  --orange-ink: #ff9717;
+
+  /* ── اکسنت‌ها: پنل‌های عمیق ── */
+  --blue-deep: #0d1b2c;
+  --green-deep: #0f2018;
+  --purple-deep: #191430;
+  --gold-deep: #221a0b;
+  --copper-deep: #241a15;
+  --red-deep: #241012;
+
+  /* ── کارت‌های رنگی صفحهٔ اصلی ── */
+  --card-lavender: #302942;
+  --card-copper: #342b27;
+  --card-sage: #25312b;
+  --card-sky: #1f2c3d;
+  --card-warm: #302925;
+
   --content-width: 80%;
+}
+
+/* پایهٔ صفحه — از توکن‌ها می‌خواند تا با تعویض تم هم‌زمان عوض شود */
+:root {
+  color: var(--white);
+  background: var(--background);
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+/*
+ * ── حالت روشن ──
+ * فقط مقدار توکن‌ها عوض می‌شود؛ هیچ لایه‌ای لازم نیست تغییر کند.
+ * `--color-white` و `--color-black` هم بازنویسی می‌شوند چون Tailwind v4
+ * کلاس‌های `text-white`، `bg-white/5`، `border-white/8` و `bg-black/30` را
+ * از همین دو متغیر می‌سازد.
+ */
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --deep: #eef1f5;
+  --background: #f4f5f7;
+  --surface: #ffffff;
+  --surface-soft: #ffffff;
+  --surface-strong: #e8eaef;
+
+  --white: #16161b;
+  --muted: #3d3d46;
+  --faint: #6b6b76;
+  --ghost: #8a8a94;
+  --ink-deep: #111114;
+
+  --pure: #ffffff;
+  --light-fill: #dfe2e8;
+  --light-fill-soft: #eceef2;
+
+  --border-solid: #d3d7df;
+
+  --wash-rgb: 16 20 28;
+  --scrim-rgb: 255 255 255;
+  --line-rgb: 16 20 28;
+  --ink-rgb: 22 22 27;
+  --shadow-rgb: 16 20 28;
+  --shadow-scale: 0.45;
+
+  --icon-filter: brightness(0);
+
+  --blue: #d7e4f4;
+  --green: #d9e9de;
+  --brown: #eaddd2;
+  --purple: #e0d9f2;
+
+  --blue-ink: #2f6bb0;
+  --blue-soft-ink: #3f7cbd;
+  --green-ink: #14784a;
+  --green-soft-ink: #1e8a53;
+  --purple-ink: #6d55b5;
+  --purple-soft-ink: #7f68c4;
+  --gold-ink: #8a5f0c;
+  --gold-soft-ink: #96690d;
+  --copper-ink: #75573f;
+  --copper-soft-ink: #7f6047;
+  --red-ink: #ab353c;
+  --red-soft-ink: #b53d44;
+  --orange-ink: #a35407;
+
+  --blue-deep: #dce9f8;
+  --green-deep: #dcece1;
+  --purple-deep: #e5e0f6;
+  --gold-deep: #f7ecd7;
+  --copper-deep: #efe3da;
+  --red-deep: #f8e3e4;
+
+  --card-lavender: #ece7f9;
+  --card-copper: #f3ebe6;
+  --card-sage: #e6f1ea;
+  --card-sky: #e4eef9;
+  --card-warm: #f3ebe7;
+
+  /*
+   * ── نگاشت کلاس‌های Tailwind ──
+   * Tailwind v4 رنگ `white`/`black` را از همین دو متغیر می‌سازد:
+   *   text-white      → color: var(--color-white)
+   *   bg-white/6      → background: color-mix(in oklab, var(--color-white) 6%, transparent)
+   *   border-white/8  → border-color: color-mix(...)
+   * پس با برگرداندن `--color-white` به مرکبِ تم روشن، حدود ۸۰۰ کلاس
+   * (text-white، bg-white/N، border-white/N) خودکار درست می‌شوند.
+   *
+   * فقط دو حالت «توپُر» از این قاعده جا می‌مانند و پایین‌تر صریح بازنویسی شده‌اند:
+   * bg-white و border-white، که در تم تیره رنگ ثابت سفید می‌خواهند نه مرکب.
+   */
+  --color-white: var(--white);
+  --color-black: var(--deep);
+}
+
+/*
+ * استثناهای تم روشن برای کلاس‌های توپُر Tailwind.
+ * این قواعد بیرون از `@layer` نوشته شده‌اند، پس در آبشار بر utilities تو‌در‌تو
+ * اولویت دارند — بدون `!important`.
+ */
+:root[data-theme='light'] .bg-white {
+  background-color: var(--surface);
+}
+
+:root[data-theme='light'] .border-white {
+  border-color: var(--border-solid);
+}
+
+/* پنل‌های فرورفته و ریل کنترل‌های سگمنتی: در تم تیره مشکی کم‌آلفا بودند،
+   در تم روشن باید یک تینت خاکستری ملایم باشند نه ۳۰٪ سیاه. */
+:root[data-theme='light'] .bg-black\/25 {
+  background-color: rgb(16 20 28 / 0.035);
+}
+
+:root[data-theme='light'] .bg-black\/30 {
+  background-color: rgb(16 20 28 / 0.04);
+}
+
+:root[data-theme='light'] .bg-black\/40 {
+  background-color: rgb(16 20 28 / 0.05);
+}
+
+:root[data-theme='light'] .bg-black\/45 {
+  background-color: rgb(16 20 28 / 0.055);
+}
+
+:root[data-theme='light'] .bg-black\/50 {
+  background-color: rgb(16 20 28 / 0.06);
+}
+
+/* پردهٔ پشت مودال — در تم روشن هم باید صفحه را تاریک کند */
+:root[data-theme='light'] .bg-black\/70 {
+  background-color: rgb(16 20 28 / 0.45);
+}
+
+:root[data-theme='light'] .bg-black\/75 {
+  background-color: rgb(16 20 28 / 0.5);
 }
 
 * {
@@ -117,6 +359,20 @@ img {
   overflow: hidden;
 }
 
+/*
+ * لایه‌هایی که صحنهٔ چسبان دارند (محصولات، دربارهٔ تپش) این کلاس را می‌گیرند.
+ *
+ * چرا: `overflow: hidden` روی `.app` آن را به ظرفِ اسکرول تبدیل می‌کند و
+ * `position: sticky` درونش دیگر نسبت به ویوپورت کار نمی‌کند — چون ظرفی که
+ * باید در آن بچسبد، خودش اسکرول نمی‌خورد. `clip` هم اسکرولِ افقی را می‌بُرد
+ * (همان کاری که `hidden` می‌کرد) و هم scroll container نمی‌سازد، پس چسبندگی
+ * زنده می‌ماند.
+ */
+.app--scroll {
+  overflow-x: clip;
+  overflow-y: visible;
+}
+
 [data-reveal] {
   opacity: 0;
   transform: translate3d(0, 30px, 0);
@@ -152,6 +408,70 @@ img {
   gap: 24px;
 }
 
+/* سمت چپ هدر: دکمهٔ تم + ورود/پروفایل. یک ردیف می‌مانند تا nav وسط بماند. */
+.site-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-shrink: 0;
+}
+
+/* ── دکمهٔ تعویض تم — در همهٔ سرصفحه‌ها مشترک ──
+   اندازه با `--theme-toggle-size` تنظیم می‌شود تا هر سرصفحه بتواند دکمه را
+   با ریتم خودش هم‌آهنگ کند، بدون بازتعریف ظاهر. */
+.theme-toggle {
+  --theme-toggle-size: 42px;
+
+  display: grid;
+  flex-shrink: 0;
+  width: var(--theme-toggle-size);
+  height: var(--theme-toggle-size);
+  padding: 0;
+  border: 1px solid rgb(var(--line-rgb) / 0.16);
+  border-radius: 50%;
+  background: rgb(var(--wash-rgb) / 0.05);
+  color: var(--white);
+  place-items: center;
+  cursor: pointer;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    transform 180ms ease;
+}
+
+.theme-toggle:hover {
+  border-color: rgb(var(--line-rgb) / 0.3);
+  background: rgb(var(--wash-rgb) / 0.1);
+}
+
+.theme-toggle:active {
+  transform: scale(0.93);
+}
+
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--blue-bright);
+  outline-offset: 2px;
+}
+
+.theme-toggle__icon {
+  display: grid;
+  width: 55%;
+  height: 55%;
+  place-items: center;
+}
+
+.theme-toggle__icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle {
+    transition: none;
+  }
+}
+
 .brand {
   display: inline-flex;
   align-items: center;
@@ -161,7 +481,7 @@ img {
 }
 
 .brand__word {
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: clamp(2rem, 2.8vw, 2.7rem);
   font-weight: 700;
   letter-spacing: -0.08em;
@@ -175,7 +495,7 @@ img {
   overflow: hidden;
   place-items: center;
   border-radius: 15px;
-  background: #050505;
+  background: var(--deep);
 }
 
 .brand__mark img {
@@ -191,7 +511,7 @@ img {
   justify-content: center;
   gap: clamp(26px, 4vw, 62px);
   margin-inline: auto;
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: clamp(0.98rem, 1.45vw, 1.2rem);
   font-weight: 500;
 }
@@ -225,54 +545,54 @@ img {
 }
 
 .site-nav__link--products::after {
-  background: #5b8cc7;
+  background: var(--blue-bright);
 }
 
 .site-nav__link--pricing::after {
-  background: #937fcd;
+  background: var(--purple-bright);
 }
 
 .site-nav__link--about::after {
-  background: #ab8e7c;
+  background: var(--brown-bright);
 }
 
 .auth-link--login::after {
-  background: #77b787;
+  background: var(--green-bright);
 }
 
 .site-nav a.site-nav__link--products:hover {
-  color: #5b8cc7;
+  color: var(--blue-ink);
   font-weight: 600;
 }
 
 .site-nav__link--products:hover::after {
-  background: #5b8cc7;
+  background: var(--blue-bright);
 }
 
 .site-nav a.site-nav__link--pricing:hover {
-  color: #937fcd;
+  color: var(--purple-ink);
   font-weight: 600;
 }
 
 .site-nav__link--pricing:hover::after {
-  background: #937fcd;
+  background: var(--purple-bright);
 }
 
 .site-nav a.site-nav__link--about:hover {
-  color: #ab8e7c;
+  color: var(--copper-ink);
   font-weight: 600;
 }
 
 .site-nav__link--about:hover::after {
-  background: #ab8e7c;
+  background: var(--brown-bright);
 }
 
 .auth-link--login:hover {
-  color: #77b787;
+  color: var(--green-ink);
 }
 
 .auth-link--login:hover::after {
-  background: #77b787;
+  background: var(--green-bright);
 }
 
 /* چیپ کاربر لاگین‌شده در هدر صفحه اصلی: آواتار + نام به‌جای «ورود / ثبت نام» */
@@ -281,9 +601,9 @@ img {
   align-items: center;
   gap: 10px;
   padding: 5px 6px 5px 16px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid rgb(var(--line-rgb) / 0.16);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgb(var(--wash-rgb) / 0.05);
   cursor: pointer;
   transition: color 180ms ease, border-color 180ms ease, background-color 180ms ease;
 }
@@ -303,7 +623,7 @@ img {
   border: 1.5px solid rgba(185, 154, 134, 0.5);
   border-radius: 50%;
   background: rgba(185, 154, 134, 0.15);
-  color: #b99a86;
+  color: var(--copper-ink);
 }
 
 .auth-link__avatar img {
@@ -320,7 +640,7 @@ img {
 }
 
 .auth-link--user:hover {
-  color: #77b787;
+  color: var(--green-ink);
   border-color: rgba(119, 183, 135, 0.55);
   background: rgba(119, 183, 135, 0.08);
 }
@@ -332,7 +652,7 @@ img {
 
 .auth-link {
   flex-shrink: 0;
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: clamp(0.95rem, 1.4vw, 1.16rem);
   font-weight: 500;
 }
@@ -342,9 +662,9 @@ img {
   width: 42px;
   height: 42px;
   padding: 10px 8px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid rgb(var(--line-rgb) / 0.18);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgb(var(--wash-rgb) / 0.05);
   cursor: pointer;
 }
 
@@ -390,7 +710,7 @@ img {
 .quote blockquote,
 .friends-banner h2,
 .tapesh-intro h2 {
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-weight: 700;
 }
 
@@ -411,7 +731,7 @@ img {
 .hero p {
   max-width: 740px;
   margin: 20px auto 0;
-  color: #eeeeee;
+  color: var(--white);
   font-size: clamp(1rem, 1.75vw, 1.35rem);
   font-weight: 500;
   line-height: 1.8;
@@ -449,167 +769,25 @@ img {
 }
 
 .button--primary:hover {
-  background: #396092;
+  background: var(--blue-bright);
   box-shadow: 0 16px 34px rgba(46, 75, 117, 0.4);
 }
 
 .button--light {
   margin-top: 0;
-  border-color: rgba(255, 255, 255, 0.12);
+  border-color: rgb(var(--line-rgb) / 0.12);
   background: var(--white);
-  color: var(--black);
+  color: var(--background);
 }
 
 .button--light:hover {
-  background: #e6efff;
-  box-shadow: 0 12px 28px rgba(255, 255, 255, 0.12);
+  background: var(--light-fill-soft);
+  box-shadow: 0 12px 28px rgb(var(--shadow-rgb) / calc(0.12 * var(--shadow-scale)));
 }
 
 .section-shell {
   width: var(--content-width);
   margin-inline: auto;
-}
-
-.products {
-  width: var(--content-width);
-  padding-top: 4px;
-}
-
-.product-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: clamp(24px, 3.1vw, 64px);
-}
-
-.product-card {
-  position: relative;
-  aspect-ratio: 0.82 / 1;
-  min-height: 298px;
-  min-width: 0;
-  overflow: hidden;
-  border-radius: clamp(22px, 2vw, 40px);
-  isolation: isolate;
-  transition: transform 220ms ease, box-shadow 220ms ease;
-}
-
-.product-card:hover {
-  transform: translateY(-7px);
-  box-shadow: 0 20px 35px rgba(0, 0, 0, 0.22);
-}
-
-.product-card::after {
-  position: absolute;
-  right: -18%;
-  bottom: -29%;
-  z-index: -1;
-  width: 90%;
-  height: 65%;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.03);
-  content: '';
-}
-
-.product-card--lavender {
-  --card-bg: #302942;
-  --card-accent: #937fcd;
-}
-
-.product-card--copper {
-  --card-bg: #342b27;
-  --card-accent: #ab8e7c;
-}
-
-.product-card--sage {
-  --card-bg: #25312b;
-  --card-accent: #77b787;
-}
-
-.product-card--sky {
-  --card-bg: #1f2c3d;
-  --card-accent: #5b8cc7;
-}
-
-.product-card {
-  background: var(--card-bg);
-}
-
-.product-card__copy {
-  position: relative;
-  z-index: 2;
-  padding: clamp(24px, 3.1vw, 66px) clamp(12px, 1.4vw, 30px) 0;
-  text-align: center;
-}
-
-.product-card h2 {
-  margin: 0;
-  font-family: 'Doran', Tahoma, sans-serif;
-  font-size: clamp(1.22rem, 2.3vw, 2.5rem);
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  line-height: 1.35;
-}
-
-.product-card p {
-  max-width: 86%;
-  margin: 8px auto 0;
-  color: rgba(255, 255, 255, 0.84);
-  font-size: clamp(0.78rem, 1.05vw, 1.22rem);
-  font-weight: 500;
-  line-height: 1.55;
-}
-
-.product-card__image {
-  position: absolute;
-  right: 50%;
-  bottom: 2%;
-  z-index: 1;
-  width: 88%;
-  max-width: none;
-  height: 56%;
-  object-fit: contain;
-  object-position: center bottom;
-  transform: translateX(50%);
-  transition: transform 260ms ease;
-}
-
-.product-card:hover .product-card__image {
-  transform: translateX(50%) scale(1.04);
-}
-
-.product-card--sky .product-card__image {
-  width: 92%;
-  height: 58%;
-}
-
-.product-card--copper .product-card__image {
-  width: 88%;
-  height: 58%;
-}
-
-.product-card--sage .product-card__image {
-  width: 90%;
-  height: 57%;
-}
-
-.product-card--lavender .product-card__image {
-  width: 84%;
-  height: 49%;
-}
-
-.product-card__arrow {
-  position: absolute;
-  right: clamp(12px, 1.9vw, 40px);
-  bottom: clamp(12px, 1.3vw, 24px);
-  z-index: 3;
-  display: grid;
-  width: clamp(48px, 3.5vw, 72px);
-  height: clamp(48px, 3.5vw, 72px);
-  place-items: center;
-  border: 2px solid var(--card-accent);
-  border-radius: 50%;
-  background: #000000;
-  color: var(--card-accent);
-  transition: background 180ms ease, color 180ms ease, transform 180ms ease;
 }
 
 .arrow-icon {
@@ -627,22 +805,6 @@ img {
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 3.8;
-}
-
-.product-card__arrow .arrow-icon {
-  width: 64%;
-  height: 64%;
-}
-
-.product-card__arrow .arrow-icon svg {
-  width: 100%;
-  height: 100%;
-}
-
-.product-card__arrow:hover {
-  background: var(--card-accent);
-  color: var(--black);
-  transform: translateY(-2px);
 }
 
 .benefits {
@@ -677,7 +839,7 @@ img {
   align-items: center;
   justify-content: center;
   padding: 28px 38px;
-  border: 1px solid rgba(255, 255, 255, 0.02);
+  border: 1px solid rgb(var(--line-rgb) / 0.02);
   border-radius: 38px;
   background: var(--surface);
   text-align: center;
@@ -685,7 +847,7 @@ img {
 }
 
 .benefit-card:hover {
-  background: #2b2b2b;
+  background: var(--surface-soft);
   transform: translateY(-4px);
 }
 
@@ -696,7 +858,7 @@ img {
 .benefit-card h3 {
   margin: 0;
   color: var(--card-accent);
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: clamp(1.6rem, 2.6vw, 2.35rem);
   font-weight: 700;
   letter-spacing: -0.055em;
@@ -706,7 +868,7 @@ img {
 .benefit-card p {
   max-width: 530px;
   margin: 12px 0 0;
-  color: #eeeeee;
+  color: var(--white);
   font-size: clamp(0.98rem, 1.5vw, 1.18rem);
   font-weight: 500;
   line-height: 1.85;
@@ -726,6 +888,455 @@ img {
 
 .benefit-card--copper {
   --card-accent: var(--brown-bright);
+}
+
+/* ── تعرفه‌ها: یک سطح جمع‌وجور برای انتخاب مدت، امکانات و وضعیت مالی ── */
+.pricing {
+  padding-top: 144px;
+  padding-bottom: 30px;
+}
+
+.pricing__header {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+  gap: clamp(28px, 6vw, 90px);
+  align-items: end;
+  margin-bottom: 46px;
+  direction: rtl;
+}
+
+.pricing__heading {
+  max-width: 720px;
+}
+
+.pricing__eyebrow,
+.pricing-finance__label,
+.pricing-card__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--purple-ink);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.015em;
+}
+
+.pricing__eyebrow::before {
+  width: 28px;
+  height: 1px;
+  background: currentColor;
+  content: '';
+}
+
+.pricing__heading h2 {
+  max-width: 680px;
+  margin: 17px 0 0;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: clamp(2.25rem, 4.8vw, 4.45rem);
+  font-weight: 700;
+  letter-spacing: -0.08em;
+  line-height: 1.14;
+}
+
+.pricing__heading p {
+  max-width: 660px;
+  margin: 20px 0 0;
+  color: var(--muted);
+  font-size: clamp(0.98rem, 1.45vw, 1.2rem);
+  font-weight: 400;
+  line-height: 1.95;
+}
+
+.pricing-finance {
+  position: relative;
+  display: flex;
+  min-height: 250px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+  overflow: hidden;
+  padding: 25px 28px;
+  border: 1px solid rgb(var(--line-rgb) / 0.12);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 16% 12%, rgb(var(--purple-bright) / 0.2), transparent 45%),
+    var(--purple-deep);
+  direction: rtl;
+}
+
+.pricing-finance::after {
+  position: absolute;
+  right: -44px;
+  bottom: -64px;
+  width: 164px;
+  height: 164px;
+  border: 1px solid rgb(var(--purple-bright) / 0.18);
+  border-radius: 50%;
+  content: '';
+  pointer-events: none;
+}
+
+.pricing-finance__label {
+  position: relative;
+  z-index: 1;
+}
+
+.pricing-finance > strong {
+  position: relative;
+  z-index: 1;
+  max-width: 270px;
+  color: var(--white);
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: clamp(1.18rem, 1.65vw, 1.55rem);
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.pricing-finance__line {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 11px;
+  border-top: 1px solid rgb(var(--line-rgb) / 0.1);
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.pricing-finance__line b {
+  color: var(--white);
+  font-weight: 600;
+}
+
+.pricing-finance > small {
+  position: relative;
+  z-index: 1;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.7;
+}
+
+.pricing__controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  margin-bottom: 18px;
+  direction: rtl;
+}
+
+.pricing__duration-picker {
+  display: flex;
+  min-width: min(100%, 520px);
+  gap: 4px;
+  padding: 5px;
+  border: 1px solid rgb(var(--line-rgb) / 0.1);
+  border-radius: 999px;
+  background: rgb(var(--wash-rgb) / 0.035);
+}
+
+.pricing__duration-option {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 54px;
+  padding: 7px 13px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.25;
+  transition: background 180ms ease, color 180ms ease, transform 180ms ease;
+}
+
+.pricing__duration-option small {
+  color: var(--faint);
+  font-size: 0.72rem;
+  font-weight: 400;
+}
+
+.pricing__duration-option:hover {
+  color: var(--white);
+  transform: translateY(-1px);
+}
+
+.pricing__duration-option.is-selected {
+  background: var(--purple);
+  color: var(--white);
+}
+
+.pricing__duration-option.is-selected small {
+  color: currentColor;
+  opacity: 0.72;
+}
+
+.pricing__duration-option:focus-visible,
+.pricing-card__action:focus-visible {
+  outline: 2px solid var(--purple-bright);
+  outline-offset: 3px;
+}
+
+.pricing__controls-note {
+  color: var(--faint);
+  font-size: 0.84rem;
+  white-space: nowrap;
+}
+
+.pricing__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  direction: rtl;
+}
+
+.pricing-card {
+  --pricing-accent: var(--blue-bright);
+  --pricing-panel: var(--blue-deep);
+  position: relative;
+  display: flex;
+  min-height: 520px;
+  flex-direction: column;
+  overflow: hidden;
+  padding: clamp(26px, 3vw, 42px);
+  border: 1px solid rgb(var(--line-rgb) / 0.1);
+  border-radius: 32px;
+  background: var(--surface);
+  direction: rtl;
+  transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+}
+
+.pricing-card--blue {
+  --pricing-accent: var(--blue-bright);
+  --pricing-panel: var(--blue-deep);
+}
+
+.pricing-card--purple {
+  --pricing-accent: var(--purple-bright);
+  --pricing-panel: var(--purple-deep);
+}
+
+.pricing-card--featured {
+  border-color: rgb(var(--purple-bright) / 0.45);
+  background:
+    radial-gradient(circle at 8% 10%, rgb(var(--purple-bright) / 0.14), transparent 38%),
+    var(--surface);
+  box-shadow: 0 24px 52px rgb(var(--shadow-rgb) / calc(0.22 * var(--shadow-scale)));
+  transform: translateY(-10px);
+}
+
+.pricing-card:hover {
+  border-color: rgb(var(--pricing-accent) / 0.48);
+  box-shadow: 0 20px 42px rgb(var(--shadow-rgb) / calc(0.2 * var(--shadow-scale)));
+  transform: translateY(-6px);
+}
+
+.pricing-card--featured:hover {
+  transform: translateY(-14px);
+}
+
+.pricing-card__badge {
+  position: absolute;
+  top: 18px;
+  left: 22px;
+  padding: 6px 12px;
+  border: 1px solid rgb(var(--purple-bright) / 0.35);
+  border-radius: 999px;
+  background: var(--purple-deep);
+  color: var(--purple-ink);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.pricing-card__topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.pricing-card__eyebrow {
+  color: var(--pricing-accent);
+}
+
+.pricing-card__duration {
+  padding: 5px 11px;
+  border: 1px solid rgb(var(--line-rgb) / 0.12);
+  border-radius: 999px;
+  background: rgb(var(--wash-rgb) / 0.045);
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 500;
+}
+
+.pricing-card h3 {
+  margin: 22px 0 0;
+  color: var(--white);
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: clamp(1.85rem, 3vw, 2.85rem);
+  font-weight: 700;
+  letter-spacing: -0.07em;
+  line-height: 1.2;
+}
+
+.pricing-card__description {
+  max-width: 430px;
+  min-height: 3.6em;
+  margin: 13px 0 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.9;
+}
+
+.pricing-card__price {
+  display: flex;
+  min-height: 144px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 26px;
+  padding: 20px 22px;
+  border: 1px solid rgb(var(--pricing-accent) / 0.2);
+  border-radius: 22px;
+  background: var(--pricing-panel);
+}
+
+.pricing-card__price span,
+.pricing-card__price small {
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.65;
+}
+
+.pricing-card__price strong {
+  color: var(--pricing-accent);
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: clamp(1.55rem, 2.5vw, 2.2rem);
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  line-height: 1.25;
+}
+
+.pricing-card__features {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--white);
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+
+.pricing-card__features li {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+}
+
+.pricing-card__features li::before {
+  flex: 0 0 auto;
+  color: var(--pricing-accent);
+  content: '✓';
+  font-family: Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.pricing-card__action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 58px;
+  margin-top: auto;
+  padding: 12px 18px 12px 14px;
+  border: 1px solid transparent;
+  border-radius: 17px;
+  background: var(--pricing-accent);
+  color: var(--ink-deep);
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.3;
+  transition: background 180ms ease, color 180ms ease, transform 180ms ease;
+}
+
+.pricing-card__action > span {
+  flex: 1;
+  text-align: center;
+}
+
+.pricing-card__action > span:last-child {
+  flex: 0 0 auto;
+  font-family: Arial, sans-serif;
+  font-size: 1.45rem;
+  line-height: 0.7;
+}
+
+.pricing-card__action:hover {
+  background: var(--white);
+  color: var(--ink-deep);
+  transform: translateY(-2px);
+}
+
+.pricing__notes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 24px;
+  direction: rtl;
+}
+
+.pricing-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+  padding: 18px 19px;
+  border: 1px solid rgb(var(--line-rgb) / 0.07);
+  border-radius: 22px;
+  background: rgb(var(--wash-rgb) / 0.035);
+}
+
+.pricing-note__number {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--purple);
+  color: var(--white);
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.pricing-note strong {
+  display: block;
+  color: var(--white);
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: 0.98rem;
+  font-weight: 700;
+}
+
+.pricing-note p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.75;
 }
 
 .quote {
@@ -792,13 +1403,13 @@ img {
 }
 
 .quote__author strong {
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: 1.1rem;
   font-weight: 700;
 }
 
 .quote__author span {
-  color: #e0e0e0;
+  color: var(--muted);
   font-size: 0.9rem;
 }
 
@@ -819,7 +1430,7 @@ img {
   direction: ltr;
   background:
     radial-gradient(circle at 30% 44%, rgba(96, 78, 66, 0.25), transparent 30%),
-    #302925;
+    var(--card-warm);
 }
 
 .friends-banner__visual {
@@ -847,8 +1458,8 @@ img {
 
 .friends-banner h2 {
   margin: 0;
-  color: #ff9717;
-  font-family: 'Doran', Tahoma, sans-serif;
+  color: var(--orange-ink);
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: clamp(2rem, 3.5vw, 3.35rem);
   font-weight: 700;
   letter-spacing: -0.07em;
@@ -858,19 +1469,19 @@ img {
 .friends-banner p {
   max-width: 420px;
   margin: 18px 0 0;
-  color: #f0ebea;
+  color: var(--white);
   font-size: clamp(0.98rem, 1.5vw, 1.3rem);
   font-weight: 500;
   line-height: 1.9;
 }
 
 .button--orange {
-  background: #ff9717;
+  background: var(--orange);
   box-shadow: 0 12px 28px rgba(255, 151, 23, 0.2);
 }
 
 .button--orange:hover {
-  background: #ffab3e;
+  background: var(--orange);
   box-shadow: 0 16px 34px rgba(255, 151, 23, 0.32);
 }
 
@@ -887,10 +1498,10 @@ img {
   min-height: 440px;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.24);
+  border: 1px solid rgb(var(--line-rgb) / 0.24);
   border-radius: 38px;
-  background: #ffffff;
-  color: var(--black);
+  background: var(--pure);
+  color: var(--ink-deep);
   transition: transform 220ms ease, box-shadow 220ms ease;
 }
 
@@ -898,7 +1509,7 @@ img {
 .green-path-card:hover,
 .tapesh-intro:hover {
   transform: translateY(-5px);
-  box-shadow: 0 22px 42px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 22px 42px rgb(var(--shadow-rgb) / calc(0.22 * var(--shadow-scale)));
 }
 
 .course-card--lavender {
@@ -927,7 +1538,7 @@ img {
   padding: 5px 11px;
   border: 1px solid var(--course-accent, var(--green-bright));
   border-radius: 4px;
-  background: #090909;
+  background: var(--deep);
   color: var(--white);
   font-size: 0.88rem;
   font-weight: 500;
@@ -967,9 +1578,9 @@ img {
   padding: 9px 18px 9px 12px;
   border: 2px solid var(--course-accent);
   border-radius: 18px;
-  background: #050505;
+  background: var(--deep);
   color: var(--course-accent);
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: clamp(1.3rem, 2.5vw, 2.15rem);
   font-weight: 700;
   letter-spacing: -0.045em;
@@ -993,7 +1604,7 @@ img {
 .course-card__footer:hover,
 .green-path-card__button:hover {
   background: var(--course-accent);
-  color: #0d0d0d;
+  color: var(--ink-deep);
 }
 
 .green-path-card {
@@ -1004,8 +1615,8 @@ img {
   overflow: hidden;
   border: 2px solid var(--blue-bright);
   border-radius: 38px;
-  background: #ffffff;
-  color: #111111;
+  background: var(--pure);
+  color: var(--ink-deep);
   direction: ltr;
   transition: transform 220ms ease, box-shadow 220ms ease;
 }
@@ -1050,7 +1661,7 @@ img {
   margin: auto 0 18px;
   padding: 0;
   list-style: none;
-  font-family: 'Pinar', Tahoma, sans-serif;
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
   font-size: clamp(0.96rem, 1.55vw, 1.25rem);
   font-weight: 500;
   line-height: 1.65;
@@ -1070,9 +1681,9 @@ img {
 }
 
 .tapesh-intro {
-  --tapesh-panel: #1f2c3d;
-  --tapesh-text: #f7f8fb;
-  --tapesh-muted: #e0e5eb;
+  --tapesh-panel: var(--card-sky);
+  --tapesh-text: var(--white);
+  --tapesh-muted: var(--white);
   display: grid;
   min-height: 394px;
   grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.42fr);
@@ -1107,7 +1718,7 @@ img {
 
 .tapesh-intro h2 {
   margin: 0;
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   color: var(--tapesh-text);
   font-size: clamp(1.7rem, 2.7vw, 2.65rem);
   font-weight: 500;
@@ -1155,7 +1766,7 @@ img {
   width: 19px;
   height: 19px;
   object-fit: contain;
-  filter: brightness(0) invert(1);
+  filter: var(--icon-filter);
 }
 
 .tapesh-feature__icon--green {
@@ -1180,7 +1791,7 @@ img {
 }
 
 .button--blue:hover {
-  background: #78afe9;
+  background: var(--blue-bright);
   box-shadow: 0 16px 34px rgba(91, 140, 199, 0.32);
 }
 
@@ -1264,7 +1875,7 @@ img {
   padding: 22px 20px 26px;
   overflow: hidden;
   border-radius: 34px;
-  background: var(--black);
+  background: var(--surface);
   direction: rtl;
   text-align: center;
 }
@@ -1291,7 +1902,7 @@ img {
   align-items: start;
   justify-content: center;
   margin: 0;
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: clamp(1.05rem, 1.35vw, 1.55rem);
   font-weight: 500;
   letter-spacing: -0.035em;
@@ -1302,7 +1913,7 @@ img {
   max-width: 280px;
   min-height: 5.25em;
   margin: 8px auto 0;
-  color: #eeeeee;
+  color: var(--white);
   font-size: clamp(0.76rem, 0.9vw, 1rem);
   font-weight: 400;
   line-height: 1.75;
@@ -1325,14 +1936,24 @@ img {
 }
 
 .auth-panel {
+  position: relative;
   display: flex;
   min-width: 0;
   flex-direction: column;
   align-items: stretch;
   padding: 34px clamp(30px, 4vw, 64px) 30px;
   border-radius: 38px;
-  background: var(--black);
+  background: var(--surface);
   direction: rtl;
+}
+
+/* دکمهٔ تم در گوشهٔ پنل — لوگو وسط است، پس این گوشه آزاد می‌ماند */
+.auth-panel__theme {
+  --theme-toggle-size: 38px;
+
+  position: absolute;
+  top: 22px;
+  left: 22px;
 }
 
 .auth-panel__logo-button {
@@ -1345,7 +1966,7 @@ img {
   overflow: hidden;
   border: 0;
   border-radius: 34px;
-  background: #000000;
+  background: var(--deep);
   cursor: pointer;
   align-self: center;
 }
@@ -1361,7 +1982,7 @@ img {
   max-width: none;
   margin: 18px 0 30px;
   color: var(--white);
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: clamp(1.7rem, 2.55vw, 3rem);
   font-weight: 400;
   letter-spacing: -0.035em;
@@ -1385,19 +2006,19 @@ img {
 }
 
 .auth-panel h1 .auth-animated-phrase--blue {
-  color: #5b8cc7;
+  color: var(--blue-ink);
 }
 
 .auth-panel h1 .auth-animated-phrase--green {
-  color: #77b787;
+  color: var(--green-ink);
 }
 
 .auth-panel h1 .auth-animated-phrase--brown {
-  color: #ab8e7c;
+  color: var(--copper-ink);
 }
 
 .auth-panel h1 .auth-animated-phrase--purple {
-  color: #937fcd;
+  color: var(--purple-ink);
 }
 
 .auth-typewriter__cursor {
@@ -1459,7 +2080,7 @@ img {
 
 .auth-form label {
   margin: 0 0 11px;
-  color: #eeeeee;
+  color: var(--white);
   font-size: clamp(0.9rem, 1.05vw, 1.15rem);
   font-weight: 400;
   line-height: 1.4;
@@ -1469,13 +2090,13 @@ img {
   width: 100%;
   height: 58px;
   padding: 0 22px;
-  border: 1px solid #666666;
+  border: 1px solid var(--border-solid);
   border-radius: 16px;
   outline: none;
   background: transparent;
   color: var(--white);
   direction: rtl;
-  font-family: 'Pinar', Tahoma, sans-serif;
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
   font-size: clamp(0.9rem, 1vw, 1.1rem);
   font-weight: 400;
   text-align: right;
@@ -1483,7 +2104,7 @@ img {
 }
 
 .auth-form input::placeholder {
-  color: #a9a9a9;
+  color: var(--muted);
   opacity: 1;
 }
 
@@ -1506,7 +2127,7 @@ img {
   display: block;
   margin: 6px 0 12px;
   color: var(--form-error);
-  font-family: 'Pinar', Tahoma, sans-serif;
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
   font-size: clamp(0.76rem, 0.82vw, 0.88rem);
   font-weight: 400;
   line-height: 1.5;
@@ -1527,7 +2148,7 @@ img {
   padding: 0;
   border: 0;
   background: transparent;
-  color: #eeeeee;
+  color: var(--white);
   cursor: pointer;
   font-family: inherit;
   font-size: clamp(0.84rem, 0.95vw, 1rem);
@@ -1542,7 +2163,7 @@ img {
   min-height: 54px;
   border-radius: 999px;
   cursor: pointer;
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: clamp(1.08rem, 1.35vw, 1.35rem);
   font-weight: 500;
   transition: transform 180ms ease, background 180ms ease, color 180ms ease;
@@ -1550,13 +2171,13 @@ img {
 
 .auth-form__submit {
   border: 1px solid transparent;
-  background: #f6f6f6;
-  color: #050505;
+  background: var(--light-fill-soft);
+  color: var(--ink-deep);
 }
 
 .auth-form__switch {
   min-height: 54px;
-  border: 1px solid #f6f6f6;
+  border: 1px solid var(--border-solid);
   background: transparent;
   color: var(--white);
 }
@@ -1567,10 +2188,10 @@ img {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  border: 1px solid #666666;
-  background: #ffffff;
-  color: #282828;
-  font-family: 'Pinar', Tahoma, sans-serif;
+  border: 1px solid var(--border-solid);
+  background: var(--pure);
+  color: var(--ghost);
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
   font-size: clamp(0.94rem, 1.05vw, 1.05rem);
   font-weight: 500;
 }
@@ -1588,26 +2209,36 @@ img {
 }
 
 .auth-form__submit:hover {
-  background: #ffffff;
+  background: var(--pure);
 }
 
 .auth-form__switch:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgb(var(--wash-rgb) / 0.08);
 }
 
 .auth-form__google:hover {
-  background: #f1f1f1;
+  background: var(--light-fill-soft);
 }
 
 .offline-page {
+  position: relative;
   display: grid;
   min-height: 100svh;
   place-items: center;
   overflow-x: hidden;
   overflow-y: auto;
   padding: clamp(24px, 5vh, 70px) clamp(18px, 4vw, 80px);
-  background: #000000;
+  background: var(--deep);
   color: var(--white);
+}
+
+/* دکمهٔ تم روی صفحهٔ آفلاین — گوشهٔ بالا-چپ */
+.offline-page__theme {
+  --theme-toggle-size: 40px;
+
+  position: absolute;
+  top: clamp(18px, 4vh, 34px);
+  left: clamp(18px, 4vw, 34px);
 }
 
 .offline-page__content {
@@ -1638,7 +2269,7 @@ img {
   max-width: 100%;
   margin: 0;
   color: var(--white);
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: clamp(2.45rem, 5.3vw, 5.15rem);
   font-weight: 800;
   letter-spacing: -0.085em;
@@ -1646,7 +2277,7 @@ img {
 }
 
 .offline-page__title-accent {
-  color: #ff5961;
+  color: var(--red-ink);
 }
 
 .offline-page__description {
@@ -1654,8 +2285,8 @@ img {
   flex-direction: column;
   gap: 2px;
   margin: clamp(24px, 3.1vh, 38px) 0 0;
-  color: #ffffff;
-  font-family: 'Pinar', Tahoma, sans-serif;
+  color: var(--white);
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
   font-size: clamp(1rem, 1.65vw, 1.65rem);
   font-weight: 400;
   line-height: 1.65;
@@ -1667,9 +2298,9 @@ img {
   padding: 4px 16px 8px;
   border: 0;
   background: transparent;
-  color: #ffffff;
+  color: var(--white);
   cursor: pointer;
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: clamp(1.3rem, 2.1vw, 2rem);
   font-weight: 700;
   line-height: 1.3;
@@ -1677,13 +2308,13 @@ img {
 }
 
 .offline-page__retry:hover {
-  color: #ff5961;
+  color: var(--red-ink);
   transform: translateY(-2px);
 }
 
 .offline-page__retry:focus-visible {
   border-radius: 10px;
-  outline: 2px solid #ff5961;
+  outline: 2px solid var(--form-error);
   outline-offset: 5px;
 }
 
@@ -1699,8 +2330,8 @@ img {
 .offline-page__status {
   min-height: 1.6em;
   margin: 8px 0 0;
-  color: #ff8a8f;
-  font-family: 'Pinar', Tahoma, sans-serif;
+  color: var(--red-soft-ink);
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
   font-size: 0.84rem;
   line-height: 1.6;
 }
@@ -1719,11 +2350,12 @@ img {
   padding: 38px 20px;
   padding-block: clamp(10px, 2.2svh, 38px);
   overflow: hidden;
-  background: #000000;
+  background: var(--deep);
   color: var(--white);
 }
 
 .onboarding-card {
+  position: relative;
   display: flex;
   width: min(78vw, 900px);
   max-height: 100%;
@@ -1733,13 +2365,23 @@ img {
   padding: 58px clamp(28px, 5vw, 78px) 62px;
   padding-block: clamp(18px, 3.5svh, 58px) clamp(22px, 4svh, 62px);
   border-radius: 58px;
-  background: var(--black);
+  background: var(--surface);
   overflow: hidden;
   opacity: 0;
   transform: translate3d(0, 26px, 0) scale(0.985);
   transition:
     opacity 520ms ease,
     transform 680ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* دکمهٔ تم در گوشهٔ کارت ثبت‌نام — مثل کارت ورود */
+.onboarding-card__theme {
+  --theme-toggle-size: 38px;
+
+  position: absolute;
+  top: 22px;
+  left: 22px;
+  z-index: 2;
 }
 
 .onboarding-card.is-visible {
@@ -1775,7 +2417,7 @@ img {
   margin: 0 0 30px;
   margin-bottom: clamp(10px, 2.2svh, 30px);
   text-align: center;
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: clamp(2rem, 3.4vw, 3.25rem);
   font-size: min(clamp(2rem, 3.4vw, 3.25rem), 4.6svh);
   font-weight: 500;
@@ -1800,7 +2442,7 @@ img {
   right: 16.66%;
   left: 16.66%;
   height: 1px;
-  background: #e5e5e5;
+  background: var(--light-fill-soft);
   content: '';
   transform: translateY(-50%);
 }
@@ -1815,18 +2457,18 @@ img {
   height: 58px;
   height: min(58px, 6.5svh);
   place-items: center;
-  border: 1px solid #e5e5e5;
+  border: 1px solid var(--border-solid);
   border-radius: 50%;
-  background: var(--black);
+  background: var(--surface);
   color: var(--white);
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: 1.35rem;
   font-size: min(1.35rem, 3svh);
   transition: background 240ms ease, color 240ms ease, transform 240ms ease;
 }
 
 .onboarding-progress__step > span {
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-weight: 400;
   line-height: 1;
 }
@@ -1834,7 +2476,7 @@ img {
 .onboarding-progress__step.is-current,
 .onboarding-progress__step.is-complete {
   background: var(--white);
-  color: var(--black);
+  color: var(--background);
 }
 
 .onboarding-progress__step.is-current {
@@ -1882,7 +2524,7 @@ img {
   height: 60px;
   height: clamp(44px, 7svh, 60px);
   padding: 0 22px 0 54px;
-  border: 1px solid #666666;
+  border: 1px solid var(--border-solid);
   border-radius: 15px;
   outline: none;
   appearance: none;
@@ -1890,7 +2532,7 @@ img {
   color: var(--white);
   cursor: pointer;
   direction: rtl;
-  font-family: 'Pinar', Tahoma, sans-serif;
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
   font-size: clamp(0.92rem, 1.2vw, 1.15rem);
   text-align: right;
   transition: border-color 180ms ease, box-shadow 180ms ease;
@@ -1902,7 +2544,7 @@ img {
 }
 
 .onboarding-select select option {
-  background: var(--black);
+  background: var(--surface);
   color: var(--white);
 }
 
@@ -1912,7 +2554,7 @@ img {
   left: 20px;
   width: 0;
   height: 0;
-  border-top: 12px solid #dddddd;
+  border-top: 12px solid var(--border-solid);
   border-right: 8px solid transparent;
   border-left: 8px solid transparent;
   content: '';
@@ -1925,7 +2567,7 @@ img {
   margin: 0;
   padding: 16px 18px 18px;
   padding: clamp(12px, 1.8svh, 16px) 18px clamp(14px, 2.2svh, 18px);
-  border: 1px solid #666666;
+  border: 1px solid var(--border-solid);
   border-radius: 14px;
 }
 
@@ -1933,7 +2575,7 @@ img {
   width: 100%;
   padding: 0;
   color: var(--white);
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: clamp(1.35rem, 2.2vw, 1.85rem);
   font-size: min(clamp(1.35rem, 2.2vw, 1.85rem), 2.9svh);
   font-weight: 400;
@@ -1942,7 +2584,7 @@ img {
 
 .onboarding-motivation-picker > p {
   margin: -2px 0 12px;
-  color: #d0d0d0;
+  color: var(--muted);
   font-size: 0.82rem;
   line-height: 1.4;
 }
@@ -1975,13 +2617,13 @@ img {
   justify-content: center;
   gap: 8px;
   padding: 5px 12px;
-  border: 1px solid #666666;
+  border: 1px solid var(--border-solid);
   border-radius: 13px;
   background: transparent;
   color: var(--white);
   cursor: pointer;
   direction: rtl;
-  font-family: 'Pinar', Tahoma, sans-serif;
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
   font-size: clamp(0.86rem, 1.3vw, 1.12rem);
   line-height: 1.2;
   transition:
@@ -1992,14 +2634,14 @@ img {
 }
 
 .onboarding-motivation-option:hover {
-  border-color: #bcbcbc;
+  border-color: var(--border-solid);
   transform: translateY(-1px);
 }
 
 .onboarding-motivation-option.is-selected {
   border-color: var(--white);
   background: var(--white);
-  color: var(--black);
+  color: var(--background);
 }
 
 .onboarding-motivation-option img {
@@ -2021,7 +2663,7 @@ img {
 .onboarding-profile__error {
   min-height: 1.5em;
   margin: -8px 0 0;
-  color: #ff8a8f;
+  color: var(--red-soft-ink);
   font-size: 0.82rem;
   line-height: 1.5;
 }
@@ -2029,7 +2671,7 @@ img {
 .onboarding-form h2 {
   margin: 0 0 22px;
   margin-bottom: clamp(8px, 1.6svh, 22px);
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: clamp(1.55rem, 2.45vw, 2.35rem);
   font-size: min(clamp(1.55rem, 2.45vw, 2.35rem), 3.4svh);
   font-weight: 400;
@@ -2054,20 +2696,20 @@ img {
   height: 60px;
   height: clamp(44px, 7svh, 60px);
   padding: 0 24px;
-  border: 1px solid #666666;
+  border: 1px solid var(--border-solid);
   border-radius: 15px;
   outline: none;
   background: transparent;
   color: var(--white);
   direction: rtl;
-  font-family: 'Pinar', Tahoma, sans-serif;
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
   font-size: clamp(0.92rem, 1.2vw, 1.2rem);
   text-align: right;
   transition: border-color 180ms ease, box-shadow 180ms ease;
 }
 
 .onboarding-field input::placeholder {
-  color: #d0d0d0;
+  color: var(--muted);
   opacity: 1;
 }
 
@@ -2083,8 +2725,8 @@ img {
   display: grid;
   width: 50px;
   place-items: center;
-  border-right: 1px solid #666666;
-  color: #d0d0d0;
+  border-right: 1px solid var(--border-solid);
+  color: var(--muted);
   direction: ltr;
   font-family: Georgia, serif;
   font-size: 1.25rem;
@@ -2097,7 +2739,7 @@ img {
 .onboarding-note {
   margin: 12px 0 0;
   margin-top: clamp(6px, 1.2svh, 12px);
-  color: #dddddd;
+  color: var(--muted);
   font-size: 0.86rem;
   line-height: 1.8;
 }
@@ -2130,7 +2772,7 @@ img {
   border-radius: 15px;
   cursor: pointer;
   direction: rtl;
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: clamp(1.1rem, 1.6vw, 1.45rem);
   font-weight: 500;
   transition: transform 180ms ease, background 180ms ease, color 180ms ease;
@@ -2143,21 +2785,21 @@ img {
 .onboarding-button--primary {
   border: 1px solid transparent;
   background: var(--white);
-  color: #050505;
+  color: var(--ink-deep);
 }
 
 .onboarding-button--primary:hover {
-  background: #f0f0f0;
+  background: var(--light-fill-soft);
 }
 
 .onboarding-button--secondary {
-  border: 1px solid #666666;
+  border: 1px solid var(--border-solid);
   background: transparent;
   color: var(--white);
 }
 
 .onboarding-button--secondary:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgb(var(--wash-rgb) / 0.08);
 }
 
 .onboarding-complete {
@@ -2170,14 +2812,14 @@ img {
 
 .onboarding-complete h1 {
   margin: 0;
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: clamp(2rem, 3.2vw, 3rem);
   font-weight: 500;
 }
 
 .onboarding-complete p {
   margin: 18px 0 30px;
-  color: #d0d0d0;
+  color: var(--muted);
   font-size: 1rem;
 }
 
@@ -2231,14 +2873,14 @@ img {
 
 .article-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 20px 36px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 36px rgb(var(--shadow-rgb) / calc(0.2 * var(--shadow-scale)));
 }
 
 .article-card__image {
   min-height: 300px;
   flex: 1;
   overflow: hidden;
-  background: #f8f8f8;
+  background: var(--light-fill-soft);
 }
 
 .article-card__image img {
@@ -2261,7 +2903,7 @@ img {
 }
 
 .article-card:hover .article-card__title-link {
-  color: #f2f6ff;
+  color: var(--white);
 }
 
 .article-card__title-link::after {
@@ -2282,7 +2924,7 @@ img {
 
 .article-card h3 {
   margin: 0;
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: clamp(1.35rem, 2vw, 1.7rem);
   font-weight: 500;
   line-height: 1.35;
@@ -2291,7 +2933,7 @@ img {
 .article-card p {
   max-width: 240px;
   margin: 15px 0 0;
-  color: #eeeeee;
+  color: var(--white);
   font-size: 0.91rem;
   font-weight: 400;
   line-height: 1.8;
@@ -2330,7 +2972,7 @@ img {
   align-items: center;
   gap: 10px;
   padding: 12px 28px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgb(var(--line-rgb) / 0.14);
   border-radius: 999px;
   color: var(--white);
   font-size: 0.98rem;
@@ -2347,8 +2989,8 @@ img {
 }
 
 .articles-all-link:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.22);
+  background: rgb(var(--wash-rgb) / 0.06);
+  border-color: rgb(var(--line-rgb) / 0.22);
   transform: translateY(-2px);
 }
 
@@ -2377,7 +3019,7 @@ img {
 
 .faq-item:hover,
 .faq-item.is-open {
-  background: #2c2c2c;
+  background: var(--surface-soft);
 }
 
 .faq-item.is-open {
@@ -2413,9 +3055,9 @@ img {
   height: 28px;
   flex: 0 0 28px;
   place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgb(var(--line-rgb) / 0.2);
   border-radius: 50%;
-  color: #e6e6e6;
+  color: var(--white);
   font-family: Arial, sans-serif;
   font-size: 1.25rem;
   font-weight: 400;
@@ -2442,7 +3084,7 @@ img {
   margin: 0;
   padding: 0 22px;
   overflow: hidden;
-  color: #d4d4d4;
+  color: var(--muted);
   font-size: 0.9rem;
   font-weight: 400;
   line-height: 1.85;
@@ -2455,8 +3097,8 @@ img {
 }
 
 .site-footer {
-  border-top: 1px solid rgba(255, 255, 255, 0.04);
-  background: #181818;
+  border-top: 1px solid rgb(var(--line-rgb) / 0.04);
+  background: var(--background);
 }
 
 .site-footer__inner {
@@ -2496,7 +3138,7 @@ img {
 
 .site-footer__brand small {
   margin-top: 8px;
-  color: #b7b7b7;
+  color: var(--muted);
   font-size: 0.62rem;
 }
 
@@ -2509,13 +3151,13 @@ img {
 
 .site-footer__column h2 {
   margin: 0 0 7px;
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: 1.55rem;
   font-weight: 700;
 }
 
 .site-footer__column a {
-  color: #f1f1f1;
+  color: var(--white);
   font-size: 1.15rem;
   font-weight: 400;
   line-height: 1.35;
@@ -2529,7 +3171,7 @@ img {
 .site-footer__about {
   align-self: center;
   max-width: 310px;
-  color: #c4c4c4;
+  color: var(--muted);
   font-size: 0.95rem;
   font-weight: 400;
   line-height: 2;
@@ -2544,7 +3186,7 @@ img {
   width: 100%;
   overflow: hidden;
   padding: 13px 0;
-  background: #181818;
+  background: var(--background);
   direction: ltr;
 }
 
@@ -2576,8 +3218,8 @@ img {
   flex: 0 0 clamp(220px, 26vw, 330px);
   place-items: center;
   border-radius: 999px;
-  color: #f8f8f8;
-  font-family: 'Doran', Tahoma, sans-serif;
+  color: var(--white);
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: clamp(1.4rem, 2.5vw, 2.2rem);
   font-weight: 500;
   letter-spacing: -0.04em;
@@ -2649,14 +3291,6 @@ img {
 
   .auth-link {
     font-size: 1rem;
-  }
-
-  .product-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .product-card {
-    min-height: 310px;
   }
 
   .benefits {
@@ -2934,10 +3568,10 @@ img {
     flex-direction: column;
     gap: 18px;
     padding: 22px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgb(var(--line-rgb) / 0.08);
     border-radius: 20px;
-    background: rgba(32, 32, 32, 0.98);
-    box-shadow: 0 18px 34px rgba(0, 0, 0, 0.28);
+    background: rgb(var(--scrim-rgb) / 0.98);
+    box-shadow: 0 18px 34px rgb(var(--shadow-rgb) / calc(0.28 * var(--shadow-scale)));
   }
 
   .site-nav.is-open {
@@ -2977,50 +3611,6 @@ img {
 
   .section-shell {
     width: min(100% - 32px, 460px);
-  }
-
-  .products {
-    width: min(calc(100% - 32px), 460px);
-  }
-
-  .product-grid {
-    grid-template-columns: 1fr;
-    gap: 18px;
-  }
-
-  .product-card {
-    height: 320px;
-    min-height: 320px;
-    aspect-ratio: auto;
-    border-radius: 22px;
-  }
-
-  .product-card__copy {
-    padding: 18px 10px 0;
-  }
-
-  .product-card h2 {
-    font-size: 1.12rem;
-  }
-
-  .product-card p {
-    max-width: 160px;
-    font-size: 0.72rem;
-    line-height: 1.55;
-  }
-
-  .product-card__image {
-    height: 154px;
-    width: 94%;
-  }
-
-  .product-card__arrow {
-    right: 10px;
-    left: auto;
-    bottom: 10px;
-    width: 32px;
-    height: 32px;
-    border-width: 1.5px;
   }
 
   .benefits {
@@ -3369,9 +3959,9 @@ img {
 
 /* ── تم رنگی دکمه «پایان پومودو» ── */
 :root {
-  --pomodoro-end: #465c4d;
-  --pomodoro-end-bright: #77b787;
-  --pomodoro-end-deep: #2b3d31;
+  --pomodoro-end: var(--green);
+  --pomodoro-end-bright: var(--green-bright);
+  --pomodoro-end-deep: var(--green-deep);
 }
 
 .pomodoro__finish-btn {
@@ -3380,9 +3970,9 @@ img {
   border-radius: 999px;
   background: linear-gradient(135deg, var(--pomodoro-end-bright), var(--pomodoro-end));
   box-shadow: 0 14px 34px rgba(95, 174, 124, 0.38);
-  color: #fff;
+  color: var(--white);
   cursor: pointer;
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: clamp(1.05rem, 1.2vw + 0.5vh, 1.3rem);
   font-weight: 600;
   min-height: 58px;

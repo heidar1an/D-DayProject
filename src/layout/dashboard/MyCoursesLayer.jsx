@@ -59,7 +59,7 @@ function KindFilter({ value, onChange, counts, total }) {
           style={{ '--kind': option.accent }}
         >
           {option.id === 'all' ? (
-            <span className="myc-filter__dot" style={{ background: 'rgba(255,255,255,0.7)' }} />
+            <span className="myc-filter__dot" style={{ background: 'rgb(var(--wash-rgb) / 0.7)' }} />
           ) : (
             <KindIcon name={option.icon} className="h-3.5 w-3.5" style={{ color: option.accent }} />
           )}
@@ -132,7 +132,7 @@ export default function MyCoursesLayer({ onBack, onOpenCourse }) {
     <section
       dir="rtl"
       aria-label="همهٔ دوره‌های من"
-      className="mx-auto w-[var(--content-width)] py-8 text-white md:py-10 [font-family:'Pinar',Tahoma,sans-serif]"
+      className="mx-auto w-[var(--content-width)] py-8 text-white md:py-10 [font-family:'Pinar','Vazir',Tahoma,sans-serif]"
     >
       {/* ── سربرگ ── */}
       <header className="mb-6 flex flex-wrap items-center justify-between gap-4 md:mb-8">
@@ -140,16 +140,16 @@ export default function MyCoursesLayer({ onBack, onOpenCourse }) {
           <button
             type="button"
             onClick={onBack}
-            className="grid h-11 w-11 cursor-pointer place-items-center rounded-full border border-white/10 bg-white/5 text-white transition-all duration-200 hover:-translate-x-0.5 hover:border-[#5b8cc7] hover:bg-[#5b8cc7]/15 hover:text-[#9cc0e8]"
+            className="grid h-11 w-11 cursor-pointer place-items-center rounded-full border border-white/10 bg-white/5 text-white transition-all duration-200 hover:-translate-x-0.5 hover:border-[var(--blue-bright)] hover:bg-[#5b8cc7]/15 hover:text-[var(--blue-soft-ink)]"
             aria-label="بازگشت به داشبورد"
           >
             <BackIcon />
           </button>
           <div>
-            <h1 className="text-2xl text-[#5b8cc7] md:text-3xl [font-family:'Doran',Tahoma,sans-serif]">
+            <h1 className="text-2xl text-[var(--blue-ink)] md:text-3xl [font-family:'Doran','Vazir',Tahoma,sans-serif]">
               همهٔ دوره‌های من
             </h1>
-            <p className="mt-1 text-xs text-[#8a8a8a] md:text-sm">
+            <p className="mt-1 text-xs text-[var(--faint)] md:text-sm">
               دروس درحال انجام و تمام‌شده از درسنامه جامع، میکرو درسنامه و دوره‌های بین‌الملل
             </p>
           </div>
@@ -158,13 +158,13 @@ export default function MyCoursesLayer({ onBack, onOpenCourse }) {
         {totalActive > 0 && (
           <div className="flex flex-wrap items-center gap-2 text-[11px]">
             {inProgressCourses.length > 0 && (
-              <span className="rounded-full border border-[#5b8cc7]/40 bg-[#5b8cc7]/15 px-3 py-1.5 text-[#9cc0e8]">
-                <span className="font-semibold [font-family:'Doran',Tahoma,sans-serif]">{toFa(inProgressCourses.length)}</span> درحال انجام
+              <span className="rounded-full border border-[#5b8cc7]/40 bg-[#5b8cc7]/15 px-3 py-1.5 text-[var(--blue-soft-ink)]">
+                <span className="font-semibold [font-family:'Doran','Vazir',Tahoma,sans-serif]">{toFa(inProgressCourses.length)}</span> درحال انجام
               </span>
             )}
             {completedCourses.length > 0 && (
-              <span className="rounded-full border border-[#77b787]/40 bg-[#77b787]/15 px-3 py-1.5 text-[#a3d8b5]">
-                <span className="font-semibold [font-family:'Doran',Tahoma,sans-serif]">{toFa(completedCourses.length)}</span> تمام‌شده
+              <span className="rounded-full border border-[#77b787]/40 bg-[#77b787]/15 px-3 py-1.5 text-[var(--green-soft-ink)]">
+                <span className="font-semibold [font-family:'Doran','Vazir',Tahoma,sans-serif]">{toFa(completedCourses.length)}</span> تمام‌شده
               </span>
             )}
           </div>
@@ -222,10 +222,10 @@ export default function MyCoursesLayer({ onBack, onOpenCourse }) {
       {/* ── حالت خالی ── */}
       {totalActive === 0 && (
         <div className="rounded-[2.5rem] border border-white/10 bg-[#282828]/80 p-10 text-center md:p-14">
-          <h2 className="text-xl text-white md:text-2xl [font-family:'Doran',Tahoma,sans-serif]">
+          <h2 className="text-xl text-white md:text-2xl [font-family:'Doran','Vazir',Tahoma,sans-serif]">
             {startedCourses.length === 0 ? 'هنوز درسی شروع نکرده‌ای' : 'دوره‌ای از این نوع نداری'}
           </h2>
-          <p className="mt-3 text-sm text-[#8a8a8a]">{emptyMessage}</p>
+          <p className="mt-3 text-sm text-[var(--faint)]">{emptyMessage}</p>
           <CourseKindLegend className="mt-6 justify-center" />
         </div>
       )}

@@ -17,11 +17,15 @@ import checklistIcon from '../images/icons/checklist.png';
 import distanceIcon from '../images/icons/distance.png';
 import OfflinePage from './layout/OfflinePage';
 import SecondaryRegistrationLayout from './layout/SecondaryRegistrationLayout';
+import ThemeToggle from './layout/ThemeToggle';
 import DashboardLayout from './layout/dashboard/DashboardLayout';
 import ArticlesPage from './layout/articles/ArticlesPage';
 import ArticlePage from './layout/articles/ArticlePage';
 import ReadingListPage from './layout/articles/ReadingListPage';
 import AdminLayout from './layout/admin/AdminLayout';
+import PricingPage from './layout/pricing/PricingPage';
+import ProductsPage from './layout/products/ProductsPage';
+import AboutPage from './layout/about/AboutPage';
 import { ArticleCover } from './layout/articles/articlesShared';
 import { avatarSrc } from './layout/dashboard/setting/avatar/avatarOptions';
 import './layout/admin/admin.css';
@@ -44,37 +48,6 @@ import { identify, startTracking, trackLogin, trackLogout, trackSignup } from '.
 import './layout/dashboard/dashboard.css';
 import './layout/admin/analytics/analytics.css';
 import './layout/admin/media/media.css';
-
-const productCards = [
-  {
-    title: 'درسنامه جامع',
-    description: 'یادگیری کامل دروس پزشکی با جدیدترین روش‌های یادگیری',
-    image: purpleBook,
-    accent: 'lavender',
-    href: '#benefits',
-  },
-  {
-    title: 'آزمون علوم پایه',
-    description: 'خودتو در کوتاه‌ترین زمان ممکن برای قبولی در علوم پایه آماده کن',
-    image: brownTest,
-    accent: 'copper',
-    href: '#benefits',
-  },
-  {
-    title: 'بانک تست جامع',
-    description: 'بزرگترین بانک تست کشوری در حوزه دروس پزشکی برای همه',
-    image: greenTest,
-    accent: 'sage',
-    href: '#benefits',
-  },
-  {
-    title: 'دستیار هوشمند',
-    description: 'از دستیار سوال بپرس و خودتو برای امتحانات دانشگاه آماده کن',
-    image: blueRobot,
-    accent: 'sky',
-    href: '#benefits',
-  },
-];
 
 const authHighlights = [
   {
@@ -280,19 +253,19 @@ function GoogleIcon() {
   return (
     <svg className="google-icon" viewBox="0 0 24 24" aria-hidden="true">
       <path
-        fill="#4285F4"
+        fill="var(--blue-ink)"
         d="M21.35 12.27c0-.79-.07-1.55-.2-2.27H12v4.3h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.7 2.91-4.2 2.91-7.42Z"
       />
       <path
-        fill="#34A853"
+        fill="var(--green-ink)"
         d="M12 21.75c2.63 0 4.84-.87 6.45-2.36l-3.14-2.45c-.87.58-1.98.92-3.31.92-2.55 0-4.7-1.72-5.47-4.03H3.28v2.53A9.74 9.74 0 0 0 12 21.75Z"
       />
       <path
-        fill="#FBBC05"
+        fill="var(--gold-ink)"
         d="M6.53 13.83A5.85 5.85 0 0 1 6.22 12c0-.64.11-1.26.31-1.83V7.64H3.28A9.75 9.75 0 0 0 2.25 12c0 1.57.38 3.05 1.03 4.36l3.25-2.53Z"
       />
       <path
-        fill="#EA4335"
+        fill="var(--red-ink)"
         d="M12 6.14c1.43 0 2.71.49 3.72 1.45l2.79-2.79C16.84 3.23 14.63 2.25 12 2.25a9.74 9.74 0 0 0-8.72 5.39l3.25 2.53C7.3 7.86 9.45 6.14 12 6.14Z"
       />
     </svg>
@@ -432,35 +405,39 @@ function SiteHeader({ menuOpen, onMenuOpenChange, userData, onOpenDashboard, onO
         <a className="site-nav__link site-nav__link--products" href="#products" onClick={closeMenu}>
           محصولات
         </a>
-        <a className="site-nav__link site-nav__link--pricing" href="#benefits" onClick={closeMenu}>
+        <a className="site-nav__link site-nav__link--pricing" href="#pricing" onClick={closeMenu}>
           تعرفه‌ها
         </a>
-        <a className="site-nav__link site-nav__link--about" href="#quote" onClick={closeMenu}>
+        <a className="site-nav__link site-nav__link--about" href="#about" onClick={closeMenu}>
           درباره ما
         </a>
       </nav>
 
-      {userData ? (
-        <button
-          className="auth-link auth-link--user"
-          type="button"
-          aria-label={`ورود به داشبورد ${getDisplayName(userData)}`}
-          onClick={onOpenDashboard}
-        >
-          <span className="auth-link__avatar">
-            {avatarSrc(userData.profile?.avatar) ? (
-              <img src={avatarSrc(userData.profile?.avatar)} alt="" />
-            ) : (
-              <HeaderUserIcon />
-            )}
-          </span>
-          <span className="auth-link__name">{getDisplayName(userData)}</span>
-        </button>
-      ) : (
-        <a className="auth-link auth-link--login" href="#auth" onClick={onOpenAuth}>
-          ورود / ثبت نام
-        </a>
-      )}
+      <div className="site-header__actions">
+        <ThemeToggle />
+
+        {userData ? (
+          <button
+            className="auth-link auth-link--user"
+            type="button"
+            aria-label={`ورود به داشبورد ${getDisplayName(userData)}`}
+            onClick={onOpenDashboard}
+          >
+            <span className="auth-link__avatar">
+              {avatarSrc(userData.profile?.avatar) ? (
+                <img src={avatarSrc(userData.profile?.avatar)} alt="" />
+              ) : (
+                <HeaderUserIcon />
+              )}
+            </span>
+            <span className="auth-link__name">{getDisplayName(userData)}</span>
+          </button>
+        ) : (
+          <a className="auth-link auth-link--login" href="#auth" onClick={onOpenAuth}>
+            ورود / ثبت نام
+          </a>
+        )}
+      </div>
     </header>
   );
 }
@@ -691,6 +668,8 @@ function AuthPage({ onBack, onLoginSuccess, onRegisterSuccess }) {
         </section>
 
         <section className="auth-panel" aria-labelledby="auth-title">
+          <ThemeToggle className="auth-panel__theme" />
+
           <button
             className="auth-panel__logo-button"
             type="button"
@@ -832,6 +811,17 @@ function AuthPage({ onBack, onLoginSuccess, onRegisterSuccess }) {
   );
 }
 
+/*
+ * لنگرهای داخلی لایهٔ تعرفه‌ها. نگاشت صریح است، نه حدس پیشوندی — چون پیشوند
+ * `#pr-` با هیچ مسیر دیگری شریک نیست ولی تکیه بر پیشوند همان تلهٔ تأییدشدهٔ
+ * پروژه است (دو آیتم هم‌زمان فعال می‌شوند). هر لنگر تازه باید این‌جا اضافه شود.
+ */
+const PRICING_HASHES = new Set(['#pricing', '#pr-products', '#pr-plans', '#pr-compare']);
+/* صفحهٔ محصولات یک مسیر تک‌لنگر است: `#products` */
+const PRODUCTS_HASHES = new Set(['#products']);
+/* صفحهٔ «دربارهٔ تپش» هم مسیر تک‌لنگر است: `#about` */
+const ABOUT_HASHES = new Set(['#about']);
+
 function getAppRoute() {
   if (typeof window === 'undefined') return 'home';
 
@@ -844,6 +834,9 @@ function getAppRoute() {
   }
   if (hash === '#onboarding') return 'onboarding';
   if (hash === '#auth') return 'auth';
+  if (PRICING_HASHES.has(hash)) return 'pricing';
+  if (PRODUCTS_HASHES.has(hash)) return 'products';
+  if (ABOUT_HASHES.has(hash)) return 'about';
   if (hash === '#articles' || hash.startsWith('#articles/')) return 'articles';
   if (hash === '#admin' || hash.startsWith('#admin/')) return 'admin';
 
@@ -859,6 +852,18 @@ function getAppRoute() {
 
   if (state.tapeshRoute === 'auth' || state.tapeshAuth === true) {
     return 'auth';
+  }
+
+  if (state.tapeshRoute === 'pricing' || state.tapeshPricing === true) {
+    return 'pricing';
+  }
+
+  if (state.tapeshRoute === 'products' || state.tapeshProducts === true) {
+    return 'products';
+  }
+
+  if (state.tapeshRoute === 'about' || state.tapeshAbout === true) {
+    return 'about';
   }
 
   if (state.tapeshRoute === 'articles' || state.tapeshArticles === true) {
@@ -907,7 +912,39 @@ function getRouteState(route, previousState = {}) {
     tapeshOnboarding: route === 'onboarding',
     tapeshDashboard: route === 'dashboard',
     tapeshArticles: route === 'articles',
+    tapeshPricing: route === 'pricing',
+    tapeshProducts: route === 'products',
+    tapeshAbout: route === 'about',
   };
+}
+
+/*
+ * بازگشت از یک لایهٔ مستقل به صفحهٔ اصلی: اگر مقصد یک لنگر بود (مثلاً فوتر)،
+ * همان بخش در صفحهٔ اصلی پیدا و به آن اسکرول می‌شود. چرا دو فریم صبر: لایه‌ای
+ * که بسته شده هنوز دارد unmount می‌شود و اندازهٔ سند تا رندرِ بعدی درست نیست.
+ */
+function useReturnToAnchor(isOpen) {
+  const wasOpenRef = useRef(false);
+
+  useEffect(() => {
+    if (wasOpenRef.current && !isOpen) {
+      const hash = window.location.hash;
+
+      if (hash && hash !== '#top') {
+        const target = document.getElementById(decodeURIComponent(hash.slice(1)));
+
+        if (target) {
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+          });
+        }
+      }
+    }
+
+    wasOpenRef.current = isOpen;
+  }, [isOpen]);
 }
 
 function useOnlineStatus() {
@@ -946,6 +983,18 @@ function App() {
   const [articlesOpen, setArticlesOpen] = useState(
     () => getAppRoute() === 'articles',
   );
+  /* صفحهٔ تعرفه‌ها یک مسیر مستقل است: لایهٔ `#pricing` */
+  const [pricingOpen, setPricingOpen] = useState(
+    () => getAppRoute() === 'pricing',
+  );
+  /* صفحهٔ محصولات هم مسیر مستقل است: لایهٔ `#products` */
+  const [productsOpen, setProductsOpen] = useState(
+    () => getAppRoute() === 'products',
+  );
+  /* صفحهٔ «دربارهٔ تپش» مسیر مستقل است: لایهٔ `#about` */
+  const [aboutOpen, setAboutOpen] = useState(
+    () => getAppRoute() === 'about',
+  );
   /* پنل مدیریت یک مسیر مستقل است و برای ورود به آن به حساب کاربری سایت نیاز نیست */
   const [adminOpen, setAdminOpen] = useState(
     () => getAppRoute() === 'admin',
@@ -953,7 +1002,6 @@ function App() {
   const [articleSlug, setArticleSlug] = useState(() =>
     getAppRoute() === 'articles' ? getArticleSlug() : null,
   );
-  const wasOnArticlesRef = useRef(false);
   const [userData, setUserData] = useState(() => getStoredUser());
   const isOnline = useOnlineStatus();
 
@@ -984,6 +1032,9 @@ function App() {
     setOnboardingOpen(false);
     setDashboardOpen(false);
     setArticlesOpen(false);
+    setPricingOpen(false);
+    setProductsOpen(false);
+    setAboutOpen(false);
     setArticleSlug(null);
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
@@ -1020,21 +1071,38 @@ function App() {
     setOnboardingOpen(false);
     setDashboardOpen(false);
     setArticlesOpen(false);
+    setPricingOpen(false);
+    setProductsOpen(false);
+    setAboutOpen(false);
     setArticleSlug(null);
   };
 
   useEffect(() => {
+    /* آخرین مسیر دیده‌شده — تا اسکرول به بالا فقط «هنگام ورود» به لایه اجرا شود،
+       نه با هر پرش لنگر داخلی همان لایه (مثل #pr-compare). */
+    let previousRoute = getAppRoute();
+
     const syncAuthRoute = () => {
       const route = getAppRoute();
+      const enteredRoute = route !== previousRoute;
+      previousRoute = route;
+
       setAuthOpen(route === 'auth');
       setOnboardingOpen(route === 'onboarding');
       setDashboardOpen(route === 'dashboard');
       setArticlesOpen(route === 'articles');
       setAdminOpen(route === 'admin');
+      setPricingOpen(route === 'pricing');
+      setProductsOpen(route === 'products');
+      setAboutOpen(route === 'about');
       setArticleSlug(route === 'articles' ? getArticleSlug() : null);
 
-      /* ورود به مقالات (فهرست یا مقاله) همیشه از بالای صفحه شروع شود */
-      if (route === 'articles') {
+      /* ورود به مقالات (فهرست یا مقاله) همیشه از بالای صفحه شروع شود؛
+         لایه‌های تعرفه و محصولات فقط وقتی از مسیر دیگری وارد می‌شوند */
+      if (
+        route === 'articles' ||
+        ((route === 'pricing' || route === 'products' || route === 'about') && enteredRoute)
+      ) {
         window.scrollTo({ top: 0, behavior: 'instant' });
       }
     };
@@ -1045,7 +1113,10 @@ function App() {
       currentState.tapeshRoute ||
       currentState.tapeshAuth === true ||
       currentState.tapeshOnboarding === true ||
-      currentState.tapeshDashboard === true;
+      currentState.tapeshDashboard === true ||
+      currentState.tapeshPricing === true ||
+      currentState.tapeshProducts === true ||
+      currentState.tapeshAbout === true;
 
     if (!hasManagedRoute && initialRoute !== 'home') {
       /* آدرس مقصد قبل از نرمال‌سازی محاسبه شود تا اسلاگ مقاله در لینک مستقیم حفظ شود */
@@ -1145,28 +1216,17 @@ function App() {
       observer.disconnect();
       pendingFrames.forEach((frame) => cancelAnimationFrame(frame));
     };
-  }, [authOpen, onboardingOpen, dashboardOpen, articlesOpen, articleSlug]);
+  }, [authOpen, onboardingOpen, dashboardOpen, articlesOpen, articleSlug, pricingOpen, productsOpen, aboutOpen]);
 
-  /* بازگشت از مقالات به صفحه اصلی: اگر مقصد یک لنگر بود (مثلا فوتر)، به همان بخش اسکرول شود */
-  useEffect(() => {
-    if (wasOnArticlesRef.current && !articlesOpen) {
-      const hash = window.location.hash;
-
-      if (hash && hash !== '#top') {
-        const target = document.getElementById(decodeURIComponent(hash.slice(1)));
-
-        if (target) {
-          requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-              target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            });
-          });
-        }
-      }
-    }
-
-    wasOnArticlesRef.current = articlesOpen;
-  }, [articlesOpen]);
+  /*
+   * بازگشت از یک لایه به صفحهٔ اصلی: اگر مقصد یک لنگر بود (مثلاً فوتر)، به
+   * همان بخش اسکرول شود. مقالات، تعرفه‌ها و محصولات دقیقاً همین رفتار را
+   * دارند — یک هوک، تا سه نسخهٔ کپی از این منطق ساخته نشود.
+   */
+  useReturnToAnchor(articlesOpen);
+  useReturnToAnchor(pricingOpen);
+  useReturnToAnchor(productsOpen);
+  useReturnToAnchor(aboutOpen);
 
   const openOnboarding = () => {
     window.history.pushState(
@@ -1178,6 +1238,9 @@ function App() {
     setOnboardingOpen(true);
     setDashboardOpen(false);
     setArticlesOpen(false);
+    setPricingOpen(false);
+    setProductsOpen(false);
+    setAboutOpen(false);
     setArticleSlug(null);
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
@@ -1197,13 +1260,23 @@ function App() {
     setAuthOpen(false);
     setDashboardOpen(false);
     setArticlesOpen(false);
+    setPricingOpen(false);
+    setProductsOpen(false);
+    setAboutOpen(false);
     setArticleSlug(null);
   };
 
-  const openDashboard = (user, { replaceHistory = true } = {}) => {
+  /*
+   * `hash` مقصدِ مشخص داخل داشبورد است (مثلاً لایهٔ یک محصول از بخشِ محصولاتِ
+   * صفحهٔ اصلی). وقتی هست، مقدم است بر مسیرِ پیش‌فرض — وگرنه لایهٔ درخواستی در
+   * نرمال‌سازیِ آدرس گم می‌شد.
+   */
+  const openDashboard = (user, { replaceHistory = true, hash = null } = {}) => {
     setUserData(user);
     const routeState = getRouteState('dashboard');
-    const routeUrl = getRouteUrl('dashboard');
+    const routeUrl = hash
+      ? `${window.location.pathname}${window.location.search}${hash}`
+      : getRouteUrl('dashboard');
 
     /* ورود از هدر صفحه اصلی با pushState انجام می‌شود تا دکمه Back کاربر را به صفحه اصلی برگرداند */
     if (replaceHistory) {
@@ -1216,8 +1289,28 @@ function App() {
     setAuthOpen(false);
     setDashboardOpen(true);
     setArticlesOpen(false);
+    setPricingOpen(false);
+    setProductsOpen(false);
+    setAboutOpen(false);
     setArticleSlug(null);
     window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+
+  /*
+   * CTA صفحه‌های تعرفه و محصولات: کاربر واردشده مستقیم به داشبورد می‌رود و
+   * کاربر تازه به ورود/ثبت‌نام. یک تابع، چون کارت‌های تعرفه، فراخوان پایانی
+   * هر دو صفحه و دکمه‌های محصولات همگی از همین استفاده می‌کنند (بدون منطق
+   * تکراری در UI).
+   */
+  const enterTapesh = (event) => {
+    event?.preventDefault();
+
+    if (userData) {
+      openDashboard(userData, { replaceHistory: false });
+      return;
+    }
+
+    openAuth(event);
   };
 
   const finishOnboarding = async (profile) => {
@@ -1239,8 +1332,44 @@ function App() {
     setAuthOpen(false);
     setOnboardingOpen(false);
     setArticlesOpen(false);
+    setPricingOpen(false);
+    setProductsOpen(false);
+    setAboutOpen(false);
     setArticleSlug(null);
     window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+
+  /*
+   * CTAهای بخش محصولات — مقصدِ هر محصول یک لایهٔ واقعیِ داشبورد است، نه یک
+   * لنگرِ تزیینیِ صفحهٔ اصلی (پیش از این همهٔ کارت‌ها به یک بخشِ بی‌ربط
+   * می‌رفتند). کاربرِ واردنشده ابتدا به ورود هدایت می‌شود؛ همان رفتاری که
+   * لایهٔ تعرفه‌ها دارد.
+   */
+  const openProduct = (event, href) => {
+    event?.preventDefault();
+    closeMenu();
+
+    /*
+     * مقصدهای غیرداشبوردی (مثل «مقالات» که مسیرِ مستقلِ خودش را دارد) نباید به
+     * عنوانِ hashِ داخلیِ داشبورد صدا زده شوند — وگرنه آدرس `#articles` می‌شد
+     * و کاربر به‌جای لایه، به صفحهٔ مقالاتِ سایت می‌رفت.
+     */
+    if (href && !href.startsWith('#dashboard')) {
+      if (href.startsWith('#articles')) {
+        openArticles(event);
+        return;
+      }
+
+      window.location.hash = href;
+      return;
+    }
+
+    if (!userData) {
+      openAuth(event);
+      return;
+    }
+
+    openDashboard(userData, { replaceHistory: false, hash: href });
   };
 
   /* بازگشت از پنل مدیریت به سایت؛ نشست مدیر دست‌نخورده می‌ماند */
@@ -1251,6 +1380,9 @@ function App() {
     setOnboardingOpen(false);
     setDashboardOpen(false);
     setArticlesOpen(false);
+    setPricingOpen(false);
+    setProductsOpen(false);
+    setAboutOpen(false);
     setArticleSlug(null);
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
@@ -1301,6 +1433,68 @@ function App() {
     );
   }
 
+  if (pricingOpen) {
+    return (
+      <div className="app" id="top">
+        <SiteHeader
+          menuOpen={menuOpen}
+          onMenuOpenChange={setMenuOpen}
+          userData={userData}
+          onOpenDashboard={() => openDashboard(userData, { replaceHistory: false })}
+          onOpenAuth={openAuth}
+        />
+
+        <PricingPage hasAccount={Boolean(userData)} onStart={enterTapesh} />
+
+        <SiteFooter onOpenArticles={openArticles} />
+      </div>
+    );
+  }
+
+  if (productsOpen) {
+    return (
+      <div className="app app--scroll" id="top">
+        <SiteHeader
+          menuOpen={menuOpen}
+          onMenuOpenChange={setMenuOpen}
+          userData={userData}
+          onOpenDashboard={() => openDashboard(userData, { replaceHistory: false })}
+          onOpenAuth={openAuth}
+        />
+
+        <ProductsPage
+          hasAccount={Boolean(userData)}
+          onOpenProduct={openProduct}
+          onStart={enterTapesh}
+        />
+
+        <SiteFooter onOpenArticles={openArticles} />
+      </div>
+    );
+  }
+
+  if (aboutOpen) {
+    return (
+      <div className="app app--scroll" id="top">
+        <SiteHeader
+          menuOpen={menuOpen}
+          onMenuOpenChange={setMenuOpen}
+          userData={userData}
+          onOpenDashboard={() => openDashboard(userData, { replaceHistory: false })}
+          onOpenAuth={openAuth}
+        />
+
+        <AboutPage
+          hasAccount={Boolean(userData)}
+          onStart={enterTapesh}
+          onOpenProduct={openProduct}
+        />
+
+        <SiteFooter onOpenArticles={openArticles} />
+      </div>
+    );
+  }
+
   if (articlesOpen) {
     return (
       <div className="app" id="top">
@@ -1344,31 +1538,6 @@ function App() {
               از الان شروع کنید
             </a>
           </div>
-        </section>
-
-        <section
-          className="products section-shell"
-          id="products"
-          data-reveal
-          aria-labelledby="products-title"
-        >
-          <div className="product-grid">
-            {productCards.map((card) => (
-              <article className={`product-card product-card--${card.accent}`} key={card.title}>
-                <div className="product-card__copy">
-                  <h2>{card.title}</h2>
-                  <p>{card.description}</p>
-                </div>
-                <img className="product-card__image" src={card.image} alt="" />
-                <a className="product-card__arrow" href={card.href} aria-label={`مشاهده ${card.title}`}>
-                  <ArrowIcon />
-                </a>
-              </article>
-            ))}
-          </div>
-          <h2 className="sr-only" id="products-title">
-            محصولات و خدمات تپش
-          </h2>
         </section>
 
         <section

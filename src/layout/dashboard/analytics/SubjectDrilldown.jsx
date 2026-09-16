@@ -45,10 +45,10 @@ export function SubjectView({ subjectData, topics, subjectId, onOpenTopic, onBac
           <div className="flex items-center gap-4">
             <RingScore score={subject.accuracy} size={96} accent={subject.accent} label="دقت" />
             <div>
-              <h2 className="text-xl font-extrabold [font-family:'Doran',Tahoma,sans-serif]" style={{ color: subject.accent }}>
+              <h2 className="text-xl font-extrabold [font-family:'Doran','Vazir',Tahoma,sans-serif]" style={{ color: subject.accent }}>
                 {subject.name}
               </h2>
-              <p className="mt-1 text-[12.5px] text-[#999]">
+              <p className="mt-1 text-[12.5px] text-[var(--faint)]">
                 {faNum(subject.attemptCount)} تست از {faNum(subject.questionCount)} سؤال متفاوت · میانگین زمان {formatSeconds(subject.averageTime)}
               </p>
               <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -152,8 +152,8 @@ export function TopicView({ topic, questions, onOpenQuestion, onBack, onStartPra
           <div className="flex items-center gap-4">
             <RingScore score={topic.accuracy} size={96} accent={topic.accuracy >= 70 ? '#61D192' : topic.accuracy >= 55 ? '#e0b45c' : '#e26d6d'} label="دقت" />
             <div>
-              <h2 className="text-lg font-extrabold [font-family:'Doran',Tahoma,sans-serif]">{topic.subtopic ? `${topic.topic} › ${topic.subtopic}` : topic.topic}</h2>
-              <p className="mt-1 text-[12.5px] text-[#999]">
+              <h2 className="text-lg font-extrabold [font-family:'Doran','Vazir',Tahoma,sans-serif]">{topic.subtopic ? `${topic.topic} › ${topic.subtopic}` : topic.topic}</h2>
+              <p className="mt-1 text-[12.5px] text-[var(--faint)]">
                 {faNum(topic.attemptCount)} تست · {faNum(topic.correctCount)} درست · {faNum(topic.wrongCount)} غلط{topic.unansweredCount ? ` · ${faNum(topic.unansweredCount)} نزده` : ''}
               </p>
               <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -167,7 +167,7 @@ export function TopicView({ topic, questions, onOpenQuestion, onBack, onStartPra
               <button
                 type="button"
                 onClick={() => onStartPractice(topic)}
-                className="cursor-pointer rounded-xl bg-[#61D192] px-4 py-2 text-[12.5px] font-bold text-[#12271a] transition-colors hover:bg-[#5ac187] focus-visible:outline-2 focus-visible:outline-white"
+                className="cursor-pointer rounded-xl bg-[var(--green-vivid)] px-4 py-2 text-[12.5px] font-bold text-[#12271a] transition-colors hover:bg-[var(--green-bright)] focus-visible:outline-2 focus-visible:outline-white"
               >
                 تمرین همین مبحث
               </button>
@@ -212,11 +212,11 @@ export function TopicView({ topic, questions, onOpenQuestion, onBack, onStartPra
                   </td>
                   <td data-label="وضعیت مفهوم">
                     {question.consolidating ? (
-                      <span className="an-status" style={{ background: 'rgba(97,209,146,0.13)', color: '#61D192' }}>در حال تثبیت</span>
+                      <span className="an-status" style={{ background: 'rgba(97,209,146,0.13)', color: 'var(--green-ink)' }}>در حال تثبیت</span>
                     ) : question.lastCorrect ? (
-                      <span className="text-[11px] text-[#777]">—</span>
+                      <span className="text-[11px] text-[var(--faint)]">—</span>
                     ) : (
-                      <span className="an-status" style={{ background: 'rgba(226,109,109,0.12)', color: '#e26d6d' }}>نیازمند مرور</span>
+                      <span className="an-status" style={{ background: 'rgba(226,109,109,0.12)', color: 'var(--red-ink)' }}>نیازمند مرور</span>
                     )}
                   </td>
                 </tr>
@@ -243,7 +243,7 @@ function BackButton({ onClick, label = 'بازگشت' }) {
     <button
       type="button"
       onClick={onClick}
-      className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#282828] px-3.5 py-2.5 text-xs text-[#aaa] transition-colors hover:bg-[#333] hover:text-white focus-visible:outline-2 focus-visible:outline-[#61D192]"
+      className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[var(--surface-soft)] px-3.5 py-2.5 text-xs text-[var(--muted)] transition-colors hover:bg-[var(--surface-strong)] hover:text-white focus-visible:outline-2 focus-visible:outline-[var(--green-vivid)]"
     >
       <Icon name="back" className="h-3.5 w-3.5" />
       {label}
@@ -261,12 +261,12 @@ export function QuestionAnalyticsModal({ question, onClose }) {
   return (
     <Modal open={Boolean(question)} onClose={onClose} title="تحلیل سؤال" width="min(44rem, 100%)">
       <div className="max-h-[70vh] overflow-y-auto">
-        <h3 className="text-[14px] font-bold leading-7 [font-family:'Doran',Tahoma,sans-serif]">{questionStemPreview(question)}</h3>
+        <h3 className="text-[14px] font-bold leading-7 [font-family:'Doran','Vazir',Tahoma,sans-serif]">{questionStemPreview(question)}</h3>
         <div className="mt-3 flex flex-wrap gap-2">
           <DifficultyBadge difficulty={question.difficulty} />
-          <span className="an-status" style={{ background: 'rgba(255,255,255,0.05)', color: '#aaa' }}>{question.subjectName}</span>
-          <span className="an-status" style={{ background: 'rgba(255,255,255,0.05)', color: '#aaa' }}>{question.topicPath.join(' › ')}</span>
-          {question.timeline[0]?.year && <span className="an-status" style={{ background: 'rgba(255,255,255,0.05)', color: '#aaa' }}>سال {toFa(question.timeline[0].year)}</span>}
+          <span className="an-status" style={{ background: 'rgb(var(--wash-rgb) / 0.05)', color: 'var(--muted)' }}>{question.subjectName}</span>
+          <span className="an-status" style={{ background: 'rgb(var(--wash-rgb) / 0.05)', color: 'var(--muted)' }}>{question.topicPath.join(' › ')}</span>
+          {question.timeline[0]?.year && <span className="an-status" style={{ background: 'rgb(var(--wash-rgb) / 0.05)', color: 'var(--muted)' }}>سال {toFa(question.timeline[0].year)}</span>}
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -277,7 +277,7 @@ export function QuestionAnalyticsModal({ question, onClose }) {
             { label: 'آخرین تلاش', value: formatFullDate(question.lastAttemptAt) },
           ].map((stat) => (
             <div key={stat.label} className="rounded-xl bg-white/[0.04] px-3 py-2 text-center">
-              <span className="block text-[10.5px] text-[#8a8a8a]">{stat.label}</span>
+              <span className="block text-[10.5px] text-[var(--faint)]">{stat.label}</span>
               <strong className="text-[13px]">{stat.value}</strong>
             </div>
           ))}
@@ -292,7 +292,7 @@ export function QuestionAnalyticsModal({ question, onClose }) {
                 className="an-timeline__dot"
                 title={`${formatFullDate(attempt.timestamp)} · ${attempt.correct ? 'درست' : attempt.correct === false ? 'غلط' : 'بی‌پاسخ'} · ${formatSeconds(attempt.timeSpent)}`}
                 style={{
-                  background: attempt.correct === null || attempt.correct === undefined ? 'rgba(255,255,255,0.05)' : attempt.correct ? 'rgba(97,209,146,0.15)' : 'rgba(226,109,109,0.15)',
+                  background: attempt.correct === null || attempt.correct === undefined ? 'rgb(var(--wash-rgb) / 0.05)' : attempt.correct ? 'rgba(97,209,146,0.15)' : 'rgba(226,109,109,0.15)',
                   borderColor: attempt.correct === null || attempt.correct === undefined ? '#6b6b6b' : attempt.correct ? '#61D192' : '#e26d6d',
                   color: attempt.correct === null || attempt.correct === undefined ? '#999' : attempt.correct ? '#61D192' : '#e26d6d',
                 }}
@@ -303,13 +303,13 @@ export function QuestionAnalyticsModal({ question, onClose }) {
             </div>
           ))}
         </div>
-        <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-[#8a8a8a]">
-          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full" style={{ background: '#61D192' }} />درست</span>
-          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full" style={{ background: '#e26d6d' }} />غلط</span>
-          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full" style={{ background: '#6b6b6b' }} />بی‌پاسخ</span>
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-[var(--faint)]">
+          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full" style={{ background: 'var(--green-vivid)' }} />درست</span>
+          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full" style={{ background: 'var(--red)' }} />غلط</span>
+          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full" style={{ background: 'var(--light-fill)' }} />بی‌پاسخ</span>
         </div>
         {question.consolidating && (
-          <p className="mt-3 rounded-xl bg-[#61D192]/[0.08] px-3.5 py-2.5 text-[12px] text-[#61D192]">
+          <p className="mt-3 rounded-xl bg-[#61D192]/[0.08] px-3.5 py-2.5 text-[12px] text-[var(--green-ink)]">
             این مفهوم در حال تثبیت است: آخرین تلاش‌ها درست بوده‌اند.
           </p>
         )}
@@ -333,7 +333,7 @@ export function QuestionAnalyticsModal({ question, onClose }) {
                 <tr key={attempt.id} style={{ cursor: 'default' }}>
                   <td data-label="#">{toFa(index + 1)}</td>
                   <td data-label="وضعیت">
-                    <span className="an-status" style={{ background: attempt.correct ? 'rgba(97,209,146,0.13)' : attempt.correct === false ? 'rgba(226,109,109,0.12)' : 'rgba(255,255,255,0.05)', color: attempt.correct ? '#61D192' : attempt.correct === false ? '#e26d6d' : '#999' }}>
+                    <span className="an-status" style={{ background: attempt.correct ? 'rgba(97,209,146,0.13)' : attempt.correct === false ? 'rgba(226,109,109,0.12)' : 'rgb(var(--wash-rgb) / 0.05)', color: attempt.correct ? '#61D192' : attempt.correct === false ? '#e26d6d' : '#999' }}>
                       {attempt.correct ? 'درست' : attempt.correct === false ? 'غلط' : 'بی‌پاسخ'}
                     </span>
                   </td>
@@ -347,7 +347,7 @@ export function QuestionAnalyticsModal({ question, onClose }) {
           </table>
         </div>
         {confidenceCells.length === 0 && (
-          <p className="mt-3 text-[11px] text-[#777]">سؤال‌های آینده می‌توانند سطح اطمینانت را هم ثبت کنند تا تحلیل «دانستن» از «فکر کردن به دانستن» تفکیک شود.</p>
+          <p className="mt-3 text-[11px] text-[var(--faint)]">سؤال‌های آینده می‌توانند سطح اطمینانت را هم ثبت کنند تا تحلیل «دانستن» از «فکر کردن به دانستن» تفکیک شود.</p>
         )}
       </div>
     </Modal>

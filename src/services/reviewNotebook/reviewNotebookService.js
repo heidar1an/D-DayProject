@@ -10,11 +10,11 @@ export const G5_STAGES = [
 ];
 
 export const REVIEW_ACTIVITY_TYPES = {
-  learning: { label: 'یادگیری', color: '#5b8cc7' },
-  test: { label: 'آزمون و تست', color: '#77b787' },
-  flashcard: { label: 'فلش‌کارت', color: '#937fcd' },
-  note: { label: 'یادداشت', color: '#ab8e7c' },
-  other: { label: 'سایر', color: '#8b9299' },
+  learning: { label: 'یادگیری', color: 'var(--blue-ink)' },
+  test: { label: 'آزمون و تست', color: 'var(--green-ink)' },
+  flashcard: { label: 'فلش‌کارت', color: 'var(--purple-ink)' },
+  note: { label: 'یادداشت', color: 'var(--copper-ink)' },
+  other: { label: 'سایر', color: 'var(--faint)' },
 };
 
 const storageKey = (userId) => `${STORAGE_PREFIX}:${userId || 'guest'}`;

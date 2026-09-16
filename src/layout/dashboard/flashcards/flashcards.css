@@ -41,13 +41,13 @@
 
 .fc-cloze--hidden {
   background: rgba(91, 140, 199, 0.16);
-  color: #9cc0e8;
+  color: var(--blue-soft-ink);
   box-shadow: inset 0 0 0 1px rgba(91, 140, 199, 0.3);
 }
 
 .fc-cloze--open {
   background: rgba(119, 183, 135, 0.14);
-  color: #9ed3ab;
+  color: var(--green-soft-ink);
   box-shadow: inset 0 0 0 1px rgba(119, 183, 135, 0.3);
 }
 

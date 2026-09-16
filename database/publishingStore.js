@@ -415,7 +415,7 @@ export async function publish({ channelIds, content: rawContent, admin = null, f
         text: content.text,
         media,
         target: channel.chatId,
-        options: { disableNotification: channel.disableNotification },
+        options: { disableNotification: channel.disableNotification, title: content.source?.title ?? '' },
       });
 
       const entry = appendLog({
@@ -451,7 +451,7 @@ export async function publish({ channelIds, content: rawContent, admin = null, f
         target: channel.chatId,
         text: content.text,
         media,
-        options: { disableNotification: channel.disableNotification },
+        options: { disableNotification: channel.disableNotification, title: content.source?.title ?? '' },
       });
 
       const entry = appendLog({
@@ -615,6 +615,8 @@ export function publishingConfig() {
       tokenHint: platform.tokenHint,
       tokenEnv: platform.tokenEnv,
       docsUrl: platform.docsUrl ?? '',
+      setupUrl: platform.setupUrl ?? platform.botFatherUrl ?? '',
+      setupUrlLabel: platform.setupUrlLabel ?? '',
       supports: platform.supports ?? [],
       contentTypes: platform.contentTypes ?? [],
       metrics: platform.metrics ?? [],

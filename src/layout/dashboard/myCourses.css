@@ -20,7 +20,7 @@
   overflow: hidden;
   isolation: isolate;
   justify-content: space-between;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgb(var(--line-rgb) / 0.1);
   border-radius: 1.75rem;
   padding: 1rem;
   text-align: right;
@@ -75,7 +75,7 @@
 /* ── ۱) درسنامه جامع: سطح یک‌دست با هالهٔ نرم (هم‌زبان با dars-card) ── */
 .myc-tile--comprehensive {
   border-color: color-mix(in srgb, var(--accent) 48%, transparent);
-  background: linear-gradient(150deg, rgba(29, 43, 61, 0.95), rgba(15, 24, 34, 0.95));
+  background: linear-gradient(150deg, var(--blue-deep), var(--blue-deep));
   box-shadow: 0 12px 28px -14px color-mix(in srgb, var(--accent) 55%, transparent);
 }
 
@@ -95,13 +95,13 @@
 .myc-tile--micro {
   border-style: dashed;
   border-color: color-mix(in srgb, var(--kind) 55%, transparent);
-  background: linear-gradient(160deg, rgba(35, 30, 52, 0.92), rgba(17, 16, 24, 0.95));
+  background: linear-gradient(160deg, var(--purple-deep), var(--blue-deep));
 }
 
 .myc-tile--micro .myc-tile__texture {
   background-image: repeating-linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.05) 0 1px,
+    rgb(var(--wash-rgb) / 0.05) 0 1px,
     transparent 1px 9px
   );
 }
@@ -114,13 +114,13 @@
 /* ── ۳) دوره‌های بین‌الملل: شبکهٔ خطی + اورب‌های کادری (هم‌زبان با intl) ── */
 .myc-tile--international {
   border-color: color-mix(in srgb, var(--kind) 42%, transparent);
-  background: linear-gradient(150deg, var(--soft, #141b26), #0a0d12 88%);
+  background: linear-gradient(150deg, var(--soft, var(--blue-deep)), var(--blue-deep) 88%);
 }
 
 .myc-tile--international .myc-tile__texture {
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+    linear-gradient(rgb(var(--wash-rgb) / 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--wash-rgb) / 0.045) 1px, transparent 1px);
   background-size: 22px 22px;
   -webkit-mask-image: linear-gradient(to top, #000, transparent 82%);
   mask-image: linear-gradient(to top, #000, transparent 82%);
@@ -164,7 +164,7 @@
   background: color-mix(in srgb, var(--kind) 16%, transparent);
   padding: 0.28rem 0.55rem;
   color: color-mix(in srgb, var(--kind) 70%, white);
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: 0.6rem;
   line-height: 1.4;
   white-space: nowrap;
@@ -172,10 +172,10 @@
 
 .myc-tile__status {
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgb(var(--wash-rgb) / 0.1);
   padding: 0.28rem 0.55rem;
-  color: rgba(255, 255, 255, 0.72);
-  font-family: 'Doran', Tahoma, sans-serif;
+  color: rgb(var(--ink-rgb) / 0.72);
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: 0.6rem;
   line-height: 1.4;
   white-space: nowrap;
@@ -183,14 +183,14 @@
 
 .myc-tile__status--done {
   background: rgba(119, 183, 135, 0.18);
-  color: #a3d8b5;
+  color: var(--green-soft-ink);
 }
 
 /* ── متن کارت ───────────────────────────────────────────────────── */
 .myc-tile__title {
   display: block;
-  color: #fff;
-  font-family: 'Doran', Tahoma, sans-serif;
+  color: var(--white);
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: 0.875rem;
   line-height: 1.75rem;
 }
@@ -205,7 +205,7 @@
   display: block;
   margin-top: 0.15rem;
   overflow: hidden;
-  color: #9a9a9a;
+  color: var(--faint);
   font-size: 0.625rem;
   line-height: 1.4rem;
   text-overflow: ellipsis;
@@ -224,7 +224,7 @@
   justify-content: space-between;
   gap: 0.4rem;
   margin-top: 0.35rem;
-  color: #9aa5b6;
+  color: var(--blue-ink);
   font-size: 0.625rem;
 }
 
@@ -235,7 +235,7 @@
 }
 
 .myc-tile__percent {
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-weight: 600;
   color: var(--accent);
 }
@@ -249,8 +249,8 @@
   margin-top: 0.6rem;
   border-radius: 0.75rem;
   padding: 0.5rem 0.75rem;
-  color: #fff;
-  font-family: 'Doran', Tahoma, sans-serif;
+  color: var(--white);
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: 0.6875rem;
   transition:
     filter 0.2s ease,
@@ -277,7 +277,7 @@
   margin-top: 0.6rem;
   overflow: hidden;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgb(var(--wash-rgb) / 0.1);
 }
 
 .myc-meter__fill {
@@ -287,7 +287,7 @@
   background: linear-gradient(
     to left,
     var(--accent),
-    color-mix(in srgb, var(--accent) 55%, #937fcd)
+    color-mix(in srgb, var(--accent) 55%, var(--purple-bright))
   );
 }
 
@@ -303,7 +303,7 @@
   width: 0.5rem;
   height: 0.5rem;
   border-radius: 50%;
-  background: #fff;
+  background: var(--pure);
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 70%, transparent);
   transform: translateY(-50%);
 }
@@ -320,7 +320,7 @@
 .myc-meter--segments i {
   flex: 1;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.12);
+  background: rgb(var(--wash-rgb) / 0.12);
   transition: background 0.2s ease;
 }
 
@@ -333,12 +333,12 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgb(var(--line-rgb) / 0.1);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgb(var(--wash-rgb) / 0.04);
   padding: 0.4rem 0.8rem;
-  color: rgba(255, 255, 255, 0.65);
-  font-family: 'Doran', Tahoma, sans-serif;
+  color: rgb(var(--ink-rgb) / 0.65);
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: 0.6875rem;
   white-space: nowrap;
   transition:
@@ -355,8 +355,8 @@
 }
 
 .myc-filter:hover {
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.25);
+  color: var(--white);
+  border-color: rgb(var(--line-rgb) / 0.25);
 }
 
 .myc-filter__dot {
@@ -378,7 +378,7 @@
 }
 
 .myc-filter__count {
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   opacity: 0.7;
 }
 
@@ -388,8 +388,8 @@
   align-items: center;
   gap: 0.4rem;
   margin-bottom: 0.9rem;
-  color: rgba(255, 255, 255, 0.78);
-  font-family: 'Doran', Tahoma, sans-serif;
+  color: rgb(var(--ink-rgb) / 0.78);
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: 0.8125rem;
 }
 
@@ -402,5 +402,5 @@
 .myc-group__rule {
   flex: 1;
   height: 1px;
-  background: linear-gradient(to left, rgba(255, 255, 255, 0.14), transparent);
+  background: linear-gradient(to left, rgb(var(--wash-rgb) / 0.14), transparent);
 }

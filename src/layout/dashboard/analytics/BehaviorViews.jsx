@@ -54,8 +54,8 @@ export function ErrorView({ errors, patterns, onOpenQuestion }) {
             ))}
             {unmarked && unmarked.count > 0 && (
               <div className="rounded-2xl border border-dashed border-white/12 bg-white/[0.02] p-3.5">
-                <p className="text-[12.5px] text-[#c9c9c9]">
-                  <strong className="text-[#999]">{faNum(unmarked.count)} غلط ثبت‌نشده</strong> — دلیلش مشخص نشده؛ «احتمالاً نیازمند بررسی».
+                <p className="text-[12.5px] text-[var(--muted)]">
+                  <strong className="text-[var(--faint)]">{faNum(unmarked.count)} غلط ثبت‌نشده</strong> — دلیلش مشخص نشده؛ «احتمالاً نیازمند بررسی».
                   هنگام مرور کارنامه‌ها می‌توانی نوع خطا را برایشان ثبت کنی تا این تحلیل دقیق‌تر شود.
                 </p>
               </div>
@@ -67,12 +67,12 @@ export function ErrorView({ errors, patterns, onOpenQuestion }) {
       {/* الگوی استنباطی جانبی — صریحاً «احتمالی» */}
       {errors.inferred.fastWrong > 0 && (
         <Card title="میل به پاسخ تند" icon="bolt" className="dashboard-layer-reveal">
-          <p className="text-[12.5px] leading-6 text-[#c9c9c9]">
+          <p className="text-[12.5px] leading-6 text-[var(--muted)]">
             {faNum(errors.inferred.fastWrong)} غلط از {faNum(errors.totalWrong)} غلط تو در کمتر از {toFa(FAST_WRONG_LIMIT)} ثانیه داده شده
             ({formatPercent(errors.inferred.fastWrongShare)}). این فقط یک الگوی آماری است؛ بخشی از آن‌ها احتمالاً بی‌دقتی است، اما با مرور خودت قابل تأیید است.
           </p>
           {errors.inferred.slowWrong > 0 && (
-            <p className="mt-2 text-[12px] text-[#8a8a8a]">در مقابل، {faNum(errors.inferred.slowWrong)} غلط هم بیش از دو برابر زمان متعارف وقت گرفته — نشانهٔ سؤال‌هایی که مسیر حل‌شان مشخص نبود.</p>
+            <p className="mt-2 text-[12px] text-[var(--faint)]">در مقابل، {faNum(errors.inferred.slowWrong)} غلط هم بیش از دو برابر زمان متعارف وقت گرفته — نشانهٔ سؤال‌هایی که مسیر حل‌شان مشخص نبود.</p>
           )}
         </Card>
       )}
@@ -81,10 +81,10 @@ export function ErrorView({ errors, patterns, onOpenQuestion }) {
         <Card title="الگوهای رفتاری شناسایی‌شده" icon="spark" hint="هر الگو با حداقل نمونهٔ لازم و شواهدش" className="dashboard-layer-reveal">
           <div className="space-y-3">
             {patterns.map((pattern) => (
-              <div key={pattern.id} className="rounded-2xl border border-white/8 bg-[#2a2a2d] p-4">
-                <h3 className="text-[13px] font-bold text-[#e0b45c]">{pattern.title}</h3>
-                <p className="mt-1 text-[12px] leading-6 text-[#c9c9c9]">{pattern.description}</p>
-                <p className="an-evidence mt-2 text-[11px] text-[#8a8a8a]"><span className="an-evidence__tag">شواهد</span>{pattern.evidence}</p>
+              <div key={pattern.id} className="rounded-2xl border border-white/8 bg-[var(--surface-soft)] p-4">
+                <h3 className="text-[13px] font-bold text-[var(--gold-ink)]">{pattern.title}</h3>
+                <p className="mt-1 text-[12px] leading-6 text-[var(--muted)]">{pattern.description}</p>
+                <p className="an-evidence mt-2 text-[11px] text-[var(--faint)]"><span className="an-evidence__tag">شواهد</span>{pattern.evidence}</p>
               </div>
             ))}
           </div>
@@ -111,9 +111,9 @@ export function TimeView({ time, questionPool }) {
             { label: 'سریع‌ترین', value: formatSeconds(time.fastest) },
             { label: 'کندترین', value: formatSeconds(time.slowest) },
           ].map((stat) => (
-            <div key={stat.label} className="rounded-2xl border border-white/8 bg-[#2a2a2d] px-4 py-3.5 text-center">
-              <span className="block text-[11px] text-[#8a8a8a]">{stat.label}</span>
-              <strong className="mt-0.5 block text-lg font-extrabold [font-family:'Doran',Tahoma,sans-serif]">{stat.value}</strong>
+            <div key={stat.label} className="rounded-2xl border border-white/8 bg-[var(--surface-soft)] px-4 py-3.5 text-center">
+              <span className="block text-[11px] text-[var(--faint)]">{stat.label}</span>
+              <strong className="mt-0.5 block text-lg font-extrabold [font-family:'Doran','Vazir',Tahoma,sans-serif]">{stat.value}</strong>
             </div>
           ))}
         </div>
@@ -142,14 +142,14 @@ export function TimeView({ time, questionPool }) {
           const normal = time.byBucket.find((bucket) => bucket.key === 'normal');
           if (fast && normal && fast.accuracy !== null && normal.accuracy !== null && normal.accuracy - fast.accuracy >= 10) {
             return (
-              <p className="mt-4 border-t border-white/6 pt-3 text-[12.5px] leading-6 text-[#c9c9c9]">
+              <p className="mt-4 border-t border-white/6 pt-3 text-[12.5px] leading-6 text-[var(--muted)]">
                 دقت تست‌های تند تو ({formatPercent(fast.accuracy)}) از تست‌های نرمال ({formatPercent(normal.accuracy)}) پایین‌تر است؛
                 احتمالاً سرعت بالا بخشی از غلط‌هایت را می‌سازد — ریتم پاسخ را کمی آرام‌تر کن.
               </p>
             );
           }
           if (fast && normal && fast.accuracy !== null && fast.accuracy >= normal.accuracy - 3) {
-            return <p className="mt-4 border-t border-white/6 pt-3 text-[12.5px] leading-6 text-[#c9c9c9]">در تست‌های سریع هم دقتت حفظ می‌شود؛ نشانهٔ تسلط واقعی روی این سؤال‌ها.</p>;
+            return <p className="mt-4 border-t border-white/6 pt-3 text-[12.5px] leading-6 text-[var(--muted)]">در تست‌های سریع هم دقتت حفظ می‌شود؛ نشانهٔ تسلط واقعی روی این سؤال‌ها.</p>;
           }
           return null;
         })()}
@@ -176,11 +176,11 @@ export function TimeView({ time, questionPool }) {
       <div className="grid gap-4 lg:grid-cols-2">
         <Card title="تست‌هایی که بیش از حد سریع پاسخ دادی" icon="bolt" className="dashboard-layer-reveal">
           {time.rushed.length === 0 ? (
-            <p className="text-[12px] text-[#8a8a8a]">موردی نیست؛ یا خیلی تند جواب نمی‌دهی یا غلط‌هایت تند نیستند. 👌</p>
+            <p className="text-[12px] text-[var(--faint)]">موردی نیست؛ یا خیلی تند جواب نمی‌دهی یا غلط‌هایت تند نیستند. 👌</p>
           ) : (
             <>
-              <p className="mb-3 text-[12.5px] leading-6 text-[#c9c9c9]">
-                <strong className="text-[#e0b45c]">{faNum(time.rushed.length)} تست</strong> زیر ۱۰ ثانیه پاسخ داده‌ای که غلط از آب درآمده‌اند؛
+              <p className="mb-3 text-[12.5px] leading-6 text-[var(--muted)]">
+                <strong className="text-[var(--gold-ink)]">{faNum(time.rushed.length)} تست</strong> زیر ۱۰ ثانیه پاسخ داده‌ای که غلط از آب درآمده‌اند؛
                 الگوی کلاسیک بی‌دقتی — ارزش دوباره خواندن دارند.
               </p>
               <QuestionChips items={time.rushed} onOpen={undefined} accent="#e0b45c" />
@@ -190,11 +190,11 @@ export function TimeView({ time, questionPool }) {
 
         <Card title="تست‌هایی که بیش از حد زمان بردند" icon="alert" className="dashboard-layer-reveal">
           {time.overtime.length === 0 ? (
-            <p className="text-[12px] text-[#8a8a8a]">همهٔ پاسخ‌هایت در بازهٔ متعارف زمانی‌اند.</p>
+            <p className="text-[12px] text-[var(--faint)]">همهٔ پاسخ‌هایت در بازهٔ متعارف زمانی‌اند.</p>
           ) : (
             <>
-              <p className="mb-3 text-[12.5px] leading-6 text-[#c9c9c9]">
-                <strong className="text-[#e26d6d]">{faNum(time.overtime.length)} تست</strong> بیش از دو برابر زمان متعارف وقت برده‌اند؛
+              <p className="mb-3 text-[12.5px] leading-6 text-[var(--muted)]">
+                <strong className="text-[var(--red-ink)]">{faNum(time.overtime.length)} تست</strong> بیش از دو برابر زمان متعارف وقت برده‌اند؛
                 در آزمون، این سؤال‌ها باید شناسایی و رد شوند تا زمان بقیه حفظ شود.
               </p>
               <QuestionChips items={time.overtime} accent="#e26d6d" />
@@ -219,7 +219,7 @@ function QuestionChips({ items, accent }) {
           {attempt.topicPath?.[0] ?? 'سؤال'} · {faNum(attempt.timeSpent)}ث
         </span>
       ))}
-      {items.length > 18 && <span className="self-center text-[11px] text-[#777]">و {faNum(items.length - 18)} مورد دیگر…</span>}
+      {items.length > 18 && <span className="self-center text-[11px] text-[var(--faint)]">و {faNum(items.length - 18)} مورد دیگر…</span>}
     </div>
   );
 }
@@ -286,16 +286,16 @@ export function ConfidenceView({ confidence }) {
                   <Icon name={quadrant.icon} className="h-4 w-4" />
                   {quadrant.title}
                 </h3>
-                <strong className="text-xl font-extrabold [font-family:'Doran',Tahoma,sans-serif]" style={{ color: quadrant.accent }}>
+                <strong className="text-xl font-extrabold [font-family:'Doran','Vazir',Tahoma,sans-serif]" style={{ color: quadrant.accent }}>
                   {faNum(quadrants[quadrant.key])}
                 </strong>
               </div>
-              <p className="text-[11.5px] leading-5 text-[#9a9a9a]">{quadrant.note}</p>
+              <p className="text-[11.5px] leading-5 text-[var(--faint)]">{quadrant.note}</p>
             </div>
           ))}
         </div>
         {confidence.calibration !== null && (
-          <p className="mt-4 border-t border-white/6 pt-3 text-[12.5px] leading-6 text-[#c9c9c9]">
+          <p className="mt-4 border-t border-white/6 pt-3 text-[12.5px] leading-6 text-[var(--muted)]">
             کالیبراسیون اطمینان تو: از پاسخ‌هایی که «مطمئن» ثبت کردی، <strong style={{ color: confidence.calibration >= 80 ? '#61D192' : confidence.calibration >= 65 ? '#e0b45c' : '#e26d6d' }}>{formatPercent(confidence.calibration)}</strong> درست بوده‌اند.
             {confidence.calibration >= 80
               ? ' اطمینانت به دانشت نزدیک است — این یعنی خودشناسی آزمونی خوب.'
@@ -310,13 +310,13 @@ export function ConfidenceView({ confidence }) {
         <Card title="تمرکز این الگوها کجاست؟" icon="puzzle" className="dashboard-layer-reveal">
           <div className="space-y-2.5">
             {confidence.dangerousByTopic && (
-              <p className="text-[12.5px] leading-6 text-[#c9c9c9]">
-                پاسخ‌های «مطمئن اما غلط» تو بیشتر در مبحث <strong className="text-[#e26d6d]">{confidence.dangerousByTopic.topic}</strong> متمرکزند ({faNum(confidence.dangerousByTopic.count)} مورد).
+              <p className="text-[12.5px] leading-6 text-[var(--muted)]">
+                پاسخ‌های «مطمئن اما غلط» تو بیشتر در مبحث <strong className="text-[var(--red-ink)]">{confidence.dangerousByTopic.topic}</strong> متمرکزند ({faNum(confidence.dangerousByTopic.count)} مورد).
               </p>
             )}
             {confidence.fragileByTopic && (
-              <p className="text-[12.5px] leading-6 text-[#c9c9c9]">
-                دانش شکنندهٔ تو (نامطمئن اما درست) بیشتر در مبحث <strong className="text-[#e0b45c]">{confidence.fragileByTopic.topic}</strong> است ({faNum(confidence.fragileByTopic.count)} مورد) — با یک تمرین کوتاه محکم می‌شود.
+              <p className="text-[12.5px] leading-6 text-[var(--muted)]">
+                دانش شکنندهٔ تو (نامطمئن اما درست) بیشتر در مبحث <strong className="text-[var(--gold-ink)]">{confidence.fragileByTopic.topic}</strong> است ({faNum(confidence.fragileByTopic.count)} مورد) — با یک تمرین کوتاه محکم می‌شود.
               </p>
             )}
           </div>
@@ -343,15 +343,15 @@ export function UnansweredView({ unanswered, kpis }) {
             { label: 'اصلاً باز نشده', value: faNum(unanswered.notAttempted), sub: 'Not Attempted' },
             { label: 'در آزمون‌ها', value: faNum(unanswered.inExams), sub: 'نشانهٔ فشار زمان' },
           ].map((stat) => (
-            <div key={stat.label} className="rounded-2xl border border-white/8 bg-[#2a2a2d] px-4 py-3.5 text-center">
-              <span className="block text-[11px] text-[#8a8a8a]">{stat.label}</span>
-              <strong className="mt-0.5 block text-xl font-extrabold [font-family:'Doran',Tahoma,sans-serif]">{stat.value}</strong>
-              <span className="block text-[10.5px] text-[#777]">{stat.sub}</span>
+            <div key={stat.label} className="rounded-2xl border border-white/8 bg-[var(--surface-soft)] px-4 py-3.5 text-center">
+              <span className="block text-[11px] text-[var(--faint)]">{stat.label}</span>
+              <strong className="mt-0.5 block text-xl font-extrabold [font-family:'Doran','Vazir',Tahoma,sans-serif]">{stat.value}</strong>
+              <span className="block text-[10.5px] text-[var(--faint)]">{stat.sub}</span>
             </div>
           ))}
         </div>
         {unanswered.inExams > 0 && (
-          <p className="mt-4 border-t border-white/6 pt-3 text-[12.5px] leading-6 text-[#c9c9c9]">
+          <p className="mt-4 border-t border-white/6 pt-3 text-[12.5px] leading-6 text-[var(--muted)]">
             بی‌پاسخ‌های آزمونی معمولاً مسئلهٔ «ندانستن» نیستند، مسئلهٔ مدیریت زمان‌اند. راه‌حل: در آزمون اول پاسخ‌های مطمئن را بزن، بعد برگرد.
           </p>
         )}
@@ -361,9 +361,9 @@ export function UnansweredView({ unanswered, kpis }) {
         <Card title="بی‌پاسخ‌ها کجا متمرکزند؟" icon="grid" className="dashboard-layer-reveal">
           <div className="space-y-3">
             {unanswered.topTopics.map((entry) => (
-              <div key={entry.topic} className="flex items-center justify-between gap-3 rounded-2xl border border-white/8 bg-[#2a2a2d] px-4 py-3">
+              <div key={entry.topic} className="flex items-center justify-between gap-3 rounded-2xl border border-white/8 bg-[var(--surface-soft)] px-4 py-3">
                 <span className="text-[12.5px]">{entry.topic}</span>
-                <strong className="text-[13px] text-[#e0b45c]">{faNum(entry.count)} سؤال</strong>
+                <strong className="text-[13px] text-[var(--gold-ink)]">{faNum(entry.count)} سؤال</strong>
               </div>
             ))}
           </div>
@@ -412,7 +412,7 @@ export function DifficultyView({ difficulty }) {
           ))}
         </div>
         {difficulty.gap !== null && Math.abs(difficulty.gap) >= 15 && (
-          <p className="mt-4 border-t border-white/6 pt-3 text-[12.5px] leading-6 text-[#c9c9c9]">
+          <p className="mt-4 border-t border-white/6 pt-3 text-[12.5px] leading-6 text-[var(--muted)]">
             {difficulty.gap > 0
               ? `عملکردت در تست‌های ساده‌تر ${toFa(Math.abs(Math.round(difficulty.gap)))} واحد بهتر از سخت‌هاست — طبیعی است، اما با تمرین پله‌ای سطح سخت این فاصله بسته می‌شود.`
               : `جالب است: دقت تو در سؤال‌های سخت‌تر حتی از ساده‌ها بالاتر است؛ نشانهٔ مفهومی بودن سبک مطالعه‌ات.`}

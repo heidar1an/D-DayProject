@@ -49,26 +49,26 @@ function ExplanationPanel({ question, userAnswer, myAttempts }) {
   const explanation = question.explanation ?? {};
 
   return (
-    <section className="tb-reveal overflow-hidden rounded-[2rem] border border-[#61D192]/20 bg-[#20241f] p-5 md:p-6" aria-label="پاسخ تشریحی">
+    <section className="tb-reveal overflow-hidden rounded-[2rem] border border-[#61D192]/20 bg-[var(--green-deep)] p-5 md:p-6" aria-label="پاسخ تشریحی">
       <header className="flex flex-wrap items-center gap-2 border-b border-white/8 pb-3">
-        <span className="grid h-7 w-7 place-items-center rounded-xl bg-[#61D192]/15 text-[#61D192]">
+        <span className="grid h-7 w-7 place-items-center rounded-xl bg-[#61D192]/15 text-[var(--green-ink)]">
           <Icon name="book" className="h-4 w-4" />
         </span>
-        <h3 className="text-sm font-bold [font-family:'Doran',Tahoma,sans-serif]">تحلیل و پاسخ تشریحی</h3>
+        <h3 className="text-sm font-bold [font-family:'Doran','Vazir',Tahoma,sans-serif]">تحلیل و پاسخ تشریحی</h3>
       </header>
 
-      <div className="mt-4 space-y-4 text-[13.5px] leading-7 text-[#d5d5d5]">
+      <div className="mt-4 space-y-4 text-[13.5px] leading-7 text-[var(--muted)]">
         {explanation.summary && (
           <p>
-            <strong className="text-[#61D192]">چرا؟ </strong>
+            <strong className="text-[var(--green-ink)]">چرا؟ </strong>
             {explanation.summary}
           </p>
         )}
-        {explanation.deep && <p className="text-[#c5c5c5]">{explanation.deep}</p>}
+        {explanation.deep && <p className="text-[var(--muted)]">{explanation.deep}</p>}
 
         {explanation.keyPoint && (
           <div className="rounded-2xl border border-[#937fcd]/25 bg-[#937fcd]/[0.08] p-4">
-            <strong className="flex items-center gap-1.5 text-[13px] text-[#c9bdf0]">
+            <strong className="flex items-center gap-1.5 text-[13px] text-[var(--purple-soft-ink)]">
               <Icon name="spark" className="h-3.5 w-3.5" />
               نکتهٔ مهم
             </strong>
@@ -78,7 +78,7 @@ function ExplanationPanel({ question, userAnswer, myAttempts }) {
 
         {explanation.trap && (
           <div className="rounded-2xl border border-[#e0b45c]/25 bg-[#e0b45c]/[0.07] p-4">
-            <strong className="flex items-center gap-1.5 text-[13px] text-[#e0b45c]">
+            <strong className="flex items-center gap-1.5 text-[13px] text-[var(--gold-ink)]">
               <Icon name="alert" className="h-3.5 w-3.5" />
               دام تستی
             </strong>
@@ -88,11 +88,11 @@ function ExplanationPanel({ question, userAnswer, myAttempts }) {
 
         {explanation.whyWrong?.length > 0 && (
           <div>
-            <strong className="text-[13px] text-[#bbb]">چرا گزینه‌های دیگر غلط‌اند؟</strong>
+            <strong className="text-[13px] text-[var(--muted)]">چرا گزینه‌های دیگر غلط‌اند؟</strong>
             <ul className="mt-2 space-y-2">
               {explanation.whyWrong.map((item) => (
                 <li key={item.index} className="flex gap-2.5 rounded-xl bg-white/[0.04] px-3.5 py-2.5">
-                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-lg bg-[#e26d6d]/15 text-[11px] font-bold text-[#ef9196]">
+                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-lg bg-[#e26d6d]/15 text-[11px] font-bold text-[var(--red-ink)]">
                     {OPTION_KEYS[item.index] ?? toFa(item.index + 1)}
                   </span>
                   <span className="min-w-0">{item.text}</span>
@@ -106,13 +106,13 @@ function ExplanationPanel({ question, userAnswer, myAttempts }) {
       {/* آمار سؤال — جامعه + خود کاربر */}
       {stats.solves != null && (
         <footer className="mt-5 border-t border-white/8 pt-4">
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[11.5px] text-[#9a9a9a]">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[11.5px] text-[var(--faint)]">
             <span className="flex items-center gap-1.5">
               <Icon name="users" className="h-3.5 w-3.5" />
               {faNum(stats.solves)} نفر حل کرده‌اند
             </span>
             <span className="flex items-center gap-1.5">
-              <Icon name="check" className="h-3.5 w-3.5 text-[#61D192]" />
+              <Icon name="check" className="h-3.5 w-3.5 text-[var(--green-ink)]" />
               {toFa(stats.correctPercent)}٪ پاسخ صحیح
             </span>
             <span className="flex items-center gap-1.5">
@@ -133,25 +133,25 @@ function ExplanationPanel({ question, userAnswer, myAttempts }) {
               const isCorrect = index === question.correctAnswer;
               return (
                 <div key={index} className="flex items-center gap-2.5">
-                  <span className={`w-5 shrink-0 text-center text-[11px] font-bold [font-family:'Doran',Tahoma,sans-serif] ${isCorrect ? 'text-[#61D192]' : 'text-[#888]'}`}>
+                  <span className={`w-5 shrink-0 text-center text-[11px] font-bold [font-family:'Doran','Vazir',Tahoma,sans-serif] ${isCorrect ? 'text-[var(--green-ink)]' : 'text-[var(--faint)]'}`}>
                     {OPTION_KEYS[index]}
                   </span>
                   <span className="tb-bar flex-1" style={{ height: '7px' }}>
                     <span
                       className="tb-bar__fill block"
-                      style={{ width: `${percent}%`, background: isCorrect ? '#61D192' : 'rgba(255,255,255,0.22)' }}
+                      style={{ width: `${percent}%`, background: isCorrect ? '#61D192' : 'rgb(var(--wash-rgb) / 0.22)' }}
                     />
                   </span>
-                  <span className="w-10 shrink-0 text-left text-[11px] text-[#9a9a9a]">{toFa(percent)}٪</span>
+                  <span className="w-10 shrink-0 text-left text-[11px] text-[var(--faint)]">{toFa(percent)}٪</span>
                   {userAnswer?.selected === index && (
-                    <span className="rounded-full bg-white/8 px-2 py-0.5 text-[9.5px] text-[#bbb]">انتخاب تو</span>
+                    <span className="rounded-full bg-white/8 px-2 py-0.5 text-[9.5px] text-[var(--muted)]">انتخاب تو</span>
                   )}
                 </div>
               );
             })}
           </div>
 
-          <p className="mt-3.5 text-[11px] text-[#777]">
+          <p className="mt-3.5 text-[11px] text-[var(--faint)]">
             منبع: {SOURCES[question.source]?.label ?? '—'} · سال {toFa(question.year)}
           </p>
         </footer>
@@ -175,11 +175,11 @@ function ReportDialog({ userId, questionId, onClose }) {
     <Modal open onClose={sent ? onClose : () => {}} title="گزارش مشکل سؤال" width="min(26rem, 100%)">
       {sent ? (
         <div className="py-4 text-center">
-          <span className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-full bg-[#61D192]/15 text-[#61D192]">
+          <span className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-full bg-[#61D192]/15 text-[var(--green-ink)]">
             <Icon name="check" className="h-6 w-6" />
           </span>
-          <strong className="block [font-family:'Doran',Tahoma,sans-serif]">گزارشت ثبت شد</strong>
-          <p className="mt-1.5 text-sm leading-6 text-[#8a8a8a]">تیم محتوای تپش بررسی می‌کند؛ ممنون که کمک می‌کنی بانک سؤال بهتر شود.</p>
+          <strong className="block [font-family:'Doran','Vazir',Tahoma,sans-serif]">گزارشت ثبت شد</strong>
+          <p className="mt-1.5 text-sm leading-6 text-[var(--faint)]">تیم محتوای تپش بررسی می‌کند؛ ممنون که کمک می‌کنی بانک سؤال بهتر شود.</p>
           <button
             type="button"
             onClick={onClose}
@@ -190,11 +190,11 @@ function ReportDialog({ userId, questionId, onClose }) {
         </div>
       ) : (
         <>
-          <h3 className="flex items-center gap-2 text-base [font-family:'Doran',Tahoma,sans-serif]">
-            <Icon name="flag" className="h-4.5 w-4.5 text-[#e0b45c]" />
+          <h3 className="flex items-center gap-2 text-base [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+            <Icon name="flag" className="h-4.5 w-4.5 text-[var(--gold-ink)]" />
             گزارش مشکل سؤال
           </h3>
-          <p className="mt-1.5 text-xs text-[#8a8a8a]">شناسه سؤال: {questionId}</p>
+          <p className="mt-1.5 text-xs text-[var(--faint)]">شناسه سؤال: {questionId}</p>
           <fieldset className="mt-4 grid grid-cols-2 gap-1.5">
             <legend className="sr-only">دلیل گزارش</legend>
             {REPORT_REASONS.map((item) => (
@@ -204,7 +204,7 @@ function ReportDialog({ userId, questionId, onClose }) {
                 onClick={() => setReason(item)}
                 aria-pressed={reason === item}
                 className={`cursor-pointer rounded-xl border px-3 py-2.5 text-[12.5px] transition-colors ${
-                  reason === item ? 'border-[#937fcd]/60 bg-[#937fcd]/10 text-white' : 'border-white/8 text-[#bbb] hover:border-white/20'
+                  reason === item ? 'border-[#937fcd]/60 bg-[#937fcd]/10 text-white' : 'border-white/8 text-[var(--muted)] hover:border-white/20'
                 }`}
               >
                 {item}
@@ -216,13 +216,13 @@ function ReportDialog({ userId, questionId, onClose }) {
             onChange={(event) => setNote(event.target.value)}
             placeholder="توضیح اختیاری…"
             rows={2}
-            className="mt-3 w-full resize-none rounded-xl border border-white/10 bg-[#2a2a2a] px-3.5 py-2.5 text-sm text-white placeholder:text-[#666] focus:border-[#61D192]/50 focus:outline-none"
+            className="mt-3 w-full resize-none rounded-xl border border-white/10 bg-[var(--surface-soft)] px-3.5 py-2.5 text-sm text-white placeholder:text-[var(--ghost)] focus:border-[#61D192]/50 focus:outline-none"
           />
           <div className="mt-4 flex gap-2">
             <button
               type="button"
               onClick={submit}
-              className="flex-1 cursor-pointer rounded-xl bg-[#937fcd] px-4 py-2.5 text-sm font-bold transition-transform hover:-translate-y-0.5"
+              className="flex-1 cursor-pointer rounded-xl bg-[var(--purple-bright)] px-4 py-2.5 text-sm font-bold transition-transform hover:-translate-y-0.5"
             >
               ارسال گزارش
             </button>
@@ -275,7 +275,7 @@ function QuestionNavigator({ questions, answers, marked, currentIndex, reviewMod
         })}
       </div>
 
-      <ul className="mt-4 grid grid-cols-2 gap-x-3 gap-y-2 border-t border-white/8 pt-3 text-[11px] text-[#8a8a8a]">
+      <ul className="mt-4 grid grid-cols-2 gap-x-3 gap-y-2 border-t border-white/8 pt-3 text-[11px] text-[var(--faint)]">
         <li className="flex items-center gap-2">
           <span className="h-2.5 w-2.5 rounded-md bg-[#61D192]/60" aria-hidden="true" /> پاسخ داده‌شده
         </li>
@@ -283,7 +283,7 @@ function QuestionNavigator({ questions, answers, marked, currentIndex, reviewMod
           <span className="h-2.5 w-2.5 rounded-md bg-[#e26d6d]/60" aria-hidden="true" /> غلط
         </li>
         <li className="flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-md bg-[#e0b45c]" aria-hidden="true" /> علامت‌گذاری‌شده
+          <span className="h-2.5 w-2.5 rounded-md bg-[var(--gold)]" aria-hidden="true" /> علامت‌گذاری‌شده
         </li>
         <li className="flex items-center gap-2">
           <span className="h-2.5 w-2.5 rounded-md bg-white/20" aria-hidden="true" /> حل‌نشده
@@ -299,7 +299,7 @@ function SessionInsights({ answeredCount, total, questionStats }) {
   const stat = questionStats;
   /* رنگ هر ردیف همان رنگ راهنمای پایین همین کادر است (نقشهٔ سؤال‌ها) */
   const rows = [
-    { key: 'appearances', label: 'کل بار', value: stat?.appearances ?? 0, dot: 'bg-[#e0b45c]' },
+    { key: 'appearances', label: 'کل بار', value: stat?.appearances ?? 0, dot: 'bg-[var(--gold)]' },
     { key: 'correct', label: 'درست', value: stat?.correct ?? 0, dot: 'bg-[#61D192]/60' },
     { key: 'wrong', label: 'غلط', value: stat?.wrong ?? 0, dot: 'bg-[#e26d6d]/60' },
     { key: 'skipped', label: 'بی‌پاسخ', value: stat?.skipped ?? 0, dot: 'bg-white/20' },
@@ -309,13 +309,13 @@ function SessionInsights({ answeredCount, total, questionStats }) {
     <>
       {/* پیشرفت پاسخ‌دهی همین تمرین */}
       <div className="rounded-2xl bg-white/[0.04] px-3.5 py-3">
-        <span className="text-[11px] text-[#8a8a8a]">پیشرفت این تمرین</span>
-        <strong className="mt-1 block text-[13px] [font-family:'Doran',Tahoma,sans-serif]">
+        <span className="text-[11px] text-[var(--faint)]">پیشرفت این تمرین</span>
+        <strong className="mt-1 block text-[13px] [font-family:'Doran','Vazir',Tahoma,sans-serif]">
           {faNum(answeredCount)} از {faNum(total)} پاسخ داده شده
         </strong>
         <span className="mt-2 block h-1.5 overflow-hidden rounded-full bg-white/8" aria-hidden="true">
           <span
-            className="block h-full rounded-full bg-gradient-to-l from-[#61D192] to-[#61D192]/70"
+            className="block h-full rounded-full bg-gradient-to-l from-[var(--green-vivid)] to-[#61D192]/70"
             style={{ width: `${total ? (answeredCount / total) * 100 : 0}%` }}
           />
         </span>
@@ -323,15 +323,15 @@ function SessionInsights({ answeredCount, total, questionStats }) {
 
       {/* شکست تلاش‌های کاربر روی همین سؤال */}
       <section className="mt-3 rounded-2xl bg-white/[0.04] px-3.5 py-3" aria-label="آمار این سؤال">
-        <h4 className="flex items-center gap-1.5 text-[11.5px] font-bold text-[#bbb] [font-family:'Doran',Tahoma,sans-serif]">
-          <Icon name="chart" className="h-3.5 w-3.5 text-[#61D192]" />
+        <h4 className="flex items-center gap-1.5 text-[11.5px] font-bold text-[var(--muted)] [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+          <Icon name="chart" className="h-3.5 w-3.5 text-[var(--green-ink)]" />
           آمار این سؤال
         </h4>
 
         {stat === null ? (
-          <p className="mt-2 text-[11.5px] text-[#777]">در حال خواندن…</p>
+          <p className="mt-2 text-[11.5px] text-[var(--faint)]">در حال خواندن…</p>
         ) : stat.appearances === 0 ? (
-          <p className="mt-2 text-[11.5px] text-[#777]">این سؤال را هنوز نزده‌ای.</p>
+          <p className="mt-2 text-[11.5px] text-[var(--faint)]">این سؤال را هنوز نزده‌ای.</p>
         ) : (
           <>
             <dl className="mt-2.5 space-y-1.5 text-[11.5px]">
@@ -340,16 +340,16 @@ function SessionInsights({ answeredCount, total, questionStats }) {
                   key={row.key}
                   className="flex items-center justify-between gap-2 rounded-lg bg-white/[0.05] px-2.5 py-1.5"
                 >
-                  <dt className="flex items-center gap-2 text-[#9a9a9a]">
+                  <dt className="flex items-center gap-2 text-[var(--faint)]">
                     <span className={`h-2.5 w-2.5 shrink-0 rounded-md ${row.dot}`} aria-hidden="true" />
                     {row.label}
                   </dt>
-                  <dd className="font-bold [font-family:'Doran',Tahoma,sans-serif]">{toFa(row.value)}</dd>
+                  <dd className="font-bold [font-family:'Doran','Vazir',Tahoma,sans-serif]">{toFa(row.value)}</dd>
                 </div>
               ))}
             </dl>
 
-            <p className="mt-2.5 flex items-start gap-1.5 text-[11px] leading-5 text-[#8a8a8a]">
+            <p className="mt-2.5 flex items-start gap-1.5 text-[11px] leading-5 text-[var(--faint)]">
               <Icon name="history" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
               <span>
                 {stat.lastAnsweredAt
@@ -545,7 +545,7 @@ export default function BankSession({ userId, session, questions, onFinished, on
           title="سؤالی برای نمایش نیست"
           note="این سشن فعلاً بدون سؤال است."
           action={
-            <button type="button" onClick={onExit} className="mt-3 cursor-pointer rounded-xl bg-[#61D192] px-5 py-2 text-sm font-bold text-[#12271a]">
+            <button type="button" onClick={onExit} className="mt-3 cursor-pointer rounded-xl bg-[var(--green-vivid)] px-5 py-2 text-sm font-bold text-[#12271a]">
               بازگشت
             </button>
           }
@@ -561,7 +561,7 @@ export default function BankSession({ userId, session, questions, onFinished, on
         <button
           type="button"
           onClick={() => (isExam ? onExit() : finish())}
-          className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-white/6 px-3 py-2 text-xs text-[#bbb] transition-colors hover:bg-white/12 hover:text-white"
+          className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-white/6 px-3 py-2 text-xs text-[var(--muted)] transition-colors hover:bg-white/12 hover:text-white"
         >
           <Icon name="back" className="h-3.5 w-3.5" />
           خروج
@@ -579,7 +579,7 @@ export default function BankSession({ userId, session, questions, onFinished, on
               type="button"
               onClick={() => (isExam ? setSubmitOpen(true) : finish())}
               disabled={submitting}
-              className="cursor-pointer rounded-xl bg-[#937fcd] px-4 py-2 text-xs font-bold transition-transform hover:-translate-y-0.5 disabled:opacity-60"
+              className="cursor-pointer rounded-xl bg-[var(--purple-bright)] px-4 py-2 text-xs font-bold transition-transform hover:-translate-y-0.5 disabled:opacity-60"
             >
               {isExam ? 'پایان و تحلیل' : 'پایان تمرین'}
             </button>
@@ -589,17 +589,17 @@ export default function BankSession({ userId, session, questions, onFinished, on
 
       {/* نوار پیشرفت */}
       <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/8" role="progressbar" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100}>
-        <div className="h-full rounded-full bg-gradient-to-l from-[#61D192] to-[#61D192]/70 transition-[width] duration-500" style={{ width: `${progress}%` }} />
+        <div className="h-full rounded-full bg-gradient-to-l from-[var(--green-vivid)] to-[#61D192]/70 transition-[width] duration-500" style={{ width: `${progress}%` }} />
       </div>
 
       <div className="mt-5 grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
         {/* ── ستون سؤال ── */}
         <div>
-          <div key={question.id} className="tb-question rounded-[2rem] border border-white/8 bg-[#242426] p-5 md:p-7">
+          <div key={question.id} className="tb-question rounded-[2rem] border border-white/8 bg-[var(--surface)] p-5 md:p-7">
             {/* سربرگ سؤال */}
             <header className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-full bg-[#61D192]/12 px-3 py-1 text-xs text-[#7ee0ac] [font-family:'Doran',Tahoma,sans-serif]">
+                <span className="rounded-full bg-[#61D192]/12 px-3 py-1 text-xs text-[var(--green-soft-ink)] [font-family:'Doran','Vazir',Tahoma,sans-serif]">
                   سؤال {toFa(currentIndex + 1)} از {toFa(questions.length)}
                 </span>
                 {subject && (
@@ -608,7 +608,7 @@ export default function BankSession({ userId, session, questions, onFinished, on
                     {subject.name}
                   </span>
                 )}
-                <span className="text-[11px] text-[#777]">{question.topicPath.join(' › ')}</span>
+                <span className="text-[11px] text-[var(--faint)]">{question.topicPath.join(' › ')}</span>
                 <BankKindBadge kind={bankKindOf(question)} />
                 <TrackBadge track={trackOf(question)} />
                 <DifficultyBadge difficulty={question.difficulty} />
@@ -623,7 +623,7 @@ export default function BankSession({ userId, session, questions, onFinished, on
                       onClick={handleBookmark}
                       aria-pressed={bookmarked}
                       className={`flex cursor-pointer items-center gap-1.5 rounded-xl px-3 py-2 text-xs transition-colors ${
-                        bookmarked ? 'bg-[#e26d6d]/15 text-[#ef9196]' : 'bg-white/6 text-[#aaa] hover:text-white'
+                        bookmarked ? 'bg-[#e26d6d]/15 text-[var(--red-ink)]' : 'bg-white/6 text-[var(--muted)] hover:text-white'
                       }`}
                     >
                       <Icon name={bookmarked ? 'heartFilled' : 'heart'} className="h-4 w-4" />
@@ -633,7 +633,7 @@ export default function BankSession({ userId, session, questions, onFinished, on
                       type="button"
                       onClick={handleReviewFlag}
                       aria-pressed={reviewFlagged}
-                      className={`cursor-pointer rounded-xl p-2 transition-colors ${reviewFlagged ? 'bg-[#937fcd]/20 text-[#c9bdf0]' : 'bg-white/6 text-[#aaa] hover:text-white'}`}
+                      className={`cursor-pointer rounded-xl p-2 transition-colors ${reviewFlagged ? 'bg-[#937fcd]/20 text-[var(--purple-soft-ink)]' : 'bg-white/6 text-[var(--muted)] hover:text-white'}`}
                       aria-label="علامت نیاز به مرور"
                       title="نیاز به مرور"
                     >
@@ -647,7 +647,7 @@ export default function BankSession({ userId, session, questions, onFinished, on
                     onClick={toggleMark}
                     aria-pressed={isMarked}
                     className={`flex cursor-pointer items-center gap-1.5 rounded-xl px-3 py-2 text-xs transition-colors ${
-                      isMarked ? 'bg-[#e0b45c]/15 text-[#e0b45c]' : 'bg-white/6 text-[#aaa] hover:text-white'
+                      isMarked ? 'bg-[#e0b45c]/15 text-[var(--gold-ink)]' : 'bg-white/6 text-[var(--muted)] hover:text-white'
                     }`}
                   >
                     <Icon name="flag" className="h-4 w-4" />
@@ -658,7 +658,7 @@ export default function BankSession({ userId, session, questions, onFinished, on
                   type="button"
                   onClick={() => setReportOpen(true)}
                   aria-label="گزارش مشکل این سؤال"
-                  className="cursor-pointer rounded-xl bg-white/6 p-2 text-[#aaa] transition-colors hover:text-white"
+                  className="cursor-pointer rounded-xl bg-white/6 p-2 text-[var(--muted)] transition-colors hover:text-white"
                 >
                   <Icon name="flag" className="h-4 w-4" />
                 </button>
@@ -701,7 +701,7 @@ export default function BankSession({ userId, session, questions, onFinished, on
                   type="button"
                   onClick={handleSubmitAnswer}
                   disabled={selected == null || submitting}
-                  className="flex-1 cursor-pointer rounded-2xl bg-[#61D192] py-3 text-sm font-bold text-[#12271a] transition-all hover:-translate-y-0.5 hover:bg-[#7ee0ac] disabled:cursor-default disabled:translate-y-0 disabled:bg-white/8 disabled:text-[#777] disabled:hover:translate-y-0"
+                  className="flex-1 cursor-pointer rounded-2xl bg-[var(--green-vivid)] py-3 text-sm font-bold text-[#12271a] transition-all hover:-translate-y-0.5 hover:bg-[var(--green-vivid)] disabled:cursor-default disabled:translate-y-0 disabled:bg-white/8 disabled:text-[var(--faint)] disabled:hover:translate-y-0"
                 >
                   {selected == null ? 'یک گزینه را انتخاب کن' : isExam ? 'ذخیرهٔ پاسخ' : 'ثبت پاسخ و دیدن تحلیل'}
                 </button>
@@ -720,15 +720,15 @@ export default function BankSession({ userId, session, questions, onFinished, on
             {/* نتیجهٔ پاسخ پس از reveal */}
             {revealed && !isReview && answer && (
               <div className="tb-reveal mt-4 flex flex-wrap items-center gap-2 text-[13px]">
-                <span className="rounded-full bg-white/6 px-3 py-1.5 text-[#bbb]">
+                <span className="rounded-full bg-white/6 px-3 py-1.5 text-[var(--muted)]">
                   پاسخ تو: <strong className="text-white">{OPTION_KEYS[answer.selected]}</strong>
                 </span>
-                <span className="rounded-full bg-[#61D192]/12 px-3 py-1.5 text-[#7ee0ac]">
+                <span className="rounded-full bg-[#61D192]/12 px-3 py-1.5 text-[var(--green-soft-ink)]">
                   پاسخ صحیح: <strong>{OPTION_KEYS[question.correctAnswer]}</strong>
                 </span>
                 <span
                   className={`rounded-full px-3 py-1.5 font-bold ${
-                    answer.isCorrect ? 'bg-[#61D192]/15 text-[#61D192]' : 'bg-[#e26d6d]/12 text-[#ef9196]'
+                    answer.isCorrect ? 'bg-[#61D192]/15 text-[var(--green-ink)]' : 'bg-[#e26d6d]/12 text-[var(--red-ink)]'
                   }`}
                 >
                   {answer.isCorrect ? 'صحیح' : 'نادرست'}
@@ -763,7 +763,7 @@ export default function BankSession({ userId, session, questions, onFinished, on
                 type="button"
                 onClick={() => setSubmitOpen(true)}
                 disabled={submitting}
-                className="cursor-pointer rounded-xl bg-[#61D192] px-5 py-2.5 text-sm font-bold text-[#12271a] transition-transform hover:-translate-y-0.5 disabled:opacity-60"
+                className="cursor-pointer rounded-xl bg-[var(--green-vivid)] px-5 py-2.5 text-sm font-bold text-[#12271a] transition-transform hover:-translate-y-0.5 disabled:opacity-60"
               >
                 پایان آزمون و مشاهدهٔ کارنامه
               </button>
@@ -773,7 +773,7 @@ export default function BankSession({ userId, session, questions, onFinished, on
                 onClick={() => goTo(currentIndex + 1)}
                 disabled={isLast}
                 title={isLast ? 'به آخرین سؤال رسیده‌ای' : undefined}
-                className="cursor-pointer rounded-xl bg-[#937fcd] px-5 py-2.5 text-sm font-bold transition-transform hover:-translate-y-0.5 disabled:cursor-default disabled:opacity-40 disabled:hover:translate-y-0"
+                className="cursor-pointer rounded-xl bg-[var(--purple-bright)] px-5 py-2.5 text-sm font-bold transition-transform hover:-translate-y-0.5 disabled:cursor-default disabled:opacity-40 disabled:hover:translate-y-0"
               >
                 سؤال بعدی
               </button>
@@ -783,11 +783,11 @@ export default function BankSession({ userId, session, questions, onFinished, on
 
         {/* ── پنل سمت چپ: پیشرفت تمرین + آمار سؤال + نقشهٔ سؤال‌ها ── */}
         <aside className="hidden lg:block">
-          <div className="sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto rounded-[1.75rem] border border-white/8 bg-[#242426] p-4">
+          <div className="sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto rounded-[1.75rem] border border-white/8 bg-[var(--surface)] p-4">
             <SessionInsights answeredCount={answeredCount} total={questions.length} questionStats={questionStats} />
 
-            <h3 className="mb-3 mt-4 flex items-center gap-2 text-sm [font-family:'Doran',Tahoma,sans-serif]">
-              <Icon name="grid" className="h-4 w-4 text-[#61D192]" />
+            <h3 className="mb-3 mt-4 flex items-center gap-2 text-sm [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+              <Icon name="grid" className="h-4 w-4 text-[var(--green-ink)]" />
               نقشهٔ سؤال‌ها
             </h3>
             <QuestionNavigator
@@ -810,14 +810,14 @@ export default function BankSession({ userId, session, questions, onFinished, on
             onClick={() => setNavigatorOpen(true)}
             className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-white/8 px-3.5 py-2.5 text-xs"
           >
-            <Icon name="grid" className="h-4 w-4 text-[#61D192]" />
+            <Icon name="grid" className="h-4 w-4 text-[var(--green-ink)]" />
             نقشه
           </button>
           <button
             type="button"
             onClick={() => goTo(currentIndex - 1)}
             disabled={currentIndex === 0}
-            className="cursor-pointer rounded-xl bg-white/8 p-2.5 text-[#aaa] disabled:opacity-40"
+            className="cursor-pointer rounded-xl bg-white/8 p-2.5 text-[var(--muted)] disabled:opacity-40"
             aria-label="سؤال قبلی"
           >
             <Icon name="chevronLeft" className="h-4 w-4" />
@@ -826,7 +826,7 @@ export default function BankSession({ userId, session, questions, onFinished, on
             type="button"
             onClick={() => (isLast && isExam ? setSubmitOpen(true) : goTo(currentIndex + 1))}
             disabled={submitting || (isLast && !isExam)}
-            className="shrink-0 cursor-pointer rounded-xl bg-[#61D192] px-4 py-2.5 text-xs font-bold text-[#12271a] disabled:opacity-60"
+            className="shrink-0 cursor-pointer rounded-xl bg-[var(--green-vivid)] px-4 py-2.5 text-xs font-bold text-[#12271a] disabled:opacity-60"
           >
             {isLast && isExam ? 'پایان' : 'سؤال بعدی'}
           </button>
@@ -839,7 +839,7 @@ export default function BankSession({ userId, session, questions, onFinished, on
           <div className="tb-drawer__scrim" onClick={() => setNavigatorOpen(false)} aria-hidden="true" />
           <div className="tb-drawer" role="dialog" aria-label="نقشهٔ سؤال‌ها">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-sm [font-family:'Doran',Tahoma,sans-serif]">نقشهٔ سؤال‌ها</h3>
+              <h3 className="text-sm [font-family:'Doran','Vazir',Tahoma,sans-serif]">نقشهٔ سؤال‌ها</h3>
               <button type="button" onClick={() => setNavigatorOpen(false)} aria-label="بستن" className="cursor-pointer rounded-lg bg-white/6 p-1.5">
                 <Icon name="x" className="h-4 w-4" />
               </button>
@@ -861,8 +861,8 @@ export default function BankSession({ userId, session, questions, onFinished, on
 
       {/* مودال پایان آزمون — تمرین هیچ مودالی ندارد و مستقیم تمام می‌شود */}
       <Modal open={submitOpen} onClose={() => setSubmitOpen(false)} title="پایان آزمون">
-        <h3 className="text-base [font-family:'Doran',Tahoma,sans-serif]">آزمون را تمام می‌کنی؟</h3>
-        <p className="mt-2 text-sm leading-6 text-[#9a9a9a]">
+        <h3 className="text-base [font-family:'Doran','Vazir',Tahoma,sans-serif]">آزمون را تمام می‌کنی؟</h3>
+        <p className="mt-2 text-sm leading-6 text-[var(--faint)]">
           {answeredCount < questions.length
             ? `${faNum(questions.length - answeredCount)} سؤال بی‌پاسخ مانده؛ بی‌پاسخ‌ها غلط حساب می‌شوند.`
             : 'به همهٔ سؤال‌ها پاسخ دادی. آمادهٔ دیدن کارنامه‌ای.'}
@@ -875,7 +875,7 @@ export default function BankSession({ userId, session, questions, onFinished, on
               finish();
             }}
             disabled={submitting}
-            className="flex-1 cursor-pointer rounded-xl bg-[#61D192] px-4 py-2.5 text-sm font-bold text-[#12271a] transition-transform hover:-translate-y-0.5 disabled:opacity-60"
+            className="flex-1 cursor-pointer rounded-xl bg-[var(--green-vivid)] px-4 py-2.5 text-sm font-bold text-[#12271a] transition-transform hover:-translate-y-0.5 disabled:opacity-60"
           >
             ثبت نهایی و کارنامه
           </button>

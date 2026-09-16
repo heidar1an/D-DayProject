@@ -93,7 +93,7 @@ export default function AnalyticsHome({ data, onNavigate, onOpenExam }) {
     <div className="space-y-4">
       {/* ── هشدار حجم داده (Empty State هوشمند) ── */}
       {dataStatus.level !== 'ok' && (
-        <div className="flex items-center gap-2.5 rounded-2xl bg-[#e0b45c]/10 px-4 py-2.5 text-[12px] text-[#e0b45c]" role="status">
+        <div className="flex items-center gap-2.5 rounded-2xl bg-[#e0b45c]/10 px-4 py-2.5 text-[12px] text-[var(--gold-ink)]" role="status">
           <Icon name="info" className="h-4 w-4 shrink-0" />
           {dataStatus.hint}
         </div>
@@ -126,13 +126,13 @@ export default function AnalyticsHome({ data, onNavigate, onOpenExam }) {
                 .filter(([, part]) => part.weight > 0)
                 .map(([key, part]) => (
                   <div key={key} className="flex items-center gap-2.5">
-                    <span className="w-16 shrink-0 text-[11px] text-[#999]">
+                    <span className="w-16 shrink-0 text-[11px] text-[var(--faint)]">
                       {{ accuracy: 'دقت', consistency: 'ثبات', speed: 'سرعت', difficulty: 'دشواری', recency: 'روند' }[key] ?? key}
                     </span>
                     <div className="an-bar flex-1">
-                      <span className="an-bar__fill" style={{ width: `${Math.min(100, part.score)}%`, background: '#937fcd' }} />
+                      <span className="an-bar__fill" style={{ width: `${Math.min(100, part.score)}%`, background: 'var(--purple-bright)' }} />
                     </div>
-                    <span className="w-[74px] shrink-0 text-left text-[10.5px] text-[#777]">
+                    <span className="w-[74px] shrink-0 text-left text-[10.5px] text-[var(--faint)]">
                       {faNum(Math.round(part.score))} <span className="text-[10px]">· وزن {toFa(Math.round(part.weight * 100))}٪</span>
                     </span>
                   </div>
@@ -141,11 +141,11 @@ export default function AnalyticsHome({ data, onNavigate, onOpenExam }) {
           </div>
 
           <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-white/6 pt-2.5 text-[11px]">
-            <span className="flex items-center gap-1 text-[#61D192]"><span className="h-2 w-2 rounded-full bg-[#61D192]" />درست {faNum(kpis.correct)}</span>
-            <span className="flex items-center gap-1 text-[#e26d6d]"><span className="h-2 w-2 rounded-full bg-[#e26d6d]" />غلط {faNum(kpis.wrong)}</span>
-            <span className="flex items-center gap-1 text-[#8a8a8a]"><span className="h-2 w-2 rounded-full bg-[#6b6b6b]" />نزده {faNum(kpis.unanswered)}</span>
+            <span className="flex items-center gap-1 text-[var(--green-ink)]"><span className="h-2 w-2 rounded-full bg-[var(--green-vivid)]" />درست {faNum(kpis.correct)}</span>
+            <span className="flex items-center gap-1 text-[var(--red-ink)]"><span className="h-2 w-2 rounded-full bg-[var(--red)]" />غلط {faNum(kpis.wrong)}</span>
+            <span className="flex items-center gap-1 text-[var(--faint)]"><span className="h-2 w-2 rounded-full bg-[var(--light-fill)]" />نزده {faNum(kpis.unanswered)}</span>
             {consistency.score !== null && (
-              <span className="mr-auto text-[#999]">
+              <span className="mr-auto text-[var(--faint)]">
                 ثبات بین {faNum(consistency.sessions)} سشن:{' '}
                 <strong style={{ color: consistency.cv < 0.22 ? '#61D192' : '#e0b45c' }}>{consistency.label}</strong>
               </span>
@@ -171,23 +171,23 @@ export default function AnalyticsHome({ data, onNavigate, onOpenExam }) {
                 ).map((side) => {
                   const stats = practiceVsExam[side.key];
                   return (
-                    <div key={side.key} className="rounded-2xl border border-white/8 bg-[#2a2a2d] p-3.5">
+                    <div key={side.key} className="rounded-2xl border border-white/8 bg-[var(--surface-soft)] p-3.5">
                       <h3 className="mb-2.5 flex items-center gap-2 text-[12.5px] font-bold" style={{ color: side.accent }}>
                         <Icon name={side.icon} className="h-3.5 w-3.5" />
                         {side.title}
                       </h3>
                       <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-[11.5px]">
-                        <span className="text-[#8a8a8a]">دقت</span><strong>{formatPercent(stats.accuracy)}</strong>
-                        <span className="text-[#8a8a8a]">میانگین زمان</span><strong>{formatSeconds(stats.averageTime)}</strong>
-                        <span className="text-[#8a8a8a]">تعداد تست</span><strong>{faNum(stats.answered)}</strong>
-                        <span className="text-[#8a8a8a]">سطح دشواری</span><strong>{stats.difficulty ? toFa(stats.difficulty.toFixed(2)) : '—'}</strong>
+                        <span className="text-[var(--faint)]">دقت</span><strong>{formatPercent(stats.accuracy)}</strong>
+                        <span className="text-[var(--faint)]">میانگین زمان</span><strong>{formatSeconds(stats.averageTime)}</strong>
+                        <span className="text-[var(--faint)]">تعداد تست</span><strong>{faNum(stats.answered)}</strong>
+                        <span className="text-[var(--faint)]">سطح دشواری</span><strong>{stats.difficulty ? toFa(stats.difficulty.toFixed(2)) : '—'}</strong>
                         {side.key === 'exam' ? (
                           <>
-                            <span className="text-[#8a8a8a]">بی‌پاسخ</span><strong>{faNum(stats.unanswered)} سؤال</strong>
+                            <span className="text-[var(--faint)]">بی‌پاسخ</span><strong>{faNum(stats.unanswered)} سؤال</strong>
                           </>
                         ) : (
                           <>
-                            <span className="text-[#8a8a8a]">پاسخ مطمئن</span><strong>{stats.confidence === null ? '—' : `${faNum(stats.confidence)}٪`}</strong>
+                            <span className="text-[var(--faint)]">پاسخ مطمئن</span><strong>{stats.confidence === null ? '—' : `${faNum(stats.confidence)}٪`}</strong>
                           </>
                         )}
                       </div>
@@ -197,11 +197,11 @@ export default function AnalyticsHome({ data, onNavigate, onOpenExam }) {
               </div>
               <div>
                 {practiceVsExam.accuracyDrop !== null && Math.abs(practiceVsExam.accuracyDrop) >= 5 ? (
-                  <p className="text-[12px] leading-6 text-[#c9c9c9]">
+                  <p className="text-[12px] leading-6 text-[var(--muted)]">
                     {practiceVsExam.accuracyDrop > 0 ? (
                       <>
-                        دقت تو در تمرین‌ها <strong className="text-[#61D192]">{faNum(Math.round(practiceVsExam.practice.accuracy))}٪</strong> است اما در آزمون‌ها به{' '}
-                        <strong className="text-[#e26d6d]">{faNum(Math.round(practiceVsExam.exam.accuracy))}٪</strong> کاهش پیدا می‌کند؛ تمرین در شرایط شبیه‌سازی‌شدهٔ آزمون (تایمر و بدون وقفه) این فاصله را می‌بندد.
+                        دقت تو در تمرین‌ها <strong className="text-[var(--green-ink)]">{faNum(Math.round(practiceVsExam.practice.accuracy))}٪</strong> است اما در آزمون‌ها به{' '}
+                        <strong className="text-[var(--red-ink)]">{faNum(Math.round(practiceVsExam.exam.accuracy))}٪</strong> کاهش پیدا می‌کند؛ تمرین در شرایط شبیه‌سازی‌شدهٔ آزمون (تایمر و بدون وقفه) این فاصله را می‌بندد.
                       </>
                     ) : (
                       <>
@@ -210,7 +210,7 @@ export default function AnalyticsHome({ data, onNavigate, onOpenExam }) {
                     )}
                   </p>
                 ) : (
-                  <p className="text-[12px] leading-6 text-[#9a9a9a]">دقت تو در تمرین و آزمون تقریباً یکسان است — عملکردت در شرایط فشار حفظ می‌شود.</p>
+                  <p className="text-[12px] leading-6 text-[var(--faint)]">دقت تو در تمرین و آزمون تقریباً یکسان است — عملکردت در شرایط فشار حفظ می‌شود.</p>
                 )}
               </div>
             </div>
@@ -274,7 +274,7 @@ export default function AnalyticsHome({ data, onNavigate, onOpenExam }) {
           />
         </div>
 
-        <p className="mt-3 text-[11px] leading-5 text-[#777]">
+        <p className="mt-3 text-[11px] leading-5 text-[var(--faint)]">
           {faNum(trendStats.activeDays)} روز دارای فعالیت از {toFa(trendStats.days)} روز این بازه
           {examMarkers.length > 0 ? ` · آزمون‌های این بازه: ${trend.examEvents.map((event) => event.title).join(' · ')}` : ''}
         </p>
@@ -294,14 +294,14 @@ export default function AnalyticsHome({ data, onNavigate, onOpenExam }) {
             {WEAKNESS_BUCKETS.map((bucket) => {
               const items = weakness[bucket.key];
               return (
-                <div key={bucket.key} className="rounded-2xl border border-white/6 bg-[#2a2a2d] p-3.5">
+                <div key={bucket.key} className="rounded-2xl border border-white/6 bg-[var(--surface-soft)] p-3.5">
                   <h3 className="mb-2 flex items-center gap-2 text-[12px] font-bold" style={{ color: bucket.accent }}>
                     <Icon name={bucket.icon} className="h-3.5 w-3.5" />
                     {bucket.title}
-                    <span className="mr-auto text-[10.5px] font-normal text-[#777]">{faNum(items.length)} مبحث</span>
+                    <span className="mr-auto text-[10.5px] font-normal text-[var(--faint)]">{faNum(items.length)} مبحث</span>
                   </h3>
                   {items.length === 0 ? (
-                    <p className="text-[11.5px] text-[#777]">—</p>
+                    <p className="text-[11.5px] text-[var(--faint)]">—</p>
                   ) : (
                     <ul className="space-y-1.5">
                       {items.slice(0, 5).map((topic) => (
@@ -309,21 +309,21 @@ export default function AnalyticsHome({ data, onNavigate, onOpenExam }) {
                           <button
                             type="button"
                             onClick={() => onNavigate?.('subject', { subjectId: topic.subjectId })}
-                            className="w-full cursor-pointer rounded-xl px-2 py-1 text-right transition-colors hover:bg-white/[0.04] focus-visible:outline-2 focus-visible:outline-[#61D192]"
+                            className="w-full cursor-pointer rounded-xl px-2 py-1 text-right transition-colors hover:bg-white/[0.04] focus-visible:outline-2 focus-visible:outline-[var(--green-vivid)]"
                           >
                             <span className="flex items-baseline justify-between gap-2 text-[12px]">
-                              <span className="min-w-0 truncate text-[#ddd]">{topic.key}</span>
+                              <span className="min-w-0 truncate text-[var(--muted)]">{topic.key}</span>
                               <span className="shrink-0 text-[10.5px] font-semibold" style={{ color: bucket.accent }}>
                                 {formatPercent(topic.accuracy)}
                               </span>
                             </span>
-                            <span className="mt-0.5 block text-[10px] text-[#777]">
+                            <span className="mt-0.5 block text-[10px] text-[var(--faint)]">
                               {faNum(topic.attemptCount)} تست · اولویت {faNum(Math.round(topic.priority))}
                             </span>
                           </button>
                         </li>
                       ))}
-                      {items.length > 5 && <li className="text-[10.5px] text-[#777]">و {faNum(items.length - 5)} مبحث دیگر…</li>}
+                      {items.length > 5 && <li className="text-[10.5px] text-[var(--faint)]">و {faNum(items.length - 5)} مبحث دیگر…</li>}
                     </ul>
                   )}
                 </div>
@@ -332,8 +332,8 @@ export default function AnalyticsHome({ data, onNavigate, onOpenExam }) {
           </div>
         )}
         {weakness.biggestDrop && (
-          <p className="mt-3 border-t border-white/6 pt-2.5 text-[12px] leading-6 text-[#c9c9c9]">
-            بیشترین افت عملکرد تو مربوط به مبحث <strong className="text-[#e0b45c]">«{weakness.biggestDrop.key}»</strong> است؛
+          <p className="mt-3 border-t border-white/6 pt-2.5 text-[12px] leading-6 text-[var(--muted)]">
+            بیشترین افت عملکرد تو مربوط به مبحث <strong className="text-[var(--gold-ink)]">«{weakness.biggestDrop.key}»</strong> است؛
             دقتش در نیمهٔ اخیر {toFa(Math.abs(weakness.biggestDrop.trend.delta))} واحد {weakness.biggestDrop.trend.delta < 0 ? 'کاهش' : 'تغییر'} کرده است.
           </p>
         )}
@@ -368,7 +368,7 @@ export default function AnalyticsHome({ data, onNavigate, onOpenExam }) {
             icon="bolt"
             hint="کارنامهٔ هر آزمون را در تحلیلش ببین"
             action={
-              <button type="button" onClick={() => onNavigate?.('exams')} className="cursor-pointer rounded-xl bg-white/[0.06] px-3 py-1.5 text-[11.5px] text-[#ccc] transition-colors hover:bg-white/[0.1]">
+              <button type="button" onClick={() => onNavigate?.('exams')} className="cursor-pointer rounded-xl bg-white/[0.06] px-3 py-1.5 text-[11.5px] text-[var(--muted)] transition-colors hover:bg-white/[0.1]">
                 همهٔ آزمون‌ها
               </button>
             }
@@ -380,11 +380,11 @@ export default function AnalyticsHome({ data, onNavigate, onOpenExam }) {
                   key={exam.examId}
                   type="button"
                   onClick={() => onOpenExam?.(exam.examId)}
-                  className="flex w-full cursor-pointer items-center justify-between gap-3 rounded-2xl border border-white/8 bg-[#2a2a2d] p-3 text-right transition-colors hover:border-white/20 focus-visible:outline-2 focus-visible:outline-[#61D192]"
+                  className="flex w-full cursor-pointer items-center justify-between gap-3 rounded-2xl border border-white/8 bg-[var(--surface-soft)] p-3 text-right transition-colors hover:border-white/20 focus-visible:outline-2 focus-visible:outline-[var(--green-vivid)]"
                 >
                   <div className="min-w-0">
                     <h3 className="truncate text-[12.5px] font-bold">{exam.title}</h3>
-                    <p className="mt-0.5 text-[10.5px] text-[#777]">
+                    <p className="mt-0.5 text-[10.5px] text-[var(--faint)]">
                       {formatShortDate(exam.submittedAt)} · {faNum(exam.total)} سؤال
                       {exam.percentile !== null && exam.percentile !== undefined ? ` · صدک ${faNum(exam.percentile)}` : ''}
                     </p>
@@ -407,9 +407,9 @@ export default function AnalyticsHome({ data, onNavigate, onOpenExam }) {
 /* ── یک سنجهٔ خلاصهٔ نمودار روند ── */
 function TrendStat({ label, value, suffix = '', accent = '#eaf6ef', note, noteTone }) {
   return (
-    <div className="rounded-2xl border border-white/8 bg-[#2a2a2d] px-3 py-2">
-      <span className="text-[10.5px] text-[#8a8a8a]">{label}</span>
-      <strong className="mt-0.5 block text-[15px] font-extrabold [font-family:'Doran',Tahoma,sans-serif]" style={{ color: accent }}>
+    <div className="rounded-2xl border border-white/8 bg-[var(--surface-soft)] px-3 py-2">
+      <span className="text-[10.5px] text-[var(--faint)]">{label}</span>
+      <strong className="mt-0.5 block text-[15px] font-extrabold [font-family:'Doran','Vazir',Tahoma,sans-serif]" style={{ color: accent }}>
         {value === null || value === undefined ? '—' : `${faNum(Math.round(value))}${suffix}`}
       </strong>
       {note && (

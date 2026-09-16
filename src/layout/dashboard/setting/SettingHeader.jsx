@@ -32,11 +32,11 @@ const SettingHeader = ({ activeTab, onTabChange }) => {
   return (
     <div dir="rtl" className="w-full">
       {/* کانتینر اصلی هدر - عنوان سمت راست، تب‌ها دقیقاً وسط (ستون‌های 1fr دو طرف قرینه‌اند) */}
-      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 bg-[#2d2d2d] rounded-full px-6 py-2 shadow-lg">
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 bg-[var(--surface-soft)] rounded-full px-6 py-2 shadow-lg">
 
         {/* عنوان تنظیمات (سمت راست) */}
         <div className="min-w-0 justify-self-start">
-          <h2 className="m-0 text-2xl leading-none tracking-wide text-white font-extrabold md:text-3xl [font-family:'Doran',Tahoma,sans-serif]">
+          <h2 className="m-0 text-2xl leading-none tracking-wide text-white font-extrabold md:text-3xl [font-family:'Doran','Vazir',Tahoma,sans-serif]">
             تنظیمات
           </h2>
         </div>
@@ -46,7 +46,7 @@ const SettingHeader = ({ activeTab, onTabChange }) => {
 
           {/* پس‌زمینه متحرک (انیمیشن حرکت رنگ #ab8e7c) */}
           <div
-            className="absolute top-0 bottom-0 my-auto h-full bg-[#ab8e7c] rounded-full transition-all duration-300 ease-in-out"
+            className="absolute top-0 bottom-0 my-auto h-full bg-[var(--brown-bright)] rounded-full transition-all duration-300 ease-in-out"
             style={{
               left: `${indicatorStyle.left}px`,
               width: `${indicatorStyle.width}px`,

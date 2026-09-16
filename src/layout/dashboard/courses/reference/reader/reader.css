@@ -22,7 +22,7 @@
   overflow: hidden;
   background: var(--rdr-bg);
   color: var(--rdr-text);
-  font-family: 'Pinar', Tahoma, sans-serif;
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
   transition: background 300ms ease, color 300ms ease;
 }
 
@@ -108,7 +108,7 @@
 }
 
 .rdr-header__chapter {
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-weight: 700;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -198,7 +198,7 @@
   justify-content: space-between;
   gap: 10px;
   padding: 14px 16px 8px;
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: 0.95rem;
 }
 
@@ -283,7 +283,7 @@
   border-radius: 8px;
   background: color-mix(in srgb, var(--ref-accent) 16%, transparent);
   color: var(--ref-accent);
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-weight: 700;
   font-size: 0.72rem;
 }
@@ -395,13 +395,13 @@
   border: 1px solid color-mix(in srgb, var(--ref-accent) 40%, transparent);
   background: color-mix(in srgb, var(--ref-accent) 10%, transparent);
   color: var(--ref-accent);
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: 0.74rem;
 }
 
 .rdr-article__head h1 {
   margin: 14px 0 0;
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-weight: 800;
   font-size: 1.65em;
   line-height: 1.6;
@@ -432,7 +432,7 @@
   align-items: center;
   gap: 10px;
   margin: 0 0 18px;
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-weight: 700;
   font-size: 1.18em;
   line-height: 1.7;
@@ -572,7 +572,7 @@
   align-items: center;
   gap: 8px;
   color: var(--co);
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: 0.85em;
   margin-bottom: 6px;
 }
@@ -665,7 +665,7 @@
 .rdr-table th {
   padding: 10px 14px;
   background: color-mix(in srgb, var(--ref-accent) 12%, var(--rdr-surface-2));
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: 0.82em;
   text-align: right;
   white-space: nowrap;
@@ -724,7 +724,7 @@
 
 .rdr-empty h3 {
   margin: 6px 0 0;
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   color: var(--rdr-text);
 }
 
@@ -771,7 +771,7 @@
 }
 
 .rdr-chapter-nav__btn strong {
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: 0.82rem;
   font-weight: 700;
 }
@@ -936,7 +936,7 @@
 
 .rdr-aside__empty strong {
   color: var(--rdr-text);
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: 0.9rem;
 }
 
@@ -1201,7 +1201,7 @@
 }
 
 .rdr-settings__stepper strong {
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: 1rem;
   font-variant-numeric: tabular-nums;
 }

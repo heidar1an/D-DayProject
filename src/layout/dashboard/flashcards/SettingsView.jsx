@@ -11,11 +11,11 @@ import { Icon, Skeleton, toFa } from './flashcardShared';
 
 function NumberField({ id, label, hint, value, min = 1, max = 999, onChange }) {
   return (
-    <div className="rounded-2xl border border-white/6 bg-[#2a2a2a] px-4 py-3.5">
+    <div className="rounded-2xl border border-white/6 bg-[var(--surface-soft)] px-4 py-3.5">
       <div className="flex items-center justify-between gap-3">
         <div>
           <label htmlFor={id} className="block text-sm">{label}</label>
-          {hint && <span className="mt-0.5 block text-[11px] text-[#6d6d6d]">{hint}</span>}
+          {hint && <span className="mt-0.5 block text-[11px] text-[var(--ghost)]">{hint}</span>}
         </div>
         <input
           id={id}
@@ -33,10 +33,10 @@ function NumberField({ id, label, hint, value, min = 1, max = 999, onChange }) {
 
 function ToggleField({ id, label, hint, checked, onChange }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-2xl border border-white/6 bg-[#2a2a2a] px-4 py-3.5">
+    <div className="flex items-center justify-between gap-3 rounded-2xl border border-white/6 bg-[var(--surface-soft)] px-4 py-3.5">
       <div>
         <label htmlFor={id} className="block text-sm">{label}</label>
-        {hint && <span className="mt-0.5 block text-[11px] text-[#6d6d6d]">{hint}</span>}
+        {hint && <span className="mt-0.5 block text-[11px] text-[var(--ghost)]">{hint}</span>}
       </div>
       <button
         id={id}
@@ -44,7 +44,7 @@ function ToggleField({ id, label, hint, checked, onChange }) {
         role="switch"
         aria-checked={checked}
         onClick={() => onChange(!checked)}
-        className={`relative h-6 w-11 shrink-0 cursor-pointer rounded-full transition-colors ${checked ? 'bg-[#77b787]' : 'bg-white/15'}`}
+        className={`relative h-6 w-11 shrink-0 cursor-pointer rounded-full transition-colors ${checked ? 'bg-[var(--green-bright)]' : 'bg-white/15'}`}
       >
         <span
           className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-[right] duration-200 ${checked ? 'right-0.5' : 'right-[1.375rem]'}`}
@@ -113,14 +113,14 @@ export default function SettingsView({ userData, onNotify, reloadKey = 0 }) {
   return (
     <div className="space-y-6">
       {savedFlash && (
-        <p className="rounded-2xl bg-[#77b787]/12 px-4 py-3 text-center text-xs text-[#9ed3ab]" role="status">
+        <p className="rounded-2xl bg-[#77b787]/12 px-4 py-3 text-center text-xs text-[var(--green-soft-ink)]" role="status">
           تنظیمات ذخیره شد.
         </p>
       )}
 
       {/* محدودیت‌های روزانه */}
       <section aria-label="محدودیت‌های روزانه" className="space-y-3">
-        <h2 className="text-lg [font-family:'Doran',Tahoma,sans-serif]">روال روزانه</h2>
+        <h2 className="text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]">روال روزانه</h2>
         <NumberField
           id="set-new-per-day"
           label="کارت جدید روزانه"
@@ -144,10 +144,10 @@ export default function SettingsView({ userData, onNotify, reloadKey = 0 }) {
       {/* الگوریتم */}
       <section aria-label="الگوریتم مرور" className="space-y-3">
         <header className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-lg [font-family:'Doran',Tahoma,sans-serif]">الگوریتم فاصله‌گذاری</h2>
-          <span className="rounded-full bg-white/5 px-3 py-1 text-[10px] text-[#6d6d6d]" dir="ltr">{ALGORITHM_VERSION}</span>
+          <h2 className="text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]">الگوریتم فاصله‌گذاری</h2>
+          <span className="rounded-full bg-white/5 px-3 py-1 text-[10px] text-[var(--ghost)]" dir="ltr">{ALGORITHM_VERSION}</span>
         </header>
-        <p className="text-[11px] leading-5 text-[#6d6d6d]">
+        <p className="text-[11px] leading-5 text-[var(--ghost)]">
           این مقادیر مستقیماً موتور محاسبهٔ مرور را تنظیم می‌کنند و ممکن است در آینده با الگوریتم‌های بهتر (مثل FSRS) جایگزین شوند.
         </p>
 
@@ -187,9 +187,9 @@ export default function SettingsView({ userData, onNotify, reloadKey = 0 }) {
           />
         </div>
 
-        <div className="rounded-2xl border border-white/6 bg-[#2a2a2a] px-4 py-3.5">
+        <div className="rounded-2xl border border-white/6 bg-[var(--surface-soft)] px-4 py-3.5">
           <p className="text-sm">گام‌های یادگیری</p>
-          <p className="mt-1 text-[11px] text-[#6d6d6d]">
+          <p className="mt-1 text-[11px] text-[var(--ghost)]">
             کارت نو بعد از هر ارزیابی به این گام‌ها می‌رود: {algo.learningStepsMinutes.map((minutes) => toFa(minutes)).join(' → ')} دقیقه
           </p>
         </div>
@@ -197,7 +197,7 @@ export default function SettingsView({ userData, onNotify, reloadKey = 0 }) {
 
       {/* نمایش و تجربه */}
       <section aria-label="نمایش و تجربه" className="space-y-3">
-        <h2 className="text-lg [font-family:'Doran',Tahoma,sans-serif]">تجربهٔ مرور</h2>
+        <h2 className="text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]">تجربهٔ مرور</h2>
         <ToggleField
           id="set-show-source"
           label="نمایش منبع کارت"
@@ -223,11 +223,11 @@ export default function SettingsView({ userData, onNotify, reloadKey = 0 }) {
 
       {/* داده */}
       <section aria-label="داده‌ها" className="space-y-3">
-        <h2 className="text-lg [font-family:'Doran',Tahoma,sans-serif]">داده‌ها</h2>
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/6 bg-[#2a2a2a] px-4 py-3.5">
+        <h2 className="text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]">داده‌ها</h2>
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/6 bg-[var(--surface-soft)] px-4 py-3.5">
           <div>
             <p className="text-sm">خروجی تنظیمات</p>
-            <p className="mt-0.5 text-[11px] text-[#6d6d6d]">قالب JSON — ورودی Anki-compatible در نقشهٔ راه است</p>
+            <p className="mt-0.5 text-[11px] text-[var(--ghost)]">قالب JSON — ورودی Anki-compatible در نقشهٔ راه است</p>
           </div>
           <button
             type="button"

@@ -22,7 +22,7 @@ function AchievementCard({ item }) {
     <article
       className={`relative flex flex-col gap-3 rounded-[1.75rem] border p-5 transition-colors ${
         item.unlocked
-          ? 'border-white/8 bg-[#2a2a2a] hover:bg-[#303030]'
+          ? 'border-white/8 bg-[var(--surface-soft)] hover:bg-[var(--surface-soft)]'
           : 'border-dashed border-white/10 bg-white/[0.015]'
       } ${item.rarity === 'legendary' && !item.unlocked ? 'lg-glow-legendary border-solid' : ''} ${
         item.rarity === 'legendary' && item.unlocked ? 'lg-glow-legendary' : ''
@@ -32,8 +32,8 @@ function AchievementCard({ item }) {
         <span
           className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl"
           style={{
-            background: item.unlocked ? `${rarity.color}1f` : 'rgba(255,255,255,0.04)',
-            color: item.unlocked ? rarity.color : '#6d6d6d',
+            background: item.unlocked ? `${rarity.color}1f` : 'rgb(var(--wash-rgb) / 0.04)',
+            color: item.unlocked ? rarity.color: 'var(--ghost)',
           }}
         >
           <Icon name={item.unlocked ? item.icon : 'lock'} className="h-6 w-6" />
@@ -47,21 +47,21 @@ function AchievementCard({ item }) {
       </div>
 
       <div>
-        <h3 className={`text-[15px] [font-family:'Doran',Tahoma,sans-serif] ${item.unlocked ? 'text-white' : 'text-[#8a8a8a]'}`}>
+        <h3 className={`text-[15px] [font-family:'Doran','Vazir',Tahoma,sans-serif] ${item.unlocked ? 'text-white' : 'text-[var(--faint)]'}`}>
           {item.title}
         </h3>
-        <p className="mt-1 text-xs leading-5 text-[#8a8a8a]">{item.description}</p>
+        <p className="mt-1 text-xs leading-5 text-[var(--faint)]">{item.description}</p>
       </div>
 
       {item.unlocked ? (
-        <p className="mt-auto inline-flex items-center gap-1.5 text-[11px] text-[#9ed3ab]">
+        <p className="mt-auto inline-flex items-center gap-1.5 text-[11px] text-[var(--green-soft-ink)]">
           <Icon name="check" className="h-3.5 w-3.5" strokeWidth={2.6} />
           باز شد · {item.unlockedAt}
         </p>
       ) : (
         <div className="mt-auto flex items-center gap-3">
           <ProgressBar value={item.progress ?? 0} max={item.goal ?? 1} color={rarity.color} height={6} className="flex-1" />
-          <span className="shrink-0 text-[10px] text-[#8a8a8a]">{item.progressNote}</span>
+          <span className="shrink-0 text-[10px] text-[var(--faint)]">{item.progressNote}</span>
         </div>
       )}
     </article>
@@ -93,15 +93,15 @@ export default function Achievements() {
   const total = data.items.length;
 
   return (
-    <section aria-label="دستاوردها" className="rounded-[2.5rem] bg-[#282828] p-5 md:p-8">
+    <section aria-label="دستاوردها" className="rounded-[2.5rem] bg-[var(--surface-soft)] p-5 md:p-8">
       <header className="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="text-lg text-white md:text-xl [font-family:'Doran',Tahoma,sans-serif]">دستاوردها</h2>
-          <p className="mt-1 text-xs text-[#8a8a8a]">
+          <h2 className="text-lg text-white md:text-xl [font-family:'Doran','Vazir',Tahoma,sans-serif]">دستاوردها</h2>
+          <p className="mt-1 text-xs text-[var(--faint)]">
             {toFa(data.unlockedCount)} از {toFa(total)} دستاورد را باز کردی — رکوردت رو بشکن.
           </p>
         </div>
-        <span className="text-xs text-[#aaa]">افسانه‌ای‌ها با درخشش مشخص می‌شوند ✦</span>
+        <span className="text-xs text-[var(--muted)]">افسانه‌ای‌ها با درخشش مشخص می‌شوند ✦</span>
       </header>
 
       <div className="mb-6 flex gap-1.5 overflow-x-auto rounded-full bg-black/40 p-1.5" role="tablist" aria-label="دستهٔ دستاورد">
@@ -116,7 +116,7 @@ export default function Achievements() {
               trackEvent('achievement_filter', { category: item.id });
             }}
             className={`shrink-0 cursor-pointer rounded-full px-3.5 py-1.5 text-xs transition-colors ${
-              category === item.id ? 'bg-[#937fcd] text-white' : 'text-[#aaa] hover:text-white'
+              category === item.id ? 'bg-[var(--purple-bright)] text-white' : 'text-[var(--muted)] hover:text-white'
             }`}
           >
             {item.label}

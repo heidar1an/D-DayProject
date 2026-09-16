@@ -40,6 +40,12 @@ function platformError(message, code, extra = {}) {
 /*
  * ترجمهٔ خطاهای رایج به فارسی. اگر الگویی نخورد، متن خود سرویس برگردانده
  * می‌شود (بدون توکن) تا کاربر حداقل پیام اصلی را ببیند.
+ *
+ * ترتیب مهم است: «ربات عضو/ادمین نیست» باید **پیش از** بررسی توکن بیاید، چون
+ * تلگرام برای کمبود دسترسی هم کد ۴۰۳ می‌دهد — همان کدی که برای توکن باطل می‌دهد
+ * (متنش: `Forbidden: bot is not a member of the channel chat`). اگر ۴۰۳ بی‌قید
+ * «توکن نامعتبر» ترجمه شود، کاربری که فقط باید ربات را ادمین کانال کند، دنبال
+ * توکن تازه می‌رود و مشکل واقعی هیچ‌وقت دیده نمی‌شود.
  */
 function friendlyDescription(raw, status) {
   const text = String(raw ?? '').trim();
@@ -51,20 +57,25 @@ function friendlyDescription(raw, status) {
   if (haystack.includes('chat not found') || haystack.includes('peer_id_invalid')) {
     return 'کانال پیدا نشد؛ شناسهٔ کانال را بررسی کنید (مثل @tapesh یا شناسهٔ عددی)';
   }
-  if (haystack.includes('not enough rights') || haystack.includes('chat_admin_required') || haystack.includes('not enough permission')) {
-    return 'ربات در این کانال ادمین نیست یا اجازهٔ ارسال پست ندارد';
-  }
   if (haystack.includes('bot was blocked') || haystack.includes('user is deactivated')) {
     return 'ربات توسط گیرنده مسدود شده است';
   }
-  if (haystack.includes('unauthorized') || haystack.includes('invalid token') || status === 401 || status === 403) {
+  if (
+    haystack.includes('not a member')
+    || haystack.includes('not enough rights')
+    || haystack.includes('chat_admin_required')
+    || haystack.includes('not enough permission')
+    || haystack.includes('chat_write_forbidden')
+    || haystack.includes('member list is inaccessible')
+    || haystack.includes('forbidden')
+  ) {
+    return 'ربات در این کانال عضو یا ادمین نیست؛ آن را با اجازهٔ ارسال پست ادمین کنید';
+  }
+  if (status === 401 || haystack.includes('unauthorized') || haystack.includes('invalid token')) {
     return 'توکن ربات نامعتبر است یا باطل شده';
   }
   if (haystack.includes('wrong file identifier') || haystack.includes('file is too big')) {
     return 'فایل برای ارسال مناسب نیست یا حجمش بیش از حد مجاز است';
-  }
-  if (haystack.includes('chat_write_forbidden')) {
-    return 'ربات اجازهٔ نوشتن در این کانال را ندارد';
   }
 
   return text || 'سرویس درخواست را نپذیرفت';
@@ -84,7 +95,9 @@ export function createTelegramLikeAdapter(config) {
   const {
     id, label, description, family, apiBaseEnv, defaultApiBase, tokenEnv,
     targetLabel, targetHint, tokenLabel, tokenHint, docsUrl, setupSteps,
-    supports, contentTypes, metrics: metricKeys, apiName,
+    supports, contentTypes, metrics: metricKeys, apiName, setupUrl, setupUrlLabel,
+    /* آیا «اجازهٔ ارسال» هم بررسی شود؟ فقط جایی که API اجازه می‌دهد (تلگرام) */
+    probeAdmin = false,
   } = config;
 
   const PLATFORM = {
@@ -99,6 +112,9 @@ export function createTelegramLikeAdapter(config) {
     tokenHint,
     tokenEnv,
     docsUrl,
+    /* لینک راه‌اندازی هر پلتفرم جدا است (BotFather در تلگرام، پنل ایتایار و…) */
+    setupUrl: setupUrl ?? '',
+    setupUrlLabel: setupUrlLabel ?? '',
     setupSteps,
     supports: supports ?? ['text', 'image', 'document'],
     contentTypes,
@@ -162,10 +178,15 @@ export function createTelegramLikeAdapter(config) {
 
     if (payload.ok === false) {
       const description_ = friendlyDescription(payload.description, response.status);
-      const code = response.status === 401 || response.status === 403 ? 'PUBLISH_UNAUTHORIZED' : 'PUBLISH_FAILED';
+      /* ۴۰۳ کد «دسترسی» است نه «توکن باطل» — کد خطا هم باید همین را بگوید */
+      const code = response.status === 401 ? 'PUBLISH_UNAUTHORIZED'
+        : response.status === 403 ? 'PUBLISH_FORBIDDEN'
+          : 'PUBLISH_FAILED';
       throw platformError(description_, code, {
         httpStatus: response.status,
         platformCode: payload.error_code ?? null,
+        /* متن اصلی سرویس نگه داشته می‌شود تا بالادست بتواند روی علت دقیق تصمیم بگیرد */
+        platformDescription: String(payload.description ?? ''),
       });
     }
 
@@ -209,6 +230,33 @@ export function createTelegramLikeAdapter(config) {
       return Number.isFinite(count) ? Number(count) : null;
     } catch {
       return null;
+    }
+  }
+
+  /*
+   * آیا ربات واقعاً اجازهٔ ارسال دارد؟
+   *
+   * چرا لازم است؟ `getChat` برای کانال **عمومی** حتی وقتی ربات اصلاً عضو نیست هم
+   * موفق می‌شود (آزمون واقعی روی `@mytapesh`). پس `getChat` فقط می‌گوید «کانال
+   * وجود دارد»، نه «ربات می‌تواند در آن پست بگذارد» — و پنلی که از آن تیک سبز
+   * بسازد، دروغ گفته است.
+   *
+   * `getChatAdministrators` این را می‌گوید: اگر ربات ادمین باشد لیست ادمین‌ها را
+   * می‌دهد، وگرنه «member list is inaccessible» می‌گیرد.
+   *
+   * فقط همین دو حالت قطعی خوانده می‌شود؛ هر خطای دیگری «نامعلوم» می‌ماند تا هیچ‌وقت
+   * ادعای نادرست نکنیم (مثلاً قطع‌شدن شبکه نباید «ربات ادمین نیست» ترجمه شود).
+   */
+  async function probeAdminAccess(token, target) {
+    try {
+      await callMethod(token, 'getChatAdministrators', { json: { chat_id: target } });
+      return { admin: true };
+    } catch (error) {
+      const raw = String(error?.platformDescription ?? '').toLowerCase();
+      if (raw.includes('member list is inaccessible') || raw.includes('not enough rights')) {
+        return { admin: false };
+      }
+      return { admin: null };
     }
   }
 
@@ -343,6 +391,51 @@ export function createTelegramLikeAdapter(config) {
         ok: true,
         message: `${targetLabel} «${info.title || info.username || info.id}» در دسترس ربات است`,
       });
+
+      /*
+       * کانال عمومی را هر رباتی می‌بیند، پس `getChat` به‌تنهایی «اجازهٔ ارسال» را
+       * ثابت نمی‌کند. برای پلتفرم‌هایی که این را می‌شود بررسی کرد، یک گام جلوتر
+       * می‌رویم؛ وگرنه همین‌جا تمام می‌شود (رفتار قبلی، بدون تغییر).
+       */
+      if (probeAdmin) {
+        const probe = await probeAdminAccess(value, dest);
+
+        if (probe.admin === true) {
+          checks.push({
+            id: 'admin',
+            label: 'اجازهٔ ارسال',
+            ok: true,
+            message: 'ربات ادمین این کانال است و می‌تواند پست بگذارد',
+          });
+          return { ok: true, complete: true, account, target: info, checks };
+        }
+
+        if (probe.admin === false) {
+          checks.push({
+            id: 'admin',
+            label: 'اجازهٔ ارسال',
+            ok: false,
+            /*
+             * دو حالت واقعی که هر دو به همین خطا می‌رسند و کاربر باید بتواند
+             * تفکیکشان کند: (۱) ربات ادمین نشده، (۲) ربات را ادمین کرده ولی در
+             * کانال **دیگری** — یوزرنیم‌های مشابه (`mtapesh` و `mytapesh`) این را
+             * به یک تلهٔ واقعی تبدیل می‌کند.
+             */
+            message: 'ربات ادمین این کانال نیست؛ آن را با اجازهٔ ارسال پست ادمین کنید. '
+              + 'اگر ادمینش کرده‌اید، شناسهٔ همین کانال را بررسی کنید — ممکن است کانال دیگری باشد (یوزرنیم‌های مشابه را جابه‌جا نگیرید).',
+          });
+          return { ok: false, complete: false, account, target: info, checks };
+        }
+
+        checks.push({
+          id: 'admin',
+          label: 'اجازهٔ ارسال',
+          ok: null,
+          message: 'اجازهٔ ارسال از API معلوم نشد؛ اولین ارسال واقعی مشخص می‌کند',
+        });
+        return { ok: true, complete: true, account, target: info, checks };
+      }
+
       return { ok: true, complete: true, account, target: info, checks };
     } catch (error) {
       checks.push({

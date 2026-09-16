@@ -17,10 +17,10 @@ import { Icon, InfoChip, Modal, Skeleton, StateChip, faNum, renderCloze, toFa } 
 import './flashcards.css';
 
 const RATING_BUTTONS = [
-  { rating: 'again', label: 'دوباره', key: '1', color: '#ef9196' },
-  { rating: 'hard', label: 'سخت', key: '2', color: '#e0b45c' },
-  { rating: 'good', label: 'خوب', key: '3', color: '#77b787' },
-  { rating: 'easy', label: 'آسان', key: '4', color: '#937fcd' },
+  { rating: 'again', label: 'دوباره', key: '1', color: 'var(--red-ink)' },
+  { rating: 'hard', label: 'سخت', key: '2', color: 'var(--gold-ink)' },
+  { rating: 'good', label: 'خوب', key: '3', color: 'var(--green-ink)' },
+  { rating: 'easy', label: 'آسان', key: '4', color: 'var(--purple-ink)' },
 ];
 
 const isTouchOnly = typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches;
@@ -49,10 +49,10 @@ function McqOptions({ card, revealed }) {
       {card.options.map((option, index) => {
         const isCorrect = option.correct;
         const isPicked = picked === index;
-        let cls = 'border-white/10 bg-[#2a2a2a] text-[#e6e6e6] hover:border-white/25';
-        if (showResult && isCorrect) cls = 'border-[#77b787]/60 bg-[#77b787]/10 text-[#9ed3ab]';
-        else if (showResult && isPicked && !isCorrect) cls = 'border-[#ef9196]/60 bg-[#ef9196]/10 text-[#ef9196]';
-        else if (revealed && picked === null && isCorrect) cls = 'border-[#77b787]/40 bg-[#77b787]/5 text-[#9ed3ab]';
+        let cls = 'border-white/10 bg-[var(--surface-soft)] text-[var(--white)] hover:border-white/25';
+        if (showResult && isCorrect) cls = 'border-[#77b787]/60 bg-[#77b787]/10 text-[var(--green-soft-ink)]';
+        else if (showResult && isPicked && !isCorrect) cls = 'border-[#ef9196]/60 bg-[#ef9196]/10 text-[var(--red-ink)]';
+        else if (revealed && picked === null && isCorrect) cls = 'border-[#77b787]/40 bg-[#77b787]/5 text-[var(--green-soft-ink)]';
 
         return (
           <button
@@ -70,13 +70,13 @@ function McqOptions({ card, revealed }) {
       })}
 
       {revealed && (
-        <p className="rounded-2xl bg-white/[0.04] px-4 py-3 text-sm leading-7 text-[#aaa]">
-          <strong className="text-[#e6e6e6]">توضیح: </strong>
+        <p className="rounded-2xl bg-white/[0.04] px-4 py-3 text-sm leading-7 text-[var(--muted)]">
+          <strong className="text-[var(--white)]">توضیح: </strong>
           {card.explanation ?? card.back}
         </p>
       )}
       {!revealed && correctIndex === -1 && card.back && (
-        <p className="text-[11px] text-[#6d6d6d]">این کارت گزینهٔ صحیح ثبت‌شده ندارد؛ پاسخ: {card.back}</p>
+        <p className="text-[11px] text-[var(--ghost)]">این کارت گزینهٔ صحیح ثبت‌شده ندارد؛ پاسخ: {card.back}</p>
       )}
     </div>
   );
@@ -96,8 +96,8 @@ function ShortcutsHelp() {
     <ul className="space-y-2 text-sm">
       {rows.map(([key, label]) => (
         <li key={key} className="flex items-center justify-between gap-4">
-          <span className="text-[#aaa]">{label}</span>
-          <kbd className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-[#e6e6e6]">{key}</kbd>
+          <span className="text-[var(--muted)]">{label}</span>
+          <kbd className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-[var(--white)]">{key}</kbd>
         </li>
       ))}
     </ul>
@@ -280,12 +280,12 @@ export default function ReviewSession({ userData, config, onExit, onEditCard }) 
     const minutes = Math.max(1, Math.round((Date.now() - session.startedAt) / 60000));
     return (
       <div className="grid min-h-[70vh] place-items-center">
-        <div className="fc-card-face w-full max-w-md rounded-[2.5rem] bg-[#282828] p-8 text-center md:p-10">
-          <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#77b787]/12 text-[#9ed3ab]">
+        <div className="fc-card-face w-full max-w-md rounded-[2.5rem] bg-[var(--surface-soft)] p-8 text-center md:p-10">
+          <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#77b787]/12 text-[var(--green-soft-ink)]">
             <Icon name="check" className="h-7 w-7" />
           </span>
-          <h2 className="mt-4 text-2xl [font-family:'Doran',Tahoma,sans-serif]">مرور امروز تمام شد!</h2>
-          <p className="mt-2 text-sm text-[#8a8a8a]">برنامه‌ریزی مرور بعدی انجام شد؛ تپش وقتش را می‌داند.</p>
+          <h2 className="mt-4 text-2xl [font-family:'Doran','Vazir',Tahoma,sans-serif]">مرور امروز تمام شد!</h2>
+          <p className="mt-2 text-sm text-[var(--faint)]">برنامه‌ریزی مرور بعدی انجام شد؛ تپش وقتش را می‌داند.</p>
 
           <div className="mt-6 grid grid-cols-3 gap-3">
             {[
@@ -293,9 +293,9 @@ export default function ReviewSession({ userData, config, onExit, onEditCard }) 
               { label: 'دقت', value: `${toFa(accuracy)}٪` },
               { label: 'زمان', value: `~${toFa(minutes)} دقیقه` },
             ].map((stat) => (
-              <div key={stat.label} className="rounded-2xl border border-white/6 bg-[#2a2a2a] p-3">
-                <strong className="block text-xl [font-family:'Doran',Tahoma,sans-serif]">{stat.value}</strong>
-                <span className="text-[11px] text-[#8a8a8a]">{stat.label}</span>
+              <div key={stat.label} className="rounded-2xl border border-white/6 bg-[var(--surface-soft)] p-3">
+                <strong className="block text-xl [font-family:'Doran','Vazir',Tahoma,sans-serif]">{stat.value}</strong>
+                <span className="text-[11px] text-[var(--faint)]">{stat.label}</span>
               </div>
             ))}
           </div>
@@ -303,7 +303,7 @@ export default function ReviewSession({ userData, config, onExit, onEditCard }) 
           <button
             type="button"
             onClick={finishSession}
-            className="mt-7 w-full cursor-pointer rounded-2xl bg-[#5b8cc7] px-6 py-3.5 text-sm font-bold text-white transition-transform hover:-translate-y-0.5 [font-family:'Doran',Tahoma,sans-serif]"
+            className="mt-7 w-full cursor-pointer rounded-2xl bg-[var(--blue-bright)] px-6 py-3.5 text-sm font-bold text-white transition-transform hover:-translate-y-0.5 [font-family:'Doran','Vazir',Tahoma,sans-serif]"
           >
             بازگشت به فلش‌کارت‌ها
           </button>
@@ -321,21 +321,21 @@ export default function ReviewSession({ userData, config, onExit, onEditCard }) 
         <button
           type="button"
           onClick={finishSession}
-          className="flex cursor-pointer items-center gap-2 rounded-xl bg-[#282828] px-4 py-2.5 text-xs text-[#aaa] transition-colors hover:text-white"
+          className="flex cursor-pointer items-center gap-2 rounded-xl bg-[var(--surface-soft)] px-4 py-2.5 text-xs text-[var(--muted)] transition-colors hover:text-white"
         >
           <Icon name="close" className="h-3.5 w-3.5" />
           پایان مرور
         </button>
 
         <div className="flex-1 text-center">
-          <p className="fc-progress-num text-xs text-[#8a8a8a]">
+          <p className="fc-progress-num text-xs text-[var(--faint)]">
             {toFa(total - remaining + 1)} / {toFa(total)}
-            {label && <span className="mx-2 text-[#6d6d6d]">·</span>}
-            {label && <span className="text-[#aaa]">{label}</span>}
+            {label && <span className="mx-2 text-[var(--ghost)]">·</span>}
+            {label && <span className="text-[var(--muted)]">{label}</span>}
           </p>
           <div className="mx-auto mt-2 h-1 w-full max-w-md overflow-hidden rounded-full bg-white/8" role="progressbar" aria-valuenow={total - remaining + 1} aria-valuemax={total}>
             <span
-              className="block h-full rounded-full bg-[#5b8cc7] transition-[width] duration-300 ease-out"
+              className="block h-full rounded-full bg-[var(--blue-bright)] transition-[width] duration-300 ease-out"
               style={{ width: `${((total - remaining) / Math.max(1, total)) * 100}%` }}
             />
           </div>
@@ -346,7 +346,7 @@ export default function ReviewSession({ userData, config, onExit, onEditCard }) 
             type="button"
             onClick={() => setShowHelp(true)}
             aria-label="میانبرهای صفحه‌کلید"
-            className="grid h-10 w-10 cursor-pointer place-items-center rounded-xl bg-[#282828] text-[#aaa] transition-colors hover:text-white"
+            className="grid h-10 w-10 cursor-pointer place-items-center rounded-xl bg-[var(--surface-soft)] text-[var(--muted)] transition-colors hover:text-white"
           >
             <Icon name="keyboard" className="h-5 w-5" />
           </button>
@@ -357,20 +357,20 @@ export default function ReviewSession({ userData, config, onExit, onEditCard }) 
       <div className="grid place-items-center px-1">
         <article
           key={card.id}
-          className={`fc-card-face w-full max-w-2xl rounded-[2.5rem] border border-white/8 bg-[#282828] p-6 md:p-10 ${leaving ? 'fc-card-leave' : ''}`}
+          className={`fc-card-face w-full max-w-2xl rounded-[2.5rem] border border-white/8 bg-[var(--surface-soft)] p-6 md:p-10 ${leaving ? 'fc-card-leave' : ''}`}
           aria-live="polite"
         >
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
             <div className="flex flex-wrap items-center gap-2">
               <StateChip state={state.state === 'new' && state.reviewCount === 0 ? 'new' : state.state} />
               {state.bookmarked && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-[#e0b45c]/12 px-2.5 py-1 text-[11px] text-[#e0b45c]">
+                <span className="inline-flex items-center gap-1 rounded-full bg-[#e0b45c]/12 px-2.5 py-1 text-[11px] text-[var(--gold-ink)]">
                   <Icon name="star-filled" className="h-3 w-3" />
                   گلچین
                 </span>
               )}
               {card.tags?.slice(0, 3).map((tag) => (
-                <span key={tag} className="rounded-full bg-white/5 px-2.5 py-1 text-[10px] text-[#8a8a8a]">#{tag}</span>
+                <span key={tag} className="rounded-full bg-white/5 px-2.5 py-1 text-[10px] text-[var(--faint)]">#{tag}</span>
               ))}
             </div>
             {mode === 'cram' && <InfoChip icon="redo">مرور آزاد — زمان‌بندی تغییر نمی‌کند</InfoChip>}
@@ -383,7 +383,7 @@ export default function ReviewSession({ userData, config, onExit, onEditCard }) 
             <button
               type="button"
               onClick={() => setHintShown(true)}
-              className="mt-4 cursor-pointer rounded-xl bg-white/5 px-4 py-2 text-xs text-[#aaa] transition-colors hover:text-white"
+              className="mt-4 cursor-pointer rounded-xl bg-white/5 px-4 py-2 text-xs text-[var(--muted)] transition-colors hover:text-white"
             >
               {hintShown ? card.hint : 'نمایش راهنما'}
             </button>
@@ -391,7 +391,7 @@ export default function ReviewSession({ userData, config, onExit, onEditCard }) 
 
           {revealed && card.type !== 'mcq' && (
             <div className="fc-card-face mt-6 border-t border-white/8 pt-5">
-              <p className="text-base leading-8 text-[#e6e6e6] md:text-lg md:leading-9">
+              <p className="text-base leading-8 text-[var(--white)] md:text-lg md:leading-9">
                 {card.type === 'cloze' ? renderCloze(card.front, { revealed: true }) : card.back}
               </p>
             </div>
@@ -401,7 +401,7 @@ export default function ReviewSession({ userData, config, onExit, onEditCard }) 
             <button
               type="button"
               onClick={() => trackEvent('source_open', { cardId: card.id, source: card.source })}
-              className="mt-5 inline-flex cursor-pointer items-center gap-1.5 text-xs text-[#5b8cc7] transition-colors hover:text-[#9cc0e8]"
+              className="mt-5 inline-flex cursor-pointer items-center gap-1.5 text-xs text-[var(--blue-ink)] transition-colors hover:text-[var(--blue-soft-ink)]"
             >
               <Icon name="book" className="h-3.5 w-3.5" />
               منبع: {card.source.title}
@@ -416,7 +416,7 @@ export default function ReviewSession({ userData, config, onExit, onEditCard }) 
           <button
             type="button"
             onClick={() => setRevealed(true)}
-            className="w-full max-w-sm cursor-pointer rounded-2xl bg-[#5b8cc7] px-8 py-4 text-base font-bold text-white shadow-[0_12px_30px_-12px_rgba(91,140,199,0.6)] transition-transform hover:-translate-y-0.5 [font-family:'Doran',Tahoma,sans-serif]"
+            className="w-full max-w-sm cursor-pointer rounded-2xl bg-[var(--blue-bright)] px-8 py-4 text-base font-bold text-white shadow-[0_12px_30px_-12px_rgba(91,140,199,0.6)] transition-transform hover:-translate-y-0.5 [font-family:'Doran','Vazir',Tahoma,sans-serif]"
           >
             نمایش پاسخ
             {!isTouchOnly && <span className="mr-2 text-xs opacity-70">Space</span>}
@@ -434,9 +434,9 @@ export default function ReviewSession({ userData, config, onExit, onEditCard }) 
               >
                 <span className="text-sm font-bold" style={{ color: button.color }}>{button.label}</span>
                 {previews && (
-                  <span className="text-[10px] text-[#8a8a8a]">{formatInterval(previews[button.rating], toFa)}</span>
+                  <span className="text-[10px] text-[var(--faint)]">{formatInterval(previews[button.rating], toFa)}</span>
                 )}
-                {!isTouchOnly && <span className="text-[10px] text-[#6d6d6d]">{button.key}</span>}
+                {!isTouchOnly && <span className="text-[10px] text-[var(--ghost)]">{button.key}</span>}
               </button>
             ))}
           </div>
@@ -447,7 +447,7 @@ export default function ReviewSession({ userData, config, onExit, onEditCard }) 
           <button
             type="button"
             onClick={() => onEditCard?.(card)}
-            className="flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-[#8a8a8a] transition-colors hover:bg-white/5 hover:text-white"
+            className="flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-[var(--faint)] transition-colors hover:bg-white/5 hover:text-white"
           >
             <Icon name="edit" className="h-3.5 w-3.5" />
             ویرایش
@@ -464,7 +464,7 @@ export default function ReviewSession({ userData, config, onExit, onEditCard }) 
               });
               setRevealed(false);
             }}
-            className="flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-[#8a8a8a] transition-colors hover:bg-white/5 hover:text-white"
+            className="flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-[var(--faint)] transition-colors hover:bg-white/5 hover:text-white"
           >
             <Icon name="pause" className="h-3.5 w-3.5" />
             فعلاً نمی‌خوانم
@@ -481,7 +481,7 @@ export default function ReviewSession({ userData, config, onExit, onEditCard }) 
               });
               setRevealed(false);
             }}
-            className="flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-[#8a8a8a] transition-colors hover:bg-white/5 hover:text-white"
+            className="flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-[var(--faint)] transition-colors hover:bg-white/5 hover:text-white"
           >
             <Icon name="clock" className="h-3.5 w-3.5" />
             بعداً امروز
@@ -499,7 +499,7 @@ export default function ReviewSession({ userData, config, onExit, onEditCard }) 
               });
             }}
             className={`flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 transition-colors hover:bg-white/5 ${
-              state.bookmarked ? 'text-[#e0b45c]' : 'text-[#8a8a8a] hover:text-white'
+              state.bookmarked ? 'text-[var(--gold-ink)]' : 'text-[var(--faint)] hover:text-white'
             }`}
             aria-pressed={state.bookmarked}
           >

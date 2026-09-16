@@ -49,7 +49,7 @@ function AvatarOption({ avatar, index, selected, onClick }) {
       title={`آواتار شمارهٔ ${index + 1}`}
       className={`group relative block aspect-square cursor-pointer overflow-hidden rounded-full border-2 transition-all duration-200 ${
         selected
-          ? 'border-[#b99a86] shadow-[0_0_0_4px_rgba(185,154,134,0.22)]'
+          ? 'border-[var(--copper)] shadow-[0_0_0_4px_rgba(185,154,134,0.22)]'
           : 'border-white/10 hover:border-[#b99a86]/60'
       }`}
     >
@@ -106,17 +106,17 @@ export default function AvatarPicker({ initialAvatar, onSave, onClose }) {
         aria-modal="true"
         aria-label="انتخاب آواتار"
         onClick={(event) => event.stopPropagation()}
-        className="avatar-picker flex max-h-[94vh] w-[min(980px,100%)] flex-col overflow-hidden rounded-[2rem] bg-[#282828] shadow-[0_30px_80px_rgba(0,0,0,0.5)] md:rounded-[2.5rem] [font-family:'Pinar',Tahoma,sans-serif]"
+        className="avatar-picker flex max-h-[94vh] w-[min(980px,100%)] flex-col overflow-hidden rounded-[2rem] bg-[var(--surface-soft)] shadow-[0_30px_80px_rgb(var(--shadow-rgb) / 0.5)] md:rounded-[2.5rem] [font-family:'Pinar','Vazir',Tahoma,sans-serif]"
       >
         <header className="flex shrink-0 items-center justify-between gap-4 border-b border-white/5 px-6 py-5 md:px-9 md:py-6">
-          <h3 className="text-xl text-white md:text-2xl [font-family:'Doran',Tahoma,sans-serif]">
+          <h3 className="text-xl text-white md:text-2xl [font-family:'Doran','Vazir',Tahoma,sans-serif]">
             آواتار من
           </h3>
           <button
             type="button"
             onClick={onClose}
             aria-label="بستن"
-            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-[#1d1d1d] text-[#aaa] transition-colors duration-200 hover:bg-[#b99a86]/20 hover:text-white"
+            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-[var(--background)] text-[var(--muted)] transition-colors duration-200 hover:bg-[#b99a86]/20 hover:text-white"
           >
             <svg
               viewBox="0 0 24 24"
@@ -137,7 +137,7 @@ export default function AvatarPicker({ initialAvatar, onSave, onClose }) {
           <aside className="shrink-0 md:sticky md:top-0 md:self-start">
             <div className="flex flex-col items-center gap-4">
               <span className="block w-40 overflow-hidden rounded-full border-4 border-[#b99a86]/40 p-1.5 md:w-48">
-                <span className="flex aspect-square items-center justify-center overflow-hidden rounded-full bg-[#1d1d1d] text-[#b99a86]/60">
+                <span className="flex aspect-square items-center justify-center overflow-hidden rounded-full bg-[var(--background)] text-[#b99a86]/60">
                   {previewSrc ? (
                     <img
                       src={previewSrc}
@@ -150,7 +150,7 @@ export default function AvatarPicker({ initialAvatar, onSave, onClose }) {
                   )}
                 </span>
               </span>
-              <span className="text-center text-sm text-[#8a8a8a]">
+              <span className="text-center text-sm text-[var(--faint)]">
                 {selected ? 'آواتار انتخاب‌شده' : 'هنوز آواتاری انتخاب نکرده‌ای'}
               </span>
             </div>
@@ -158,7 +158,7 @@ export default function AvatarPicker({ initialAvatar, onSave, onClose }) {
 
           {/* شبکهٔ آواتارها */}
           <div className="min-w-0 flex-1">
-            <h4 className="mb-4 text-base text-[#b99a86] [font-family:'Doran',Tahoma,sans-serif]">
+            <h4 className="mb-4 text-base text-[var(--copper-ink)] [font-family:'Doran','Vazir',Tahoma,sans-serif]">
               یکی از آواتارها را انتخاب کن
             </h4>
             <div className="grid grid-cols-4 gap-3 sm:grid-cols-5 md:grid-cols-6 md:gap-4">
@@ -179,14 +179,14 @@ export default function AvatarPicker({ initialAvatar, onSave, onClose }) {
           <button
             type="button"
             onClick={onClose}
-            className="cursor-pointer rounded-full border border-white/15 px-8 py-3 text-[#ccc] transition-colors duration-200 hover:border-[#b99a86]/60 hover:text-white [font-family:'Doran',Tahoma,sans-serif]"
+            className="cursor-pointer rounded-full border border-white/15 px-8 py-3 text-[var(--muted)] transition-colors duration-200 hover:border-[#b99a86]/60 hover:text-white [font-family:'Doran','Vazir',Tahoma,sans-serif]"
           >
             انصراف
           </button>
           <button
             type="button"
             onClick={() => onSave?.(selected)}
-            className="cursor-pointer rounded-full bg-[#b99a86] px-10 py-3 text-white transition-colors duration-200 hover:bg-[#a3826e] [font-family:'Doran',Tahoma,sans-serif]"
+            className="cursor-pointer rounded-full bg-[var(--copper)] px-10 py-3 text-white transition-colors duration-200 hover:bg-[var(--copper)] [font-family:'Doran','Vazir',Tahoma,sans-serif]"
           >
             ذخیره آواتار
           </button>

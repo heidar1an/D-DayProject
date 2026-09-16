@@ -34,13 +34,13 @@ function PrivacyToggle({ item }) {
       role="switch"
       aria-checked={on}
       onClick={() => setOn((prev) => !prev)}
-      className="flex w-full cursor-pointer items-center justify-between gap-3 rounded-2xl border border-white/6 bg-[#2a2a2a] px-4 py-3 text-right transition-colors hover:bg-[#303030]"
+      className="flex w-full cursor-pointer items-center justify-between gap-3 rounded-2xl border border-white/6 bg-[var(--surface-soft)] px-4 py-3 text-right transition-colors hover:bg-[var(--surface-soft)]"
     >
       <span className="min-w-0">
         <strong className="block text-sm">{item.label}</strong>
-        <span className="block text-xs text-[#8a8a8a]">{item.note}</span>
+        <span className="block text-xs text-[var(--faint)]">{item.note}</span>
       </span>
-      <span className={`relative h-6 w-10 shrink-0 rounded-full transition-colors ${on ? 'bg-[#937fcd]' : 'bg-white/12'}`}>
+      <span className={`relative h-6 w-10 shrink-0 rounded-full transition-colors ${on ? 'bg-[var(--purple-bright)]' : 'bg-white/12'}`}>
         <span
           className="absolute right-0.5 top-1/2 h-5 w-5 -translate-y-1/2 rounded-full bg-white shadow transition-transform duration-200"
           style={{ transform: `translateY(-50%) translateX(${on ? -16 : 0}px)` }}
@@ -52,12 +52,12 @@ function PrivacyToggle({ item }) {
 
 function StatTile({ icon, label, value, accent = '#937fcd', heart = false }) {
   return (
-    <div className="rounded-2xl border border-white/6 bg-[#2a2a2a] p-4">
-      <span className="flex items-center gap-2 text-xs text-[#8a8a8a]">
+    <div className="rounded-2xl border border-white/6 bg-[var(--surface-soft)] p-4">
+      <span className="flex items-center gap-2 text-xs text-[var(--faint)]">
         {heart ? <IconHeart className="h-4 w-4" /> : <Icon name={icon} className="h-4 w-4" style={{ color: accent }} />}
         {label}
       </span>
-      <strong className="mt-2 block text-xl [font-family:'Doran',Tahoma,sans-serif]">{value}</strong>
+      <strong className="mt-2 block text-xl [font-family:'Doran','Vazir',Tahoma,sans-serif]">{value}</strong>
     </div>
   );
 }
@@ -69,7 +69,7 @@ function StreakCalendar({ history }) {
 
   return (
     <div>
-      <div className="mb-2 grid grid-cols-7 gap-1.5 text-center text-[10px] text-[#6d6d6d]">
+      <div className="mb-2 grid grid-cols-7 gap-1.5 text-center text-[10px] text-[var(--ghost)]">
         {WEEKDAYS.map((day) => (
           <span key={day}>{day}</span>
         ))}
@@ -86,9 +86,9 @@ function StreakCalendar({ history }) {
                   className={`lg-heat grid aspect-square place-items-center rounded-lg text-[10px] ${
                     active
                       ? isToday
-                        ? 'bg-[#e26d6d] text-white'
+                        ? 'bg-[var(--red)] text-white'
                         : 'bg-[#937fcd]/45 text-white/90'
-                      : 'bg-white/[0.045] text-[#5d5d5d]'
+                      : 'bg-white/[0.045] text-[var(--ghost)]'
                   }`}
                   style={{ '--i': index }}
                   title={active ? 'روز فعال' : 'روز غیرفعال'}
@@ -100,7 +100,7 @@ function StreakCalendar({ history }) {
           </div>
         ))}
       </div>
-      <p className="mt-3 text-[11px] leading-5 text-[#8a8a8a]">
+      <p className="mt-3 text-[11px] leading-5 text-[var(--faint)]">
         استریک یعنی هر روز حداقل یک فعالیت آموزشی معتبر — فقط ورود کافی نیست.
       </p>
     </div>
@@ -125,24 +125,24 @@ export default function LeagueProfile({ userData, me }) {
   const { me: profile, titles, rewards, ledger, streakHistory, pastSeasons, season } = data;
 
   const comparison = [
-    { label: 'دوستان', rank: profile.friendsRank, icon: 'users', color: '#77b787' },
-    { label: 'دانشگاه من', rank: profile.rank, icon: 'shield', color: '#5b8cc7' },
-    { label: 'فصل فعلی', rank: profile.seasonRank, icon: 'calendar', color: '#937fcd' },
-    { label: 'کل تپش', rank: profile.globalRank, icon: 'spark', color: '#ab8e7c' },
+    { label: 'دوستان', rank: profile.friendsRank, icon: 'users', color: 'var(--green-ink)' },
+    { label: 'دانشگاه من', rank: profile.rank, icon: 'shield', color: 'var(--blue-ink)' },
+    { label: 'فصل فعلی', rank: profile.seasonRank, icon: 'calendar', color: 'var(--purple-ink)' },
+    { label: 'کل تپش', rank: profile.globalRank, icon: 'spark', color: 'var(--copper-ink)' },
   ];
 
   return (
     <div className="space-y-6">
       {/* هویت لیگ */}
-      <section aria-label="پروفایل لیگ" className="rounded-[2.5rem] bg-[#282828] p-5 md:p-8">
+      <section aria-label="پروفایل لیگ" className="rounded-[2.5rem] bg-[var(--surface-soft)] p-5 md:p-8">
         <div className="flex flex-wrap items-center gap-5">
           <UserAvatar avatar={profile.avatar} size={84} isYou />
           <div className="min-w-0 flex-1">
-            <h2 className="text-2xl [font-family:'Doran',Tahoma,sans-serif]">{profile.name}</h2>
-            <p className="mt-1 text-sm text-[#aaa]">{profile.university}</p>
+            <h2 className="text-2xl [font-family:'Doran','Vazir',Tahoma,sans-serif]">{profile.name}</h2>
+            <p className="mt-1 text-sm text-[var(--muted)]">{profile.university}</p>
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <TierBadge tier={me?.tier} />
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#e26d6d]/12 px-3 py-1.5 text-sm text-[#ef9196]">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#e26d6d]/12 px-3 py-1.5 text-sm text-[var(--red-ink)]">
                 <IconHeart className="h-4 w-4" />
                 {faNum(profile.hearts)}
               </span>
@@ -150,12 +150,12 @@ export default function LeagueProfile({ userData, me }) {
           </div>
           {me?.tier && (
             <div className="w-full max-w-56 md:w-56">
-              <div className="mb-2 flex items-center justify-between text-xs text-[#aaa]">
+              <div className="mb-2 flex items-center justify-between text-xs text-[var(--muted)]">
                 <span>پیشرفت تا لیگ بعدی</span>
                 <span>{toFa(me.tierProgress?.percent ?? 0)}٪</span>
               </div>
               <ProgressBar value={me.tierProgress?.percent ?? 0} max={100} color={me.tier.color} />
-              <p className="mt-2 text-[11px] text-[#8a8a8a]">
+              <p className="mt-2 text-[11px] text-[var(--faint)]">
                 {faNum(me.tierProgress?.toNextTier ?? 0)} قلب تا لیگ {me.tierProgress?.nextName ?? 'بعدی'}
               </p>
             </div>
@@ -173,16 +173,16 @@ export default function LeagueProfile({ userData, me }) {
       </section>
 
       {/* مقایسهٔ اجتماعی سالم در چند مقیاس */}
-      <section aria-label="جایگاه تو در چند مقیاس" className="rounded-[2.5rem] bg-[#282828] p-5 md:p-8">
-        <h2 className="mb-4 text-lg [font-family:'Doran',Tahoma,sans-serif]">تو کجای لیگ هستی؟</h2>
+      <section aria-label="جایگاه تو در چند مقیاس" className="rounded-[2.5rem] bg-[var(--surface-soft)] p-5 md:p-8">
+        <h2 className="mb-4 text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]">تو کجای لیگ هستی؟</h2>
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           {comparison.map((item) => (
-            <div key={item.label} className="rounded-2xl border border-white/6 bg-[#2a2a2a] p-4 text-center">
+            <div key={item.label} className="rounded-2xl border border-white/6 bg-[var(--surface-soft)] p-4 text-center">
               <span className="mx-auto mb-2 grid h-9 w-9 place-items-center rounded-full" style={{ background: `${item.color}1c`, color: item.color }}>
                 <Icon name={item.icon} className="h-4.5 w-4.5" />
               </span>
-              <strong className="block text-lg [font-family:'Doran',Tahoma,sans-serif]">#{toFa(item.rank)}</strong>
-              <span className="text-xs text-[#8a8a8a]">{item.label}</span>
+              <strong className="block text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]">#{toFa(item.rank)}</strong>
+              <span className="text-xs text-[var(--faint)]">{item.label}</span>
             </div>
           ))}
         </div>
@@ -190,37 +190,37 @@ export default function LeagueProfile({ userData, me }) {
 
       <div className="grid gap-6 xl:grid-cols-2">
         {/* تقویم استریک */}
-        <section aria-label="تقویم استریک" className="rounded-[2.5rem] bg-[#282828] p-5 md:p-8">
+        <section aria-label="تقویم استریک" className="rounded-[2.5rem] bg-[var(--surface-soft)] p-5 md:p-8">
           <header className="mb-5 flex items-center justify-between">
-            <h2 className="flex items-center gap-2 text-lg [font-family:'Doran',Tahoma,sans-serif]">
-              <Icon name="flame" className="h-5 w-5 text-[#ef9196]" />
+            <h2 className="flex items-center gap-2 text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+              <Icon name="flame" className="h-5 w-5 text-[var(--red-ink)]" />
               {toFa(profile.streak)} روز پیوسته
             </h2>
-            <span className="text-xs text-[#8a8a8a]">رکوردت: {toFa(profile.longestStreak)} روز</span>
+            <span className="text-xs text-[var(--faint)]">رکوردت: {toFa(profile.longestStreak)} روز</span>
           </header>
           <StreakCalendar history={streakHistory} />
         </section>
 
         {/* دفتر قلب */}
-        <section aria-label="دفتر قلب" className="rounded-[2.5rem] bg-[#282828] p-5 md:p-8">
+        <section aria-label="دفتر قلب" className="rounded-[2.5rem] bg-[var(--surface-soft)] p-5 md:p-8">
           <header className="mb-5 flex items-center justify-between">
-            <h2 className="flex items-center gap-2 text-lg [font-family:'Doran',Tahoma,sans-serif]">
+            <h2 className="flex items-center gap-2 text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]">
               <IconHeart className="h-5 w-5" />
               دفتر قلب
             </h2>
-            <span className="text-xs text-[#8a8a8a]">هر قلب یک منبع دارد</span>
+            <span className="text-xs text-[var(--faint)]">هر قلب یک منبع دارد</span>
           </header>
           <ul className="space-y-2">
             {ledger.map((row) => (
-              <li key={row.id} className="flex items-center gap-3 rounded-2xl border border-white/6 bg-[#2a2a2a] px-4 py-3">
-                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-[#e26d6d]/12 text-[#ef9196]">
+              <li key={row.id} className="flex items-center gap-3 rounded-2xl border border-white/6 bg-[var(--surface-soft)] px-4 py-3">
+                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-[#e26d6d]/12 text-[var(--red-ink)]">
                   <IconHeart className="h-4 w-4" />
                 </span>
                 <span className="min-w-0 flex-1">
                   <strong className="block truncate text-sm">{row.source}</strong>
-                  <span className="block text-[11px] text-[#8a8a8a]">{row.date}</span>
+                  <span className="block text-[11px] text-[var(--faint)]">{row.date}</span>
                 </span>
-                <span className="shrink-0 text-sm font-bold text-[#ef9196]">+{faNum(row.amount)}</span>
+                <span className="shrink-0 text-sm font-bold text-[var(--red-ink)]">+{faNum(row.amount)}</span>
               </li>
             ))}
           </ul>
@@ -229,71 +229,71 @@ export default function LeagueProfile({ userData, me }) {
 
       <div className="grid gap-6 xl:grid-cols-2">
         {/* فصل‌ها */}
-        <section aria-label="فصل‌های لیگ" className="rounded-[2.5rem] bg-[#282828] p-5 md:p-8">
-          <h2 className="mb-4 text-lg [font-family:'Doran',Tahoma,sans-serif]">فصل‌ها</h2>
+        <section aria-label="فصل‌های لیگ" className="rounded-[2.5rem] bg-[var(--surface-soft)] p-5 md:p-8">
+          <h2 className="mb-4 text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]">فصل‌ها</h2>
 
           <div className="mb-4 rounded-2xl border border-[#937fcd]/30 bg-[#937fcd]/[0.07] p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
-                <p className="text-xs text-[#c9bdf0]">فصل {toFa(season.number)} در جریان است</p>
-                <strong className="text-base [font-family:'Doran',Tahoma,sans-serif]">«{season.name}»</strong>
+                <p className="text-xs text-[var(--purple-soft-ink)]">فصل {toFa(season.number)} در جریان است</p>
+                <strong className="text-base [font-family:'Doran','Vazir',Tahoma,sans-serif]">«{season.name}»</strong>
               </div>
-              <span className="rounded-full bg-black/30 px-3 py-1 text-xs text-[#c9bdf0]">
+              <span className="rounded-full bg-black/30 px-3 py-1 text-xs text-[var(--purple-soft-ink)]">
                 {toFa(season.durationDays)} روزه
               </span>
             </div>
-            <p className="mt-3 text-xs leading-5 text-[#aaa]">
+            <p className="mt-3 text-xs leading-5 text-[var(--muted)]">
               پایان فصل: ثبت رتبه‌ها، اعطای ریوارد و ریست نرمِ لیگ. بهترین رتبهٔ فعلی تو: #{toFa(profile.seasonRank)} دانشگاه.
             </p>
           </div>
 
           {pastSeasons.map((item) => (
-            <div key={item.id} className="mb-3 flex items-center gap-3 rounded-2xl border border-white/6 bg-[#2a2a2a] px-4 py-3 last:mb-0">
-              <span className="grid h-9 w-9 place-items-center rounded-xl text-[#1c1c1c]" style={{ background: item.badgeColor }}>
+            <div key={item.id} className="mb-3 flex items-center gap-3 rounded-2xl border border-white/6 bg-[var(--surface-soft)] px-4 py-3 last:mb-0">
+              <span className="grid h-9 w-9 place-items-center rounded-xl text-[var(--ink-deep)]" style={{ background: item.badgeColor }}>
                 <Icon name="shield" className="h-4.5 w-4.5" strokeWidth={2.2} />
               </span>
               <span className="min-w-0 flex-1">
                 <strong className="block text-sm">فصل {toFa(item.number)} · {item.name}</strong>
-                <span className="block text-[11px] text-[#8a8a8a]">
+                <span className="block text-[11px] text-[var(--faint)]">
                   رتبه #{toFa(item.rank)} {item.scope} · لیگ {item.tier}
                 </span>
               </span>
-              <span className="shrink-0 text-xs text-[#ef9196]">+{faNum(item.heartsEarned)} قلب</span>
+              <span className="shrink-0 text-xs text-[var(--red-ink)]">+{faNum(item.heartsEarned)} قلب</span>
             </div>
           ))}
 
           <div className="mt-4 rounded-2xl bg-black/25 p-4">
-            <p className="mb-2 text-xs text-[#8a8a8a]">ریواردهای پایان فصل:</p>
+            <p className="mb-2 text-xs text-[var(--faint)]">ریواردهای پایان فصل:</p>
             <ul className="flex flex-wrap gap-2">
               {season.rewards.map((reward) => (
-                <li key={reward} className="rounded-full bg-white/5 px-3 py-1.5 text-xs text-[#c9c9c9]">{reward}</li>
+                <li key={reward} className="rounded-full bg-white/5 px-3 py-1.5 text-xs text-[var(--muted)]">{reward}</li>
               ))}
             </ul>
           </div>
         </section>
 
         {/* ریواردها و عناوین */}
-        <section aria-label="ریواردها و عناوین" className="rounded-[2.5rem] bg-[#282828] p-5 md:p-8">
-          <h2 className="mb-4 text-lg [font-family:'Doran',Tahoma,sans-serif]">گنجینهٔ ریوارد</h2>
+        <section aria-label="ریواردها و عناوین" className="rounded-[2.5rem] bg-[var(--surface-soft)] p-5 md:p-8">
+          <h2 className="mb-4 text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]">گنجینهٔ ریوارد</h2>
           <div className="mb-6 grid gap-3 sm:grid-cols-2">
             {rewards.map((reward) => (
               <div
                 key={reward.id}
-                className={`rounded-2xl border p-4 ${reward.owned ? 'border-white/8 bg-[#2a2a2a]' : 'border-dashed border-white/10 bg-transparent opacity-70'}`}
+                className={`rounded-2xl border p-4 ${reward.owned ? 'border-white/8 bg-[var(--surface-soft)]' : 'border-dashed border-white/10 bg-transparent opacity-70'}`}
               >
                 <div className="flex items-center gap-2.5">
                   <span className="h-3 w-3 shrink-0 rounded-full" style={{ background: reward.owned ? reward.color : 'transparent', boxShadow: `inset 0 0 0 2px ${reward.color}` }} />
                   <strong className="text-sm">{reward.label}</strong>
                 </div>
-                <p className="mt-2 text-[11px] text-[#8a8a8a]">{reward.note}</p>
-                <span className={`mt-3 inline-block rounded-full px-2.5 py-1 text-[10px] ${reward.owned ? 'bg-[#77b787]/15 text-[#9ed3ab]' : 'bg-white/5 text-[#8a8a8a]'}`}>
+                <p className="mt-2 text-[11px] text-[var(--faint)]">{reward.note}</p>
+                <span className={`mt-3 inline-block rounded-full px-2.5 py-1 text-[10px] ${reward.owned ? 'bg-[#77b787]/15 text-[var(--green-soft-ink)]' : 'bg-white/5 text-[var(--faint)]'}`}>
                   {reward.owned ? 'در گنجینه‌ات' : 'قفل'}
                 </span>
               </div>
             ))}
           </div>
 
-          <h3 className="mb-3 text-sm text-[#aaa]">عنوان پروفایل — یکی را انتخاب کن</h3>
+          <h3 className="mb-3 text-sm text-[var(--muted)]">عنوان پروفایل — یکی را انتخاب کن</h3>
           <div className="flex flex-wrap gap-2">
             {titles.map((title) => (
               <button
@@ -306,8 +306,8 @@ export default function LeagueProfile({ userData, me }) {
                 aria-pressed={equippedTitle === title.label}
                 className={`cursor-pointer rounded-full px-4 py-2 text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
                   equippedTitle === title.label
-                    ? 'bg-[#937fcd] text-white'
-                    : 'bg-white/5 text-[#aaa] hover:bg-white/10 hover:text-white'
+                    ? 'bg-[var(--purple-bright)] text-white'
+                    : 'bg-white/5 text-[var(--muted)] hover:bg-white/10 hover:text-white'
                 }`}
               >
                 {title.owned ? title.label : `🔒 ${title.label}`}
@@ -318,9 +318,9 @@ export default function LeagueProfile({ userData, me }) {
       </div>
 
       {/* حریم خصوصی */}
-      <section aria-label="حریم خصوصی لیگ" className="rounded-[2.5rem] bg-[#282828] p-5 md:p-8">
-        <h2 className="mb-1.5 text-lg [font-family:'Doran',Tahoma,sans-serif]">حریم خصوصی</h2>
-        <p className="mb-5 text-xs text-[#8a8a8a]">تو تصمیم می‌گیری چه چیزی از فعالیتت دیده شود.</p>
+      <section aria-label="حریم خصوصی لیگ" className="rounded-[2.5rem] bg-[var(--surface-soft)] p-5 md:p-8">
+        <h2 className="mb-1.5 text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]">حریم خصوصی</h2>
+        <p className="mb-5 text-xs text-[var(--faint)]">تو تصمیم می‌گیری چه چیزی از فعالیتت دیده شود.</p>
         <div className="grid gap-3 md:grid-cols-2">
           {PRIVACY_ITEMS.map((item) => (
             <PrivacyToggle key={item.id} item={item} />

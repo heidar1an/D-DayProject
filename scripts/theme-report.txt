@@ -1,0 +1,732 @@
+files touched: 110
+
+── mapped (697 distinct) ──
+   308  ink:#8a8a8a → --faint
+   194  ink:#fff → --white
+   150  ink:#aaa → --muted
+    96  ink:#777 → --faint
+    94  wash:#282828 → --surface-soft
+    88  wash:#5b8cc7 → --blue-bright
+    86  ink:#ef9196 → --red-ink
+    75  ink:#e0b45c → --gold-ink
+    70  ink:#61d192 → --green-ink
+    67  wash:#937fcd → --purple-bright
+    63  ink:#9a9a9a → --faint
+    60  wash:#242426 → --surface
+    52  line:rgba(255,255,255,0.08) → rgb(var(--line-rgb) / 0.08)
+    51  wash:#61d192 → --green-vivid
+    50  ink:#937fcd → --purple-ink
+    48  wash:rgba(255,255,255,0.05) → rgb(var(--wash-rgb) / 0.05)
+    47  ink:#5b8cc7 → --blue-ink
+    47  wash:#2a2a2a → --surface-soft
+    45  ink:#6d6d6d → --ghost
+    43  ink:#bbb → --muted
+    38  line:rgba(255,255,255,0.1) → rgb(var(--line-rgb) / 0.1)
+    37  line:#5b8cc7 → --blue-bright
+    37  ink:#c9bdf0 → --purple-soft-ink
+    32  ink:#9ed3ab → --green-soft-ink
+    28  wash:rgba(255,255,255,0.04) → rgb(var(--wash-rgb) / 0.04)
+    26  ink:#e26d6d → --red-ink
+    26  ink:#c9c9c9 → --muted
+    25  ink:#9cc0e8 → --blue-soft-ink
+    25  ink:#ccc → --muted
+    24  line:rgba(255,255,255,0.07) → rgb(var(--line-rgb) / 0.07)
+    23  line:rgba(255,255,255,0.12) → rgb(var(--line-rgb) / 0.12)
+    23  ink:#e6e6e6 → --white
+    23  line:#61d192 → --green-vivid
+    23  line:rgba(255,255,255,0.09) → rgb(var(--line-rgb) / 0.09)
+    23  ink:#b9b9b9 → --muted
+    22  wash:rgba(255,255,255,0.06) → rgb(var(--wash-rgb) / 0.06)
+    22  ink:#999 → --faint
+    21  wash:#202020 → --surface
+    20  wash:rgba(255,255,255,0.07) → rgb(var(--wash-rgb) / 0.07)
+    20  ink:#77b787 → --green-ink
+    19  wash:rgba(255,255,255,0.03) → rgb(var(--wash-rgb) / 0.03)
+    19  ink:#ddd → --muted
+    19  ink:#666 → --ghost
+    18  wash:rgba(255,255,255,0.08) → rgb(var(--wash-rgb) / 0.08)
+    17  line:rgba(255,255,255,0.06) → rgb(var(--line-rgb) / 0.06)
+    17  wash:#77b787 → --green-bright
+    17  wash:#232323 → --surface
+    17  line:rgba(255,255,255,.055) → rgb(var(--line-rgb) / .055)
+    15  ink:#b99a86 → --copper-ink
+    15  wash:#2a2a2d → --surface-soft
+    15  ink:#555 → --ghost
+    14  ink:#d6d6d6 → --muted
+    13  wash:#e0b45c → --gold
+    13  ink:#d9d9d9 → --muted
+    13  wash:#333 → --surface-strong
+    13  wash:#b99a86 → --copper
+    12  ink:#5c5c5c → --ghost
+    11  wash:#ab8e7c → --brown-bright
+    11  ink:#a8a8a8 → --muted
+    11  wash:#e26d6d → --red
+    11  line:#b99a86 → --copper
+    10  wash:#181818 → --background
+    10  ink:#8f8f8f → --faint
+    10  wash:rgba(255,255,255,0.035) → rgb(var(--wash-rgb) / 0.035)
+    10  ink:#6f6f6f → --faint
+    10  ink:#7ee0ac → --green-soft-ink
+     9  line:rgba(255,255,255,0.16) → rgb(var(--line-rgb) / 0.16)
+     9  wash:rgba(255,255,255,0.1) → rgb(var(--wash-rgb) / 0.1)
+     9  ink:#8a8a90 → --faint
+     9  ink:#b5b5b5 → --muted
+     9  wash:#1b1b1b → --background
+     9  wash:#1c1c1c → --background
+     8  ink:#7c7c7c → --faint
+     8  wash:rgba(255,255,255,0.045) → rgb(var(--wash-rgb) / 0.045)
+     8  ink:#cfcfcf → --muted
+     8  line:rgba(255,255,255,0.14) → rgb(var(--line-rgb) / 0.14)
+     8  ink:#b3a3e0 → --purple-soft-ink
+     8  ink:#ff6969 → --red-ink
+     8  ink:#7a7a7a → --faint
+     8  line:#666666 → --border-solid
+     7  shadow:rgba(0,0,0,0.45) → calc-scale
+     7  wash:rgba(255,255,255,0.02) → rgb(var(--wash-rgb) / 0.02)
+     7  shadow:rgba(0,0,0,0.5) → calc-scale
+     7  line:rgba(255,255,255,0.05) → rgb(var(--line-rgb) / 0.05)
+     7  wash:#1d1d1d → --background
+     7  wash:#303030 → --surface-soft
+     7  shadow:rgba(0,0,0,0.42) → calc-scale
+     7  ink:#709ccb → --blue-ink
+     7  wash:#7ee0ac → --green-vivid
+     6  line:rgba(255,255,255,0.045) → rgb(var(--line-rgb) / 0.045)
+     6  shadow:rgba(0,0,0,0.55) → calc-scale
+     6  ink:#888 → --faint
+     6  wash:rgba(255,255,255,0.022) → rgb(var(--wash-rgb) / 0.022)
+     6  wash:#222 → --surface
+     6  wash:#191919 → --background
+     6  ink:#7f7f7f → --faint
+     6  wash:#132943 → --blue-deep
+     6  ink:#ff8585 → --red-ink
+     6  ink:#b6a6e6 → --purple-soft-ink
+     6  ink:#91b8e7 → --blue-ink
+     6  ink:#eeeeee → --white
+     5  shadow:rgba(0,0,0,0.22) → calc-scale
+     5  wash:#242424 → --surface
+     5  ink:#e6e6ea → --white
+     5  ink:#e2e2e2 → --muted
+     5  wash:#171717 → --background
+     5  ink:#858585 → --faint
+     5  ink:#5f5f5f → --ghost
+     5  line:rgba(255,255,255,.07) → rgb(var(--line-rgb) / .07)
+     5  ink:#d0d0d0 → --muted
+     5  ink:#e2c5ae → --gold-soft-ink
+     5  shadow:rgba(255,255,255,0.025) → calc-scale
+     5  ink:#a5a5a5 → --muted
+     5  wash:#8a8a8a → --light-fill
+     5  ink:#dcdcdc → --muted
+     5  ink:#ab8e7c → --copper-ink
+     5  wash:#2a2a2c → --surface-soft
+     5  ink:#cfc4f2 → --purple-soft-ink
+     5  wash:#202023 → --surface
+     4  ink:#c6b6ee → --purple-soft-ink
+     4  wash:rgba(255,255,255,0.025) → rgb(var(--wash-rgb) / 0.025)
+     4  wash:rgba(255,255,255,0.012) → rgb(var(--wash-rgb) / 0.012)
+     4  wash:rgba(255,255,255,0.14) → rgb(var(--wash-rgb) / 0.14)
+     4  line:rgba(255,255,255,0.22) → rgb(var(--line-rgb) / 0.22)
+     4  wash:#396092 → --blue-bright
+     4  wash:#2e2e30 → --surface-soft
+     4  ink:#b9b9bf → --muted
+     4  ink:#c4c4c4 → --muted
+     4  wash:#222225 → --surface
+     4  line:rgba(255,255,255,0.2) → rgb(var(--line-rgb) / 0.2)
+     4  line:rgba(255,255,255,.08) → rgb(var(--line-rgb) / .08)
+     4  line:rgba(255,255,255,.06) → rgb(var(--line-rgb) / .06)
+     4  ink:#f3f3f3 → --white
+     4  ink:#8f9fb8 → --blue-ink
+     4  wash:#a3826e → --copper
+     4  wash:#212124 → --surface
+     4  wash:#000000 → --deep
+     4  wash:#ffffff → --pure
+     3  line:#35353b → --border-solid
+     3  ink:#f4f4f5 → --white
+     3  wash:#ef9196 → --rose
+     3  shadow:rgba(0,0,0,0.4) → calc-scale
+     3  shadow:rgba(0,0,0,0.38) → calc-scale
+     3  ink:#9d9d9d → --faint
+     3  ink:#f2f2f2 → --white
+     3  wash:#2d2d2d → --surface-soft
+     3  wash:#465c4d → --green
+     3  ink:#9a9aa0 → --faint
+     3  wash:#1d1d1f → --background
+     3  wash:#1f1f22 → --surface
+     3  ink:#c9c9ce → --muted
+     3  ink:#7f7d87 → --faint
+     3  wash:#6b6b6b → --light-fill
+     3  line:rgba(255,255,255,0.25) → rgb(var(--line-rgb) / 0.25)
+     3  ink:#eaf6ef → --white
+     3  wash:#3c6ea5 → --blue-bright
+     3  wash:#0a0d12 → --blue-deep
+     3  ink:#8793a2 → --blue-ink
+     3  ink:#a9ccef → --blue-soft-ink
+     3  wash:rgba(255,255,255,.07) → rgb(var(--wash-rgb) / .07)
+     3  wash:#1a1a1a → --background
+     3  ink:#4f4f4f → --ghost
+     3  ink:#8c8c8c → --faint
+     3  line:rgba(255,255,255,.065) → rgb(var(--line-rgb) / .065)
+     3  line:rgba(255,255,255,0.3) → rgb(var(--line-rgb) / 0.3)
+     3  ink:#5b91cb → --blue-ink
+     3  filter:brightness(0) invert(1) → var(--icon-filter)
+     3  ink:#ff7b7b → --red-ink
+     3  ink:#7d7d7d → --faint
+     3  ink:#1c1c1c → --ink-deep
+     3  ink:#ffffff → --white
+     3  ink:#7fb2e0 → --blue-soft-ink
+     3  ink:#eaf3fc → --white
+     3  ink:#dcebfa → --white
+     3  ink:#e3e3e3 → --muted
+     3  line:#1b1b1e → --border-solid
+     3  ink:#0d0d0d → --ink-deep
+     2  wash:#34343a → --surface-strong
+     2  ink:#c9c9cd → --muted
+     2  line:rgba(255,255,255,0.18) → rgb(var(--line-rgb) / 0.18)
+     2  wash:#1a1a1c → --background
+     2  ink:rgba(255,255,255,0.06) → rgb(var(--ink-rgb) / 0.06)
+     2  line:rgba(255,255,255,0.04) → rgb(var(--line-rgb) / 0.04)
+     2  wash:#262626 → --surface
+     2  ink:#a3a3a3 → --muted
+     2  ink:#ebebeb → --white
+     2  ink:#e8e8e8 → --white
+     2  shadow:rgba(0,0,0,0.35) → calc-scale
+     2  wash:#2b2b2b → --surface-soft
+     2  ink:#a3d8b5 → --green-soft-ink
+     2  wash:#38383c → --surface-strong
+     2  ink:#c2c2c7 → --muted
+     2  wash:#28282c → --surface-soft
+     2  shadow:rgba(0,0,0,0.25) → calc-scale
+     2  ink:#f5f2fb → --white
+     2  wash:#3a3a3e → --surface-strong
+     2  wash:#202022 → --surface
+     2  wash:#262629 → --surface-soft
+     2  wash:#3a3a40 → --surface-strong
+     2  wash:#2b2b2e → --surface-soft
+     2  ink:#d9d9de → --muted
+     2  ink:#cdd7a3 → --gold-ink
+     2  line:rgba(255,255,255,0.055) → rgb(var(--line-rgb) / 0.055)
+     2  wash:#5ac187 → --green-bright
+     2  wash:rgba(255,255,255,0.12) → rgb(var(--wash-rgb) / 0.12)
+     2  ink:#1b1b1e → --ink-deep
+     2  ink:#0c0c0c → --ink-deep
+     2  ink:#b3b3b3 → --muted
+     2  wash:#574c80 → --purple
+     2  wash:rgba(255,255,255,0.25) → rgb(var(--wash-rgb) / 0.25)
+     2  wash:#2e4b75 → --blue
+     2  ink:#9bc2ed → --blue-soft-ink
+     2  ink:#f7f9fc → --white
+     2  ink:#8e99a7 → --blue-ink
+     2  ink:#c7c7c7 → --muted
+     2  ink:#8d8d8d → --faint
+     2  wash:#151515 → --background
+     2  wash:rgba(255,255,255,.016) → rgb(var(--wash-rgb) / .016)
+     2  ink:#808080 → --faint
+     2  ink:#929292 → --faint
+     2  line:rgba(255,255,255,.075) → rgb(var(--line-rgb) / .075)
+     2  wash:rgba(255,255,255,.035) → rgb(var(--wash-rgb) / .035)
+     2  ink:#717171 → --faint
+     2  ink:#b2b2b2 → --muted
+     2  wash:rgba(255,255,255,.045) → rgb(var(--wash-rgb) / .045)
+     2  wash:rgba(255,255,255,.05) → rgb(var(--wash-rgb) / .05)
+     2  wash:rgba(255,255,255,.025) → rgb(var(--wash-rgb) / .025)
+     2  ink:#5d82a8 → --blue-ink
+     2  ink:#6c6c6c → --ghost
+     2  ink:#181818 → --ink-deep
+     2  ink:#737373 → --faint
+     2  wash:rgba(255,255,255,0.16) → rgb(var(--wash-rgb) / 0.16)
+     2  ink:rgba(255,255,255,0.09) → rgb(var(--ink-rgb) / 0.09)
+     2  shadow:rgba(255,255,255,0.16) → calc-scale
+     2  ink:rgba(255,255,255,0.72) → rgb(var(--ink-rgb) / 0.72)
+     2  wash:#000 → --deep
+     2  wash:#285584 → --blue
+     2  ink:#ececec → --white
+     2  ink:#ff9717 → --orange-ink
+     2  ink:#c7aa98 → --gold-ink
+     2  ink:#5a5a5a → --ghost
+     2  ink:#dedede → --muted
+     2  ink:#cfe0f2 → --blue-soft-ink
+     2  ink:#b3a3e8 → --purple-soft-ink
+     2  wash:rgba(255,255,255,0.11) → rgb(var(--wash-rgb) / 0.11)
+     2  wash:#fff → --pure
+     2  ink:#d6cbf5 → --purple-soft-ink
+     2  ink:#191817 → --ink-deep
+     2  shadow:rgba(255,255,255,0.12) → calc-scale
+     2  ink:#cdcdcd → --muted
+     2  wash:#5fae7c → --green-bright
+     2  ink:#8ba3bf → --blue-ink
+     2  ink:#dc9292 → --red-ink
+     2  wash:#23405f → --blue-deep
+     2  ink:#8a7d73 → --gold-ink
+     2  ink:#67ba85 → --green-ink
+     2  wash:#141414 → --background
+     2  line:#8a8a8a → --border-solid
+     2  line:#e5e5e5 → --border-solid
+     2  ink:#bdbdbd → --muted
+     2  ink:#c5c5c5 → --muted
+     2  line:#fff → --border-solid
+     2  wash:#101012 → --background
+     2  wash:#1b1b1e → --background
+     2  ink:#6a6a6a → --ghost
+     2  wash:#ea7f7f → --red
+     2  ink:#a8d8bc → --green-ink
+     2  wash:#232325 → --surface
+     2  shadow:rgba(0,0,0,0.75) → calc-scale
+     2  ink:#9c9c9c → --faint
+     2  wash:#222224 → --surface
+     2  ink:#93a7bf → --blue-ink
+     2  ink:#8b8b8b → --faint
+     2  wash:rgba(255,255,255,0.01) → rgb(var(--wash-rgb) / 0.01)
+     2  ink:#2a2a2e → --ghost
+     2  ink:#b9c2cc → --muted
+     2  ink:#c2a48c → --gold-ink
+     2  wash:#050505 → --deep
+     2  wash:#1f2c3d → --card-sky
+     2  ink:#050505 → --ink-deep
+     2  ink:#ff5961 → --red-ink
+     2  ink:#ff8a8f → --red-soft-ink
+     1  ink:#4285f4 → --blue-ink
+     1  ink:#34a853 → --green-ink
+     1  ink:#fbbc05 → --gold-ink
+     1  ink:#ea4335 → --red-ink
+     1  wash:#2c2c30 → --surface-soft
+     1  wash:#6c5bb0 → --purple-bright
+     1  wash:#3a2628 → --red-deep
+     1  wash:#23342b → --green-deep
+     1  ink:#8ab4f8 → --blue-ink
+     1  ink:#d8d8dc → --muted
+     1  ink:#e6e6e9 → --white
+     1  ink:#cfcfd4 → --muted
+     1  ink:#cbbcf5 → --purple-soft-ink
+     1  wash:rgba(255,255,255,0.18) → rgb(var(--wash-rgb) / 0.18)
+     1  wash:rgba(255,255,255,0.09) → rgb(var(--wash-rgb) / 0.09)
+     1  ink:#b6b6b6 → --muted
+     1  ink:#e4e4e4 → --white
+     1  ink:#d8d8d8 → --muted
+     1  wash:#22262e → --blue-deep
+     1  wash:#0b0d12 → --blue-deep
+     1  wash:#12141a → --blue-deep
+     1  wash:#15171c → --blue-deep
+     1  wash:#3d5244 → --green-deep
+     1  wash:rgba(255,255,255,0.7) → rgb(var(--wash-rgb) / 0.7)
+     1  wash:#2f3034 → --surface-strong
+     1  wash:#3f4045 → --surface-strong
+     1  ink:#e6e1f2 → --white
+     1  ink:#9ed3ad → --green-ink
+     1  line:#b3a3e0 → --purple-bright
+     1  ink:#8d8c95 → --faint
+     1  ink:#bcb8c5 → --muted
+     1  wash:#1c1c1f → --background
+     1  ink:#efedf4 → --white
+     1  ink:#85838d → --faint
+     1  ink:#c4b6ea → --purple-soft-ink
+     1  ink:#dedbe6 → --muted
+     1  ink:#7b7982 → --faint
+     1  ink:#e2898f → --red-ink
+     1  ink:#e8e6ed → --white
+     1  ink:#88878f → --faint
+     1  wash:#a390dd → --purple-bright
+     1  ink:#7c7c82 → --faint
+     1  wash:#45454b → --surface-strong
+     1  wash:#303034 → --surface-strong
+     1  wash:#8d7fbc → --purple-bright
+     1  ink:#e8e8ea → --white
+     1  ink:#d6d0ea → --muted
+     1  wash:#17171a → --background
+     1  ink:#9db8dd → --blue-ink
+     1  ink:#a9e5c4 → --green-soft-ink
+     1  wash:#7ee0a9 → --green-vivid
+     1  wash:#3f9e6d → --green
+     1  wash:#2d2d31 → --surface-soft
+     1  ink:#9fd4ac → --green-ink
+     1  wash:#7fb4e3 → --blue-bright
+     1  ink:#b7e3c2 → --green-soft-ink
+     1  line:rgba(255,255,255,0.4) → rgb(var(--line-rgb) / 0.4)
+     1  wash:#08090c → --blue-deep
+     1  wash:#12161d → --blue-deep
+     1  wash:#181d25 → --blue-deep
+     1  line:rgba(255,255,255,0.11) → rgb(var(--line-rgb) / 0.11)
+     1  ink:#8d96a4 → --blue-ink
+     1  ink:#cbd1da → --muted
+     1  ink:#d8dde5 → --muted
+     1  ink:#818b99 → --blue-ink
+     1  wash:#101821 → --blue-deep
+     1  wash:#0d1118 → --blue-deep
+     1  wash:#171a24 → --blue-deep
+     1  ink:#93b9e7 → --blue-ink
+     1  ink:#f6f8fc → --white
+     1  ink:#b6c0ce → --muted
+     1  wash:#4b79af → --blue-bright
+     1  ink:#c6d8ed → --blue-soft-ink
+     1  ink:#cbdaf0 → --blue-soft-ink
+     1  ink:#bfcfe2 → --blue-soft-ink
+     1  ink:#c3b8e6 → --purple-soft-ink
+     1  ink:#b8e1c3 → --green-soft-ink
+     1  wash:#111b28 → --blue-deep
+     1  wash:#10141c → --blue-deep
+     1  wash:#171823 → --blue-deep
+     1  ink:#b4becb → --muted
+     1  ink:#a9bfd9 → --blue-ink
+     1  ink:#c6dcf6 → --blue-soft-ink
+     1  ink:#f6f8fb → --white
+     1  ink:rgba(255,255,255,0.44) → rgb(var(--ink-rgb) / 0.44)
+     1  ink:#9aa9bc → --blue-ink
+     1  ink:#748092 → --blue-ink
+     1  ink:#c3dcfa → --blue-soft-ink
+     1  ink:#c7d2df → --muted
+     1  ink:#9aa8b8 → --blue-ink
+     1  ink:#f1f4f8 → --white
+     1  ink:#9ba8b7 → --blue-ink
+     1  ink:#e5eaf1 → --white
+     1  wash:#161a20 → --blue-deep
+     1  wash:#101216 → --blue-deep
+     1  ink:#8b96a5 → --blue-ink
+     1  ink:#b3bdca → --muted
+     1  ink:#707a88 → --blue-ink
+     1  ink:#d0d8e4 → --muted
+     1  wash:#11151c → --blue-deep
+     1  ink:#91b7e5 → --blue-ink
+     1  wash:#657487 → --surface-strong
+     1  ink:#a4afbd → --blue-ink
+     1  ink:#adc9e8 → --blue-soft-ink
+     1  ink:#c3cad4 → --muted
+     1  line:rgba(255,255,255,0.28) → rgb(var(--line-rgb) / 0.28)
+     1  ink:#8996a6 → --blue-ink
+     1  ink:#cfdded → --blue-soft-ink
+     1  wash:#11151b → --blue-deep
+     1  ink:#7f8d9c → --blue-ink
+     1  wash:#182535 → --blue-deep
+     1  ink:rgba(255,255,255,0.35) → rgb(var(--ink-rgb) / 0.35)
+     1  ink:#e8eef7 → --white
+     1  ink:#8797aa → --blue-ink
+     1  ink:#ddecff → --blue-soft-ink
+     1  ink:#aab8c8 → --blue-ink
+     1  wash:rgba(255,255,255,0.15) → rgb(var(--wash-rgb) / 0.15)
+     1  wash:#80afe2 → --blue-bright
+     1  ink:#8794a2 → --blue-ink
+     1  ink:#d4e0ee → --muted
+     1  ink:#8b97a5 → --blue-ink
+     1  ink:#dbe8f7 → --white
+     1  ink:#b3c5da → --blue-soft-ink
+     1  ink:#d7dfe9 → --muted
+     1  ink:#6f7d8d → --blue-ink
+     1  wash:#222222 → --surface
+     1  wash:#292929 → --surface-soft
+     1  line:rgba(255,255,255,0.085) → rgb(var(--line-rgb) / 0.085)
+     1  ink:#b7d4f1 → --blue-soft-ink
+     1  ink:#a7a7a7 → --muted
+     1  ink:#8fb5de → --blue-ink
+     1  ink:#afe0bb → --green-soft-ink
+     1  ink:#c2b5e8 → --purple-soft-ink
+     1  ink:#d9bdae → --gold-soft-ink
+     1  ink:#939393 → --faint
+     1  ink:#b8d4ef → --blue-soft-ink
+     1  ink:#444 → --ghost
+     1  shadow:rgba(255,255,255,0.04) → calc-scale
+     1  ink:#c4b9e5 → --purple-soft-ink
+     1  ink:#aac7e6 → --blue-soft-ink
+     1  ink:rgba(255,255,255,0.08) → rgb(var(--ink-rgb) / 0.08)
+     1  ink:#527dab → --blue-ink
+     1  ink:#565656 → --ghost
+     1  ink:#b6d2ef → --blue-soft-ink
+     1  ink:#729dcc → --blue-ink
+     1  ink:#c7bbe9 → --purple-soft-ink
+     1  ink:#b8d4f0 → --blue-soft-ink
+     1  wash:rgba(255,255,255,.03) → rgb(var(--wash-rgb) / .03)
+     1  ink:#d6e5f4 → --blue-soft-ink
+     1  shadow:rgba(0,0,0,.28) → calc-scale
+     1  ink:#9ed3aa → --green-ink
+     1  ink:#9fc4e9 → --blue-soft-ink
+     1  wash:rgba(255,255,255,.02) → rgb(var(--wash-rgb) / .02)
+     1  ink:#648cb9 → --blue-ink
+     1  ink:#626262 → --ghost
+     1  ink:#959595 → --faint
+     1  ink:#525252 → --ghost
+     1  ink:#a8c9eb → --blue-soft-ink
+     1  ink:#5e7fa5 → --blue-ink
+     1  ink:#747474 → --faint
+     1  ink:#393939 → --ghost
+     1  ink:#8fb5dd → --blue-ink
+     1  ink:#969696 → --faint
+     1  ink:#8aa6c4 → --blue-ink
+     1  line:rgba(255,255,255,.095) → rgb(var(--line-rgb) / .095)
+     1  shadow:rgba(0,0,0,.35) → calc-scale
+     1  ink:#567ca6 → --blue-ink
+     1  ink:#8ec59b → --green-ink
+     1  ink:#789580 → --green-ink
+     1  ink:#5e5e5e → --ghost
+     1  ink:#d6e4f2 → --white
+     1  ink:#91bd9c → --green-ink
+     1  ink:#a7d7b2 → --green-ink
+     1  ink:#484848 → --ghost
+     1  ink:#828282 → --faint
+     1  ink:#a88672 → --gold-ink
+     1  ink:#a8c4df → --blue-soft-ink
+     1  ink:#b4a6dc → --purple-ink
+     1  ink:#696969 → --ghost
+     1  ink:#b39a8a → --gold-ink
+     1  line:rgba(255,255,255,.14) → rgb(var(--line-rgb) / .14)
+     1  ink:#a7cbb0 → --green-soft-ink
+     1  ink:#818181 → --faint
+     1  ink:#5f83ab → --blue-ink
+     1  ink:#6d89a5 → --blue-ink
+     1  ink:#52779d → --blue-ink
+     1  ink:#4a6380 → --blue-ink
+     1  line:rgba(255,255,255,.035) → rgb(var(--line-rgb) / .035)
+     1  ink:#bfd4e8 → --blue-soft-ink
+     1  ink:#9dd1a9 → --green-ink
+     1  wash:#212121 → --surface
+     1  ink:#88aed5 → --blue-ink
+     1  ink:#7094ba → --blue-ink
+     1  ink:#adc4da → --blue-soft-ink
+     1  ink:#898989 → --faint
+     1  ink:#b69a89 → --gold-ink
+     1  ink:#c3aa9b → --gold-ink
+     1  line:rgba(255,255,255,.05) → rgb(var(--line-rgb) / .05)
+     1  ink:#a9bed1 → --blue-ink
+     1  wash:#383838 → --surface-strong
+     1  wash:#888 → --light-fill
+     1  wash:#a8caec → --blue-bright
+     1  ink:#5b7fa5 → --blue-ink
+     1  ink:#587da5 → --blue-ink
+     1  ink:#9a806f → --gold-ink
+     1  line:#161616 → --border-solid
+     1  ink:#b9cce0 → --blue-soft-ink
+     1  ink:#727272 → --faint
+     1  ink:#c0b4e1 → --purple-soft-ink
+     1  ink:#786aa1 → --purple-ink
+     1  ink:#655c7a → --purple-ink
+     1  ink:#668eb8 → --blue-ink
+     1  ink:#789abe → --blue-ink
+     1  ink:#b8cde1 → --blue-soft-ink
+     1  ink:#a9d5b3 → --green-ink
+     1  ink:#9ecba9 → --green-ink
+     1  ink:#c3a897 → --gold-ink
+     1  ink:#8c786c → --gold-ink
+     1  line:#171717 → --border-solid
+     1  ink:#9ebedc → --blue-ink
+     1  ink:#82aa8c → --green-ink
+     1  ink:#a6bbaa → --muted
+     1  ink:#607765 → --green-ink
+     1  wash:#1f1d25 → --purple-deep
+     1  ink:#c2b7e1 → --purple-soft-ink
+     1  ink:#71668c → --purple-ink
+     1  ink:#796aa3 → --purple-ink
+     1  ink:#746e80 → --purple-ink
+     1  ink:#656565 → --ghost
+     1  ink:#807396 → --purple-ink
+     1  ink:#505050 → --ghost
+     1  ink:#6188b0 → --blue-ink
+     1  ink:#8195a8 → --blue-ink
+     1  ink:#b89b89 → --gold-ink
+     1  ink:#746796 → --purple-ink
+     1  ink:#c2a591 → --gold-ink
+     1  line:rgba(255,255,255,.04) → rgb(var(--line-rgb) / .04)
+     1  ink:#c9b8e8 → --purple-soft-ink
+     1  wash:#4d84c4 → --blue-bright
+     1  wash:#2f5c8f → --blue-deep
+     1  wash:#101418 → --blue-deep
+     1  wash:#0b0d10 → --blue-deep
+     1  wash:#14181c → --blue-deep
+     1  wash:#f0e9d8 → --light-fill-soft
+     1  shadow:rgba(0,0,0,0.3) → calc-scale
+     1  ink:rgba(255,255,255,0.92) → rgb(var(--ink-rgb) / 0.92)
+     1  line:rgba(255,255,255,0.42) → rgb(var(--line-rgb) / 0.42)
+     1  ink:rgba(255,255,255,0.88) → rgb(var(--ink-rgb) / 0.88)
+     1  wash:#2a2320 → --red-deep
+     1  wash:#171310 → --gold-deep
+     1  ink:#d5bba9 → --gold-ink
+     1  wash:#654f40 → --copper-deep
+     1  line:rgba(255,255,255,0.23) → rgb(var(--line-rgb) / 0.23)
+     1  wash:#67ba85 → --green-bright
+     1  ink:#172d20 → --ink-deep
+     1  wash:#285782 → --blue-deep
+     1  ink:#eb9a9a → --red-ink
+     1  wash:#3d3d3d → --surface-strong
+     1  ink:#ffa53d → --gold-ink
+     1  line:#77b787 → --green-bright
+     1  ink:rgba(255,255,255,0.13) → rgb(var(--ink-rgb) / 0.13)
+     1  wash:#1f1f1f → --surface
+     1  ink:#8fb4dd → --blue-ink
+     1  wash:rgba(255,255,255,0.018) → rgb(var(--wash-rgb) / 0.018)
+     1  ink:#1f1f1f → --ghost
+     1  ink:#ffd0c9 → --red-soft-ink
+     1  ink:#ff9a8d → --red-soft-ink
+     1  ink:#ffe2dd → --red-soft-ink
+     1  wash:#183158 → --blue-deep
+     1  wash:#1e1e1e → --background
+     1  ink:#2e2e30 → --ghost
+     1  ink:rgba(255,255,255,0.14) → rgb(var(--ink-rgb) / 0.14)
+     1  ink:#242426 → --ghost
+     1  ink:#2c2c30 → --ghost
+     1  ink:#e6e0f6 → --white
+     1  ink:#ece7f8 → --white
+     1  ink:#9ab → --blue-ink
+     1  ink:#9aa8bd → --blue-ink
+     1  ink:#e8a3a3 → --red-soft-ink
+     1  ink:#5f6d82 → --blue-ink
+     1  wash:#8a76c8 → --purple-bright
+     1  wash:#6f5fae → --purple-bright
+     1  wash:#7f6dbd → --purple-bright
+     1  ink:#5d5d5d → --ghost
+     1  wash:#141b26 → --blue-deep
+     1  ink:#9aa5b6 → --blue-ink
+     1  ink:rgba(255,255,255,0.65) → rgb(var(--ink-rgb) / 0.65)
+     1  ink:rgba(255,255,255,0.78) → rgb(var(--ink-rgb) / 0.78)
+     1  ink:#a9d6b6 → --green-soft-ink
+     1  wash:rgba(255,255,255,0.015) → rgb(var(--wash-rgb) / 0.015)
+     1  ink:#d9cffa → --purple-soft-ink
+     1  ink:#9d8fd6 → --purple-ink
+     1  line:#b6a6e6 → --purple-bright
+     1  ink:#f4f4f6 → --white
+     1  ink:#8d8d95 → --faint
+     1  line:#5fae7c → --green-bright
+     1  wash:#14301f → --green-deep
+     1  wash:#4a92d4 → --blue
+     1  wash:#2a6396 → --blue-deep
+     1  wash:#16375a → --blue-deep
+     1  wash:#0d2136 → --blue-deep
+     1  wash:rgba(255,255,255,0.98) → rgb(var(--wash-rgb) / 0.98)
+     1  ink:#4a92d4 → --blue-ink
+     1  wash:#6cc08c → --green-bright
+     1  wash:#46945f → --green-bright
+     1  wash:#2b6644 → --green-deep
+     1  wash:#17422b → --green-deep
+     1  ink:#6cc08c → --green-ink
+     1  wash:#f4f4f4 → --light-fill-soft
+     1  ink:#1d1d1d → --ink-deep
+     1  wash:#3576b4 → --blue-bright
+     1  wash:#1d4470 → --blue-deep
+     1  wash:#5b91cb → --blue-bright
+     1  ink:#7fd49a → --green-ink
+     1  wash:#4f83bd → --blue-bright
+     1  wash:#7fb2e0 → --blue-bright
+     1  ink:#86afe0 → --blue-ink
+     1  ink:#a9caf0 → --blue-soft-ink
+     1  line:rgba(255,255,255,0.065) → rgb(var(--line-rgb) / 0.065)
+     1  wash:rgba(255,255,255,0.055) → rgb(var(--wash-rgb) / 0.055)
+     1  ink:#8dcc9d → --green-ink
+     1  ink:#5b5b5b → --ghost
+     1  line:#343434 → --border-solid
+     1  ink:#9fc3ee → --blue-soft-ink
+     1  line:#477253 → --green-deep
+     1  wash:#294331 → --green-deep
+     1  wash:#416f9f → --blue-bright
+     1  ink:#cfe2f7 → --blue-soft-ink
+     1  ink:#7d92ab → --blue-ink
+     1  line:#666 → --border-solid
+     1  ink:#d4b8a4 → --gold-ink
+     1  wash:#a5a0d6 → --purple-bright
+     1  wash:#908bc6 → --purple-bright
+     1  ink:#d98a8a → --red-ink
+     1  wash:#2e2a3a → --purple-deep
+     1  line:#937fcd → --purple-bright
+     1  wash:#a08fd8 → --purple-bright
+     1  wash:#20241f → --green-deep
+     1  ink:#d5d5d5 → --muted
+     1  wash:#1d1d20 → --surface
+     1  ink:#f3e2e2 → --white
+     1  ink:#a8d8b5 → --green-ink
+     1  ink:#dbb0b0 → --red-soft-ink
+     1  wash:#a390da → --purple-bright
+     1  ink:#bfe8d2 → --green-soft-ink
+     1  ink:#e3b8b8 → --red-soft-ink
+     1  ink:#b7a6e8 → --purple-soft-ink
+     1  wash:#1a1a1d → --background
+     1  wash:rgba(255,255,255,0.028) → rgb(var(--wash-rgb) / 0.028)
+     1  shadow:rgba(255,255,255,0.18) → calc-scale
+     1  line:#17171a → --border-solid
+     1  wash:#3a5c8c → --blue-deep
+     1  shadow:rgba(0,0,0,0.85) → calc-scale
+     1  ink:#8f9fb5 → --blue-ink
+     1  ink:#b7c6dd → --blue-soft-ink
+     1  ink:#d8b06a → --gold-ink
+     1  ink:#a9c4e4 → --blue-soft-ink
+     1  ink:#8e8e8e → --faint
+     1  ink:#96a8bd → --blue-ink
+     1  ink:#767676 → --faint
+     1  ink:#eee → --white
+     1  ink:#d98b8b → --red-ink
+     1  ink:#f0a5a5 → --red-soft-ink
+     1  ink:#757575 → --faint
+     1  wash:#4d4d4d → --surface-strong
+     1  ink:#e8c98a → --gold-ink
+     1  wash:rgba(255,255,255,0.008) → rgb(var(--wash-rgb) / 0.008)
+     1  wash:#d8b06a → --gold
+     1  ink:#f0f0f0 → --white
+     1  ink:rgba(255,255,255,0.16) → rgb(var(--ink-rgb) / 0.16)
+     1  ink:rgba(255,255,255,0.34) → rgb(var(--ink-rgb) / 0.34)
+     1  ink:#232326 → --ghost
+     1  wash:rgba(255,255,255,0.3) → rgb(var(--wash-rgb) / 0.3)
+     1  ink:#949494 → --faint
+     1  ink:#a9d9b4 → --green-ink
+     1  ink:#8b9299 → --faint
+     1  wash:#16161b → --blue-deep
+     1  wash:#eef1f5 → --light-fill-soft
+     1  wash:#e6efff → --light-fill-soft
+     1  wash:#302942 → --card-lavender
+     1  wash:#342b27 → --card-copper
+     1  wash:#25312b → --card-sage
+     1  ink:rgba(255,255,255,0.84) → rgb(var(--ink-rgb) / 0.84)
+     1  line:rgba(255,255,255,0.02) → rgb(var(--line-rgb) / 0.02)
+     1  ink:#e0e0e0 → --muted
+     1  wash:#302925 → --card-warm
+     1  ink:#f0ebea → --white
+     1  wash:#ff9717 → --orange
+     1  wash:#ffab3e → --orange
+     1  line:rgba(255,255,255,0.24) → rgb(var(--line-rgb) / 0.24)
+     1  wash:#090909 → --deep
+     1  ink:#111111 → --ink-deep
+     1  ink:#f7f8fb → --white
+     1  ink:#e0e5eb → --white
+     1  wash:#78afe9 → --blue-bright
+     1  ink:#a9a9a9 → --muted
+     1  wash:#f6f6f6 → --light-fill-soft
+     1  line:#f6f6f6 → --border-solid
+     1  ink:#282828 → --ghost
+     1  wash:#f1f1f1 → --light-fill-soft
+     1  wash:#e5e5e5 → --light-fill-soft
+     1  line:#dddddd → --border-solid
+     1  line:#bcbcbc → --border-solid
+     1  ink:#dddddd → --muted
+     1  wash:#f0f0f0 → --light-fill-soft
+     1  shadow:rgba(0,0,0,0.2) → calc-scale
+     1  wash:#f8f8f8 → --light-fill-soft
+     1  ink:#f2f6ff → --white
+     1  wash:#2c2c2c → --surface-soft
+     1  ink:#d4d4d4 → --muted
+     1  ink:#b7b7b7 → --muted
+     1  ink:#f1f1f1 → --white
+     1  ink:#f8f8f8 → --white
+     1  shadow:rgba(0,0,0,0.28) → calc-scale
+     1  wash:#2b3d31 → --green-deep
+
+── left untouched (30 distinct) ──
+    30  ink:#12271a
+     6  ink:#0d1f16
+     4  wash:#74dd9f
+     2  ink:#14121c
+     2  ink:#081019
+     2  ink:#101820
+     2  wash:rgba(0,0,0,0.6)
+     2  ink:#2a1010
+     2  ink:#10161d
+     1  ink:#2a1416
+     1  wash:rgba(0,0,0,0.16)
+     1  ink:#1c1508
+     1  ink:#18131f
+     1  wash:rgba(0,0,0,0.08)
+     1  ink:#091019
+     1  ink:#101b13
+     1  ink:#0e1721
+     1  ink:#152018
+     1  wash:rgba(0,0,0,.55)
+     1  wash:rgba(0,0,0,0.45)
+     1  wash:rgba(0,0,0,0.12)
+     1  wash:#d6ccb4
+     1  wash:rgba(0,0,0,0.2)
+     1  wash:rgba(0,0,0,0.55)
+     1  wash:rgba(0,0,0,0.94)
+     1  ink:#102b47
+     1  wash:rgba(0,0,0,0.28)
+     1  wash:rgba(0,0,0,0.68)
+     1  wash:#9db9d8
+     1  line:#ff5961

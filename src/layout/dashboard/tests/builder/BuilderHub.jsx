@@ -29,25 +29,25 @@ export default function BuilderHub({ subjects, onQuickBuild, onPreset, onAdvance
   return (
     <div className="ex-enter space-y-5">
       {/* سربرگ */}
-      <section className="rounded-[2.5rem] border border-white/8 bg-[#242426] p-6 md:p-8">
+      <section className="rounded-[2.5rem] border border-white/8 bg-[var(--surface)] p-6 md:p-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-extrabold text-[#61D192] [font-family:'Doran',Tahoma,sans-serif] md:text-3xl">
+            <h1 className="text-2xl font-extrabold text-[var(--green-ink)] [font-family:'Doran','Vazir',Tahoma,sans-serif] md:text-3xl">
               آزمون‌ساز شخصی
             </h1>
-            <p className="mt-2 max-w-xl text-sm leading-7 text-[#aaa]">
+            <p className="mt-2 max-w-xl text-sm leading-7 text-[var(--muted)]">
               آزمونی متناسب با چیزی که امروز می‌خواهی تمرین کنی بساز؛ از بانک تست تپش، دقیقاً به اندازهٔ نیازت.
             </p>
           </div>
           <button
             type="button"
             onClick={onMyExams}
-            className="flex cursor-pointer items-center gap-2 rounded-2xl border border-white/10 bg-white/6 px-4 py-2.5 text-xs text-[#ccc] transition-colors hover:bg-white/12 hover:text-white"
+            className="flex cursor-pointer items-center gap-2 rounded-2xl border border-white/10 bg-white/6 px-4 py-2.5 text-xs text-[var(--muted)] transition-colors hover:bg-white/12 hover:text-white"
           >
-            <Icon name="card" className="h-4 w-4 text-[#937fcd]" />
+            <Icon name="card" className="h-4 w-4 text-[var(--purple-ink)]" />
             آزمون‌های من
             {savedExamCount > 0 && (
-              <span className="rounded-full bg-[#937fcd]/20 px-2 py-0.5 text-[10px] text-[#cfc4f2]">{toFa(savedExamCount)}</span>
+              <span className="rounded-full bg-[#937fcd]/20 px-2 py-0.5 text-[10px] text-[var(--purple-soft-ink)]">{toFa(savedExamCount)}</span>
             )}
           </button>
         </div>
@@ -62,7 +62,7 @@ export default function BuilderHub({ subjects, onQuickBuild, onPreset, onAdvance
       >
         <div className="space-y-4">
           <div>
-            <p className="mb-2 text-[11px] text-[#8a8a8a]">درس (اختیاری — خالی = کل بانک)</p>
+            <p className="mb-2 text-[11px] text-[var(--faint)]">درس (اختیاری — خالی = کل بانک)</p>
             <div className="flex flex-wrap gap-1.5">
               {availableSubjects.map((subject) => (
                 <button
@@ -73,8 +73,8 @@ export default function BuilderHub({ subjects, onQuickBuild, onPreset, onAdvance
                   className="cursor-pointer rounded-full border px-3.5 py-2 text-xs transition-colors"
                   style={
                     subjectIds.includes(subject.id)
-                      ? { borderColor: `${subject.accent}80`, background: `${subject.accent}1a`, color: '#fff' }
-                      : { borderColor: 'rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)', color: '#aaa' }
+                      ? { borderColor: `${subject.accent}80`, background: `${subject.accent}1a`, color: 'var(--white)' }
+                      : { borderColor: 'rgb(var(--line-rgb) / 0.1)', background: 'rgb(var(--wash-rgb) / 0.03)', color: 'var(--muted)' }
                   }
                 >
                   {subject.name}
@@ -86,7 +86,7 @@ export default function BuilderHub({ subjects, onQuickBuild, onPreset, onAdvance
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <p className="mb-2 text-[11px] text-[#8a8a8a]">تعداد تست</p>
+              <p className="mb-2 text-[11px] text-[var(--faint)]">تعداد تست</p>
               <div className="flex flex-wrap gap-1.5">
                 {QUICK_COUNTS.map((option) => (
                   <button
@@ -95,7 +95,7 @@ export default function BuilderHub({ subjects, onQuickBuild, onPreset, onAdvance
                     onClick={() => setCount(option)}
                     aria-pressed={count === option}
                     className={`cursor-pointer rounded-xl px-3.5 py-2 text-xs transition-colors ${
-                      count === option ? 'bg-[#61D192] font-bold text-[#12271a]' : 'bg-white/6 text-[#bbb] hover:bg-white/12'
+                      count === option ? 'bg-[var(--green-vivid)] font-bold text-[#12271a]' : 'bg-white/6 text-[var(--muted)] hover:bg-white/12'
                     }`}
                   >
                     {toFa(option)}
@@ -104,7 +104,7 @@ export default function BuilderHub({ subjects, onQuickBuild, onPreset, onAdvance
               </div>
             </div>
             <div>
-              <p className="mb-2 text-[11px] text-[#8a8a8a]">زمان</p>
+              <p className="mb-2 text-[11px] text-[var(--faint)]">زمان</p>
               <div className="flex flex-wrap gap-1.5">
                 {QUICK_TIMES.map((option) => (
                   <button
@@ -113,7 +113,7 @@ export default function BuilderHub({ subjects, onQuickBuild, onPreset, onAdvance
                     onClick={() => setTime(option.id)}
                     aria-pressed={time === option.id}
                     className={`cursor-pointer rounded-xl px-3.5 py-2 text-xs transition-colors ${
-                      time === option.id ? 'bg-[#61D192] font-bold text-[#12271a]' : 'bg-white/6 text-[#bbb] hover:bg-white/12'
+                      time === option.id ? 'bg-[var(--green-vivid)] font-bold text-[#12271a]' : 'bg-white/6 text-[var(--muted)] hover:bg-white/12'
                     }`}
                   >
                     {option.label}
@@ -126,7 +126,7 @@ export default function BuilderHub({ subjects, onQuickBuild, onPreset, onAdvance
           <button
             type="button"
             onClick={() => onQuickBuild({ subjectIds, questionCount: count, durationMode: time === 'suggested' ? 'suggested' : 'custom', durationMinutes: time === 'suggested' ? null : time })}
-            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-[#61D192] py-3.5 text-sm font-bold text-[#12271a] transition-all hover:-translate-y-0.5 hover:bg-[#7ee0ac] sm:w-auto sm:px-10"
+            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-[var(--green-vivid)] py-3.5 text-sm font-bold text-[#12271a] transition-all hover:-translate-y-0.5 hover:bg-[var(--green-vivid)] sm:w-auto sm:px-10"
           >
             <Icon name="play" className="h-4 w-4" />
             ساخت آزمون
@@ -136,8 +136,8 @@ export default function BuilderHub({ subjects, onQuickBuild, onPreset, onAdvance
 
       {/* پریست‌های هوشمند */}
       <section aria-label="پریست‌های هوشمند">
-        <h2 className="mb-3 flex items-center gap-2 text-sm font-bold [font-family:'Doran',Tahoma,sans-serif]">
-          <Icon name="spark" className="h-4 w-4 text-[#937fcd]" />
+        <h2 className="mb-3 flex items-center gap-2 text-sm font-bold [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+          <Icon name="spark" className="h-4 w-4 text-[var(--purple-ink)]" />
           یا یکی از این مسیرهای آماده را برو
         </h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -146,14 +146,14 @@ export default function BuilderHub({ subjects, onQuickBuild, onPreset, onAdvance
               key={preset.id}
               type="button"
               onClick={() => onPreset(preset)}
-              className="group flex cursor-pointer items-start gap-3 rounded-[1.5rem] border border-white/8 bg-[#242426] p-4 text-right transition-all hover:-translate-y-0.5 hover:border-white/16"
+              className="group flex cursor-pointer items-start gap-3 rounded-[1.5rem] border border-white/8 bg-[var(--surface)] p-4 text-right transition-all hover:-translate-y-0.5 hover:border-white/16"
             >
               <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl" style={{ background: `${preset.accent}14`, color: preset.accent }}>
                 <Icon name={preset.icon} className="h-5 w-5" />
               </span>
               <span className="min-w-0">
-                <strong className="block text-[13px] [font-family:'Doran',Tahoma,sans-serif]">{preset.label}</strong>
-                <span className="mt-1 block text-[11.5px] leading-5 text-[#9a9a9a]">{preset.description}</span>
+                <strong className="block text-[13px] [font-family:'Doran','Vazir',Tahoma,sans-serif]">{preset.label}</strong>
+                <span className="mt-1 block text-[11.5px] leading-5 text-[var(--faint)]">{preset.description}</span>
               </span>
             </button>
           ))}
@@ -167,18 +167,18 @@ export default function BuilderHub({ subjects, onQuickBuild, onPreset, onAdvance
         className="group flex w-full cursor-pointer items-center justify-between gap-4 rounded-[2rem] border border-[#937fcd]/30 bg-[#937fcd]/[0.06] p-5 text-right transition-all hover:-translate-y-0.5 hover:border-[#937fcd]/50 md:p-6"
       >
         <span className="flex items-start gap-3.5">
-          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#937fcd]/15 text-[#937fcd]">
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#937fcd]/15 text-[var(--purple-ink)]">
             <Icon name="layers" className="h-5.5 w-5.5" />
           </span>
           <span>
-            <strong className="block text-[14.5px] [font-family:'Doran',Tahoma,sans-serif]">سازندهٔ پیشرفته — کنترل کامل</strong>
-            <span className="mt-1 block text-[12px] leading-6 text-[#9a9a9a]">
+            <strong className="block text-[14.5px] [font-family:'Doran','Vazir',Tahoma,sans-serif]">سازندهٔ پیشرفته — کنترل کامل</strong>
+            <span className="mt-1 block text-[12px] leading-6 text-[var(--faint)]">
               انتخاب درس به درس و مبحث به مبحث، توزیع سطح سختی، سهمیهٔ اشتباهات قبلی، فیلترهای پیشرفته و Blueprint دقیق قبل از ساخت
               — {faNum(5)} مرحله، همه‌چیز زیر دست تو.
             </span>
           </span>
         </span>
-        <Icon name="chevron" className="h-5 w-5 shrink-0 -rotate-90 text-[#937fcd] transition-transform group-hover:-translate-x-1" />
+        <Icon name="chevron" className="h-5 w-5 shrink-0 -rotate-90 text-[var(--purple-ink)] transition-transform group-hover:-translate-x-1" />
       </button>
     </div>
   );

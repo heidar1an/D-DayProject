@@ -5,13 +5,13 @@
  */
 
 :root {
-  --league-heart: #e26d6d;
+  --league-heart: var(--red);
 }
 
 /* ── اسکلت لودینگ: بدون Layout Shift، هم‌اندازهٔ محتوای واقعی ── */
 .lg-sk {
   border-radius: 0.75rem;
-  background: linear-gradient(100deg, rgba(255, 255, 255, 0.05) 40%, rgba(255, 255, 255, 0.11) 50%, rgba(255, 255, 255, 0.05) 60%);
+  background: linear-gradient(100deg, rgb(var(--wash-rgb) / 0.05) 40%, rgb(var(--wash-rgb) / 0.11) 50%, rgb(var(--wash-rgb) / 0.05) 60%);
   background-size: 200% 100%;
   animation: lg-shimmer 1.4s ease-in-out infinite;
 }

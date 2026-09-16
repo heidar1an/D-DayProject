@@ -48,7 +48,7 @@
   border: 1px solid transparent;
   background: transparent;
   color: var(--ad-muted);
-  font-family: 'Pinar', Tahoma, sans-serif;
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
   font-size: 0.82rem;
   cursor: pointer;
   transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
@@ -61,7 +61,7 @@
 }
 
 .an-tab.is-active {
-  color: #fff;
+  color: var(--white);
   background: var(--ad-accent-soft);
   border-color: rgba(147, 127, 205, 0.5);
 }
@@ -88,7 +88,7 @@
   border-radius: 999px;
   background: transparent;
   color: var(--ad-muted);
-  font-family: 'Pinar', Tahoma, sans-serif;
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
   font-size: 0.76rem;
   cursor: pointer;
   white-space: nowrap;
@@ -96,7 +96,7 @@
 
 .an-range.is-active {
   background: var(--ad-accent);
-  color: #fff;
+  color: var(--white);
 }
 
 .an-dates {
@@ -118,7 +118,7 @@
   border: 1px solid var(--ad-border);
   background: var(--ad-surface-2);
   color: var(--ad-text);
-  font-family: 'Pinar', Tahoma, sans-serif;
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
   font-size: 0.78rem;
   color-scheme: dark;
 }
@@ -185,7 +185,7 @@
 .an-hero h2 {
   margin: 0;
   font-size: 1.22rem;
-  background: linear-gradient(90deg, #5b8cc7, #937fcd);
+  background: linear-gradient(90deg, var(--blue-bright), var(--purple-bright));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -349,7 +349,7 @@
 }
 
 .an-kpi__value {
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: 1.42rem;
   line-height: 1.1;
   color: var(--ad-text);
@@ -395,7 +395,7 @@
 }
 
 .an-mini__label { font-size: 0.7rem; color: var(--ad-muted); }
-.an-mini__value { font-family: 'Doran', Tahoma, sans-serif; font-size: 1rem; color: var(--ad-text); }
+.an-mini__value { font-family: 'Doran', 'Vazir', Tahoma, sans-serif; font-size: 1rem; color: var(--ad-text); }
 .an-mini--good .an-mini__value { color: var(--ad-green); }
 .an-mini--warn .an-mini__value { color: var(--ad-gold); }
 .an-mini--critical .an-mini__value { color: var(--ad-red); }
@@ -511,7 +511,7 @@
 
 .an-summary__metrics div { display: flex; flex-direction: column; gap: 0.25rem; }
 .an-summary__metrics span { font-size: 0.7rem; }
-.an-summary__metrics strong { font-family: 'Doran', Tahoma, sans-serif; font-size: 1rem; }
+.an-summary__metrics strong { font-family: 'Doran', 'Vazir', Tahoma, sans-serif; font-size: 1rem; }
 
 /* ───────────────────────────── مسائل و یافته‌ها ───────────────────────────── */
 
@@ -613,7 +613,7 @@
 .an-chart__axis {
   fill: var(--ad-muted-2);
   font-size: 10px;
-  font-family: 'Pinar', Tahoma, sans-serif;
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
 }
 
 .an-chart__empty {
@@ -637,10 +637,10 @@
   z-index: 20;
   min-width: 140px;
   padding: 0.5rem 0.65rem;
-  background: rgba(20, 20, 22, 0.96);
+  background: rgb(var(--scrim-rgb) / 0.96);
   border: 1px solid var(--ad-border);
   border-radius: var(--ad-radius-sm);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 10px 28px rgb(var(--shadow-rgb) / calc(0.45 * var(--shadow-scale)));
   font-size: 0.72rem;
   pointer-events: none;
   display: flex;
@@ -682,13 +682,13 @@
 .an-donut__value {
   fill: var(--ad-text);
   font-size: 20px;
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
 }
 
 .an-donut__label {
   fill: var(--ad-muted);
   font-size: 10px;
-  font-family: 'Pinar', Tahoma, sans-serif;
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
 }
 
 .an-legend {
@@ -740,7 +740,7 @@
 .an-gauge__value {
   fill: var(--ad-text);
   font-size: 22px;
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
 }
 
 .an-gauge__label {
@@ -829,7 +829,7 @@
   margin-bottom: 0.3rem;
 }
 
-.an-funnel__value { font-family: 'Doran', Tahoma, sans-serif; }
+.an-funnel__value { font-family: 'Doran', 'Vazir', Tahoma, sans-serif; }
 
 .an-funnel__track {
   height: 12px;
@@ -1100,7 +1100,7 @@
 }
 
 .an-inventory__item span { font-size: 0.7rem; color: var(--ad-muted); }
-.an-inventory__item strong { font-family: 'Doran', Tahoma, sans-serif; font-size: 0.92rem; }
+.an-inventory__item strong { font-family: 'Doran', 'Vazir', Tahoma, sans-serif; font-size: 0.92rem; }
 
 .an-plain--tight { gap: 0.3rem; }
 .an-plain li { font-size: 0.75rem; display: flex; gap: 0.5rem; align-items: baseline; }
@@ -1141,7 +1141,7 @@
 
 .an-vital__value {
   margin: 0 0 0.4rem;
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: 1.3rem;
 }
 
@@ -1200,7 +1200,7 @@
 }
 
 .an-error__count {
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: 0.95rem;
   color: var(--ad-red);
   min-width: 2.2rem;
@@ -1257,7 +1257,7 @@
 }
 
 .an-live__big strong {
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: 2.4rem;
   line-height: 1;
   color: var(--ad-text);
@@ -1368,7 +1368,7 @@
   border: 1px solid var(--ad-border);
   background: var(--ad-surface-2);
   color: var(--ad-text);
-  font-family: 'Pinar', Tahoma, sans-serif;
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
   font-size: 0.78rem;
 }
 
@@ -1402,7 +1402,7 @@
   border: 1px solid var(--ad-border);
   background: var(--ad-surface-2);
   color: var(--ad-text);
-  font-family: 'Pinar', Tahoma, sans-serif;
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
   font-size: 0.78rem;
   cursor: pointer;
   transition: background 0.18s ease, border-color 0.18s ease;
@@ -1414,14 +1414,14 @@
 .an-btn--primary {
   background: var(--ad-accent);
   border-color: var(--ad-accent);
-  color: #fff;
+  color: var(--white);
 }
 
 .an-linkbtn {
   border: 0;
   background: transparent;
   color: var(--ad-accent);
-  font-family: 'Pinar', Tahoma, sans-serif;
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
   font-size: 0.72rem;
   cursor: pointer;
   padding: 0;
@@ -1441,7 +1441,7 @@
   border: 1px solid var(--ad-border);
   background: transparent;
   color: var(--ad-muted);
-  font-family: 'Pinar', Tahoma, sans-serif;
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
   font-size: 0.72rem;
   cursor: pointer;
   transition: background 0.18s ease, color 0.18s ease;

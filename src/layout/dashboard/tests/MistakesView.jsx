@@ -54,15 +54,15 @@ export default function MistakesView({ userData, onStartReview }) {
     <div className="space-y-5" dir="rtl">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg [font-family:'Doran',Tahoma,sans-serif]">اشتباهات من</h2>
-          <p className="mt-1 text-xs text-[#8a8a8a]">
+          <h2 className="text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]">اشتباهات من</h2>
+          <p className="mt-1 text-xs text-[var(--faint)]">
             {faNum(data.items.length)} سؤال غلط — قوی‌ترین منبع یادگیری، اشتباه خودت است.
           </p>
         </div>
         <button
           type="button"
           onClick={() => onStartReview(visibleItems.map((entry) => entry.question.id))}
-          className="cursor-pointer rounded-xl bg-[#e26d6d]/15 px-5 py-2.5 text-sm font-bold text-[#ef9196] transition-transform hover:-translate-y-0.5"
+          className="cursor-pointer rounded-xl bg-[#e26d6d]/15 px-5 py-2.5 text-sm font-bold text-[var(--red-ink)] transition-transform hover:-translate-y-0.5"
         >
           مرور اشتباهات ({toFa(visibleItems.length)} سؤال)
         </button>
@@ -70,9 +70,9 @@ export default function MistakesView({ userData, onStartReview }) {
 
       {/* موضوعات ضعیف */}
       {data.weakTopics.length > 0 && (
-        <section className="rounded-[2rem] border border-white/8 bg-[#282828] p-5" aria-label="موضوعات ضعیف">
-          <h3 className="flex items-center gap-2 text-sm [font-family:'Doran',Tahoma,sans-serif]">
-            <Icon name="chart" className="h-4 w-4 text-[#ef9196]" />
+        <section className="rounded-[2rem] border border-white/8 bg-[var(--surface-soft)] p-5" aria-label="موضوعات ضعیف">
+          <h3 className="flex items-center gap-2 text-sm [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+            <Icon name="chart" className="h-4 w-4 text-[var(--red-ink)]" />
             موضوعات ضعیف تو
           </h3>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -85,7 +85,7 @@ export default function MistakesView({ userData, onStartReview }) {
                 className={`flex cursor-pointer items-center justify-between gap-3 rounded-2xl border px-4 py-3.5 text-right transition-colors ${
                   activeTopic === topic.subjectId
                     ? 'border-[#e26d6d]/50 bg-[#e26d6d]/10'
-                    : 'border-white/6 bg-[#2a2a2a] hover:border-white/20'
+                    : 'border-white/6 bg-[var(--surface-soft)] hover:border-white/20'
                 }`}
               >
                 <span className="flex min-w-0 items-center gap-2.5">
@@ -97,12 +97,12 @@ export default function MistakesView({ userData, onStartReview }) {
                   </span>
                   <span className="min-w-0">
                     <strong className="block truncate text-[13px]">{topic.subject?.nameFa ?? topic.subjectId}</strong>
-                    <span className="text-[10px] text-[#8a8a8a]">
+                    <span className="text-[10px] text-[var(--faint)]">
                       {topic.subject?.name} · {toFa(topic.count)} اشتباه
                     </span>
                   </span>
                 </span>
-                <span className="shrink-0 text-lg font-bold text-[#ef9196] [font-family:'Doran',Tahoma,sans-serif]">
+                <span className="shrink-0 text-lg font-bold text-[var(--red-ink)] [font-family:'Doran','Vazir',Tahoma,sans-serif]">
                   {toFa(topic.count)}
                 </span>
               </button>
@@ -112,7 +112,7 @@ export default function MistakesView({ userData, onStartReview }) {
             <button
               type="button"
               onClick={() => setActiveTopic(null)}
-              className="mt-3 cursor-pointer text-xs text-[#937fcd] transition-colors hover:text-[#c9bdf0]"
+              className="mt-3 cursor-pointer text-xs text-[var(--purple-ink)] transition-colors hover:text-[var(--purple-soft-ink)]"
             >
               حذف فیلتر موضوع
             </button>
@@ -124,25 +124,25 @@ export default function MistakesView({ userData, onStartReview }) {
       <section aria-label="سؤال‌های غلط">
         <ul className="space-y-2.5">
           {visibleItems.map(({ question, state, repeated }) => (
-            <li key={question.id} className="flex items-start gap-3 rounded-2xl border border-white/6 bg-[#2a2a2a] px-4 py-3.5">
+            <li key={question.id} className="flex items-start gap-3 rounded-2xl border border-white/6 bg-[var(--surface-soft)] px-4 py-3.5">
               <span
                 className="grid h-9 w-9 shrink-0 place-items-center rounded-xl"
-                style={{ background: 'rgba(226,109,109,0.12)', color: '#ef9196' }}
+                style={{ background: 'rgba(226,109,109,0.12)', color: 'var(--red-ink)' }}
               >
                 <Icon name={repeated ? 'flame' : 'x'} className="h-4 w-4" />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="line-clamp-2 text-[13.5px] leading-6 text-[#e6e6e6]" dir="ltr">
+                <p className="line-clamp-2 text-[13.5px] leading-6 text-[var(--white)]" dir="ltr">
                   {question.stem}
                 </p>
                 <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                   <DifficultyBadge difficulty={question.difficulty} />
-                  <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] text-[#9a9a9a]">{question.topic.fa}</span>
-                  <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] text-[#9a9a9a]">
+                  <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] text-[var(--faint)]">{question.topic.fa}</span>
+                  <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] text-[var(--faint)]">
                     {state.attempts > 1 ? `${toFa(state.attempts)} بار حل‌شده` : 'یک بار غلط'}
                   </span>
                   {repeated && (
-                    <span className="rounded-full bg-[#e26d6d]/12 px-2 py-0.5 text-[10px] text-[#ef9196]">
+                    <span className="rounded-full bg-[#e26d6d]/12 px-2 py-0.5 text-[10px] text-[var(--red-ink)]">
                       اشتباه تکراری — اولویت مرور
                     </span>
                   )}

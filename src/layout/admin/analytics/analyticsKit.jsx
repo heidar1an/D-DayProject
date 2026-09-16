@@ -442,7 +442,7 @@ export function exportExcel(sectionLabel, data, rangeLabel = '') {
   }).join('<br/>');
 
   const html = `<html dir="rtl"><head><meta charset="utf-8" />
-    <style>body{font-family:Tahoma,sans-serif;direction:rtl}h1{font-size:15px}h3{font-size:13px;color:#555}
+    <style>body{font-family:'Vazir',Tahoma,sans-serif;direction:rtl}h1{font-size:15px}h3{font-size:13px;color:#555}
     table{border-collapse:collapse;font-size:12px}th,td{border:1px solid #999;padding:4px 8px;text-align:right}
     th{background:#eee}</style></head><body>
     <h1>تپش — ${esc(sectionLabel)}${rangeLabel ? ` — ${esc(rangeLabel)}` : ''}</h1>
@@ -480,7 +480,7 @@ export function exportPdf(sectionLabel, data, rangeLabel = '') {
     <title>تپش — ${esc(sectionLabel)}</title>
     <style>
       @page { size: A4; margin: 14mm; }
-      body { font-family: Tahoma, sans-serif; direction: rtl; color: #222; }
+      body { font-family: 'Vazir', Tahoma, sans-serif; direction: rtl; color: #222; }
       h1 { font-size: 17px; border-bottom: 2px solid #937fcd; padding-bottom: 8px; }
       h2 { font-size: 13px; margin-top: 18px; color: #555; }
       .meta { color: #777; font-size: 11px; margin-bottom: 14px; }

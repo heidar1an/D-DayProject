@@ -35,7 +35,7 @@ function Chip({ active, onClick, children, accent = '#937fcd' }) {
       onClick={onClick}
       aria-pressed={active}
       className={`flex cursor-pointer items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs transition-all ${
-        active ? 'text-white' : 'border-white/10 bg-white/[0.03] text-[#aaa] hover:border-white/25 hover:text-white'
+        active ? 'text-white' : 'border-white/10 bg-white/[0.03] text-[var(--muted)] hover:border-white/25 hover:text-white'
       }`}
       style={active ? { borderColor: `${accent}80`, background: `${accent}1f` } : undefined}
     >
@@ -122,8 +122,8 @@ export default function ExamBuilderView({ userData, exams, onStart, presetCollec
   return (
     <div className="space-y-5" dir="rtl">
       <header>
-        <h2 className="text-lg [font-family:'Doran',Tahoma,sans-serif]">آزمون‌ساز شخصی</h2>
-        <p className="mt-1 text-xs leading-5 text-[#8a8a8a]">
+        <h2 className="text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]">آزمون‌ساز شخصی</h2>
+        <p className="mt-1 text-xs leading-5 text-[var(--faint)]">
           فقط با سؤال‌هایی که خودت انتخاب کردی آزمون بساز؛ ترکیب چند منبع هم می‌شود.
         </p>
       </header>
@@ -132,17 +132,17 @@ export default function ExamBuilderView({ userData, exams, onStart, presetCollec
         {/* ستون تنظیمات */}
         <div className="space-y-4">
           {/* منابع */}
-          <section className="rounded-[2rem] border border-white/8 bg-[#282828] p-5" aria-label="منابع سؤال">
-            <h3 className="flex items-center gap-2 text-sm [font-family:'Doran',Tahoma,sans-serif]">
-              <Icon name="layers" className="h-4 w-4 text-[#937fcd]" />
+          <section className="rounded-[2rem] border border-white/8 bg-[var(--surface-soft)] p-5" aria-label="منابع سؤال">
+            <h3 className="flex items-center gap-2 text-sm [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+              <Icon name="layers" className="h-4 w-4 text-[var(--purple-ink)]" />
               از کجا سؤال بردارم؟
             </h3>
 
             <div className="mt-4 space-y-4">
               <div>
-                <p className="mb-2 text-[11px] text-[#8a8a8a]">مجموعه‌های من</p>
+                <p className="mb-2 text-[11px] text-[var(--faint)]">مجموعه‌های من</p>
                 {collections.length === 0 ? (
-                  <p className="text-xs text-[#666]">هنوز مجموعه‌ای نساخته‌ای — از بخش «مجموعه‌های من» بساز.</p>
+                  <p className="text-xs text-[var(--ghost)]">هنوز مجموعه‌ای نساخته‌ای — از بخش «مجموعه‌های من» بساز.</p>
                 ) : (
                   <div className="flex flex-wrap gap-2">
                     {collections.map((collection) => (
@@ -160,7 +160,7 @@ export default function ExamBuilderView({ userData, exams, onStart, presetCollec
               </div>
 
               <div>
-                <p className="mb-2 text-[11px] text-[#8a8a8a]">منابع سریع</p>
+                <p className="mb-2 text-[11px] text-[var(--faint)]">منابع سریع</p>
                 <div className="flex flex-wrap gap-2">
                   <Chip active={useBookmarks} onClick={() => setUseBookmarks((prev) => !prev)} accent="#e26d6d">
                     <Icon name="heart" className="h-3.5 w-3.5" /> گلچین‌های من ({toFa(bookmarkCount)})
@@ -172,7 +172,7 @@ export default function ExamBuilderView({ userData, exams, onStart, presetCollec
               </div>
 
               <div>
-                <p className="mb-2 text-[11px] text-[#8a8a8a]">کل بانک یک آزمون</p>
+                <p className="mb-2 text-[11px] text-[var(--faint)]">کل بانک یک آزمون</p>
                 <div className="flex flex-wrap gap-2">
                   {exams.map((exam) => (
                     <Chip key={exam.id} active={examIds.includes(exam.id)} onClick={() => toggleIn(setExamIds)(exam.id)} accent={exam.accent}>
@@ -184,7 +184,7 @@ export default function ExamBuilderView({ userData, exams, onStart, presetCollec
               </div>
 
               <div>
-                <p className="mb-2 text-[11px] text-[#8a8a8a]">سطح سختی (اختیاری)</p>
+                <p className="mb-2 text-[11px] text-[var(--faint)]">سطح سختی (اختیاری)</p>
                 <div className="flex flex-wrap gap-2">
                   {DIFFICULTY_OPTIONS.map((option) => (
                     <Chip key={option.id} active={difficulties.includes(option.id)} onClick={() => toggleIn(setDifficulties)(option.id)} accent="#e0b45c">
@@ -197,16 +197,16 @@ export default function ExamBuilderView({ userData, exams, onStart, presetCollec
           </section>
 
           {/* تنظیمات آزمون */}
-          <section className="rounded-[2rem] border border-white/8 bg-[#282828] p-5" aria-label="تنظیمات آزمون">
-            <h3 className="flex items-center gap-2 text-sm [font-family:'Doran',Tahoma,sans-serif]">
-              <Icon name="target" className="h-4 w-4 text-[#937fcd]" />
+          <section className="rounded-[2rem] border border-white/8 bg-[var(--surface-soft)] p-5" aria-label="تنظیمات آزمون">
+            <h3 className="flex items-center gap-2 text-sm [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+              <Icon name="target" className="h-4 w-4 text-[var(--purple-ink)]" />
               تنظیمات آزمون
             </h3>
 
             <div className="mt-4 grid gap-5 sm:grid-cols-2">
               {/* تعداد سؤال */}
               <div>
-                <p className="mb-2 text-[11px] text-[#8a8a8a]">تعداد سؤال</p>
+                <p className="mb-2 text-[11px] text-[var(--faint)]">تعداد سؤال</p>
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
@@ -222,7 +222,7 @@ export default function ExamBuilderView({ userData, exams, onStart, presetCollec
                     max={Math.max(1, poolSize)}
                     value={count}
                     onChange={(event) => setCount(Math.max(1, Number(event.target.value) || 1))}
-                    className="h-9 w-20 rounded-xl border border-white/8 bg-[#2a2a2a] text-center text-sm text-white focus:border-[#937fcd]/60 focus:outline-none"
+                    className="h-9 w-20 rounded-xl border border-white/8 bg-[var(--surface-soft)] text-center text-sm text-white focus:border-[#937fcd]/60 focus:outline-none"
                     aria-label="تعداد سؤال"
                   />
                   <button
@@ -238,7 +238,7 @@ export default function ExamBuilderView({ userData, exams, onStart, presetCollec
 
               {/* زمان */}
               <div>
-                <p className="mb-2 text-[11px] text-[#8a8a8a]">زمان آزمون</p>
+                <p className="mb-2 text-[11px] text-[var(--faint)]">زمان آزمون</p>
                 <div className="flex flex-wrap gap-1.5">
                   {DURATION_OPTIONS.map((option) => (
                     <button
@@ -247,7 +247,7 @@ export default function ExamBuilderView({ userData, exams, onStart, presetCollec
                       onClick={() => setDurationMinutes(option.value)}
                       aria-pressed={durationMinutes === option.value}
                       className={`cursor-pointer rounded-xl px-3 py-1.5 text-[11px] transition-colors ${
-                        durationMinutes === option.value ? 'bg-[#937fcd] text-white' : 'bg-white/6 text-[#aaa] hover:text-white'
+                        durationMinutes === option.value ? 'bg-[var(--purple-bright)] text-white' : 'bg-white/6 text-[var(--muted)] hover:text-white'
                       }`}
                     >
                       {option.label}
@@ -258,14 +258,14 @@ export default function ExamBuilderView({ userData, exams, onStart, presetCollec
 
               {/* ترتیب */}
               <div className="sm:col-span-2">
-                <p className="mb-2 text-[11px] text-[#8a8a8a]">ترتیب سؤال‌ها</p>
+                <p className="mb-2 text-[11px] text-[var(--faint)]">ترتیب سؤال‌ها</p>
                 <div className="flex flex-wrap gap-1.5">
                   <button
                     type="button"
                     onClick={() => setShuffleQuestions(true)}
                     aria-pressed={shuffleQuestions}
                     className={`cursor-pointer rounded-xl px-3.5 py-2 text-xs transition-colors ${
-                      shuffleQuestions ? 'bg-[#937fcd] text-white' : 'bg-white/6 text-[#aaa] hover:text-white'
+                      shuffleQuestions ? 'bg-[var(--purple-bright)] text-white' : 'bg-white/6 text-[var(--muted)] hover:text-white'
                     }`}
                   >
                     تصادفی
@@ -275,7 +275,7 @@ export default function ExamBuilderView({ userData, exams, onStart, presetCollec
                     onClick={() => setShuffleQuestions(false)}
                     aria-pressed={!shuffleQuestions}
                     className={`cursor-pointer rounded-xl px-3.5 py-2 text-xs transition-colors ${
-                      !shuffleQuestions ? 'bg-[#937fcd] text-white' : 'bg-white/6 text-[#aaa] hover:text-white'
+                      !shuffleQuestions ? 'bg-[var(--purple-bright)] text-white' : 'bg-white/6 text-[var(--muted)] hover:text-white'
                     }`}
                   >
                     بر اساس ترتیب ذخیره‌شدن
@@ -288,19 +288,19 @@ export default function ExamBuilderView({ userData, exams, onStart, presetCollec
 
         {/* خلاصهٔ کنار: چسبان در دسکتاپ */}
         <aside>
-          <div className="sticky top-6 rounded-[2rem] border border-white/8 bg-[#282828] p-5">
-            <h3 className="text-sm [font-family:'Doran',Tahoma,sans-serif]">آزمون تو</h3>
+          <div className="sticky top-6 rounded-[2rem] border border-white/8 bg-[var(--surface-soft)] p-5">
+            <h3 className="text-sm [font-family:'Doran','Vazir',Tahoma,sans-serif]">آزمون تو</h3>
             <dl className="mt-4 space-y-2.5 text-xs">
               <div className="flex justify-between">
-                <dt className="text-[#8a8a8a]">مخزن سؤال</dt>
+                <dt className="text-[var(--faint)]">مخزن سؤال</dt>
                 <dd className="font-bold">{toFa(poolSize)} سؤال</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-[#8a8a8a]">انتخاب‌شده</dt>
+                <dt className="text-[var(--faint)]">انتخاب‌شده</dt>
                 <dd className="font-bold">{toFa(effectiveCount)} سؤال</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-[#8a8a8a]">زمان</dt>
+                <dt className="text-[var(--faint)]">زمان</dt>
                 <dd className="font-bold">{DURATION_OPTIONS.find((option) => option.value === durationMinutes)?.label ?? '—'}</dd>
               </div>
             </dl>
@@ -309,12 +309,12 @@ export default function ExamBuilderView({ userData, exams, onStart, presetCollec
               type="button"
               onClick={start}
               disabled={!hasAnySource || poolSize === 0}
-              className="mt-5 w-full cursor-pointer rounded-2xl bg-[#937fcd] py-3 text-sm font-bold transition-transform hover:-translate-y-0.5 disabled:cursor-default disabled:translate-y-0 disabled:bg-white/8 disabled:text-[#777] [font-family:'Doran',Tahoma,sans-serif]"
+              className="mt-5 w-full cursor-pointer rounded-2xl bg-[var(--purple-bright)] py-3 text-sm font-bold transition-transform hover:-translate-y-0.5 disabled:cursor-default disabled:translate-y-0 disabled:bg-white/8 disabled:text-[var(--faint)] [font-family:'Doran','Vazir',Tahoma,sans-serif]"
             >
               شروع آزمون
             </button>
 
-            <p className="mt-3 text-[11px] leading-5 text-[#777]">
+            <p className="mt-3 text-[11px] leading-5 text-[var(--faint)]">
               {!hasAnySource
                 ? 'حداقل یک منبع انتخاب کن.'
                 : poolSize === 0

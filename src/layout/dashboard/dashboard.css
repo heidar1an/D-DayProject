@@ -1,24 +1,45 @@
 .dashboard {
   min-height: 100vh;
-  background: #000;
-  color: #fff;
+  background: var(--deep);
+  color: var(--white);
 }
 
+/*
+ * ── هدر داشبورد ──
+ *
+ * هدر chromeِ ثابت است، نه یک لایه. سه قاعده آن را از «پریدن» بین لایه‌ها
+ * نگه می‌دارد:
+ *
+ *   ۱. پس‌زمینهٔ توپُر (نه نیمه‌شفاف + بلور). قبلاً rgba(0,0,0,0.94) با
+ *      backdrop-filter بود؛ وقتی محتوای لایه زیرش از پایین سُر می‌خورد،
+ *      لبهٔ بلور تکان می‌خورد و هدر «جابه‌جا» به‌نظر می‌رسید.
+ *   ۲. ارتفاع ثابت و مستقل از viewport. قبلاً `clamp(66px, 10vh, 98px)` بود؛
+ *      10vh با جمع/باز شدن نوار آدرس موبایل عوض می‌شود و هدر را می‌کشد.
+ *   ۳. `overflow-anchor: none` روی ناحیهٔ اسکرول — بدون آن مرورگر موقع
+ *      عوض شدن محتوا دنبال لنگر جدید می‌گردد و اسکرول را می‌پراند.
+ */
 .dashboard-header {
   position: sticky;
   top: 0;
   z-index: 20;
-  background: rgba(0, 0, 0, 0.94);
-  backdrop-filter: blur(16px);
+  flex: 0 0 auto;
+  background: var(--deep);
+  /* ارتفاع ثابت هدر — نقطهٔ مرجع لایه‌های زیرین */
+  --dashboard-header-height: 84px;
 }
 
 .dashboard-header__inner {
   display: flex;
   align-items: center;
   width: var(--content-width);
-  min-height: 98px;
+  height: var(--dashboard-header-height);
   margin: 0 auto;
   gap: 24px;
+}
+
+/* دکمهٔ تم هم‌اندازهٔ آیکون‌های هدر تا ردیف اکشن‌ها یکدست بماند */
+.dashboard-header__theme {
+  --theme-toggle-size: 38px;
 }
 
 .dashboard-nav {
@@ -28,7 +49,7 @@
   justify-content: center;
   gap: clamp(26px, 4vw, 62px);
   margin-inline: auto;
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: clamp(0.98rem, 1.45vw, 1.2rem);
   font-weight: 500;
 }
@@ -49,7 +70,7 @@
   border: 0;
   border-radius: 14px;
   background: transparent;
-  color: #fff;
+  color: var(--white);
   font: inherit;
   line-height: 1.15;
   white-space: nowrap;
@@ -62,7 +83,7 @@
 }
 
 .dashboard-nav__link--active {
-  color: #fff;
+  color: var(--white);
 }
 
 .dashboard-header__actions {
@@ -82,10 +103,10 @@
   padding: 9px 14px;
   border: 0;
   border-radius: 16px;
-  background: #132943;
-  box-shadow: inset 3px 0 #285584;
-  color: #5b91cb;
-  font-family: 'Pinar', Tahoma, sans-serif;
+  background: var(--blue-deep);
+  box-shadow: inset 3px 0 var(--blue);
+  color: var(--blue-ink);
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
   font-size: 1.06rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
@@ -105,7 +126,7 @@
   padding: 0;
   border: 0;
   background: transparent;
-  color: #fff;
+  color: var(--white);
   place-items: center;
   cursor: pointer;
   transition: transform 160ms ease, opacity 160ms ease;
@@ -120,7 +141,7 @@
   width: 31px;
   height: 31px;
   object-fit: contain;
-  filter: brightness(0) invert(1);
+  filter: var(--icon-filter);
 }
 
 /* بج اعلان‌های نخوانده روی زنگولهٔ هدر — زبان بصری بج‌های لیگ */
@@ -133,19 +154,19 @@
   height: 20px;
   padding: 0 5px;
   border-radius: 999px;
-  background: #e26d6d;
-  color: #fff;
-  font-family: 'Pinar', Tahoma, sans-serif;
+  background: var(--red);
+  color: var(--white);
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
   font-size: 0.68rem;
   font-weight: 700;
   line-height: 1;
   place-items: center;
-  box-shadow: 0 0 0 2px #282828;
+  box-shadow: 0 0 0 2px var(--surface-soft);
 }
 
 /* حالت فعال زنگوله: مثل طرح، آیکون بژ روشن می‌شود */
 .dashboard-header__icon-btn--active {
-  color: #d5bba9;
+  color: var(--gold-ink);
 }
 
 /* ── لایه اعلان‌ها ── */
@@ -167,16 +188,16 @@
   overflow-y: auto;
   padding: clamp(26px, 4.5vh, 52px) clamp(22px, 3vw, 56px) clamp(20px, 3vh, 40px);
   border-radius: 48px;
-  background: #282828;
-  box-shadow: inset 0 1px rgba(255, 255, 255, 0.025);
+  background: var(--surface-soft);
+  box-shadow: inset 0 1px rgb(var(--shadow-rgb) / calc(0.025 * var(--shadow-scale)));
   scrollbar-width: thin;
-  scrollbar-color: #3a3a3a transparent;
+  scrollbar-color: rgb(var(--line-rgb) / 0.3) transparent;
 }
 
 .notifications__title {
   margin: 0;
-  color: #fff;
-  font-family: 'Doran', Tahoma, sans-serif;
+  color: var(--white);
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: clamp(1.5rem, 2.2vw, 2.3rem);
   font-weight: 600;
   text-align: center;
@@ -196,8 +217,8 @@
   padding: 5px 12px 6px;
   border-radius: 999px;
   background: rgba(226, 109, 109, 0.16);
-  color: #ef9196;
-  font-family: 'Pinar', Tahoma, sans-serif;
+  color: var(--red-ink);
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
   font-size: 0.76rem;
   font-weight: 600;
   box-shadow: inset 0 0 0 1px rgba(226, 109, 109, 0.4);
@@ -215,14 +236,14 @@
 /* ── ردیف اعلان — ظاهر پیام‌رسان: آواتار + حباب پیام (فقط نمایش) ── */
 .notifications__row {
   /* رنگ حباب؛ ردیف نخوانده همان متغیر را بازنویسی می‌کند تا دم حباب هم‌رنگ بماند */
-  --n-bubble: rgba(255, 255, 255, 0.075);
+  --n-bubble: rgb(var(--wash-rgb) / 0.075);
   display: flex;
   align-items: flex-start;
   gap: 15px;
   padding: 16px 18px;
   border-radius: 28px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgb(var(--wash-rgb) / 0.02);
+  border: 1px solid rgb(var(--line-rgb) / 0.06);
   animation: notifications-row-in 420ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
   animation-delay: calc(var(--n-i, 0) * 45ms);
 }
@@ -247,7 +268,7 @@
   height: 56px;
   flex-shrink: 0;
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgb(var(--wash-rgb) / 0.06);
   place-items: center;
 }
 
@@ -271,8 +292,8 @@
 }
 
 .notifications__row-name {
-  color: #fff;
-  font-family: 'Doran', Tahoma, sans-serif;
+  color: var(--white);
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: 1.08rem;
   font-weight: 600;
 }
@@ -293,7 +314,7 @@
 .notifications__row-time {
   margin-inline-start: auto;
   padding-inline-start: 10px;
-  color: #7c7c7c;
+  color: var(--faint);
   font-size: 0.82rem;
   white-space: nowrap;
 }
@@ -325,14 +346,14 @@
 }
 
 .notifications__row-text {
-  color: #ececec;
-  font-family: 'Pinar', Tahoma, sans-serif;
+  color: var(--white);
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
   font-size: 1.02rem;
   line-height: 1.95;
 }
 
 .notifications__row-note {
-  color: #9a9a9a;
+  color: var(--faint);
   font-size: 0.88rem;
   line-height: 1.8;
 }
@@ -356,7 +377,7 @@
   padding: 5px 12px 6px;
   border-radius: 999px;
   background: rgba(226, 109, 109, 0.12);
-  color: #ef9196;
+  color: var(--red-ink);
   font-size: 0.86rem;
   font-weight: 600;
   box-shadow: inset 0 0 0 1px rgba(226, 109, 109, 0.35);
@@ -398,8 +419,8 @@
 /* ── حالت خطا ── */
 .notifications__error {
   padding: 26px 10px;
-  color: #aaa;
-  font-family: 'Pinar', Tahoma, sans-serif;
+  color: var(--muted);
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
   font-size: 0.86rem;
   text-align: center;
 }
@@ -410,9 +431,9 @@
   border: 0;
   border-radius: 12px;
   background: rgba(147, 127, 205, 0.2);
-  color: #c9bdf0;
+  color: var(--purple-soft-ink);
   cursor: pointer;
-  font-family: 'Pinar', Tahoma, sans-serif;
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
   font-size: 0.8rem;
   transition: background-color 160ms ease;
 }
@@ -463,10 +484,10 @@
   min-height: 480px;
   flex-direction: column;
   padding: 34px 38px;
-  border: 1px solid rgba(255, 255, 255, 0.045);
+  border: 1px solid rgb(var(--line-rgb) / 0.045);
   border-radius: 64px;
-  background: #282828;
-  box-shadow: inset 0 1px rgba(255, 255, 255, 0.025);
+  background: var(--surface-soft);
+  box-shadow: inset 0 1px rgb(var(--shadow-rgb) / calc(0.025 * var(--shadow-scale)));
 }
 
 .dashboard__chart-header {
@@ -491,7 +512,7 @@
   gap: 7px;
   padding: 7px 13px;
   border-radius: 14px;
-  font-family: 'Pinar', Tahoma, sans-serif;
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
 }
 
 .dashboard__chart-stat svg {
@@ -507,7 +528,7 @@
 }
 
 .dashboard__chart-stat-text b {
-  font-family: 'Pinar', Tahoma, sans-serif;
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
   font-size: 1.18rem;
   font-weight: 700;
   line-height: 1;
@@ -523,12 +544,12 @@
 
 .dashboard__chart-stat--streak {
   background: rgba(255, 151, 23, 0.1);
-  color: #ff9717;
+  color: var(--orange-ink);
 }
 
 .dashboard__chart-stat--hearts {
   background: rgba(255, 105, 105, 0.1);
-  color: #ff8585;
+  color: var(--red-ink);
 }
 
 /* ابزارهای نمودار: سوییچ حالت + دراپ‌داون بازه — سمت چپ هدر */
@@ -546,10 +567,10 @@
   padding: 9px 16px;
   border: 0;
   border-radius: 14px;
-  background: #132943;
-  color: #5b8cc7;
+  background: var(--blue-deep);
+  color: var(--blue-ink);
   cursor: pointer;
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: 0.92rem;
   font-weight: 500;
 }
@@ -566,9 +587,9 @@
 
 .user-profile-card,
 .dashboard-action-card {
-  background: #282828;
-  border: 1px solid rgba(255, 255, 255, 0.045);
-  box-shadow: inset 0 1px rgba(255, 255, 255, 0.025);
+  background: var(--surface-soft);
+  border: 1px solid rgb(var(--line-rgb) / 0.045);
+  box-shadow: inset 0 1px rgb(var(--shadow-rgb) / calc(0.025 * var(--shadow-scale)));
 }
 
 .user-profile-card {
@@ -594,7 +615,7 @@
   width: clamp(186px, 14.5vw, 272px);
   aspect-ratio: 1;
   padding: 21px;
-  border: 5px solid #b99a86;
+  border: 5px solid var(--copper);
   border-radius: 50%;
   place-items: center;
 }
@@ -604,7 +625,7 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
-  border: 2px solid #b99a86;
+  border: 2px solid var(--copper);
   border-radius: 50%;
 }
 
@@ -613,7 +634,7 @@
   position: absolute;
   display: block;
   right: 50%;
-  background: #b99a86;
+  background: var(--copper);
   transform: translateX(50%);
 }
 
@@ -645,9 +666,9 @@
   min-width: 198px;
   padding: 10px 20px 12px;
   border-radius: 999px;
-  background: #654f40;
-  color: #fff;
-  font-family: 'Doran', Tahoma, sans-serif;
+  background: var(--copper-deep);
+  color: var(--white);
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: 1.15rem;
   font-weight: 600;
   text-align: center;
@@ -660,8 +681,8 @@
 
 .user-profile-card__greeting {
   margin: 0 0 6px;
-  color: #fff;
-  font-family: 'Pinar', Tahoma, sans-serif;
+  color: var(--white);
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
   font-size: 1.15rem;
   font-weight: 600;
   text-align: center;
@@ -669,7 +690,7 @@
 
 .user-profile-card__name {
   margin: 0 0 7px;
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: clamp(1.45rem, 2vw, 2.15rem);
   font-weight: 600;
   line-height: 1.4;
@@ -677,7 +698,7 @@
 
 .user-profile-card__username {
   margin: 0;
-  color: #aaa;
+  color: var(--muted);
   font-family: Georgia, serif;
   font-size: 1.22rem;
   text-align: center;
@@ -697,18 +718,18 @@
 }
 
 .user-profile-card__stat + .user-profile-card__stat {
-  border-right: 1px solid rgba(255, 255, 255, 0.23);
+  border-right: 1px solid rgb(var(--line-rgb) / 0.23);
 }
 
 .user-profile-card__stat-value {
-  font-family: 'Pinar', Tahoma, sans-serif;
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
   font-size: 1.55rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
 .user-profile-card__stat-label {
-  color: #f3f3f3;
+  color: var(--white);
   font-size: 0.95rem;
 }
 
@@ -723,7 +744,7 @@
   align-items: center;
   justify-content: center;
   gap: 7px;
-  color: #f3f3f3;
+  color: var(--white);
   font-size: 0.86rem;
   white-space: nowrap;
 }
@@ -741,12 +762,12 @@
 }
 
 .user-profile-card__progress-icon--tests {
-  background: #67ba85;
-  color: #172d20;
+  background: var(--green-bright);
+  color: var(--ink-deep);
 }
 
 .user-profile-card__progress-icon--courses {
-  background: #285782;
+  background: var(--blue-deep);
   color: #102b47;
 }
 
@@ -764,10 +785,10 @@
   min-height: 318px;
   flex-direction: column;
   padding: 30px 30px 26px;
-  border: 1px solid rgba(255, 255, 255, 0.045);
+  border: 1px solid rgb(var(--line-rgb) / 0.045);
   border-radius: 64px;
-  background: #282828;
-  box-shadow: inset 0 1px rgba(255, 255, 255, 0.025);
+  background: var(--surface-soft);
+  box-shadow: inset 0 1px rgb(var(--shadow-rgb) / calc(0.025 * var(--shadow-scale)));
 }
 
 .peers-section__header {
@@ -780,8 +801,8 @@
 
 .peers-section__title {
   margin: 0;
-  color: #fff;
-  font-family: 'Doran', Tahoma, sans-serif;
+  color: var(--white);
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: clamp(1.05rem, 1.4vw, 1.24rem);
   font-weight: 600;
   text-align: right;
@@ -793,7 +814,7 @@
   border: 1px solid rgba(226, 109, 109, 0.32);
   border-radius: 999px;
   background: rgba(226, 109, 109, 0.1);
-  color: #eb9a9a;
+  color: var(--red-ink);
   font-size: 0.62rem;
   white-space: nowrap;
 }
@@ -819,7 +840,7 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
-  scrollbar-color: #3d3d3d transparent;
+  scrollbar-color: rgb(var(--line-rgb) / 0.3) transparent;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -831,7 +852,7 @@
 
 .peers-section__list::-webkit-scrollbar-thumb {
   border-radius: 999px;
-  background: #3d3d3d;
+  background: var(--surface-strong);
 }
 
 .peers-section__list::-webkit-scrollbar-track {
@@ -849,12 +870,12 @@
 
 .peers-section__fade--top {
   top: 0;
-  background: linear-gradient(180deg, #282828, rgba(40, 40, 40, 0));
+  background: linear-gradient(180deg, var(--surface-soft), rgb(var(--scrim-rgb) / 0));
 }
 
 .peers-section__fade--bottom {
   bottom: 0;
-  background: linear-gradient(0deg, #282828, rgba(40, 40, 40, 0));
+  background: linear-gradient(0deg, var(--surface-soft), rgb(var(--scrim-rgb) / 0));
 }
 
 .peers-section__list-wrap.has-above .peers-section__fade--top,
@@ -875,24 +896,24 @@
   width: 100%;
   min-width: 0;
   padding: 5px 11px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgb(var(--line-rgb) / 0.05);
   border-radius: 18px;
-  background: #202020;
-  color: #fff;
+  background: var(--surface);
+  color: var(--white);
   cursor: pointer;
-  font-family: 'Pinar', Tahoma, sans-serif;
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
   text-align: right;
   transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
 }
 
 .peers-section__peer:hover {
-  border-color: rgba(255, 255, 255, 0.16);
-  background: #242424;
+  border-color: rgb(var(--line-rgb) / 0.16);
+  background: var(--surface);
   transform: translateY(-1px);
 }
 
 .peers-section__peer:focus-visible {
-  outline: 2px solid var(--peer-tint, #b99a86);
+  outline: 2px solid var(--peer-tint, var(--copper));
   outline-offset: 2px;
 }
 
@@ -902,9 +923,9 @@
   width: clamp(28px, 4.4vh, 34px);
   height: clamp(28px, 4.4vh, 34px);
   border-radius: 50%;
-  background: linear-gradient(140deg, var(--peer-tint, #b99a86), color-mix(in srgb, var(--peer-tint, #b99a86) 42%, #1d1d1d));
-  color: #fff;
-  font-family: 'Doran', Tahoma, sans-serif;
+  background: linear-gradient(140deg, var(--peer-tint, var(--copper)), color-mix(in srgb, var(--peer-tint, var(--copper)) 42%, var(--background)));
+  color: var(--white);
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: 0.82rem;
   place-items: center;
 }
@@ -930,7 +951,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-family: 'Pinar', Tahoma, sans-serif;
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
   font-size: 0.74rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
@@ -938,21 +959,21 @@
 }
 
 .peers-section__metric--hearts {
-  color: #ff8585;
+  color: var(--red-ink);
 }
 
 .peers-section__metric--streak {
-  color: #ffa53d;
+  color: var(--gold-ink);
 }
 
 .peers-section__chevron {
   flex: 0 0 auto;
-  color: #5f5f5f;
+  color: var(--ghost);
   transition: color 160ms ease, transform 160ms ease;
 }
 
 .peers-section__peer:hover .peers-section__chevron {
-  color: #9a9a9a;
+  color: var(--faint);
   transform: translateX(-2px);
 }
 
@@ -969,20 +990,20 @@
   border: 1px dashed rgba(185, 154, 134, 0.45);
   border-radius: 18px;
   background: transparent;
-  color: #c7aa98;
+  color: var(--gold-ink);
   cursor: pointer;
-  font-family: 'Pinar', Tahoma, sans-serif;
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
   text-align: right;
   transition: border-color 160ms ease, background-color 160ms ease;
 }
 
 .peers-section__add:hover {
-  border-color: #b99a86;
+  border-color: var(--copper);
   background: rgba(185, 154, 134, 0.06);
 }
 
 .peers-section__add:focus-visible {
-  outline: 2px solid #b99a86;
+  outline: 2px solid var(--copper);
   outline-offset: 2px;
 }
 
@@ -991,9 +1012,9 @@
 }
 
 .peers-section__avatar--add {
-  border: 1.5px dashed #b99a86;
+  border: 1.5px dashed var(--copper);
   background: transparent;
-  color: #b99a86;
+  color: var(--copper-ink);
   font-size: 1.1rem;
 }
 
@@ -1006,13 +1027,13 @@
   padding: 39px 20px 31px;
   border: 0;
   border-radius: 64px;
-  color: #fff;
+  color: var(--white);
   cursor: pointer;
   transition: transform 180ms ease, background-color 180ms ease;
 }
 
 .dashboard-action-card:hover {
-  background: #303030;
+  background: var(--surface-soft);
 }
 
 .dashboard-action-card__icon {
@@ -1025,7 +1046,7 @@
 
 .dashboard-action-card__title {
   margin-top: 25px;
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: clamp(1.25rem, 1.8vw, 2rem);
   font-weight: 600;
 }
@@ -1108,9 +1129,11 @@
 }
 
 @media (max-width: 1100px) {
+  /* دو ردیف می‌شود؛ ارتفاع ثابت و صریح تا با محتوا کش نیاید */
   .dashboard-header__inner {
+    --dashboard-header-height: 104px;
+
     flex-wrap: wrap;
-    min-height: 104px;
     gap: 18px;
   }
 
@@ -1132,9 +1155,11 @@
 }
 
 @media (max-width: 700px) {
+  /* موبایل: ناوبری به ردیف سوم می‌رود، پس ارتفاع باید محتوایی باشد */
   .dashboard-header__inner {
-    flex-wrap: wrap;
+    height: auto;
     min-height: 0;
+    flex-wrap: wrap;
     padding: 17px 0 15px;
   }
 
@@ -1259,10 +1284,6 @@
     flex: 0 0 auto;
   }
 
-  .dashboard-header__inner {
-    min-height: clamp(66px, 10vh, 98px);
-  }
-
   /* لایه‌ی اسکرول‌پذیر بخش‌ها: محتوای بلند (مثل دوره‌ها) داخل همین اسکرول می‌شود */
   .dashboard__section {
     display: flex;
@@ -1271,8 +1292,16 @@
     min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
+    /*
+     * بدون این دو، عوض کردن لایه هدر را می‌پراند:
+     * `overflow-anchor: none` جلوی لنگرگیری خودکار مرورگر را می‌گیرد و
+     * `scrollbar-gutter: stable` عرض محتوا را ثابت نگه می‌دارد تا با آمد و
+     * رفت نوار اسکرول، چیدمان افقی تکان نخورد.
+     */
+    overflow-anchor: none;
+    scrollbar-gutter: stable;
     scrollbar-width: thin;
-    scrollbar-color: #3a3a3a transparent;
+    scrollbar-color: rgb(var(--line-rgb) / 0.3) transparent;
   }
 
   .dashboard__section > * {
@@ -1297,9 +1326,11 @@
     min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
+    overflow-anchor: none;
+    scrollbar-gutter: stable;
     padding-bottom: clamp(14px, 3vh, 64px);
     scrollbar-width: thin;
-    scrollbar-color: #3a3a3a transparent;
+    scrollbar-color: rgb(var(--line-rgb) / 0.3) transparent;
   }
 
   .dashboard__main {

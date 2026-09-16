@@ -30,16 +30,16 @@
   padding: 0.35rem 0.5rem;
   border-radius: 1rem;
   cursor: pointer;
-  color: #8a8a8a;
+  color: var(--faint);
   transition: color 0.15s ease, background 0.15s ease;
 }
 
 .ex-step:hover {
-  color: #ddd;
+  color: var(--muted);
 }
 
 .ex-step:focus-visible {
-  outline: 2px solid #61d192;
+  outline: 2px solid var(--green-vivid);
   outline-offset: 2px;
 }
 
@@ -49,9 +49,9 @@
   width: 2rem;
   height: 2rem;
   border-radius: 999px;
-  border: 1.5px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.04);
-  font-family: 'Doran', Tahoma, sans-serif;
+  border: 1.5px solid rgb(var(--line-rgb) / 0.14);
+  background: rgb(var(--wash-rgb) / 0.04);
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: 0.78rem;
   font-weight: 700;
   transition: inherit;
@@ -69,27 +69,27 @@
   inset-inline-start: calc(50% + 1.4rem);
   width: calc(100% - 2.8rem);
   height: 1.5px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgb(var(--wash-rgb) / 0.1);
 }
 
 .ex-step.is-done {
-  color: #9a9a9a;
+  color: var(--faint);
 }
 
 .ex-step.is-done .ex-step__dot {
   border-color: rgba(97, 209, 146, 0.5);
   background: rgba(97, 209, 146, 0.12);
-  color: #61d192;
+  color: var(--green-ink);
 }
 
 .ex-step.is-active {
-  color: #fff;
+  color: var(--white);
 }
 
 .ex-step.is-active .ex-step__dot {
-  border-color: #61d192;
+  border-color: var(--green-vivid);
   background: rgba(97, 209, 146, 0.16);
-  color: #7ee0ac;
+  color: var(--green-soft-ink);
   box-shadow: 0 0 0 4px rgba(97, 209, 146, 0.1);
 }
 
@@ -99,9 +99,9 @@
 }
 
 .ex-tree__branch {
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border: 1px solid rgb(var(--line-rgb) / 0.07);
   border-radius: 1.1rem;
-  background: rgba(255, 255, 255, 0.02);
+  background: rgb(var(--wash-rgb) / 0.02);
   transition: border-color 0.15s ease;
 }
 
@@ -125,30 +125,30 @@
   align-items: center;
   gap: 0.5rem;
   border-radius: 0.85rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgb(var(--line-rgb) / 0.08);
+  background: rgb(var(--wash-rgb) / 0.03);
   padding: 0.45rem 0.7rem;
   font-size: 12px;
-  color: #c5c5c5;
+  color: var(--muted);
   cursor: pointer;
   text-align: right;
   transition: border-color 0.14s ease, background 0.14s ease, color 0.14s ease;
 }
 
 .ex-check:hover {
-  border-color: rgba(255, 255, 255, 0.22);
-  color: #fff;
+  border-color: rgb(var(--line-rgb) / 0.22);
+  color: var(--white);
 }
 
 .ex-check:focus-visible {
-  outline: 2px solid #61d192;
+  outline: 2px solid var(--green-vivid);
   outline-offset: 2px;
 }
 
 .ex-check[aria-pressed='true'] {
   border-color: rgba(97, 209, 146, 0.5);
   background: rgba(97, 209, 146, 0.1);
-  color: #7ee0ac;
+  color: var(--green-soft-ink);
 }
 
 .ex-check__box {
@@ -158,14 +158,14 @@
   width: 1.15rem;
   height: 1.15rem;
   border-radius: 0.4rem;
-  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  border: 1.5px solid rgb(var(--line-rgb) / 0.25);
   background: transparent;
   transition: inherit;
 }
 
 .ex-check[aria-pressed='true'] .ex-check__box {
-  border-color: #61d192;
-  background: #61d192;
+  border-color: var(--green-vivid);
+  background: var(--green-vivid);
   color: #12271a;
 }
 
@@ -173,7 +173,7 @@
   margin-inline-start: auto;
   flex-shrink: 0;
   font-size: 10px;
-  color: #777;
+  color: var(--faint);
   font-variant-numeric: tabular-nums;
 }
 
@@ -191,7 +191,7 @@
   width: 100%;
   height: 8px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgb(var(--wash-rgb) / 0.08);
   outline: none;
   cursor: pointer;
 }
@@ -202,9 +202,9 @@
   width: 18px;
   height: 18px;
   border-radius: 999px;
-  border: 3px solid #1b1b1e;
-  background: var(--ex-accent, #61d192);
-  box-shadow: 0 0 0 1.5px var(--ex-accent, #61d192);
+  border: 3px solid var(--border-solid);
+  background: var(--ex-accent, var(--green-vivid));
+  box-shadow: 0 0 0 1.5px var(--ex-accent, var(--green-vivid));
   cursor: grab;
   transition: transform 0.12s ease;
 }
@@ -217,14 +217,14 @@
   width: 18px;
   height: 18px;
   border-radius: 999px;
-  border: 3px solid #1b1b1e;
-  background: var(--ex-accent, #61d192);
-  box-shadow: 0 0 0 1.5px var(--ex-accent, #61d192);
+  border: 3px solid var(--border-solid);
+  background: var(--ex-accent, var(--green-vivid));
+  box-shadow: 0 0 0 1.5px var(--ex-accent, var(--green-vivid));
   cursor: grab;
 }
 
 .ex-slider:focus-visible {
-  outline: 2px solid #61d192;
+  outline: 2px solid var(--green-vivid);
   outline-offset: 4px;
 }
 
@@ -233,7 +233,7 @@
   border-radius: 999px;
   overflow: hidden;
   display: flex;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgb(var(--wash-rgb) / 0.06);
 }
 
 .ex-dial__seg {
@@ -258,7 +258,7 @@
 }
 
 .ex-trend__bar.is-first {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgb(var(--wash-rgb) / 0.25);
 }
 
 /* ─────────────── ورود نرم محتوا ─────────────── */

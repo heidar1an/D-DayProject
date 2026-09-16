@@ -18,7 +18,7 @@ export default function StepBlueprint({ plan, planBusy, planError, onReroll, dra
       )}
 
       {!planBusy && planError && (
-        <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-[#e26d6d]/30 bg-[#e26d6d]/[0.07] px-4 py-3.5 text-sm leading-6 text-[#ef9196]" role="alert">
+        <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-[#e26d6d]/30 bg-[#e26d6d]/[0.07] px-4 py-3.5 text-sm leading-6 text-[var(--red-ink)]" role="alert">
           <Icon name="alert" className="h-4.5 w-4.5 shrink-0" />
           {planError}
           <button
@@ -46,12 +46,12 @@ export default function StepBlueprint({ plan, planBusy, planError, onReroll, dra
             <button
               type="button"
               onClick={onReroll}
-              className="flex cursor-pointer items-center gap-2 rounded-xl bg-white/6 px-4 py-2.5 text-sm text-[#ccc] transition-colors hover:bg-white/12 hover:text-white"
+              className="flex cursor-pointer items-center gap-2 rounded-xl bg-white/6 px-4 py-2.5 text-sm text-[var(--muted)] transition-colors hover:bg-white/12 hover:text-white"
             >
-              <Icon name="dice" className="h-4 w-4 text-[#5b8cc7]" />
+              <Icon name="dice" className="h-4 w-4 text-[var(--blue-ink)]" />
               ترکیب دیگر
             </button>
-            <p className="text-[11px] leading-5 text-[#777]">
+            <p className="text-[11px] leading-5 text-[var(--faint)]">
               {faQuestionsNote(plan)}
             </p>
           </div>

@@ -24,24 +24,24 @@
   padding: 0.2rem 0.6rem;
   border-radius: 999px;
   font-size: 10px;
-  background: rgba(255, 255, 255, 0.05);
-  color: #8a8a8a;
+  background: rgb(var(--wash-rgb) / 0.05);
+  color: var(--faint);
   white-space: nowrap;
 }
 
 .nt-kind-badge--checklist {
   background: rgba(119, 183, 135, 0.12);
-  color: #9ed3ab;
+  color: var(--green-soft-ink);
 }
 
 .nt-kind-badge--qa {
   background: rgba(147, 127, 205, 0.14);
-  color: #b6a6e6;
+  color: var(--purple-soft-ink);
 }
 
 .nt-kind-badge--table {
   background: rgba(91, 140, 199, 0.14);
-  color: #9cc0e8;
+  color: var(--blue-soft-ink);
 }
 
 /* ── تگ‌ها ── */
@@ -73,7 +73,7 @@
 .nt-tag.is-active {
   border-color: color-mix(in srgb, var(--accent) 70%, transparent);
   background: color-mix(in srgb, var(--accent) 26%, transparent);
-  color: #fff;
+  color: var(--white);
 }
 
 .nt-tag__count {
@@ -114,7 +114,7 @@
   pointer-events: none;
   opacity: 0.22;
   filter: blur(70px);
-  background: radial-gradient(circle, #5b8cc7 0%, transparent 70%);
+  background: radial-gradient(circle, var(--blue-bright) 0%, transparent 70%);
 }
 
 .nt-hero__content {
@@ -129,21 +129,21 @@
   align-items: center;
   gap: 4px;
   margin: 0;
-  color: #fff;
-  font-family: 'Doran', Tahoma, sans-serif;
+  color: var(--white);
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
 }
 
 .nt-hero__title-top {
   font-weight: 500;
   font-size: clamp(1.25rem, 2.6vw, 1.95rem);
-  color: #d6d6d6;
+  color: var(--muted);
 }
 
 .nt-hero__title-accent {
   font-weight: 800;
   font-size: clamp(2.5rem, 6.2vw, 4.5rem);
   line-height: 1.3;
-  background: linear-gradient(120deg, #5b8cc7 15%, #937fcd 85%);
+  background: linear-gradient(120deg, var(--blue-bright) 15%, var(--purple-bright) 85%);
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
@@ -152,7 +152,7 @@
 .nt-hero__subtitle {
   max-width: 660px;
   margin: 12px auto 0;
-  color: #b9b9b9;
+  color: var(--muted);
   font-size: clamp(0.9rem, 1.3vw, 1.05rem);
   line-height: 2;
 }
@@ -170,10 +170,10 @@
   align-items: center;
   gap: 0.4rem;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgb(var(--wash-rgb) / 0.05);
   padding: 0.4rem 0.85rem;
   font-size: 11px;
-  color: #aaa;
+  color: var(--muted);
 }
 
 .nt-hero__cta {
@@ -188,10 +188,10 @@
   gap: 0.55rem;
   cursor: pointer;
   border-radius: 1rem;
-  background: #5b8cc7;
-  color: #fff;
+  background: var(--blue-bright);
+  color: var(--white);
   padding: 0.9rem 1.7rem;
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: 0.9rem;
   font-weight: 700;
   box-shadow: 0 16px 40px -16px rgba(91, 140, 199, 0.85);
@@ -205,8 +205,8 @@
 /* ── نوار دسته‌بندی تگ‌ها ── */
 .nt-tagbar {
   border-radius: 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  background: #282828;
+  border: 1px solid rgb(var(--line-rgb) / 0.06);
+  background: var(--surface-soft);
   padding: 1rem 1.2rem;
 }
 
@@ -219,15 +219,15 @@
   padding: 0;
   border: 0;
   background: none;
-  color: #fff;
+  color: var(--white);
   cursor: pointer;
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: 0.8rem;
   text-align: right;
 }
 
 .nt-tagbar__chevron {
-  color: #8a8a8a;
+  color: var(--faint);
   transition: transform 220ms ease;
 }
 
@@ -255,7 +255,7 @@
   align-items: center;
   gap: 0.35rem;
   color: var(--accent);
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: 11px;
 }
 
@@ -274,8 +274,8 @@
 
 .nt-qa__item {
   border-radius: 1.2rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgb(var(--line-rgb) / 0.08);
+  background: rgb(var(--wash-rgb) / 0.03);
   padding: 0.9rem 1rem;
 }
 
@@ -290,7 +290,7 @@
   min-width: 0;
   font-size: 0.85rem;
   line-height: 1.9;
-  color: #e6e6e6;
+  color: var(--white);
 }
 
 .nt-qa__badge {
@@ -301,7 +301,7 @@
   height: 1.45rem;
   border-radius: 0.5rem;
   background: rgba(147, 127, 205, 0.16);
-  color: #b6a6e6;
+  color: var(--purple-soft-ink);
   font-size: 10px;
 }
 
@@ -314,7 +314,7 @@
   border-radius: 0.7rem;
   border: 1px solid rgba(147, 127, 205, 0.3);
   background: rgba(147, 127, 205, 0.1);
-  color: #b6a6e6;
+  color: var(--purple-soft-ink);
   cursor: pointer;
   font-size: 10.5px;
   white-space: nowrap;
@@ -323,24 +323,24 @@
 
 .nt-qa__toggle:hover {
   background: rgba(147, 127, 205, 0.2);
-  color: #d6cbf5;
+  color: var(--purple-soft-ink);
 }
 
 .nt-qa__answer {
   margin-top: 0.7rem;
   margin-inline-start: 2.05rem;
-  border-top: 1px dashed rgba(255, 255, 255, 0.12);
+  border-top: 1px dashed rgb(var(--line-rgb) / 0.12);
   padding-top: 0.7rem;
   font-size: 0.85rem;
   line-height: 1.95;
-  color: #a9d6b6;
+  color: var(--green-soft-ink);
   white-space: pre-wrap;
 }
 
 .nt-qa__empty {
   flex: 0 0 auto;
   font-size: 11px;
-  color: #6d6d6d;
+  color: var(--ghost);
   padding-top: 0.3rem;
 }
 
@@ -348,7 +348,7 @@
 .nt-table-wrap {
   overflow-x: auto;
   border-radius: 1.2rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgb(var(--line-rgb) / 0.08);
 }
 
 .nt-table {
@@ -358,9 +358,9 @@
 }
 
 .nt-table th {
-  background: rgba(255, 255, 255, 0.05);
-  color: #d6d6d6;
-  font-family: 'Doran', Tahoma, sans-serif;
+  background: rgb(var(--wash-rgb) / 0.05);
+  color: var(--muted);
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: 0.75rem;
   font-weight: 600;
   padding: 0.7rem 0.9rem;
@@ -370,19 +370,19 @@
 
 .nt-table td {
   padding: 0.7rem 0.9rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-  color: #c9c9c9;
+  border-top: 1px solid rgb(var(--line-rgb) / 0.06);
+  color: var(--muted);
   font-size: 0.8rem;
   line-height: 1.9;
   vertical-align: top;
 }
 
 .nt-table tbody tr:nth-child(even) {
-  background: rgba(255, 255, 255, 0.015);
+  background: rgb(var(--wash-rgb) / 0.015);
 }
 
 .nt-table td:first-child {
-  color: #fff;
+  color: var(--white);
   font-weight: 600;
 }
 
@@ -403,7 +403,7 @@
   border-radius: 0.7rem;
   border: 1px solid rgba(147, 127, 205, 0.32);
   background: rgba(147, 127, 205, 0.1);
-  color: #b6a6e6;
+  color: var(--purple-soft-ink);
   cursor: pointer;
   font-size: 10.5px;
   white-space: nowrap;
@@ -420,7 +420,7 @@
 .nt-ai__btn:hover,
 .nt-ai__btn.is-open {
   background: rgba(147, 127, 205, 0.22);
-  color: #d6cbf5;
+  color: var(--purple-soft-ink);
 }
 
 .nt-ai__panel {
@@ -441,9 +441,9 @@
 .nt-ai__chip {
   padding: 0.28rem 0.7rem;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.04);
-  color: #aaa;
+  border: 1px solid rgb(var(--line-rgb) / 0.1);
+  background: rgb(var(--wash-rgb) / 0.04);
+  color: var(--muted);
   cursor: pointer;
   font-size: 11px;
   transition:
@@ -454,20 +454,20 @@
 
 .nt-ai__chip:hover {
   border-color: rgba(147, 127, 205, 0.5);
-  color: #fff;
+  color: var(--white);
 }
 
 .nt-ai__chip.is-active {
   border-color: rgba(147, 127, 205, 0.65);
   background: rgba(147, 127, 205, 0.22);
-  color: #d9cffa;
+  color: var(--purple-soft-ink);
 }
 
 .nt-ai__status {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  color: #9d8fd6;
+  color: var(--purple-ink);
   font-size: 10.5px;
 }
 
@@ -476,7 +476,7 @@
   height: 0.75rem;
   border-radius: 999px;
   border: 2px solid rgba(147, 127, 205, 0.3);
-  border-top-color: #b6a6e6;
+  border-top-color: var(--purple-bright);
   animation: nt-spin 0.7s linear infinite;
 }
 
@@ -489,14 +489,14 @@
 .nt-ai__preview {
   margin-top: 0.6rem;
   border-radius: 0.8rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgb(var(--line-rgb) / 0.08);
+  background: rgb(var(--shadow-rgb) / 0.28);
   padding: 0.7rem 0.85rem;
 }
 
 .nt-ai__preview-text {
   margin: 0;
-  color: #d6d6d6;
+  color: var(--muted);
   font-size: 12px;
   line-height: 2;
   white-space: pre-wrap;
@@ -511,10 +511,10 @@
 .nt-ai__apply {
   padding: 0.4rem 0.9rem;
   border-radius: 0.7rem;
-  background: #937fcd;
-  color: #fff;
+  background: var(--purple-bright);
+  color: var(--white);
   cursor: pointer;
-  font-family: 'Doran', Tahoma, sans-serif;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: 11px;
 }
 
@@ -526,15 +526,15 @@
 .nt-ai__cancel {
   padding: 0.4rem 0.9rem;
   border-radius: 0.7rem;
-  background: rgba(255, 255, 255, 0.06);
-  color: #aaa;
+  background: rgb(var(--wash-rgb) / 0.06);
+  color: var(--muted);
   cursor: pointer;
   font-size: 11px;
 }
 
 .nt-ai__cancel:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: rgb(var(--wash-rgb) / 0.1);
+  color: var(--white);
 }
 
 .nt-ai__hint,
@@ -544,12 +544,12 @@
 }
 
 .nt-ai__hint {
-  color: #8a8a8a;
+  color: var(--faint);
 }
 
 .nt-ai__error {
   margin-top: 0.5rem;
-  color: #ef9196;
+  color: var(--red-ink);
 }
 
 /* دکمهٔ حذف دومرحله‌ای */
@@ -559,8 +559,8 @@
   gap: 0.4rem;
   cursor: pointer;
   border-radius: 0.75rem;
-  background: rgba(255, 255, 255, 0.05);
-  color: #8a8a8a;
+  background: rgb(var(--wash-rgb) / 0.05);
+  color: var(--faint);
   padding: 0.5rem 0.9rem;
   font-size: 11px;
   transition:
@@ -578,12 +578,12 @@
 
 .nt-delete-btn:hover {
   background: rgba(226, 109, 109, 0.12);
-  color: #ef9196;
+  color: var(--red-ink);
 }
 
 .nt-delete-btn--armed {
   background: rgba(226, 109, 109, 0.18) !important;
-  color: #ef9196 !important;
+  color: var(--red-ink) !important;
 }
 
 /* کارت یادداشت — بلند شدن ملایم روی هاور */

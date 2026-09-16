@@ -113,7 +113,7 @@ function mutateUserSpace(userData, mutator) {
 
 export const subjectLabel = (id) => SUBJECTS.find((s) => s.id === id)?.label ?? 'عمومی';
 export const subjectAccent = (id) => SUBJECTS.find((s) => s.id === id)?.accent ?? '#8a8a8a';
-export const noteColor = (note) => NOTE_COLORS.includes(note?.color) ? note.color : '#5b8cc7';
+export const noteColor = (note) => NOTE_COLORS.includes(note?.color) ? note.color: 'var(--blue-ink)';
 
 /* نرمال‌سازی متن برای جست‌وجو: فارسی/عربی و نیم‌فاصله به هم برسند */
 function normalizeForSearch(text) {
