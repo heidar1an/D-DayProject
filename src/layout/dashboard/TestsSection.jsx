@@ -47,7 +47,7 @@ export default function TestsSection({ onOpenAnalytics, onOpenInternational, onO
 
   return (
     <div
-      className="mx-auto w-[var(--content-width)] bg-black py-6 text-white md:py-10 lg:h-full lg:py-6"
+      className="mx-auto w-[var(--content-width)] bg-[var(--background)] py-6 text-white md:py-10 lg:h-full lg:py-6"
       dir="rtl"
     >
 

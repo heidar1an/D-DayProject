@@ -459,7 +459,7 @@ export default function NotesSection({ userData }) {
      در آن فریم (و حالت خطا) اسکلت/خطا نشان بده، نه رندر فهرست. */
   if (notes === null) {
     return (
-      <main dir="rtl" className="dash-stagger mx-auto w-[var(--content-width)] bg-black py-8 text-white md:py-10 [font-family:'Pinar','Vazir',Tahoma,sans-serif]">
+      <main dir="rtl" className="dash-stagger mx-auto w-[var(--content-width)] bg-[var(--background)] py-8 text-white md:py-10 [font-family:'Pinar','Vazir',Tahoma,sans-serif]">
         {error ? <ErrorState onRetry={retry} /> : <SkeletonHome />}
       </main>
     );
@@ -468,7 +468,7 @@ export default function NotesSection({ userData }) {
   return (
     <main
       dir="rtl"
-      className="dash-stagger mx-auto w-[var(--content-width)] bg-black py-8 text-white md:py-10 [font-family:'Pinar','Vazir',Tahoma,sans-serif]"
+      className="dash-stagger mx-auto w-[var(--content-width)] bg-[var(--background)] py-8 text-white md:py-10 [font-family:'Pinar','Vazir',Tahoma,sans-serif]"
     >
       {mode === 'note' ? (
         <NoteDetail

@@ -64,6 +64,7 @@ export default function LearningPhilosophy() {
                   className={`ab-philosophy__arc ${index === stage ? 'is-active' : ''} ${
                     index < stage ? 'is-past' : ''
                   }`}
+                  style={{ '--ab-i': index }}
                   vectorEffect="non-scaling-stroke"
                 />
               ))}

@@ -516,6 +516,36 @@ img {
   font-weight: 500;
 }
 
+/*
+ * ── وسط‌چینی ناوبری نسبت به «کل صفحه»، نه نسبت به فضای باقی‌مانده ──
+ * قبلاً ناوبری با `margin-inline: auto` وسطِ فاصلهٔ بین لوگو و اکشن‌ها می‌نشست؛
+ * چون لوگو و اکشن‌ها عرض یکسان ندارند، مرکزِ ناوبری از مرکز صفحه می‌لغزید.
+ * این‌جا دو ستون کناری هم‌عرض می‌شوند (`flex-basis: 0` + `flex-grow: 1`) ⇒
+ * ناوبری دقیقاً روی مرکزِ هدر می‌افتد و چون خودِ هدر با `margin: 0 auto` وسطِ
+ * صفحه است، نتیجه مرکزِ کل صفحه می‌شود. اقلام در جریان می‌مانند، پس در عرض‌های
+ * باریک هیچ‌وقت روی هم نمی‌افتند — فقط ستون‌ها به کمینهٔ محتوایشان می‌رسند.
+ * فقط از ۶۴۱px به بالا (جایی که ناوبری افقی است؛ پایین‌تر منوی همبرگری است).
+ *
+ * ⚠️ انتخابگر باید به `.site-header` مقید بماند. `.brand` یک کامپوننت مشترک
+ * است (`src/layout/dashboard/Brand.jsx`) و هدر داشبورد و پنل هم همان را
+ * رندر می‌کنند؛ نسخهٔ مقید‌نشدهٔ این قاعده هدر داشبورد را به‌هم ریخت.
+ */
+@media (min-width: 641px) {
+  .site-header > .brand,
+  .site-header__actions {
+    flex: 1 1 0;
+  }
+
+  /* لوگو به لبهٔ راست و اکشن‌ها به لبهٔ چپ بچسبند، نه به سمت مرکز */
+  .site-header__actions {
+    justify-content: flex-end;
+  }
+
+  .site-nav {
+    margin-inline: 0;
+  }
+}
+
 .site-nav a,
 .auth-link {
   position: relative;
@@ -556,6 +586,13 @@ img {
   background: var(--brown-bright);
 }
 
+/* مقالات رنگ خودِ لایهٔ مقالات را می‌گیرد: برچسب «مقاله منتخب» در
+   `articles.css` هم `--green-bright` است. سبز تنها اکسنتِ آزادِ پالت است
+   (آبی=محصولات، بنفش=تعرفه، قهوه‌ای=درباره ما). */
+.site-nav__link--articles::after {
+  background: var(--green-bright);
+}
+
 .auth-link--login::after {
   background: var(--green-bright);
 }
@@ -585,6 +622,15 @@ img {
 
 .site-nav__link--about:hover::after {
   background: var(--brown-bright);
+}
+
+.site-nav a.site-nav__link--articles:hover {
+  color: var(--green-ink);
+  font-weight: 600;
+}
+
+.site-nav__link--articles:hover::after {
+  background: var(--green-bright);
 }
 
 .auth-link--login:hover {
@@ -694,7 +740,15 @@ img {
   display: grid;
   min-height: 424px;
   place-items: center;
-  padding: 70px 24px 32px;
+  /*
+   * پدینگ افقی روی خودِ هیرو نمی‌نشیند و به‌صورت توکن به فرزندانش داده می‌شود.
+   * چرا: درصدِ `var(--content-width)` نسبت به **جعبهٔ محتوای** والد حساب
+   * می‌شود؛ اگر هیرو پدینگ افقی داشته باشد، نوار پنج دوره ۸۰٪ عرضِ «ویوپورت
+   * منهای ۴۸px» می‌شود و از بخش‌های دیگر (`.section-shell`) باریک‌تر می‌افتد.
+   * با برداشتن پدینگ، مبنای درصد برای هر دو یکی می‌شود.
+   */
+  --hero-gutter: 24px;
+  padding: 70px 0 32px;
   text-align: center;
 }
 
@@ -702,6 +756,7 @@ img {
   position: relative;
   z-index: 1;
   max-width: 930px;
+  padding-inline: var(--hero-gutter);
 }
 
 .hero h1,
@@ -735,6 +790,184 @@ img {
   font-size: clamp(1rem, 1.75vw, 1.35rem);
   font-weight: 500;
   line-height: 1.8;
+}
+
+/*
+ * پنج کارتِ دورهٔ اصلی، بلافاصله زیر دکمهٔ «از الان شروع کنید» هیرو.
+ *
+ * `.hero` یک grid با `place-items: center` است؛ این بلوک فرزند دومِ همان grid
+ * است، پس عرضش را خودش تعیین می‌کند و وسط‌چین می‌ماند. کارت‌ها همان کارت‌های
+ * کاتالوگ بخش «دوره‌ها»ی داشبوردند (CoursesSection → CatalogCourseCard) و
+ * شبکه‌شان هم همان شبکه است، فقط فضای بیشتری می‌گیرد.
+ *
+ * عرض **بی‌سقف** است: قبلاً `max-width: 1180px` داشت و روی نمایشگرهای پهن از
+ * بخش‌های دیگر (`.section-shell`) باریک‌تر می‌افتاد. حالا هر دو یک عدد‌اند.
+ */
+.hero__courses {
+  position: relative;
+  z-index: 1;
+  width: var(--content-width);
+  margin-top: 52px;
+}
+
+/*
+ * پاپ‌آپ «اول ثبت‌نام کن» — کارت‌های دوره برای کاربر واردنشده مقصدی ندارند.
+ * به‌جای پرش بی‌توضیح به صفحهٔ ورود، مسیر و دکمهٔ ثبت‌نام همین‌جا نشان داده
+ * می‌شود. پرده از `--shadow-rgb` می‌آید چون طبق قاعدهٔ توکن‌ها «هر چیزی که باید
+ * همیشه تیره بماند» — پس در تم روشن هم صفحه را تاریک می‌کند و override جدا لازم ندارد.
+ */
+.signup-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+/* پرده یک دکمه است تا با کیبورد هم بسته شود، ولی فوکوس‌نما نمی‌گیرد */
+.signup-modal__scrim {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  border: 0;
+  background: rgb(var(--shadow-rgb) / 0.72);
+  cursor: default;
+}
+
+.signup-modal__panel {
+  position: relative;
+  width: min(100%, 460px);
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: 30px 26px 24px;
+  border: 1px solid rgb(var(--line-rgb) / 0.14);
+  border-radius: 2rem;
+  background: var(--surface);
+  box-shadow: 0 32px 80px -24px rgb(var(--shadow-rgb) / calc(0.9 * var(--shadow-scale)));
+  text-align: right;
+  animation: signup-modal-in 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes signup-modal-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.signup-modal__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 13px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: 0.8rem;
+}
+
+.signup-modal__badge-icon {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+}
+
+.signup-modal__title {
+  margin: 18px 0 0;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: 1.35rem;
+  line-height: 1.6;
+}
+
+.signup-modal__text {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.95;
+}
+
+.signup-modal__steps {
+  display: grid;
+  gap: 10px;
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.signup-modal__steps li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+
+.signup-modal__step-index {
+  display: grid;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border-radius: 999px;
+  background: rgb(var(--wash-rgb) / 0.08);
+  color: var(--faint);
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: 0.75rem;
+}
+
+.signup-modal__actions {
+  display: grid;
+  gap: 6px;
+  margin-top: 24px;
+}
+
+/* `.button` خودش `margin-top` دارد؛ داخل پاپ‌آپ فاصله را خودِ شبکه می‌دهد */
+.signup-modal__actions .button {
+  margin-top: 0;
+}
+
+.signup-modal__later {
+  padding: 10px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: color 160ms ease;
+}
+
+.signup-modal__later:hover {
+  color: var(--white);
+}
+
+@media (max-width: 640px) {
+  /* زیر ۶۴۰px عرض ۸۰٪ کارت‌ها را در دو ستون خیلی باریک می‌کرد */
+  .hero__courses {
+    width: calc(100% - 2 * var(--hero-gutter));
+    margin-top: 34px;
+  }
+
+  .signup-modal__panel {
+    padding: 24px 20px 18px;
+    border-radius: 1.75rem;
+  }
+
+  .signup-modal__title {
+    font-size: 1.15rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .signup-modal__panel {
+    animation: none;
+  }
 }
 
 .button {
@@ -1368,8 +1601,17 @@ img {
   pointer-events: none;
 }
 
+/*
+ * نشان باز نقل‌قول با `top` نسبت به لبهٔ **بالای همین بخش** اندازه می‌گیرد، نه
+ * نسبت به متنِ نقل‌قول؛ پس فاصله‌اش از کارتِ بالایی مستقیماً همین عدد است.
+ * عدد قبلی (۲۶px) نشان را چسبیده به کارت بالا می‌نشاند، در حالی که فاصله‌اش
+ * از متنِ زیرش نزدیک ۸۰px بود. با ۶۱px، جوهرِ نشان از بالا و پایین تقریباً
+ * یک‌اندازه فاصله می‌گیرد (اندازه‌گیری واقعی در ۱۹۲۰px: ۵۸px بالا، ۵۸px پایین).
+ * ⚠️ این عدد و `padding-top` بخش به هم گره خورده‌اند: بزرگ‌کردن پدینگ بدون
+ * این عدد، دوباره نشان را به کارت بالا می‌چسباند.
+ */
 .quote__mark--open {
-  top: 26px;
+  top: 61px;
   right: 18px;
 }
 
@@ -1485,201 +1727,200 @@ img {
   box-shadow: 0 16px 34px rgba(255, 151, 23, 0.32);
 }
 
-.course-grid {
+/*
+ * کادرهای تبلیغی محصولات سرصفحه — دو ردیف نامتقارن، مثل چیدمان مرجع:
+ * ردیف اول کارتِ سمت چپ عریض و کارتِ سمت راست باریک است؛ در ردیف دوم
+ * این نسبت برعکس می‌شود. شبکه برای جای‌گذاری از چپ به راست می‌خواند، اما
+ * خودِ کارت‌ها جهت فارسی‌شان را نگه می‌دارند تا متن و آیکون‌ها برنگردند.
+ *
+ * ترکیبِ هر کادر مورّب است: بلوکِ متن پایینِ سمت راست (برچسبِ رده → نام محصول →
+ * یک جملهٔ توضیح) و نشانهٔ گرافیکیِ بزرگ بالا سمت چپ که از گوشه بیرون می‌زند.
+ * پس چیدمان `column` + `justify-content: flex-end` است و لوگو `absolute` بیرونِ
+ * جریان می‌نشیند؛ دکمهٔ فلش هم گوشهٔ پایین-چپ را پر می‌کند تا ترکیب متعادل بماند.
+ *
+ * `--promo-accent` از خودِ داده می‌آید (هگزِ محصول) و فقط پشتِ هالهٔ نرمِ لوگو
+ * می‌نشیند. متن و لوگو از `--promo-ink` رنگ می‌گیرند که توکنِ لایهٔ استایل است؛
+ * چرا: هگزِ خامِ اکسنت در تم روشن روی پنلِ پاستلی متن‌خوان نیست و توکن‌های
+ * `*-ink` دقیقاً برای همین ساخته شده‌اند. پنل هم از همان `--surface` کارت‌های
+ * اصلی می‌آید، پس هر دو تم بدون یک خط استایلِ جداگانه درست می‌شود.
+ */
+.promo-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 36px;
-  direction: rtl;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 22px;
+  direction: ltr;
 }
 
-.course-card {
+@media (min-width: 641px) {
+  /* ۷/۵ در ردیف اول و ۵/۷ در ردیف دوم؛ چهار کارت دقیقاً یک شبکه را می‌سازند. */
+  .promo-card--test-bank,
+  .promo-card--knowledge {
+    grid-column: span 7;
+  }
+
+  .promo-card--tapesh-ai,
+  .promo-card--wiki {
+    grid-column: span 5;
+  }
+}
+
+.promo-card {
+  --promo-panel: var(--surface);
+  --promo-ink: var(--blue-ink);
   position: relative;
   display: flex;
-  min-height: 440px;
+  min-height: 292px;
   flex-direction: column;
+  justify-content: flex-end;
   overflow: hidden;
-  border: 1px solid rgb(var(--line-rgb) / 0.24);
-  border-radius: 38px;
-  background: var(--pure);
-  color: var(--ink-deep);
+  border-radius: 34px;
+  padding: 32px 34px 34px;
+  background: var(--promo-panel);
+  direction: rtl;
+  text-align: right;
   transition: transform 220ms ease, box-shadow 220ms ease;
 }
 
-.course-card:hover,
-.green-path-card:hover,
-.tapesh-intro:hover {
+.promo-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 22px 42px rgb(var(--shadow-rgb) / calc(0.22 * var(--shadow-scale)));
 }
 
-.course-card--lavender {
-  --course-accent: var(--purple-bright);
+/* پنل و نسخهٔ متن‌خوانِ اکسنت، هر کدام از توکنِ خودش — یک قاعده به ازای محصول */
+.promo-card--test-bank {
+  --promo-panel: var(--surface);
+  --promo-ink: var(--blue-ink);
 }
 
-.course-card--copper {
-  --course-accent: var(--brown-bright);
+.promo-card--tapesh-ai {
+  --promo-panel: var(--surface);
+  --promo-ink: var(--purple-ink);
 }
 
-.course-card__tags,
-.green-path-card__tags {
+.promo-card--wiki {
+  --promo-panel: var(--surface);
+  --promo-ink: var(--copper-ink);
+}
+
+.promo-card--knowledge {
+  --promo-panel: var(--surface);
+  --promo-ink: var(--green-ink);
+}
+
+/* نشانهٔ گرافیکی — بزرگ، لنگرِ بالا-چپ، از گوشه بیرون می‌زند */
+.promo-card__art {
   position: absolute;
-  top: 17px;
-  right: 18px;
-  z-index: 2;
-  display: flex;
-  max-width: calc(100% - 36px);
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  gap: 5px;
+  top: -22px;
+  left: -16px;
+  display: grid;
+  width: 200px;
+  height: 200px;
+  place-items: center;
+  color: var(--promo-ink);
+  transition: transform 320ms ease;
 }
 
-.course-card__tags span,
-.green-path-card__tags span {
-  padding: 5px 11px;
-  border: 1px solid var(--course-accent, var(--green-bright));
-  border-radius: 4px;
-  background: var(--deep);
+/* هالهٔ نرمِ پشتِ لوگو — همان روشِ کارتِ کاتالوگ: دایرهٔ اکسنت با بلور */
+.promo-card__art::before {
+  content: '';
+  position: absolute;
+  inset: 12%;
+  border-radius: 50%;
+  background: var(--promo-accent);
+  filter: blur(34px);
+  opacity: 0.22;
+}
+
+.promo-card__glyph {
+  position: relative;
+  width: 124px;
+  height: 124px;
+  stroke-width: 1.1;
+}
+
+.promo-card:hover .promo-card__art {
+  transform: scale(1.05) rotate(-3deg);
+}
+
+/* بلوکِ متن — پایینِ سمت راست. عرضش کوتاه می‌ماند تا از لوگو فاصله بگیرد */
+.promo-card__body {
+  position: relative;
+  display: flex;
+  max-width: 64%;
+  flex-direction: column;
+}
+
+.promo-card__eyebrow {
+  color: var(--promo-ink);
+  font-size: 0.92rem;
+  font-weight: 500;
+  line-height: 1.7;
+}
+
+.promo-card__title {
   color: var(--white);
-  font-size: 0.88rem;
-  font-weight: 500;
-  line-height: 1.3;
-  white-space: nowrap;
-}
-
-.course-card__visual {
-  display: grid;
-  flex: 1;
-  min-height: 0;
-  padding: 30px 42px 8px;
-  place-items: center;
-}
-
-.course-card__visual img {
-  width: 100%;
-  height: 100%;
-  max-height: 330px;
-  object-fit: contain;
-  object-position: center;
-  filter: grayscale(1) contrast(1.2);
-}
-
-.course-card--lavender .course-card__visual img {
-  filter: grayscale(1) contrast(1.3) brightness(0.92);
-}
-
-.course-card__footer,
-.green-path-card__button {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  min-height: 70px;
-  margin: 0 22px 21px;
-  padding: 9px 18px 9px 12px;
-  border: 2px solid var(--course-accent);
-  border-radius: 18px;
-  background: var(--deep);
-  color: var(--course-accent);
   font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
-  font-size: clamp(1.3rem, 2.5vw, 2.15rem);
+  font-size: clamp(1.22rem, 1.7vw, 1.62rem);
   font-weight: 700;
-  letter-spacing: -0.045em;
-  line-height: 1.25;
-  transition: background 180ms ease, color 180ms ease;
+  letter-spacing: -0.05em;
+  line-height: 1.45;
 }
 
-.course-card__footer span,
-.green-path-card__button span {
-  flex: 1;
-  text-align: center;
+.promo-card__text {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.9;
 }
 
-.course-card__footer > span:last-child,
-.green-path-card__button > span:last-child {
-  flex: 0 0 auto;
-  font-size: 1.65em;
-  line-height: 0.7;
-}
-
-.course-card__footer:hover,
-.green-path-card__button:hover {
-  background: var(--course-accent);
-  color: var(--ink-deep);
-}
-
-.green-path-card {
+/* دکمهٔ فلشِ گوشهٔ پایین-چپ — فقط تا «کلیک‌شدنی» بودنِ کادر دیده شود */
+.promo-card__go {
+  position: absolute;
+  bottom: 34px;
+  left: 34px;
   display: grid;
-  min-height: 320px;
-  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.58fr);
-  align-items: stretch;
-  overflow: hidden;
-  border: 2px solid var(--blue-bright);
-  border-radius: 38px;
-  background: var(--pure);
-  color: var(--ink-deep);
-  direction: ltr;
-  transition: transform 220ms ease, box-shadow 220ms ease;
-}
-
-.green-path-card__visual {
-  display: grid;
-  min-width: 0;
-  padding: 18px 18px 14px 28px;
+  width: 42px;
+  height: 42px;
   place-items: center;
+  border: 1px solid rgb(var(--line-rgb) / 0.14);
+  border-radius: 50%;
+  background: rgb(var(--wash-rgb) / 0.06);
+  color: var(--promo-ink);
+  transition: background 200ms ease, border-color 200ms ease, transform 200ms ease;
 }
 
-.green-path-card__visual img {
-  width: 100%;
-  height: 100%;
-  max-height: 280px;
-  object-fit: contain;
-  object-position: center;
-  filter: grayscale(1) contrast(1.35);
+.promo-card__go svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.2;
 }
 
-.green-path-card__content {
-  display: flex;
-  flex-direction: column;
-  padding: 18px 24px 20px 28px;
-  direction: rtl;
+.promo-card:hover .promo-card__go {
+  border-color: var(--promo-ink);
+  background: rgb(var(--wash-rgb) / 0.12);
+  transform: translateX(-4px);
 }
 
-.green-path-card__tags {
-  position: static;
-  justify-content: flex-start;
+.tapesh-intro:hover {
+  translate: 0 -5px;
+  box-shadow: 0 22px 42px rgb(var(--shadow-rgb) / calc(0.22 * var(--shadow-scale)));
 }
 
-.green-path-card__tags span {
-  --course-accent: var(--green-bright);
-}
-
-.green-path-card ul {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  align-items: flex-start;
-  margin: auto 0 18px;
-  padding: 0;
-  list-style: none;
-  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
-  font-size: clamp(0.96rem, 1.55vw, 1.25rem);
-  font-weight: 500;
-  line-height: 1.65;
-}
-
-.green-path-card li::before {
-  margin-left: 7px;
-  content: '–';
-}
-
-.green-path-card__button {
-  --course-accent: var(--green-bright);
-  width: min(100%, 530px);
-  min-height: 68px;
-  margin: 0 0 0 auto;
-  font-size: clamp(1.5rem, 2.7vw, 2.35rem);
-}
-
+/*
+ * ⚠️ این کارت transition خودش را روی `transform` داشت (`transform 220ms ease`) و
+ * چون هم‌سطحِ `[data-reveal]` است ولی بعد از آن می‌آید، انیمیشن ورود را می‌بست:
+ * بالا آمدن به ۲۲۰ms کوتاه می‌شد و `opacity` هیچ‌وقت transition نمی‌گرفت ⇒ کارت
+ * به‌جای بالا آمدن، یک‌دفعه ظاهر می‌شد («می‌پرید»).
+ *
+ * راه‌حل: بالا کشیدنِ هاور از ویژگی مستقلِ `translate` می‌آید، نه `transform`.
+ * انیمیشن ورود `transform` را می‌گیرد و هاور `translate` را؛ دو transition جدا
+ * که هم‌زمان کار می‌کنند و هم را باطل نمی‌کنند. تأخیرِ ۲۵۰ms فقط روی ورود است
+ * تا هاور بلافاصله جواب بدهد (اگر روی translate هم می‌نشست، هاور کند می‌شد).
+ */
 .tapesh-intro {
   --tapesh-panel: var(--card-sky);
   --tapesh-text: var(--white);
@@ -1692,7 +1933,11 @@ img {
   border-radius: 44px;
   background: var(--tapesh-panel);
   direction: ltr;
-  transition: transform 220ms ease, box-shadow 220ms ease;
+  transition:
+    opacity 720ms ease 250ms,
+    transform 820ms cubic-bezier(0.22, 1, 0.36, 1) 250ms,
+    translate 220ms ease,
+    box-shadow 220ms ease;
 }
 
 .tapesh-intro__visual {
@@ -2218,6 +2463,32 @@ img {
 
 .auth-form__google:hover {
   background: var(--light-fill-soft);
+}
+
+/*
+ * گوگلِ پیکربندی‌نشده: مرز خط‌چین + متن راهنما زیر دکمه، بدون دست‌زدن به کنتراست.
+ * دکمه عمداً `disabled` نمی‌شود تا کلیکش همان دلیل را بگوید، نه اینکه مرده باشد.
+ */
+.auth-form__google.is-unavailable {
+  border-style: dashed;
+}
+
+.auth-form__google.is-unavailable:hover {
+  transform: none;
+}
+
+.auth-form__google:disabled {
+  cursor: progress;
+  opacity: 0.75;
+}
+
+.auth-form__google-note {
+  margin: -4px 0 0;
+  color: var(--faint);
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
+  font-size: clamp(0.78rem, 0.88vw, 0.92rem);
+  line-height: 1.8;
+  text-align: right;
 }
 
 .offline-page {
@@ -2876,9 +3147,15 @@ img {
   box-shadow: 0 20px 36px rgb(var(--shadow-rgb) / calc(0.2 * var(--shadow-scale)));
 }
 
+/*
+ * ارتفاع تصویر ثابت است، نه `flex: 1`. قبلاً تصویر فضای باقی‌ماندهٔ کارت را
+ * می‌گرفت و چون طول عنوان/خلاصهٔ سه مقاله یکی نیست، هر کارت ارتفاع دیگری
+ * می‌گرفت و سه تصویر هم‌تراز نبودند. حالا هر سه دقیقاً یک ارتفاع دارند و
+ * تفاوت طول متن فقط در بخش محتوا (پایین کارت) دیده می‌شود.
+ */
 .article-card__image {
-  min-height: 300px;
-  flex: 1;
+  height: 300px;
+  flex: 0 0 auto;
   overflow: hidden;
   background: var(--light-fill-soft);
 }
@@ -3002,10 +3279,11 @@ img {
   padding-bottom: 92px;
 }
 
+/* هر ۶ کادر زیر هم — یک ستون، بدون شبکهٔ دوستونیِ قبلی */
 .faq-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 22px 54px;
+  grid-template-columns: 1fr;
+  gap: 18px;
   direction: rtl;
 }
 
@@ -3103,7 +3381,7 @@ img {
 
 .site-footer__inner {
   display: grid;
-  grid-template-columns: 1fr 0.9fr 0.85fr 1.35fr;
+  grid-template-columns: 1fr 0.9fr 0.85fr 0.95fr;
   gap: 46px;
   padding-top: 38px;
   padding-bottom: 70px;
@@ -3112,6 +3390,7 @@ img {
 
 .site-footer__brand,
 .site-footer__column,
+.site-footer__social,
 .site-footer__about {
   min-width: 0;
 }
@@ -3168,9 +3447,85 @@ img {
   color: var(--blue-bright);
 }
 
+.site-footer__social {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 13px;
+}
+
+.site-footer__social h2 {
+  margin: 0 0 7px;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: 1.55rem;
+  font-weight: 700;
+}
+
+.site-footer__social-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-width: 190px;
+}
+
+.site-footer__social-link {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid rgb(var(--line-rgb) / 0.12);
+  border-radius: 14px;
+  background: rgb(var(--wash-rgb) / 0.08);
+  color: var(--white);
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+
+.site-footer__social-link:hover {
+  transform: translateY(-3px);
+  border-color: var(--blue-bright);
+  background: rgb(var(--wash-rgb) / 0.16);
+}
+
+.site-footer__social-link img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.site-footer__social-link span {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border-radius: 7px;
+  background: currentColor;
+  color: var(--background);
+  font-family: Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.site-footer__social-link--eitaa span {
+  border-radius: 50%;
+  color: var(--gold);
+  background: transparent;
+  border: 2px solid currentColor;
+  font-size: 1.15rem;
+  text-transform: lowercase;
+}
+
+.site-footer__social-link--youtube span {
+  color: var(--red);
+  background: transparent;
+  border: 2px solid currentColor;
+  font-size: 0.72rem;
+}
+
 .site-footer__about {
-  align-self: center;
+  width: 100%;
   max-width: 310px;
+  margin-top: 18px;
   color: var(--muted);
   font-size: 0.95rem;
   font-weight: 400;
@@ -3226,6 +3581,8 @@ img {
   line-height: 1;
   direction: rtl;
   white-space: nowrap;
+  /* کادرها حالا لینک‌اند؛ بدون این، مرورگر زیرشان خط می‌کشد */
+  text-decoration: none;
 }
 
 .motion-pill--purple {
@@ -3305,16 +3662,47 @@ img {
     min-height: 340px;
   }
 
-  .course-card {
-    min-height: 390px;
-  }
-
-  .green-path-card {
-    min-height: 280px;
-  }
-
   .tapesh-intro {
     min-height: 360px;
+  }
+
+  /* دو ستون می‌ماند، ولی کارت کوتاه‌تر و لوگو کوچک‌تر می‌شود */
+  .promo-grid {
+    gap: 16px;
+  }
+
+  .promo-card {
+    min-height: 248px;
+    border-radius: 26px;
+    padding: 24px 22px 26px;
+  }
+
+  .promo-card__art {
+    top: -18px;
+    left: -14px;
+    width: 156px;
+    height: 156px;
+  }
+
+  .promo-card__glyph {
+    width: 94px;
+    height: 94px;
+  }
+
+  .promo-card__body {
+    max-width: 66%;
+  }
+
+  .promo-card__text {
+    font-size: 0.8rem;
+    line-height: 1.8;
+  }
+
+  .promo-card__go {
+    bottom: 26px;
+    left: 22px;
+    width: 36px;
+    height: 36px;
   }
 
   .article-card {
@@ -3322,11 +3710,11 @@ img {
   }
 
   .article-card__image {
-    min-height: 255px;
+    height: 255px;
   }
 
   .faq-grid {
-    gap: 16px 24px;
+    gap: 16px;
   }
 
   .site-footer__inner {
@@ -3588,8 +3976,11 @@ img {
   }
 
   .hero {
+    /* همان حاشیهٔ ۱۶pxی `.section-shell` در موبایل، تا نوار کارت‌ها دقیقاً
+       هم‌عرض بخش‌های دیگر بماند (اندازه‌گیری‌شده: ۳۵۸px در ویوپورت ۳۹۰px) */
+    --hero-gutter: 16px;
     min-height: 400px;
-    padding: 54px 18px 24px;
+    padding: 54px 0 24px;
   }
 
   .hero h1 {
@@ -3733,70 +4124,6 @@ img {
     margin-top: 18px;
   }
 
-  .course-grid {
-    grid-template-columns: 1fr;
-    gap: 18px;
-  }
-
-  .course-card {
-    min-height: 370px;
-    border-radius: 28px;
-  }
-
-  .course-card__tags,
-  .green-path-card__tags {
-    top: 13px;
-    right: 13px;
-    max-width: calc(100% - 26px);
-  }
-
-  .course-card__visual {
-    padding: 35px 34px 2px;
-  }
-
-  .course-card__visual img {
-    max-height: 264px;
-  }
-
-  .course-card__footer {
-    min-height: 61px;
-    margin: 0 13px 13px;
-    padding-inline: 12px 8px;
-    border-radius: 15px;
-    font-size: 1.35rem;
-  }
-
-  .green-path-card {
-    min-height: 580px;
-    grid-template-columns: 1fr;
-    border-radius: 28px;
-  }
-
-  .green-path-card__visual {
-    order: 2;
-    min-height: 250px;
-    padding: 12px 24px 20px;
-  }
-
-  .green-path-card__content {
-    order: 1;
-    padding: 18px 20px 0;
-  }
-
-  .green-path-card__tags {
-    margin: 0;
-  }
-
-  .green-path-card ul {
-    margin: 16px 0 18px;
-    font-size: 0.95rem;
-  }
-
-  .green-path-card__button {
-    min-height: 60px;
-    font-size: 1.45rem;
-  }
-
   .tapesh-intro {
     min-height: 650px;
     grid-template-columns: 1fr;
@@ -3837,6 +4164,51 @@ img {
     margin-top: 20px;
   }
 
+  /* یک ستون؛ لوگو کوچک می‌شود ولی ترکیبِ مورّبِ متن/گرافیک حفظ می‌ماند */
+  .promo-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .promo-card {
+    min-height: 224px;
+    border-radius: 24px;
+    padding: 20px 20px 22px;
+  }
+
+  .promo-card__art {
+    top: -10px;
+    left: -10px;
+    width: 118px;
+    height: 118px;
+  }
+
+  .promo-card__glyph {
+    width: 74px;
+    height: 74px;
+  }
+
+  .promo-card__body {
+    max-width: 62%;
+  }
+
+  .promo-card__title {
+    font-size: 1.16rem;
+  }
+
+  .promo-card__text {
+    margin-top: 8px;
+    font-size: 0.78rem;
+    line-height: 1.8;
+  }
+
+  .promo-card__go {
+    bottom: 22px;
+    left: 20px;
+    width: 34px;
+    height: 34px;
+  }
+
   .articles,
   .faq {
     padding-top: 56px;
@@ -3859,7 +4231,7 @@ img {
   }
 
   .article-card__image {
-    min-height: 220px;
+    height: 220px;
   }
 
   .article-card__content {

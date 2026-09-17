@@ -32,11 +32,11 @@
       "phone": "4138",
       "passwordHash": "1f61c05e5a94a1995a4dbaf9e3b9280190246279d7d9a0f229b16627fe15845a",
       "profile": {
-        "firstName": "فاطمه",
-        "lastName": "رحمان زاده",
+        "firstName": "امیرحسین",
+        "lastName": "حیدریان",
         "username": "heidarian",
         "university": "دانشگاه علوم پزشکی تهران",
-        "term": "۱۴",
+        "term": "۵",
         "motivations": [
           "experience",
           "helping-people"
@@ -45,15 +45,15 @@
           "rubika",
           "friends"
         ],
-        "email": "",
+        "email": "a.h.heidarian4139@gmail.com",
         "birthDate": "",
         "grade": "دوره علوم پایه",
         "favoriteCourses": [],
-        "gender": "",
-        "avatar": "03"
+        "gender": "مرد",
+        "avatar": "08"
       },
       "createdAt": "2026-09-11T10:58:07.985Z",
-      "updatedAt": "2026-09-15T14:25:04.352Z"
+      "updatedAt": "2026-09-17T09:00:12.002Z"
     },
     {
       "id": "d3c529d7-f3e7-4848-92b8-4ebb80609ab4",

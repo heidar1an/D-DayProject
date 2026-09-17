@@ -22,14 +22,18 @@ function PulseField() {
       <svg viewBox="0 0 600 600" focusable="false">
         <g className="ab-pulse__spin">
           {RINGS.map((radius, index) => (
-            <circle
-              cx="300"
-              cy="300"
-              r={radius}
+            <g
+              className={`ab-pulse__ring ab-pulse__ring--${index}`}
               key={`ring-${radius}`}
               style={{ '--ab-i': index }}
-              vectorEffect="non-scaling-stroke"
-            />
+            >
+              <circle
+                cx="300"
+                cy="300"
+                r={radius}
+                vectorEffect="non-scaling-stroke"
+              />
+            </g>
           ))}
 
           {TICKS.map((angle) => (

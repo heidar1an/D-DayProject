@@ -30,8 +30,8 @@ import {
   Button, Spinner, ToastProvider, faDate, toFa, useToast,
 } from './adminShared';
 import {
-  IconAnalytics, IconArticle, IconBanner, IconBroadcast, IconDashboard, IconLog, IconLogout, IconMedia,
-  IconMenu, IconNote, IconPage, IconSend, IconSettings, IconTag, IconUser,
+  IconAnalytics, IconArticle, IconBanner, IconBroadcast, IconChevron, IconDashboard, IconLog, IconLogout,
+  IconMedia, IconMenu, IconNote, IconPage, IconSend, IconSettings, IconTag, IconUser,
 } from './adminIcons';
 
 const SECTIONS = [
@@ -107,7 +107,10 @@ export function AdminShell({ admin, onExit, onLogout }) {
   const [view, setView] = useState(() => parseHashView());
   const [meta, setMeta] = useState(null);
   const [metaError, setMetaError] = useState(null);
+  /* کشوی موبایل (`is-open`) و ریل جمع‌شوی دسکتاپ (`is-collapsed`) دو چیز جدااند:
+     اولی فقط زیر ۸۶۱px معنا دارد، دومی فقط بالای آن. */
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const can = useCallback(
     (permission) => !permission || admin.permissions?.includes(permission),
@@ -240,7 +243,10 @@ export function AdminShell({ admin, onExit, onLogout }) {
 
   return (
     <div className="ad-root" dir="rtl">
-      <aside className={`ad-sidebar ${sidebarOpen ? 'is-open' : ''}`}>
+      <aside
+        id="ad-sidebar"
+        className={`ad-sidebar ${sidebarOpen ? 'is-open' : ''} ${sidebarCollapsed ? 'is-collapsed' : ''}`}
+      >
         <div className="ad-sidebar__brand">
           <span className="ad-sidebar__logo" aria-hidden="true">ت</span>
           <div>
@@ -261,6 +267,9 @@ export function AdminShell({ admin, onExit, onLogout }) {
                 className={`ad-nav__item ${isActive ? 'is-active' : ''}`}
                 onClick={() => navigate(section.id)}
                 aria-current={isActive ? 'page' : undefined}
+                /* فقط در حالت جمع، عنوان را به‌صورت راهنمای شناور نشان بده؛
+                   در حالت باز خودِ برچسب کنار آیکون هست و راهنما تکراری می‌شود. */
+                title={sidebarCollapsed ? section.label : undefined}
               >
                 <Icon width={18} height={18} />
                 <span>{section.label}</span>
@@ -270,11 +279,39 @@ export function AdminShell({ admin, onExit, onLogout }) {
         </nav>
 
         <div className="ad-sidebar__foot">
-          <button type="button" className="ad-nav__item" onClick={() => navigate('profile')}>
+          {/* کلید جمع/باز کردن نوار — فقط روی دسکتاپ کار می‌کند (زیر ۸۶۱px پنهان است،
+              چون آن‌جا نوار اصلاً کشوی روی‌هم‌افتاده است و ریلی وجود ندارد). */}
+          <button
+            type="button"
+            className="ad-nav__item ad-sidebar__collapse"
+            onClick={() => setSidebarCollapsed((current) => !current)}
+            aria-expanded={!sidebarCollapsed}
+            aria-controls="ad-sidebar"
+            title={sidebarCollapsed ? 'باز کردن منو' : undefined}
+          >
+            <IconChevron
+              width={18}
+              height={18}
+              style={{ transform: sidebarCollapsed ? 'none' : 'rotate(180deg)' }}
+            />
+            <span>{sidebarCollapsed ? 'باز کردن منو' : 'جمع کردن منو'}</span>
+          </button>
+
+          <button
+            type="button"
+            className="ad-nav__item"
+            onClick={() => navigate('profile')}
+            title={sidebarCollapsed ? 'حساب من' : undefined}
+          >
             <IconUser width={18} height={18} />
             <span>حساب من</span>
           </button>
-          <button type="button" className="ad-nav__item" onClick={onExit}>
+          <button
+            type="button"
+            className="ad-nav__item"
+            onClick={onExit}
+            title={sidebarCollapsed ? 'بازگشت به سایت' : undefined}
+          >
             <IconPage width={18} height={18} />
             <span>بازگشت به سایت</span>
           </button>

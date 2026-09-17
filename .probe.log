@@ -1,0 +1,230 @@
+{
+ "w1440": {
+  "viewport": 1440,
+  "heroCourses": {
+   "x": 144,
+   "y": 556,
+   "w": 1152,
+   "h": 300,
+   "bottom": 856
+  },
+  "benefits": {
+   "x": 144,
+   "y": 888,
+   "w": 1152,
+   "h": 808,
+   "bottom": 1695
+  },
+  "heroContent": {
+   "x": 277,
+   "y": 168,
+   "w": 887,
+   "h": 336,
+   "bottom": 504
+  },
+  "cards": [
+   {
+    "w": 214,
+    "h": 300
+   },
+   {
+    "w": 214,
+    "h": 300
+   },
+   {
+    "w": 214,
+    "h": 300
+   },
+   {
+    "w": 214,
+    "h": 300
+   },
+   {
+    "w": 214,
+    "h": 300
+   }
+  ],
+  "header": {
+   "x": 144,
+   "y": 0,
+   "w": 1152,
+   "h": 98,
+   "bottom": 98
+  },
+  "firstBenefitCard": {
+   "x": 644,
+   "y": 1145,
+   "w": 652,
+   "h": 272,
+   "bottom": 1417
+  }
+ },
+ "quoteRect1440": {
+  "x": 0,
+  "y": 1395,
+  "width": 1440,
+  "height": 767
+ },
+ "markInk1440": {
+  "boxTop": 1731,
+  "baseline": 1815,
+  "inkTop": 1729,
+  "inkBottom": 1769,
+  "lineHeight": 86.4,
+  "fontSize": "115.2px",
+  "halfLeading": -22
+ },
+ "textInk1440": {
+  "boxTop": 1825,
+  "baseline": 1866,
+  "inkTop": 1841,
+  "inkBottom": 1873,
+  "lineHeight": 56.7,
+  "fontSize": "32.4px",
+  "halfLeading": 9
+ },
+ "w1920": {
+  "viewport": 1920,
+  "heroCourses": {
+   "x": 192,
+   "y": 556,
+   "w": 1536,
+   "h": 380,
+   "bottom": 936
+  },
+  "benefits": {
+   "x": 192,
+   "y": 968,
+   "w": 1536,
+   "h": 789,
+   "bottom": 1757
+  },
+  "heroContent": {
+   "x": 566,
+   "y": 168,
+   "w": 788,
+   "h": 336,
+   "bottom": 504
+  },
+  "cards": [
+   {
+    "w": 291,
+    "h": 380
+   },
+   {
+    "w": 291,
+    "h": 380
+   },
+   {
+    "w": 291,
+    "h": 380
+   },
+   {
+    "w": 291,
+    "h": 380
+   },
+   {
+    "w": 291,
+    "h": 380
+   }
+  ],
+  "header": {
+   "x": 192,
+   "y": 0,
+   "w": 1536,
+   "h": 98,
+   "bottom": 98
+  },
+  "firstBenefitCard": {
+   "x": 851,
+   "y": 1227,
+   "w": 877,
+   "h": 252,
+   "bottom": 1479
+  }
+ },
+ "quoteRect1920": {
+  "x": 0,
+  "y": 1457,
+  "width": 1920,
+  "height": 776
+ },
+ "markInk1920": {
+  "boxTop": 1813,
+  "baseline": 1905,
+  "inkTop": 1810,
+  "inkBottom": 1854,
+  "lineHeight": 96,
+  "fontSize": "128px",
+  "halfLeading": -24
+ },
+ "textInk1920": {
+  "boxTop": 1907,
+  "baseline": 1946,
+  "inkTop": 1917,
+  "inkBottom": 1958,
+  "lineHeight": 60.2,
+  "fontSize": "34.4px",
+  "halfLeading": 1
+ },
+ "w390": {
+  "viewport": 390,
+  "heroCourses": {
+   "x": 18,
+   "y": 395,
+   "w": 354,
+   "h": 632,
+   "bottom": 1027
+  },
+  "benefits": {
+   "x": 16,
+   "y": 1051,
+   "w": 358,
+   "h": 1086,
+   "bottom": 2137
+  },
+  "heroContent": {
+   "x": 0,
+   "y": 132,
+   "w": 390,
+   "h": 229,
+   "bottom": 361
+  },
+  "cards": [
+   {
+    "w": 169,
+    "h": 200
+   },
+   {
+    "w": 169,
+    "h": 200
+   },
+   {
+    "w": 169,
+    "h": 200
+   },
+   {
+    "w": 169,
+    "h": 200
+   },
+   {
+    "w": 169,
+    "h": 200
+   }
+  ],
+  "header": {
+   "x": 16,
+   "y": 0,
+   "w": 358,
+   "h": 78,
+   "bottom": 78
+  },
+  "firstBenefitCard": {
+   "x": 16,
+   "y": 1255,
+   "w": 358,
+   "h": 210,
+   "bottom": 1465
+  }
+ }
+}

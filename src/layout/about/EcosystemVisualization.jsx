@@ -24,7 +24,11 @@ export default function EcosystemVisualization() {
   const rootRef = useRef(null);
   const fieldRef = useRef(null);
 
-  const stage = useScene(rootRef, { mode: 'sticky', stages: data.phases.length });
+  const stage = useScene(rootRef, {
+    mode: 'sticky',
+    stages: data.phases.length,
+    stageMode: 'endpoints',
+  });
   const inView = useInView(fieldRef, { threshold: 0.25 });
 
   const phases = useMemo(
@@ -72,6 +76,7 @@ export default function EcosystemVisualization() {
               />
               <g className="ab-cycle__pointer">
                 <line x1="50" y1="50" x2="50" y2="8" vectorEffect="non-scaling-stroke" />
+                <circle className="ab-cycle__marker" cx="50" cy="8" r="2.4" />
               </g>
             </svg>
 

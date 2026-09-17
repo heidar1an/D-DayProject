@@ -18,12 +18,15 @@ function Principle({ text, index, total }) {
 
   return (
     <article
-      className={`ab-principle ab-principle--${index % 3} ${inView ? 'is-in' : ''}`}
+      className={`ab-principle ab-principle--${index % 3} ab-principle--motion-${index} ${
+        inView ? 'is-in' : ''
+      }`}
       ref={ref}
     >
       <span className="ab-principle__index">
         {toFa(index + 1)} <span aria-hidden="true">/</span> {toFa(total)}
       </span>
+      <span className="ab-principle__signal" aria-hidden="true" />
       <p className="ab-principle__text">{text}</p>
       <span className="ab-principle__rule" aria-hidden="true" />
     </article>

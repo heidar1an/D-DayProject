@@ -12,6 +12,7 @@ import ComprehensiveCourseLayer from './courses/ComprehensiveCourseLayer';
 import MicroCourseLayer from './courses/MicroCourseLayer';
 import ReferenceLayer from './courses/ReferenceLayer';
 import InternationalCoursesLayer from './courses/InternationalCoursesLayer';
+import GreenPathLayer from './greenPath/GreenPathLayer';
 import TestsSection from './TestsSection';
 import InternationalExamsLayer from './tests/InternationalExamsLayer';
 import CoordinatedExamsLayer from './tests/coordinated/CoordinatedExamsLayer';
@@ -47,10 +48,12 @@ const settingsTabLabels = {
   support: 'راهنما و پشتیبان',
 };
 
-/* کارت‌های بخش دوره‌ها → لایهٔ مستقل همان دوره */
-const COURSE_LAYERS = {
+/* کارت‌های بخش دوره‌ها → لایهٔ مستقل همان دوره.
+   صفحهٔ اصلی هم از همین نگاشت استفاده می‌کند تا مقصد کارت‌هایش با داشبورد یکی بماند. */
+export const COURSE_LAYERS = {
   comprehensive: LAYER_IDS.comprehensive,
   micro: LAYER_IDS.micro,
+  'green-path': LAYER_IDS.greenPath,
   reference: LAYER_IDS.reference,
   international: LAYER_IDS.intlCourses,
 };
@@ -254,6 +257,9 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
     switch (activeLayer) {
       case LAYER_IDS.ai:
         return <AILayer onBack={closeLayer} />;
+
+      case LAYER_IDS.greenPath:
+        return <GreenPathLayer userData={userData} onBack={closeLayer} />;
 
       case LAYER_IDS.comprehensive:
         return (

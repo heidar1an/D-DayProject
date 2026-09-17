@@ -39,6 +39,7 @@ export const DASHBOARD_SECTIONS = [
 /* شناسهٔ لایه‌ها — تنها جایی که این رشته‌ها تعریف می‌شوند */
 export const LAYER_IDS = {
   myCourses: 'my-courses',
+  greenPath: 'green-path',
   comprehensive: 'course-comprehensive',
   micro: 'course-micro',
   reference: 'course-reference',

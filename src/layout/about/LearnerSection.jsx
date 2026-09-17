@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import { getAboutLearners } from '../../services/about/aboutService';
+import { toFa } from './aboutShared';
 
 /*
  * ── «تپش برای چه کسی ساخته شده؟» ──
@@ -17,6 +18,7 @@ export default function LearnerSection() {
   const data = getAboutLearners();
   const [activeId, setActiveId] = useState(data.scenarios[0].id);
   const active = data.scenarios.find((item) => item.id === activeId) ?? data.scenarios[0];
+  const activeIndex = Math.max(0, data.scenarios.findIndex((item) => item.id === active.id));
 
   return (
     <section className="ab-learners section-shell" aria-labelledby="ab-learners-title">
@@ -29,9 +31,16 @@ export default function LearnerSection() {
       </header>
 
       <div className="ab-learners__body">
-        <div className="ab-learners__voice" key={active.id}>
+        <div className="ab-learners__voice" key={active.id} aria-live="polite">
+          <div className="ab-learners__voice-head">
+            <span className="ab-learners__voice-index">
+              {toFa(activeIndex + 1)} <span aria-hidden="true">/</span> {toFa(data.scenarios.length)}
+            </span>
+            <span className="ab-learners__voice-label">صدای یادگیرنده</span>
+          </div>
           <p className="ab-learners__quote">{active.voice}</p>
           <p className="ab-learners__answer">{active.answer}</p>
+          <span className="ab-learners__voice-line" aria-hidden="true" />
         </div>
 
         <ul className="ab-learners__list">

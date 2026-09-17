@@ -7,9 +7,9 @@ import professor from '../images/pictures/images (1).jpeg';
 import brownTest from '../images/pictures/01.png';
 import heartbeatMark from '../images/pictures/600ppi/Asset 6.webp';
 import friendsDoctorsIllustration from '../images/pictures/Asset 3.webp';
-import greenPath from '../images/pictures/HeidarianMan 2026-08-19 at 19.19.22.png';
-import microbiology from '../images/pictures/HeidarianMan 2026-08-19 at 19.38.37.png';
-import physiology from '../images/pictures/tuberculosis-abstract-concept-vector-illustration-world-tuberculosis-day-mycobacterium-infection-diagnostics-treatment-infectious-lung-disease-contagious-infection-abstract-metaphor.png';
+import baleSocialIcon from '../images/icons/Asset 13.webp';
+import telegramSocialIcon from '../images/icons/Asset 11.webp';
+import instagramSocialIcon from '../images/icons/Asset 14.webp';
 import tapeshCollage from '../images/pictures/Asset 7.webp';
 import trophyIcon from '../images/icons/trophy.png';
 import aiIcon from '../images/icons/ai-technology.png';
@@ -18,7 +18,9 @@ import distanceIcon from '../images/icons/distance.png';
 import OfflinePage from './layout/OfflinePage';
 import SecondaryRegistrationLayout from './layout/SecondaryRegistrationLayout';
 import ThemeToggle from './layout/ThemeToggle';
-import DashboardLayout from './layout/dashboard/DashboardLayout';
+import DashboardLayout, { COURSE_LAYERS } from './layout/dashboard/DashboardLayout';
+import { CATALOG_COURSES, CatalogCourseCard, CatalogIcon } from './layout/dashboard/CoursesSection';
+import { dashboardRouteHash, LAYER_IDS, OVERLAY_IDS } from './layout/dashboard/dashboardRoute';
 import ArticlesPage from './layout/articles/ArticlesPage';
 import ArticlePage from './layout/articles/ArticlePage';
 import ReadingListPage from './layout/articles/ReadingListPage';
@@ -26,6 +28,7 @@ import AdminLayout from './layout/admin/AdminLayout';
 import PricingPage from './layout/pricing/PricingPage';
 import ProductsPage from './layout/products/ProductsPage';
 import AboutPage from './layout/about/AboutPage';
+import GroupPage from './layout/group/GroupPage';
 import { ArticleCover } from './layout/articles/articlesShared';
 import { avatarSrc } from './layout/dashboard/setting/avatar/avatarOptions';
 import './layout/admin/admin.css';
@@ -43,8 +46,20 @@ function ArticlesRoute({ articleSlug }) {
   return <ArticlePage key={articleSlug} slug={articleSlug} />;
 }
 import { getLatestArticles } from './services/articles/articlesService';
-import { clearStoredUser, getDisplayName, getStoredUser, loginUser, saveUserRecord } from './services/userStorage';
+import {
+  clearGoogleReturn,
+  clearStoredUser,
+  consumeGoogleHandoff,
+  getDisplayName,
+  getGoogleAuthStatus,
+  getStoredUser,
+  loginUser,
+  readGoogleReturn,
+  saveUserRecord,
+  startGoogleAuth,
+} from './services/userStorage';
 import { identify, startTracking, trackLogin, trackLogout, trackSignup } from './services/telemetry/trafficTracker';
+import { GROUP_PAGE_HASH } from './services/group/groupService';
 import './layout/dashboard/dashboard.css';
 import './layout/admin/analytics/analytics.css';
 import './layout/admin/media/media.css';
@@ -83,6 +98,20 @@ const authAnimatedPhrases = [
   { text: 'بانک تست کاملی داره', accent: 'purple' },
 ];
 
+/*
+ * پیام‌های بازگشت از گوگل. کدها را سرور در آدرس می‌گذارد (`database/googleAuth.js`)
+ * و هر کدام باید کاربر را به «کار درست» بفرستد، نه به یک پیام مبهم — همان قاعدهٔ
+ * ترجمهٔ خطای انتشار: اول متنِ سرویس، بعد کد وضعیت.
+ */
+const GOOGLE_RETURN_MESSAGES = {
+  unconfigured:
+    'ورود با گوگل روی این سرور فعال نشده است (GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET).',
+  offline: 'سرور ورود با گوگل در دسترس نیست؛ اتصال خود را بررسی کنید.',
+  cancelled: 'ورود با گوگل لغو شد.',
+  state: 'نشست ورود با گوگل منقضی شد؛ یک‌بار دیگر تلاش کنید.',
+  failed: 'ورود با گوگل انجام نشد؛ یک‌بار دیگر تلاش کنید.',
+};
+
 const benefitRows = [
   [
     {
@@ -112,37 +141,6 @@ const benefitRows = [
       size: 'wide',
     },
   ],
-];
-
-const courseCards = [
-  {
-    title: 'جمع بندی جامع فیزیولوژی',
-    image: physiology,
-    accent: 'lavender',
-    tags: ['درسنامه جامع', 'تست', 'خلاصه نکات', 'یادگیری با پوشش مفهومی'],
-  },
-  {
-    title: 'میکرو درسنامه بیوشیمی',
-    image: microbiology,
-    accent: 'copper',
-    tags: ['میکرو درسنامه', 'تست هدفمند', 'متن روان', 'یادگیری با پوشش مفهومی'],
-  },
-];
-
-const greenPathTags = [
-  'درسنامه مبتنی بر ویدیوهای درسی',
-  'خلاصه نکات',
-  'یادگیری در طول ترم',
-  'بانک تست جامع',
-  'آمادگی برای علوم پایه',
-  'یادگیری با پوشش مفهومی',
-  'منتورینگ',
-];
-
-const greenPathBenefits = [
-  'مسیری جامع برای معدل الف شدن',
-  'مسیری برای یادگیری ساده و هدفمند',
-  'قابلیت استفاده جدا از طرح اشتراکی و برای همه',
 ];
 
 const tapeshFeatures = [
@@ -198,11 +196,17 @@ const faqItems = [
   },
 ];
 
+/*
+ * نوار چرخانِ انتهای فوتر — چهار کادرِ دسته‌بندی. هر کدام به بخش واقعیِ خودش
+ * می‌رسد، نه به یک لنگرِ تزئینی (تلهٔ ۱۰): سه مقصد لایهٔ داشبوردند و از
+ * `dashboardRouteHash` + `LAYER_IDS` ساخته می‌شوند؛ «علوم پایه» تنها مقصدِ
+ * غیرداشبوردی است و به صفحهٔ مستقلِ محصولات می‌رود (همان نگاشتی که فوترِ قبلی داشت).
+ */
 const motionItems = [
-  { title: 'دستیار', accent: 'blue' },
-  { title: 'علوم پایه', accent: 'brown' },
-  { title: 'بانک تست', accent: 'green' },
-  { title: 'درسنامه جامع', accent: 'purple' },
+  { title: 'دستیار', accent: 'blue', href: dashboardRouteHash({ section: 'other', layer: LAYER_IDS.ai }) },
+  { title: 'علوم پایه', accent: 'brown', href: '#products' },
+  { title: 'بانک تست', accent: 'green', href: dashboardRouteHash({ section: 'tests', layer: LAYER_IDS.testBank }) },
+  { title: 'درسنامه جامع', accent: 'purple', href: dashboardRouteHash({ section: 'courses', layer: LAYER_IDS.comprehensive }) },
 ];
 
 function Brand() {
@@ -367,15 +371,36 @@ function MotionStrip() {
       onPointerLeave={resumeMotion}
     >
       <div className="motion-track" ref={trackRef}>
-        {[0, 1, 2, 3, 4].map((sequenceIndex) => (
-          <div className="motion-sequence" ref={sequenceIndex === 0 ? sequenceRef : undefined} key={sequenceIndex}>
-            {motionItems.map((item) => (
-              <span className={`motion-pill motion-pill--${item.accent}`} key={`${sequenceIndex}-${item.title}`}>
-                {item.title}
-              </span>
-            ))}
-          </div>
-        ))}
+        {[0, 1, 2, 3, 4].map((sequenceIndex) => {
+          /*
+           * پنج نسخهٔ یکسان برای بی‌درز شدن چرخش تکرار می‌شوند؛ فقط نسخهٔ اول
+           * «واقعی» است. چهار نسخهٔ تکراری از درخت دسترس‌پذیری و ترتیب تب بیرون
+           * می‌مانند (aria-hidden + tabIndex=-1) وگرنه فوتر بیست وقفهٔ تبی می‌ساخت
+           * در حالی که کاربر فقط چهار مقصد می‌بیند. کلیک روی نسخه‌های تکراری
+           * دست‌نخورده کار می‌کند.
+           */
+          const isClone = sequenceIndex > 0;
+
+          return (
+            <div
+              className="motion-sequence"
+              ref={sequenceIndex === 0 ? sequenceRef : undefined}
+              key={sequenceIndex}
+              aria-hidden={isClone || undefined}
+            >
+              {motionItems.map((item) => (
+                <a
+                  className={`motion-pill motion-pill--${item.accent}`}
+                  href={item.href}
+                  tabIndex={isClone ? -1 : undefined}
+                  key={`${sequenceIndex}-${item.title}`}
+                >
+                  {item.title}
+                </a>
+              ))}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -411,6 +436,11 @@ function SiteHeader({ menuOpen, onMenuOpenChange, userData, onOpenDashboard, onO
         <a className="site-nav__link site-nav__link--about" href="#about" onClick={closeMenu}>
           درباره ما
         </a>
+        {/* مقالات یک مسیر مستقل است (`#articles`) — مثل سه لینک دیگر، فقط hash
+            عوض می‌شود و روتر خودش صفحه را بالا می‌آورد. */}
+        <a className="site-nav__link site-nav__link--articles" href="#articles" onClick={closeMenu}>
+          مقالات
+        </a>
       </nav>
 
       <div className="site-header__actions">
@@ -442,43 +472,60 @@ function SiteHeader({ menuOpen, onMenuOpenChange, userData, onOpenDashboard, onO
   );
 }
 
-/* فوتر سایت — مشترک بین صفحه اصلی و صفحه مقالات */
-function SiteFooter({ onOpenArticles }) {
+/* فوتر سایت — مشترک بین صفحهٔ اصلی و بقیهٔ لایه‌های عمومی */
+function SiteFooter() {
   return (
     <footer className="site-footer" id="footer" data-reveal>
       <div className="site-footer__inner section-shell">
         <div className="site-footer__brand">
           <Brand />
           <small>نسخه ۱.۵.۵.۲۷</small>
+          <div className="site-footer__about">
+            <p>
+              ما می‌خواهیم دانش پزشکی را از حالت پراکنده و فرسایشی خارج کنیم و
+              آن را به یک مسیر منسجم، قابل‌فهم و قابل‌اعتماد تبدیل کنیم؛ مسیری
+              که دانشجو بداند امروز چه بخواند، چرا بخواند، چطور تمرین کند و کجا
+              باید بهتر شود
+            </p>
+          </div>
         </div>
 
         <nav className="site-footer__column" aria-label="محصولات">
           <h2>محصولات</h2>
-          <a href="#courses">درسنامه جامع</a>
-          <a href="#courses">میکرو درسنامه</a>
-          <a href="#courses">بانک تست</a>
-          <a href="#tapesh-intro">دستیار هوشمند</a>
-          <a href="#green-path">مسیر سبز</a>
+          {FOOTER_PRODUCT_LINKS.map((link) => (
+            <a key={link.title} href={link.href}>
+              {link.title}
+            </a>
+          ))}
         </nav>
 
-        <nav className="site-footer__column" aria-label="بخش‌ها">
-          <h2>بخش‌ها</h2>
-          <a href="#products">علوم پایه</a>
-          <a href="#articles" onClick={onOpenArticles}>
-            پره انترنی
-          </a>
-          <a href="#faq">المپیاد</a>
-          <a href="#faq">کمک و راهنمایی</a>
+        <nav className="site-footer__column" aria-label="سایر بخش‌ها">
+          <h2>سایر بخش‌ها</h2>
+          {FOOTER_SECTION_LINKS.map((link) => (
+            <a key={link.title} href={link.href}>
+              {link.title}
+            </a>
+          ))}
         </nav>
 
-        <div className="site-footer__about">
-          <p>
-            ما می‌خواهیم دانش پزشکی را از حالت پراکنده و فرسایشی خارج کنیم و
-            آن را به یک مسیر منسجم، قابل‌فهم و قابل‌اعتماد تبدیل کنیم؛ مسیری
-            که دانشجو بداند امروز چه بخواند، چرا بخواند، چطور تمرین کند و کجا
-            باید بهتر شود
-          </p>
-        </div>
+        <nav className="site-footer__social" aria-label="فضاهای مجازی تپش">
+          <h2>ما را دنبال کنید</h2>
+          <div className="site-footer__social-links">
+            {FOOTER_SOCIAL_LINKS.map((item) => (
+              <a
+                key={item.id}
+                className={`site-footer__social-link site-footer__social-link--${item.id}`}
+                href={item.href}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={item.label}
+                title={item.label}
+              >
+                <SocialMark item={item} />
+              </a>
+            ))}
+          </div>
+        </nav>
       </div>
     </footer>
   );
@@ -537,11 +584,20 @@ function useAuthTypewriter(phrases, enabled) {
   return { displayedPhrase, phraseIndex };
 }
 
-function AuthPage({ onBack, onLoginSuccess, onRegisterSuccess }) {
+/*
+ * `export` عمدی است — مثل `SignupPromptModal` و `AdminShell`: صفحهٔ ورود پشت
+ * state (`authOpen`) قفل است و در رندر سرور به آن نمی‌رسیم، پس هارنس
+ * `scripts/verify-render.mjs` باید بتواند همین کامپوننت را مستقیم رندر کند.
+ */
+export function AuthPage({ onBack, onLoginSuccess, onRegisterSuccess }) {
   const [mode, setMode] = useState('login');
   const [isEntered, setIsEntered] = useState(false);
   const [isFormSwitching, setIsFormSwitching] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
+  /* وضعیت گوگل: `null` یعنی هنوز از سرور نپرسیده‌ایم — با `false` اشتباه نشود */
+  const [googleStatus, setGoogleStatus] = useState(null);
+  const [googleNotice, setGoogleNotice] = useState('');
+  const [isGooglePending, setIsGooglePending] = useState(false);
   const modeSwitchTimerRef = useRef(null);
   const isRegistering = mode === 'register';
   const {
@@ -651,6 +707,93 @@ function AuthPage({ onBack, onLoginSuccess, onRegisterSuccess }) {
   useEffect(() => {
     return () => window.clearTimeout(modeSwitchTimerRef.current);
   }, []);
+
+  /*
+   * callbackها در ref می‌مانند چون `deps` این افکت عمداً خالی است:
+   * `onLoginSuccess`/`onRegisterSuccess` در App توابع inline تازه‌اند و اگر در
+   * deps بیایند، هر رندر یک‌بار دیگر اجرا می‌شد؛ `setGoogleStatus` هم شیء تازه
+   * می‌سازد ⇒ حلقهٔ بی‌پایان fetch (همان تلهٔ `useAsync(loader, deps)` در README).
+   */
+  const authCallbacksRef = useRef({ onLoginSuccess, onRegisterSuccess });
+
+  useEffect(() => {
+    authCallbacksRef.current = { onLoginSuccess, onRegisterSuccess };
+  });
+
+  /*
+   * ورود با گوگل — دو کار در زمان mount:
+   *   ۱. پرسیدن وضعیت پیکربندی سرور، تا دکمه چیزی را که نیست ادعا نکند.
+   *   ۲. اگر با `?google=…` برگشتیم: نشانه را از آدرس پاک کنیم (تا رفرش جریان را
+   *      تکرار نکند) و کاربرِ «دست‌دادن» را تحویل بگیریم.
+   *
+   * پروفایل ناقص ⇒ همان مسیر ثبت‌نام (آنبوردینگ)؛ حساب کامل ⇒ ورود مستقیم.
+   * یعنی کاربر گوگلیِ تازه هم «ثبت نام اولیه» را همان‌جا تمام می‌کند.
+   *
+   * ⚠️ گاردِ `googleBootRef` یک‌بارمصرف است، نه فلگ `active`: پروژه زیر
+   * `StrictMode` اجرا می‌شود و افکت در توسعه دو بار اجرا می‌شود
+   * (mount → cleanup → mount). با فلگ `active`، ادامهٔ async اجرای اول دور
+   * ریخته می‌شد و اجرای دوم — چون اجرای اول پارامتر آدرس را پاک کرده بود —
+   * `returned = null` می‌دید؛ یعنی «دست‌دادن» هیچ‌وقت تحویل نمی‌شد و کاربر
+   * بی‌هیچ خطایی روی `#auth` می‌ماند.
+   */
+  const googleBootRef = useRef(false);
+
+  useEffect(() => {
+    if (googleBootRef.current) return;
+    googleBootRef.current = true;
+
+    const returned = readGoogleReturn();
+    if (returned) clearGoogleReturn();
+
+    const boot = async () => {
+      const status = await getGoogleAuthStatus();
+      setGoogleStatus(status);
+
+      if (!returned) return;
+
+      if (returned !== 'handoff') {
+        setGoogleNotice(GOOGLE_RETURN_MESSAGES[returned] ?? GOOGLE_RETURN_MESSAGES.failed);
+        return;
+      }
+
+      setIsGooglePending(true);
+      const user = await consumeGoogleHandoff();
+      setIsGooglePending(false);
+
+      if (!user) {
+        setGoogleNotice(GOOGLE_RETURN_MESSAGES.failed);
+        return;
+      }
+
+      if (user.profile?.username) authCallbacksRef.current.onLoginSuccess?.(user);
+      else authCallbacksRef.current.onRegisterSuccess?.(user);
+    };
+
+    boot();
+  }, []);
+
+  const handleGoogleAuth = () => {
+    if (isGooglePending) return;
+
+    /* پیکربندی‌نشده را همین‌جا می‌گوییم؛ رفتن به سرور و برگشتن فقط وقت می‌برد */
+    if (googleStatus && !googleStatus.configured) {
+      setGoogleNotice(GOOGLE_RETURN_MESSAGES.unconfigured);
+      return;
+    }
+
+    setIsGooglePending(true);
+    startGoogleAuth();
+  };
+
+  const googleNote =
+    googleNotice ||
+    (googleStatus && !googleStatus.configured
+      ? googleStatus.reachable
+        ? GOOGLE_RETURN_MESSAGES.unconfigured
+        : GOOGLE_RETURN_MESSAGES.offline
+      : '');
+
+  const isGoogleReady = googleStatus?.configured !== false;
 
   return (
     <main className="auth-page" dir="rtl">
@@ -793,11 +936,28 @@ function AuthPage({ onBack, onLoginSuccess, onRegisterSuccess }) {
                 {isRegistering ? 'ثبت نام' : 'ورود'}
               </button>
 
-              {isRegistering && (
-                <button className="auth-form__google" type="button">
-                  <GoogleIcon />
-                  <span>ثبت نام از طریق گوگل</span>
-                </button>
+              {/*
+                یک دکمه برای هر دو حالت ورود و ثبت‌نام: گوگل خودش می‌فهمد حساب
+                هست یا نه (`prompt=select_account`)، پس جدا کردنشان فقط دو
+                دکمهٔ بی‌تفاوت می‌ساخت.
+              */}
+              <button
+                className={`auth-form__google${isGoogleReady ? '' : ' is-unavailable'}`}
+                type="button"
+                onClick={handleGoogleAuth}
+                disabled={isGooglePending}
+                aria-busy={isGooglePending}
+              >
+                <GoogleIcon />
+                <span>
+                  {isGooglePending ? 'در حال ورود با گوگل…' : 'ورود / ثبت نام با گوگل'}
+                </span>
+              </button>
+
+              {googleNote && (
+                <p className="auth-form__google-note" role="status">
+                  {googleNote}
+                </p>
               )}
 
               <button className="auth-form__switch" type="button" onClick={switchMode}>
@@ -821,6 +981,215 @@ const PRICING_HASHES = new Set(['#pricing', '#pr-products', '#pr-plans', '#pr-co
 const PRODUCTS_HASHES = new Set(['#products']);
 /* صفحهٔ «دربارهٔ تپش» هم مسیر تک‌لنگر است: `#about` */
 const ABOUT_HASHES = new Set(['#about']);
+/*
+ * صفحهٔ اشتراک گروهی: `#group`. لینک دعوت هم از همین مسیر می‌آید
+ * (`#group?join=CODE`) و کد را در query می‌آورد تا فرمِ پیوستن خودش پُر شود —
+ * پس برخلاف سه لایهٔ دیگر، تطبیق **دقیق** کافی نیست و پیشوند هم لازم است.
+ * هیچ مسیر دیگری با `#group` شروع نمی‌شود، پس پیشوند امن است.
+ * ⚠️ خودِ مسیر از سرویس گروه می‌آید (`GROUP_PAGE_HASH`) تا کارتِ صفحهٔ اصلی،
+ * CTA پلن گروهی در تعرفه‌ها و این روتر هر سه یک رشته را بخوانند.
+ */
+const GROUP_HASH = GROUP_PAGE_HASH;
+/* مقصد واحد Green Path — از شناسهٔ روتر ساخته می‌شود تا لینک عمومی و داشبورد جدا نشوند. */
+const GREEN_PATH_DASHBOARD_HASH = dashboardRouteHash({ layer: LAYER_IDS.greenPath });
+
+/*
+ * مقصد هر یک از پنج کارتِ دورهٔ صفحهٔ اصلی. از همان نگاشت داشبورد (`COURSE_LAYERS`)
+ * ساخته می‌شود؛ اگر روزی مقصد یک دوره عوض شود، کارت صفحهٔ اصلی و کارت داشبورد با هم
+ * عوض می‌شوند. رشتهٔ دستی این‌جا نوشته نمی‌شود (تلهٔ ۱۰ فایل README).
+ */
+function courseDashboardHash(courseId) {
+  const layerId = COURSE_LAYERS[courseId];
+  return layerId ? dashboardRouteHash({ layer: layerId }) : null;
+}
+
+/*
+ * ── مقصدهای فوتر ──
+ *
+ * هر عنوانِ فوتر به لایهٔ واقعیِ خودش می‌رسد، نه به یک لنگرِ بی‌ربط (تلهٔ ۱۰).
+ * آدرس‌ها از `dashboardRouteHash` + `LAYER_IDS` ساخته می‌شوند، پس با تغییر نام یک
+ * لایه هیچ لینکی بی‌صدا از کار نمی‌افتد. تنها مقصد غیرِداشبوردی «مقالات» است که
+ * مسیر مستقل خودش را دارد و «علوم پایه» که به صفحهٔ محصولات می‌رود.
+ *
+ * چرا `export`: مثل `homePromoCards`، هارنس از همین دو جدول می‌سنجد که هر مقصد
+ * یک لایهٔ واقعی است — چیزی که در HTML به‌تنهایی قابل اثبات نیست.
+ */
+export const FOOTER_PRODUCT_LINKS = [
+  { title: 'درسنامه جامع', href: dashboardRouteHash({ section: 'courses', layer: LAYER_IDS.comprehensive }) },
+  { title: 'میکرو درسنامه', href: dashboardRouteHash({ section: 'courses', layer: LAYER_IDS.micro }) },
+  { title: 'بانک تست', href: dashboardRouteHash({ section: 'tests', layer: LAYER_IDS.testBank }) },
+  { title: 'دستیار هوشمند', href: dashboardRouteHash({ section: 'other', layer: LAYER_IDS.ai }) },
+  { title: 'مسیر سبز', href: GREEN_PATH_DASHBOARD_HASH },
+];
+
+export const FOOTER_SECTION_LINKS = [
+  { title: 'ویکی تپش', href: dashboardRouteHash({ section: 'other', layer: LAYER_IDS.wiki }) },
+  { title: 'شبکه دانش', href: dashboardRouteHash({ section: 'other', layer: LAYER_IDS.knowledge }) },
+  { title: 'مقالات', href: '#articles' },
+  /* پشتیبانی یک تبِ پنل تنظیمات است، نه لایه؛ مقصدش همان مسیر واقعی است */
+  { title: 'پشتیبانی', href: dashboardRouteHash({ overlay: OVERLAY_IDS.settings, tab: 'support' }) },
+];
+
+const FOOTER_SOCIAL_LINKS = [
+  { id: 'bale', label: 'بله', href: 'https://ble.ir/tapesh', image: baleSocialIcon },
+  { id: 'eitaa', label: 'ایتا', href: 'https://eitaa.com/tapesh', mark: 'e' },
+  { id: 'telegram', label: 'تلگرام', href: 'https://t.me/tapesh', image: telegramSocialIcon },
+  { id: 'instagram', label: 'اینستاگرام', href: 'https://instagram.com/tapesh', image: instagramSocialIcon },
+  { id: 'youtube', label: 'یوتیوب', href: 'https://youtube.com/@tapesh', mark: '▶' },
+];
+
+function SocialMark({ item }) {
+  if (item.image) return <img src={item.image} alt="" />;
+  return <span aria-hidden="true">{item.mark}</span>;
+}
+
+/*
+ * ── کادرهای تبلیغی محصولات سرصفحه ──
+ *
+ * چهار محصولی که کاربر باید از همان صفحهٔ اصلی ببیند. هر کادر سه چیز دارد:
+ * یک برچسبِ کوتاهِ رده (`eyebrow`)، نام محصول (`title`) و یک جملهٔ توضیح. نشانهٔ
+ * گرافیکی هر کادر از `CatalogIcon` می‌آید — همان مجموعه‌ای که کارت‌های کاتالوگ هم
+ * از آن لوگو می‌گیرند، پس شکل آیکون‌ها یک تعریف دارد و دو مصرف.
+ *
+ * مقصد هر کادر یک لایهٔ واقعیِ داشبورد است، نه لنگرِ تزیینیِ صفحه (تلهٔ ۱۰):
+ * آدرس‌ها از `dashboardRouteHash` + `LAYER_IDS` ساخته می‌شوند، پس با تغییر نام
+ * یک لایه هیچ‌کدام از کارت‌ها بی‌صدا از کار نمی‌افتند.
+ *
+ * چرا `export`: دکمهٔ کادرها `<button>` است و مقصدش در HTML نمی‌نشیند، پس تنها
+ * راهِ سنجیدنِ «هر چهار کادر به یک لایهٔ واقعی می‌روند» خواندن خودِ همین داده در
+ * هارنس است — همان دلیلی که `SignupPromptModal` هم `export` شد.
+ */
+export const homePromoCards = [
+  {
+    id: 'test-bank',
+    eyebrow: 'تمرین',
+    title: 'بانک تست علوم پایه',
+    accent: '#5b8cc7',
+    description: 'تست‌های طبقه‌بندی‌شده با پاسخ تشریحی؛ بعد از هر آزمون، تحلیل می‌گوید کجا وقت کم آوردی.',
+    href: dashboardRouteHash({ section: 'tests', layer: LAYER_IDS.testBank }),
+  },
+  {
+    id: 'tapesh-ai',
+    eyebrow: 'دستیار',
+    title: 'تپش هوشمند',
+    accent: '#937fcd',
+    description: 'سؤالت را همان‌جا که گیر کرده‌ای بپرس؛ پاسخ متناسب با همان مبحثی که در آن هستی.',
+    href: dashboardRouteHash({ section: 'other', layer: LAYER_IDS.ai }),
+  },
+  {
+    id: 'wiki',
+    eyebrow: 'مرجع',
+    title: 'ویکی تپش',
+    accent: '#b99a86',
+    description: 'مقالات مرجعِ پیوسته به هم؛ از یک مفهوم شروع کن و تا مثال بالینی و تست‌های همان مبحث برو.',
+    href: dashboardRouteHash({ section: 'other', layer: LAYER_IDS.wiki }),
+  },
+  {
+    id: 'knowledge',
+    eyebrow: 'ارتباط',
+    title: 'شبکه دانش',
+    accent: '#77b787',
+    description: 'هر مفهوم به درس‌ها، مقالات و تست‌های مرتبط وصل است؛ ببین یک موضوع کجای نقشه می‌نشیند.',
+    href: dashboardRouteHash({ section: 'other', layer: LAYER_IDS.knowledge }),
+  },
+];
+
+/*
+ * پاپ‌آپ «اول ثبت‌نام کن» — دیگر به هیچ کارتی وصل نیست.
+ *
+ * چرا باقی مانده: کارت‌های دورهٔ هیرو گاردِ ثبت‌نام ندارند و همه مستقیم وارد
+ * لایهٔ دوره می‌شوند، پس این پاپ‌آپ در جریان عادی سایت باز نمی‌شود. کامپوننت
+ * حذف نشد چون تنها جایی است که «مسیر ثبت‌نام» را قدم‌به‌قدم توضیح می‌دهد و
+ * هارنس مستقیم رندرش می‌کند؛ اگر روزی مسیرِ پولی/قفل‌شده‌ای اضافه شد، از همین
+ * استفاده می‌کند. Escape و کلیک روی پرده می‌بندند (قرارداد مودال‌های پروژه).
+ *
+ * چرا `export`: این پاپ‌آپ پشت state است و در رندر سرور (بدون کلیک) هرگز باز
+ * نمی‌شود، پس تنها راهِ سنجیدنِ محتوایش رندر مستقیم خودش است — همان کاری که
+ * برای `AdminShell` انجام شد.
+ */
+export function SignupPromptModal({ course, onClose, onConfirm }) {
+  useEffect(() => {
+    if (!course) return undefined;
+
+    const handleKey = (event) => {
+      if (event.key === 'Escape') onClose();
+    };
+
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [course, onClose]);
+
+  if (!course) return null;
+
+  return (
+    <div
+      className="signup-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="signup-modal-title"
+    >
+      <button
+        type="button"
+        className="signup-modal__scrim"
+        aria-label="بستن"
+        onClick={onClose}
+      />
+
+      <div className="signup-modal__panel">
+        <span
+          className="signup-modal__badge"
+          style={{
+            color: course.accent,
+            backgroundColor: `${course.accent}1f`,
+            borderColor: `${course.accent}3d`,
+          }}
+        >
+          <CatalogIcon name={course.id} className="signup-modal__badge-icon" />
+          {course.title}
+        </span>
+
+        <h2 className="signup-modal__title" id="signup-modal-title">
+          برای شروع این دوره اول ثبت‌نام کن
+        </h2>
+
+        <p className="signup-modal__text">
+          «{course.title}» برای دانشجوهای ثبت‌نام‌شده فعال است. ثبت‌نام رایگان است و
+          کمتر از یک دقیقه طول می‌کشد؛ بعد از آن مستقیم وارد همین دوره می‌شوی.
+        </p>
+
+        <ol className="signup-modal__steps">
+          <li>
+            <span className="signup-modal__step-index" aria-hidden="true">
+              ۱
+            </span>
+            شمارهٔ موبایلت را وارد کن و کد تأیید را بزن.
+          </li>
+          <li>
+            <span className="signup-modal__step-index" aria-hidden="true">
+              ۲
+            </span>
+            پروفایل کوتاهت را کامل کن.
+          </li>
+          <li>
+            <span className="signup-modal__step-index" aria-hidden="true">
+              ۳
+            </span>
+            وارد «{course.title}» می‌شوی.
+          </li>
+        </ol>
+
+        <div className="signup-modal__actions">
+          <a className="button button--primary" href="#auth" onClick={onConfirm}>
+            ثبت‌نام و ورود به دوره
+          </a>
+          <button type="button" className="signup-modal__later" onClick={onClose}>
+            بعداً
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function getAppRoute() {
   if (typeof window === 'undefined') return 'home';
@@ -837,6 +1206,7 @@ function getAppRoute() {
   if (PRICING_HASHES.has(hash)) return 'pricing';
   if (PRODUCTS_HASHES.has(hash)) return 'products';
   if (ABOUT_HASHES.has(hash)) return 'about';
+  if (hash === GROUP_HASH || hash.startsWith(`${GROUP_HASH}?`)) return 'group';
   if (hash === '#articles' || hash.startsWith('#articles/')) return 'articles';
   if (hash === '#admin' || hash.startsWith('#admin/')) return 'admin';
 
@@ -864,6 +1234,10 @@ function getAppRoute() {
 
   if (state.tapeshRoute === 'about' || state.tapeshAbout === true) {
     return 'about';
+  }
+
+  if (state.tapeshRoute === 'group' || state.tapeshGroup === true) {
+    return 'group';
   }
 
   if (state.tapeshRoute === 'articles' || state.tapeshArticles === true) {
@@ -901,6 +1275,14 @@ function getRouteUrl(route) {
     return `${window.location.pathname}${window.location.search}${window.location.hash}`;
   }
 
+  /*
+   * لینک دعوت اشتراک گروهی (`#group?join=CODE`) هم باید در نرمال‌سازی آدرس
+   * زنده بماند؛ وگرنه کاربر تازه‌وارد، کد را از دست می‌دهد و فرم خالی می‌ماند.
+   */
+  if (route === 'group' && window.location.hash.startsWith(`${GROUP_HASH}?`)) {
+    return `${window.location.pathname}${window.location.search}${window.location.hash}`;
+  }
+
   return `${window.location.pathname}${window.location.search}#${route}`;
 }
 
@@ -915,6 +1297,7 @@ function getRouteState(route, previousState = {}) {
     tapeshPricing: route === 'pricing',
     tapeshProducts: route === 'products',
     tapeshAbout: route === 'about',
+    tapeshGroup: route === 'group',
   };
 }
 
@@ -995,6 +1378,10 @@ function App() {
   const [aboutOpen, setAboutOpen] = useState(
     () => getAppRoute() === 'about',
   );
+  /* صفحهٔ اشتراک گروهی مسیر مستقل است: لایهٔ `#group` (و `#group?join=CODE`) */
+  const [groupOpen, setGroupOpen] = useState(
+    () => getAppRoute() === 'group',
+  );
   /* پنل مدیریت یک مسیر مستقل است و برای ورود به آن به حساب کاربری سایت نیاز نیست */
   const [adminOpen, setAdminOpen] = useState(
     () => getAppRoute() === 'admin',
@@ -1003,6 +1390,7 @@ function App() {
     getAppRoute() === 'articles' ? getArticleSlug() : null,
   );
   const [userData, setUserData] = useState(() => getStoredUser());
+  const [pendingDashboardHash, setPendingDashboardHash] = useState(null);
   const isOnline = useOnlineStatus();
 
   /*
@@ -1021,7 +1409,8 @@ function App() {
 
   const closeMenu = () => setMenuOpen(false);
   const openAuth = (event) => {
-    event.preventDefault();
+    /* رویداد اختیاری است: مسیرهایی مثل کادرهای تبلیغی محصولات بدون کلیک هم به ورود می‌فرستند */
+    event?.preventDefault();
     closeMenu();
     window.history.pushState(
       getRouteState('auth'),
@@ -1035,6 +1424,7 @@ function App() {
     setPricingOpen(false);
     setProductsOpen(false);
     setAboutOpen(false);
+    setGroupOpen(false);
     setArticleSlug(null);
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
@@ -1057,6 +1447,7 @@ function App() {
   };
 
   const closeAuth = () => {
+    setPendingDashboardHash(null);
     if (getAppRoute() === 'auth') {
       window.history.back();
       return;
@@ -1074,6 +1465,7 @@ function App() {
     setPricingOpen(false);
     setProductsOpen(false);
     setAboutOpen(false);
+    setGroupOpen(false);
     setArticleSlug(null);
   };
 
@@ -1095,13 +1487,15 @@ function App() {
       setPricingOpen(route === 'pricing');
       setProductsOpen(route === 'products');
       setAboutOpen(route === 'about');
+      setGroupOpen(route === 'group');
       setArticleSlug(route === 'articles' ? getArticleSlug() : null);
 
       /* ورود به مقالات (فهرست یا مقاله) همیشه از بالای صفحه شروع شود؛
          لایه‌های تعرفه و محصولات فقط وقتی از مسیر دیگری وارد می‌شوند */
       if (
         route === 'articles' ||
-        ((route === 'pricing' || route === 'products' || route === 'about') && enteredRoute)
+        ((route === 'pricing' || route === 'products' || route === 'about' || route === 'group') &&
+          enteredRoute)
       ) {
         window.scrollTo({ top: 0, behavior: 'instant' });
       }
@@ -1116,7 +1510,8 @@ function App() {
       currentState.tapeshDashboard === true ||
       currentState.tapeshPricing === true ||
       currentState.tapeshProducts === true ||
-      currentState.tapeshAbout === true;
+      currentState.tapeshAbout === true ||
+      currentState.tapeshGroup === true;
 
     if (!hasManagedRoute && initialRoute !== 'home') {
       /* آدرس مقصد قبل از نرمال‌سازی محاسبه شود تا اسلاگ مقاله در لینک مستقیم حفظ شود */
@@ -1216,7 +1611,7 @@ function App() {
       observer.disconnect();
       pendingFrames.forEach((frame) => cancelAnimationFrame(frame));
     };
-  }, [authOpen, onboardingOpen, dashboardOpen, articlesOpen, articleSlug, pricingOpen, productsOpen, aboutOpen]);
+  }, [authOpen, onboardingOpen, dashboardOpen, articlesOpen, articleSlug, pricingOpen, productsOpen, aboutOpen, groupOpen]);
 
   /*
    * بازگشت از یک لایه به صفحهٔ اصلی: اگر مقصد یک لنگر بود (مثلاً فوتر)، به
@@ -1227,6 +1622,7 @@ function App() {
   useReturnToAnchor(pricingOpen);
   useReturnToAnchor(productsOpen);
   useReturnToAnchor(aboutOpen);
+  useReturnToAnchor(groupOpen);
 
   const openOnboarding = () => {
     window.history.pushState(
@@ -1241,6 +1637,7 @@ function App() {
     setPricingOpen(false);
     setProductsOpen(false);
     setAboutOpen(false);
+    setGroupOpen(false);
     setArticleSlug(null);
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
@@ -1263,6 +1660,7 @@ function App() {
     setPricingOpen(false);
     setProductsOpen(false);
     setAboutOpen(false);
+    setGroupOpen(false);
     setArticleSlug(null);
   };
 
@@ -1292,9 +1690,33 @@ function App() {
     setPricingOpen(false);
     setProductsOpen(false);
     setAboutOpen(false);
+    setGroupOpen(false);
     setArticleSlug(null);
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
+
+  /*
+   * کادرهای تبلیغی محصولات سرصفحه. کاربر واردنشده مقصدش را در
+   * `pendingDashboardHash` نگه می‌دارد تا پس از ورود یا تکمیل پروفایل دقیقاً همان
+   * لایه فرود بیاید — همان قراردادی که کارت‌های دوره و لینک فوتر دارند.
+   * امضای `onOpen` کارتِ کاتالوگ فقط شناسهٔ کارت را می‌فرستد، پس رویداد کلیک لازم نیست.
+   */
+  const openHomePromo = (promoId) => {
+    const card = homePromoCards.find((promo) => promo.id === promoId);
+    if (!card) return;
+
+    closeMenu();
+
+    if (!userData) {
+      setPendingDashboardHash(card.href);
+      openAuth();
+      return;
+    }
+
+    openDashboard(userData, { replaceHistory: false, hash: card.href });
+  };
+
+  /* مقصد عمومی مسیر سبز از خودِ جدول لینک‌های فوتر می‌آید؛ تابع جدا لازم نیست. */
 
   /*
    * CTA صفحه‌های تعرفه و محصولات: کاربر واردشده مستقیم به داشبورد می‌رود و
@@ -1313,12 +1735,27 @@ function App() {
     openAuth(event);
   };
 
+  /*
+   * پنج کارتِ دورهٔ زیر هیرو. هیچ گاردِ ثبت‌نامی این‌جا نیست: لایه‌های دوره برای
+   * همه باز است و کاربرِ واردنشده هم مستقیم وارد همان لایه می‌شود (داشبورد در
+   * حالت مهمان رندر می‌شود). پیش‌تر کاربرِ واردنشده پاپ‌آپ ثبت‌نام می‌گرفت و
+   * اصلاً به لایه نمی‌رسید.
+   */
+  const openHomeCourse = (courseId) => {
+    const hash = courseDashboardHash(courseId);
+    if (!hash) return;
+
+    openDashboard(userData, { replaceHistory: false, hash });
+  };
+
   const finishOnboarding = async (profile) => {
     const updatedUser = await saveUserRecord({
       phone: userData?.phone,
       profile,
     });
-    openDashboard(updatedUser);
+    const destination = pendingDashboardHash;
+    setPendingDashboardHash(null);
+    openDashboard(updatedUser, { hash: destination });
   };
 
   /* خروج از حساب: فقط سشن پاک می‌شود تا حساب کاربر برای ورود بعدی باقی بماند */
@@ -1326,6 +1763,7 @@ function App() {
     trackLogout();
     identify(null);
     clearStoredUser();
+    setPendingDashboardHash(null);
     setUserData(null);
     window.history.replaceState(getRouteState('home'), '', getRouteUrl('home'));
     setDashboardOpen(false);
@@ -1335,6 +1773,7 @@ function App() {
     setPricingOpen(false);
     setProductsOpen(false);
     setAboutOpen(false);
+    setGroupOpen(false);
     setArticleSlug(null);
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
@@ -1383,6 +1822,7 @@ function App() {
     setPricingOpen(false);
     setProductsOpen(false);
     setAboutOpen(false);
+    setGroupOpen(false);
     setArticleSlug(null);
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
@@ -1406,7 +1846,13 @@ function App() {
     );
   }
 
-  if (dashboardOpen && userData) {
+  /*
+   * داشبورد برای کاربرِ واردنشده هم رندر می‌شود (حالت مهمان): لایه‌های دوره و
+   * محصولات گاردِ ثبت‌نام ندارند. سرویس‌ها `userData?.id ?? 'guest'` را به‌عنوان
+   * هویت می‌گیرند، پس نبودِ حساب خطا نمی‌سازد. هدر سایت بیرون از داشبورد همچنان
+   * «ورود / ثبت نام» را نشان می‌دهد چون `userData` دست‌نخورده می‌ماند.
+   */
+  if (dashboardOpen) {
     return (
       <DashboardLayout
         userData={userData}
@@ -1422,7 +1868,9 @@ function App() {
         onBack={closeAuth}
         onLoginSuccess={(user) => {
           trackLogin();
-          openDashboard(user);
+          const destination = pendingDashboardHash;
+          setPendingDashboardHash(null);
+          openDashboard(user, { hash: destination });
         }}
         onRegisterSuccess={(user) => {
           trackSignup();
@@ -1446,7 +1894,7 @@ function App() {
 
         <PricingPage hasAccount={Boolean(userData)} onStart={enterTapesh} />
 
-        <SiteFooter onOpenArticles={openArticles} />
+        <SiteFooter />
       </div>
     );
   }
@@ -1468,7 +1916,7 @@ function App() {
           onStart={enterTapesh}
         />
 
-        <SiteFooter onOpenArticles={openArticles} />
+        <SiteFooter />
       </div>
     );
   }
@@ -1490,7 +1938,25 @@ function App() {
           onOpenProduct={openProduct}
         />
 
-        <SiteFooter onOpenArticles={openArticles} />
+        <SiteFooter />
+      </div>
+    );
+  }
+
+  if (groupOpen) {
+    return (
+      <div className="app app--scroll" id="top">
+        <SiteHeader
+          menuOpen={menuOpen}
+          onMenuOpenChange={setMenuOpen}
+          userData={userData}
+          onOpenDashboard={() => openDashboard(userData, { replaceHistory: false })}
+          onOpenAuth={openAuth}
+        />
+
+        <GroupPage userData={userData} onStart={enterTapesh} />
+
+        <SiteFooter />
       </div>
     );
   }
@@ -1508,7 +1974,7 @@ function App() {
 
         {articleSlug ? <ArticlesRoute articleSlug={articleSlug} /> : <ArticlesPage />}
 
-        <SiteFooter onOpenArticles={openArticles} />
+        <SiteFooter />
       </div>
     );
   }
@@ -1537,6 +2003,25 @@ function App() {
             <a className="button button--primary" href="#products">
               از الان شروع کنید
             </a>
+          </div>
+
+          {/*
+           * پنج دورهٔ اصلی — همان کارت‌های کاتالوگ بخش «دوره‌ها» در داشبورد،
+           * بلافاصله زیر دکمهٔ «از الان شروع کنید» تا مسیر شروع از خودِ هیرو
+           * مشخص باشد. `size="lg"` همان کارت است با اندازهٔ بزرگ‌ترِ همین نوار
+           * (فقط از ۱۵۳۶px به بعد، جایی که نوار از سقف قبلی‌اش پهن‌تر می‌شود).
+           */}
+          <div className="hero__courses" data-reveal>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:gap-5 lg:grid-cols-5">
+              {CATALOG_COURSES.map((course) => (
+                <CatalogCourseCard
+                  key={course.id}
+                  course={course}
+                  size="lg"
+                  onOpen={openHomeCourse}
+                />
+              ))}
+            </div>
           </div>
         </section>
 
@@ -1606,52 +2091,61 @@ function App() {
                 با تهیه اشتراک گروهی می‌توانید تا ۳۰٪ تخفیف بین ۲ الی ۳ نفر به
                 همراه دوستانتان مطالعه داشته باشید.
               </p>
-              <a className="button button--orange" href="#courses">
+              {/*
+               * مقصد، لایهٔ واقعیِ اشتراک گروهی است (`#group`) — همان قاعدهٔ
+               * تلهٔ ۱۰: CTA نباید به یک لنگرِ بی‌ربط ختم شود. پیش از این به
+               * `#courses` می‌رفت، یعنی فقط کمی پایین‌تر.
+               */}
+              <a className="button button--orange" href="#group">
                 از الان شروع کنید
               </a>
             </div>
           </article>
 
-          <div className="course-grid" id="courses" data-reveal>
-            {courseCards.map((card) => (
-              <article className={`course-card course-card--${card.accent}`} key={card.title}>
-                <div className="course-card__tags" aria-label="ویژگی‌های دوره">
-                  {card.tags.map((tag) => (
-                    <span key={tag}>{tag}</span>
-                  ))}
-                </div>
-                <div className="course-card__visual">
-                  <img src={card.image} alt="" />
-                </div>
-                <a className="course-card__footer" href="#green-path">
-                  <span>{card.title}</span>
-                  <ArrowIcon />
-                </a>
-              </article>
+          {/*
+           * کادرهای تبلیغی محصولات سرصفحه — چیدمانِ دو در دو (`.promo-grid`).
+           *
+           * هر کادر یک ترکیبِ مورّب است: بلوکِ متن پایینِ سمت راست (برچسبِ رده →
+           * نام محصول → یک جملهٔ توضیح) و نشانهٔ گرافیکیِ بزرگ بالا سمت چپ.
+           * دکمهٔ فلشِ گوشهٔ پایین-چپ فقط برای این است که «کلیک‌شدنی» بودنِ کادر
+           * دیده شود، چون خودِ کارت یک <button> است و مقصدش در HTML نمی‌نشیند.
+           *
+           * پنلِ رنگی و نسخهٔ متن‌خوانِ اکسنت (`--promo-ink`) از توکن‌های لایهٔ
+           * استایل می‌آیند — قاعدهٔ `.promo-card--<id>` در styles.css؛ خودِ اکسنتِ
+           * خامِ داده فقط پشتِ هالهٔ تزیینیِ لوگو می‌نشیند. دلیلش این است که هگزِ
+           * خام در تم روشن روی پنلِ پاستلی متن‌خوان نیست.
+           *
+           * `id="courses"` عمداً همین‌جاست: لینک‌های فوتر و صفحهٔ مقاله به
+           * `#courses` می‌روند و باید به یک لنگرِ موجود برسند (تلهٔ ۱۰).
+           */}
+          <div id="courses" className="promo-grid" data-reveal>
+            {homePromoCards.map((card) => (
+              <button
+                key={card.id}
+                type="button"
+                onClick={() => openHomePromo(card.id)}
+                aria-label={`ورود به ${card.title}`}
+                className={`promo-card promo-card--${card.id}`}
+                style={{ '--promo-accent': card.accent }}
+              >
+                <span className="promo-card__art" aria-hidden="true">
+                  <CatalogIcon name={card.id} className="promo-card__glyph" />
+                </span>
+
+                <span className="promo-card__body">
+                  <span className="promo-card__eyebrow">{card.eyebrow}</span>
+                  <span className="promo-card__title">{card.title}</span>
+                  <span className="promo-card__text">{card.description}</span>
+                </span>
+
+                <span className="promo-card__go" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" focusable="false">
+                    <path d="M19 12H5m6-6-6 6 6 6" />
+                  </svg>
+                </span>
+              </button>
             ))}
           </div>
-
-          <article className="green-path-card" id="green-path" data-reveal>
-            <div className="green-path-card__visual">
-              <img src={greenPath} alt="تصویر مفهومی مسیر یادگیری علوم پزشکی" />
-            </div>
-            <div className="green-path-card__content">
-              <div className="green-path-card__tags" aria-label="ویژگی‌های دوره مسیر سبز">
-                {greenPathTags.map((tag) => (
-                  <span key={tag}>{tag}</span>
-                ))}
-              </div>
-              <ul>
-                {greenPathBenefits.map((benefit) => (
-                  <li key={benefit}>{benefit}</li>
-                ))}
-              </ul>
-              <a className="green-path-card__button" href="#tapesh-intro">
-                <span>دوره کامل مسیر سبز</span>
-                <ArrowIcon />
-              </a>
-            </div>
-          </article>
 
           <article className="tapesh-intro" id="tapesh-intro" data-reveal>
             <div className="tapesh-intro__visual">
@@ -1756,7 +2250,7 @@ function App() {
         </section>
       </main>
 
-      <SiteFooter onOpenArticles={openArticles} />
+      <SiteFooter />
 
       <MotionStrip />
     </div>

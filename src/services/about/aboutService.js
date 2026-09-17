@@ -8,13 +8,13 @@
  *
  * قرارداد REST آینده:
  *   GET /api/public/about → { meta, hero, problem, why, philosophy, ecosystem,
- *                              cycle, timeline, principles, learners, future, closing }
+ *                              cycle, timeline, principles, learners, closing }
  * امضاهای زیر همان شکل را نگه می‌دارند؛ فقط بدنهٔ‌شان به `fetch` تبدیل می‌شود.
  *
  * ⚠️ اصلِ حاکم (همان اصلِ مرکز تحلیل): **هیچ عدد یا تاریخِ ساختگی.**
  * تاریخچهٔ تپش در این پروژه دادهٔ واقعی ندارد، پس هیچ تاریخ، سال یا آماری
  * ساخته نشده؛ مراحل فقط «عنوان و نقش» دارند و پرچمِ `historyConfirmed` پایین
- * یادداشتِ شفاف را زنده نگه می‌دارد. همین قاعده برای بخشِ آینده برقرار است.
+ * یادداشتِ شفاف را زنده نگه می‌دارد.
  */
 
 import { LAYER_IDS } from '../../layout/dashboard/dashboardRoute';
@@ -43,13 +43,6 @@ export const ABOUT_META = {
   historyConfirmed: false,
   historyNote:
     'روایت این مراحل هنوز تأیید نشده است؛ متن‌های بالا placeholderند و برای جایگزینی در همین فایل آماده‌اند.',
-
-  /*
-   * آینده: عنوان‌ها نشان‌دهندهٔ جهتِ کارند، نه تعهد و نه زمان‌بندی.
-   */
-  futureConfirmed: false,
-  futureNote:
-    'عناوین این بخش نمونه‌اند و هیچ تعهد یا زمان‌بندی‌ای اعلام نمی‌کنند.',
 };
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -91,22 +84,10 @@ export const ABOUT_WHY = {
   eyebrow: 'چرا تپش',
   title: 'پس تپش برای چه ساخته شد؟',
   lead: 'برای اینکه دانش پزشکی از مجموعه‌ای از جزوه‌ها، تست‌ها و منابع پراکنده، به یک شبکهٔ قابل فهم تبدیل شود.',
-  center: 'دانش',
-  caption: 'هر مفهوم، تنها یک واژه نیست؛ معنایش در پیوند با بقیه است.',
-  /* `hint` همان یک خطی است که با اشاره‌گر یا لمسِ مفهوم دیده می‌شود */
-  nodes: [
-    { id: 'anatomy', label: 'آناتومی', hint: 'ساختار؛ نقطهٔ شروعِ توصیف.' },
-    { id: 'physiology', label: 'فیزیولوژی', hint: 'عملکرد؛ معنایِ همان ساختار.' },
-    { id: 'biochemistry', label: 'بیوشیمی', hint: 'زیرِ پوستِ مولکولیِ همان عملکرد.' },
-    { id: 'histology', label: 'بافت‌شناسی', hint: 'ساختار در مقیاسی دیگر.' },
-    { id: 'bacteriology', label: 'باکتری‌شناسی', hint: 'عامل، و مسیرش در بدن.' },
-    { id: 'neurophysiology', label: 'نوروفیزیولوژی', hint: 'جایی که دو درس به هم می‌رسند.' },
-    { id: 'test', label: 'تست', hint: 'سنجیدن، نه فقط پاسخ دادن.' },
-    { id: 'review', label: 'مرور', hint: 'برگشتن در زمانِ درست.' },
-    { id: 'understanding', label: 'فهم', hint: 'معنایی که می‌ماند.' },
-    { id: 'connection', label: 'ارتباط', hint: 'پیوندی که فراموشی را عقب می‌زند.' },
-    { id: 'learning', label: 'یادگیری', hint: 'حاصلِ همهٔ این‌ها.' },
-  ],
+  visualLabel: 'سه ورودیِ پراکنده که به فهمِ قابل استفاده می‌رسند.',
+  inputs: ['جزوه‌ها', 'تست‌ها', 'مرورها'],
+  output: 'فهمِ قابل استفاده',
+  center: 'یادگیری',
 };
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -356,55 +337,7 @@ export const ABOUT_LEARNERS = {
 };
 
 /* ══════════════════════════════════════════════════════════════════════════
- * ۱۰. آینده — بدون وعدهٔ بزرگ
- * ══════════════════════════════════════════════════════════════════════════ */
-
-export const ABOUT_FUTURE = {
-  eyebrow: 'آینده',
-  title: 'این پایان تپش نیست.',
-  lead: 'ما هنوز در حال ساختنیم.',
-  statuses: {
-    building: { id: 'building', label: 'در حال ساخت', accent: 'green' },
-    testing: { id: 'testing', label: 'در حال آزمایش', accent: 'blue' },
-    idea: { id: 'idea', label: 'ایده', accent: 'purple' },
-    future: { id: 'future', label: 'آینده', accent: 'gold' },
-  },
-  items: [
-    {
-      id: 'personal-path',
-      label: 'مسیر یادگیری شخصی',
-      status: 'building',
-      text: 'مسیری که با وضعیتِ تو تغییر می‌کند، نه یک برنامهٔ ثابت برای همه.',
-    },
-    {
-      id: 'weakness-forecast',
-      label: 'پیش‌بینی نقاط ضعف',
-      status: 'testing',
-      text: 'تشخیصِ زودهنگامِ مبحثی که دارد از دست می‌رود.',
-    },
-    {
-      id: 'collective-graph',
-      label: 'شبکهٔ دانشِ جمعی',
-      status: 'idea',
-      text: 'پیوندهایی که از یادداشت‌های همه ساخته می‌شود.',
-    },
-    {
-      id: 'study-companion',
-      label: 'همراهِ لحظه‌ای مطالعه',
-      status: 'idea',
-      text: 'پاسخ در همان لحظه‌ای که سؤال پیش می‌آید.',
-    },
-    {
-      id: 'deeper-analysis',
-      label: 'تحلیل عمیق‌تر یادگیری',
-      status: 'future',
-      text: 'فهمیدنِ چرایِ پیشرفت، نه فقط ثبتِ آن.',
-    },
-  ],
-};
-
-/* ══════════════════════════════════════════════════════════════════════════
- * ۱۱. پایان
+ * ۱۰. پایان
  * ══════════════════════════════════════════════════════════════════════════ */
 
 export const ABOUT_CLOSING = {
@@ -428,5 +361,4 @@ export const getAboutCycle = () => ABOUT_CYCLE;
 export const getAboutTimeline = () => ABOUT_TIMELINE;
 export const getAboutPrinciples = () => ABOUT_PRINCIPLES;
 export const getAboutLearners = () => ABOUT_LEARNERS;
-export const getAboutFuture = () => ABOUT_FUTURE;
 export const getAboutClosing = () => ABOUT_CLOSING;

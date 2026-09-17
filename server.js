@@ -15,10 +15,23 @@ import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { handleApi } from './database/adminApi.js';
+import { handleGoogleAuthApi } from './database/googleAuth.js';
 
 const rootDir = dirname(fileURLToPath(import.meta.url));
 const distDir = resolve(rootDir, 'dist');
 const uploadsDir = resolve(rootDir, 'public', 'uploads');
+
+/*
+ * همان دلیل `vite.config.js`: نود خودش `.env` را نمی‌خواند، پس متغیرهای
+ * سروری (از جمله GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET) بدون این خط
+ * هیچ‌وقت به `process.env` نمی‌رسند. باید **قبل** از خواندن PORT/HOST باشد.
+ * پوسته مقدم است و اگر `.env` نبود، بی‌صدا رد می‌شویم.
+ */
+try {
+  process.loadEnvFile(resolve(rootDir, '.env'));
+} catch {
+  /* .env نداریم */
+}
 
 const PORT = Number(process.env.PORT) || 4173;
 const HOST = process.env.HOST || '0.0.0.0';
@@ -76,6 +89,10 @@ const server = createServer(async (request, response) => {
     const handled = await handleApi(request, response);
     if (handled) return;
 
+    /* ورود/ثبت‌نام با گوگل — تنها API کاربری سایت که در پروداکشن لازم است */
+    const handledGoogleAuth = await handleGoogleAuthApi(request, response);
+    if (handledGoogleAuth) return;
+
     const url = new URL(request.url ?? '/', 'http://localhost');
     const pathname = decodeURIComponent(url.pathname);
 
@@ -117,4 +134,15 @@ const server = createServer(async (request, response) => {
 
 server.listen(PORT, HOST, () => {
   console.log(`تپش روی http://localhost:${PORT} بالا آمد — پنل مدیریت: /#admin`);
+
+  const googleReady = Boolean(
+    String(process.env.GOOGLE_CLIENT_ID ?? '').trim() &&
+      String(process.env.GOOGLE_CLIENT_SECRET ?? '').trim(),
+  );
+
+  console.log(
+    googleReady
+      ? 'ورود با گوگل: فعال'
+      : 'ورود با گوگل: غیرفعال — GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET را در .env بگذارید',
+  );
 });

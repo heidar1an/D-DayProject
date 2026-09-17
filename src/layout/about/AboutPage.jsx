@@ -2,7 +2,6 @@ import AboutCTA from './AboutCTA';
 import AboutHero from './AboutHero';
 import AboutTimeline from './AboutTimeline';
 import EcosystemVisualization from './EcosystemVisualization';
-import FutureSection from './FutureSection';
 import KnowledgeNetwork from './KnowledgeNetwork';
 import LearningPhilosophy from './LearningPhilosophy';
 import LearnerSection from './LearnerSection';
@@ -23,15 +22,14 @@ import './about.css';
  *
  *   ۱. آغاز        تمام‌صفحه · چسبان · تایپوگرافیِ خیلی بزرگ
  *   ۲. مسئله       چسبان · فقط تایپوگرافی · بدون کارت
- *   ۳. چرا تپش     دوپاره · شبکهٔ تعاملی
+ *   ۳. چرا تپش     دوپاره · جریانِ «از پراکندگی تا فهم»
  *   ۴. نگاه ما     چسبان · دوپاره · قوس‌های مرحله‌ای
  *   ۵. سیستم       چسبان (تعویض جمله) + میدانِ گره‌ها
  *   ۶. چرخه        چسبان · دایرهٔ مراحل + پانلِ ابزارها
  *   ۷. تاریخچه     ستونِ چسبان + ردیفِ مراحل
  *   ۸. اصول        عمودی · تایپوگرافیِ بسیار بزرگ · بدون چسبندگی
  *   ۹. مخاطب       دوپاره · تعاملی (صداها)
- *   ۱۰. آینده      فهرستِ افقی با وضعیت
- *   ۱۱. پایان      مرکزِ خالی و یک لینک
+ *   ۱۰. پایان      مرکزِ خالی و یک لینک
  *
  * قواعد پروژه رعایت شده: هیچ رنگِ ثابتی (فقط توکن‌ها)، هیچ وابستگیِ تازه‌ای،
  * همهٔ حرکت‌ها transform/opacity و همه گارد `prefers-reduced-motion` دارند.
@@ -49,7 +47,6 @@ export default function AboutPage({ hasAccount = false, onStart, onOpenProduct }
       <AboutTimeline />
       <Principles />
       <LearnerSection />
-      <FutureSection />
       <AboutCTA hasAccount={hasAccount} onStart={onStart} />
     </main>
   );

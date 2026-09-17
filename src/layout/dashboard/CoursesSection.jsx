@@ -23,8 +23,10 @@ const TODAY_LESSONS = [
   { subjectId: 'english', time: 25, tests: 20 },
 ];
 
-/* پنج دورهٔ اصلی کاتالوگ — ثابت و مستقل از فعّالیّت کاربر */
-const CATALOG_COURSES = [
+/* پنج دورهٔ اصلی کاتالوگ — ثابت و مستقل از فعّالیّت کاربر.
+   همین آرایه هم نوار زیر هیروی صفحهٔ اصلی را می‌سازد؛ پس تنها منبع حقیقتِ
+   عنوان/اکسنت/توضیح این پنج کارت همین‌جاست و دو نسخه نمی‌شود. */
+export const CATALOG_COURSES = [
   { id: 'comprehensive', title: 'درسنامه جامع', accent: '#5b8cc7', tagline: 'پوشش کامل دروس پایه با درسنامه و تست' },
   { id: 'micro', title: 'میکرو درسنامه', accent: '#937fcd', tagline: 'خلاصهٔ سریع درس‌ها برای مرور فشرده' },
   { id: 'green-path', title: 'مسیر سبز', accent: '#77b787', tagline: 'مسیر ساختار‌یافته برای معدل الف' },
@@ -70,9 +72,11 @@ function SparkIcon({ className = 'h-3.5 w-3.5' }) {
   );
 }
 
-/* لوگوی اختصاصی هر یک از پنج دورهٔ کاتالوگ.
-   همهٔ شکل‌ها با currentColor رسم می‌شوند تا رنگ کارت (accent) خودکار روی لوگو بنشیند. */
-function CatalogIcon({ name, className = 'h-7 w-7' }) {
+/* لوگوی هر کارتِ کاتالوگ — پنج دورهٔ کاتالوگ + سه محصولِ سرصفحهٔ سایت.
+   همهٔ شکل‌ها با currentColor رسم می‌شوند تا رنگ کارت (accent) خودکار روی لوگو بنشیند.
+   این آیکن بیرون از این بخش هم مصرف می‌شود (نوار دوره‌های صفحهٔ اصلی، کادرهای تبلیغی
+   محصولات و پاپ‌آپ ثبت‌نام). */
+export function CatalogIcon({ name, className = 'h-7 w-7' }) {
   const common = {
     className,
     viewBox: '0 0 24 24',
@@ -139,9 +143,125 @@ function CatalogIcon({ name, className = 'h-7 w-7' }) {
         </svg>
       );
 
+    /* بانک تست — برگهٔ آزمون با تیکِ بزرگ */
+    case 'test-bank':
+      return (
+        <svg {...common}>
+          <rect x="4.4" y="2.8" width="15.2" height="18.4" rx="3.4" />
+          <path d="M8 11.2l2.4 2.4L16 8.4" />
+          <path d="M8 16.6h8" />
+        </svg>
+      );
+
+    /* تپش هوشمند — حباب گفت‌وگو با جرقهٔ درونش */
+    case 'tapesh-ai':
+      return (
+        <svg {...common}>
+          <rect x="3.6" y="4.2" width="16.8" height="12.4" rx="4.4" />
+          <path d="M8.6 16.6 7.4 20.4l3.4-3.8" />
+          <path d="M12 7.2c.39 2.1 1.16 2.87 3.3 3.3-2.14.43-2.91 1.2-3.3 3.3-.39-2.1-1.16-2.87-3.3-3.3 2.14-.43 2.91-1.2 3.3-3.3z" />
+        </svg>
+      );
+
+    /* ویکی تپش — ذره‌بین روی سطرهای متن */
+    case 'wiki':
+      return (
+        <svg {...common}>
+          <circle cx="10.7" cy="10.7" r="6.3" />
+          <path d="M15.3 15.3 20.6 20.6" />
+          <path d="M7.9 8.7h5.6M7.9 12.4h3.7" />
+        </svg>
+      );
+
+    /* شبکه دانش — گرهٔ مرکزی و چهار گرهِ پیوسته */
+    case 'knowledge':
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="12" r="2.7" />
+          <circle cx="5.1" cy="6.2" r="1.9" />
+          <circle cx="18.9" cy="6.2" r="1.9" />
+          <circle cx="5.1" cy="17.8" r="1.9" />
+          <circle cx="18.9" cy="17.8" r="1.9" />
+          <path d="M6.6 7.5 9.9 10.3M17.4 7.5 14.1 10.3M6.6 16.5 9.9 13.7M17.4 16.5 14.1 13.7" />
+        </svg>
+      );
+
     default:
       return null;
   }
+}
+
+/*
+ * اندازهٔ کارت کاتالوگ — یک تعریف، دو اندازه.
+ *
+ * `md` همان اندازهٔ کاتالوگِ داشبورد است. `lg` نسخهٔ بزرگ‌ترِ نوار زیر هیروی
+ * صفحهٔ اصلی است و فقط از `2xl` (۱۵۳۶px) به بعد بزرگ می‌شود؛ چرا: تا آن عرض،
+ * نوار صفحهٔ اصلی از سقف قبلی‌اش (۱۱۸۰px) پهن‌تر نمی‌شد و کارتِ بلندتر آن‌جا
+ * فقط لاغر و کشیده به نظر می‌رسید. این‌طوری هر دو مصرف‌کننده یک مارک‌آپ دارند و
+ * فقط اندازهٔ کارتِ صفحهٔ اصلی عوض می‌شود — کارت داشبورد دست‌نخورده می‌ماند.
+ */
+const CARD_SIZE_MD = {
+  root: 'min-h-[200px] rounded-[2rem] px-4 py-5 md:min-h-[300px] md:rounded-[2.5rem] md:px-5 md:py-8',
+  tile: 'h-14 w-14 rounded-[1.25rem] md:h-24 md:w-24 md:rounded-[1.9rem]',
+  glyph: 'h-8 w-8 md:h-14 md:w-14',
+  title: 'text-sm leading-6 md:text-xl md:leading-9',
+  tagline: 'text-[10px] leading-5 md:text-xs md:leading-6',
+};
+
+const CARD_SIZE_LG = {
+  root: `${CARD_SIZE_MD.root} 2xl:min-h-[380px] 2xl:rounded-[3rem] 2xl:px-7 2xl:py-11`,
+  tile: `${CARD_SIZE_MD.tile} 2xl:h-[7.5rem] 2xl:w-[7.5rem] 2xl:rounded-[2.3rem]`,
+  glyph: `${CARD_SIZE_MD.glyph} 2xl:h-16 2xl:w-16`,
+  title: `${CARD_SIZE_MD.title} 2xl:text-[1.6rem] 2xl:leading-[3rem]`,
+  tagline: `${CARD_SIZE_MD.tagline} 2xl:text-[0.85rem] 2xl:leading-7`,
+};
+
+const CATALOG_CARD_SIZES = { md: CARD_SIZE_MD, lg: CARD_SIZE_LG };
+
+/* کارت کاتالوگ — یک تعریف، دو مصرف: شبکهٔ بخش دوره‌های داشبورد و نوار زیر هیروی
+   صفحهٔ اصلی. مارک‌آپ یکی است تا کارتِ صفحهٔ اصلی هرگز از کارتِ داشبورد جدا نیفتد. */
+export function CatalogCourseCard({ course, onOpen, size = 'md' }) {
+  const scale = CATALOG_CARD_SIZES[size] ?? CARD_SIZE_MD;
+
+  return (
+    <button
+      type="button"
+      onClick={() => onOpen(course.id)}
+      aria-label={`ورود به ${course.title}`}
+      className={`group relative flex cursor-pointer flex-col items-center justify-between overflow-hidden bg-[var(--surface)] text-center transition duration-200 hover:-translate-y-0.5 hover:bg-[var(--surface-soft)] hover:ring-1 hover:ring-white/20 ${scale.root}`}
+      style={{ '--accent': course.accent }}
+    >
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-16 left-1/2 h-40 w-40 -translate-x-1/2 rounded-full opacity-25 blur-3xl transition-opacity duration-300 group-hover:opacity-45"
+        style={{ backgroundColor: course.accent }}
+      />
+
+      {/* لوگوی اختصاصی دوره — بزرگ و وسط‌چین */}
+      <span
+        className={`relative mx-auto grid shrink-0 place-items-center transition-transform duration-300 group-hover:scale-105 ${scale.tile}`}
+        style={{
+          color: course.accent,
+          backgroundColor: `${course.accent}1f`,
+          border: `1px solid ${course.accent}3d`,
+        }}
+      >
+        <CatalogIcon name={course.id} className={scale.glyph} />
+      </span>
+
+      <span className="relative flex w-full flex-col items-center gap-1.5">
+        <span
+          className={`block [font-family:'Doran','Vazir',Tahoma,sans-serif] ${scale.title}`}
+          style={{ color: course.accent }}
+        >
+          {course.title}
+        </span>
+        <span className={`block text-[var(--faint)] ${scale.tagline}`}>
+          {course.tagline}
+        </span>
+      </span>
+    </button>
+  );
 }
 
 /* ردیف افقی کارت‌ها؛ محتوا به سمت چپ سرریز می‌شود و با دکمه‌های سربرگ هم می‌شود چرخاند.
@@ -345,13 +465,8 @@ export default function CoursesSection({ onOpenCourse, onOpenAllCourses }) {
     onOpenCourse(course.courseId, course.target);
   };
 
-  /* پنج دورهٔ کاتالوگ: «مسیر سبز» فقط اسکرول می‌شود؛ بقیه لایهٔ مستقل خود را باز می‌کنند
-     (از جمله «دوره‌های بین‌الملل» که به لایهٔ InternationalCoursesLayer وصل است). */
+  /* هر کارت کاتالوگ به مقصد واقعی خودش می‌رود؛ مسیر سبز دیگر لنگر یا بخش تزئینی نیست. */
   const handleOpenCatalog = (courseId) => {
-    if (courseId === 'green-path') {
-      document.getElementById('green-path-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      return;
-    }
     onOpenCourse?.(courseId);
   };
 
@@ -382,7 +497,7 @@ export default function CoursesSection({ onOpenCourse, onOpenAllCourses }) {
     <section
       dir="rtl"
       aria-label="دوره ها"
-      className="dash-stagger mx-auto w-[var(--content-width)] min-h-[calc(100vh-7rem)] bg-black py-8 text-white md:py-10 [font-family:'Pinar','Vazir',Tahoma,sans-serif]"
+      className="dash-stagger mx-auto w-[var(--content-width)] min-h-[calc(100vh-7rem)] bg-[var(--background)] py-8 text-white md:py-10 [font-family:'Pinar','Vazir',Tahoma,sans-serif]"
     >
       {/* ── ۱) دوره‌های من: دروس درحال انجام در یک ردیف افقی با فلش اسکرول ── */}
       {hasStartedCourses ? (
@@ -422,43 +537,7 @@ export default function CoursesSection({ onOpenCourse, onOpenAllCourses }) {
       <section className="mb-10 md:mb-12" aria-label="کاتالوگ دوره‌ها">
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:gap-5 lg:grid-cols-5">
           {CATALOG_COURSES.map((course) => (
-            <button
-              key={course.id}
-              type="button"
-              onClick={() => handleOpenCatalog(course.id)}
-              className="group relative flex min-h-[200px] cursor-pointer flex-col items-center justify-between overflow-hidden rounded-[2rem] bg-[var(--surface)] px-4 py-5 text-center transition duration-200 hover:-translate-y-0.5 hover:bg-[var(--surface-soft)] hover:ring-1 hover:ring-white/20 md:min-h-[300px] md:rounded-[2.5rem] md:px-5 md:py-8"
-              style={{ '--accent': course.accent }}
-            >
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute -top-16 left-1/2 h-40 w-40 -translate-x-1/2 rounded-full opacity-25 blur-3xl transition-opacity duration-300 group-hover:opacity-45"
-                style={{ backgroundColor: course.accent }}
-              />
-
-              {/* لوگوی اختصاصی دوره — بزرگ و وسط‌چین */}
-              <span
-                className="relative mx-auto grid h-14 w-14 shrink-0 place-items-center rounded-[1.25rem] transition-transform duration-300 group-hover:scale-105 md:h-24 md:w-24 md:rounded-[1.9rem]"
-                style={{
-                  color: course.accent,
-                  backgroundColor: `${course.accent}1f`,
-                  border: `1px solid ${course.accent}3d`,
-                }}
-              >
-                <CatalogIcon name={course.id} className="h-8 w-8 md:h-14 md:w-14" />
-              </span>
-
-              <span className="relative flex w-full flex-col items-center gap-1.5">
-                <span
-                  className="block text-sm leading-6 md:text-xl md:leading-9 [font-family:'Doran','Vazir',Tahoma,sans-serif]"
-                  style={{ color: course.accent }}
-                >
-                  {course.title}
-                </span>
-                <span className="block text-[10px] leading-5 text-[var(--faint)] md:text-xs md:leading-6">
-                  {course.tagline}
-                </span>
-              </span>
-            </button>
+            <CatalogCourseCard key={course.id} course={course} onOpen={handleOpenCatalog} />
           ))}
         </div>
       </section>
@@ -559,14 +638,15 @@ export default function CoursesSection({ onOpenCourse, onOpenAllCourses }) {
         ))}
       </LessonRail>
 
-      {/* ── مسیر سبز ── */}
+      {/* ── ورود به موتور مسیر سبز ── */}
       <button
-        id="green-path-section"
         type="button"
+        onClick={() => onOpenCourse?.('green-path')}
+        aria-label="باز کردن موتور مسیر سبز"
         className="flex min-h-[220px] w-full cursor-pointer items-center justify-center rounded-[2.5rem] bg-[var(--green)] px-6 py-16 transition duration-200 hover:bg-[var(--green-deep)] md:min-h-[280px] md:rounded-[3rem] md:py-20"
       >
         <span className="text-base text-white md:text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]">
-          مسیر سبز
+          ورود به مسیر سبز
         </span>
       </button>
     </section>

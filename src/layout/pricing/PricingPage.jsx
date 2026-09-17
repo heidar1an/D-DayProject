@@ -15,6 +15,7 @@ import FeatureMatrix from './FeatureMatrix';
 import PricingCard from './PricingCard';
 import ProductShowcase from './ProductShowcase';
 import { ArrowStartIcon } from './pricingShared';
+import { GROUP_PAGE_HASH } from '../../services/group/groupService';
 import './pricing.css';
 
 /*
@@ -143,18 +144,28 @@ export default function PricingPage({ hasAccount = false, onStart }) {
         </div>
 
         <div className="pr-grid">
-          {plans.map((plan) => (
-            <PricingCard
-              key={plan.id}
-              plan={plan}
-              price={prices[plan.id]}
-              seats={plan.seats ? clampSeats(plan, seats) : 1}
-              isSelected={plan.id === selectedPlanId}
-              onSelect={selectPlan}
-              onSeatChange={setSeats}
-              onCta={onStart}
-            />
-          ))}
+          {plans.map((plan) => {
+            /*
+             * مقصد CTA: پلن گروهی به لایهٔ واقعیِ خودش می‌رود (`#group`) و
+             * بقیه به ورود/داشبورد. برای پلن گروهی `onCta` پاس داده نمی‌شود،
+             * چون آن هندلر `preventDefault` می‌کند و مقصد را عوض می‌کرد.
+             */
+            const isGroupPlan = plan.cta?.mode === 'group';
+
+            return (
+              <PricingCard
+                key={plan.id}
+                plan={plan}
+                price={prices[plan.id]}
+                seats={plan.seats ? clampSeats(plan, seats) : 1}
+                isSelected={plan.id === selectedPlanId}
+                onSelect={selectPlan}
+                onSeatChange={setSeats}
+                ctaHref={isGroupPlan ? GROUP_PAGE_HASH : hasAccount ? '#dashboard' : '#auth'}
+                onCta={isGroupPlan ? undefined : onStart}
+              />
+            );
+          })}
         </div>
       </section>
 

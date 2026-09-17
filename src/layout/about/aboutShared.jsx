@@ -127,7 +127,7 @@ function progressOf(node, mode) {
  * اندیسِ مرحلهٔ فعال را برمی‌گرداند. هیچ رندرِ دوباره‌ای هنگام اسکرول رخ
  * نمی‌دهد مگر اینکه مرحله عوض شود.
  */
-export function useScene(ref, { mode = 'sticky', stages = 0 } = {}) {
+export function useScene(ref, { mode = 'sticky', stages = 0, stageMode = 'segments' } = {}) {
   const [stage, setStage] = useState(0);
 
   useEffect(
@@ -140,11 +140,20 @@ export function useScene(ref, { mode = 'sticky', stages = 0 } = {}) {
         node.style.setProperty('--ab-p', raw.toFixed(4));
 
         if (stages > 1) {
-          const next = Math.min(stages - 1, Math.max(0, Math.floor(raw * stages)));
+          /*
+           * صحنه‌های روایی به «بازه»‌ها تقسیم می‌شوند، اما چرخه یک نقطهٔ شروع
+           * و یک نقطهٔ پایان دارد. در حالت endpoints هر دو سرِ مسیر دقیقاً به
+           * یک مرحلهٔ قابل‌مشاهده وصل می‌شوند و آخرین مرحله با نشانگر جا نمی‌ماند.
+           */
+          const scaled = stageMode === 'endpoints' ? raw * (stages - 1) : raw * stages;
+          const next = Math.min(
+            stages - 1,
+            Math.max(0, stageMode === 'endpoints' ? Math.round(scaled) : Math.floor(scaled)),
+          );
           setStage((current) => (current === next ? current : next));
         }
       }),
-    [ref, mode, stages],
+    [ref, mode, stages, stageMode],
   );
 
   return stage;

@@ -1,3 +1,4 @@
+import { handleGoogleAuthApi } from './googleAuth.js';
 import { findUserByPhone, publicUser, saveUser, verifyUser } from './usersStore.js';
 
 function sendJson(response, status, payload) {
@@ -32,9 +33,29 @@ function readBody(request) {
 }
 
 export default function usersApiPlugin() {
+  /*
+   * جریان گوگل مسیر خودش (`/api/auth/google/*`) را دارد و بی‌قید سوار می‌شود،
+   * دقیقاً مثل `contentApiPlugin`؛ منطقش در `googleAuth.js` است تا `server.js`
+   * هم بدون تغییر همان کد را اجرا کند.
+   */
+  const googleAuthMiddleware = async (request, response, next) => {
+    try {
+      const handled = await handleGoogleAuthApi(request, response);
+      if (!handled) next();
+    } catch (error) {
+      console.error('[tapesh-google-auth]', error);
+      if (!response.headersSent) {
+        response.statusCode = 500;
+        response.setHeader('Content-Type', 'application/json; charset=utf-8');
+      }
+      response.end(JSON.stringify({ success: false, error: { code: 'INTERNAL_ERROR', message: 'خطای سرور' } }));
+    }
+  };
+
   return {
     name: 'tapesh-users-api',
     configureServer(server) {
+      server.middlewares.use(googleAuthMiddleware);
       server.middlewares.use('/api/users', async (request, response, next) => {
         const url = new URL(request.url ?? '/', 'http://localhost');
         const path = url.pathname.replace(/\/$/, '');

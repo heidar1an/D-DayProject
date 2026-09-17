@@ -1,6 +1,7 @@
 const SESSION_KEY = 'tapesh:current-user';
 const LOCAL_USERS_KEY = 'tapesh:users';
 const API_BASE = '/api/users';
+const GOOGLE_BASE = '/api/auth/google';
 
 export function normalizeDigits(value) {
   return String(value ?? '')
@@ -129,4 +130,90 @@ export async function loginUser({ phone, password }) {
 
   const localUser = readLocalUsers().find((user) => user.phone === normalizedPhone);
   return localUser ? storeUser(localUser) : null;
+}
+
+/*
+ * ═══ ورود / ثبت‌نام با گوگل ═══
+ *
+ * جریان کامل سمت سرور است (`database/googleAuth.js`) و اینجا فقط سه کار انجام
+ * می‌شود: پرسیدن وضعیت پیکربندی، فرستادن مرورگر به گوگل، و گرفتن «دست‌دادن»
+ * برگشتی. هیچ‌جا رمزی از گوگل دیده نمی‌شود و هیچ ورود ساختگی‌ای انجام نمی‌شود:
+ * اگر سرور پیکربندی نشده باشد، همین را برمی‌گردانیم و UI صریح می‌گوید.
+ */
+
+/*
+ * `configured` تنها وقتی true است که سرور واقعاً `GOOGLE_CLIENT_ID/SECRET`
+ * داشته باشد. `reachable` جدا نگه داشته می‌شود: «سرور جواب نداد» با «سرور
+ * گفت پیکربندی نشده‌ام» دو چیز متفاوت‌اند و پیام UI باید فرقشان را بگوید.
+ */
+export async function getGoogleAuthStatus() {
+  try {
+    const response = await fetch(`${GOOGLE_BASE}/status`, {
+      headers: { Accept: 'application/json' },
+    });
+
+    if (!response.ok) return { reachable: false, configured: false, redirectUri: '' };
+
+    const data = await response.json();
+
+    return {
+      reachable: true,
+      configured: data?.configured === true,
+      redirectUri: String(data?.redirectUri ?? ''),
+    };
+  } catch {
+    return { reachable: false, configured: false, redirectUri: '' };
+  }
+}
+
+/* ناوبری کامل صفحه؛ برگشت گوگل با ۳۰۲ به `/?google=…` می‌آید */
+export function startGoogleAuth() {
+  if (typeof window === 'undefined') return;
+  window.location.assign(`${GOOGLE_BASE}/start`);
+}
+
+/* نشانهٔ بازگشت از گوگل در آدرس؛ `null` یعنی این بار اصلاً از گوگل برنگشتیم */
+export function readGoogleReturn() {
+  if (typeof window === 'undefined') return null;
+
+  const value = new URLSearchParams(window.location.search).get('google');
+  return value || null;
+}
+
+/* پاک‌کردن نشانه از آدرس تا رفرش، جریان را دوباره اجرا نکند (hash دست‌نخورده می‌ماند) */
+export function clearGoogleReturn() {
+  if (typeof window === 'undefined') return;
+
+  const params = new URLSearchParams(window.location.search);
+  params.delete('google');
+
+  const query = params.toString();
+  const { pathname, hash } = window.location;
+
+  window.history.replaceState(
+    window.history.state,
+    '',
+    `${pathname}${query ? `?${query}` : ''}${hash}`,
+  );
+}
+
+/*
+ * گرفتن کاربرِ «دست‌دادن». کوکی HttpOnly یک‌بارمصرف است و سرور همان‌جا پاکش
+ * می‌کند، پس فراخوانی دوم `null` می‌دهد — نه خطا.
+ */
+export async function consumeGoogleHandoff() {
+  try {
+    const response = await fetch(`${GOOGLE_BASE}/handoff`, {
+      headers: { Accept: 'application/json' },
+    });
+
+    if (!response.ok) return null;
+
+    const data = await response.json();
+    if (!data?.user) return null;
+
+    return storeUser(data.user);
+  } catch {
+    return null;
+  }
 }

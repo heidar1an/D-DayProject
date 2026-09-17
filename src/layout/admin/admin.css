@@ -28,6 +28,12 @@
   --ad-radius: 1.35rem;
   --ad-radius-sm: 0.85rem;
 
+  /* ── نوار کناری: حداکثر عرض (باز) و حداقل عرض (ریل آیکونی) ──
+     ریل = پدینگ نوار (۱rem × ۲) + پدینگ آیتم (۰٫۸۵rem × ۲) + آیکون (۱۸px) ≈ ۷۷px؛
+     با ۷۸px آیکون‌ها دقیقاً وسط می‌ایستند و لوگوی ۴۲px هم جا می‌شود. */
+  --ad-sidebar-w: 258px;
+  --ad-sidebar-w-min: 79px;
+
   min-height: 100dvh;
   background: var(--ad-bg);
   color: var(--ad-text);
@@ -62,8 +68,8 @@
 /* ───────────────────────────── چیدمان اصلی ───────────────────────────── */
 
 .ad-sidebar {
-  width: 258px;
-  flex: 0 0 258px;
+  width: var(--ad-sidebar-w);
+  flex: 0 0 var(--ad-sidebar-w);
   display: flex;
   flex-direction: column;
   gap: 1.1rem;
@@ -74,6 +80,10 @@
   top: 0;
   height: 100dvh;
   overflow-y: auto;
+  /* برچسب‌ها هنگام جمع شدن تا عرض صفر کوچک می‌شوند؛ این خط تکه‌های در حال
+     محو شدن را در حین انیمیشن می‌بُرد و از سرریز افقی جلوگیری می‌کند. */
+  overflow-x: hidden;
+  transition: width 0.22s ease, flex-basis 0.22s ease;
 }
 
 .ad-sidebar__brand {
@@ -82,11 +92,13 @@
   gap: 0.75rem;
   padding: 0.35rem 0.5rem 0.9rem;
   border-bottom: 1px solid var(--ad-border);
+  transition: gap 0.22s ease, padding 0.22s ease;
 }
 
 .ad-sidebar__logo {
   width: 42px;
   height: 42px;
+  flex-shrink: 0;
   display: grid;
   place-items: center;
   border-radius: 1rem;
@@ -127,7 +139,15 @@
   font-size: 0.88rem;
   text-align: right;
   cursor: pointer;
-  transition: background 0.18s ease, color 0.18s ease;
+  transition: background 0.18s ease, color 0.18s ease, gap 0.22s ease;
+}
+
+/*
+ * آیکون هرگز فشرده نشود. در ریل جمع، `flex-shrink` پیش‌فرض (۱) آیکون ۱۸px را
+ * به عرض باقی‌ماندهٔ خط می‌کوبید و آن را به یک لکهٔ باریک تبدیل می‌کرد.
+ */
+.ad-nav__item > svg {
+  flex-shrink: 0;
 }
 
 .ad-nav__item:hover {
@@ -139,6 +159,22 @@
   background: var(--ad-accent-soft);
   color: var(--ad-text);
   box-shadow: inset -3px 0 0 var(--ad-accent);
+}
+
+/*
+ * ── برچسب‌های نوار کناری (متن لوگو + عنوان هر بخش) ──
+ * وقتی نوار روی ریل آیکونی جمع می‌شود، این‌ها با `max-width: 0` به عرض صفر
+ * می‌رسند و محو می‌شوند. `min-width: 0` اجباری است: بدون آن `min-width: auto`
+ * فلیکس‌آیتم روی «عرض بزرگ‌ترین کلمه» می‌ماند و `max-width: 0` را باطل می‌کند.
+ * `max-width` عمداً px است (نه `auto`) تا گذار قابل انیمیت بماند.
+ */
+.ad-nav__item > span,
+.ad-sidebar__brand > div {
+  min-width: 0;
+  max-width: 14rem;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: max-width 0.22s ease, opacity 0.16s ease;
 }
 
 .ad-sidebar__foot {
@@ -2039,6 +2075,41 @@
   }
 }
 
+/*
+ * ── نوار کناری داینامیک (فقط دسکتاپ، بالای نقطهٔ شکست کشوی موبایل) ──
+ * پیش‌فرض همان حالت قبلی است: ۲۵۸px ثابت با عنوان‌ها. کلید پایین نوار
+ * (`.ad-sidebar__collapse`) کلاس `is-collapsed` را می‌نشاند و نوار به ریل
+ * آیکونی جمع می‌شود؛ دوباره که بزنی، عنوان‌ها برمی‌گردند.
+ * نوار در جریان می‌ماند (اورلی نیست)، پس محتوا فضای آزادشده را می‌گیرد و
+ * هیچ‌وقت چیزی روی چیزی نمی‌افتد.
+ */
+@media (min-width: 861px) {
+  .ad-sidebar.is-collapsed {
+    width: var(--ad-sidebar-w-min);
+    flex-basis: var(--ad-sidebar-w-min);
+  }
+
+  /*
+   * ریل جمع: برچسب‌ها به عرض صفر می‌رسند، فاصلهٔ میان آیکون و برچسب هم صفر
+   * می‌شود (وگرنه همان ۰٫۷rem جای خالی می‌ماند و آیکون از مرکز در می‌آید)، و
+   * پدینگ افقی لوگو برداشته می‌شود تا لوگوی ۴۲px در ریل ۷۹px جا شود.
+   */
+  .ad-sidebar.is-collapsed .ad-nav__item > span,
+  .ad-sidebar.is-collapsed .ad-sidebar__brand > div {
+    max-width: 0;
+    opacity: 0;
+  }
+
+  .ad-sidebar.is-collapsed .ad-nav__item,
+  .ad-sidebar.is-collapsed .ad-sidebar__brand {
+    gap: 0;
+  }
+
+  .ad-sidebar.is-collapsed .ad-sidebar__brand {
+    padding-inline: 0;
+  }
+}
+
 @media (max-width: 860px) {
   .ad-sidebar {
     position: fixed;
@@ -2052,6 +2123,11 @@
 
   .ad-sidebar.is-open {
     transform: translateX(0);
+  }
+
+  /* کشوی موبایل همیشه با عنوان است؛ کلید جمع کردن این‌جا معنا ندارد */
+  .ad-sidebar__collapse {
+    display: none;
   }
 
   .ad-scrim {
