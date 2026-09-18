@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 
 import ProductVisual from './ProductVisual';
-import { ProductArrow, toFa, useStageIndex } from './productsShared';
+import { ProductArrow, useStageIndex } from './productsShared';
 
 /*
  * ── نمای چسبان ──
@@ -31,10 +31,7 @@ export default function ProductStickyShowcase({ product, onOpen }) {
         </div>
 
         <div className="ps-sticky__copy">
-          <p className="ps-eyebrow">
-            <span className="ps-eyebrow__index">{product.index}</span>
-            {product.eyebrow}
-          </p>
+          <p className="ps-eyebrow">{product.eyebrow}</p>
 
           <h3 className="ps-sticky__title">{product.title}</h3>
           <p className="ps-subtitle">{product.subtitle}</p>
@@ -46,7 +43,6 @@ export default function ProductStickyShowcase({ product, onOpen }) {
                 key={feature.id}
               >
                 <span className="ps-sticky__feature-head">
-                  <span className="ps-sticky__feature-index">{toFa(index + 1)}</span>
                   <span className="ps-sticky__feature-label">{feature.label}</span>
                 </span>
                 <p className="ps-sticky__feature-text">{feature.text}</p>

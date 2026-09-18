@@ -1,4 +1,4 @@
-import { toFa, usePrefersReducedMotion } from '../productsShared';
+import { usePrefersReducedMotion } from '../productsShared';
 
 /*
  * ── برگه‌های پشت‌سرهمِ نمای بزرگ ──
@@ -33,7 +33,6 @@ export default function SheetStackPreview({ sheets = [], stage = 0 }) {
               aria-hidden={reduced ? undefined : index !== stage}
             >
               <div className="ps-sheet__head">
-                <span className="ps-sheet__index">{toFa(index + 1)}</span>
                 <h4 className="ps-sheet__title">{sheet.title}</h4>
               </div>
 

@@ -4,7 +4,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Skeleton, toFa } from '../league/leagueShared';
-import { NOTE_AI_ACTIONS, NOTE_KINDS, runNoteAI, subjectAccent, subjectLabel } from '../../../services/notes/notesService';
+import { NOTE_KINDS, subjectAccent, subjectLabel } from '../../../services/notes/notesService';
 
 export { Skeleton, toFa };
 
@@ -173,124 +173,6 @@ export function TagPill({ tag, accent = '#8a8a8a', count, active = false, onClic
         </button>
       )}
     </Wrapper>
-  );
-}
-
-/* ── تپش هوشمند روی هر متن ──
-   دکمهٔ کوچک کنار هر فیلد؛ با باز شدن، چهار کنش بازنویسی می‌آید، متن جدید تکه‌تکه
-   (استریم) نوشته می‌شود و کاربر تصمیم می‌گیرد جایگزین کند یا نه. لغو با AbortController. */
-export function AIAssist({ text, onApply, label = 'تپش هوشمند', compact = false }) {
-  const [open, setOpen] = useState(false);
-  const [action, setAction] = useState(null);
-  const [preview, setPreview] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
-  const controllerRef = useRef(null);
-
-  useEffect(() => () => controllerRef.current?.abort(), []);
-
-  const reset = () => {
-    controllerRef.current?.abort();
-    controllerRef.current = null;
-    setAction(null);
-    setPreview('');
-    setBusy(false);
-    setError('');
-  };
-
-  const close = () => {
-    reset();
-    setOpen(false);
-  };
-
-  const run = async (actionId) => {
-    controllerRef.current?.abort();
-    const controller = new AbortController();
-    controllerRef.current = controller;
-    setAction(actionId);
-    setPreview('');
-    setError('');
-    setBusy(true);
-    try {
-      await runNoteAI({ action: actionId, text, signal: controller.signal, onChunk: setPreview });
-    } catch (err) {
-      if (err?.name !== 'AbortError') setError('تپش هوشمند همین حالا پاسخ نمی‌دهد؛ دوباره تلاش کن.');
-    } finally {
-      if (controllerRef.current === controller) setBusy(false);
-    }
-  };
-
-  const empty = !String(text ?? '').trim();
-
-  return (
-    <div className={`nt-ai ${compact ? 'nt-ai--compact' : ''}`}>
-      <button
-        type="button"
-        className={`nt-ai__btn ${open ? 'is-open' : ''}`}
-        aria-expanded={open}
-        onClick={() => (open ? close() : setOpen(true))}
-      >
-        <Icon name="wand" size={12} />
-        {!compact && <span>{label}</span>}
-      </button>
-
-      {open && (
-        <div className="nt-ai__panel">
-          {empty ? (
-            <p className="nt-ai__hint">اول متن را بنویس، بعد تپش هوشمند مرتبش می‌کند.</p>
-          ) : (
-            <>
-              <div className="nt-ai__actions" role="group" aria-label="کنش‌های تپش هوشمند">
-                {NOTE_AI_ACTIONS.map((option) => (
-                  <button
-                    key={option.id}
-                    type="button"
-                    title={option.hint}
-                    aria-pressed={action === option.id}
-                    onClick={() => run(option.id)}
-                    className={`nt-ai__chip ${action === option.id ? 'is-active' : ''}`}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-                {busy && (
-                  <span className="nt-ai__status">
-                    <span className="nt-ai__spinner" aria-hidden="true" />
-                    در حال نوشتن…
-                  </span>
-                )}
-              </div>
-
-              {error && (
-                <p role="alert" className="nt-ai__error">
-                  {error}
-                </p>
-              )}
-
-              {preview && (
-                <div className="nt-ai__preview">
-                  <p className="nt-ai__preview-text">{preview}</p>
-                  <div className="nt-ai__preview-actions">
-                    <button type="button" className="nt-ai__apply" onClick={() => { onApply?.(preview); close(); }} disabled={busy}>
-                      جایگزین کن
-                    </button>
-                    <button type="button" className="nt-ai__cancel" onClick={close}>
-                      لغو
-                    </button>
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-
-          {empty && (
-            <button type="button" className="nt-ai__cancel" onClick={close}>
-              بستن
-            </button>
-          )}
-        </div>
-      )}
-    </div>
   );
 }
 

@@ -8,7 +8,7 @@
  *   CardEditor/DeckModal ← ساخت و ویرایش
  *   سرویس: src/services/flashcards (قرارداد API واقعی، فعلاً Mock + localStorage)
  */
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   addLibraryDeck,
   createCard,
@@ -17,6 +17,7 @@ import {
   fetchLibrary,
   fetchMyDecks,
   fetchOverview,
+  redeemDeckShare,
   removeLibraryDeck,
   setCardArchived,
   setCardBookmarked,
@@ -31,7 +32,7 @@ import DeckView from './DeckView';
 import ReviewSession from './ReviewSession';
 import SettingsView from './SettingsView';
 import StatsView from './StatsView';
-import { Icon, Skeleton, faNum, toFa } from './flashcardShared';
+import { Icon, Modal, Skeleton, faNum, toFa } from './flashcardShared';
 import { useAsyncData } from '../league/useAsyncData';
 import './flashcards.css';
 
@@ -75,8 +76,9 @@ function SkeletonHome() {
 }
 
 /* ── کتابخانهٔ رسمی تپش ── */
-function LibraryView({ userData, onChanged }) {
-  const { data, loading, error, retry } = useAsyncData(() => fetchLibrary(userData), [userData]);
+function LibraryView({ userData, reloadKey, onChanged }) {
+  /* `reloadKey` در وابستگی‌هاست تا افزودن/حذف لحظه‌ای، فهرست را بی‌درنگ تازه کند */
+  const { data, loading, error, retry } = useAsyncData(() => fetchLibrary(userData), [userData, reloadKey]);
 
   const toggle = async (deck) => {
     if (deck.added) {
@@ -105,6 +107,57 @@ function LibraryView({ userData, onChanged }) {
       <p className="text-sm leading-7 text-[var(--faint)]">
         مجموعه‌های رسمی تپش توسط تیم آموزشی ساخته و به‌روزرسانی می‌شوند؛ هر مجموعه را که اضافه کنی، کارت‌هایش وارد چرخهٔ مرور هوشمند تو می‌شوند.
       </p>
+
+      {/* ردیف ویژهٔ آناتومی تصویری — روی تصویر، نقطه‌های مشخص‌شده را نام می‌بری */}
+      {(() => {
+        const anatomyDecks = data.decks.filter((deck) => deck.anatomy);
+        if (!anatomyDecks.length) return null;
+        return (
+          <section aria-label="آناتومی تصویری" className="rounded-[2rem] border border-[#937fcd]/25 bg-[#937fcd]/[0.06] p-5">
+            <header className="mb-4 flex items-center gap-2.5">
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#937fcd]/15 text-[var(--purple-soft-ink)]">
+                <Icon name="image" className="h-4.5 w-4.5" />
+              </span>
+              <div>
+                <h3 className="text-sm [font-family:'Doran','Vazir',Tahoma,sans-serif]">آناتومی تصویری — لوکیشن‌یاب</h3>
+                <p className="mt-0.5 text-[11px] text-[var(--faint)]">روی تصویر نقطه مشخص شده؛ تو نام ساختار را بگو.</p>
+              </div>
+            </header>
+            <div className="fc-scroll-x flex gap-4 overflow-x-auto pb-1">
+              {anatomyDecks.map((deck) => (
+                <article
+                  key={deck.id}
+                  className="flex w-64 shrink-0 flex-col rounded-[1.25rem] border border-white/8 bg-[rgb(var(--wash-rgb)/0.03)] p-5 transition-colors hover:border-white/15"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: deck.cover }} aria-hidden="true" />
+                    {/* عنوان کوتاه فقط در همین ردیف؛ در «مجموعه‌های من» عنوان کامل می‌نشیند */}
+                    <h4 className="min-w-0 flex-1 truncate text-[15px] [font-family:'Doran','Vazir',Tahoma,sans-serif]">{deck.shortTitle ?? deck.title}</h4>
+                    {deck.added && <span className="shrink-0 rounded-full bg-[#77b787]/12 px-2.5 py-1 text-[10px] text-[var(--green-soft-ink)]">اضافه شد</span>}
+                  </div>
+                  <p className="mt-1.5 flex-1 text-xs leading-6 text-[var(--faint)]">{deck.description}</p>
+                  <p className="mt-2 text-[10px] text-[var(--ghost)]">
+                    {deck.level} · {faNum(deck.cardCount)} کارت
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => toggle(deck)}
+                    aria-pressed={deck.added}
+                    className={`mt-4 cursor-pointer rounded-xl px-4 py-2.5 text-xs font-bold transition-colors [font-family:'Doran','Vazir',Tahoma,sans-serif] ${
+                      deck.added
+                        ? 'border border-white/10 bg-white/5 text-[var(--muted)] hover:border-[#ef9196]/40 hover:bg-[#ef9196]/12 hover:text-[var(--red-ink)]'
+                        : 'bg-[var(--blue-bright)] text-white hover:brightness-110'
+                    }`}
+                  >
+                    {deck.added ? 'حذف از مجموعه‌های من' : 'افزودن به مجموعه‌های من'}
+                  </button>
+                </article>
+              ))}
+            </div>
+          </section>
+        );
+      })()}
+
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {data.decks.map((deck) => (
           <article
@@ -118,7 +171,7 @@ function LibraryView({ userData, onChanged }) {
             </div>
             <p className="mt-1.5 flex-1 text-xs leading-6 text-[var(--faint)]">{deck.description}</p>
             <p className="mt-2 text-[10px] text-[var(--ghost)]">
-              {deck.level} · {faNum(deck.cardCount)} کارت · به‌روزرسانی: {toFa(new Date(deck.updatedAt).toLocaleDateString('fa-IR'))}
+              {deck.level} · {faNum(deck.cardCount)} کارت
             </p>
             <button
               type="button"
@@ -139,9 +192,95 @@ function LibraryView({ userData, onChanged }) {
   );
 }
 
+/* ── دریافت مجموعه با لینک اشتراک ──
+ * گیرنده لینک را همین‌جا وارد می‌کند؛ اعتبارسنجی «فقط کاربران تپش» در سرویس است. */
+function ShareRedeemModal({ userData, open, prefill = '', onClose, onRedeemed, notify }) {
+  const [value, setValue] = useState('');
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setValue(prefill);
+      setError('');
+      setBusy(false);
+    }
+  }, [open, prefill]);
+
+  const redeem = async () => {
+    if (!value.trim() || busy) return;
+    setBusy(true);
+    setError('');
+    try {
+      const result = await redeemDeckShare(userData, value);
+      onRedeemed();
+      notify(result.already ? 'این مجموعه قبلاً به فهرستت اضافه شده بود.' : `مجموعه «${result.deckTitle}» به مجموعه‌های تو اضافه شد.`);
+      onClose();
+    } catch (err) {
+      setBusy(false);
+      if (err?.message === 'tapesh-user-required') {
+        setError('اشتراک مجموعه‌ها فقط میان کاربران ثبت‌نام‌شدهٔ تپش کار می‌کند؛ اول وارد حسابت شو.');
+      } else if (err?.message === 'share-not-found') {
+        setError('این لینک اشتراک معتبر نیست یا مجموعه‌اش دیگر در دسترس نیست.');
+      } else {
+        setError('دریافت مجموعه انجام نشد؛ لینک را دوباره چک کن.');
+      }
+    }
+  };
+
+  return (
+    <Modal open={open} onClose={onClose} title="افزودن مجموعه با لینک اشتراک">
+      <div className="space-y-4">
+        <p className="text-sm leading-7 text-[var(--muted)]">
+          لینکی که سازندهٔ مجموعه برایت فرستاده را اینجا بچسبان؛ مجموعه و کارت‌هایش به فهرست تو اضافه می‌شود.
+        </p>
+        <div>
+          <label htmlFor="fc-share-link" className="mb-2 block text-xs text-[var(--muted)]">لینک یا کد اشتراک</label>
+          <input
+            id="fc-share-link"
+            value={value}
+            onChange={(event) => setValue(event.target.value)}
+            onKeyDown={(event) => event.key === 'Enter' && redeem()}
+            placeholder="https://…/#dashboard?s=flashcards&share=…"
+            dir="ltr"
+            className="w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-3 text-sm outline-none transition-colors placeholder:text-[var(--ghost)] focus:border-[#5b8cc7]/50"
+          />
+        </div>
+        <p className="rounded-xl bg-[#937fcd]/10 px-3.5 py-2.5 text-[11px] leading-5 text-[var(--purple-soft-ink)]">
+          اشتراک مجموعه فقط میان کاربران ثبت‌نام‌شدهٔ تپش امکان‌پذیر است.
+        </p>
+        {error && <p className="text-xs text-[var(--red-ink)]" role="alert">{error}</p>}
+        <div className="flex items-center justify-end gap-2.5">
+          <button type="button" onClick={onClose} className="cursor-pointer rounded-xl px-5 py-2.5 text-sm text-[var(--muted)] transition-colors hover:text-white">
+            انصراف
+          </button>
+          <button
+            type="button"
+            onClick={redeem}
+            disabled={busy || !value.trim()}
+            className="cursor-pointer rounded-xl bg-[var(--blue-bright)] px-6 py-2.5 text-sm font-bold text-white transition-transform hover:-translate-y-0.5 disabled:cursor-default disabled:opacity-50 [font-family:'Doran','Vazir',Tahoma,sans-serif]"
+          >
+            {busy ? 'در حال دریافت…' : 'دریافت مجموعه'}
+          </button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
 /* ── مجموعه‌های من ── */
-function MyDecksView({ userData, overview, onOpenDeck, onCreateDeck, onEditDeck, onDeleteDeck, onStartReview, onCreateCard }) {
-  const { data, loading, error, retry } = useAsyncData(() => fetchMyDecks(userData), [userData]);
+function MyDecksView({ userData, reloadKey, overview, onOpenDeck, onCreateDeck, onEditDeck, onDeleteDeck, onStartReview, onCreateCard, onRedeemClick }) {
+  /* `reloadKey` در وابستگی‌هاست: بدون آن مجموعهٔ تازه‌ساخته‌شده تا عوض شدن نما
+     در فهرست نمی‌آمد — ریشهٔ گزارش «در لحظه نمایش داده نمی‌شود». */
+  const { data, loading, error, retry } = useAsyncData(() => fetchMyDecks(userData), [userData, reloadKey]);
+  const [armedDeleteId, setArmedDeleteId] = useState(null);
+
+  /* تأیید حذف دومرحله‌ای: کلیک اول مسلح می‌کند، کلیک دوم حذف می‌کند؛ ۳ ثانیه بعد خودش خنثی می‌شود */
+  useEffect(() => {
+    if (!armedDeleteId) return undefined;
+    const timer = window.setTimeout(() => setArmedDeleteId(null), 3000);
+    return () => window.clearTimeout(timer);
+  }, [armedDeleteId]);
 
   if (loading) {
     return (
@@ -160,14 +299,24 @@ function MyDecksView({ userData, overview, onOpenDeck, onCreateDeck, onEditDeck,
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm text-[var(--faint)]">{toFa(decks.length)} مجموعه در فهرست تو</p>
-        <button
-          type="button"
-          onClick={onCreateDeck}
-          className="flex cursor-pointer items-center gap-2 rounded-xl bg-[var(--blue-bright)] px-4 py-2.5 text-xs font-bold text-white transition-transform hover:-translate-y-0.5 [font-family:'Doran','Vazir',Tahoma,sans-serif]"
-        >
-          <Icon name="plus" className="h-3.5 w-3.5" />
-          ساخت مجموعه
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onRedeemClick}
+            className="flex cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs text-[var(--muted)] transition-colors hover:border-[#937fcd]/50 hover:text-white [font-family:'Doran','Vazir',Tahoma,sans-serif]"
+          >
+            <Icon name="link" className="h-3.5 w-3.5" />
+            افزودن با لینک
+          </button>
+          <button
+            type="button"
+            onClick={onCreateDeck}
+            className="flex cursor-pointer items-center gap-2 rounded-xl bg-[var(--blue-bright)] px-4 py-2.5 text-xs font-bold text-white transition-transform hover:-translate-y-0.5 [font-family:'Doran','Vazir',Tahoma,sans-serif]"
+          >
+            <Icon name="plus" className="h-3.5 w-3.5" />
+            ساخت مجموعه
+          </button>
+        </div>
       </div>
 
       {decks.length === 0 ? (
@@ -203,6 +352,9 @@ function MyDecksView({ userData, overview, onOpenDeck, onCreateDeck, onEditDeck,
                 >
                   {deck.title}
                 </button>
+                {deck.sharedFromToken && (
+                  <span className="shrink-0 rounded-full bg-[#937fcd]/15 px-2.5 py-1 text-[10px] text-[var(--purple-soft-ink)]">اشتراکی</span>
+                )}
                 {deck.due > 0 && (
                   <span className="shrink-0 rounded-full bg-[#e26d6d]/12 px-2.5 py-1 text-[10px] text-[var(--red-ink)]">امروز {faNum(deck.due)} مرور</span>
                 )}
@@ -236,14 +388,39 @@ function MyDecksView({ userData, overview, onOpenDeck, onCreateDeck, onEditDeck,
                   مشاهده
                 </button>
                 {!deck.byTapesh && (
-                  <button
-                    type="button"
-                    onClick={() => onEditDeck(deck)}
-                    aria-label={`ویرایش مجموعه ${deck.title}`}
-                    className="grid h-9 w-9 shrink-0 cursor-pointer place-items-center rounded-xl text-[var(--ghost)] transition-colors hover:bg-white/5 hover:text-white"
-                  >
-                    <Icon name="edit" className="h-4 w-4" />
-                  </button>
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => onEditDeck(deck)}
+                      aria-label={`ویرایش مجموعه ${deck.title}`}
+                      title="ویرایش"
+                      className="grid h-9 w-9 shrink-0 cursor-pointer place-items-center rounded-xl text-[var(--ghost)] transition-colors hover:bg-white/5 hover:text-white"
+                    >
+                      <Icon name="edit" className="h-4 w-4" />
+                    </button>
+                    {armedDeleteId === deck.id ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onDeleteDeck(deck.id);
+                          setArmedDeleteId(null);
+                        }}
+                        className="shrink-0 cursor-pointer rounded-xl border border-[#ef9196]/50 bg-[#ef9196]/12 px-3 py-2 text-[11px] font-bold text-[var(--red-ink)] [font-family:'Doran','Vazir',Tahoma,sans-serif]"
+                      >
+                        تأیید حذف
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setArmedDeleteId(deck.id)}
+                        aria-label={`حذف مجموعه ${deck.title}`}
+                        title="حذف مجموعه"
+                        className="grid h-9 w-9 shrink-0 cursor-pointer place-items-center rounded-xl text-[var(--ghost)] transition-colors hover:bg-[#ef9196]/10 hover:text-[var(--red-ink)]"
+                      >
+                        <Icon name="trash" className="h-4 w-4" />
+                      </button>
+                    )}
+                  </>
                 )}
               </div>
             </article>
@@ -350,6 +527,7 @@ export default function FlashcardSection({ userData, onBack }) {
   const [reloadKey, setReloadKey] = useState(0);
   const [deckModal, setDeckModal] = useState({ open: false, deck: null });
   const [cardEditor, setCardEditor] = useState({ open: false, card: null, deckId: null });
+  const [shareModal, setShareModal] = useState({ open: false, prefill: '' });
   const [toast, setToast] = useState(null);
 
   const { data: overview, loading, error, retry } = useAsyncData(() => fetchOverview(userData), [userData, reloadKey]);
@@ -359,6 +537,12 @@ export default function FlashcardSection({ userData, onBack }) {
   const notify = useCallback((message) => {
     setToast(message);
     window.setTimeout(() => setToast(null), 2200);
+  }, []);
+
+  /* لینک اشتراک باز شده («…&share=توکن») مستقیم به مودال دریافت می‌رسد */
+  useEffect(() => {
+    const match = /share=([A-Za-z0-9-]+)/.exec(window.location.hash);
+    if (match) setShareModal({ open: true, prefill: decodeURIComponent(match[1]) });
   }, []);
 
   const startReview = useCallback(
@@ -428,6 +612,7 @@ export default function FlashcardSection({ userData, onBack }) {
           config={reviewConfig}
           onExit={exitReview}
           onEditCard={(card) => setCardEditor({ open: true, card, deckId: card.deckId })}
+          shortcutPaused={cardEditor.open}
         />
         <CardEditor
           open={cardEditor.open}
@@ -450,11 +635,10 @@ export default function FlashcardSection({ userData, onBack }) {
           </svg>
           بازگشت به داشبورد
         </button>
-        <span className="fc-topbar__crumb">داشبورد / فلش‌کارت</span>
         <button
           type="button"
           onClick={() => setCardEditor({ open: true, card: null, deckId: null })}
-          className="flex cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm transition-colors hover:border-[#5b8cc7]/50 hover:bg-[#5b8cc7]/12 [font-family:'Doran','Vazir',Tahoma,sans-serif]"
+          className="fc-topbar__cta flex cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm transition-colors hover:border-[#5b8cc7]/50 hover:bg-[#5b8cc7]/12 [font-family:'Doran','Vazir',Tahoma,sans-serif]"
         >
           <Icon name="plus" className="h-4 w-4 text-[var(--blue-soft-ink)]" />
           ساخت کارت
@@ -519,6 +703,7 @@ export default function FlashcardSection({ userData, onBack }) {
           ) : view === 'decks' ? (
             <MyDecksView
               userData={userData}
+              reloadKey={reloadKey}
               overview={overview}
               onOpenDeck={openDeck}
               onCreateDeck={() => setDeckModal({ open: true, deck: null })}
@@ -526,9 +711,10 @@ export default function FlashcardSection({ userData, onBack }) {
               onDeleteDeck={handleDeleteDeck}
               onStartReview={startReview}
               onCreateCard={(deckId) => setCardEditor({ open: true, card: null, deckId })}
+              onRedeemClick={() => setShareModal({ open: true, prefill: '' })}
             />
           ) : view === 'library' ? (
-            <LibraryView userData={userData} onChanged={refresh} />
+            <LibraryView userData={userData} reloadKey={reloadKey} onChanged={refresh} />
           ) : view === 'stats' ? (
             <StatsView
               userData={userData}
@@ -547,6 +733,16 @@ export default function FlashcardSection({ userData, onBack }) {
         deck={deckModal.deck}
         onClose={() => setDeckModal({ open: false, deck: null })}
         onSave={handleSaveDeck}
+      />
+
+      {/* مودال دریافت مجموعه با لینک اشتراک */}
+      <ShareRedeemModal
+        userData={userData}
+        open={shareModal.open}
+        prefill={shareModal.prefill}
+        onClose={() => setShareModal({ open: false, prefill: '' })}
+        onRedeemed={refresh}
+        notify={notify}
       />
 
       {/* ویرایشگر کارت */}

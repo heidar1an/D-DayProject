@@ -11,6 +11,7 @@ import { useAsyncData } from '../../league/useAsyncData';
 import { Skeleton } from '../bank/bankShared';
 import BuilderHub from './BuilderHub';
 import BuilderWizard from './BuilderWizard';
+import './builder.css';
 import { fetchSavedExams } from '../../../../services/examBuilder/examBuilderService';
 
 const QUICK_DRAFT = {
@@ -36,7 +37,7 @@ export default function PersonalExamBuilder({ userId, payload = null, onLaunchEx
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
-  /* شروع از مسیرهای بیرونی: prefill کارنامه / preset تصادفی */
+  /* شروع از مسیرهای بیرونی: prefill کارنامه / preset تصادفی / دکمهٔ «ساخت آزمون» سربرگ */
   useEffect(() => {
     if (!payload) return;
     if (payload.prefill) {
@@ -47,6 +48,8 @@ export default function PersonalExamBuilder({ userId, payload = null, onLaunchEx
       );
     } else if (payload.preset === 'random') {
       enterWizard({ ...DEFAULT_DRAFT, ...QUICK_DRAFT, subjectIds: [] }, 3);
+    } else if (payload.preset === 'advanced') {
+      enterWizard({ ...DEFAULT_DRAFT }, 0);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [payload]);
@@ -86,10 +89,9 @@ export default function PersonalExamBuilder({ userId, payload = null, onLaunchEx
     return (
       <BuilderHub
         subjects={catalog?.subjects ?? []}
-        savedExamCount={savedExams?.length ?? 0}
+        savedExams={savedExams ?? null}
         onQuickBuild={handleQuickBuild}
         onPreset={handlePreset}
-        onAdvanced={() => enterWizard({ ...DEFAULT_DRAFT }, 0)}
         onMyExams={onOpenMyExams}
       />
     );

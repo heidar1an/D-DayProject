@@ -398,7 +398,7 @@ const [view, setView, patchView] = useLayerRoute(LAYER_IDS.wiki, WIKI_HOME_VIEW,
 | `league/` | لیگ، رتبه‌بندی، چالش، اعلان‌ها | `leagueService.js` |
 | `learning/` | موتور درسنامهٔ جامع | `index.js` (ری‌اکسپورت ۶ سرویس) |
 | `notes/` | دفترچهٔ یادداشت | `notesService.js` |
-| `products/` | صفحهٔ محصولات: هدرِ بدون هاله، برگه‌های ورق‌خور دوره‌ها، کادرهای چرخان بانک تست، ویکی/مقالات، تصویر شبکهٔ دانش، دفترچهٔ مرور و اکوسیستم متحرک؛ با **مقصد واقعی** هر محصول | `productsService.js` |
+| `products/` | صفحهٔ محصولات: هدرِ بدون هاله، برگه‌های چسبان و ورق‌خور دوره‌ها، کادرهای کلیکی بانک تست، ویکی/مقالات، تصویر شبکهٔ دانش، دفترچهٔ مرور و اکوسیستم متحرک؛ با **مقصد واقعی** هر محصول | `productsService.js` |
 | `pricing/` | تعرفه‌ها: پلن‌ها، دوره‌های پرداخت، ماتریس قابلیت، `quote()` | `pricingService.js` |
 | `reviewNotebook/` | دفترچهٔ مرور (مراحل G5) | `reviewNotebookService.js` |
 | `telemetry/` | ردیاب ترافیک مرورگر | `trafficTracker.js` |

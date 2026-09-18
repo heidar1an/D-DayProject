@@ -40,19 +40,6 @@ import BankResult from './BankResult';
 import PersonalExamBuilder from '../builder/PersonalExamBuilder';
 import SavedExamsView from '../builder/SavedExamsView';
 
-const VIEW_LABELS = {
-  subjects: 'بر اساس درس',
-  years: 'آزمون‌های سال به سال',
-  topics: 'تست مبحثی',
-  subject: 'مباحث درس',
-  browse: 'کاوشگر بانک تست',
-  builder: 'آزمون‌ساز شخصی',
-  'my-exams': 'آزمون‌های من',
-  history: 'تاریخچه',
-  live: 'محیط حل',
-  result: 'کارنامه',
-};
-
 const STATUS_LABELS = {
   unsolved: 'حل‌نشده',
   solved: 'حل‌شده',
@@ -374,10 +361,6 @@ export default function TestBankLayer({ userData, onBack }) {
       exitRoom();
       return;
     }
-    if (view.name === 'my-exams') {
-      go('builder');
-      return;
-    }
     go('home');
   };
 
@@ -393,54 +376,50 @@ export default function TestBankLayer({ userData, onBack }) {
     go(name, payload);
   };
 
-  const showBackToHome = !['home'].includes(view.name);
+  /* نماهای «خانه / آزمون‌ساز شخصی / آزمون‌های من» — بازگشت، مستقیم به بخش تست داشبورد وصل است */
+  const exitViews = ['home', 'builder', 'my-exams'];
+  const backLabel = exitViews.includes(view.name) ? 'بازگشت به تست' : 'بازگشت';
   const activeScopeLabel = scopeLabel(scope);
 
   return (
     <section
       dir="rtl"
       aria-label="بانک تست علوم پایه"
-      className="mx-auto w-[var(--content-width)] py-8 text-white [font-family:'Pinar','Vazir',Tahoma,sans-serif] md:py-10"
+      className={`mx-auto w-[var(--content-width)] py-8 text-white [font-family:'Pinar','Vazir',Tahoma,sans-serif] md:py-10 ${
+        view.name === 'builder' ? 'flex min-h-full flex-col' : ''
+      }`}
     >
-      {/* سربرگ لایه */}
-      <header className="mb-6 flex items-center justify-between gap-3">
-        {showBackToHome ? (
-          <button
-            type="button"
-            onClick={handleBack}
-            aria-label={view.name === 'live' ? 'خروج از محیط حل' : 'بازگشت'}
-            className={`flex cursor-pointer items-center gap-1.5 rounded-xl bg-[var(--surface-soft)] py-2.5 text-xs text-[var(--muted)] transition-colors hover:bg-[var(--surface-strong)] hover:text-white ${
-              view.name === 'live' ? 'px-2.5' : 'px-3.5'
-            }`}
-          >
-            <Icon name="back" className="h-3.5 w-3.5" />
-            {/* در «محیط حل» فقط آیکن — عنوان حذف شده است */}
-            {view.name !== 'live' && 'بازگشت'}
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={onBack}
-            className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[var(--surface-soft)] px-3.5 py-2.5 text-xs text-[var(--muted)] transition-colors hover:bg-[var(--surface-strong)] hover:text-white"
-          >
-            <Icon name="back" className="h-3.5 w-3.5" />
-            بازگشت به تست
-          </button>
-        )}
-        {/* سمت راست: برچسب نما (جز خانه/محیط حل/مباحث درس) + دامنهٔ فعال */}
-        <span className="flex items-center gap-2.5">
-          {!['home', 'live', 'subject'].includes(view.name) && (
-            <span className="flex items-center gap-1.5 text-xs text-[var(--faint)]">
-              <span className="h-1.5 w-1.5 rounded-full bg-[var(--green-vivid)]" aria-hidden="true" />
-              {VIEW_LABELS[view.name] ?? 'بانک تست'}
-            </span>
-          )}
+      {/* سربرگ لایه — بازگشت راست و (فقط در آزمون‌ساز شخصی) «ساخت آزمون» چپ، در یک خط */}
+      <header className="tb-topbar dash-stagger">
+        <button
+          type="button"
+          onClick={exitViews.includes(view.name) ? onBack : handleBack}
+          aria-label={view.name === 'live' ? 'خروج از محیط حل' : backLabel}
+          className={`tb-topbar__back ${view.name === 'live' ? 'tb-topbar__back--icon' : ''}`}
+        >
+          <Icon name="back" className="h-4.5 w-4.5" />
+          {/* در «محیط حل» فقط آیکن — عنوان حذف شده است */}
+          {view.name !== 'live' && backLabel}
+        </button>
+        <span className="ms-auto flex items-center gap-2.5">
           {/* دامنهٔ فعال (نوع بانک/رشته) — روی نماها یادآوری می‌شود تا کاربر بداند داخل کدام بانک است */}
           {activeScopeLabel && !['home', 'live'].includes(view.name) && (
             <span className="tb-badge tb-badge--plain" title="دامنهٔ فعال این بانک">
-              <Icon name="filter" className="h-3 w-3" />
+              <Icon name="filter" className="h-3.5 w-3.5" />
               {activeScopeLabel}
             </span>
+          )}
+          {/* «ساخت آزمون» — ورود به ویزارد کامل؛ هم‌خطِ «بازگشت به تست» مثل نوار فلش‌کارت.
+              با payload به PersonalExamBuilder سیگنال می‌رود تا ویزارد از مرحلهٔ ۱ باز شود. */}
+          {view.name === 'builder' && (
+            <button
+              type="button"
+              onClick={() => go('builder', { preset: 'advanced' })}
+              className="flex cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm transition-colors hover:border-[#61d192]/50 hover:bg-[#61d192]/12 [font-family:'Doran','Vazir',Tahoma,sans-serif]"
+            >
+              <Icon name="plus" className="h-4 w-4 text-[var(--green-soft-ink)]" />
+              ساخت آزمون
+            </button>
           )}
         </span>
       </header>
@@ -531,7 +510,7 @@ export default function TestBankLayer({ userData, onBack }) {
       )}
 
       {!busy && view.name === 'builder' && (
-        <div className="dashboard-layer-reveal">
+        <div className="dashboard-layer-reveal flex flex-1 flex-col">
           <PersonalExamBuilder
             userId={userId}
             payload={view.payload}

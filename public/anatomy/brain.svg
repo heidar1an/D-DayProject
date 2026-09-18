@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400" role="img" aria-label="نمای جانبی مغز — شماتیک آموزشی">
+  <rect width="400" height="400" rx="18" fill="#151c26"/>
+  <!-- نیمکره مغز -->
+  <path d="M92 152 C84 96 130 52 196 48 C270 44 324 88 330 150 C334 192 312 218 282 226 L148 222 C116 216 96 188 92 152 Z" fill="#b48ec7"/>
+  <!-- شیارهای قشر -->
+  <path d="M148 66 C158 108 148 150 166 200" stroke="#8f6aa8" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <path d="M226 54 C216 98 234 152 224 212" stroke="#8f6aa8" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <path d="M280 80 C270 118 286 162 278 216" stroke="#8f6aa8" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <path d="M110 110 C126 138 120 172 132 206" stroke="#8f6aa8" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <!-- مخچه -->
+  <path d="M236 228 C220 234 216 262 234 280 C254 300 294 296 308 272 C318 254 308 234 290 228 C274 222 252 222 236 228 Z" fill="#937fcd"/>
+  <path d="M240 240 C260 252 286 254 302 246 M236 258 C258 270 288 270 306 262" stroke="#7a66ad" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <!-- ساقه مغز -->
+  <path d="M196 222 C192 248 188 272 176 294 C168 308 176 322 192 324 C208 326 220 312 216 294 C212 270 212 246 214 226 Z" fill="#c98080"/>
+</svg>

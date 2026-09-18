@@ -5,13 +5,14 @@
  */
 import { useEffect, useMemo, useState } from 'react';
 import {
+  createDeckShare,
   fetchDeck,
   setCardArchived,
   setCardBookmarked,
   setCardSuspended,
   trackEvent,
 } from '../../../services/flashcards/flashcardService';
-import { Icon, MasteryRing, Skeleton, StateChip, faNum, toFa } from './flashcardShared';
+import { Icon, MasteryRing, Modal, Skeleton, StateChip, faNum, toFa } from './flashcardShared';
 
 const STATE_FILTERS = [
   { id: 'all', label: 'همه' },
@@ -49,11 +50,20 @@ function CardRow({ card, deckCover, onEdit, onBookmark, onSuspend, onArchive }) 
             <div className="mt-2 rounded-xl bg-white/[0.04] px-3.5 py-2.5 text-xs leading-6 text-[var(--muted)]">
               {/* پاسخ فقط با عمد باز می‌شود؛ در حالت پیش‌فرض مخفی است */}
               {card.type === 'cloze' ? card.front.replace(/\{\{c\d+::(.*?)\}\}/g, '«$1»') : card.back}
+              {card.media?.backImageUrl && (
+                <img src={card.media.backImageUrl} alt="تصویر پاسخ کارت" className="mt-2 max-h-40 rounded-lg border border-white/10 object-contain" />
+              )}
             </div>
           )}
 
           <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] text-[var(--faint)]">
             <StateChip state={state.state} />
+            {(card.media?.frontImageUrl || card.type === 'image-locate') && (
+              <span className="inline-flex items-center gap-1 text-[var(--purple-soft-ink)]" title="این کارت عکس دارد">
+                <Icon name="image" className="h-3 w-3" />
+                عکس‌دار
+              </span>
+            )}
             {card.media?.audioUrl && (
               <span className="inline-flex items-center gap-1 text-[var(--blue-soft-ink)]" title="این کارت صدا دارد">
                 <Icon name="volume" className="h-3 w-3" />
@@ -208,6 +218,43 @@ export default function DeckView({ userData, deckId, onBack, onStartReview, onEd
     trackEvent('card_archive', { cardId: card.id });
   };
 
+  /* ── اشتراک با لینک — فقط برای مجموعه‌های خودِ کاربر ── */
+  const [shareState, setShareState] = useState({ open: false, link: '', busy: false, error: '', copied: false });
+
+  const openShare = async () => {
+    setShareState({ open: true, link: '', busy: true, error: '', copied: false });
+    try {
+      const { token, deckTitle } = await createDeckShare(userData, deckId);
+      setShareState({
+        open: true,
+        link: `${window.location.origin}${window.location.pathname}#dashboard?s=flashcards&share=${token}`,
+        busy: false,
+        error: '',
+        copied: false,
+        deckTitle,
+      });
+    } catch (err) {
+      setShareState((prev) => ({
+        ...prev,
+        busy: false,
+        error:
+          err?.message === 'tapesh-user-required'
+            ? 'اشتراک مجموعه فقط میان کاربران ثبت‌نام‌شدهٔ تپش امکان‌پذیر است.'
+            : 'ساخت لینک اشتراک انجام نشد؛ دوباره تلاش کن.',
+      }));
+    }
+  };
+
+  const copyShareLink = async () => {
+    try {
+      await navigator.clipboard.writeText(shareState.link);
+      setShareState((prev) => ({ ...prev, copied: true }));
+    } catch {
+      /* کلیپ‌بورد در دسترس نیست — لینک در input انتخاب‌شده‌است و دستی کپی می‌شود */
+      setShareState((prev) => ({ ...prev, copied: true }));
+    }
+  };
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -279,38 +326,50 @@ export default function DeckView({ userData, deckId, onBack, onStartReview, onEd
                 <Icon name="plus" className="h-3.5 w-3.5" />
                 ساخت کارت
               </button>
+              {!deck.byTapesh && (
+                <button
+                  type="button"
+                  onClick={openShare}
+                  className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-white/8 px-6 py-2.5 text-xs text-white transition-colors hover:bg-white/15"
+                >
+                  <Icon name="users" className="h-3.5 w-3.5" />
+                  اشتراک با لینک
+                </button>
+              )}
             </div>
           </div>
         </div>
       </header>
 
-      {/* جستجو و فیلتر */}
+      {/* جستجو و فیلتر — در یک ردیف: جستجو سمت راست، کاتالوگ وضعیت کنارش (در موبایل زیر هم) */}
       <div className="space-y-3">
-        <div className="relative">
-          <Icon name="search" className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--ghost)]" />
-          <input
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="جستجو در کارت‌های این مجموعه…"
-            aria-label="جستجو در کارت‌ها"
-            className="w-full rounded-2xl border border-white/8 bg-[var(--surface-soft)] py-3.5 pl-4 pr-11 text-sm outline-none transition-colors placeholder:text-[var(--ghost)] focus:border-[#5b8cc7]/40"
-          />
-        </div>
+        <div className="flex flex-col gap-2.5 lg:flex-row lg:items-stretch">
+          <div className="relative shrink-0 lg:w-80">
+            <Icon name="search" className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--ghost)]" />
+            <input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="جستجو در کارت‌های این مجموعه…"
+              aria-label="جستجو در کارت‌ها"
+              className="h-full w-full rounded-2xl border border-white/8 bg-[var(--surface-soft)] py-3.5 pl-4 pr-11 text-sm outline-none transition-colors placeholder:text-[var(--ghost)] focus:border-[#5b8cc7]/40"
+            />
+          </div>
 
-        <div className="fc-scroll-x flex items-center gap-1.5 overflow-x-auto rounded-full bg-black/50 p-1.5">
-          {STATE_FILTERS.map((filter) => (
-            <button
-              key={filter.id}
-              type="button"
-              aria-pressed={stateFilter === filter.id}
-              onClick={() => setStateFilter(filter.id)}
-              className={`shrink-0 cursor-pointer rounded-full px-4 py-2 text-xs transition-colors [font-family:'Doran','Vazir',Tahoma,sans-serif] ${
-                stateFilter === filter.id ? 'bg-[var(--blue-bright)] text-white' : 'text-[var(--muted)] hover:bg-white/5 hover:text-white'
-              }`}
-            >
-              {filter.label}
-            </button>
-          ))}
+          <div className="fc-scroll-x flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto rounded-full bg-black/50 p-1.5">
+            {STATE_FILTERS.map((filter) => (
+              <button
+                key={filter.id}
+                type="button"
+                aria-pressed={stateFilter === filter.id}
+                onClick={() => setStateFilter(filter.id)}
+                className={`shrink-0 cursor-pointer rounded-full px-4 py-2 text-xs transition-colors [font-family:'Doran','Vazir',Tahoma,sans-serif] ${
+                  stateFilter === filter.id ? 'bg-[var(--blue-bright)] text-white' : 'text-[var(--muted)] hover:bg-white/5 hover:text-white'
+                }`}
+              >
+                {filter.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {allTags.length > 0 && (
@@ -350,6 +409,25 @@ export default function DeckView({ userData, deckId, onBack, onStartReview, onEd
               />
             ))}
           </ul>
+        ) : cards.length === 0 ? (
+          /* مجموعه از پایه خالی است — مقصر فیلتر نیست؛ مسیر درست، ساخت کارت است */
+          <div className="rounded-[2rem] border border-dashed border-white/12 bg-white/[0.02] px-6 py-12 text-center">
+            <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-white/5 text-[var(--faint)]">
+              <Icon name="cards" className="h-6 w-6" />
+            </span>
+            <strong className="mt-3 block [font-family:'Doran','Vazir',Tahoma,sans-serif]">این مجموعه هنوز خالی است</strong>
+            <p className="mx-auto mt-1.5 max-w-sm text-sm leading-6 text-[var(--faint)]">
+              اولین کارتت را بساز تا چرخهٔ مرور هوشمند همین‌جا شروع شود.
+            </p>
+            <button
+              type="button"
+              onClick={() => onCreateCard(deck.id)}
+              className="mt-4 inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[var(--blue-bright)] px-5 py-2.5 text-xs font-bold text-white transition-transform hover:-translate-y-0.5 [font-family:'Doran','Vazir',Tahoma,sans-serif]"
+            >
+              <Icon name="plus" className="h-3.5 w-3.5" />
+              ساخت کارت
+            </button>
+          </div>
         ) : (
           <div className="rounded-[2rem] border border-dashed border-white/12 bg-white/[0.02] px-6 py-12 text-center">
             <p className="text-sm text-[var(--faint)]">کارتی با این شرایط پیدا نشد.</p>
@@ -367,6 +445,43 @@ export default function DeckView({ userData, deckId, onBack, onStartReview, onEd
           </div>
         )}
       </section>
+
+      {/* مودال اشتراک با لینک */}
+      <Modal open={shareState.open} onClose={() => setShareState((prev) => ({ ...prev, open: false }))} title="اشتراک مجموعه با لینک">
+        <div className="space-y-4">
+          {shareState.busy ? (
+            <p className="py-4 text-center text-sm text-[var(--muted)]">در حال ساخت لینک…</p>
+          ) : shareState.error ? (
+            <p className="text-sm leading-7 text-[var(--red-ink)]" role="alert">{shareState.error}</p>
+          ) : (
+            <>
+              <p className="text-sm leading-7 text-[var(--muted)]">
+                این لینک را برای کاربر تپش موردنظرت بفرست؛ با باز کردنش، «{deck.title}» و کارت‌هایش به فهرست او اضافه می‌شود.
+              </p>
+              <div className="flex items-center gap-2">
+                <input
+                  value={shareState.link}
+                  readOnly
+                  dir="ltr"
+                  aria-label="لینک اشتراک مجموعه"
+                  onFocus={(event) => event.target.select()}
+                  className="min-w-0 flex-1 rounded-xl border border-white/10 bg-black/30 px-3.5 py-2.5 text-xs text-[var(--muted)] outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={copyShareLink}
+                  className="shrink-0 cursor-pointer rounded-xl bg-[var(--blue-bright)] px-4 py-2.5 text-xs font-bold text-white transition-transform hover:-translate-y-0.5 [font-family:'Doran','Vazir',Tahoma,sans-serif]"
+                >
+                  {shareState.copied ? 'کپی شد' : 'کپی لینک'}
+                </button>
+              </div>
+              <p className="rounded-xl bg-[#937fcd]/10 px-3.5 py-2.5 text-[11px] leading-5 text-[var(--purple-soft-ink)]">
+                اشتراک مجموعه فقط میان کاربران ثبت‌نام‌شدهٔ تپش امکان‌پذیر است.
+              </p>
+            </>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 }

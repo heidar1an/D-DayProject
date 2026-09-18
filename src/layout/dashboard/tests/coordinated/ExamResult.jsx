@@ -35,7 +35,7 @@ function ScoreRing({ percentage, accent }) {
         strokeDashoffset={RING_CIRCUMFERENCE * (1 - progress / 100)}
         transform="rotate(-90 64 64)"
       />
-      <text x="64" y="60" textAnchor="middle" fill="var(--white)" fontSize="26" fontWeight="700" fontFamily="Doran, 'Vazir', Tahoma, sans-serif">
+      <text x="64" y="60" textAnchor="middle" fill="var(--white)" fontSize="26" fontWeight="700" fontFamily="Pinar, 'Vazir', Tahoma, sans-serif">
         {toFa(percentage)}
       </text>
       <text x="64" y="80" textAnchor="middle" fill="var(--faint)" fontSize="11" fontFamily="Pinar, 'Vazir', Tahoma, sans-serif">
@@ -48,7 +48,7 @@ function ScoreRing({ percentage, accent }) {
 function StatChip({ label, value, accent = '#ddd' }) {
   return (
     <div className="flex-1 rounded-2xl bg-white/[0.03] p-3.5 text-center">
-      <strong className="block text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]" style={{ color: accent }}>
+      <strong className="block text-lg [font-family:'Pinar','Vazir',Tahoma,sans-serif]" style={{ color: accent }}>
         {value}
       </strong>
       <span className="mt-0.5 block text-[11px] text-[var(--faint)]">{label}</span>
@@ -159,6 +159,10 @@ export default function ExamResult({ variant, exam, result, reward, releaseAt, r
 
   const strong = result.subjects?.[0];
   const weak = [...(result.subjects ?? [])].sort((a, b) => a.percent - b.percent)[0];
+  /* رتبه تا پایان کامل زمان آزمون (همان روز) نمایش داده نمی‌شود */
+  const examStillLive = exam ? computeExamStatus(exam) === 'LIVE' : false;
+  /* میانگین شرکت‌کنندگان موقتاً از کارنامهٔ آزمون‌های جامع/سراسری/آزمایشی حذف شده است */
+  const isComprehensive = ['comprehensive', 'national', 'mock'].includes(exam?.type);
 
   return (
     <div className="dash-stagger space-y-6">
@@ -202,13 +206,22 @@ export default function ExamResult({ variant, exam, result, reward, releaseAt, r
         </h2>
 
         <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
-          <StatChip label="رتبهٔ من" value={`${faNum(result.rank)} از ${faNum(result.participantsCount)}`} accent="#937fcd" />
+          {!examStillLive && (
+            <StatChip label="رتبهٔ من" value={`${faNum(result.rank)} از ${faNum(result.participantsCount)}`} accent="#937fcd" />
+          )}
           <StatChip label="صدک من" value={faNum(result.percentile)} />
           {result.teraz !== null && <StatChip label="تراز" value={faNum(result.teraz)} />}
-          <StatChip label="میانگین آزمون" value={`${toFa(result.community.averagePercent)}٪`} />
+          {!isComprehensive && <StatChip label="میانگین آزمون" value={`${toFa(result.community.averagePercent)}٪`} />}
           <StatChip label="میانهٔ نمرات" value={`${toFa(result.community.medianPercent)}٪`} />
           <StatChip label="بالاترین نمره" value={`${toFa(result.community.topPercent)}٪`} accent="#937fcd" />
         </div>
+
+        {examStillLive && (
+          <p className="mt-4 flex items-start gap-2 text-xs leading-6 text-[var(--gold-ink)]">
+            <Icon name="info" className="mt-0.5 h-4 w-4 shrink-0" />
+            رتبهٔ شما بعد از پایان کامل زمان آزمون و تطبیق با همهٔ شرکت‌کنندگان اعلام می‌شود.
+          </p>
+        )}
 
         <p className="mt-4 text-xs leading-6 text-[var(--faint)]">
           {result.percentage >= result.community.averagePercent

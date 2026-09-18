@@ -64,6 +64,32 @@
 }
 
 /*
+ * ═══ ارقام فارسی همیشه با Pinar ═══
+ *
+ * دو رویهٔ هم‌نام Doran/Vazir که فقط محدودهٔ کد ارقام فارسی/عربی را پوشش می‌دهند
+ * و به پروندهٔ Pinar اشاره می‌کنند؛ چون بعد از رویه‌های اصلی تعریف شده‌اند، برای
+ * ارقام برنده‌اند و حروف از فونت اصلی خود عنصر می‌آیند. نتیجه: هر عددی حتی داخل
+ * تیترهای Doran یا متن‌های Vazir هم با همان اعداد Pinar رندر می‌شود.
+ */
+@font-face {
+  font-family: 'Doran';
+  src: url('../fonts/pinar/Pinar-VF[DSTY,KSHD,wght].woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+06F0-06F9, U+0660-0669;
+}
+
+@font-face {
+  font-family: 'Vazir';
+  src: url('../fonts/pinar/Pinar-VF[DSTY,KSHD,wght].woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+06F0-06F9, U+0660-0669;
+}
+
+/*
  * ══════════════════════════════════════════════════════════════════════════
  * توکن‌های تم — تنها منبع رنگ در پروژه
  * ══════════════════════════════════════════════════════════════════════════
@@ -802,12 +828,14 @@ img {
 }
 
 .hero p {
-  max-width: 740px;
+  max-width: none;
   margin: 20px auto 0;
   color: var(--white);
   font-size: clamp(1rem, 1.75vw, 1.35rem);
   font-weight: 500;
   line-height: 1.8;
+  /* جملهٔ هیرو باید یک‌خطی بماند؛ در موبایل (بلاک ۶۴۰px) به حالت عادی برمی‌گردد */
+  white-space: nowrap;
 }
 
 /*
@@ -4035,6 +4063,7 @@ img {
     margin-top: 18px;
     font-size: 0.95rem;
     line-height: 1.9;
+    white-space: normal;
   }
 
   .button {

@@ -4,9 +4,8 @@
  * Countdown) → آزمونک‌های سریع → آزمون‌های آینده (Timeline) → فهرست کامل با فیلتر.
  * این کامپوننت صرفاً نمایش است؛ هر گذار با callback به لایهٔ روتر می‌رود.
  */
-import { useMemo, useState } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import {
-  DifficultyBadge,
   EmptyState,
   ExamCountdown,
   Icon,
@@ -16,9 +15,7 @@ import {
   faNum,
   formatShortDate,
   formatTime,
-  formatMonth,
   formatDuration,
-  toFa,
 } from './coordinatedShared';
 
 /* CTA متناسب با وضعیت هر آزمون — همان منطق سند §۶ */
@@ -115,6 +112,8 @@ export default function ExamHub({ exams, onOpenExam, onQuickStart }) {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
+  /* ردیف بازِ بودجه‌بندی در جدول تقویم */
+  const [openBudgetId, setOpenBudgetId] = useState(null);
 
   const liveExams = exams?.filter((exam) => exam.status === 'LIVE' && exam.type !== 'quiz') ?? [];
   const liveExam = liveExams[0];
@@ -132,16 +131,11 @@ export default function ExamHub({ exams, onOpenExam, onQuickStart }) {
       ?.filter((exam) => ['FINISHED', 'RESULTS_AVAILABLE'].includes(exam.status))
       .sort((a, b) => b.startTime - a.startTime) ?? [];
 
-  /* Timeline ماه‌های آینده */
-  const timelineMonths = useMemo(() => {
-    const map = new Map();
-    for (const exam of [featuredExam, ...futureExams].filter(Boolean)) {
-      const key = formatMonth(exam.startTime);
-      if (!map.has(key)) map.set(key, []);
-      map.get(key).push(exam);
-    }
-    return [...map.entries()];
-  }, [featuredExam, futureExams]);
+  /* تقویم کامل — همهٔ آزمون‌ها مرتب بر اساس زمان شروع */
+  const calendarExams = useMemo(
+    () => [...(exams ?? [])].sort((a, b) => a.startTime - b.startTime),
+    [exams],
+  );
 
   const typeOptions = useMemo(() => {
     const present = [...new Set((exams ?? []).map((exam) => exam.type))];
@@ -172,15 +166,18 @@ export default function ExamHub({ exams, onOpenExam, onQuickStart }) {
 
   return (
     <div className="space-y-8">
-      {/* ── سربرگ و فلسفه ── */}
-      <header className="dash-stagger space-y-2">
-        <h1 className="text-2xl text-white md:text-[1.7rem] [font-family:'Doran','Vazir',Tahoma,sans-serif]">
-          آزمون‌های هماهنگ
-        </h1>
-        <p className="max-w-2xl text-sm leading-7 text-[var(--faint)]">
-          آزمون‌هایی که تیم تپش طراحی و سراسر کشور هم‌زمان برگزار می‌کند؛ با کارنامه،
-          تراز و مقایسهٔ عملکرد. سنجیدن، اولین قدم بهتر شدن است.
-        </p>
+      {/* ── هیرو — هم‌ساختِ میکرو درسنامه، با اکسنت سبز ── */}
+      <header className="exm-hero dash-stagger">
+        <div className="exm-hero__content">
+          <span className="exm-hero__chip">
+            <i aria-hidden="true" />
+            برگزاری آزمون‌های سراسری و آزمونک
+          </span>
+          <h1 className="exm-hero__title">آزمون‌های هماهنگ</h1>
+          <p className="exm-hero__subtitle">
+            آزمون‌های طراحی‌شده به همراه آزمونک‌های سراسری جهت سنجش وضعیت شما
+          </p>
+        </div>
       </header>
 
       {/* ── آزمون در حال برگزاری ── */}
@@ -280,58 +277,133 @@ export default function ExamHub({ exams, onOpenExam, onQuickStart }) {
 
       {/* ── آزمونک‌های سریع ── */}
       {quizzes.length > 0 && (
-        <section aria-label="آزمونک‌های سریع" className="dash-stagger grid gap-4 sm:grid-cols-2">
-          {quizzes.map((quiz) => (
-            <div
-              key={quiz.id}
-              className="flex items-center justify-between gap-4 rounded-[1.6rem] border border-white/[0.06] bg-[var(--surface)] p-5"
-            >
-              <div className="min-w-0 space-y-1.5">
-                <div className="flex flex-wrap items-center gap-2">
-                  <strong className="text-[15px] text-white [font-family:'Doran','Vazir',Tahoma,sans-serif]">{quiz.title}</strong>
-                  <StatusBadge status={quiz.status} size="sm" />
-                </div>
-                <p className="text-xs text-[var(--faint)]">
-                  {faNum(quiz.effectiveQuestionCount)} سؤال • {formatDuration(quiz.duration)} • بدون ثبت‌نام
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => onQuickStart(quiz.slug)}
-                className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-xl bg-[#61D192]/15 px-4 py-2.5 text-xs font-bold text-[var(--green-ink)] transition-colors hover:bg-[#61D192]/25"
+        <section aria-label="آزمونک‌های سریع" className="dash-stagger space-y-3">
+          <h2 className="flex items-center gap-2 text-base text-white [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+            <Icon name="spark" className="h-4.5 w-4.5 text-[#e0b45c]" />
+            آزمونک‌های سریع
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {quizzes.map((quiz) => (
+              <div
+                key={quiz.id}
+                className="flex items-center justify-between gap-4 rounded-[1.6rem] border border-white/[0.06] bg-[var(--surface)] p-5"
               >
-                <Icon name="play" className="h-3.5 w-3.5" />
-                شروع سریع
-              </button>
-            </div>
-          ))}
+                <div className="min-w-0 space-y-1.5">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <strong className="text-[15px] text-white [font-family:'Doran','Vazir',Tahoma,sans-serif]">{quiz.title}</strong>
+                    <StatusBadge status={quiz.status} size="sm" />
+                  </div>
+                  <p className="text-xs text-[var(--faint)]">
+                    {faNum(quiz.effectiveQuestionCount)} سؤال • {formatDuration(quiz.duration)} • بدون ثبت‌نام
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onQuickStart(quiz.slug)}
+                  className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-xl bg-[#61D192]/15 px-4 py-2.5 text-xs font-bold text-[var(--green-ink)] transition-colors hover:bg-[#61D192]/25"
+                >
+                  <Icon name="play" className="h-3.5 w-3.5" />
+                  شروع سریع
+                </button>
+              </div>
+            ))}
+          </div>
         </section>
       )}
 
-      {/* ── Timeline آزمون‌های آینده ── */}
-      {timelineMonths.length > 0 && (
-        <section aria-label="تقویم آزمون‌های آینده" className="dash-stagger space-y-3">
+      {/* ── تقویم کامل: جدول زمان‌بندی + بودجه‌بندی ── */}
+      {calendarExams.length > 0 && (
+        <section aria-label="تقویم و بودجه‌بندی آزمون‌ها" className="dash-stagger space-y-3">
           <h2 className="flex items-center gap-2 text-base text-white [font-family:'Doran','Vazir',Tahoma,sans-serif]">
             <Icon name="calendar" className="h-4.5 w-4.5 text-[var(--purple-ink)]" />
             تقویم آزمون‌ها
           </h2>
-          <div className="flex gap-3 overflow-x-auto pb-1">
-            {timelineMonths.map(([month, items]) => (
-              <div key={month} className="min-w-[15rem] flex-1 space-y-2 rounded-[1.4rem] bg-[var(--surface)] p-4">
-                <p className="text-xs font-bold text-[var(--purple-ink)]">{month}</p>
-                {items.map((exam) => (
-                  <button
-                    key={exam.id}
-                    type="button"
-                    onClick={() => onOpenExam(exam.slug)}
-                    className="flex w-full cursor-pointer items-center justify-between gap-2 rounded-xl bg-white/[0.03] px-3 py-2.5 text-right text-xs text-[var(--muted)] transition-colors hover:bg-white/[0.07]"
-                  >
-                    <span className="truncate">{exam.shortName}</span>
-                    <span className="shrink-0 text-[11px] text-[var(--faint)]">{formatShortDate(exam.startTime)}</span>
-                  </button>
+          <p className="text-xs text-[var(--faint)]">
+            زمان‌بندی کامل همهٔ آزمون‌ها؛ با دکمهٔ «بودجه‌بندی» ببین هر آزمون از هر مبحث چند سؤال دارد.
+          </p>
+          <div className="exm-cal">
+            <table className="exm-cal__table">
+              <thead>
+                <tr>
+                  <th scope="col">آزمون</th>
+                  <th scope="col">وضعیت</th>
+                  <th scope="col">تاریخ</th>
+                  <th scope="col">شروع</th>
+                  <th scope="col">پایان</th>
+                  <th scope="col">مدت</th>
+                  <th scope="col">سؤال</th>
+                  <th scope="col">بودجه‌بندی</th>
+                </tr>
+              </thead>
+              <tbody>
+                {calendarExams.map((exam) => (
+                  <Fragment key={exam.id}>
+                    <tr>
+                      <td>
+                        <button
+                          type="button"
+                          onClick={() => onOpenExam(exam.slug)}
+                          className="exm-cal__title cursor-pointer transition-colors hover:text-[var(--green-ink)]"
+                        >
+                          {exam.shortName}
+                        </button>
+                      </td>
+                      <td><StatusBadge status={exam.status} size="sm" /></td>
+                      <td>{formatShortDate(exam.startTime)}</td>
+                      <td>{formatTime(exam.startTime)}</td>
+                      <td>{formatTime(exam.endTime)}</td>
+                      <td>{formatDuration(exam.duration)}</td>
+                      <td>{faNum(exam.effectiveQuestionCount)}</td>
+                      <td>
+                        {exam.budget?.length > 0 ? (
+                          <button
+                            type="button"
+                            aria-expanded={openBudgetId === exam.id}
+                            onClick={() => setOpenBudgetId(openBudgetId === exam.id ? null : exam.id)}
+                            className="exm-cal__budget-btn"
+                          >
+                            بودجه‌بندی
+                            <Icon name="chevron" strokeWidth={2.4} />
+                          </button>
+                        ) : (
+                          <span className="text-[var(--ghost)] text-[11px]">به‌زودی</span>
+                        )}
+                      </td>
+                    </tr>
+                    {openBudgetId === exam.id && (
+                      <tr>
+                        <td colSpan={8} className="exm-cal__budget-cell">
+                          <div className="exm-cal__budget">
+                            <div className="exm-cal__budget-head">
+                              <strong className="text-xs text-[var(--muted)]">
+                                بودجه‌بندی {exam.shortName}
+                              </strong>
+                              <span>بخش‌های هر درس که در این آزمون می‌آید</span>
+                            </div>
+                            {exam.budget.map((item, index) => (
+                              <div
+                                key={item.topic}
+                                className="exm-cal__budget-row"
+                                style={{ animationDelay: `${index * 70}ms` }}
+                              >
+                                <span className="exm-cal__budget-topic">{item.topic}</span>
+                                <div className="exm-cal__budget-sections">
+                                  {item.sections.map((section) => (
+                                    <span key={section} className="exm-cal__budget-chip">
+                                      {section}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
                 ))}
-              </div>
-            ))}
+              </tbody>
+            </table>
           </div>
         </section>
       )}

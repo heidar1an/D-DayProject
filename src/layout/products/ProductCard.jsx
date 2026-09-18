@@ -17,10 +17,7 @@ export default function ProductCard({ product, onOpen }) {
   return (
     <article className={`ps-card ps-card--${product.layout}${extraClass} ps-accent-${product.accent}`} data-reveal>
       <div className="ps-card__copy">
-        <p className="ps-eyebrow">
-          <span className="ps-eyebrow__index">{product.index}</span>
-          {product.eyebrow}
-        </p>
+        <p className="ps-eyebrow">{product.eyebrow}</p>
 
         <h3 className="ps-card__title">{product.title}</h3>
         <p className="ps-card__subtitle">{product.subtitle}</p>

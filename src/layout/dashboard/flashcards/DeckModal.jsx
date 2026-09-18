@@ -1,15 +1,19 @@
 /*
  * DeckModal — ساخت و ویرایش مجموعه.
- * فرم کوتاه: نام، توضیح، درس، رنگ کاور (از پالت تپش) و سطح دسترسی.
+ * فرم کوتاه: نام، توضیح، موضوع، رنگ کاور (از پالت تپش) و سطح دسترسی.
+ * موضوع آزاد-متنی است اما فقط حروف فارسی/انگلیسی را می‌پذیرد (عدد و نماد غیرعادی رد می‌شود).
  */
 import { useEffect, useState } from 'react';
 import { DECK_COLORS, SUBJECTS } from '../../../services/flashcards/mockData';
-import { Modal } from './flashcardShared';
+import { Modal, textFieldError } from './flashcardShared';
+
+/* اگر فیلد موضوع قبلاً به‌شکل شناسه ذخیره شده باشد، برای نمایش به عنوانش تبدیل می‌شود */
+const subjectLabelOf = (value) => SUBJECTS.find((subject) => subject.id === value)?.title ?? value;
 
 export default function DeckModal({ open, onClose, onSave, deck = null }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [subjectId, setSubjectId] = useState('general');
+  const [subject, setSubject] = useState('');
   const [cover, setCover] = useState(DECK_COLORS[0]);
   const [visibility, setVisibility] = useState('private');
   const [error, setError] = useState('');
@@ -20,13 +24,13 @@ export default function DeckModal({ open, onClose, onSave, deck = null }) {
     if (deck) {
       setTitle(deck.title ?? '');
       setDescription(deck.description ?? '');
-      setSubjectId(deck.subjectId ?? 'general');
+      setSubject(deck.subjectId && deck.subjectId !== 'general' ? subjectLabelOf(deck.subjectId) : '');
       setCover(deck.cover ?? DECK_COLORS[0]);
       setVisibility(deck.visibility ?? 'private');
     } else {
       setTitle('');
       setDescription('');
-      setSubjectId('general');
+      setSubject('');
       setCover(DECK_COLORS[Math.floor(Math.random() * DECK_COLORS.length)]);
       setVisibility('private');
     }
@@ -38,9 +42,14 @@ export default function DeckModal({ open, onClose, onSave, deck = null }) {
       setError('نام مجموعه را بنویس.');
       return;
     }
+    const subjectError = textFieldError(subject);
+    if (subjectError) {
+      setError(subjectError);
+      return;
+    }
     setSaving(true);
     try {
-      await onSave(deck?.id ?? null, { title, description, subjectId, cover, visibility });
+      await onSave(deck?.id ?? null, { title, description, subjectId: subject.trim() || 'general', cover, visibility });
       onClose();
     } catch {
       setError('ذخیره نشد؛ دوباره تلاش کن.');
@@ -79,16 +88,16 @@ export default function DeckModal({ open, onClose, onSave, deck = null }) {
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label htmlFor="deck-subject" className="mb-2 block text-xs text-[var(--muted)]">موضوع</label>
-            <select
+            <input
               id="deck-subject"
-              value={subjectId}
-              onChange={(event) => setSubjectId(event.target.value)}
-              className="w-full cursor-pointer rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm outline-none focus:border-[#5b8cc7]/50"
-            >
-              {SUBJECTS.map((subject) => (
-                <option key={subject.id} value={subject.id} className="bg-[var(--surface)]">{subject.title}</option>
-              ))}
-            </select>
+              value={subject}
+              onChange={(event) => setSubject(event.target.value)}
+              placeholder="مثلاً آناتومی"
+              className={`w-full rounded-xl border bg-black/30 px-3 py-2.5 text-sm outline-none transition-colors placeholder:text-[var(--ghost)] focus:border-[#5b8cc7]/50 ${
+                subject && textFieldError(subject) ? 'border-[#ef9196]/60' : 'border-white/10'
+              }`}
+            />
+            <p className="mt-1.5 text-[10px] leading-4 text-[var(--ghost)]">فقط حروف فارسی یا انگلیسی — عدد و نماد غیرعادی مجاز نیست.</p>
           </div>
           <div>
             <label htmlFor="deck-visibility" className="mb-2 block text-xs text-[var(--muted)]">دسترسی</label>

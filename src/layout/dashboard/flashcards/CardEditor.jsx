@@ -1,19 +1,55 @@
 /*
  * CardEditor — ساخت و ویرایش سریع کارت.
  * اصل: کاربر برای کارت ساده نباید فرم طولانی ببیند؛ Advanced Options جمع‌شده است.
- * انواع کارت: basic | basic-hint | cloze | mcq (معماری برای انواع بعدی باز است).
- * صدا: فایل صوتیِ کاربر (تا ۲ مگابایت) به‌صورت Data-URL روی کارت ذخیره می‌شود.
+ * انواع کارت: basic | basic-hint | cloze | mcq | image (معماری برای انواع بعدی باز است).
+ * صدا و تصویر: فایل کاربر (تا ۲ مگابایت) به‌صورت Data-URL روی کارت ذخیره می‌شود؛
+ * تصویر هم برای صورت کارت و هم برای پاسخ جداگانه بارگذاری می‌شود.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { SUBJECTS } from '../../../services/flashcards/mockData';
-import { Icon, Modal, toFa } from './flashcardShared';
+import { Icon, Modal, textFieldError, toFa } from './flashcardShared';
 
 const CARD_TYPES = [
   { id: 'basic', label: 'پایه', note: 'سؤال و جواب' },
   { id: 'basic-hint', label: 'پایه + راهنما', note: 'با سرنخ' },
   { id: 'cloze', label: 'جای خالی', note: 'متن با {{}}' },
   { id: 'mcq', label: 'چهارگزینه‌ای', note: 'با توضیح' },
+  { id: 'image', label: 'تصویری', note: 'کارت با عکس' },
 ];
+
+/* اگر فیلد درس قبلاً به‌شکل شناسهٔ ذخیره شده باشد، برای نمایش به عنوانش تبدیل می‌شود */
+const subjectLabelOf = (value) => SUBJECTS.find((subject) => subject.id === value)?.title ?? value;
+
+/* یک جای خالی بارگذاری تصویر — پیش‌نمایش + حذف؛ فایل ≤ ۲ مگابایت به Data-URL */
+function ImageSlot({ label, required = false, value, onPick, onClear }) {
+  return (
+    <div>
+      <p className="mb-2 text-xs text-[var(--muted)]">
+        {label} {required && <span className="text-[var(--red-ink)]">*</span>}
+      </p>
+      {value ? (
+        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/30">
+          <img src={value} alt={label} className="max-h-44 w-full object-contain" />
+          <button
+            type="button"
+            onClick={onClear}
+            aria-label={`حذف ${label}`}
+            title="حذف تصویر"
+            className="absolute left-2 top-2 grid h-8 w-8 cursor-pointer place-items-center rounded-lg bg-black/70 text-[var(--muted)] transition-colors hover:text-[var(--red-ink)]"
+          >
+            <Icon name="close" className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      ) : (
+        <label className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] px-4 py-6 text-xs text-[var(--faint)] transition-colors hover:border-[#5b8cc7]/40 hover:text-white">
+          <Icon name="image" className="h-4 w-4" />
+          بارگذاری تصویر
+          <input type="file" accept="image/*" onChange={onPick} className="hidden" />
+        </label>
+      )}
+    </div>
+  );
+}
 
 const SOURCE_TYPES = [
   { id: 'lesson', label: 'درسنامه' },
@@ -63,7 +99,8 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
   const [subjectId, setSubjectId] = useState('');
   const [topic, setTopic] = useState('');
   const [deckId, setDeckId] = useState(defaultDeckId ?? '');
-  const [imageUrl, setImageUrl] = useState('');
+  const [frontImageUrl, setFrontImageUrl] = useState('');
+  const [backImageUrl, setBackImageUrl] = useState('');
   const [audioUrl, setAudioUrl] = useState('');
   const [sourceType, setSourceType] = useState('user');
   const [sourceTitle, setSourceTitle] = useState('');
@@ -84,10 +121,11 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
         { text: '', correct: true },
         { text: '', correct: false },
       ]);
-      setSubjectId(card.subjectId ?? '');
+      setSubjectId(card.subjectId ? subjectLabelOf(card.subjectId) : '');
       setTopic(card.topicId ?? '');
       setDeckId(card.deckId ?? defaultDeckId ?? '');
-      setImageUrl(card.media?.imageUrl ?? '');
+      setFrontImageUrl(card.media?.frontImageUrl ?? card.media?.imageUrl ?? '');
+      setBackImageUrl(card.media?.backImageUrl ?? '');
       setAudioUrl(card.media?.audioUrl ?? '');
       setSourceType(card.source?.sourceType ?? 'user');
       setSourceTitle(card.source?.title ?? '');
@@ -104,8 +142,11 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
       ]);
       setSubjectId('');
       setTopic('');
-      setDeckId(defaultDeckId ?? deckOptions[0]?.id ?? '');
-      setImageUrl('');
+      /* مجموعه به‌صورت خودکار پر نمی‌شود: مقصد ذخیره باید انتخابِ آگاه کاربر باشد
+         (فقط وقتی از داخل یک مجموعه باز شده، `defaultDeckId` از قبل نشسته است). */
+      setDeckId(defaultDeckId ?? '');
+      setFrontImageUrl('');
+      setBackImageUrl('');
       setAudioUrl('');
       setSourceType('user');
       setSourceTitle('');
@@ -156,13 +197,49 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
     reader.readAsDataURL(file);
   };
 
+  /* فایل تصویری کاربر (صورت یا پاسخ کارت) → Data-URL با همان سقف ۲ مگابایت */
+  const handleImageFile = (kind) => (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      setError('یک فایل تصویری انتخاب کن (jpg، png، webp و…).');
+      return;
+    }
+    if (file.size > MAX_AUDIO_BYTES) {
+      setError('حجم تصویر باید کمتر از ۲ مگابایت باشد.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (kind === 'front') setFrontImageUrl(String(reader.result));
+      else setBackImageUrl(String(reader.result));
+      setError('');
+    };
+    reader.onerror = () => setError('خواندن فایل تصویری نشد؛ دوباره تلاش کن.');
+    reader.readAsDataURL(file);
+  };
+
   const handleSave = async () => {
-    if (!front.trim() || (!back.trim() && type !== 'mcq')) {
-      setError('صورت و پاسخ کارت را پر کن.');
+    const subjectError = textFieldError(subjectId);
+    if (subjectError) {
+      setError(subjectError);
+      return;
+    }
+    if (type === 'image' && !frontImageUrl) {
+      setError('برای کارت تصویری، عکسِ صورت کارت را بارگذاری کن.');
+      return;
+    }
+    if (type !== 'image' && !front.trim()) {
+      setError('صورت کارت را پر کن.');
+      return;
+    }
+    if (!back.trim() && type !== 'mcq') {
+      setError('پاسخ کارت را پر کن.');
       return;
     }
     if (!deckId) {
-      setError('یک مجموعه انتخاب کن.');
+      setError('مجموعه مقصد را انتخاب کن — کارت بدون مجموعه ذخیره نمی‌شود.');
       return;
     }
     if (type === 'mcq' && options.filter((option) => option.text.trim() && option.correct).length !== 1) {
@@ -177,9 +254,13 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
       back: back.trim(),
       hint: type === 'basic-hint' ? hint.trim() : null,
       tags,
-      subjectId: subjectId || null,
+      subjectId: subjectId.trim() || null,
       topicId: topic.trim() || null,
-      media: { imageUrl: imageUrl.trim() || null, audioUrl: audioUrl || null },
+      media: {
+        frontImageUrl: frontImageUrl || null,
+        backImageUrl: backImageUrl || null,
+        audioUrl: audioUrl || null,
+      },
       source: { sourceType, sourceId: null, title: sourceTitle.trim() || null, url: null },
       ...(type === 'mcq' ? { options: options.filter((option) => option.text.trim()) } : {}),
     };
@@ -197,6 +278,38 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
   return (
     <Modal open={open} onClose={onClose} title={card ? 'ویرایش کارت' : 'ساخت کارت'} wide>
       <div className="space-y-5">
+        {/* مجموعه — اولین فیلد و اجباری: مقصد ذخیره از همان ابتدا روشن است، نه در گزینه‌های پیشرفته */}
+        <div>
+          <label htmlFor="fc-deck" className="mb-2 block text-xs text-[var(--muted)]">
+            مجموعه <span className="text-[var(--red-ink)]">*</span>
+          </label>
+          <select
+            id="fc-deck"
+            value={deckId}
+            onChange={(event) => setDeckId(event.target.value)}
+            aria-required="true"
+            className={`w-full cursor-pointer rounded-xl border bg-black/30 px-3.5 py-3 text-sm outline-none transition-colors focus:border-[#5b8cc7]/50 ${
+              deckId ? 'border-white/10' : 'border-[#ef9196]/60'
+            }`}
+          >
+            <option value="" disabled className="bg-[var(--surface)]">
+              انتخاب مجموعه…
+            </option>
+            {deckOptions.map((deck) => (
+              <option key={deck.id} value={deck.id} className="bg-[var(--surface)]">
+                {deck.title}
+              </option>
+            ))}
+          </select>
+          {deckOptions.length === 0 ? (
+            <p className="mt-1.5 text-[11px] leading-5 text-[var(--gold-ink)]">
+              هنوز مجموعه‌ای نداری؛ اول از بخش «مجموعه‌های من» یک مجموعه بساز، بعد کارتت را در آن ذخیره کن.
+            </p>
+          ) : (
+            !deckId && <p className="mt-1.5 text-[11px] text-[var(--ghost)]">کارت داخل مجموعه‌ای که اینجا انتخاب می‌کنی ذخیره می‌شود.</p>
+          )}
+        </div>
+
         {/* نوع کارت */}
         <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
           {CARD_TYPES.map((item) => (
@@ -215,16 +328,19 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
           ))}
         </div>
 
-        {/* صورت کارت */}
+        {/* صورت کارت — در کارت تصویری، متن اختیاری است و عکس نقش اصلی را دارد */}
         <div>
-          <label htmlFor="fc-front" className="mb-2 block text-xs text-[var(--muted)]">صورت کارت {type === 'cloze' && <span className="text-[var(--ghost)]">— بخش‌های «جای خالی» در مرور مخفی می‌شوند</span>}</label>
+          <label htmlFor="fc-front" className="mb-2 block text-xs text-[var(--muted)]">
+            صورت کارت {type === 'cloze' && <span className="text-[var(--ghost)]">— بخش‌های «جای خالی» در مرور مخفی می‌شوند</span>}
+            {type === 'image' && <span className="text-[var(--ghost)]">— اختیاری؛ عکس زیر را همراهی می‌کند</span>}
+          </label>
           <textarea
             id="fc-front"
             ref={frontRef}
             value={front}
             onChange={(event) => setFront(event.target.value)}
             rows={3}
-            placeholder={type === 'cloze' ? 'هورمون {{c1::ADH}} باعث بازجذب آب می‌شود.' : 'مهم‌ترین تنظیم‌کننده ضربان قلب چیست؟'}
+            placeholder={type === 'cloze' ? 'هورمون {{c1::ADH}} باعث بازجذب آب می‌شود.' : type === 'image' ? 'مثلاً: این ساختار کجاست؟' : 'مهم‌ترین تنظیم‌کننده ضربان قلب چیست؟'}
             className="w-full resize-none rounded-2xl border border-white/10 bg-black/30 p-4 text-sm leading-7 outline-none transition-colors placeholder:text-[var(--ghost)] focus:border-[#5b8cc7]/50"
           />
           {type === 'cloze' && (
@@ -332,6 +448,29 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
           </div>
         )}
 
+        {/* تصاویر کارت — هم صورت و هم پاسخ؛ فایل تا ۲ مگابایت */}
+        <div>
+          <p className="mb-2 text-xs text-[var(--muted)]">
+            تصاویر کارت {type === 'image' && <span className="text-[var(--ghost)]">— برای نوع تصویری، عکس صورت لازم است</span>}
+          </p>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <ImageSlot
+              label="تصویر صورت کارت"
+              required={type === 'image'}
+              value={frontImageUrl}
+              onPick={handleImageFile('front')}
+              onClear={() => setFrontImageUrl('')}
+            />
+            <ImageSlot
+              label="تصویر پاسخ"
+              value={backImageUrl}
+              onPick={handleImageFile('back')}
+              onClear={() => setBackImageUrl('')}
+            />
+          </div>
+          <p className="mt-1.5 text-[10px] text-[var(--ghost)]">حداکثر ۲ مگابایت برای هر تصویر — در مرور بالای صورت کارت و داخل پاسخ نمایش داده می‌شود.</p>
+        </div>
+
         {/* صدا — بارگذاری فایل صوتی توسط کاربر */}
         <div>
           <p className="mb-2 text-xs text-[var(--muted)]">صدا (اختیاری)</p>
@@ -407,65 +546,29 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
 
           {showAdvanced && (
             <div className="fc-card-face mt-2 space-y-3 rounded-2xl border border-white/8 p-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label htmlFor="fc-deck" className="mb-1.5 block text-[11px] text-[var(--faint)]">مجموعه</label>
-                  <select
-                    id="fc-deck"
-                    value={deckId}
-                    onChange={(event) => setDeckId(event.target.value)}
-                    className="w-full cursor-pointer rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm outline-none focus:border-[#5b8cc7]/50"
-                  >
-                    {deckOptions.map((deck) => (
-                      <option key={deck.id} value={deck.id} className="bg-[var(--surface)]">
-                        {deck.title}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label htmlFor="fc-subject" className="mb-1.5 block text-[11px] text-[var(--faint)]">درس</label>
-                  <select
-                    id="fc-subject"
-                    value={subjectId}
-                    onChange={(event) => setSubjectId(event.target.value)}
-                    className="w-full cursor-pointer rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm outline-none focus:border-[#5b8cc7]/50"
-                  >
-                    <option value="" className="bg-[var(--surface)]">—</option>
-                    {SUBJECTS.map((subject) => (
-                      <option key={subject.id} value={subject.id} className="bg-[var(--surface)]">{subject.title}</option>
-                    ))}
-                  </select>
-                </div>
+              <div>
+                <label htmlFor="fc-subject" className="mb-1.5 block text-[11px] text-[var(--faint)]">درس</label>
+                <input
+                  id="fc-subject"
+                  value={subjectId}
+                  onChange={(event) => setSubjectId(event.target.value)}
+                  placeholder="مثلاً فیزیولوژی"
+                  className="w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm outline-none transition-colors placeholder:text-[var(--ghost)] focus:border-[#5b8cc7]/50"
+                />
+                <p className="mt-1.5 text-[10px] text-[var(--ghost)]">فقط حروف فارسی یا انگلیسی — استفاده از عدد و نماد غیرعادی مجاز نیست.</p>
+                {textFieldError(subjectId) && <p className="mt-1 text-[11px] text-[var(--red-ink)]" role="alert">{textFieldError(subjectId)}</p>}
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label htmlFor="fc-topic" className="mb-1.5 block text-[11px] text-[var(--faint)]">مبحث</label>
-                  <input
-                    id="fc-topic"
-                    value={topic}
-                    onChange={(event) => setTopic(event.target.value)}
-                    placeholder="cardiac-cycle"
-                    className="w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm outline-none transition-colors placeholder:text-[var(--ghost)] focus:border-[#5b8cc7]/50"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="fc-image" className="mb-1.5 block text-[11px] text-[var(--faint)]">آدرس تصویر (اختیاری)</label>
-                  <input
-                    id="fc-image"
-                    value={imageUrl}
-                    onChange={(event) => setImageUrl(event.target.value)}
-                    placeholder="https://…"
-                    dir="ltr"
-                    className="w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm outline-none transition-colors placeholder:text-[var(--ghost)] focus:border-[#5b8cc7]/50"
-                  />
-                </div>
+              <div>
+                <label htmlFor="fc-topic" className="mb-1.5 block text-[11px] text-[var(--faint)]">مبحث</label>
+                <input
+                  id="fc-topic"
+                  value={topic}
+                  onChange={(event) => setTopic(event.target.value)}
+                  placeholder="چرخهٔ قلبی"
+                  className="w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm outline-none transition-colors placeholder:text-[var(--ghost)] focus:border-[#5b8cc7]/50"
+                />
               </div>
-
-              {imageUrl.trim() && (
-                <img src={imageUrl} alt="پیش‌نمایش تصویر کارت" className="max-h-40 rounded-xl border border-white/10 object-contain" />
-              )}
 
               <div className="grid grid-cols-2 gap-3">
                 <div>

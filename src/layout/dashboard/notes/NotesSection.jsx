@@ -64,7 +64,8 @@ function ErrorState({ onRetry }) {
 }
 
 /* ── نوار بالای لایه — همان چیدمان و همان دکمهٔ نوار فلش‌کارت ──
-   دکمهٔ «ساخت یادداشت» اینجا می‌نشیند (نه در هیرو)، دقیقاً مثل «ساخت کارت» فلش‌کارت. */
+   دکمهٔ «ساخت یادداشت» اینجا می‌نشیند (نه در هیرو)، دقیقاً مثل «ساخت کارت» فلش‌کارت.
+   مسیر متنی («داشبورد / یادداشت‌ها») عمداً نیست؛ بازگشت و دکمهٔ ساخت کافی‌اند. */
 function LayerTopbar({ onBack, onCreate }) {
   return (
     <div className="nt-topbar dash-stagger">
@@ -76,7 +77,6 @@ function LayerTopbar({ onBack, onCreate }) {
           بازگشت به داشبورد
         </button>
       )}
-      <span className="nt-topbar__crumb">داشبورد / یادداشت‌ها</span>
       <button type="button" onClick={onCreate} className="nt-topbar__create">
         <Icon name="plus" size={16} />
         ساخت یادداشت
@@ -459,8 +459,12 @@ export default function NotesSection({ userData, onBack }) {
     setTagFilter(null);
   }, []);
 
+  /* کلید ورود کارت‌ها — با هر جابه‌جایی موضوع یا تگ عوض می‌شود تا گرید از نو بنشیند
+     و انیمیشن پله‌ای `dash-stagger` (همان انیمیشن بلوک‌های داشبورد) دوباره اجرا شود. */
+  const topicKey = `${subjectFilter}|${tagFilter ?? ''}`;
+
   const renderGrid = (list) => (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+    <div key={topicKey} className="dash-stagger grid gap-4 md:grid-cols-2 xl:grid-cols-3">
       {list.map((note) => (
         <NoteCard
           key={note.id}

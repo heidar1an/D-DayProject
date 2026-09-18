@@ -38,10 +38,9 @@
   height: 18px;
 }
 
-.fc-topbar__crumb {
+/* دکمهٔ «ساخت کارت» مثل قبل سمت چپ می‌نشیند — جای crumb حذف‌شده را می‌گیرد */
+.fc-topbar__cta {
   margin-inline-start: auto;
-  color: var(--faint);
-  font-size: 0.88rem;
 }
 
 /* ── هیروی وسط‌چین لایه — همانند درسنامه جامع علوم پایه ── */
@@ -203,10 +202,34 @@
   display: none;
 }
 
-/* در موبایل مسیر (crumb) جا را تنگ می‌کند — مثل درسنامه جامع حذف می‌شود */
-@media (max-width: 760px) {
-  .fc-topbar__crumb {
-    display: none;
+/* ── نقطهٔ مشخص‌شده روی کارت‌های آناتومی تصویری ── */
+.fc-hotspot {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin: -12px 0 0 -12px;
+  border: 2px solid #fff;
+  border-radius: 9999px;
+  background: rgba(226, 109, 109, 0.85);
+  box-shadow: 0 0 0 5px rgba(226, 109, 109, 0.28);
+  animation: fc-hotspot-pulse 1.6s ease-in-out infinite;
+}
+
+.fc-hotspot__num {
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+@keyframes fc-hotspot-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.14);
   }
 }
 
@@ -216,7 +239,8 @@
   .fc-card-leave,
   .fc-modal,
   .fc-heat-cell,
-  .fc-bar {
+  .fc-bar,
+  .fc-hotspot {
     animation: none;
   }
 

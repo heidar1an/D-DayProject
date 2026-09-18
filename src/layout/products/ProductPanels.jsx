@@ -1,14 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
-import { ProductArrow, toFa, usePrefersReducedMotion } from './productsShared';
+import { ProductArrow } from './productsShared';
 
 /*
  * ── نمای چرخانِ بانک تست ──
  *
  * چهار کادر یک محصول‌اند: بانک تست، آنالیز شخصی، آزمون‌های هماهنگ و آزمون‌های
- * بین‌الملل. نام‌ها در یک ردیفِ قابل اسکرول می‌مانند و فقط محتوای کادرِ فعال
- * عوض می‌شود. چرخش خودکار برای معرفی آرامِ قابلیت‌هاست؛ کلیک روی هر برچسب
- * همان لحظه کادر را عوض می‌کند.
+ * بین‌الملل. گزینه‌ها در یک ردیفِ هم‌اندازه می‌مانند و فقط محتوای کادرِ فعال
+ * با کلیک کاربر عوض می‌شود؛ هیچ چرخش خودکاری وجود ندارد.
  */
 
 function AnalysisVisual({ panel }) {
@@ -90,18 +89,7 @@ function PanelVisual({ panel }) {
 
 export default function ProductPanels({ product, onOpen }) {
   const panels = product.panels ?? [];
-  const reduced = usePrefersReducedMotion();
   const [activeIndex, setActiveIndex] = useState(0);
-
-  useEffect(() => {
-    if (reduced || panels.length < 2 || typeof window === 'undefined') return undefined;
-
-    const timer = window.setInterval(() => {
-      setActiveIndex((current) => (current + 1) % panels.length);
-    }, 5200);
-
-    return () => window.clearInterval(timer);
-  }, [panels.length, reduced]);
 
   if (panels.length === 0) return null;
 
@@ -111,10 +99,7 @@ export default function ProductPanels({ product, onOpen }) {
     <article className={`ps-panels ps-accent-${product.accent}`} data-reveal>
       <div className="ps-panels__head">
         <div className="ps-panels__copy">
-          <p className="ps-eyebrow">
-            <span className="ps-eyebrow__index">{product.index}</span>
-            {product.eyebrow}
-          </p>
+          <p className="ps-eyebrow">{product.eyebrow}</p>
           <h3 className="ps-panels__title">{product.title}</h3>
           <p className="ps-subtitle">{product.subtitle}</p>
           <p className="ps-text">{product.description}</p>
@@ -140,7 +125,6 @@ export default function ProductPanels({ product, onOpen }) {
               key={panel.id}
               onClick={() => setActiveIndex(index)}
             >
-              <span className="ps-panels__tab-number">{toFa(index + 1)}</span>
               <span>{panel.label}</span>
             </button>
           ))}

@@ -131,7 +131,7 @@ const benefitRows = [
   ],
   [
     {
-      title: 'بهترین‌ها رقابت کن',
+      title: 'با بهترین‌ها رقابت کن',
       description: 'با همکلاسی‌هات و دانشجوهای سراسر کشور رقابت کن؛ به همراه آزمون‌های آنلاین.',
       accent: 'mint',
       size: 'regular',
@@ -312,7 +312,7 @@ function MotionStrip() {
     let animationFrame = 0;
     let lastTime = performance.now();
     const loopDuration = 24000;
-    const totalLoops = 6;
+    const totalLoops = 12;
 
     const animate = (time) => {
       const delta = Math.min(time - lastTime, 50);

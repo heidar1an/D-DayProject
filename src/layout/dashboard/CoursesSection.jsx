@@ -31,7 +31,7 @@ export const CATALOG_COURSES = [
   { id: 'micro', title: 'میکرو درسنامه', accent: '#937fcd', tagline: 'خلاصهٔ سریع درس‌ها برای مرور فشرده' },
   { id: 'green-path', title: 'مسیر سبز', accent: '#77b787', tagline: 'مسیر ساختار‌یافته برای معدل الف' },
   { id: 'reference', title: 'رفرنس', accent: '#e0b45c', tagline: 'مرجع کامل نکات و جدول‌ها' },
-  { id: 'international', title: 'دوره‌های بین الملل', accent: '#61d192', tagline: 'USMLE · PLAB · AMC · MCCQE · IFOM' },
+  { id: 'international', title: 'دوره‌های بین الملل', accent: '#61d192', tagline: 'یادگیری توسط بهترین اساتید دنیا.' },
 ];
 
 /* در حالت جمع‌شده یک ردیف کامل از کارت‌های مربعی نمایش داده می‌شود */
@@ -638,17 +638,78 @@ export default function CoursesSection({ onOpenCourse, onOpenAllCourses }) {
         ))}
       </LessonRail>
 
-      {/* ── ورود به موتور مسیر سبز ── */}
-      <button
-        type="button"
-        onClick={() => onOpenCourse?.('green-path')}
-        aria-label="باز کردن موتور مسیر سبز"
-        className="flex min-h-[220px] w-full cursor-pointer items-center justify-center rounded-[2.5rem] bg-[var(--green)] px-6 py-16 transition duration-200 hover:bg-[var(--green-deep)] md:min-h-[280px] md:rounded-[3rem] md:py-20"
-      >
-        <span className="text-base text-white md:text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]">
-          ورود به مسیر سبز
-        </span>
-      </button>
+      {/* ── کادر تبلیغی مسیر سبز ── */}
+      <aside className="relative overflow-hidden rounded-[2.5rem] border border-[var(--green-ink)]/20 bg-[var(--green-deep)] md:rounded-[3rem]">
+        {/* هالهٔ نرم سبز */}
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute -top-32 left-1/2 h-64 w-[42rem] -translate-x-1/2 rounded-full opacity-[0.16] blur-3xl"
+          style={{ background: 'radial-gradient(50% 50% at 50% 50%, var(--green-bright), transparent 72%)' }}
+        />
+
+        <div className="relative flex flex-col items-center gap-8 px-6 py-12 text-center md:flex-row md:items-center md:justify-between md:gap-12 md:px-14 md:py-14 md:text-right">
+          <div className="flex flex-col items-center md:items-start">
+            <span className="flex items-center gap-2 rounded-full border border-[var(--green-ink)]/30 bg-[var(--green-ink)]/10 px-3.5 py-1.5 text-[11px] text-[var(--green-soft-ink)] md:text-xs [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+              <CatalogIcon name="green-path" className="h-3.5 w-3.5" />
+              مسیر سبز
+            </span>
+
+            <h2 className="mt-4 text-2xl leading-9 text-white md:mt-5 md:text-[2rem] md:leading-[3rem] [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+              برنامه‌ات را به مسیر سبز بسپار
+            </h2>
+
+            <p className="mt-2 max-w-md text-sm text-white/55 md:mt-3 md:text-lg">
+              یک نقشهٔ راه روزانه و ساختار‌یافته که قدم‌به‌قدم تا رسیدن به معدل الف جلوی روت را باز می‌کند
+            </p>
+
+            <button
+              type="button"
+              onClick={() => onOpenCourse?.('green-path')}
+              className="mt-7 flex cursor-pointer items-center gap-2 rounded-2xl bg-[var(--green-bright)] px-7 py-3 text-sm text-[#0f2018] transition duration-200 hover:-translate-y-0.5 hover:brightness-110 md:mt-8 md:rounded-[1.25rem] md:px-9 md:py-3.5 md:text-base [font-family:'Doran','Vazir',Tahoma,sans-serif]"
+            >
+              ورود به مسیر سبز
+              <ChevronIcon direction="left" className="h-4 w-4" />
+            </button>
+          </div>
+
+          {/* نشان مینیمال مسیر سبز — نقشهٔ قله: خطوط تراز، مسیر نقطه‌چین و پرچم */}
+          <div aria-hidden="true" className="relative grid h-44 w-44 shrink-0 place-items-center md:h-72 md:w-72">
+            <span
+              className="absolute inset-4 rounded-full opacity-25 blur-2xl"
+              style={{ background: 'radial-gradient(50% 50% at 50% 50%, var(--green-bright), transparent 70%)' }}
+            />
+            <svg viewBox="0 0 200 200" className="relative h-full w-full">
+              {/* خطوط تراز زمین — حلقه‌های هم‌مرکز و منظم دور پرچمِ قله */}
+              <g fill="none" stroke="var(--green-ink)" strokeWidth="1">
+                <ellipse cx="134" cy="52" rx="26" ry="18" opacity="0.26" />
+                <ellipse cx="134" cy="52" rx="46" ry="32" opacity="0.16" />
+                <ellipse cx="134" cy="52" rx="64" ry="44" opacity="0.09" />
+              </g>
+
+              {/* مسیر پیچ‌درپیچ نقطه‌چین از پایین تا قله */}
+              <path
+                d="M40 172 Q88 156 92 128 Q96 100 70 92 Q44 84 78 64 Q104 50 134 58"
+                fill="none"
+                stroke="var(--green-bright)"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeDasharray="0.1 8"
+                opacity="0.85"
+              />
+
+              {/* نقاط علامت‌گذاری مسیر — نقطهٔ شروع با تپش ملایم */}
+              <circle cx="40" cy="172" r="4" fill="var(--green-bright)" className="animate-pulse" />
+              <circle cx="92" cy="128" r="3.2" fill="var(--green-ink)" fillOpacity="0.55" />
+              <circle cx="70" cy="92" r="3.2" fill="var(--green-ink)" fillOpacity="0.75" />
+              <circle cx="134" cy="58" r="4" fill="var(--green-bright)" />
+
+              {/* پرچم قله */}
+              <path d="M134 58V34" stroke="var(--green-bright)" strokeWidth="2.2" strokeLinecap="round" />
+              <path d="M134 34h15l-5.5 7 5.5 7h-15z" fill="var(--green-bright)" fillOpacity="0.9" />
+            </svg>
+          </div>
+        </div>
+      </aside>
     </section>
   );
 }

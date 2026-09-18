@@ -16,11 +16,17 @@ import { formatInterval, previewIntervals } from '../../../services/flashcards/s
 import { Icon, InfoChip, Modal, Skeleton, StateChip, faNum, renderCloze, toFa } from './flashcardShared';
 import './flashcards.css';
 
+/*
+ * کلیدهای میانبر. تطبیق با `event.code` انجام می‌شود (نه `event.key`) تا مستقل از
+ * چیدمان کیبورد باشد: روی چیدمان فارسی، کلیدهای «۱ تا ۴» کاراکتر فارسی تولید
+ * می‌کنند و کلیدهای N/E/S/B حروف فارسی — تطبیق با `key` هیچ‌وقت نمی‌گرفت.
+ * `chars` فقط پشتیبانِ ارقام فارسی است (برای صفحه‌کلیدهایی که code را گزارش نمی‌کنند).
+ */
 const RATING_BUTTONS = [
-  { rating: 'again', label: 'دوباره', key: '1', color: 'var(--red-ink)' },
-  { rating: 'hard', label: 'سخت', key: '2', color: 'var(--gold-ink)' },
-  { rating: 'good', label: 'خوب', key: '3', color: 'var(--green-ink)' },
-  { rating: 'easy', label: 'آسان', key: '4', color: 'var(--purple-ink)' },
+  { rating: 'again', label: 'دوباره', key: '1', codes: ['Digit1', 'Numpad1'], chars: ['1', '۱'], color: 'var(--red-ink)' },
+  { rating: 'hard', label: 'سخت', key: '2', codes: ['Digit2', 'Numpad2'], chars: ['2', '۲'], color: 'var(--gold-ink)' },
+  { rating: 'good', label: 'خوب', key: '3', codes: ['Digit3', 'Numpad3'], chars: ['3', '۳'], color: 'var(--green-ink)' },
+  { rating: 'easy', label: 'آسان', key: '4', codes: ['Digit4', 'Numpad4'], chars: ['4', '۴'], color: 'var(--purple-ink)' },
 ];
 
 const isTouchOnly = typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches;
@@ -32,7 +38,35 @@ function CardBody({ card, revealed }) {
   if (card.type === 'mcq') {
     return <p className="text-lg leading-9 md:text-xl md:leading-10">{card.front}</p>;
   }
+  if (!card.front) return null; /* کارت تصویریِ بی‌متن: عکس جای صورت کارت را می‌گیرد */
   return <p className="text-lg leading-9 md:text-2xl md:leading-[2.6rem]">{card.front}</p>;
+}
+
+/* تصویر صورت کارت — آپلودی کاربر یا کارت لوکیشن‌یاب آناتومی با نقطه‌های مشخص */
+function CardFrontImage({ card }) {
+  if (card.type === 'image-locate') {
+    const image = card.image;
+    if (!image?.url) return null;
+    return (
+      <figure className="relative mx-auto mb-4 w-fit overflow-hidden rounded-2xl border border-white/10 bg-black/30">
+        <img src={image.url} alt={image.alt ?? 'تصویر کارت'} className="h-64 w-64 object-contain" />
+        {(image.points ?? []).map((point, index) => (
+          <span key={index} className="fc-hotspot" style={{ left: `${point.x}%`, top: `${point.y}%` }}>
+            <span className="fc-hotspot__num">{toFa(index + 1)}</span>
+          </span>
+        ))}
+        <figcaption className="sr-only">یک نقطه روی تصویر مشخص شده؛ نام ساختار را حدس بزن.</figcaption>
+      </figure>
+    );
+  }
+  if (!card.media?.frontImageUrl) return null;
+  return (
+    <img
+      src={card.media.frontImageUrl}
+      alt="تصویر صورت کارت"
+      className="mb-4 max-h-64 w-auto rounded-2xl border border-white/10 object-contain"
+    />
+  );
 }
 
 function McqOptions({ card, revealed }) {
@@ -148,7 +182,7 @@ function CardAudio({ card, autoPlay }) {
   );
 }
 
-export default function ReviewSession({ userData, config, onExit, onEditCard }) {
+export default function ReviewSession({ userData, config, onExit, onEditCard, shortcutPaused = false }) {
   const { mode, deckId, label } = config;
   const [queue, setQueue] = useState(null);
   const [index, setIndex] = useState(0);
@@ -236,31 +270,32 @@ export default function ReviewSession({ userData, config, onExit, onEditCard }) 
     [current, userData, mode, session],
   );
 
-  /* میانبرهای صفحه‌کلید */
+  /* میانبرهای صفحه‌کلید — فقط در همین بخش فعال‌اند (هوک با unmount شدن مرور برداشته
+     می‌شود) و وقتی مودالی روی مرور باز است (`shortcutPaused`) کلاً ساکت‌اند. */
   useEffect(() => {
-    if (isTouchOnly) return undefined;
+    if (isTouchOnly || shortcutPaused) return undefined;
 
     const handleKey = (event) => {
+      if (event.isComposing) return;
+      /* کلیدهای ترکیبی (Cmd+S و…) مال خود مرورگر/سیستم‌اند، نه میانبر ما */
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
       if (event.target instanceof HTMLElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target.tagName)) return;
       if (showHelp) {
-        if (event.key === 'Escape' || event.key === '?') setShowHelp(false);
+        if (event.key === 'Escape' || event.key === '?' || event.key === '؟') setShowHelp(false);
         return;
       }
 
-      if (event.key === ' ') {
+      if (event.code === 'Space' || event.key === ' ') {
         event.preventDefault();
         if (!revealed && current) setRevealed(true);
         return;
       }
-      if (!current || !revealed) return;
+      if (!current) return;
 
-      const ratingKey = RATING_BUTTONS.find((button) => button.key === event.key);
-      if (ratingKey) {
-        handleRate(ratingKey.rating);
-        return;
-      }
-      const lower = event.key.toLowerCase();
-      if (lower === 'n') {
+      /* اقدام‌های ثانویه (N/E/S/B) و راهنما حتی قبل از پاسخ‌دادن کار می‌کنند —
+         گلوگاه «باید اول پاسخ بدهی» فقط برای کلیدهای ارزیابی است که بدون دیدن
+         پاسخ اصلاً معنا ندارند. */
+      if (event.code === 'KeyN') {
         /* انتقال به انتهای صف — وضعیت مرور خراب نمی‌شود */
         setQueue((prev) => {
           if (!prev) return prev;
@@ -271,9 +306,13 @@ export default function ReviewSession({ userData, config, onExit, onEditCard }) 
         });
         setRevealed(false);
         setHintShown(false);
-      } else if (lower === 'e') {
+        return;
+      }
+      if (event.code === 'KeyE') {
         onEditCard?.(current.card);
-      } else if (lower === 's') {
+        return;
+      }
+      if (event.code === 'KeyS') {
         setCardSuspended(userData, current.card.id, true);
         setQueue((prev) => {
           if (!prev) return prev;
@@ -283,7 +322,9 @@ export default function ReviewSession({ userData, config, onExit, onEditCard }) 
         });
         setRevealed(false);
         setHintShown(false);
-      } else if (lower === 'b') {
+        return;
+      }
+      if (event.code === 'KeyB') {
         const next = !current.state.bookmarked;
         setCardBookmarked(userData, current.card.id, next);
         setQueue((prev) => {
@@ -292,14 +333,24 @@ export default function ReviewSession({ userData, config, onExit, onEditCard }) 
           items[index] = { ...items[index], state: { ...items[index].state, bookmarked: next } };
           return { ...prev, items };
         });
-      } else if (event.key === '?') {
-        setShowHelp(true);
+        return;
       }
+      if (event.key === '?' || event.key === '؟' || event.code === 'Slash') {
+        setShowHelp(true);
+        return;
+      }
+
+      /* کلیدهای ارزیابی — فقط وقتی پاسخ دیده شده */
+      if (!revealed) return;
+      const ratingKey = RATING_BUTTONS.find(
+        (button) => button.codes.includes(event.code) || button.chars.includes(event.key),
+      );
+      if (ratingKey) handleRate(ratingKey.rating);
     };
 
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [current, revealed, index, handleRate, onEditCard, userData, showHelp]);
+  }, [current, revealed, index, handleRate, onEditCard, userData, showHelp, shortcutPaused]);
 
   /* ثبت زمان پاسخ هر کارت برای آمار */
   useEffect(() => {
@@ -420,6 +471,7 @@ export default function ReviewSession({ userData, config, onExit, onEditCard }) 
             {mode === 'cram' && <InfoChip icon="redo">مرور آزاد — زمان‌بندی تغییر نمی‌کند</InfoChip>}
           </div>
 
+          <CardFrontImage card={card} />
           <CardBody card={card} revealed={revealed} />
           {card.media?.audioUrl && <CardAudio card={card} autoPlay={queue?.settings?.autoPlayAudio} />}
           <McqOptions card={card} revealed={revealed} />
@@ -440,6 +492,15 @@ export default function ReviewSession({ userData, config, onExit, onEditCard }) 
                 {card.type === 'cloze' ? renderCloze(card.front, { revealed: true }) : card.back}
               </p>
             </div>
+          )}
+
+          {/* تصویر پاسخ — بارگذاری‌شده در ساخت کارت */}
+          {revealed && card.media?.backImageUrl && (
+            <img
+              src={card.media.backImageUrl}
+              alt="تصویر پاسخ کارت"
+              className="mt-4 max-h-56 w-auto rounded-2xl border border-white/10 object-contain"
+            />
           )}
 
           {queue?.settings?.showSource && card.source?.title && (

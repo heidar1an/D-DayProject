@@ -170,6 +170,46 @@ export default function ExamRoom({ userData, exam, attempt, questions, onFinishe
     return { answered, unanswered: total - answered, marked: marked.length };
   }, [answers, marked.length, total]);
 
+  /* ── بخش درس‌ها (آزمون‌های جامع چند‌درسی): نقشهٔ سؤال‌ها هم می‌تواند فیلتر شود ── */
+  const subjects = useMemo(() => {
+    const seen = [];
+    for (const question of questions) {
+      if (question?.subject && !seen.includes(question.subject)) seen.push(question.subject);
+    }
+    return seen;
+  }, [questions]);
+  const subjectOf = useCallback(
+    (questionId) => questions.find((question) => question.id === questionId)?.subject ?? null,
+    [questions],
+  );
+  const multiSubject = subjects.length > 1;
+  const [subjectTab, setSubjectTab] = useState('all'); // 'all' = کل آزمون هماهنگ
+
+  const selectSubject = (subject) => {
+    setSubjectTab(subject);
+    if (subject !== 'all') {
+      const firstIndex = attempt.questionIds.findIndex((id) => subjectOf(id) === subject);
+      if (firstIndex >= 0) go(firstIndex);
+    }
+  };
+
+  const subjectTabs = multiSubject && (
+    <div className="exm-navtabs" role="tablist" aria-label="بخش درس‌ها">
+      <button type="button" aria-pressed={subjectTab === 'all'} onClick={() => selectSubject('all')}>
+        کل آزمون
+      </button>
+      {subjects.map((subject) => {
+        const count = questions.filter((question) => question.subject === subject).length;
+        return (
+          <button key={subject} type="button" aria-pressed={subjectTab === subject} onClick={() => selectSubject(subject)}>
+            {subject}
+            <span className="exm-navtabs__count">({faNum(count)})</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+
   const level = timerLevel(remaining);
   const levelClass = level === 'danger' ? 'exm-timer--danger' : level === 'warn' || level === 'caution' ? 'exm-timer--warn' : '';
   const currentAnswer = currentQuestion ? answers[currentQuestion.id]?.selected : undefined;
@@ -181,25 +221,28 @@ export default function ExamRoom({ userData, exam, attempt, questions, onFinishe
 
   const navigatorGrid = (
     <div className="exm-navgrid" role="navigation" aria-label="ناوبری سؤال‌ها">
-      {attempt.questionIds.map((questionId, index) => {
-        const isAnswered = answers[questionId] !== undefined;
-        const isMarkedChip = marked.includes(questionId);
-        return (
-          <button
-            key={questionId}
-            type="button"
-            onClick={() => go(index)}
-            aria-label={`سؤال ${toFa(index + 1)}${isAnswered ? ' — پاسخ داده‌شده' : ''}${isMarkedChip ? ' — علامت‌گذاری‌شده' : ''}`}
-            aria-current={index === currentIndex ? 'true' : undefined}
-            className={`exm-navchip ${isAnswered ? 'is-answered' : ''} ${isMarkedChip ? 'is-marked' : ''} ${
-              index === currentIndex ? 'is-current' : ''
-            }`}
-          >
-            {toFa(index + 1)}
-            {isMarkedChip && <span className="exm-navchip__flag" aria-hidden="true" />}
-          </button>
-        );
-      })}
+      {attempt.questionIds
+        .map((questionId, index) => ({ questionId, index }))
+        .filter(({ questionId }) => subjectTab === 'all' || subjectOf(questionId) === subjectTab)
+        .map(({ questionId, index }) => {
+          const isAnswered = answers[questionId] !== undefined;
+          const isMarkedChip = marked.includes(questionId);
+          return (
+            <button
+              key={questionId}
+              type="button"
+              onClick={() => go(index)}
+              aria-label={`سؤال ${toFa(index + 1)}${isAnswered ? ' — پاسخ داده‌شده' : ''}${isMarkedChip ? ' — علامت‌گذاری‌شده' : ''}`}
+              aria-current={index === currentIndex ? 'true' : undefined}
+              className={`exm-navchip ${isAnswered ? 'is-answered' : ''} ${isMarkedChip ? 'is-marked' : ''} ${
+                index === currentIndex ? 'is-current' : ''
+              }`}
+            >
+              {toFa(index + 1)}
+              {isMarkedChip && <span className="exm-navchip__flag" aria-hidden="true" />}
+            </button>
+          );
+        })}
     </div>
   );
 
@@ -208,8 +251,8 @@ export default function ExamRoom({ userData, exam, attempt, questions, onFinishe
   return (
     <div className="exm-room" dir="rtl">
       <div className="exm-room__shell">
-        {/* ── هدر آزمون ── */}
-        <header className="sticky top-0 z-20 -mx-1 mb-6 flex flex-wrap items-center gap-3 bg-[#101012]/95 px-1 py-3 backdrop-blur">
+        {/* ── هدر آزمون — بدون پس‌زمینه ── */}
+        <header className="sticky top-0 z-20 -mx-1 mb-6 flex flex-wrap items-center gap-3 px-1 py-3">
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-bold text-white [font-family:'Doran','Vazir',Tahoma,sans-serif]">{exam.title}</p>
             <p className="mt-0.5 text-[11px] text-[var(--faint)]">
@@ -243,22 +286,22 @@ export default function ExamRoom({ userData, exam, attempt, questions, onFinishe
           {announce}
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[1fr_16rem] lg:items-start">
+        {/* ── صحنهٔ آزمون: کل سؤال و کادرها وسطِ صفحه (افقی و عمودی) ── */}
+        <div className="exm-room__stage">
+          <div className="exm-room__grid grid gap-6 lg:grid-cols-[1fr_16rem] lg:items-start">
           {/* ── ستون سؤال ── */}
           <div>
-            <div className="exm-question" key={currentQuestion.id}>
-              <div className="mb-4 flex flex-wrap items-center gap-2 text-[11px] text-[var(--faint)]">
-                <span className="rounded-full bg-white/[0.05] px-2.5 py-1">{currentQuestion.subject}</span>
-                <span className="rounded-full bg-white/[0.05] px-2.5 py-1">{currentQuestion.topic}</span>
-                {isMarked && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-[#e0b45c]/12 px-2.5 py-1 text-[var(--gold-ink)]">
+            <div className="exm-question mx-auto w-full max-w-[46rem]" key={currentQuestion.id}>
+              {isMarked && (
+                <div className="mb-4">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[#e0b45c]/12 px-2.5 py-1 text-xs text-[var(--gold-ink)]">
                     <Icon name="flag" className="h-3 w-3" />
                     برای مرور علامت خورده
                   </span>
-                )}
-              </div>
+                </div>
+              )}
 
-              <p className="mb-6 text-[15px] leading-8 text-white md:text-base">{currentQuestion.stem}</p>
+              <p className="mb-6 text-[17px] leading-9 text-white md:text-[19px]">{currentQuestion.stem}</p>
 
               <div className="space-y-3" role="radiogroup" aria-label={`گزینه‌های سؤال ${toFa(currentIndex + 1)}`}>
                 {currentQuestion.options.map((option, index) => (
@@ -277,8 +320,8 @@ export default function ExamRoom({ userData, exam, attempt, questions, onFinishe
               </div>
             </div>
 
-            {/* ── ناوبری پایین ── */}
-            <div className="mt-7 flex flex-wrap items-center gap-3">
+            {/* ── ناوبری پایین — هم‌تراز با لبهٔ راست کادر سؤال ── */}
+            <div className="mx-auto mt-7 flex w-full max-w-[46rem] flex-wrap items-center gap-3">
               <button
                 type="button"
                 onClick={() => go(currentIndex - 1)}
@@ -321,28 +364,41 @@ export default function ExamRoom({ userData, exam, attempt, questions, onFinishe
             </div>
           </div>
 
-          {/* ── Navigator دسکتاپ ── */}
-          <aside className="hidden rounded-[1.6rem] border border-white/[0.07] bg-[var(--background)] p-4 lg:sticky lg:top-24 lg:block">
-            <h2 className="mb-3 flex items-center gap-2 text-xs font-bold text-white [font-family:'Doran','Vazir',Tahoma,sans-serif]">
-              <Icon name="grid" className="h-4 w-4 text-[var(--purple-ink)]" />
-              نقشهٔ سؤال‌ها
-            </h2>
-            {navigatorGrid}
-            <ul className="mt-4 space-y-2 border-t border-white/[0.07] pt-3 text-[10.5px] text-[var(--faint)]">
-              <li className="flex items-center gap-2">
-                <span className="h-3 w-3 rounded bg-[#61D192]/50" aria-hidden="true" />
-                پاسخ داده‌شده ({faNum(stats.answered)})
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="h-3 w-3 rounded border border-white/20 bg-white/5" aria-hidden="true" />
-                بی‌پاسخ ({faNum(stats.unanswered)})
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="h-3 w-3 rounded bg-[#e0b45c]/60" aria-hidden="true" />
-                علامت‌گذاری‌شده ({faNum(stats.marked)})
-              </li>
-            </ul>
+          {/* ── Navigator دسکتاپ: نقشهٔ سؤال‌ها + کادر حرکت بین درس‌ها (آزمون جامع) ── */}
+          <aside className="hidden space-y-4 lg:sticky lg:top-24 lg:block">
+            <div className="rounded-[1.6rem] border border-white/[0.07] bg-[var(--background)] p-4">
+              <h2 className="mb-3 flex items-center gap-2 text-xs font-bold text-white [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+                <Icon name="grid" className="h-4 w-4 text-[var(--purple-ink)]" />
+                نقشهٔ سؤال‌ها
+              </h2>
+              {navigatorGrid}
+              <ul className="mt-4 space-y-2 border-t border-white/[0.07] pt-3 text-[10.5px] text-[var(--faint)]">
+                <li className="flex items-center gap-2">
+                  <span className="h-3 w-3 rounded bg-[#61D192]/50" aria-hidden="true" />
+                  پاسخ داده‌شده ({faNum(stats.answered)})
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="h-3 w-3 rounded border border-white/20 bg-white/5" aria-hidden="true" />
+                  بی‌پاسخ ({faNum(stats.unanswered)})
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="h-3 w-3 rounded bg-[#e0b45c]/60" aria-hidden="true" />
+                  علامت‌گذاری‌شده ({faNum(stats.marked)})
+                </li>
+              </ul>
+            </div>
+
+            {multiSubject && (
+              <div className="rounded-[1.6rem] border border-white/[0.07] bg-[var(--background)] p-4">
+                <h2 className="mb-3 flex items-center gap-2 text-xs font-bold text-white [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+                  <Icon name="book" className="h-4 w-4 text-[var(--green-ink)]" />
+                  حرکت بین درس‌ها
+                </h2>
+                {subjectTabs}
+              </div>
+            )}
           </aside>
+          </div>
         </div>
       </div>
 
@@ -394,6 +450,7 @@ export default function ExamRoom({ userData, exam, attempt, questions, onFinishe
                 بستن
               </button>
             </div>
+            {subjectTabs}
             {navigatorGrid}
             <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-[10.5px] text-[var(--faint)]">
               <li className="flex items-center gap-1.5">

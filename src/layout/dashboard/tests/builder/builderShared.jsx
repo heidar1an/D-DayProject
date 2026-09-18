@@ -93,7 +93,7 @@ export function WizardNav({ onBack, onNext, nextLabel = 'مرحلهٔ بعد', n
         onClick={onBack}
         className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-white/6 px-4 py-2.5 text-sm text-[var(--muted)] transition-colors hover:bg-white/12 hover:text-white"
       >
-        <Icon name="chevron" className="h-4 w-4 rotate-90" />
+        <Icon name="chevron" className="h-4 w-4 -rotate-90" />
         مرحلهٔ قبل
       </button>
       <div className="flex items-center gap-3">
@@ -106,7 +106,7 @@ export function WizardNav({ onBack, onNext, nextLabel = 'مرحلهٔ بعد', n
           className="flex cursor-pointer items-center gap-2 rounded-xl bg-[var(--green-vivid)] px-6 py-2.5 text-sm font-bold text-[#12271a] transition-all hover:-translate-y-0.5 hover:bg-[var(--green-vivid)] disabled:cursor-default disabled:translate-y-0 disabled:bg-white/8 disabled:text-[var(--faint)]"
         >
           {nextLabel}
-          <Icon name="chevron" className="h-4 w-4 -rotate-90" />
+          <Icon name="chevron" className="h-4 w-4 rotate-90" />
         </button>
       </div>
     </div>

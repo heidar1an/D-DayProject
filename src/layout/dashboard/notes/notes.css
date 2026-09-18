@@ -134,17 +134,14 @@
   flex-shrink: 0;
 }
 
-.nt-topbar__crumb {
-  margin-inline-start: auto;
-  color: var(--faint);
-  font-size: 0.88rem;
-}
-
-/* دکمهٔ «ساخت یادداشت» — همان حالت گرافیکی «ساخت کارت» فلش‌کارت */
+/* دکمهٔ «ساخت یادداشت» — همان حالت گرافیکی «ساخت کارت» فلش‌کارت.
+   `margin-inline-start: auto` دکمه را در انتهای ردیف (سمت چپ در RTL) نگه می‌دارد؛
+   قبلاً این فاصله را مسیر متنی می‌گرفت و حالا که مسیر برداشته شده، خودِ دکمه می‌گیرد. */
 .nt-topbar__create {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  margin-inline-start: auto;
   padding: 10px 16px;
   border: 1px solid rgb(var(--line-rgb) / 0.1);
   border-radius: 0.75rem;
@@ -446,15 +443,9 @@
   font-weight: 600;
 }
 
-/* ── تپش هوشمند ── */
-.nt-ai {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.45rem;
-  width: 100%;
-}
-
+/* ── تپش هوشمند ──
+   یک آیکون و یک کادر خلاصه؛ ویرایشگر فقط `nt-ai__chip` را برمی‌دارد و نمای
+   یادداشت دکمه/پنل را. بدنهٔ متن‌ها دیگر آیکون جدا ندارد. */
 .nt-ai__btn {
   display: inline-flex;
   align-items: center;
@@ -470,11 +461,6 @@
   transition:
     background-color 200ms ease,
     color 200ms ease;
-}
-
-.nt-ai--compact .nt-ai__btn {
-  padding: 0.3rem;
-  border-radius: 0.55rem;
 }
 
 .nt-ai__btn:hover,
@@ -517,12 +503,6 @@
   color: var(--white);
 }
 
-.nt-ai__chip.is-active {
-  border-color: rgba(147, 127, 205, 0.65);
-  background: rgba(147, 127, 205, 0.22);
-  color: var(--purple-soft-ink);
-}
-
 .nt-ai__status {
   display: inline-flex;
   align-items: center;
@@ -544,57 +524,6 @@
   to {
     transform: rotate(360deg);
   }
-}
-
-.nt-ai__preview {
-  margin-top: 0.6rem;
-  border-radius: 0.8rem;
-  border: 1px solid rgb(var(--line-rgb) / 0.08);
-  background: rgb(var(--shadow-rgb) / 0.28);
-  padding: 0.7rem 0.85rem;
-}
-
-.nt-ai__preview-text {
-  margin: 0;
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 2;
-  white-space: pre-wrap;
-}
-
-.nt-ai__preview-actions {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.6rem;
-}
-
-.nt-ai__apply {
-  padding: 0.4rem 0.9rem;
-  border-radius: 0.7rem;
-  background: var(--purple-bright);
-  color: var(--white);
-  cursor: pointer;
-  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
-  font-size: 11px;
-}
-
-.nt-ai__apply:disabled {
-  cursor: wait;
-  opacity: 0.6;
-}
-
-.nt-ai__cancel {
-  padding: 0.4rem 0.9rem;
-  border-radius: 0.7rem;
-  background: rgb(var(--wash-rgb) / 0.06);
-  color: var(--muted);
-  cursor: pointer;
-  font-size: 11px;
-}
-
-.nt-ai__cancel:hover {
-  background: rgb(var(--wash-rgb) / 0.1);
-  color: var(--white);
 }
 
 .nt-ai__hint,
@@ -694,12 +623,18 @@
   transition: transform 240ms ease;
 }
 
-/* کاربر سیستمش کاهش حرکت را خواسته — همه‌چیز بی‌حرکت */
+/* کاربر سیستمش کاهش حرکت را خواسته — همه‌چیز بی‌حرکت.
+   `.nt-card` عمداً از فهرست `animation: none` بیرون است: انیمیشن ورودِ کارت‌ها
+   از `dash-stagger` می‌آید و مثل بقیهٔ لایه‌های داشبورد گارد نمی‌شود؛ خودِ کارت
+   انیمیشن مستقلی ندارد که اینجا باید خفه شود. */
 @media (prefers-reduced-motion: reduce) {
   .nt-modal,
-  .nt-pop,
-  .nt-card {
+  .nt-pop {
     animation: none !important;
+    transition: none !important;
+  }
+
+  .nt-card {
     transition: none !important;
   }
 
@@ -719,12 +654,5 @@
 
   .nt-topbar__back:hover {
     transform: none;
-  }
-}
-
-/* در موبایل مسیر (crumb) جا را تنگ می‌کند — مثل نوار فلش‌کارت حذف می‌شود */
-@media (max-width: 760px) {
-  .nt-topbar__crumb {
-    display: none;
   }
 }

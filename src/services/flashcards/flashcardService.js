@@ -64,21 +64,30 @@ export function __setFailure(next) {
   simulateFailure = next;
 }
 
+/* کش درون‌حافظه — منبع حقیقت نشست. اگر localStorage بنویسد و پر باشد (مثلاً
+ * با حجم صدا/تصویر زیاد) خواندن‌های بعدی دادهٔ کهنه برنمی‌گردانند؛ وگرنه
+ * «افزودن شد ولی در فهرست نمی‌آمد» اتفاق می‌افتاد. */
+let storeCache = null;
+
 function readStore() {
+  if (storeCache) return storeCache;
   if (typeof window === 'undefined') return {};
   try {
-    return JSON.parse(window.localStorage.getItem(STORAGE_KEY) || '{}');
+    storeCache = JSON.parse(window.localStorage.getItem(STORAGE_KEY) || '{}') ?? {};
   } catch {
-    return {};
+    storeCache = {};
   }
+  return storeCache;
 }
 
 function writeStore(store) {
+  storeCache = store;
   if (typeof window === 'undefined') return;
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   } catch {
-    /* حافظه پر یا غیرفعال — مرور ادامه می‌یابد، فقط sync به‌وقت دیگری انجام می‌شود */
+    /* حافظه پر یا غیرفعال — نشست جاری در حافظه ادامه می‌یابد؛ فقط ماندگاری
+       بین رفرش‌ها کم می‌شود (در نسخهٔ واقعی: Sync-Queue سمت سرور) */
   }
 }
 
@@ -618,10 +627,113 @@ export function deleteDeck(userData, deckId) {
   });
 }
 
+/* ── اشتراک مجموعه با لینک — فقط میان کاربران ثبت‌نام‌شدهٔ تپش ──
+ * ساختار آیندهٔ Backend:
+ *   POST /api/flashcards/decks/:id/share  ← توکن اشتراک می‌سازد
+ *   POST /api/flashcards/shares/redeem    ← گیرنده با توکن به مجموعه دسترسی پیدا می‌کند
+ * در نسخهٔ Mock، توکن‌ها در localStorage مشترک می‌مانند تا جریان «لینک → دریافت»
+ * بین دو حساب همان مرورگر قابل آزمودن باشد.
+ */
+
+const SHARE_KEY = 'tapesh:flashcards:shares:v1';
+
+function readShares() {
+  if (typeof window === 'undefined') return [];
+  try {
+    return JSON.parse(window.localStorage.getItem(SHARE_KEY) || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function writeShares(list) {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(SHARE_KEY, JSON.stringify(list));
+  } catch {
+    /* حافظه پر — ساخت لینک این بار شکست خورده؛ UI پیام خطا می‌دهد */
+  }
+}
+
+const requireTapeshUser = (userData) => {
+  if (!userData?.id) throw new Error('tapesh-user-required');
+  return userData.id;
+};
+
+/* POST /api/flashcards/decks/:id/share */
+export function createDeckShare(userData, deckId) {
+  return respond(() => {
+    const ownerId = requireTapeshUser(userData);
+    const space = getUserSpace(userData);
+    const deck = space.decks.find((item) => item.id === deckId);
+    if (!deck) throw new Error('deck-not-found');
+
+    const token = `fcshare-${deckId.replace(/^deck-/, '').slice(0, 12)}-${Math.random().toString(36).slice(2, 10)}`;
+    writeShares([...readShares(), { token, deckId, ownerId, createdAt: Date.now() }]);
+    return { token, deckTitle: deck.title };
+  });
+}
+
+/* POST /api/flashcards/shares/redeem — ورودی: توکن یا خودِ لینک کامل */
+export function redeemDeckShare(userData, input) {
+  return respond(() => {
+    const recipientId = requireTapeshUser(userData);
+    const raw = String(input ?? '').trim();
+    const match = raw.match(/share=([A-Za-z0-9-]+)/);
+    const token = match ? match[1] : raw;
+    const share = readShares().find((item) => item.token === token);
+    if (!share) throw new Error('share-not-found');
+
+    /* فضای مالک — بدون seed؛ اگر حساب مالک در این مرورگر نیست، لینک بی‌اعتبار است */
+    const ownerSpace = readStore()[`u:${share.ownerId}`];
+    const ownerDeck = ownerSpace?.decks?.find((item) => item.id === share.deckId);
+    if (!ownerSpace || !ownerDeck) throw new Error('share-not-found');
+
+    let result = null;
+    mutateUserSpace(userData, (space) => {
+      /* هر لینک فقط یک‌بار به فهرست گیرنده اضافه می‌شود */
+      if (space.decks.some((item) => item.sharedFromToken === token)) {
+        result = { already: true, deckTitle: ownerDeck.title };
+        return;
+      }
+      const stamp = Date.now().toString(36);
+      const sharedDeck = {
+        ...ownerDeck,
+        id: `deck-shared-${stamp}`,
+        userId: recipientId,
+        byTapesh: false,
+        visibility: 'shared',
+        sharedFromToken: token,
+        sharedFromUserId: share.ownerId,
+        updatedAt: new Date().toISOString(),
+      };
+      space.decks.push(sharedDeck);
+
+      const ownerCards = ownerSpace.userCards.filter((card) => card.deckId === share.deckId && card.status === 'active');
+      ownerCards.forEach((card, index) => {
+        const copy = { ...card, id: `card-shared-${stamp}-${index}`, deckId: sharedDeck.id };
+        space.userCards.push(copy);
+        space.cardStates[copy.id] = stateFor();
+      });
+      result = { already: false, deckTitle: sharedDeck.title, cardCount: ownerCards.length };
+    });
+    return result;
+  });
+}
+
 /* POST /api/flashcards/cards */
 export function createCard(userData, deckId, draft) {
   return respond(() => {
     const media = draft.media ?? (draft.imageUrl ? { imageUrl: draft.imageUrl } : null);
+    const cleanMedia =
+      media && (media.frontImageUrl || media.backImageUrl || media.imageUrl || media.audioUrl)
+        ? {
+            frontImageUrl: media.frontImageUrl ?? null,
+            backImageUrl: media.backImageUrl ?? null,
+            imageUrl: media.imageUrl ?? null,
+            audioUrl: media.audioUrl ?? null,
+          }
+        : null;
     const card = {
       id: `card-user-${Date.now().toString(36)}`,
       deckId,
@@ -629,7 +741,7 @@ export function createCard(userData, deckId, draft) {
       front: draft.front.trim(),
       back: draft.back.trim(),
       hint: draft.hint?.trim() || null,
-      media: media && (media.imageUrl || media.audioUrl) ? { imageUrl: media.imageUrl ?? null, audioUrl: media.audioUrl ?? null } : null,
+      media: cleanMedia,
       tags: (draft.tags ?? []).map((tag) => tag.trim()).filter(Boolean),
       subjectId: draft.subjectId ?? null,
       topicId: draft.topicId ?? null,
@@ -640,7 +752,10 @@ export function createCard(userData, deckId, draft) {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-    if (!card.front || !card.back) throw new Error('front-and-back-required');
+    /* کارت تصویری می‌تواند بی‌متن باشد (عکس نقش صورت را دارد)؛ بقیه به صورت+پاسخ متنی نیاز دارند */
+    if (!card.front && !card.media?.frontImageUrl) throw new Error('front-required');
+    if (!card.back && card.type !== 'mcq') throw new Error('back-required');
+    if (card.type === 'image' && !card.media?.frontImageUrl) throw new Error('image-required');
 
     mutateUserSpace(userData, (space) => {
       space.userCards.push(card);

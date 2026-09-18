@@ -3,7 +3,8 @@
  * چهار حالت: «متنی» (چندخطی)، «چک‌لیست» (آیتم‌های تیک‌خور)، «پرسش و پاسخ»
  * (بازیابی فعال) و «جدول مقایسه» (چند مورد روی چند معیار).
  * هر یادداشت می‌تواند موضوع (از لیست ویکی)، تگ دسته‌بندی‌شده، رنگ کارت و یک منبع داشته باشد.
- * تپش هوشمند روی هر متن (بدنه، آیتم، پرسش/پاسخ، سلول) و یک‌جا روی همهٔ متن‌ها کار می‌کند.
+ * تپش هوشمند یک نقطهٔ ورود دارد: کادر خلاصهٔ بالای فرم، که همهٔ متن‌های این یادداشت
+ * (بدنه، آیتم‌ها، پرسش/پاسخ‌ها و سلول‌های جدول) را یک‌جا بازنویسی می‌کند.
  * ذخیره async است و والد با onSave نتیجه را می‌گیرد؛ این کامپوننت خودش سرویس CRUD صدا نمی‌زند.
  */
 import { useEffect, useMemo, useState } from 'react';
@@ -18,7 +19,7 @@ import {
   rewriteDraft,
   tagAccent,
 } from '../../../services/notes/notesService';
-import { AIAssist, Icon, Modal, TagPill, toFa } from './notesShared';
+import { Icon, Modal, TagPill, toFa } from './notesShared';
 
 const labelClass = 'mb-2 block text-xs text-[var(--faint)]';
 const fieldClass =
@@ -303,11 +304,14 @@ export default function NoteEditor({ open, note, tagGroups = [], saving = false,
           <p className="mt-2 text-[10px] leading-6 text-[var(--ghost)]">{activeKind.hint}</p>
         </div>
 
-        {/* تپش هوشمند روی همهٔ متن‌ها */}
+        {/* ── تنها نقطهٔ ورود تپش هوشمند در ویرایشگر ──
+            قبلاً کنار هر فیلد (بدنه، هر آیتم، هر پرسش/پاسخ، هر سلول جدول) یک آیکون
+            جدا بود؛ همه جمع شدند در همین یک آیکون + کادر خلاصه که کل پیش‌نویس را
+            یک‌جا بازنویسی می‌کند. */}
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#937fcd]/25 bg-[#937fcd]/[0.07] p-3.5">
           <span className="flex items-center gap-2 text-[11px] text-[var(--purple-soft-ink)]">
             <Icon name="wand" size={14} />
-            تپش هوشمند می‌تواند همهٔ متن‌های این یادداشت را یک‌جا بازنویسی کند.
+            تپش هوشمند همهٔ متن‌های این یادداشت — بدنه، آیتم‌ها، پرسش و پاسخ و جدول — را یک‌جا مرتب می‌کند.
           </span>
           <div className="flex flex-wrap gap-1.5">
             {NOTE_AI_ACTIONS.map((option) => (
@@ -327,16 +331,13 @@ export default function NoteEditor({ open, note, tagGroups = [], saving = false,
         {kind === 'text' && (
           <div>
             <label className={labelClass} htmlFor="nt-editor-body">متن یادداشت</label>
-            <div className="space-y-2">
-              <textarea
-                id="nt-editor-body"
-                className={`${fieldClass} min-h-36 resize-y leading-7`}
-                value={body}
-                onChange={(event) => setBody(event.target.value)}
-                placeholder="هر چیزی که بعداً لازم داری بنویس… (خط تیره و بولت آزاد است)"
-              />
-              <AIAssist text={body} onApply={setBody} />
-            </div>
+            <textarea
+              id="nt-editor-body"
+              className={`${fieldClass} min-h-36 resize-y leading-7`}
+              value={body}
+              onChange={(event) => setBody(event.target.value)}
+              placeholder="هر چیزی که بعداً لازم داری بنویس… (خط تیره و بولت آزاد است)"
+            />
           </div>
         )}
 
@@ -359,15 +360,12 @@ export default function NoteEditor({ open, note, tagGroups = [], saving = false,
                   >
                     <Icon name="check" size={13} />
                   </button>
-                  <div className="flex-1 space-y-1.5">
-                    <input
-                      className={fieldClass}
-                      value={item.text}
-                      onChange={(event) => updateItem(item.id, { text: event.target.value })}
-                      placeholder="آیتم جدید…"
-                    />
-                    <AIAssist compact text={item.text} onApply={(value) => updateItem(item.id, { text: value })} />
-                  </div>
+                  <input
+                    className={`${fieldClass} flex-1`}
+                    value={item.text}
+                    onChange={(event) => updateItem(item.id, { text: event.target.value })}
+                    placeholder="آیتم جدید…"
+                  />
                   <button
                     type="button"
                     aria-label="حذف آیتم"
@@ -404,24 +402,18 @@ export default function NoteEditor({ open, note, tagGroups = [], saving = false,
                     </button>
                   </div>
                   <div className="space-y-2.5">
-                    <div className="space-y-1.5">
-                      <input
-                        className={fieldClass}
-                        value={pair.question}
-                        onChange={(event) => updatePair(pair.id, { question: event.target.value })}
-                        placeholder="پرسش… مثلا: چرا S2 شنیده می‌شود؟"
-                      />
-                      <AIAssist compact text={pair.question} onApply={(value) => updatePair(pair.id, { question: value })} />
-                    </div>
-                    <div className="space-y-1.5">
-                      <textarea
-                        className={`${fieldClass} min-h-20 resize-y leading-7`}
-                        value={pair.answer}
-                        onChange={(event) => updatePair(pair.id, { answer: event.target.value })}
-                        placeholder="پاسخ… (در حالت مرور پنهان می‌ماند تا خودت بازیابی کنی)"
-                      />
-                      <AIAssist compact text={pair.answer} onApply={(value) => updatePair(pair.id, { answer: value })} />
-                    </div>
+                    <input
+                      className={fieldClass}
+                      value={pair.question}
+                      onChange={(event) => updatePair(pair.id, { question: event.target.value })}
+                      placeholder="پرسش… مثلا: چرا S2 شنیده می‌شود؟"
+                    />
+                    <textarea
+                      className={`${fieldClass} min-h-20 resize-y leading-7`}
+                      value={pair.answer}
+                      onChange={(event) => updatePair(pair.id, { answer: event.target.value })}
+                      placeholder="پاسخ… (در حالت مرور پنهان می‌ماند تا خودت بازیابی کنی)"
+                    />
                   </div>
                 </div>
               ))}
@@ -490,11 +482,6 @@ export default function NoteEditor({ open, note, tagGroups = [], saving = false,
                             value={row.cells[column.id] ?? ''}
                             onChange={(event) => updateCell(row.id, column.id, event.target.value)}
                             placeholder="…"
-                          />
-                          <AIAssist
-                            compact
-                            text={row.cells[column.id] ?? ''}
-                            onApply={(value) => updateCell(row.id, column.id, value)}
                           />
                         </div>
                       ))}
