@@ -104,6 +104,50 @@ function ShortcutsHelp() {
   );
 }
 
+/* صدای کارت — فایل بارگذاری‌شدهٔ کاربر؛ پخش دستی با دکمه یا خودکار از تنظیمات */
+function CardAudio({ card, autoPlay }) {
+  const audioRef = useRef(null);
+  const [playing, setPlaying] = useState(false);
+
+  useEffect(() => {
+    const el = audioRef.current;
+    setPlaying(false);
+    if (!el) return undefined;
+    el.currentTime = 0;
+    if (autoPlay) {
+      el.play().then(() => setPlaying(true)).catch(() => {});
+    }
+    return undefined;
+  }, [card.id, autoPlay]);
+
+  const toggle = () => {
+    const el = audioRef.current;
+    if (!el) return;
+    if (el.paused) {
+      el.play().then(() => setPlaying(true)).catch(() => {});
+    } else {
+      el.pause();
+      el.currentTime = 0;
+      setPlaying(false);
+    }
+  };
+
+  return (
+    <div className="mt-4">
+      <button
+        type="button"
+        onClick={toggle}
+        aria-pressed={playing}
+        className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-white/5 px-4 py-2 text-xs text-[var(--muted)] transition-colors hover:bg-white/10 hover:text-white"
+      >
+        <Icon name={playing ? 'pause' : 'volume'} className="h-4 w-4 text-[var(--blue-soft-ink)]" />
+        {playing ? 'توقف صدا' : 'پخش صدا'}
+      </button>
+      <audio ref={audioRef} src={card.media?.audioUrl} preload="auto" onEnded={() => setPlaying(false)} className="hidden" />
+    </div>
+  );
+}
+
 export default function ReviewSession({ userData, config, onExit, onEditCard }) {
   const { mode, deckId, label } = config;
   const [queue, setQueue] = useState(null);
@@ -294,7 +338,7 @@ export default function ReviewSession({ userData, config, onExit, onEditCard }) 
               { label: 'زمان', value: `~${toFa(minutes)} دقیقه` },
             ].map((stat) => (
               <div key={stat.label} className="rounded-2xl border border-white/6 bg-[var(--surface-soft)] p-3">
-                <strong className="block text-xl [font-family:'Doran','Vazir',Tahoma,sans-serif]">{stat.value}</strong>
+                <strong className="fc-num block text-xl">{stat.value}</strong>
                 <span className="text-[11px] text-[var(--faint)]">{stat.label}</span>
               </div>
             ))}
@@ -377,6 +421,7 @@ export default function ReviewSession({ userData, config, onExit, onEditCard }) 
           </div>
 
           <CardBody card={card} revealed={revealed} />
+          {card.media?.audioUrl && <CardAudio card={card} autoPlay={queue?.settings?.autoPlayAudio} />}
           <McqOptions card={card} revealed={revealed} />
 
           {card.type === 'basic-hint' && card.hint && !revealed && (

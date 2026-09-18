@@ -2,6 +2,7 @@
  * CardEditor — ساخت و ویرایش سریع کارت.
  * اصل: کاربر برای کارت ساده نباید فرم طولانی ببیند؛ Advanced Options جمع‌شده است.
  * انواع کارت: basic | basic-hint | cloze | mcq (معماری برای انواع بعدی باز است).
+ * صدا: فایل صوتیِ کاربر (تا ۲ مگابایت) به‌صورت Data-URL روی کارت ذخیره می‌شود.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { SUBJECTS } from '../../../services/flashcards/mockData';
@@ -45,6 +46,8 @@ function QualityHints({ front, back, type, options }) {
   );
 }
 
+const MAX_AUDIO_BYTES = 2 * 1024 * 1024; /* سقف ذخیره‌سازی محلی — localStorage محدود است */
+
 export default function CardEditor({ open, onClose, onSave, card = null, defaultDeckId = null, deckOptions = [] }) {
   const [type, setType] = useState('basic');
   const [front, setFront] = useState('');
@@ -61,6 +64,7 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
   const [topic, setTopic] = useState('');
   const [deckId, setDeckId] = useState(defaultDeckId ?? '');
   const [imageUrl, setImageUrl] = useState('');
+  const [audioUrl, setAudioUrl] = useState('');
   const [sourceType, setSourceType] = useState('user');
   const [sourceTitle, setSourceTitle] = useState('');
   const [error, setError] = useState('');
@@ -84,6 +88,7 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
       setTopic(card.topicId ?? '');
       setDeckId(card.deckId ?? defaultDeckId ?? '');
       setImageUrl(card.media?.imageUrl ?? '');
+      setAudioUrl(card.media?.audioUrl ?? '');
       setSourceType(card.source?.sourceType ?? 'user');
       setSourceTitle(card.source?.title ?? '');
     } else {
@@ -101,6 +106,7 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
       setTopic('');
       setDeckId(defaultDeckId ?? deckOptions[0]?.id ?? '');
       setImageUrl('');
+      setAudioUrl('');
       setSourceType('user');
       setSourceTitle('');
     }
@@ -128,13 +134,35 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
     setTagDraft('');
   };
 
+  /* فایل صوتی کاربر → Data-URL؛ اعتبارسنجی نوع و حجم پیش از خواندن */
+  const handleAudioFile = (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = ''; /* انتخاب دوبارهٔ همان فایل هم کار کند */
+    if (!file) return;
+    if (!file.type.startsWith('audio/')) {
+      setError('یک فایل صوتی انتخاب کن (mp3، m4a، ogg و…).');
+      return;
+    }
+    if (file.size > MAX_AUDIO_BYTES) {
+      setError('حجم فایل صوتی باید کمتر از ۲ مگابایت باشد.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setAudioUrl(String(reader.result));
+      setError('');
+    };
+    reader.onerror = () => setError('خواندن فایل صوتی نشد؛ دوباره تلاش کن.');
+    reader.readAsDataURL(file);
+  };
+
   const handleSave = async () => {
     if (!front.trim() || (!back.trim() && type !== 'mcq')) {
       setError('صورت و پاسخ کارت را پر کن.');
       return;
     }
     if (!deckId) {
-      setError('یک دِک انتخاب کن.');
+      setError('یک مجموعه انتخاب کن.');
       return;
     }
     if (type === 'mcq' && options.filter((option) => option.text.trim() && option.correct).length !== 1) {
@@ -151,7 +179,7 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
       tags,
       subjectId: subjectId || null,
       topicId: topic.trim() || null,
-      imageUrl: imageUrl.trim() || null,
+      media: { imageUrl: imageUrl.trim() || null, audioUrl: audioUrl || null },
       source: { sourceType, sourceId: null, title: sourceTitle.trim() || null, url: null },
       ...(type === 'mcq' ? { options: options.filter((option) => option.text.trim()) } : {}),
     };
@@ -304,6 +332,33 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
           </div>
         )}
 
+        {/* صدا — بارگذاری فایل صوتی توسط کاربر */}
+        <div>
+          <p className="mb-2 text-xs text-[var(--muted)]">صدا (اختیاری)</p>
+          {audioUrl ? (
+            <div className="flex items-center gap-2.5 rounded-2xl border border-white/10 bg-black/30 px-3.5 py-2.5">
+              <Icon name="volume" className="h-4 w-4 shrink-0 text-[var(--blue-soft-ink)]" />
+              <audio controls src={audioUrl} className="h-9 min-w-0 flex-1" aria-label="پیش‌نمایش صدای کارت" />
+              <button
+                type="button"
+                onClick={() => setAudioUrl('')}
+                aria-label="حذف صدای کارت"
+                title="حذف صدا"
+                className="grid h-8 w-8 shrink-0 cursor-pointer place-items-center rounded-lg text-[var(--faint)] transition-colors hover:bg-white/5 hover:text-[var(--red-ink)]"
+              >
+                <Icon name="close" className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          ) : (
+            <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-white/5 px-4 py-2.5 text-xs text-[var(--muted)] transition-colors hover:bg-white/10 hover:text-white">
+              <Icon name="volume" className="h-4 w-4 text-[var(--blue-soft-ink)]" />
+              بارگذاری فایل صوتی
+              <input type="file" accept="audio/*" onChange={handleAudioFile} className="hidden" />
+            </label>
+          )}
+          <p className="mt-1.5 text-[10px] text-[var(--ghost)]">حداکثر ۲ مگابایت — در مرور با دکمهٔ پخش یا خودکار (تنظیمات) پخش می‌شود.</p>
+        </div>
+
         {/* تگ‌ها */}
         <div>
           <label htmlFor="fc-tag" className="mb-2 block text-xs text-[var(--muted)]">تگ‌ها</label>
@@ -354,7 +409,7 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
             <div className="fc-card-face mt-2 space-y-3 rounded-2xl border border-white/8 p-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label htmlFor="fc-deck" className="mb-1.5 block text-[11px] text-[var(--faint)]">دِک</label>
+                  <label htmlFor="fc-deck" className="mb-1.5 block text-[11px] text-[var(--faint)]">مجموعه</label>
                   <select
                     id="fc-deck"
                     value={deckId}

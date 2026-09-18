@@ -1,5 +1,5 @@
 /*
- * DeckModal — ساخت و ویرایش دِک.
+ * DeckModal — ساخت و ویرایش مجموعه.
  * فرم کوتاه: نام، توضیح، درس، رنگ کاور (از پالت تپش) و سطح دسترسی.
  */
 import { useEffect, useState } from 'react';
@@ -35,7 +35,7 @@ export default function DeckModal({ open, onClose, onSave, deck = null }) {
 
   const handleSave = async () => {
     if (!title.trim()) {
-      setError('نام دِک را بنویس.');
+      setError('نام مجموعه را بنویس.');
       return;
     }
     setSaving(true);
@@ -50,10 +50,10 @@ export default function DeckModal({ open, onClose, onSave, deck = null }) {
   };
 
   return (
-    <Modal open={open} onClose={onClose} title={deck ? 'ویرایش دِک' : 'ساخت دِک'}>
+    <Modal open={open} onClose={onClose} title={deck ? 'ویرایش مجموعه' : 'ساخت مجموعه'}>
       <div className="space-y-4">
         <div>
-          <label htmlFor="deck-title" className="mb-2 block text-xs text-[var(--muted)]">نام دِک</label>
+          <label htmlFor="deck-title" className="mb-2 block text-xs text-[var(--muted)]">نام مجموعه</label>
           <input
             id="deck-title"
             value={title}
@@ -71,7 +71,7 @@ export default function DeckModal({ open, onClose, onSave, deck = null }) {
             value={description}
             onChange={(event) => setDescription(event.target.value)}
             rows={2}
-            placeholder="این دِک برای چیست؟"
+            placeholder="این مجموعه برای چیست؟"
             className="w-full resize-none rounded-xl border border-white/10 bg-black/30 p-4 text-sm leading-7 outline-none transition-colors placeholder:text-[var(--ghost)] focus:border-[#5b8cc7]/50"
           />
         </div>
@@ -106,7 +106,7 @@ export default function DeckModal({ open, onClose, onSave, deck = null }) {
 
         <div>
           <p className="mb-2 text-xs text-[var(--muted)]">رنگ کاور</p>
-          <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="رنگ کاور دِک">
+          <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="رنگ کاور مجموعه">
             {DECK_COLORS.map((color) => (
               <button
                 key={color}
@@ -136,7 +136,7 @@ export default function DeckModal({ open, onClose, onSave, deck = null }) {
             disabled={saving}
             className="cursor-pointer rounded-xl bg-[var(--blue-bright)] px-6 py-2.5 text-sm font-bold text-white transition-transform hover:-translate-y-0.5 disabled:opacity-60 [font-family:'Doran','Vazir',Tahoma,sans-serif]"
           >
-            {deck ? 'ذخیره' : 'ساخت دِک'}
+            {deck ? 'ذخیره' : 'ساخت مجموعه'}
           </button>
         </div>
       </div>

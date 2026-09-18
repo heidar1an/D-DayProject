@@ -616,15 +616,71 @@ check('صفحهٔ محصولات رندر می‌شود', /class="ps-page"/.test
 check('بدنهٔ محصولات در صفحهٔ مستقل هست', /class="ps-section/.test(productsPage));
 check('تیتر صفحه یک h1 برچسب‌دار است',
   /<h1 class="ps-intro__title" id="products-title"/.test(productsPage));
+check('هیروی محصولات هدرِ دوخطیِ تازه دارد',
+  /ps-intro__title-top/.test(productsPage) && /ps-intro__title-accent/.test(productsPage));
+check('هاله و کادرهای آماری قدیمی از هیرو حذف شده‌اند',
+  !/ps-hero__glow/.test(productsPage) && !/ps-hero__facts/.test(productsPage));
+
+/* CSS همین لایه — سنجه‌های ظاهری که از HTML تنها درنمی‌آید */
+const productsCss = readFileSync('__ROOT__/src/layout/products/products.css', 'utf8');
+check('دو تکهٔ تیترِ محصولات هم‌سطح و سبز شده‌اند',
+  /\.ps-intro__title-top,\s*\.ps-intro__title-accent \{[^}]*color: var\(--green-ink\)[^}]*font-size: 1em/.test(
+    productsCss,
+  ));
+check('تیترِ سرآغازِ محصولات بزرگ‌تر شده است',
+  /\.ps-intro__title \{[^}]*font-size: clamp\(2\.6rem, 5\.2vw, 4\.8rem\)/.test(productsCss));
+
+/* سیاهِ خالص در پس‌زمینه‌ها — توکنِ عمیق، پردهٔ سطح، و پلِ Tailwind */
+check('هیچ پس‌زمینهٔ سیاهِ خالصی در توکن‌ها نمانده است',
+  /--deep: #121212;/.test(siteCss) &&
+    !/--deep: #000000;/.test(siteCss) &&
+    /--scrim-rgb: 18 18 18;/.test(siteCss) &&
+    /:root \{[^}]*--color-black: var\(--deep\)/.test(siteCss));
+check('سیاهِ سایه/پردهٔ مودال عمداً تیره مانده است',
+  /--shadow-rgb: 0 0 0;/.test(siteCss));
+
 const productsCount = (productsPage.match(/class="ps-eyebrow"/g) || []).length;
-check('هشت محصول معرفی می‌شود', productsCount === 8, String(productsCount));
-check('سه واقعیتِ سرآغاز از خودِ داده می‌آید', /ps-hero__facts/.test(productsPage));
+check('نه محصول معرفی می‌شود', productsCount === 9, String(productsCount));
 check('هر محصول مقصدِ واقعیِ داشبورد دارد',
   (productsPage.match(/href="#dashboard\?/g) || []).length >= 8,
   String((productsPage.match(/href="#dashboard\?/g) || []).length));
-check('نمای چسبانِ بانک تست رندر می‌شود', /ps-sticky__visual-inner/.test(productsPage));
-check('فراخوان پایانیِ صفحه رندر می‌شود', /ps-final__panel/.test(productsPage));
-check('صفحهٔ محصولات به تعرفه‌ها راه دارد', /href="#pricing"/.test(productsPage));
+check('برگه‌های پشت‌سرهمِ درسنامه رندر می‌شوند',
+  /ps-sheets/.test(productsPage) && (productsPage.match(/class="ps-sheet /g) || []).length === 5,
+  String((productsPage.match(/class="ps-sheet /g) || []).length));
+check('کادرهای بانک تست در یک ردیفِ قابل چرخش هستند',
+  /ps-panels/.test(productsPage) && (productsPage.match(/class="ps-panels__tab /g) || []).length === 4,
+  String((productsPage.match(/class="ps-panels__tab /g) || []).length));
+
+/* ترتیبِ خواسته‌شده: آزمون‌ساز → مقالات (کارتِ مستقل) → ویکی */
+const examTitleAt = productsPage.indexOf('class="ps-card__title">آزمون');
+const articlesTitleAt = productsPage.indexOf('class="ps-card__title">مقالات');
+const wikiTitleAt = productsPage.indexOf('class="ps-card__title">ویکی');
+check('مقالات کارتِ مستقلِ خودش را دارد و بین آزمون‌ساز و ویکی نشسته',
+  examTitleAt > 0 && articlesTitleAt > examTitleAt && wikiTitleAt > articlesTitleAt,
+  examTitleAt + ' < ' + articlesTitleAt + ' < ' + wikiTitleAt);
+check('مقالات دیگر داخل کارتِ ویکی نیست',
+  productsPage.indexOf('ps-articles') > 0 &&
+    productsPage.indexOf('ps-articles') < productsPage.indexOf('ps-card--wiki'));
+check('کارتِ ویکی آینهٔ هدرِ لایه است، نه کادرِ جست‌وجوی قدیمی',
+  /ps-wiki-header/.test(productsPage) && !/ps-wiki__input/.test(productsPage));
+check('عنوانِ کارتِ ویکی دیگر اکسنتِ مسی نمی‌گیرد',
+  /\.ps-card--wiki \.ps-card__title/.test(productsCss) &&
+    !/\.ps-card--wiki \.ps-card__title \{[^}]*copper-soft-ink/.test(productsCss));
+
+check('تصویر شبکهٔ دانش و دفترچهٔ مرور رندر می‌شوند',
+  /ps-network-image/.test(productsPage) && /ps-review/.test(productsPage));
+check('قابِ شبکهٔ دانش بدون پس‌زمینه و بدون دایرهٔ تزئینی است',
+  !/ps-network-image__orbit/.test(productsPage) &&
+    !/ps-network-image__veil/.test(productsPage) &&
+    /\.ps-network-image \{[^}]*direction: ltr/.test(productsCss) &&
+    !/\.ps-network-image \{[^}]*background/.test(productsCss));
+check('برچسب‌های اکوسیستم در RTL کنارِ گوی‌ها می‌نشینند',
+  /\.ps-eco__label \{[^}]*direction: rtl/.test(productsCss) &&
+    /class="ps-eco__label"[^>]*text-anchor="end"/.test(productsPage) &&
+    /class="ps-eco__label"[^>]*text-anchor="start"/.test(productsPage));
+
+check('کادر پایانیِ جداگانه حذف شده و اکوسیستمِ متحرک مانده است',
+  !/ps-final__panel/.test(productsPage) && /ps-eco__orbit-ring/.test(productsPage));
 check('هدر و فوتر سایت روی صفحهٔ محصولات هستند',
   /class="site-header"/.test(productsPage) && /class="site-footer"/.test(productsPage));
 

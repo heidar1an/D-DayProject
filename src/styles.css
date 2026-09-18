@@ -70,6 +70,8 @@
  *
  * قرارداد نام‌گذاری:
  *   سطوح  : --deep (فرورفته‌ترین) → --background → --surface → --surface-soft → --surface-strong
+ *           `--deep` هم مثل `--background` یک خاکستریِ نزدیک به هم است، نه سیاهِ
+ *           خالص (#121212 مقابل #181818) — همان فاصلهٔ ۶ واحدیِ تم روشن.
  *   متن   : --white (اصلی) → --muted → --faint → --ghost (کم‌رنگ‌ترین)
  *   اکسنت : --blue / --purple / --green / --gold / --copper / --red / --orange
  *            پرکننده‌اند و در هر دو تم یکسان می‌مانند.
@@ -88,7 +90,10 @@
   color-scheme: dark;
 
   /* ── سطوح ── */
-  --deep: #000000;
+  /* `--deep` عمداً «سیاهِ خالص» نیست: یک پله زیرِ `--background` می‌نشیند تا
+     پنل‌های فرورفته با زمینهٔ صفحه هم‌خانواده باشند و کنتراستِ تند نسازند.
+     همان فاصله‌ای که تم روشن از قبل دارد (۶ واحد). */
+  --deep: #121212;
   --background: #181818;
   --surface: #242426;
   --surface-soft: #282828;
@@ -112,12 +117,13 @@
 
   /* ── پایهٔ رنگ لایه‌های نیمه‌شفاف ──
      wash  = تینت کم‌آلفا (۰ تا ~۰٫۲): در تم تیره روشن‌کننده، در تم روشن تیره‌کننده.
-     scrim = پردهٔ توپُر از جنس «سطح»: در تم تیره سیاه، در تم روشن سفید.
-             برای پنل‌های شیشه‌ای و پس‌زمینهٔ کارت‌هایی که باید با تم برگردند.
+     scrim = پردهٔ توپُر از جنس «سطح»: در تم تیره هم‌خانوادهٔ `--deep` (نه سیاهِ
+             خالص)، در تم روشن سفید. برای پنل‌های شیشه‌ای و پس‌زمینهٔ کارت‌هایی
+             که باید با تم برگردند.
      shadow = هر چیزی که باید همیشه تیره بماند: سایه، drop-shadow، پردهٔ پشت
               مودال و روکش تیره‌کنندهٔ روی تصویر. سایهٔ سفید معنا ندارد. */
   --wash-rgb: 255 255 255;
-  --scrim-rgb: 0 0 0;
+  --scrim-rgb: 18 18 18;
   --line-rgb: 255 255 255;
   --ink-rgb: 255 255 255;
   --shadow-rgb: 0 0 0;
@@ -134,6 +140,7 @@
   --green-vivid: #61d192;
   --brown: #604e42;
   --brown-bright: #ab8e7c;
+  --brown-ink: #ab8e7c;
   --copper: #b99a86;
   --purple: #574c80;
   --purple-bright: #937fcd;
@@ -172,6 +179,16 @@
   --card-sage: #25312b;
   --card-sky: #1f2c3d;
   --card-warm: #302925;
+
+  /*
+   * ── نگاشت کلاس‌های Tailwind در تم تیره ──
+   * Tailwind v4 رنگ `black` را از `--color-black` می‌سازد. اگر تعریف نشود،
+   * مقدار پیش‌فرضِ خودش (#000) می‌آید و هر `bg-black/N` سیاهِ خالص می‌شود —
+   * ناهم‌خانواده با بقیهٔ سطح‌ها. پس اینجا به `--deep` گره می‌خورد تا هر دو تم
+   * از یک منبع رنگ بخوانند.
+   */
+  --color-white: var(--white);
+  --color-black: var(--deep);
 
   --content-width: 80%;
 }
@@ -235,6 +252,7 @@
   --purple-soft-ink: #7f68c4;
   --gold-ink: #8a5f0c;
   --gold-soft-ink: #96690d;
+  --brown-ink: #75573f;
   --copper-ink: #75573f;
   --copper-soft-ink: #7f6047;
   --red-ink: #ab353c;
@@ -3191,8 +3209,19 @@ img {
   border-radius: inherit;
 }
 
+/*
+ * `flex: 1` عمدی است، نه تزئینی. فلشِ کارت (`.article-card__go`) مطلق است و به
+ * همین بلوک قید می‌شود؛ اگر بلوک فقط به اندازهٔ متنِ خودش ارتفاع بگیرد، کارتی که
+ * عنوان/خلاصهٔ کوتاه‌تری دارد بلوکِ کوتاه‌تری می‌گیرد و فلشش بالاتر از بقیه
+ * می‌افتد. با پر کردن فضای باقی‌مانده، پایینِ هر سه بلوک روی پایینِ کارت می‌نشیند
+ * و فلش‌ها در یک خط هم‌تراز می‌شوند.
+ *
+ * در حالت چندستونی (≥۶۴۱px) این بلوک از حالت فلکس بیرون می‌رود و ردیف‌هایش را
+ * از شبکهٔ والد قرض می‌گیرد — پایین‌تر، در بلوک `subgrid`، توضیح داده شده.
+ */
 .article-card__content {
   position: relative;
+  flex: 1;
   min-height: 190px;
   padding: 26px 28px 42px;
   direction: rtl;
@@ -3236,6 +3265,47 @@ img {
 .article-card:hover .article-card__go {
   color: var(--blue-bright);
   transform: translateX(-4px);
+}
+
+/*
+ * هم‌ترازی کارت‌های مقاله — «توضیحات هر سه کارت از یک خط شروع شود».
+ *
+ * چرا لازم بود: ارتفاع تیتر بسته به عرض صفحه ۲ تا ۶ خط می‌شود (در ۱۲۸۰px یکی
+ * ۲ خط و دوتای دیگر ۳ خط). چون توضیحات در جریانِ بعد از تیتر می‌آمد، شروعش به
+ * ارتفاع تیترِ همان کارت گره خورده بود و تا ~۳۵px ناتراز می‌شد.
+ *
+ * چرا `subgrid`: هر سه کارت **ردیف‌های مشترکِ شبکهٔ والد** را قرض می‌گیرند
+ * (تصویر / تیتر / توضیحات). پس ارتفاع ردیفِ تیتر = بلندترین تیترِ همان عرض، و
+ * توضیحاتِ هر سه از یک خط شروع می‌شود — **بدون کوتاه‌کردن هیچ متنی** (اگر با
+ * `line-clamp` تیتر را ۲ خط می‌کردیم، تیترهای بلند «…» می‌خوردند).
+ *
+ * فقط ≥۶۴۱px: زیر آن شبکه تک‌ستونی است و کارت‌ها روی هم می‌نشینند، پس
+ * هم‌ترازی افقی معنا ندارد و چیدمان فلکسِ پایه دست‌نخورده می‌ماند.
+ * `row-gap: 0` حیاتی است — ردیف‌ها داخلِ هر کارت‌اند، نه بین کارت‌ها؛ فاصلهٔ
+ * ستون‌ها همان ۱۸px می‌ماند.
+ */
+@media (min-width: 641px) {
+  .article-grid {
+    grid-template-rows: auto auto auto;
+    column-gap: 18px;
+    row-gap: 0;
+  }
+
+  .article-card {
+    display: grid;
+    grid-row: 1 / -1;
+    grid-template-rows: subgrid;
+  }
+
+  .article-card__image {
+    grid-row: 1;
+  }
+
+  .article-card__content {
+    display: grid;
+    grid-row: 2 / -1;
+    grid-template-rows: subgrid;
+  }
 }
 
 .articles__all {
@@ -3486,40 +3556,13 @@ img {
   background: rgb(var(--wash-rgb) / 0.16);
 }
 
+/* نشانه‌های فضاهای مجازی همه تصویرند (webp/svg) و تک‌فام سفید ذخیره شده‌اند؛
+   همین فیلترِ آیکون‌های سایت آن‌ها را با تم برمی‌گرداند: سفید در تیره، تیره در روشن. */
 .site-footer__social-link img {
   width: 24px;
   height: 24px;
   object-fit: contain;
-}
-
-.site-footer__social-link span {
-  display: grid;
-  width: 24px;
-  height: 24px;
-  place-items: center;
-  border-radius: 7px;
-  background: currentColor;
-  color: var(--background);
-  font-family: Arial, sans-serif;
-  font-size: 1rem;
-  font-weight: 800;
-  line-height: 1;
-}
-
-.site-footer__social-link--eitaa span {
-  border-radius: 50%;
-  color: var(--gold);
-  background: transparent;
-  border: 2px solid currentColor;
-  font-size: 1.15rem;
-  text-transform: lowercase;
-}
-
-.site-footer__social-link--youtube span {
-  color: var(--red);
-  background: transparent;
-  border: 2px solid currentColor;
-  font-size: 0.72rem;
+  filter: var(--icon-filter);
 }
 
 .site-footer__about {

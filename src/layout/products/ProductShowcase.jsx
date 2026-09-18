@@ -1,20 +1,19 @@
 import { useRef } from 'react';
 
 import ProductVisual from './ProductVisual';
-import { ProductArrow, useScrollProgressVar } from './productsShared';
+import { ProductArrow, useStageIndex } from './productsShared';
 
 /*
  * ── نمای بزرگِ تمام‌عرض (محصولِ شاخص) ──
  *
- * پیش‌نمایش هنگام ورود به دید بالا می‌آید و با اسکرول، لایه‌های داخلی‌اش با
- * سرعت‌های کمی متفاوت جابه‌جا می‌شوند (پارالاکس). عددِ پیشروی روی متغیر
- * `--ps-progress` نوشته می‌شود و فقط CSS آن را می‌خواند؛ هیچ رندرِ دوباره‌ای
- * هنگام اسکرول رخ نمی‌دهد.
+ * پیش‌نمایش هنگام ورود به دید بالا می‌آید و خانوادهٔ دوره‌ها با اسکرول، مثل
+ * برگه‌های پشت‌سرهم ورق می‌خورند. فقط وقتی مرحله عوض شود state تغییر می‌کند؛
+ * حرکت پیوستهٔ اسکرول وارد رندرهای متعدد React نمی‌شود.
  */
 
 export default function ProductShowcase({ product, onOpen }) {
   const rootRef = useRef(null);
-  useScrollProgressVar(rootRef);
+  const stage = useStageIndex(rootRef, product.sheets?.length ?? 1);
 
   return (
     <article className={`ps-showcase ps-accent-${product.accent}`} ref={rootRef} data-reveal>
@@ -39,7 +38,7 @@ export default function ProductShowcase({ product, onOpen }) {
       </div>
 
       <div className="ps-showcase__visual">
-        <ProductVisual product={product} />
+        <ProductVisual product={product} stage={stage} />
       </div>
     </article>
   );

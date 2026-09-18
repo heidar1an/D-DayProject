@@ -2,7 +2,8 @@
  * بخش یادداشت تپش — دفترچهٔ شخصی دانشجوی پزشکی.
  *
  * ساختار (مستند کامل: README.md کنار همین پوشه):
- *   NotesSection ← پوسته: هیرو + آمار + جست‌وجو/فیلتر + دسته‌بندی تگ‌ها + گرید کارت‌ها
+ *   NotesSection ← پوسته: نوار بالای لایه (بازگشت + ساخت یادداشت) + هیرو +
+ *                  جست‌وجو/مرتب‌سازی + بخش واحد «موضوع و تگ» + گرید کارت‌ها
  *   NoteDetail   ← نمای کامل یادداشت (چک‌لیست، پرسش و پاسخ، جدول، منبع، تگ‌ها)
  *   NoteEditor   ← مودال ساخت/ویرایش (چهار حالت + موضوع + تگ دسته‌بندی‌شده + منبع)
  *   سرویس: src/services/notes (قرارداد API واقعی، فعلاً Mock + localStorage)
@@ -57,6 +58,28 @@ function ErrorState({ onRetry }) {
         className="mt-5 cursor-pointer rounded-xl bg-[var(--blue-bright)] px-6 py-2.5 text-sm text-white transition-transform hover:-translate-y-0.5 [font-family:'Doran','Vazir',Tahoma,sans-serif]"
       >
         تلاش دوباره
+      </button>
+    </div>
+  );
+}
+
+/* ── نوار بالای لایه — همان چیدمان و همان دکمهٔ نوار فلش‌کارت ──
+   دکمهٔ «ساخت یادداشت» اینجا می‌نشیند (نه در هیرو)، دقیقاً مثل «ساخت کارت» فلش‌کارت. */
+function LayerTopbar({ onBack, onCreate }) {
+  return (
+    <div className="nt-topbar dash-stagger">
+      {onBack && (
+        <button className="nt-topbar__back" type="button" onClick={onBack}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M9 6l6 6-6 6" />
+          </svg>
+          بازگشت به داشبورد
+        </button>
+      )}
+      <span className="nt-topbar__crumb">داشبورد / یادداشت‌ها</span>
+      <button type="button" onClick={onCreate} className="nt-topbar__create">
+        <Icon name="plus" size={16} />
+        ساخت یادداشت
       </button>
     </div>
   );
@@ -166,80 +189,59 @@ function NoteCard({ note, onOpen, onTogglePin, onEdit, onDelete }) {
   );
 }
 
-/* ── دسته‌بندی تگ‌ها ──
-   تگ‌ها زیر عنوان دستهٔ خودشان (فیزیولوژی، عمومی، …) می‌آیند تا فهرست تگ‌ها
-   به‌هم‌ریخته نشود؛ کلیک روی هر تگ فهرست را فیلتر می‌کند. */
-function TagBrowser({ groups, activeTag, onSelect }) {
-  const [open, setOpen] = useState(false);
-  const total = groups.reduce((sum, group) => sum + group.tags.length, 0);
+/* ── نوار چیپ موضوع و تگ ──
+   هم‌شکل ردیف مسیرهای «بانک تست علوم پایه» (`PathChip`): همهٔ چیپ‌ها در یک ردیف
+   افقی، هر چیپ فقط آیکون + عنوان، بدون کادر و بدون گروه. گروه‌بندی تگ‌ها با رنگ
+   آیکون باقی می‌ماند. کلیک روی چیپ درس، موضوع را فیلتر می‌کند، کلیک روی چیپ تگ
+   فهرست را به همان تگ می‌برد و کلیک دوباره فیلتر را برمی‌دارد. */
+function TopicChips({ rows, activeSubject, activeTag, onSelectSubject, onSelectTag, onClear, subjectCount }) {
+  const subjects = rows.filter((row) => row.count > 0);
+  const tags = rows.flatMap((row) => row.tags.map(({ tag }) => ({ tag, accent: row.accent })));
 
-  /* وقتی تگی فیلتر شده، پنل خودش باز می‌ماند تا فیلترِ فعال گم نشود */
-  useEffect(() => {
-    if (activeTag) setOpen(true);
-  }, [activeTag]);
-
-  if (groups.length === 0) return null;
+  if (subjects.length === 0 && tags.length === 0) return null;
 
   return (
-    <section className="nt-tagbar" aria-label="دسته‌بندی تگ‌ها">
-      <button
-        type="button"
-        className={`nt-tagbar__head ${open ? 'is-open' : ''}`}
-        aria-expanded={open}
-        onClick={() => setOpen((current) => !current)}
-      >
-        <span className="flex flex-wrap items-center gap-2">
-          <Icon name="folder" size={14} />
-          دسته‌بندی تگ‌ها
-          <span className="text-[10px] font-normal text-[var(--ghost)]">
-            {toFa(total)} تگ در {toFa(groups.length)} دسته
+    <section aria-label="موضوع‌ها و تگ‌ها">
+      {/* ردیف وسط‌چین؛ اگر از عرض صفحه بیشتر شد، از ابتدا اسکرول می‌شود */}
+      <div className="dash-stagger overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="mx-auto flex w-max items-center gap-2.5">
+          <button type="button" aria-pressed={activeSubject === 'all' && !activeTag} onClick={onClear} className="nt-chip">
+            همه
+          </button>
+
+          {/* عدد آماری کنار همان چیزی است که می‌شمارد: موضوع‌ها */}
+          <span className="nt-count">
+            <Icon name="tag" size={12} />
+            {toFa(subjectCount)} موضوع
           </span>
-        </span>
-        <span className="flex items-center gap-2">
-          {activeTag && <TagPill tag={activeTag} accent={tagAccent(activeTag)} />}
-          <Icon name="chevron" size={16} className="nt-tagbar__chevron" />
-        </span>
-      </button>
 
-      {open && (
-        <div className="nt-tagbar__body">
-          <div>
+          {subjects.map((row) => (
             <button
+              key={row.id}
               type="button"
-              aria-pressed={!activeTag}
-              onClick={() => onSelect(null)}
-              className={`cursor-pointer rounded-full border px-3.5 py-1.5 text-xs transition-colors ${
-                !activeTag
-                  ? 'border-white/25 bg-white/[0.1] text-white'
-                  : 'border-white/8 bg-white/[0.03] text-[var(--faint)] hover:bg-white/[0.06]'
-              }`}
+              aria-pressed={activeSubject === row.id}
+              onClick={() => onSelectSubject(activeSubject === row.id ? 'all' : row.id)}
+              className="nt-chip"
             >
-              همهٔ تگ‌ها
+              <Icon name="folder" size={16} className="nt-chip__icon" style={{ color: row.accent }} />
+              {row.label}
             </button>
-          </div>
+          ))}
 
-          {groups.map((group) => (
-            <div key={group.id} className="nt-taggroup" style={{ '--accent': group.accent }}>
-              <span className="nt-taggroup__label">
-                <Icon name="folder" size={12} />
-                {group.label}
-              </span>
-              <div className="nt-taggroup__tags">
-                {group.tags.map(({ tag, count }) => (
-                  <TagPill
-                    key={tag}
-                    tag={tag}
-                    accent={group.accent}
-                    count={count}
-                    active={activeTag === tag}
-                    onClick={() => onSelect(activeTag === tag ? null : tag)}
-                  />
-                ))}
-              </div>
-            </div>
+          {tags.map(({ tag, accent }) => (
+            <button
+              key={tag}
+              type="button"
+              aria-pressed={activeTag === tag}
+              onClick={() => onSelectTag(activeTag === tag ? null : tag)}
+              className="nt-chip"
+            >
+              <Icon name="tag" size={16} className="nt-chip__icon" style={{ color: accent }} />
+              {tag}
+            </button>
           ))}
         </div>
-      )}
+      </div>
     </section>
   );
 }
@@ -258,7 +260,7 @@ function SkeletonHome() {
   );
 }
 
-export default function NotesSection({ userData }) {
+export default function NotesSection({ userData, onBack }) {
   const { data, error, retry } = useAsyncData(() => fetchNotes(userData), [userData]);
 
   /* state محلی برای رندر اپتیمستیک — بعد از هر mutation با refresh بی‌صدا هم‌راستا می‌شود */
@@ -396,16 +398,14 @@ export default function NotesSection({ userData }) {
     [mode, notes, activeId],
   );
 
-  /* آمار کلی از همهٔ یادداشت‌ها — مستقل از فیلترهای جاری */
+  /* آمار کلی از همهٔ یادداشت‌ها — مستقل از فیلترهای جاری.
+     این اعداد جای ردیف آماری هیرو را گرفته‌اند و هرکدام کنار بخش خودش نشان داده
+     می‌شوند: «موضوع» کنار ردیف فیلتر موضوع و «این هفته» کنار نوار جست‌وجو. */
   const stats = useMemo(() => {
     const list = notes ?? [];
-    const subjectsUsed = new Set(list.map((note) => note.subjectId));
-    const thisWeek = list.filter((note) => Date.now() - new Date(note.updatedAt).getTime() < WEEK_MS).length;
     return {
-      total: list.length,
-      pinned: list.filter((note) => note.pinned).length,
-      subjects: subjectsUsed.size,
-      thisWeek,
+      subjects: new Set(list.map((note) => note.subjectId)).size,
+      thisWeek: list.filter((note) => Date.now() - new Date(note.updatedAt).getTime() < WEEK_MS).length,
     };
   }, [notes]);
 
@@ -416,23 +416,45 @@ export default function NotesSection({ userData }) {
   const pinnedNotes = filtered.filter((note) => note.pinned);
   const restNotes = filtered.filter((note) => !note.pinned);
 
-  /* چیپ موضوع‌ها فقط برای موضوع‌هایی که یادداشت دارند */
-  const usedSubjects = useMemo(() => {
-    const counts = new Map();
-    (notes ?? []).forEach((note) => counts.set(note.subjectId, (counts.get(note.subjectId) ?? 0) + 1));
-    return SUBJECTS.filter((subject) => counts.has(subject.id)).map((subject) => ({
-      ...subject,
-      count: counts.get(subject.id),
-    }));
-  }, [notes]);
-
-  /* تگ‌ها به تفکیک دسته (فیزیولوژی، آناتومی، …، عمومی) */
+  /* تگ‌ها به تفکیک دسته (فیزیولوژی، آناتومی، …، عمومی) — ویرایشگر هم از همین می‌خواند */
   const tagGroups = useMemo(() => groupTags(notes), [notes]);
+
+  /* ── ردیف‌های «موضوع + تگ» ──
+     هر موضوع یک ردیف است: سرتیتر همان درس و تگ‌های همان درس هم‌ردیفش. موضوعی که
+     تگ دارد ولی یادداشت ندارد هم می‌آید تا تگش بی‌صاحب نماند. */
+  const topicRows = useMemo(() => {
+    const noteCounts = new Map();
+    (notes ?? []).forEach((note) => noteCounts.set(note.subjectId, (noteCounts.get(note.subjectId) ?? 0) + 1));
+
+    const tagsByGroup = new Map(tagGroups.map((group) => [group.id, group.tags]));
+    const rows = SUBJECTS.filter(
+      (subject) => noteCounts.has(subject.id) || tagsByGroup.has(subject.id),
+    ).map((subject) => ({
+      id: subject.id,
+      label: subject.label,
+      accent: subject.accent,
+      count: noteCounts.get(subject.id) ?? 0,
+      tags: tagsByGroup.get(subject.id) ?? [],
+    }));
+
+    /* دستهٔ تگ‌های آزاد (خارج از فهرست پیش‌فرض) موضوع ندارد — ته فهرست می‌آید */
+    tagGroups
+      .filter((group) => !SUBJECTS.some((subject) => subject.id === group.id))
+      .forEach((group) => rows.push({ id: group.id, label: group.label, accent: group.accent, count: 0, tags: group.tags }));
+
+    return rows;
+  }, [notes, tagGroups]);
 
   const isFiltering = query.trim() || subjectFilter !== 'all' || Boolean(tagFilter);
 
   const resetFilters = useCallback(() => {
     setQuery('');
+    setSubjectFilter('all');
+    setTagFilter(null);
+  }, []);
+
+  /* «همه» فقط موضوع و تگ را پاک می‌کند؛ عبارت جست‌وجو دست‌نخورده می‌ماند */
+  const clearTopicFilters = useCallback(() => {
     setSubjectFilter('all');
     setTagFilter(null);
   }, []);
@@ -460,7 +482,9 @@ export default function NotesSection({ userData }) {
   if (notes === null) {
     return (
       <main dir="rtl" className="dash-stagger mx-auto w-[var(--content-width)] bg-[var(--background)] py-8 text-white md:py-10 [font-family:'Pinar','Vazir',Tahoma,sans-serif]">
-        {error ? <ErrorState onRetry={retry} /> : <SkeletonHome />}
+        {/* نوار بالا در حالت بارگذاری هم هست تا آمدن داده، چیدمان را جابه‌جا نکند */}
+        <LayerTopbar onBack={onBack} onCreate={() => setEditor({ note: null, saving: false })} />
+        <div className="mt-6">{error ? <ErrorState onRetry={retry} /> : <SkeletonHome />}</div>
       </main>
     );
   }
@@ -482,9 +506,11 @@ export default function NotesSection({ userData }) {
         />
       ) : (
         <div className="space-y-6">
-          {/* ── هیرو — هم‌زبان بصری سرتیتر «درسنامه جامع» ── */}
+          {/* نوار بالای لایه — دکمهٔ «ساخت یادداشت» با همان جای و همان شکل «ساخت کارت» فلش‌کارت */}
+          <LayerTopbar onBack={onBack} onCreate={() => setEditor({ note: null, saving: false })} />
+
+          {/* ── هیرو — فقط تیتر و توضیح؛ بدون هالهٔ نور و بدون ردیف آماری ── */}
           <header className="nt-hero dash-stagger" aria-label="دفترچهٔ یادداشت">
-            <span className="nt-hero__glow" aria-hidden="true" />
             <div className="nt-hero__content">
               <h1 className="nt-hero__title">
                 <span className="nt-hero__title-top">دفترچهٔ شخصی تپش</span>
@@ -494,32 +520,6 @@ export default function NotesSection({ userData }) {
                 هر نکته، ترفند و برنامه‌ات یک‌جا؛ متن و چک‌لیست بنویس، با پرسش و پاسخ خودت را
                 بسنج، مقایسه‌ها را در جدول بچین و بگذار تپش هوشمند مرتبشان کند.
               </p>
-
-              <div className="nt-hero__stats">
-                <span className="nt-hero__stat">
-                  <Icon name="note" size={13} />
-                  {toFa(stats.total)} یادداشت
-                </span>
-                <span className="nt-hero__stat">
-                  <Icon name="pinFilled" size={13} />
-                  {toFa(stats.pinned)} گلچین‌شده
-                </span>
-                <span className="nt-hero__stat">
-                  <Icon name="tag" size={13} />
-                  {toFa(stats.subjects)} موضوع
-                </span>
-                <span className="nt-hero__stat">
-                  <Icon name="spark" size={13} />
-                  {toFa(stats.thisWeek)} این هفته
-                </span>
-              </div>
-
-              <div className="nt-hero__cta">
-                <button type="button" onClick={() => setEditor({ note: null, saving: false })} className="nt-hero__create">
-                  <Icon name="plus" size={16} />
-                  ساخت یادداشت
-                </button>
-              </div>
             </div>
           </header>
 
@@ -540,7 +540,7 @@ export default function NotesSection({ userData }) {
             />
           ) : (
             <>
-              {/* ── نوار ابزار: جست‌وجو + موضوع + مرتب‌سازی ── */}
+              {/* ── نوار ابزار: جست‌وجو + مرتب‌سازی + شمارندهٔ «این هفته» ── */}
               <section className="space-y-3" aria-label="جست‌وجو و فیلتر یادداشت‌ها">
                 <div className="flex flex-wrap items-center gap-2">
                   <div className="relative min-w-56 flex-1">
@@ -556,6 +556,12 @@ export default function NotesSection({ userData }) {
                       className="w-full rounded-2xl border border-white/8 bg-[var(--surface-soft)] py-3 pe-4 ps-11 text-sm text-white outline-none transition-colors placeholder:text-[var(--ghost)] focus:border-[#5b8cc7]/60"
                     />
                   </div>
+
+                  {/* «این هفته» از هیرو به همین نوار آمده؛ کنار جست‌وجو معنی پیدا می‌کند */}
+                  <span className="nt-count">
+                    <Icon name="spark" size={12} />
+                    {toFa(stats.thisWeek)} این هفته
+                  </span>
 
                   <label className="relative">
                     <span className="sr-only">مرتب‌سازی</span>
@@ -575,43 +581,18 @@ export default function NotesSection({ userData }) {
                     </span>
                   </label>
                 </div>
-
-                {usedSubjects.length > 0 && (
-                  <div className="flex flex-wrap items-center gap-2">
-                    <button
-                      type="button"
-                      aria-pressed={subjectFilter === 'all'}
-                      onClick={() => setSubjectFilter('all')}
-                      className={`cursor-pointer rounded-full border px-3.5 py-1.5 text-xs transition-colors ${
-                        subjectFilter === 'all'
-                          ? 'border-white/25 bg-white/[0.1] text-white'
-                          : 'border-white/8 bg-white/[0.03] text-[var(--faint)] hover:bg-white/[0.06]'
-                      }`}
-                    >
-                      همه
-                    </button>
-                    {usedSubjects.map((subject) => (
-                      <button
-                        key={subject.id}
-                        type="button"
-                        aria-pressed={subjectFilter === subject.id}
-                        onClick={() => setSubjectFilter(subjectFilter === subject.id ? 'all' : subject.id)}
-                        className="cursor-pointer rounded-full border px-3.5 py-1.5 text-xs transition-colors"
-                        style={
-                          subjectFilter === subject.id
-                            ? { background: `${subject.accent}2e`, borderColor: `${subject.accent}66`, color: subject.accent }
-                            : { borderColor: 'rgb(var(--line-rgb) / 0.08)', color: 'var(--faint)' }
-                        }
-                      >
-                        {subject.label}
-                        <span className="ms-1.5 text-[10px] opacity-70">{toFa(subject.count)}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
               </section>
 
-              <TagBrowser groups={tagGroups} activeTag={tagFilter} onSelect={setTagFilter} />
+              {/* ── موضوع و تگ در یک ردیف چیپ — هم‌شکل بانک تست ── */}
+              <TopicChips
+                rows={topicRows}
+                activeSubject={subjectFilter}
+                activeTag={tagFilter}
+                onSelectSubject={setSubjectFilter}
+                onSelectTag={setTagFilter}
+                onClear={clearTopicFilters}
+                subjectCount={stats.subjects}
+              />
 
               {filtered.length === 0 ? (
                 <EmptyState
@@ -632,26 +613,22 @@ export default function NotesSection({ userData }) {
                 <>
                   {pinnedNotes.length > 0 && (
                     <section aria-label="گلچین‌شده‌ها" className="space-y-3">
-                      <h2 className="flex items-center gap-2 text-sm text-[var(--gold-ink)] [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+                      <h2 className="nt-section-title nt-section-title--pinned">
                         <Icon name="pinFilled" size={14} />
                         گلچین‌شده‌ها
+                        <span className="nt-section-title__count">{toFa(pinnedNotes.length)}</span>
                       </h2>
                       {renderGrid(pinnedNotes)}
                     </section>
                   )}
 
                   <section aria-label="همهٔ یادداشت‌ها" className="space-y-3">
-                    {(pinnedNotes.length > 0 || isFiltering) && (
-                      <h2 className="flex flex-wrap items-center gap-2 text-sm text-[var(--faint)] [font-family:'Doran','Vazir',Tahoma,sans-serif]">
-                        {isFiltering ? 'نتیجه‌های دیگر' : 'همهٔ یادداشت‌ها'}
-                        {tagFilter && (
-                          <span className="flex items-center gap-1.5 text-[11px] text-[var(--ghost)]">
-                            با تگ
-                            <TagPill tag={tagFilter} accent={tagAccent(tagFilter)} />
-                          </span>
-                        )}
-                      </h2>
-                    )}
+                    {/* شمارندهٔ «یادداشت» از هیرو به همین سرتیتر آمده — عدد همان چیزی است
+                        که در این بخش رندر می‌شود، نه یک عدد جدا از محتوا */}
+                    <h2 className="nt-section-title">
+                      {isFiltering ? 'نتیجه‌های دیگر' : 'همهٔ یادداشت‌ها'}
+                      <span className="nt-section-title__count">{toFa(restNotes.length)}</span>
+                    </h2>
                     {renderGrid(restNotes)}
                   </section>
                 </>

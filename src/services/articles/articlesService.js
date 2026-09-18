@@ -53,6 +53,24 @@ const TIME_FILTERS = {
   long: (article) => article.readingTime > 6,
 };
 
+/* دسته‌های قابل نمایش در نوار فیلتر؛ دسته‌های قدیمی برای برچسب مقاله‌ها نگه داشته می‌شوند. */
+const VISIBLE_CATEGORY_IDS = new Set([
+  'basic-sciences',
+  'physiology',
+  'study-skills',
+  'olympiad',
+  'lifestyle',
+  'news',
+  'biotechnology',
+  'public-health',
+  'featured',
+]);
+
+function matchesCategory(article, category) {
+  if (category === 'featured') return Boolean(article.recommended);
+  return article.category === category;
+}
+
 function filterArticles({
   category = 'all',
   query = '',
@@ -63,7 +81,7 @@ function filterArticles({
   const normalizedQuery = normalize(query);
 
   const list = ARTICLES.filter((article) => {
-    if (category !== 'all' && article.category !== category) return false;
+    if (category !== 'all' && !matchesCategory(article, category)) return false;
     if (!(TIME_FILTERS[time] ?? TIME_FILTERS.all)(article)) return false;
     if (recommendedOnly && !article.recommended) return false;
 
@@ -139,9 +157,9 @@ export async function getSearchSuggestions(query) {
 }
 
 export function getCategories() {
-  return CATEGORIES.map((category) => ({
+  return CATEGORIES.filter((category) => VISIBLE_CATEGORY_IDS.has(category.id)).map((category) => ({
     ...category,
-    count: ARTICLES.filter((article) => article.category === category.id).length,
+    count: ARTICLES.filter((article) => matchesCategory(article, category.id)).length,
   }));
 }
 

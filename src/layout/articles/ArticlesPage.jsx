@@ -17,6 +17,7 @@ import {
   ArticleCard,
   ArticleCover,
   AuthorChip,
+  BookmarkIcon,
   ChevronIcon,
   SearchIcon,
   faCompact,
@@ -33,12 +34,6 @@ const SORT_OPTIONS = [
   { value: 'popular', label: 'محبوب‌ترین' },
   { value: 'mostRead', label: 'بیشترین مطالعه' },
   { value: 'recommended', label: 'پیشنهادی' },
-];
-
-const TIME_OPTIONS = [
-  { value: 'all', label: 'همه' },
-  { value: 'short', label: 'کوتاه' },
-  { value: 'long', label: 'مفصل' },
 ];
 
 const CATEGORIES = getCategories();
@@ -397,8 +392,6 @@ export default function ArticlesPage({ initialCategory = 'all' }) {
   });
   const [debouncedQuery, setDebouncedQuery] = useState(query);
   const [category, setCategory] = useState(initialCategory);
-  const [time, setTime] = useState('all');
-  const [recommendedOnly, setRecommendedOnly] = useState(false);
   const [sort, setSort] = useState('newest');
   const [articles, setArticles] = useState(null);
   const [failed, setFailed] = useState(false);
@@ -411,7 +404,7 @@ export default function ArticlesPage({ initialCategory = 'all' }) {
 
   usePageMeta({
     title: 'مقالات تپش | یادگیری پزشکی ساده‌تر',
-    description: 'مقالات آموزشی پزشکی تپش؛ فیزیولوژی، آناتومی، بیوشیمی و مهارت‌های مطالعه را ساده، عمیق و کاربردی یاد بگیر.',
+    description: 'مقالات تپش؛ جدیدترین اخبار، بیوتکنولوژی، بهداشت عمومی و منتخب‌های پزشکی را ساده، عمیق و کاربردی دنبال کن.',
     path: '/#articles',
   });
 
@@ -431,7 +424,7 @@ export default function ArticlesPage({ initialCategory = 'all' }) {
     setFailed(false);
     setArticles(null);
 
-    getArticles({ category, query: debouncedQuery, sort, time, recommendedOnly })
+    getArticles({ category, query: debouncedQuery, sort })
       .then((list) => {
         if (isActive) setArticles(list);
       })
@@ -442,13 +435,13 @@ export default function ArticlesPage({ initialCategory = 'all' }) {
     return () => {
       isActive = false;
     };
-  }, [category, debouncedQuery, sort, time, recommendedOnly]);
+  }, [category, debouncedQuery, sort]);
 
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
-  }, [category, debouncedQuery, sort, time, recommendedOnly]);
+  }, [category, debouncedQuery, sort]);
 
-  const isDefaultView = category === 'all' && !debouncedQuery && sort === 'newest' && time === 'all' && !recommendedOnly;
+  const isDefaultView = category === 'all' && !debouncedQuery && sort === 'newest';
 
   const featuredHero = isDefaultView ? FEATURED : null;
   const featuredSide = isDefaultView ? SIDE_FEATURED : null;
@@ -477,8 +470,6 @@ export default function ArticlesPage({ initialCategory = 'all' }) {
     setQuery('');
     setCategory('all');
     setSort('newest');
-    setTime('all');
-    setRecommendedOnly(false);
   };
 
   return (
@@ -486,7 +477,7 @@ export default function ArticlesPage({ initialCategory = 'all' }) {
       <div className="ap-shell ap-stagger">
         <section className="ap-hero" aria-labelledby="ap-hero-title">
           <h1 id="ap-hero-title">مقالات تپش</h1>
-          <p>کتابخانه زنده دانش پزشکی؛ پیدا کن، عمیق بخوان و یاد بگیر.</p>
+          <p>دسترسی به جدیدترین اطلاعات و اخبار روز دنیای پزشکی</p>
           <SearchBar query={query} onQueryChange={setQuery} />
         </section>
 
@@ -511,35 +502,15 @@ export default function ArticlesPage({ initialCategory = 'all' }) {
                 {item.label}
               </button>
             ))}
-            <a className={`ap-chip ap-chip--saved${savedCount > 0 ? ' has-items' : ''}`} href="#articles/saved">
-              ذخیره‌شده‌ها
-              {savedCount > 0 && <span>{toFa(savedCount)}</span>}
-            </a>
-          </div>
-        </div>
-
-        <div className="ap-subfilters">
-          <div className="ap-subfilters__pills" role="group" aria-label="فیلترهای بیشتر">
-            {TIME_OPTIONS.map((option) => (
-              <button
-                type="button"
-                key={option.value}
-                className={`ap-pill ${time === option.value ? 'is-active' : ''}`}
-                aria-pressed={time === option.value}
-                onClick={() => setTime(option.value)}
-              >
-                {option.label}
-              </button>
-            ))}
-            <span className="ap-subfilters__sep" aria-hidden="true" />
-            <button
-              type="button"
-              className={`ap-pill ap-pill--featured ${recommendedOnly ? 'is-active' : ''}`}
-              aria-pressed={recommendedOnly}
-              onClick={() => setRecommendedOnly((value) => !value)}
+            <a
+              className={`ap-chip ap-chip--saved${savedCount > 0 ? ' has-items' : ''}`}
+              href="#articles/saved"
+              aria-label="رفتن به مقاله‌های ذخیره‌شده"
             >
-              منتخب تپش
-            </button>
+              <BookmarkIcon filled={savedCount > 0} />
+              ذخیره‌شده‌ها
+              {savedCount > 0 && <span className="ap-chip__count">{toFa(savedCount)}</span>}
+            </a>
           </div>
 
           <div className="ap-toolbar__end">

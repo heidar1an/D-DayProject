@@ -16,18 +16,32 @@
  *   accent      یکی از: purple | blue | green | gold | copper | orange | red
  *   layout      جای محصول در ریتم روایت:
  *                 showcase بخشِ بزرگِ تمام‌عرض (فقط یکی، همان featured)
- *                 sticky   نمای چسبان با تعویض ویژگی هنگام اسکرول
+ *                 panels   بلوکِ تمام‌عرض با کادرهای چرخان
  *                 duo      کارتِ ستونی در ردیف دو‌تایی
  *                 feature  بخشِ بزرگِ میانی (فقط یکی)
  *                 compact  کارتِ فشرده در ردیف سه‌تایی
  *   visualType  کلیدِ پیش‌نمایش تعاملی (نگاشت در ProductVisual)
  *   href        مقصد واقعی محصول در داشبورد — نه لنگرِ تزیینی
  *
+ * دو میدانِ اختیاریِ دیگر، ریتم را از داده می‌سازند (نه از کامپوننت):
+ *   sheets      برگه‌های پشت‌سرهمِ نمای بزرگ (`showcase`) — با اسکرول ورق می‌خورند
+ *   panels      کادرهای چرخانِ بلوکِ `panels` — برچسب‌ها در یک ردیف
+ *
  * `href` با همان قراردادی ساخته می‌شود که `dashboardRoute` می‌خواند، و کلیدهای
  * لایه از خودِ `LAYER_IDS` می‌آیند تا با تغییر نام یک لایه، اینجا از کار نیفتد.
+ *
+ * دو جا دادهٔ «قرضی» آمده و از سرویسِ صاحبش خوانده می‌شود، نه بازنویسی:
+ *   · «مقالات تپش» از `services/articles` (عنوان و دستهٔ واقعی همان مقالات)
+ *   · پله‌های مرور از `services/reviewNotebook` (همان G5)
  */
 
 import { LAYER_IDS } from '../../layout/dashboard/dashboardRoute';
+import { ARTICLES, CATEGORIES } from '../articles/mockData';
+import { G5_STAGES } from '../reviewNotebook/reviewNotebookService';
+
+import coursesHero from '../../../images/pictures/courses-hero.jpg';
+import testBankHero from '../../../images/pictures/test-bank-hero.png';
+import knowledgeNetwork from '../../../images/pictures/knowledge-network.jpg';
 
 /* آدرس داشبورد — همان چیزی که dashboardRouteHash می‌سازد */
 function dashboardHref({ section, layer = null, view = null }) {
@@ -44,9 +58,116 @@ function dashboardHref({ section, layer = null, view = null }) {
 /* ── سرآغاز بخش ── */
 const PRODUCTS_INTRO = {
   eyebrow: 'اکوسیستم یادگیری تپش',
-  heading: 'برای هر مرحله از یادگیری، یک ابزار.',
+  headingTop: 'محصولات',
+  headingAccent: 'تپش',
+  heading: 'محصولات تپش',
   subheading: 'از یادگیری عمیق و مرور هوشمند تا آزمون، تحلیل و ساختن شبکه‌ای از دانش.',
 };
+
+/*
+ * ── برگه‌های نمای بزرگ ──
+ * خانوادهٔ دوره‌ها؛ هنگام اسکرول یکی‌یکی ورق می‌خورند. برگهٔ اول خودِ
+ * «درسنامه جامع» است و تصویر سرتیترش را حمل می‌کند.
+ */
+const LESSON_SHEETS = [
+  {
+    id: 'comprehensive',
+    title: 'درسنامه جامع',
+    tagline: 'پوشش کامل دروس پایه با درسنامه و تست',
+    accent: 'green',
+    cover: coursesHero,
+    href: dashboardHref({ section: 'courses', layer: LAYER_IDS.comprehensive }),
+  },
+  {
+    id: 'micro',
+    title: 'میکرو درسنامه',
+    tagline: 'خلاصهٔ سریع درس‌ها برای مرور فشرده',
+    accent: 'purple',
+    href: dashboardHref({ section: 'courses', layer: LAYER_IDS.micro }),
+  },
+  {
+    id: 'reference',
+    title: 'رفرنس',
+    tagline: 'مرجع کامل نکات و جدول‌ها',
+    accent: 'gold',
+    href: dashboardHref({ section: 'courses', layer: LAYER_IDS.reference }),
+  },
+  {
+    id: 'green-path',
+    title: 'مسیر سبز',
+    tagline: 'مسیر ساختار‌یافته برای معدل الف',
+    accent: 'green',
+    href: dashboardHref({ section: 'courses', layer: LAYER_IDS.greenPath }),
+  },
+  {
+    id: 'international',
+    title: 'دوره‌های بین‌الملل',
+    tagline: 'USMLE · PLAB · AMC · MCCQE · IFOM',
+    accent: 'blue',
+    href: dashboardHref({ section: 'courses', layer: LAYER_IDS.intlCourses }),
+  },
+];
+
+/*
+ * ── کادرهای چرخانِ بانک تست ──
+ * برچسب‌ها یک ردیف‌اند و کادرِ فعال با انیمیشن عوض می‌شود. `visual` می‌گوید
+ * هر کادر با کدام پیش‌نمایش پر شود؛ همهٔ مقصدها لایهٔ واقعیِ داشبوردند.
+ */
+const TEST_PANELS = [
+  {
+    id: 'bank',
+    label: 'بانک تست',
+    title: 'بانک تست علوم پایه',
+    text: 'تست‌های طبقه‌بندی‌شده با پاسخ تشریحی؛ هر سؤال با درس، مبحث، سال و سطح دشواری برچسب خورده است.',
+    accent: 'blue',
+    visual: 'image',
+    cover: testBankHero,
+    href: dashboardHref({ section: 'tests', layer: LAYER_IDS.testBank }),
+  },
+  {
+    id: 'analysis',
+    label: 'آنالیز شخصی',
+    title: 'آنالیز وضعیت',
+    text: 'درصد پاسخ صحیح، زمان پاسخ‌گویی و موضوعات ضعیف و قوی کنار هم می‌آیند تا بدانی کجا وقت کم می‌آوری.',
+    accent: 'purple',
+    visual: 'analysis',
+    stats: [
+      { label: 'پاسخ صحیح', value: '۷۴٪' },
+      { label: 'زمان پاسخ', value: '۳۸ ثانیه' },
+      { label: 'تست حل‌شده', value: '۴۲۸' },
+    ],
+    bars: [38, 52, 44, 67, 58, 74],
+    href: dashboardHref({ section: 'tests', layer: LAYER_IDS.analytics }),
+  },
+  {
+    id: 'coordinated',
+    label: 'آزمون‌های هماهنگ',
+    title: 'آزمون‌های هماهنگ‌شده',
+    text: 'آزمون‌های جامع و درس‌به‌درس با شرکت‌کنندگان سراسر کشور؛ رتبه و میانگین واقعی، نه تخمینی.',
+    accent: 'red',
+    visual: 'coordinated',
+    stats: [
+      { label: 'شرکت‌کننده', value: '۱۲٬۴۸۰' },
+      { label: 'رتبهٔ شما', value: '۳۴۲' },
+      { label: 'میانگین', value: '۱۳٫۸' },
+    ],
+    href: dashboardHref({ section: 'tests', layer: LAYER_IDS.coordinated }),
+  },
+  {
+    id: 'international',
+    label: 'آزمون‌های بین‌الملل',
+    title: 'آزمون‌های بین‌الملل',
+    text: 'سؤال‌های هم‌سو با آزمون‌های بین‌المللی پزشکی، با پاسخ تشریحی و تحلیل عملکرد.',
+    accent: 'green',
+    visual: 'international',
+    exams: ['USMLE', 'PLAB', 'AMC', 'MCCQE', 'IFOM'],
+    stats: [
+      { label: 'تست حل‌شده', value: '۲۴۰' },
+      { label: 'دقت پاسخ', value: '۶۸٪' },
+    ],
+    href: dashboardHref({ section: 'tests', layer: LAYER_IDS.intlExams }),
+  },
+];
 
 /* ── محصولات ── */
 const PRODUCTS = [
@@ -59,10 +180,11 @@ const PRODUCTS = [
     description:
       'درسنامه‌های ساختاریافتهٔ تپش برای یادگیری عمیق علوم پایه، مرور سریع و آمادگی آزمون.',
     cta: 'ورود به درسنامه',
-    accent: 'purple',
+    accent: 'green',
     layout: 'showcase',
     featured: true,
-    visualType: 'reader',
+    visualType: 'sheets',
+    sheets: LESSON_SHEETS,
     href: dashboardHref({ section: 'courses', layer: LAYER_IDS.comprehensive }),
   },
   {
@@ -72,57 +194,17 @@ const PRODUCTS = [
     title: 'بانک تست علوم پایه',
     subtitle: 'تمرین کن. تحلیل کن. بهتر شو.',
     description:
-      'تست‌های طبقه‌بندی‌شده با پاسخ تشریحی؛ بعد از هر آزمون، تحلیل می‌گوید کجا وقت کم آوردی.',
+      'بانک تست تپش فقط سؤال نیست؛ سه کادر کنارش هم دارند: آنالیز شخصی، آزمون‌های هماهنگ و آزمون‌های بین‌الملل.',
     cta: 'ورود به بانک تست',
     accent: 'blue',
-    layout: 'sticky',
-    visualType: 'questionBank',
-    /* ویژگی‌هایی که هنگام اسکرول یکی‌یکی فعال می‌شوند و پیش‌نمایش همراهشان عوض می‌شود */
-    features: [
-      {
-        id: 'question',
-        label: 'سؤال طبقه‌بندی‌شده',
-        text: 'هر سؤال با درس، مبحث، سال و سطح دشواری برچسب خورده است.',
-        stage: 'question',
-      },
-      {
-        id: 'answer',
-        label: 'پاسخ تشریحی',
-        text: 'فقط گزینهٔ درست را نمی‌بینی؛ دلیل رد شدن بقیهٔ گزینه‌ها را هم می‌خوانی.',
-        stage: 'answer',
-      },
-      {
-        id: 'analysis',
-        label: 'تحلیل عملکرد',
-        text: 'درصد پاسخ صحیح، زمان پاسخ‌گویی و موضوعات ضعیف و قوی کنار هم می‌آیند.',
-        stage: 'analysis',
-      },
-      {
-        id: 'trend',
-        label: 'روند پیشرفت',
-        text: 'نمودار پیشرفت نشان می‌دهد هر مبحث در طول زمان کجا ایستاده است.',
-        stage: 'trend',
-      },
-    ],
+    layout: 'panels',
+    visualType: null,
+    panels: TEST_PANELS,
     href: dashboardHref({ section: 'tests', layer: LAYER_IDS.testBank }),
   },
   {
-    id: 'wiki',
-    index: '۰۳',
-    eyebrow: 'مرجع',
-    title: 'ویکی تپش',
-    subtitle: 'یک موتور دانش پزشکی، نه یک واژه‌نامه.',
-    description:
-      'مقالات مرجعِ پیوسته به هم؛ از یک مفهوم شروع کن و تا مثال بالینی و تست‌های همان مبحث برو.',
-    cta: 'جست‌وجو در ویکی',
-    accent: 'copper',
-    layout: 'duo',
-    visualType: 'wiki',
-    href: dashboardHref({ section: 'other', layer: LAYER_IDS.wiki }),
-  },
-  {
     id: 'examBuilder',
-    index: '۰۴',
+    index: '۰۳',
     eyebrow: 'ساختن',
     title: 'آزمون‌ساز شخصی',
     subtitle: 'آزمون را خودت بساز؛ دقیقاً همان‌قدر که لازم داری.',
@@ -139,6 +221,36 @@ const PRODUCTS = [
     }),
   },
   {
+    id: 'articles',
+    index: '۰۴',
+    eyebrow: 'خواندن',
+    title: 'مقالات تپش',
+    subtitle: 'یک مفهوم را باز کن؛ عمیق‌تر برو.',
+    description:
+      'مقاله‌های علوم پایه، فیزیولوژی و مهارت مطالعه؛ کوتاه، دقیق و متصل به مسیر یادگیری تو.',
+    cta: 'رفتن به مقالات',
+    accent: 'copper',
+    layout: 'duo',
+    visualType: 'articles',
+    heroStyle: 'articles',
+    href: '#articles',
+  },
+  {
+    id: 'wiki',
+    index: '۰۵',
+    eyebrow: 'مرجع',
+    title: 'ویکی تپش',
+    subtitle: 'موتور کشف دانش پزشکی — جست‌وجو کن، بفهم، بین مفاهیم حرکت کن.',
+    description:
+      'از مخفف‌ها و مترادف‌ها تا شبکهٔ ارتباط مفاهیم بالینی و پایه؛ هر مفهوم به مقاله و تست همان مبحث وصل است.',
+    cta: 'ورود به ویکی',
+    accent: 'copper',
+    layout: 'duo',
+    visualType: 'wikiHeader',
+    heroStyle: 'wiki',
+    href: dashboardHref({ section: 'other', layer: LAYER_IDS.wiki }),
+  },
+  {
     id: 'knowledge',
     index: '۰۵',
     eyebrow: 'ارتباط',
@@ -150,6 +262,7 @@ const PRODUCTS = [
     accent: 'gold',
     layout: 'feature',
     visualType: 'knowledgeGraph',
+    cover: knowledgeNetwork,
     href: dashboardHref({ section: 'other', layer: LAYER_IDS.knowledge }),
   },
   {
@@ -166,17 +279,18 @@ const PRODUCTS = [
     href: dashboardHref({ section: 'flashcards' }),
   },
   {
-    id: 'coordinatedExams',
+    id: 'reviewNotebook',
     index: '۰۷',
-    eyebrow: 'سنجش',
-    title: 'آزمون‌های هماهنگ‌شده',
-    subtitle: 'خودت را در مقیاس واقعی بسنج.',
-    description: 'آزمون‌های هماهنگ با شرکت‌کنندگان سراسر کشور، رتبه و میانگین واقعی.',
-    cta: 'دیدن آزمون‌ها',
-    accent: 'red',
+    eyebrow: 'مرور',
+    title: 'دفترچهٔ مرور',
+    subtitle: 'هرچه یاد گرفتی، سر وقت برمی‌گردد.',
+    description:
+      'هر مبحثی که یاد می‌گیری وارد پله‌های مرور می‌شود؛ سرِ موعد خودش یادآوری می‌شود تا ماندگار شود.',
+    cta: 'ورود به دفترچهٔ مرور',
+    accent: 'copper',
     layout: 'compact',
-    visualType: 'coordinatedExam',
-    href: dashboardHref({ section: 'tests', layer: LAYER_IDS.coordinated }),
+    visualType: 'reviewNotebook',
+    href: dashboardHref({ section: 'review-notebook' }),
   },
   {
     id: 'league',
@@ -195,7 +309,7 @@ const PRODUCTS = [
 
 /* ── فراخوان پایانی ── */
 const PRODUCTS_OUTRO = {
-  heading: 'همه ابزارهای یادگیری، یک‌جا.',
+  heading: 'همه ابزارهای یادگیری، یک‌جا',
   text: 'تپش فقط مجموعه‌ای از ابزارها نیست؛ یک محیط یکپارچه برای یادگیری پزشکی است.',
   cta: 'شروع یادگیری',
   href: dashboardHref({ section: 'courses', layer: LAYER_IDS.comprehensive }),
@@ -203,39 +317,19 @@ const PRODUCTS_OUTRO = {
 
 /* گره‌های نمودار پایانی — همان محصولات، به شکل یک سیستم واحد */
 const ECOSYSTEM_NODES = [
-  { id: 'lessons', label: 'درسنامه', accent: 'purple' },
+  { id: 'lessons', label: 'درسنامه', accent: 'green' },
   { id: 'bank', label: 'بانک تست', accent: 'blue' },
   { id: 'flashcards', label: 'فلش‌کارت', accent: 'green' },
   { id: 'wiki', label: 'ویکی', accent: 'copper' },
   { id: 'knowledge', label: 'شبکه دانش', accent: 'gold' },
   { id: 'examBuilder', label: 'آزمون‌ساز', accent: 'blue' },
-  { id: 'coordinatedExams', label: 'آزمون هماهنگ', accent: 'red' },
+  { id: 'reviewNotebook', label: 'دفترچهٔ مرور', accent: 'copper' },
   { id: 'league', label: 'لیگ', accent: 'orange' },
 ];
 
 /* ── داده‌های درون پیش‌نمایش‌ها ──
    این‌ها «رابطِ محصول» هستند، نه آمار ادعایی؛ همان چیزی که کاربر داخل محصول
    می‌بیند. هیچ عددی به عنوان دستاوردِ تپش در متن‌های معرفی نیامده است. */
-
-const READER_PREVIEW = {
-  chapter: 'فصل ۴ · فیزیولوژی قلب',
-  title: 'پتانسیل عمل سلول‌های میوکارد',
-  sidebar: [
-    { label: 'مقدمه', active: false },
-    { label: 'کانال‌های یونی', active: true },
-    { label: 'فاز‌های پتانسیل عمل', active: false },
-    { label: 'دورهٔ تحریک‌ناپذیری', active: false },
-    { label: 'نکات مهم', active: false },
-  ],
-  paragraphs: [
-    'سلول‌های میوکارد برخلاف سلول‌های اسکلتی، پس از شروع پتانسیل عمل مدتی طولانی در فاز پلاتو می‌مانند؛ این مکث همان چیزی است که اجازه نمی‌دهد قلب دچار تتانوس شود.',
-    'ورود کلسیم از کانال‌های نوع L در فاز پلاتو، هم پتانسیل را طولانی می‌کند و هم پیام شیمیایی انقباض را به سارکومر می‌رساند.',
-  ],
-  highlight: 'مکثِ فاز پلاتو دلیلِ نبودِ تتانوس در عضلهٔ قلبی است.',
-  note: 'نکتهٔ مهم: هر دارویی که کانال کلسیمی نوع L را مهار کند، قدرت انقباض را هم کم می‌کند.',
-  progress: 62,
-  pageLabel: 'صفحه ۱۲۴ از ۲۰۱',
-};
 
 const QUESTION_BANK_PREVIEW = {
   topic: 'فیزیولوژی · قلب',
@@ -268,85 +362,29 @@ const FLASHCARD_PREVIEW = {
   streak: 12,
 };
 
-const KNOWLEDGE_GRAPH_PREVIEW = {
-  center: { id: 'diabetes', label: 'دیابت' },
-  nodes: [
-    {
-      id: 'physiology',
-      label: 'فیزیولوژی',
-      detail: 'تنظیم گلوکز و نقش انسولین در بافت هدف',
-      courses: 4,
-      articles: 12,
-      questions: 86,
-    },
-    {
-      id: 'biochemistry',
-      label: 'بیوشیمی',
-      detail: 'مسیرهای گلیکولیز و گلوکونئوژنز',
-      courses: 3,
-      articles: 9,
-      questions: 74,
-    },
-    {
-      id: 'anatomy',
-      label: 'آناتومی',
-      detail: 'جزایر لانگرهانس و ساختار پانکراس',
-      courses: 2,
-      articles: 5,
-      questions: 31,
-    },
-    {
-      id: 'pathology',
-      label: 'پاتولوژی',
-      detail: 'تغییرات عروقی و آسیب اندام‌های هدف',
-      courses: 3,
-      articles: 11,
-      questions: 68,
-    },
-    {
-      id: 'pharmacology',
-      label: 'فارماکولوژی',
-      detail: 'مهارکننده‌های SGLT2 و biguanideها',
-      courses: 2,
-      articles: 8,
-      questions: 52,
-    },
-  ],
-};
+/*
+ * ── مقالات تپش ──
+ * از خودِ سرویس مقالات خوانده می‌شود (عنوان و دستهٔ واقعی)، نه فهرستِ ساختگی.
+ * فقط چند میدانِ لازم برداشته می‌شود تا این پیش‌نمایش به بدنهٔ مقاله وابسته نشود.
+ */
+const ARTICLE_PREVIEW = ARTICLES.filter((article) => article.recommended)
+  .slice(0, 3)
+  .map((article) => ({
+    id: article.id,
+    slug: article.slug,
+    title: article.title,
+    category: CATEGORIES.find((entry) => entry.id === article.category)?.label ?? '',
+    readingTime: article.readingTime,
+  }));
 
-const WIKI_PREVIEW = {
-  placeholder: 'مثلاً: Acetylcholine',
-  terms: [
-    {
-      id: 'acetylcholine',
-      title: 'Acetylcholine',
-      subtitle: 'Neurotransmitter',
-      topics: ['Physiology', 'Pharmacology'],
-    },
-    {
-      id: 'acetylcholinesterase',
-      title: 'Acetylcholinesterase',
-      subtitle: 'Enzyme',
-      topics: ['Biochemistry', 'Pharmacology'],
-    },
-    {
-      id: 'acetyl-coa',
-      title: 'Acetyl-CoA',
-      subtitle: 'Metabolite',
-      topics: ['Biochemistry'],
-    },
-    {
-      id: 'acid-base',
-      title: 'Acid–Base Balance',
-      subtitle: 'Physiology',
-      topics: ['Physiology', 'Nephrology'],
-    },
-    {
-      id: 'action-potential',
-      title: 'Action Potential',
-      subtitle: 'Physiology',
-      topics: ['Physiology', 'Neuroscience'],
-    },
+const REVIEW_NOTEBOOK_PREVIEW = {
+  dueToday: 4,
+  /* پله‌های واقعیِ G5 — همان چیزی که سرویس دفترچهٔ مرور می‌خواند */
+  stages: G5_STAGES.map((stage) => stage.label),
+  items: [
+    { id: 'rv-1', title: 'پتانسیل عمل میوکارد', subject: 'فیزیولوژی', stage: 3, due: 'امروز' },
+    { id: 'rv-2', title: 'چرخهٔ کربس', subject: 'بیوشیمی', stage: 2, due: 'فردا' },
+    { id: 'rv-3', title: 'جزایر لانگرهانس', subject: 'آناتومی', stage: 1, due: '۳ روز دیگر' },
   ],
 };
 
@@ -380,6 +418,14 @@ const COORDINATED_EXAM_PREVIEW = {
   minutes: 20,
 };
 
+/* آزمون‌های بین‌الملل — فقط نامِ آزمون‌ها؛ هیچ ادعای آماری پشتشان نیست */
+const INTERNATIONAL_EXAMS_PREVIEW = {
+  title: 'آزمون‌های بین‌الملل',
+  exams: ['USMLE', 'PLAB', 'AMC', 'MCCQE', 'IFOM'],
+  solved: 240,
+  accuracy: 68,
+};
+
 const LEAGUE_PREVIEW = {
   position: 4,
   university: 'دانشگاه علوم پزشکی تهران',
@@ -400,13 +446,13 @@ export const getProductsIntro = () => PRODUCTS_INTRO;
 export const getProductsOutro = () => PRODUCTS_OUTRO;
 export const getEcosystemNodes = () => ECOSYSTEM_NODES;
 
-export const getReaderPreview = () => READER_PREVIEW;
 export const getQuestionBankPreview = () => QUESTION_BANK_PREVIEW;
 export const getFlashcardPreview = () => FLASHCARD_PREVIEW;
-export const getKnowledgeGraphPreview = () => KNOWLEDGE_GRAPH_PREVIEW;
-export const getWikiPreview = () => WIKI_PREVIEW;
+export const getArticlePreview = () => ARTICLE_PREVIEW;
+export const getReviewNotebookPreview = () => REVIEW_NOTEBOOK_PREVIEW;
 export const getExamBuilderPreview = () => EXAM_BUILDER_PREVIEW;
 export const getCoordinatedExamPreview = () => COORDINATED_EXAM_PREVIEW;
+export const getInternationalExamsPreview = () => INTERNATIONAL_EXAMS_PREVIEW;
 export const getLeaguePreview = () => LEAGUE_PREVIEW;
 
 /* محصولِ شاخص — همان که نمای بزرگِ تمام‌عرض را می‌گیرد */

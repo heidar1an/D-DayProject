@@ -95,26 +95,104 @@
   opacity: 1;
 }
 
-/* ── هیرو: هم‌زبان بصری سرتیتر «درسنامه جامع» ── */
+/* ── نوار بالای لایه — همان چیدمان نوار فلش‌کارت ──
+   (بازگشت در ابتدای ردیف، مسیر و دکمهٔ ساخت در انتهای ردیف) */
+.nt-topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.nt-topbar__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px 10px 14px;
+  border: 1px solid rgb(var(--line-rgb) / 0.1);
+  border-radius: 16px;
+  background: rgb(var(--wash-rgb) / 0.04);
+  color: var(--white);
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition:
+    border-color 200ms ease,
+    background 200ms ease,
+    transform 160ms ease;
+}
+
+.nt-topbar__back:hover {
+  border-color: color-mix(in srgb, var(--blue-bright) 60%, transparent);
+  background: color-mix(in srgb, var(--blue-bright) 12%, transparent);
+  transform: translateY(-1px);
+}
+
+.nt-topbar__back svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.nt-topbar__crumb {
+  margin-inline-start: auto;
+  color: var(--faint);
+  font-size: 0.88rem;
+}
+
+/* دکمهٔ «ساخت یادداشت» — همان حالت گرافیکی «ساخت کارت» فلش‌کارت */
+.nt-topbar__create {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 1px solid rgb(var(--line-rgb) / 0.1);
+  border-radius: 0.75rem;
+  background: rgb(var(--wash-rgb) / 0.05);
+  color: var(--white);
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition:
+    border-color 200ms ease,
+    background 200ms ease;
+}
+
+.nt-topbar__create svg {
+  flex-shrink: 0;
+  color: var(--blue-soft-ink);
+}
+
+.nt-topbar__create:hover {
+  border-color: color-mix(in srgb, var(--blue-bright) 50%, transparent);
+  background: color-mix(in srgb, var(--blue-bright) 12%, transparent);
+}
+
+/* نشان عددی کوچک — اعداد آماری که از هیرو به بخش خودشان برگشته‌اند */
+.nt-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgb(var(--line-rgb) / 0.08);
+  background: rgb(var(--wash-rgb) / 0.04);
+  color: var(--faint);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.nt-count svg {
+  flex-shrink: 0;
+}
+
+/* ── هیرو: هم‌زبان بصری سرتیتر «درسنامه جامع» — بدون هالهٔ نور پشت تیتر ── */
 .nt-hero {
   position: relative;
   display: flex;
   justify-content: center;
   padding: clamp(16px, 3.6vh, 42px) 0 4px;
   text-align: center;
-}
-
-.nt-hero__glow {
-  position: absolute;
-  top: -3rem;
-  left: 50%;
-  width: 26rem;
-  height: 16rem;
-  transform: translateX(-50%);
-  pointer-events: none;
-  opacity: 0.22;
-  filter: blur(70px);
-  background: radial-gradient(circle, var(--blue-bright) 0%, transparent 70%);
 }
 
 .nt-hero__content {
@@ -139,11 +217,13 @@
   color: var(--muted);
 }
 
+/* تیتر با قهوه‌ای پالت پروژه. `--brown-ink` همان قهوه‌ای است که در تم روشن
+   تیره می‌شود؛ بدون آن تیتر روی زمینهٔ روشن فقط ۲٫۷۹:۱ کنتراست می‌داد. */
 .nt-hero__title-accent {
   font-weight: 800;
   font-size: clamp(2.5rem, 6.2vw, 4.5rem);
   line-height: 1.3;
-  background: linear-gradient(120deg, var(--blue-bright) 15%, var(--purple-bright) 85%);
+  background: linear-gradient(120deg, var(--brown-ink) 15%, var(--brown-ink) 85%);
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
@@ -157,91 +237,71 @@
   line-height: 2;
 }
 
-.nt-hero__stats {
+/* ── چیپ موضوع و تگ ──
+   آینهٔ چیپ مسیرهای «بانک تست علوم پایه» (`PathChip` در BankHome.jsx): همان اندازه،
+   همان شعاع کامل، همان حاشیهٔ ۸٪ و همان پس‌زمینهٔ سطح. تفاوت عمدی یکی است: آنجا
+   چیپ ناوبری است، اینجا فیلتر — پس حالت `aria-pressed` دارد. */
+.nt-chip {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  border: 1px solid rgb(var(--line-rgb) / 0.08);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 13px;
+  white-space: nowrap;
+  transition:
+    border-color 200ms ease,
+    background-color 200ms ease,
+    color 200ms ease;
+}
+
+.nt-chip:hover {
+  border-color: rgb(var(--line-rgb) / 0.2);
+  background: var(--surface-soft);
+  color: var(--white);
+}
+
+.nt-chip[aria-pressed='true'] {
+  border-color: rgb(var(--line-rgb) / 0.25);
+  background: rgb(var(--wash-rgb) / 0.1);
+  color: var(--white);
+}
+
+.nt-chip__icon {
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+}
+
+/* سرتیتر بخش‌های گرید + شمارندهٔ همان بخش */
+.nt-section-title {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  align-items: center;
   gap: 0.5rem;
-  margin-top: 18px;
-}
-
-.nt-hero__stat {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  border-radius: 999px;
-  background: rgb(var(--wash-rgb) / 0.05);
-  padding: 0.4rem 0.85rem;
-  font-size: 11px;
-  color: var(--muted);
-}
-
-.nt-hero__cta {
-  display: flex;
-  justify-content: center;
-  margin-top: 22px;
-}
-
-.nt-hero__create {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-  cursor: pointer;
-  border-radius: 1rem;
-  background: var(--blue-bright);
-  color: var(--white);
-  padding: 0.9rem 1.7rem;
-  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
-  font-size: 0.9rem;
-  font-weight: 700;
-  box-shadow: 0 16px 40px -16px rgba(91, 140, 199, 0.85);
-  transition: transform 200ms ease;
-}
-
-.nt-hero__create:hover {
-  transform: translateY(-2px);
-}
-
-/* ── نوار دسته‌بندی تگ‌ها ── */
-.nt-tagbar {
-  border-radius: 2rem;
-  border: 1px solid rgb(var(--line-rgb) / 0.06);
-  background: var(--surface-soft);
-  padding: 1rem 1.2rem;
-}
-
-.nt-tagbar__head {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--white);
-  cursor: pointer;
-  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
-  font-size: 0.8rem;
-  text-align: right;
-}
-
-.nt-tagbar__chevron {
   color: var(--faint);
-  transition: transform 220ms ease;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: 0.875rem;
 }
 
-.nt-tagbar__head.is-open .nt-tagbar__chevron {
-  transform: rotate(180deg);
+.nt-section-title--pinned {
+  color: var(--gold-ink);
 }
 
-.nt-tagbar__body {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin-top: 1rem;
+.nt-section-title__count {
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: rgb(var(--wash-rgb) / 0.06);
+  color: var(--white);
+  font-size: 11px;
 }
 
+/* گروه تگ — در ویرایشگر یادداشت استفاده می‌شود */
 .nt-taggroup {
   display: flex;
   flex-wrap: wrap;
@@ -647,8 +707,9 @@
     transform: none;
   }
 
-  .nt-hero__create,
-  .nt-tagbar__chevron,
+  .nt-topbar__back,
+  .nt-topbar__create,
+  .nt-chip,
   .nt-tag,
   .nt-ai__btn,
   .nt-ai__chip,
@@ -656,7 +717,14 @@
     transition: none !important;
   }
 
-  .nt-hero__create:hover {
+  .nt-topbar__back:hover {
     transform: none;
+  }
+}
+
+/* در موبایل مسیر (crumb) جا را تنگ می‌کند — مثل نوار فلش‌کارت حذف می‌شود */
+@media (max-width: 760px) {
+  .nt-topbar__crumb {
+    display: none;
   }
 }

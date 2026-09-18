@@ -40,6 +40,10 @@ export default function ReadingListPage() {
     <main className="articles-page ap-layer-reveal">
       <div className="ap-shell ap-stagger">
         <section className="ap-hero ap-hero--compact" aria-labelledby="ap-saved-title">
+          <a className="ap-saved-back" href="#articles">
+            <span aria-hidden="true">→</span>
+            بازگشت به مقالات
+          </a>
           <h1 id="ap-saved-title">لیست مطالعه</h1>
           <p>آنچه برای خودت نگه داشته‌ای؛ از ادامه مطالعه تا مرور مقاله‌های خوانده‌شده.</p>
         </section>

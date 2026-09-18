@@ -122,20 +122,6 @@
   pointer-events: none;
 }
 
-.pr-hero__glow {
-  position: absolute;
-  z-index: -1;
-  top: -26%;
-  left: 50%;
-  width: min(620px, 68vw);
-  aspect-ratio: 1.6;
-  border-radius: 50%;
-  background: radial-gradient(ellipse at center, var(--purple-deep) 0%, transparent 68%);
-  opacity: 0.9;
-  transform: translateX(-50%);
-  pointer-events: none;
-}
-
 .pr-hero__copy {
   position: relative;
   z-index: 1;
@@ -144,30 +130,6 @@
   min-width: 0;
   flex-direction: column;
   align-items: center;
-}
-
-.pr-hero__facts {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 14px clamp(20px, 3.4vw, 48px);
-  margin: 34px 0 0;
-  padding-top: 22px;
-  border-top: 1px solid rgb(var(--line-rgb) / 0.08);
-}
-
-.pr-fact dt {
-  color: var(--faint);
-  font-size: 0.78rem;
-  font-weight: 400;
-}
-
-.pr-fact dd {
-  margin: 6px 0 0;
-  color: var(--white);
-  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
-  font-size: clamp(1rem, 1.4vw, 1.2rem);
-  font-weight: 500;
 }
 
 .pr-hero__visual {
@@ -444,6 +406,195 @@
 .pr-products__bridge-link:hover {
   border-color: currentColor;
   color: var(--purple-ink);
+}
+
+/* ── کادر ورق‌زدن محصولات بیشتر ── */
+.pr-products__deck {
+  --pr-deck-accent: var(--purple-ink);
+  --pr-deck-soft: var(--purple-deep);
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 28px;
+  align-items: end;
+  margin-top: 30px;
+  padding: clamp(24px, 3.2vw, 42px);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--pr-deck-accent) 28%, rgb(var(--line-rgb) / 0.12));
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at 12% 12%, color-mix(in srgb, var(--pr-deck-accent) 15%, transparent), transparent 48%),
+    var(--surface);
+  direction: rtl;
+}
+
+.pr-products__deck--blue {
+  --pr-deck-accent: var(--blue-ink);
+  --pr-deck-soft: var(--blue-deep);
+}
+
+.pr-products__deck--green {
+  --pr-deck-accent: var(--green-ink);
+  --pr-deck-soft: var(--green-deep);
+}
+
+.pr-products__deck--gold {
+  --pr-deck-accent: var(--gold-ink);
+  --pr-deck-soft: var(--gold-deep);
+}
+
+.pr-products__deck--copper {
+  --pr-deck-accent: var(--copper-ink);
+  --pr-deck-soft: var(--copper-deep);
+}
+
+.pr-products__deck--orange {
+  --pr-deck-accent: var(--orange-ink);
+  --pr-deck-soft: var(--copper-deep);
+}
+
+.pr-products__deck--red {
+  --pr-deck-accent: var(--red-ink);
+  --pr-deck-soft: var(--red-deep);
+}
+
+.pr-products__deck-copy {
+  min-width: 0;
+}
+
+.pr-products__deck-kicker {
+  display: inline-block;
+  color: var(--pr-deck-accent);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.pr-products__deck-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.pr-products__deck-index {
+  color: var(--pr-deck-accent);
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: clamp(1.6rem, 3vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: -0.06em;
+  line-height: 1;
+}
+
+.pr-products__deck-title {
+  margin: 0;
+  color: var(--white);
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: clamp(1.35rem, 2.4vw, 2.1rem);
+  font-weight: 700;
+  letter-spacing: -0.06em;
+  line-height: 1.3;
+}
+
+.pr-products__deck-subtitle {
+  margin: 8px 0 0;
+  color: var(--pr-deck-accent);
+  font-size: 0.92rem;
+  line-height: 1.7;
+}
+
+.pr-products__deck-description {
+  max-width: 68ch;
+  margin: 18px 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 2;
+}
+
+.pr-products__deck-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 22px;
+  color: var(--white);
+  font-size: 0.86rem;
+  font-weight: 600;
+  transition: color 220ms ease;
+}
+
+.pr-products__deck-cta svg,
+.pr-products__deck-button svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.pr-products__deck-cta:hover {
+  color: var(--pr-deck-accent);
+}
+
+.pr-products__deck-controls {
+  display: flex;
+  min-width: 132px;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 14px;
+}
+
+.pr-products__deck-count {
+  color: var(--faint);
+  font-size: 0.76rem;
+}
+
+.pr-products__deck-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.pr-products__deck-button {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid rgb(var(--line-rgb) / 0.14);
+  border-radius: 50%;
+  background: var(--pr-deck-soft);
+  color: var(--white);
+  cursor: pointer;
+  transition: border-color 220ms ease, color 220ms ease, transform 220ms ease;
+}
+
+.pr-products__deck-button:hover {
+  border-color: var(--pr-deck-accent);
+  color: var(--pr-deck-accent);
+  transform: translateY(-2px);
+}
+
+.pr-products__deck-dots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+  max-width: 150px;
+}
+
+.pr-products__deck-dot {
+  width: 7px;
+  height: 7px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(var(--line-rgb) / 0.22);
+  cursor: pointer;
+  transition: background 220ms ease, transform 220ms ease;
+}
+
+.pr-products__deck-dot.is-active {
+  background: var(--pr-deck-accent);
+  transform: scale(1.35);
 }
 
 /* ══════════════ لایهٔ سوم: کنترلر دوره + کارت‌ها ══════════════ */
@@ -1108,105 +1259,7 @@
   text-align: center;
 }
 
-/* ══════════════ لایهٔ چهارم: شفافیت مالی ══════════════ */
-
-.pr-finance {
-  padding-top: clamp(48px, 7vw, 96px);
-}
-
-.pr-finance__panel {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(300px, 1.05fr);
-  gap: clamp(24px, 4vw, 60px);
-  padding: clamp(26px, 3.4vw, 46px);
-  border: 1px solid rgb(var(--line-rgb) / 0.08);
-  border-radius: 36px;
-  background:
-    radial-gradient(circle at 88% 8%, var(--blue-deep), transparent 46%),
-    var(--surface);
-  direction: rtl;
-}
-
-.pr-finance__head {
-  min-width: 0;
-}
-
-.pr-finance__rows {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  margin: 0;
-}
-
-.pr-finance__row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 18px;
-  padding: 13px 0;
-  border-bottom: 1px solid rgb(var(--line-rgb) / 0.07);
-}
-
-.pr-finance__row dt {
-  color: var(--faint);
-  font-size: 0.84rem;
-}
-
-.pr-finance__row dd {
-  margin: 0;
-  color: var(--white);
-  font-size: 0.9rem;
-  font-weight: 500;
-  text-align: left;
-}
-
-.pr-finance__row--total {
-  border-bottom: 0;
-  padding-top: 16px;
-}
-
-.pr-finance__row--total dt {
-  color: var(--muted);
-  font-size: 0.9rem;
-}
-
-.pr-finance__row--total dd {
-  color: var(--blue-ink);
-  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
-  font-size: clamp(1.25rem, 2vw, 1.6rem);
-  font-weight: 700;
-  letter-spacing: -0.05em;
-}
-
-.pr-finance__status {
-  display: flex;
-  grid-column: 1 / -1;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px 14px;
-  padding-top: 20px;
-  border-top: 1px solid rgb(var(--line-rgb) / 0.07);
-}
-
-.pr-finance__status-chip {
-  padding: 5px 12px;
-  border: 1px solid var(--gold-ink);
-  border-radius: 999px;
-  color: var(--gold-ink);
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-.pr-finance__status p {
-  flex: 1;
-  min-width: 240px;
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.82rem;
-  line-height: 1.85;
-}
-
-/* ══════════════ لایهٔ پنجم: ماتریس مقایسه ══════════════ */
+/* ══════════════ لایهٔ چهارم: ماتریس مقایسه ══════════════ */
 
 .pr-compare {
   padding-top: clamp(48px, 7vw, 96px);
@@ -1618,10 +1671,6 @@
     height: 46px;
   }
 
-  .pr-finance__panel {
-    grid-template-columns: 1fr;
-  }
-
   .pr-matrix__desktop {
     display: none;
   }
@@ -1638,11 +1687,6 @@
 
   .pr-title {
     font-size: clamp(2rem, 9vw, 2.7rem);
-  }
-
-  .pr-hero__glow {
-    width: min(380px, 88vw);
-    opacity: 0.6;
   }
 
   /* در موبایل نشانهٔ گرافیکی حذف می‌شود؛ ردیف به «شماره + متن» ساده می‌رسد */
@@ -1673,6 +1717,22 @@
     font-size: 0.84rem;
   }
 
+  .pr-products__deck {
+    grid-template-columns: 1fr;
+    gap: 22px;
+    border-radius: 24px;
+  }
+
+  .pr-products__deck-controls {
+    min-width: 0;
+    align-items: flex-start;
+  }
+
+  .pr-products__deck-dots {
+    justify-content: flex-start;
+    max-width: none;
+  }
+
   .pr-grid {
     grid-template-columns: 1fr;
     gap: 16px;
@@ -1695,7 +1755,6 @@
     font-size: 2.1rem;
   }
 
-  .pr-finance__panel,
   .pr-final__panel {
     border-radius: 28px;
   }

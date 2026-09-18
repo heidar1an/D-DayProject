@@ -91,6 +91,22 @@
   padding: 52px 0 26px;
 }
 
+.ap-saved-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 500;
+  transition: color 180ms ease, transform 180ms ease;
+}
+
+.ap-saved-back:hover {
+  color: var(--white);
+  transform: translateX(-3px);
+}
+
 .ap-hero h1 {
   margin: 0;
   font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
@@ -270,8 +286,7 @@
 /* ── نوار دسته‌بندی‌ها ── */
 .ap-toolbar {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  align-items: flex-start;
   gap: 18px;
   margin: 8px 0 14px;
 }
@@ -279,6 +294,7 @@
 /* دسکتاپ: چیپ‌ها در چند ردیف جا می‌شوند؛ موبایل: اسکرول افقی (پایین‌تر) */
 .ap-chips {
   display: flex;
+  flex: 1;
   flex-wrap: wrap;
   align-items: center;
   gap: 10px;
@@ -322,15 +338,27 @@
 }
 
 .ap-chip--saved {
-  border-style: dashed;
+  gap: 7px;
+  border-color: rgb(var(--line-rgb) / 0.16);
+  background: rgb(var(--wash-rgb) / 0.04);
+  color: var(--white);
+}
+
+.ap-chip--saved svg {
+  flex-shrink: 0;
+  color: var(--blue-bright);
 }
 
 .ap-chip--saved.has-items {
-  color: var(--white);
   border-color: rgba(119, 183, 135, 0.45);
+  background: rgba(119, 183, 135, 0.08);
 }
 
-.ap-chip--saved span {
+.ap-chip--saved.has-items svg {
+  color: var(--green-bright);
+}
+
+.ap-chip--saved .ap-chip__count {
   display: grid;
   place-items: center;
   min-width: 20px;
@@ -343,72 +371,13 @@
   font-weight: 700;
 }
 
-/* ── فیلترهای دوم + مرتب‌سازی ── */
-.ap-subfilters {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 26px;
-}
-
-.ap-subfilters__pills {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-  overflow-x: auto;
-  padding: 4px 2px;
-  scrollbar-width: none;
-}
-
-.ap-subfilters__pills::-webkit-scrollbar {
-  display: none;
-}
-
-.ap-pill {
-  flex-shrink: 0;
-  padding: 7px 15px;
-  border: 1px solid rgb(var(--line-rgb) / 0.08);
-  border-radius: 999px;
-  background: transparent;
-  color: var(--muted);
-  font-family: inherit;
-  font-size: 0.82rem;
-  font-weight: 500;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 170ms ease, color 170ms ease, border-color 170ms ease;
-}
-
-.ap-pill:hover {
-  color: var(--white);
-  background: rgb(var(--wash-rgb) / 0.05);
-}
-
-.ap-pill.is-active {
-  border-color: transparent;
-  background: rgba(91, 140, 199, 0.18);
-  color: var(--blue-bright);
-}
-
-.ap-pill--featured.is-active {
-  background: rgba(171, 142, 124, 0.16);
-  color: var(--brown-bright);
-}
-
-.ap-subfilters__sep {
-  width: 1px;
-  height: 18px;
-  flex-shrink: 0;
-  background: rgb(var(--wash-rgb) / 0.1);
-}
-
+/* ── تعداد و مرتب‌سازی در همان ردیف دسته‌بندی‌ها ── */
 .ap-toolbar__end {
   display: flex;
   align-items: center;
   gap: 14px;
   flex-shrink: 0;
+  margin-inline-start: auto;
 }
 
 .ap-count {
@@ -2417,12 +2386,6 @@ body.ap-reading-mode .ap-back {
     flex-direction: row;
   }
 
-  .ap-subfilters {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-  }
-
   .ap-toolbar__end {
     justify-content: space-between;
   }
@@ -2473,15 +2436,6 @@ body.ap-reading-mode .ap-back {
   .ap-chip {
     padding: 8px 15px;
     font-size: 0.84rem;
-  }
-
-  .ap-subfilters {
-    margin-bottom: 22px;
-  }
-
-  .ap-pill {
-    padding: 7px 13px;
-    font-size: 0.79rem;
   }
 
   .ap-sort select {

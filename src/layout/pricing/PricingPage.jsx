@@ -1,11 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import {
-  PAYMENT_STATUS,
   PRICING_META,
   clampSeats,
-  formatPercentFa,
-  formatToman,
   getPlans,
   quote,
   toFa,
@@ -87,7 +84,6 @@ export default function PricingPage({ hasAccount = false, onStart }) {
       {/* ── لایهٔ اول: هدر ── */}
       <section className="pr-hero section-shell" data-reveal="hero" aria-labelledby="pr-title">
         <span className="pr-hero__grid" aria-hidden="true" />
-        <span className="pr-hero__glow" aria-hidden="true" />
 
         <div className="pr-hero__copy">
           <span className="pr-eyebrow">تعرفه‌های تپش</span>
@@ -98,21 +94,6 @@ export default function PricingPage({ hasAccount = false, onStart }) {
             یک اشتراک برای شروع منظم، یک اشتراک برای آمادگی کامل. مدت پرداخت را
             خودت انتخاب می‌کنی و هرچه جلوتر بروی، پوشش بیشتری از تپش در اختیارت است.
           </p>
-
-          <dl className="pr-hero__facts">
-            <div className="pr-fact">
-              <dt>پلن‌ها</dt>
-              <dd>{toFa(plans.length)}</dd>
-            </div>
-            <div className="pr-fact">
-              <dt>دوره‌های پرداخت</dt>
-              <dd>ماهانه تا سالانه</dd>
-            </div>
-            <div className="pr-fact">
-              <dt>وضعیت پرداخت</dt>
-              <dd>{PAYMENT_STATUS.label}</dd>
-            </div>
-          </dl>
         </div>
       </section>
 
@@ -169,59 +150,7 @@ export default function PricingPage({ hasAccount = false, onStart }) {
         </div>
       </section>
 
-      {/* ── لایهٔ چهارم: شفافیت مالی ── */}
-      <section className="pr-finance section-shell" data-reveal aria-labelledby="pr-finance-title">
-        <div className="pr-finance__panel">
-          <header className="pr-finance__head">
-            <span className="pr-eyebrow pr-eyebrow--quiet">شفافیت مالی</span>
-            <h2 className="pr-section-title" id="pr-finance-title">
-              پیش از پرداخت، حساب روشن است
-            </h2>
-            <p className="pr-section-lead">
-              هر عددی که در ادامهٔ خرید می‌بینی، همان چیزی است که در کارت‌ها
-              انتخاب کرده‌ای — بدون هزینهٔ پنهان.
-            </p>
-          </header>
-
-          <dl className="pr-finance__rows">
-            <div className="pr-finance__row">
-              <dt>پلن انتخاب‌شده</dt>
-              <dd>اشتراک {selectedPlan.name}</dd>
-            </div>
-            <div className="pr-finance__row">
-              <dt>دورهٔ پرداخت</dt>
-              <dd>{selectedPrice.cycleLabel}</dd>
-            </div>
-            <div className="pr-finance__row">
-              <dt>{selectedPlan.seats ? 'هزینهٔ هر نفر در ماه' : 'هزینهٔ ماهانه'}</dt>
-              <dd>{formatToman(selectedPrice.perMonth)}</dd>
-            </div>
-            <div className="pr-finance__row">
-              <dt>تخفیف اعمال‌شده</dt>
-              <dd>
-                {activeDiscount > 0
-                  ? `${formatPercentFa(activeDiscount)} · ${formatToman(selectedPrice.savedPerMonth)} کمتر در هر ماه`
-                  : 'بدون تخفیف در این دوره'}
-              </dd>
-            </div>
-            <div className="pr-finance__row pr-finance__row--total">
-              <dt>
-                {selectedPlan.seats
-                  ? `مبلغ کل برای ${toFa(selectedPrice.seats)} نفر`
-                  : 'مبلغ قابل پرداخت'}
-              </dt>
-              <dd>{formatToman(selectedPrice.total)}</dd>
-            </div>
-          </dl>
-
-          <div className="pr-finance__status">
-            <span className="pr-finance__status-chip">{PAYMENT_STATUS.label}</span>
-            <p>{PAYMENT_STATUS.note}</p>
-          </div>
-        </div>
-      </section>
-
-      {/* ── لایهٔ پنجم: مقایسهٔ قابلیت‌ها ── */}
+      {/* ── لایهٔ چهارم: مقایسهٔ قابلیت‌ها ── */}
       <section
         className="pr-compare section-shell"
         id="pr-compare"
@@ -245,7 +174,7 @@ export default function PricingPage({ hasAccount = false, onStart }) {
         />
       </section>
 
-      {/* ── لایهٔ ششم: فراخوان پایانی ── */}
+      {/* ── لایهٔ پنجم: فراخوان پایانی ── */}
       <section className="pr-final section-shell" data-reveal aria-labelledby="pr-final-title">
         <div className="pr-final__panel">
           <div className="pr-final__copy">

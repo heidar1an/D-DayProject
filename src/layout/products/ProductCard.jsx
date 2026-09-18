@@ -12,8 +12,10 @@ import { ProductArrow } from './productsShared';
  */
 
 export default function ProductCard({ product, onOpen }) {
+  const extraClass = product.heroStyle ? ` ps-card--${product.heroStyle}` : '';
+
   return (
-    <article className={`ps-card ps-card--${product.layout} ps-accent-${product.accent}`} data-reveal>
+    <article className={`ps-card ps-card--${product.layout}${extraClass} ps-accent-${product.accent}`} data-reveal>
       <div className="ps-card__copy">
         <p className="ps-eyebrow">
           <span className="ps-eyebrow__index">{product.index}</span>

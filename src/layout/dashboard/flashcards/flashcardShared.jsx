@@ -105,6 +105,12 @@ const fcIconPaths = {
       <path d="M9.6 9.3A2.5 2.5 0 0 1 14.5 10c0 1.7-2.5 2-2.5 3.5M12 17h.01" />
     </>
   ),
+  volume: (
+    <>
+      <path d="M11.5 4.5 7 8H3.5v8H7l4.5 3.5z" />
+      <path d="M15 8.6a4.8 4.8 0 0 1 0 6.8M17.8 6a8.5 8.5 0 0 1 0 12" />
+    </>
+  ),
 };
 
 export function Icon({ name, className = 'h-[18px] w-[18px]', strokeWidth = 1.9, style }) {
@@ -168,7 +174,7 @@ export function MasteryRing({ value = 0, size = 56, stroke = 5, color = '#5b8cc7
           style={{ transition: 'stroke-dashoffset 700ms ease' }}
         />
       </svg>
-      <span className="absolute text-center [font-family:'Doran','Vazir',Tahoma,sans-serif]" style={{ fontSize: size * 0.24 }}>
+      <span className="fc-num absolute text-center" style={{ fontSize: size * 0.24 }}>
         {toFa(clamped)}
         <span className="block text-[9px] text-[var(--faint)]" style={{ fontSize: size * 0.15 }}>{label ?? '٪'}</span>
       </span>

@@ -1,16 +1,16 @@
 import { getProducts, getProductsOutro } from '../../services/products/productsService';
 import ProductCard from './ProductCard';
 import ProductOutro from './ProductOutro';
+import ProductPanels from './ProductPanels';
 import ProductShowcase from './ProductShowcase';
-import ProductStickyShowcase from './ProductStickyShowcase';
 
 /*
  * ── بدنهٔ صفحهٔ محصولات (مسیر مستقل `#products`) ──
  *
  * این فایل فقط «ریتم» را می‌سازد؛ هیچ متن و هیچ مسیری اینجا نیست. ترتیبِ ثابت:
  *
- *   نمای بزرگ → نمای چسبان → ردیف دو‌تایی → بخشِ بزرگ میانی →
- *   ردیف فشرده → اکوسیستم + فراخوان پایانی
+ *   نمای ورق‌خورِ دوره‌ها → کادرهای چرخانِ بانک تست → ردیف دو‌تایی →
+ *   بخشِ بزرگ میانی → ردیف فشرده → اکوسیستم
  *
  * هر محصول از داده می‌آید و با `layout` خودش سر جایش می‌نشیند؛ پس اضافه‌کردن
  * محصولِ تازه فقط یک شیء در `productsService` است و این فایل دست‌نخورده می‌ماند.
@@ -24,7 +24,7 @@ export default function ProductsSection({ onOpenProduct }) {
   const products = getProducts();
 
   const showcase = products.find((product) => product.layout === 'showcase') ?? null;
-  const sticky = products.find((product) => product.layout === 'sticky') ?? null;
+  const panels = products.find((product) => product.layout === 'panels') ?? null;
   const feature = products.find((product) => product.layout === 'feature') ?? null;
   const duo = products.filter((product) => product.layout === 'duo');
   const compact = products.filter((product) => product.layout === 'compact');
@@ -37,7 +37,7 @@ export default function ProductsSection({ onOpenProduct }) {
     >
       {showcase ? <ProductShowcase product={showcase} onOpen={onOpenProduct} /> : null}
 
-      {sticky ? <ProductStickyShowcase product={sticky} onOpen={onOpenProduct} /> : null}
+      {panels ? <ProductPanels product={panels} onOpen={onOpenProduct} /> : null}
 
       {duo.length > 0 ? (
         <div className="ps-row ps-row--duo">

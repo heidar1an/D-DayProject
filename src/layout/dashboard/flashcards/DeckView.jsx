@@ -1,5 +1,5 @@
 /*
- * DeckView — جزئیات یک دِک: آمار، مرور، ساخت کارت، و مدیریت کارت‌ها
+ * DeckView — جزئیات یک مجموعه: آمار، مرور، ساخت کارت، و مدیریت کارت‌ها
  * با جستجو و فیلتر (حالت، گلچین، تگ).
  * پاسخ کارت‌ها در لیست عمداً پنهان است؛ فقط با کلیک «نمایش» باز می‌شود (اصل Card Preview).
  */
@@ -54,6 +54,12 @@ function CardRow({ card, deckCover, onEdit, onBookmark, onSuspend, onArchive }) 
 
           <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] text-[var(--faint)]">
             <StateChip state={state.state} />
+            {card.media?.audioUrl && (
+              <span className="inline-flex items-center gap-1 text-[var(--blue-soft-ink)]" title="این کارت صدا دارد">
+                <Icon name="volume" className="h-3 w-3" />
+                صدا دار
+              </span>
+            )}
             <span className="inline-flex items-center gap-1">
               <Icon name="clock" className="h-3 w-3" />
               {state.suspended ? 'معلق' : formatDue(state.dueAt)}
@@ -141,7 +147,7 @@ export default function DeckView({ userData, deckId, onBack, onStartReview, onEd
       })
       .catch(() => {
         if (alive) {
-          setError('دِک پیدا نشد.');
+          setError('مجموعه پیدا نشد.');
           setLoading(false);
         }
       });
@@ -215,7 +221,7 @@ export default function DeckView({ userData, deckId, onBack, onStartReview, onEd
   if (error || !data) {
     return (
       <div className="rounded-[2.5rem] bg-[var(--surface-soft)] p-10 text-center">
-        <p className="text-sm text-[var(--muted)]">{error ?? 'دِک پیدا نشد.'}</p>
+        <p className="text-sm text-[var(--muted)]">{error ?? 'مجموعه پیدا نشد.'}</p>
         <button type="button" onClick={onBack} className="mt-4 cursor-pointer rounded-xl bg-white/8 px-5 py-2 text-sm transition-colors hover:bg-white/15">
           بازگشت
         </button>
@@ -227,7 +233,7 @@ export default function DeckView({ userData, deckId, onBack, onStartReview, onEd
 
   return (
     <div className="space-y-5">
-      {/* سربرگ دِک */}
+      {/* سربرگ مجموعه */}
       <header className="rounded-[2.5rem] bg-[var(--surface-soft)] p-5 md:p-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
@@ -237,7 +243,7 @@ export default function DeckView({ userData, deckId, onBack, onStartReview, onEd
               className="mb-3 inline-flex cursor-pointer items-center gap-1.5 text-xs text-[var(--faint)] transition-colors hover:text-white"
             >
               <Icon name="back" className="h-3.5 w-3.5" />
-              همهٔ دِک‌ها
+              همهٔ مجموعه‌ها
             </button>
             <h1 className="flex items-center gap-2.5 text-2xl [font-family:'Doran','Vazir',Tahoma,sans-serif] md:text-3xl">
               <span className="h-3.5 w-3.5 rounded-full" style={{ background: deck.cover }} aria-hidden="true" />
@@ -263,7 +269,7 @@ export default function DeckView({ userData, deckId, onBack, onStartReview, onEd
                 className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-[var(--blue-bright)] px-6 py-3 text-sm font-bold text-white transition-transform hover:-translate-y-0.5 [font-family:'Doran','Vazir',Tahoma,sans-serif]"
               >
                 <Icon name="play" className="h-4 w-4" />
-                مرور این دِک
+                مرور این مجموعه
               </button>
               <button
                 type="button"
@@ -285,7 +291,7 @@ export default function DeckView({ userData, deckId, onBack, onStartReview, onEd
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="جستجو در کارت‌های این دِک…"
+            placeholder="جستجو در کارت‌های این مجموعه…"
             aria-label="جستجو در کارت‌ها"
             className="w-full rounded-2xl border border-white/8 bg-[var(--surface-soft)] py-3.5 pl-4 pr-11 text-sm outline-none transition-colors placeholder:text-[var(--ghost)] focus:border-[#5b8cc7]/40"
           />
@@ -328,7 +334,7 @@ export default function DeckView({ userData, deckId, onBack, onStartReview, onEd
       </div>
 
       {/* لیست کارت‌ها */}
-      <section aria-label="کارت‌های دِک">
+      <section aria-label="کارت‌های مجموعه">
         <p className="mb-3 text-xs text-[var(--ghost)]">{toFa(visibleCards.length)} کارت</p>
         {visibleCards.length ? (
           <ul className="space-y-2.5">

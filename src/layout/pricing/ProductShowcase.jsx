@@ -1,4 +1,7 @@
-import { getProducts } from '../../services/pricing/pricingService';
+import { useState } from 'react';
+
+import { getProducts as getPricingProducts } from '../../services/pricing/pricingService';
+import { getProducts as getCatalogProducts } from '../../services/products/productsService';
 
 /*
  * ── معرفی محصولات، پیش از تعرفه‌ها ──
@@ -47,8 +50,24 @@ function ProductMark({ mark }) {
   return <span className="pr-product__mark">{MARKS[mark] ?? MARKS.layers}</span>;
 }
 
+function DeckArrow({ direction }) {
+  return (
+    <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+      <path d={direction === 'next' ? 'M7 4l6 6-6 6' : 'M13 4l-6 6 6 6'} />
+    </svg>
+  );
+}
+
 export default function ProductShowcase({ onSeePlans }) {
-  const products = getProducts();
+  const products = getPricingProducts();
+  const catalogProducts = getCatalogProducts();
+  const [activeIndex, setActiveIndex] = useState(0);
+  const activeProduct = catalogProducts[activeIndex] ?? catalogProducts[0];
+
+  const changeProduct = (step) => {
+    if (!catalogProducts.length) return;
+    setActiveIndex((current) => (current + step + catalogProducts.length) % catalogProducts.length);
+  };
 
   return (
     <section className="pr-products section-shell" data-reveal aria-labelledby="pr-products-title">
@@ -95,6 +114,68 @@ export default function ProductShowcase({ onSeePlans }) {
           ))}
         </ol>
       </div>
+
+      {activeProduct && (
+        <section
+          className={`pr-products__deck pr-products__deck--${activeProduct.accent}`}
+          aria-labelledby="pr-products-deck-title"
+        >
+          <div className="pr-products__deck-copy">
+            <span className="pr-products__deck-kicker">محصولات بیشتری را ورق بزن</span>
+            <div className="pr-products__deck-heading">
+              <span className="pr-products__deck-index">{activeProduct.index}</span>
+              <div>
+                <h3 className="pr-products__deck-title" id="pr-products-deck-title">
+                  {activeProduct.title}
+                </h3>
+                <p className="pr-products__deck-subtitle">{activeProduct.subtitle}</p>
+              </div>
+            </div>
+            <p className="pr-products__deck-description">{activeProduct.description}</p>
+            <a className="pr-products__deck-cta" href="#products">
+              دیدن همهٔ محصولات
+              <DeckArrow direction="next" />
+            </a>
+          </div>
+
+          <div className="pr-products__deck-controls">
+            <div className="pr-products__deck-count" aria-live="polite">
+              {activeProduct.index} از {catalogProducts.length.toLocaleString('fa-IR')}
+            </div>
+            <div className="pr-products__deck-buttons">
+              <button
+                className="pr-products__deck-button"
+                type="button"
+                aria-label="محصول قبلی"
+                onClick={() => changeProduct(-1)}
+              >
+                <DeckArrow direction="prev" />
+              </button>
+              <button
+                className="pr-products__deck-button"
+                type="button"
+                aria-label="محصول بعدی"
+                onClick={() => changeProduct(1)}
+              >
+                <DeckArrow direction="next" />
+              </button>
+            </div>
+            <div className="pr-products__deck-dots" role="tablist" aria-label="انتخاب محصول">
+              {catalogProducts.map((product, index) => (
+                <button
+                  className={`pr-products__deck-dot ${index === activeIndex ? 'is-active' : ''}`}
+                  type="button"
+                  role="tab"
+                  aria-selected={index === activeIndex}
+                  aria-label={`نمایش ${product.title}`}
+                  key={product.id}
+                  onClick={() => setActiveIndex(index)}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       <p className="pr-products__bridge">
         پوشش هر محصول در پلن‌ها متفاوت است.{' '}

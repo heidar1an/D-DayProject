@@ -10,11 +10,20 @@
  */
 
 export default function ProductIntro({ intro, as: Heading = 'h2', headingId = 'products-title' }) {
+  const hasSplitHeading = intro.headingTop || intro.headingAccent;
+
   return (
     <header className="ps-intro" data-reveal>
       <p className="ps-intro__eyebrow">{intro.eyebrow}</p>
       <Heading className="ps-intro__title" id={headingId}>
-        {intro.heading}
+        {hasSplitHeading ? (
+          <>
+            <span className="ps-intro__title-top">{intro.headingTop}</span>{' '}
+            <span className="ps-intro__title-accent">{intro.headingAccent}</span>
+          </>
+        ) : (
+          intro.heading
+        )}
       </Heading>
       <p className="ps-intro__lead">{intro.subheading}</p>
     </header>

@@ -5,3 +5,10 @@ dist
 vendor
 database/publishing.secrets.json
 database/media.secrets.json
+
+# ── زوائد بررسی (probe / bundle) — هرگز commit نشوند ──
+# هارنس واقعی (`scripts/verify-render.mjs`) خروجی موقتش را در
+# `node_modules/.cache/tapesh-verify/` می‌سازد و خودش پاک می‌کند.
+# هر `*.out.mjs` یا `.probe*` در ریشهٔ پروژه، باقی‌ماندهٔ اجرای دستی است.
+.probe*
+*.out.mjs

@@ -62,6 +62,10 @@ export const CATEGORIES = [
   { id: 'study-skills', label: 'مهارت‌های مطالعه', accent: 'sage' },
   { id: 'olympiad', label: 'المپیاد', accent: 'gold' },
   { id: 'lifestyle', label: 'سبک زندگی دانشجویی', accent: 'mint' },
+  { id: 'news', label: 'اخبار', accent: 'blue' },
+  { id: 'biotechnology', label: 'بیوتکنولوژی', accent: 'purple' },
+  { id: 'public-health', label: 'بهداشت عمومی', accent: 'green' },
+  { id: 'featured', label: 'منتخب تپش', accent: 'gold' },
 ];
 
 const RAW_ARTICLES = [

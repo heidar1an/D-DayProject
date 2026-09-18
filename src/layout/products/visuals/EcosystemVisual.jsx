@@ -8,6 +8,10 @@ import { getEcosystemNodes } from '../../../services/products/productsService';
  *
  * مختصات از تعداد گره‌ها حساب می‌شود و جهتِ متن (`text-anchor`) از علامتِ کسینوس،
  * پس محصولِ تازه خودکار جا می‌گیرد و برچسب‌ها بیرون نمی‌زنند.
+ *
+ * نکتهٔ راست‌به‌چپ: در بسترِ RTL، `start` یعنی لبهٔ **راستِ** متن و `end` یعنی
+ * لبهٔ چپش. پس برای گره‌های سمت راست باید `end` بدهیم تا متن به سمتِ راست (دور
+ * از مرکز) باز شود و روی گویِ خودش نیفتد؛ برای گره‌های سمت چپ برعکس.
  */
 
 const CENTER_X = 280;
@@ -29,7 +33,7 @@ export default function EcosystemVisual() {
       nodeY: CENTER_Y + RADIUS_NODE * sin,
       labelX: CENTER_X + RADIUS_LABEL * cos,
       labelY: CENTER_Y + RADIUS_LABEL * sin,
-      anchor: cos > 0.25 ? 'start' : cos < -0.25 ? 'end' : 'middle',
+      anchor: cos > 0.25 ? 'end' : cos < -0.25 ? 'start' : 'middle',
     };
   });
 
@@ -41,6 +45,11 @@ export default function EcosystemVisual() {
         role="img"
         aria-label="نمودار اکوسیستم تپش: همهٔ محصولات به یک هستهٔ مشترک وصل‌اند"
       >
+        <g className="ps-eco__orbit-rings" aria-hidden="true">
+          <circle className="ps-eco__orbit-ring" cx={CENTER_X} cy={CENTER_Y} r="70" />
+          <circle className="ps-eco__orbit-ring ps-eco__orbit-ring--two" cx={CENTER_X} cy={CENTER_Y} r="116" />
+        </g>
+
         <g className="ps-eco__links">
           {points.map((point) => (
             <line
@@ -67,7 +76,11 @@ export default function EcosystemVisual() {
         </g>
 
         {points.map((point) => (
-          <g className={`ps-eco__node ps-eco__node--${point.accent}`} key={point.id}>
+          <g
+            className={`ps-eco__node ps-eco__node--${point.accent}`}
+            key={point.id}
+            style={{ '--ps-i': point.id === 'lessons' ? 0 : points.indexOf(point) }}
+          >
             <circle className="ps-eco__dot" cx={point.nodeX} cy={point.nodeY} r="6" />
             <text
               className="ps-eco__label"

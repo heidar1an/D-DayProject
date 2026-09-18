@@ -66,6 +66,7 @@ const PAIRS = [
   ['بنفش متن روی پنل بنفش', 'purple-ink', 'purple-deep'],
   ['طلایی متن', 'gold-ink', 'surface'],
   ['طلایی متن روی پنل طلایی', 'gold-ink', 'gold-deep'],
+  ['قهوه‌ای متن', 'brown-ink', 'surface'],
   ['مسی متن', 'copper-ink', 'surface'],
   ['مسی متن روی پنل مسی', 'copper-ink', 'copper-deep'],
   ['قرمز متن', 'red-ink', 'surface'],

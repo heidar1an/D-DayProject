@@ -8,8 +8,10 @@ import brownTest from '../images/pictures/01.png';
 import heartbeatMark from '../images/pictures/600ppi/Asset 6.webp';
 import friendsDoctorsIllustration from '../images/pictures/Asset 3.webp';
 import baleSocialIcon from '../images/icons/Asset 13.webp';
+import eitaaSocialIcon from '../images/icons/eitaa.svg';
 import telegramSocialIcon from '../images/icons/Asset 11.webp';
 import instagramSocialIcon from '../images/icons/Asset 14.webp';
+import youtubeSocialIcon from '../images/icons/youtube.svg';
 import tapeshCollage from '../images/pictures/Asset 7.webp';
 import trophyIcon from '../images/icons/trophy.png';
 import aiIcon from '../images/icons/ai-technology.png';
@@ -175,8 +177,8 @@ const faqItems = [
     answer: 'تپش برای دانشجویان علوم پزشکی طراحی شده است؛ از شروع ترم و یادگیری مفهومی تا جمع‌بندی و آمادگی آزمون.',
   },
   {
-    question: 'دوره مسیر رشد چیست؟',
-    answer: 'مسیر رشد یک برنامه مرحله‌به‌مرحله برای ساختن عادت مطالعه، یادگیری هدفمند و پیشرفت پیوسته در دروس پزشکی است.',
+    question: 'دوره مسیر سبز چیست؟',
+    answer: 'مسیر سبز، یک برنامه جامع مرحله به مرحله برای ساختن عادت مطالعه، یادگیری هدفمند، رنک دانشگاه شدن و پیشرفت پیوسته در دروس پزشکی است.',
   },
   {
     question: 'محتوای آموزشی تپش شامل چه چیزهایی است؟',
@@ -482,10 +484,9 @@ function SiteFooter() {
           <small>نسخه ۱.۵.۵.۲۷</small>
           <div className="site-footer__about">
             <p>
-              ما می‌خواهیم دانش پزشکی را از حالت پراکنده و فرسایشی خارج کنیم و
-              آن را به یک مسیر منسجم، قابل‌فهم و قابل‌اعتماد تبدیل کنیم؛ مسیری
-              که دانشجو بداند امروز چه بخواند، چرا بخواند، چطور تمرین کند و کجا
-              باید بهتر شود
+              والا ما اومدیم دور هم یک چایی بخوریم گفتیم ی پلتفرم نزنیم بچه‌های
+              پزشکی رو دور هم جمع کنیم؟ اینجوری شد که بار نیسان سر از اینجا در
+              آوردیم. اگه بازم این حوالی راهت خورد بیا پیش خودمون ی چایی مهمون ما باش!
             </p>
           </div>
         </div>
@@ -521,7 +522,7 @@ function SiteFooter() {
                 aria-label={item.label}
                 title={item.label}
               >
-                <SocialMark item={item} />
+                <img src={item.image} alt="" />
               </a>
             ))}
           </div>
@@ -1030,18 +1031,19 @@ export const FOOTER_SECTION_LINKS = [
   { title: 'پشتیبانی', href: dashboardRouteHash({ overlay: OVERLAY_IDS.settings, tab: 'support' }) },
 ];
 
+/*
+ * پنج فضای مجازی تپش. نشانهٔ هر کدام یک تصویر تک‌فام است — دو تای اولِ قبلی
+ * (ایتا با حرف «e» و یوتیوب با مثلث) نشانهٔ تایپی بودند و کنار سه نشانهٔ تصویریِ
+ * دیگر ناهمگون می‌شدند؛ جایشان لوگوی واقعی و هم‌اندازهٔ همان‌ها نشست.
+ * رنگشان از `filter: var(--icon-filter)` می‌آید (سفید در تم تیره، تیره در تم روشن).
+ */
 const FOOTER_SOCIAL_LINKS = [
-  { id: 'bale', label: 'بله', href: 'https://ble.ir/tapesh', image: baleSocialIcon },
-  { id: 'eitaa', label: 'ایتا', href: 'https://eitaa.com/tapesh', mark: 'e' },
-  { id: 'telegram', label: 'تلگرام', href: 'https://t.me/tapesh', image: telegramSocialIcon },
-  { id: 'instagram', label: 'اینستاگرام', href: 'https://instagram.com/tapesh', image: instagramSocialIcon },
-  { id: 'youtube', label: 'یوتیوب', href: 'https://youtube.com/@tapesh', mark: '▶' },
+  { id: 'bale', label: 'بله', href: 'https://ble.ir/tapesh_production', image: baleSocialIcon },
+  { id: 'eitaa', label: 'ایتا', href: 'https://eitaa.com/tapesh_production', image: eitaaSocialIcon },
+  { id: 'telegram', label: 'تلگرام', href: 'https://t.me/tapesh_production', image: telegramSocialIcon },
+  { id: 'instagram', label: 'اینستاگرام', href: 'https://www.instagram.com/tapesh_production/', image: instagramSocialIcon },
+  { id: 'youtube', label: 'یوتیوب', href: 'https://www.youtube.com/@tapesh_production', image: youtubeSocialIcon },
 ];
-
-function SocialMark({ item }) {
-  if (item.image) return <img src={item.image} alt="" />;
-  return <span aria-hidden="true">{item.mark}</span>;
-}
 
 /*
  * ── کادرهای تبلیغی محصولات سرصفحه ──

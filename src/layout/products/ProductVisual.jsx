@@ -1,37 +1,37 @@
-import CoordinatedExamPreview from './visuals/CoordinatedExamPreview';
 import ExamBuilderPreview from './visuals/ExamBuilderPreview';
 import FlashcardPreview from './visuals/FlashcardPreview';
-import KnowledgeGraphPreview from './visuals/KnowledgeGraphPreview';
+import KnowledgeNetworkPreview from './visuals/KnowledgeNetworkPreview';
 import LeaguePreview from './visuals/LeaguePreview';
-import QuestionBankPreview from './visuals/QuestionBankPreview';
-import ReaderPreview from './visuals/ReaderPreview';
-import WikiPreview from './visuals/WikiPreview';
+import ArticlesPreview from './visuals/ArticlesPreview';
+import ReviewNotebookPreview from './visuals/ReviewNotebookPreview';
+import SheetStackPreview from './visuals/SheetStackPreview';
+import WikiHeaderPreview from './visuals/WikiHeaderPreview';
 
 /*
  * ── نگاشتِ `visualType` به پیش‌نمایش ──
  *
  * محصولِ تازه = یک کلید تازه در این نگاشت؛ اگر پیش‌نمایشی نداشته باشد، بخش
- * بدون هیچ خطایی فقط متنِ محصول را نشان می‌دهد (return null).
+ * بدون هیچ خطایی فقط متنِ محصول را نشان می‌دهد (return null). پیش‌نمایش‌های
+ * ورق‌خور و مقالات هم مثل بقیه از همین مسیر واحد مصرف می‌شوند.
  */
 
 const VISUALS = {
-  reader: ReaderPreview,
-  questionBank: QuestionBankPreview,
+  sheets: SheetStackPreview,
+  wikiHeader: WikiHeaderPreview,
+  articles: ArticlesPreview,
+  reviewNotebook: ReviewNotebookPreview,
   flashcard: FlashcardPreview,
-  knowledgeGraph: KnowledgeGraphPreview,
-  wiki: WikiPreview,
+  knowledgeGraph: KnowledgeNetworkPreview,
   examBuilder: ExamBuilderPreview,
-  coordinatedExam: CoordinatedExamPreview,
   league: LeaguePreview,
 };
 
-export default function ProductVisual({ product, stage = 'question' }) {
+export default function ProductVisual({ product, stage = 0 }) {
   const Component = VISUALS[product.visualType];
 
   if (!Component) return null;
 
-  /* فقط پیش‌نمایش بانک تست مرحله می‌گیرد (نمای چسبان آن را جابه‌جا می‌کند) */
-  if (product.visualType === 'questionBank') return <Component stage={stage} />;
+  if (product.visualType === 'sheets') return <Component sheets={product.sheets} stage={stage} />;
 
-  return <Component />;
+  return <Component product={product} />;
 }

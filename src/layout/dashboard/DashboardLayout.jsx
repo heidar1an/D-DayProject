@@ -214,8 +214,8 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
         onOpenTestBank={(initialView) => openLayer(LAYER_IDS.testBank, testBankEntryView(initialView))}
       />
     ),
-    flashcards: <FlashcardSection userData={userData} />,
-    notes: <NotesSection userData={userData} />,
+    flashcards: <FlashcardSection userData={userData} onBack={() => handleSectionChange('dashboard')} />,
+    notes: <NotesSection userData={userData} onBack={() => handleSectionChange('dashboard')} />,
     'review-notebook': (
       <ReviewNotebook
         userData={userData}

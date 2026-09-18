@@ -204,6 +204,7 @@ function seedUserSpace(userData) {
       showSource: true,
       keyboardShortcuts: true,
       autoPlayAudio: false,
+      textSize: 'medium',
       algorithmConfig: {}, // Override الگوریتم در سطح کاربر — خالی = پیش‌فرض موتور
     },
   };
@@ -620,6 +621,7 @@ export function deleteDeck(userData, deckId) {
 /* POST /api/flashcards/cards */
 export function createCard(userData, deckId, draft) {
   return respond(() => {
+    const media = draft.media ?? (draft.imageUrl ? { imageUrl: draft.imageUrl } : null);
     const card = {
       id: `card-user-${Date.now().toString(36)}`,
       deckId,
@@ -627,7 +629,7 @@ export function createCard(userData, deckId, draft) {
       front: draft.front.trim(),
       back: draft.back.trim(),
       hint: draft.hint?.trim() || null,
-      media: draft.imageUrl ? { imageUrl: draft.imageUrl } : null,
+      media: media && (media.imageUrl || media.audioUrl) ? { imageUrl: media.imageUrl ?? null, audioUrl: media.audioUrl ?? null } : null,
       tags: (draft.tags ?? []).map((tag) => tag.trim()).filter(Boolean),
       subjectId: draft.subjectId ?? null,
       topicId: draft.topicId ?? null,
@@ -875,10 +877,10 @@ export function fetchStats(userData) {
     const performance = computePerformance(space.reviewLogs);
     const streak = computeStreak(space.reviewLogs);
 
-    /* شمارش روزانهٔ ۳۰ روز اخیر برای نمودار و هیت‌مپ */
+    /* شمارش روزانهٔ ۴۲ روز اخیر برای نمودار و تقویم ۵ هفته‌ایِ تراز با روزهای هفته */
     const todayStart = startOfLocalDay();
     const daily = [];
-    for (let i = 29; i >= 0; i -= 1) {
+    for (let i = 41; i >= 0; i -= 1) {
       const dayStart = todayStart - i * 24 * 60 * 60 * 1000;
       const dayLogs = space.reviewLogs.filter((log) => log.reviewedAt >= dayStart && log.reviewedAt < dayStart + 24 * 60 * 60 * 1000);
       daily.push({
@@ -926,6 +928,116 @@ export function fetchSettings(userData) {
       algorithmVersion: ALGORITHM_VERSION,
       algorithmDefaults: DEFAULT_ALGORITHM_CONFIG,
     };
+  });
+}
+
+/* ── ورود داده (Import) — خروجی متنی انکی و CSV/TSV ──
+ * انکی در مسیر File › Export نوع «Text separated by …» می‌دهد: سطرهای
+ * «جلو<جداکننده>پاسخ» با سرخط‌های اختیاری #separator / #html / #tags column.
+ * بستهٔ .apkg (پایگاه‌دادهٔ sqlite فشرده) در مرورگر بدون موتور SQL باز نمی‌شود؛
+ * مسیر پشتیبانی‌شده همان خروجی متنی رسمی انکی است.
+ */
+
+const ANKI_SEPARATORS = { tab: '\t', comma: ',', semicolon: ';', pipe: '|', colon: ':', space: ' ' };
+const IMPORT_LIMIT = 500;
+
+/* جداکننده را از سرخط #separator یا سِنیگ نخستین سطر داده تشخیص می‌دهد */
+function detectAnkiSeparator(lines) {
+  for (const line of lines) {
+    if (!line.startsWith('#')) break;
+    const match = /^#separator:\s*['"]?([\w-]+)['"]?/i.exec(line);
+    if (match) return ANKI_SEPARATORS[match[1].toLowerCase()] ?? null;
+  }
+  const sample = lines.find((line) => line.trim() && !line.startsWith('#')) ?? '';
+  const candidates = ['\t', ';', '|', ','].map((sep) => [sep, sample.split(sep).length - 1]);
+  candidates.sort((a, b) => b[1] - a[1]);
+  return candidates[0][1] > 0 ? candidates[0][0] : '\t';
+}
+
+/* جداسازی فیلدها با پشتیبانی نقل‌قول RFC («""» = گیومه داخل متن) */
+function splitAnkiFields(line, separator) {
+  const fields = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i += 1) {
+    const char = line[i];
+    if (inQuotes) {
+      if (char === '"') {
+        if (line[i + 1] === '"') { current += '"'; i += 1; }
+        else inQuotes = false;
+      } else current += char;
+    } else if (char === '"' && current === '') inQuotes = true;
+    else if (char === separator) { fields.push(current); current = ''; }
+    else current += char;
+  }
+  fields.push(current);
+  return fields;
+}
+
+/* متن خام خروجی انکی → فهرست کارت‌های خام؛ بدون وابستگی به DOM و localStorage */
+export function parseAnkiText(raw) {
+  if (typeof raw !== 'string' || !raw.trim()) return [];
+  const lines = raw.split(/\r?\n/);
+  const separator = detectAnkiSeparator(lines);
+  const cards = [];
+
+  for (const line of lines) {
+    if (cards.length >= IMPORT_LIMIT) break;
+    if (!line.trim() || line.startsWith('#')) continue;
+
+    const fields = splitAnkiFields(line, separator);
+    const front = fields[0].replace(/<br\s*\/?>/gi, '\n').trim();
+    if (!front) continue;
+    const back = (fields[1] ?? '').replace(/<br\s*\/?>/gi, '\n').trim();
+    /* ستون سوم انکی در خروجیِ همراه تگ، خودِ تگ‌هاست */
+    const tags = (fields[2] ?? '').trim().split(/\s+/).filter(Boolean).slice(0, 6);
+
+    cards.push({
+      type: /\{\{c\d+::/.test(front) ? 'cloze' : 'basic',
+      front,
+      back,
+      tags,
+    });
+  }
+  return cards;
+}
+
+/* POST /api/flashcards/import — ورود دسته‌ای کارت به یک مجموعه */
+export function importCards(userData, deckId, cards) {
+  return respond(() => {
+    if (!deckId) throw new Error('deck-required');
+    const now = new Date().toISOString();
+    let imported = 0;
+
+    mutateUserSpace(userData, (space) => {
+      cards.slice(0, IMPORT_LIMIT).forEach((draft) => {
+        const front = String(draft.front ?? '').trim();
+        if (!front) return;
+        const card = {
+          id: `card-user-${Date.now().toString(36)}-${imported}`,
+          deckId,
+          type: draft.type ?? 'basic',
+          front,
+          back: String(draft.back ?? '').trim(),
+          hint: null,
+          media: null,
+          tags: (draft.tags ?? []).filter(Boolean),
+          subjectId: null,
+          topicId: null,
+          source: { sourceType: 'import', sourceId: null, title: 'ورود از فایل', url: null },
+          language: 'fa',
+          status: 'active',
+          version: 1,
+          createdAt: now,
+          updatedAt: now,
+        };
+        space.userCards.push(card);
+        space.cardStates[card.id] = stateFor();
+        imported += 1;
+      });
+    });
+
+    return { imported };
   });
 }
 
