@@ -241,7 +241,8 @@ export function renderCloze(text, { revealed = false, highlight = false } = {}) 
     if (match.index > lastIndex) parts.push({ type: 'text', value: text.slice(lastIndex, match.index), key: `t${key}` });
     key += 1;
     if (revealed) {
-      parts.push({ type: 'cloze-open', value: match[2], key: `c${key}` });
+      /* جای خالی بدون پاسخِ توکار، خالیِ مطلق رندر نمی‌شود تا در مرور «ناپدید» به نظر نرسد */
+      parts.push({ type: 'cloze-open', value: match[2].trim() || '…', key: `c${key}` });
     } else {
       parts.push({ type: 'cloze-hidden', value: `جای خالی ${toFa(match[1])}`, key: `h${key}` });
     }
@@ -264,6 +265,18 @@ export function renderCloze(text, { revealed = false, highlight = false } = {}) 
       </mark>
     );
   });
+}
+
+/* فهرست جای خالی‌های یک متن کلوز — شماره و پاسخِ توکار هر کدام؛
+   مبنای کادرهای «پاسخ جای خالی» در ساخت کارت و فهرست پاسخ‌ها در مرور */
+export function parseClozeBlanks(text) {
+  const blanks = [];
+  const regex = /\{\{c(\d+)::(.*?)\}\}/g;
+  let match;
+  while ((match = regex.exec(text ?? '')) !== null) {
+    blanks.push({ index: Number(match[1]), content: match[2] });
+  }
+  return blanks;
 }
 
 /* برچسب کوچک اطلاعاتی */

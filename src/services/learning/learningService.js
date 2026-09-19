@@ -28,8 +28,6 @@ export const LearningService = {
       case 'activate':
         return Boolean(unitState.acknowledgedSteps?.activate)
           || Object.values(unitState.recallResponses ?? {}).some((value) => value?.trim());
-      case 'orient':
-        return Boolean(unitState.acknowledgedSteps?.orient);
       case 'learn':
         return unit.learning.microLessons.every((lesson) => unitState.completedLessons?.includes(lesson.id));
       case 'visualize':

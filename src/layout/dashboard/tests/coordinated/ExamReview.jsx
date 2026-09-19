@@ -1,8 +1,8 @@
 /*
  * ExamReview — مرور سؤال به سؤال بعد از آزمون.
- * برای هر سؤال: صورت، گزینهٔ صحیح، گزینهٔ انتخاب‌شده، توضیح، مبحث و پیوند به چرخهٔ
- * یادگیری: «افزودن به فلش‌کارت» مستقیم به سرویس فلش‌کارت تپش می‌رود (دک اختصاصی
- * مرور آزمون‌های هماهنگ ساخته/یافت می‌شود). لینک درسنامه و ویکی گام بعدی اتصال است.
+ * برای هر سؤال: صورت، گزینهٔ صحیح، گزینهٔ انتخاب‌شده، توضیح، گزارش ایراد سؤال و
+ * پیوند به چرخهٔ یادگیری: «افزودن به فلش‌کارت» مستقیم به سرویس فلش‌کارت تپش می‌رود
+ * (دک اختصاصی مرور آزمون‌های هماهنگ ساخته/یافت می‌شود). لینک درسنامه و ویکی گام بعدی اتصال است.
  */
 import { useMemo, useState } from 'react';
 import {
@@ -10,9 +10,114 @@ import {
   createDeck,
   fetchMyDecks,
 } from '../../../../services/flashcards/flashcardService';
+import { reportQuestion } from '../../../../services/coordinatedExams/coordinatedExamService';
 import { Icon, faNum, toFa } from './coordinatedShared';
 
 const REVIEW_DECK_TITLE = 'مرور آزمون‌های هماهنگ';
+
+const REPORT_REASONS = [
+  'پاسخ صحیح اشتباه است',
+  'توضیح ناقص یا نادرست است',
+  'متن سؤال مبهم است',
+  'خطای نگارشی',
+  'خطای علمی/درسی',
+  'سایر',
+];
+
+/* ── دیالوگ گزارش ایراد سؤال — از مرور کارنامه ── */
+function ReportDialog({ userId, questionId, examId, attemptId, onClose }) {
+  const [reason, setReason] = useState(REPORT_REASONS[0]);
+  const [note, setNote] = useState('');
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+
+  const submit = async () => {
+    if (sending) return;
+    setSending(true);
+    try {
+      await reportQuestion(userId, questionId, { reason, note, examId, attemptId });
+      setSent(true);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div className="exm-modal__scrim" role="dialog" aria-modal="true" aria-label="گزارش ایراد سؤال" onClick={sent ? onClose : undefined}>
+      <div className="exm-modal space-y-4" onClick={(event) => event.stopPropagation()}>
+        {sent ? (
+          <div className="py-3 text-center">
+            <span className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-full bg-[#61D192]/15 text-[var(--green-ink)]">
+              <Icon name="check" className="h-6 w-6" />
+            </span>
+            <strong className="block [font-family:'Doran','Vazir',Tahoma,sans-serif]">گزارشت ثبت شد</strong>
+            <p className="mt-1.5 text-sm leading-6 text-[var(--faint)]">
+              تیم محتوای تپش بررسی می‌کند؛ ممنون که کمک می‌کنی بانک سؤال بهتر شود.
+            </p>
+            <button
+              type="button"
+              onClick={onClose}
+              className="mt-5 cursor-pointer rounded-xl bg-white/[0.06] px-5 py-2 text-sm text-[var(--muted)] transition-colors hover:bg-white/[0.1] hover:text-white"
+            >
+              بستن
+            </button>
+          </div>
+        ) : (
+          <>
+            <h2 className="flex items-center gap-2 text-lg text-white [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+              <Icon name="flag" className="h-4.5 w-4.5 text-[var(--gold-ink)]" />
+              گزارش ایراد سؤال
+            </h2>
+            <p className="text-[11.5px] text-[var(--faint)]">شناسه سؤال: {questionId}</p>
+            <fieldset className="grid grid-cols-2 gap-1.5">
+              <legend className="sr-only">دلیل گزارش</legend>
+              {REPORT_REASONS.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => setReason(item)}
+                  aria-pressed={reason === item}
+                  className={`cursor-pointer rounded-xl border px-3 py-2.5 text-[12px] transition-colors ${
+                    reason === item
+                      ? 'border-[#937fcd]/60 bg-[#937fcd]/10 text-white'
+                      : 'border-white/[0.07] text-[var(--muted)] hover:border-white/20'
+                  }`}
+                >
+                  {item}
+                </button>
+              ))}
+            </fieldset>
+            <textarea
+              value={note}
+              onChange={(event) => setNote(event.target.value)}
+              placeholder="توضیح اختیاری…"
+              rows={2}
+              maxLength={500}
+              className="w-full resize-none rounded-xl border border-white/[0.07] bg-black/30 px-3.5 py-2.5 text-sm text-white placeholder:text-[var(--faint)] focus:border-[#937fcd]/50 focus:outline-none"
+            />
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={submit}
+                disabled={sending}
+                className="flex-1 cursor-pointer rounded-2xl bg-[var(--green-vivid)] py-3 text-sm font-bold text-[#0d1f16] transition-colors hover:bg-[#74dd9f] disabled:opacity-50"
+              >
+                {sending ? 'در حال ارسال…' : 'ارسال گزارش'}
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="cursor-pointer rounded-2xl bg-white/[0.06] px-5 py-3 text-sm text-[var(--muted)] transition-colors hover:bg-white/[0.1] hover:text-white"
+              >
+                انصراف
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
 
 const FILTERS = [
   { id: 'all', label: 'همه' },
@@ -29,7 +134,7 @@ const optionState = (index, question) => {
   return 'neutral';
 };
 
-function ReviewQuestionCard({ question, index, userData, sourceMeta }) {
+function ReviewQuestionCard({ question, index, userData, sourceMeta, onReport }) {
   const [cardState, setCardState] = useState('idle'); // idle | saving | saved
   const selected = question.userAnswer?.selected;
   const state =
@@ -76,7 +181,6 @@ function ReviewQuestionCard({ question, index, userData, sourceMeta }) {
         <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-white/[0.06] text-xs font-bold text-[var(--muted)]">
           {toFa(index + 1)}
         </span>
-        <span className="rounded-full bg-white/[0.05] px-2.5 py-1 text-[10.5px] text-[var(--faint)]">{question.topic}</span>
         <span
           className="rounded-full px-2.5 py-1 text-[10.5px] font-bold"
           style={{ background: `${state.accent}16`, color: state.accent }}
@@ -161,14 +265,24 @@ function ReviewQuestionCard({ question, index, userData, sourceMeta }) {
               درسنامه: {question.related.lesson}
             </span>
           )}
+          <button
+            type="button"
+            onClick={onReport}
+            className="mr-auto flex cursor-pointer items-center gap-1.5 rounded-xl bg-white/[0.04] px-3.5 py-2.5 text-xs text-[var(--faint)] transition-colors hover:bg-[#e26d6d]/12 hover:text-[var(--red-ink)]"
+          >
+            <Icon name="flag" className="h-3.5 w-3.5" />
+            گزارش ایراد سؤال
+          </button>
         </div>
       </div>
     </article>
   );
 }
 
-export default function ExamReview({ exam, questions, userData, onBack }) {
+export default function ExamReview({ exam, attempt, questions, userData, onBack }) {
   const [filter, setFilter] = useState('all');
+  const [reportTarget, setReportTarget] = useState(null); // { questionId, index }
+  const userId = userData?.id ?? userData?.phone;
 
   const counts = useMemo(() => {
     let correct = 0;
@@ -235,6 +349,7 @@ export default function ExamReview({ exam, questions, userData, onBack }) {
               index={questions.indexOf(question)}
               userData={userData}
               sourceMeta={{ examId: exam?.id, examTitle: exam?.title }}
+              onReport={() => setReportTarget({ questionId: question.id, index: questions.indexOf(question) })}
             />
           ))}
         </div>
@@ -242,6 +357,16 @@ export default function ExamReview({ exam, questions, userData, onBack }) {
         <p className="rounded-[1.6rem] border border-dashed border-white/12 bg-white/[0.02] p-8 text-center text-sm text-[var(--faint)]">
           سؤالی در این دسته نیست.
         </p>
+      )}
+
+      {reportTarget && (
+        <ReportDialog
+          userId={userId}
+          questionId={reportTarget.questionId}
+          examId={exam?.id ?? null}
+          attemptId={attempt?.id ?? null}
+          onClose={() => setReportTarget(null)}
+        />
       )}
     </div>
   );

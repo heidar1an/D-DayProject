@@ -4,6 +4,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import usersApiPlugin from './database/apiPlugin.js';
 import contentApiPlugin from './database/adminApiPlugin.js';
+import examApiPlugin from './database/examApiPlugin.js';
 import tailwindcss from '@tailwindcss/vite';
 
 /*
@@ -36,7 +37,7 @@ console.log(
 );
 
 export default defineConfig({
-  plugins: [react(), usersApiPlugin(), contentApiPlugin(), tailwindcss()],
+  plugins: [react(), usersApiPlugin(), contentApiPlugin(), examApiPlugin(), tailwindcss()],
   base: './',
 
   /*
@@ -62,6 +63,7 @@ export default defineConfig({
         '**/database/publishing.secrets.json',
         '**/database/media.secrets.json',
         '**/database/users.json',
+        '**/database/users.sessions.json',
         '**/public/uploads/**',
       ],
     },

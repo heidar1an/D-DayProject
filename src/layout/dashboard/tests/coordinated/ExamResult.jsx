@@ -1,12 +1,12 @@
 /*
  * ExamResult — کارنامه و تحلیل عملکرد.
  * سه حالت: ready (کارنامهٔ کامل) / processing (نتایج در حال پردازش) / not_participated.
- * مقایسهٔ جامعهٔ آماری جذاب ولی غیر-Leaderboard است؛ رتبه، صدک، تراز و آمار کلیدی.
+ * مقایسهٔ جامعهٔ آماری جذاب ولی غیر-Leaderboard است؛ رتبه، تراز و آمار کلیدی.
  */
 import { useEffect, useState } from 'react';
 import { HeartReward } from '../../league/leagueShared';
 import { computeExamStatus } from '../../../../services/coordinatedExams/coordinatedExamService';
-import { Icon, StatusBadge, TypeBadge, faNum, formatFullDate, formatTime, toFa } from './coordinatedShared';
+import { Icon, TypeBadge, faNum, formatFullDate, formatTime, toFa } from './coordinatedShared';
 
 const RING_RADIUS = 54;
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
@@ -99,7 +99,6 @@ export default function ExamResult({ variant, exam, result, reward, releaseAt, r
         <span className="mr-auto flex flex-wrap items-center gap-2 text-xs text-[var(--faint)]">
           {formatFullDate(exam.startTime)}
           <TypeBadge type={exam.type} />
-          <StatusBadge status={computeExamStatus(exam)} size="sm" />
         </span>
       )}
     </header>
@@ -209,7 +208,6 @@ export default function ExamResult({ variant, exam, result, reward, releaseAt, r
           {!examStillLive && (
             <StatChip label="رتبهٔ من" value={`${faNum(result.rank)} از ${faNum(result.participantsCount)}`} accent="#937fcd" />
           )}
-          <StatChip label="صدک من" value={faNum(result.percentile)} />
           {result.teraz !== null && <StatChip label="تراز" value={faNum(result.teraz)} />}
           {!isComprehensive && <StatChip label="میانگین آزمون" value={`${toFa(result.community.averagePercent)}٪`} />}
           <StatChip label="میانهٔ نمرات" value={`${toFa(result.community.medianPercent)}٪`} />
@@ -222,12 +220,6 @@ export default function ExamResult({ variant, exam, result, reward, releaseAt, r
             رتبهٔ شما بعد از پایان کامل زمان آزمون و تطبیق با همهٔ شرکت‌کنندگان اعلام می‌شود.
           </p>
         )}
-
-        <p className="mt-4 text-xs leading-6 text-[var(--faint)]">
-          {result.percentage >= result.community.averagePercent
-            ? `از میانگین شرکت‌کنندگان (${toFa(result.community.averagePercent)}٪) بالاتری؛ همین مسیر را نگه دار.`
-            : `میانگین شرکت‌کنندگان ${toFa(result.community.averagePercent)}٪ است — با مرور مباحث پایین، در آزمون بعدی از آن عبور می‌کنی.`}
-        </p>
       </section>
 
       {/* ── تحلیل عملکرد بر اساس درس ── */}

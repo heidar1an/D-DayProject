@@ -1,7 +1,7 @@
 /*
  * صفحهٔ اصلی «آزمون‌های بین‌الملل».
- * ترتیب روایت: Hero مینیمال ← داشبورد پیشرفت ← ادامهٔ مطالعه / مرور فاصله‌دار ←
- * اشتباهات من ← مرورگر آزمون‌ها ← نوار دستاوردها (کم‌رنگ و انگیزشی).
+ * ترتیب روایت: کارت‌های اقدام (ادامهٔ مطالعه / مرور فاصله‌دار / اشتباهات من) ←
+ * مرورگر آزمون‌ها. سرتیتر و ناوبری در سطح لایه (InternationalExamsLayer) است.
  * همهٔ داده‌ها از internationalService می‌آید؛ این کامپوننت فقط نمایش است.
  */
 import { ProgressBar } from '../league/leagueShared';
@@ -13,94 +13,6 @@ import {
   Skeleton,
   toFa,
 } from './intlShared';
-
-/* ── Hero مینیمال با مدارهای انتزاعی ── */
-function Hero({ onStart }) {
-  return (
-    <section className="intl-hero relative overflow-hidden rounded-[2.5rem] border border-white/8 bg-gradient-to-l from-[var(--surface-soft)] via-[var(--surface-soft)] to-[var(--purple-deep)] px-6 py-10 md:px-10 md:py-12" aria-labelledby="intl-hero-title">
-      <div className="intl-hero-orbits" aria-hidden="true">
-        <span />
-        <span />
-        <span />
-        <i />
-        <i />
-      </div>
-
-      <div className="relative max-w-xl">
-        <span className="inline-flex items-center gap-2 rounded-full bg-[#937fcd]/12 px-3 py-1.5 text-xs text-[var(--purple-soft-ink)]">
-          <Icon name="globe" className="h-3.5 w-3.5" />
-          با استانداردهای جهانی پزشکی تمرین کن
-        </span>
-        <h1 id="intl-hero-title" className="mt-4 text-3xl leading-snug [font-family:'Doran','Vazir',Tahoma,sans-serif] md:text-4xl">
-          آزمون‌های بین‌الملل
-        </h1>
-        <p className="mt-3 max-w-lg text-sm leading-7 text-[var(--muted)] md:text-[15px]">
-          سؤال‌های استاندارد جهانی را حل کن، تحلیل بگیر، اشتباه‌هات را بفهم و از دل همین سؤال‌ها برای خودت آزمون بساز.
-        </p>
-        <div className="mt-6 flex flex-wrap items-center gap-2.5">
-          <button
-            type="button"
-            onClick={onStart}
-            className="cursor-pointer rounded-2xl bg-[var(--purple-bright)] px-6 py-3 text-sm font-bold transition-transform hover:-translate-y-0.5 [font-family:'Doran','Vazir',Tahoma,sans-serif]"
-          >
-            شروع حل سؤال
-          </button>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/5 px-3 py-2 text-[11px] text-[var(--faint)]">
-            <Icon name="spark" className="h-3.5 w-3.5" />
-            سؤال‌های فعلی نمونهٔ آموزشی تپش هستند
-          </span>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ── داشبورد پیشرفت: پاسخ سریع به «کجایم؟» ── */
-function ProgressDashboard({ stats, examProgress }) {
-  const cells = [
-    { icon: 'target', label: 'سؤال حل‌شده', value: faNum(stats.solvedQuestions) },
-    { icon: 'chart', label: 'دقت پاسخ', value: `${toFa(stats.accuracy)}٪` },
-    { icon: 'heart', label: 'گلچین‌شده', value: faNum(stats.bookmarked) },
-    { icon: 'refresh', label: 'آمادهٔ مرور', value: faNum(stats.dueReview) },
-    { icon: 'layers', label: 'مجموعهٔ شخصی', value: faNum(stats.collections) },
-  ];
-
-  return (
-    <section className="rounded-[2.5rem] bg-[var(--surface-soft)] p-5 md:p-7" aria-label="پیشرفت بین‌المللی تو">
-      <h2 className="flex items-center gap-2 text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]">
-        <Icon name="up" className="h-5 w-5 text-[var(--purple-ink)]" />
-        پیشرفت بین‌المللی تو
-      </h2>
-
-      <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-5">
-        {cells.map((cell) => (
-          <div key={cell.label} className="rounded-2xl border border-white/6 bg-[var(--surface-soft)] p-3.5 text-center">
-            <span className="mx-auto mb-2 grid h-9 w-9 place-items-center rounded-xl bg-[#937fcd]/12 text-[var(--purple-soft-ink)]">
-              <Icon name={cell.icon} className="h-4.5 w-4.5" />
-            </span>
-            <strong className="block text-xl leading-7 [font-family:'Doran','Vazir',Tahoma,sans-serif]">{cell.value}</strong>
-            <span className="text-[11px] text-[var(--faint)]">{cell.label}</span>
-          </div>
-        ))}
-      </div>
-
-      {/* ویژوال مینیمال پیشرفت به تفکیک آزمون */}
-      <div className="mt-5 space-y-3 border-t border-white/6 pt-4">
-        {examProgress.map((row) => (
-          <div key={row.examId} className="flex items-center gap-3">
-            <span className="w-16 shrink-0 text-xs text-[var(--muted)]" style={{ color: row.accent }}>
-              {row.shortName}
-            </span>
-            <ProgressBar value={row.percent} max={100} color={row.accent} height={5} className="min-w-0 flex-1" />
-            <span className="shrink-0 text-[11px] tabular-nums text-[var(--faint)]">
-              {toFa(row.solved)}/{toFa(row.total)}
-            </span>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
 
 /* ── ادامهٔ مطالعه + وقت مرور + اشتباهات من: کارت‌های اقدام ── */
 function ActionCards({ overview, onResume, onStartReview, onOpenMistakes }) {
@@ -248,56 +160,12 @@ function ExamExplorer({ exams, onOpenExam }) {
   );
 }
 
-/* ── نوار دستاوردها — کوچک، انگیزشی، اشغالگر اصلی UI نیست ── */
-function AchievementsStrip({ achievements }) {
-  return (
-    <section aria-label="دستاوردها" className="rounded-[2rem] border border-white/6 bg-[#282828]/60 p-5">
-      <h2 className="flex items-center gap-2 text-sm [font-family:'Doran','Vazir',Tahoma,sans-serif]">
-        <Icon name="trophy" className="h-4 w-4 text-[var(--gold-ink)]" />
-        دستاوردها
-      </h2>
-      <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {achievements.map((item) => {
-          const percent = Math.min(100, Math.round((item.value / item.goal) * 100));
-          return (
-            <div
-              key={item.id}
-              className={`rounded-2xl border p-3.5 ${
-                item.unlocked ? 'border-[#e0b45c]/35 bg-[#e0b45c]/[0.06]' : 'border-white/6 bg-[var(--surface-soft)]'
-              }`}
-              title={item.description}
-            >
-              <div className="flex items-center gap-2">
-                <span
-                  className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl ${
-                    item.unlocked ? 'bg-[#e0b45c]/20 text-[var(--gold-ink)]' : 'bg-white/5 text-[var(--faint)]'
-                  }`}
-                >
-                  <Icon name={item.unlocked ? 'star' : item.icon} className="h-4 w-4" />
-                </span>
-                <div className="min-w-0">
-                  <strong className="block truncate text-xs [font-family:'Doran','Vazir',Tahoma,sans-serif]">{item.title}</strong>
-                  <span className="text-[10px] text-[var(--faint)]">
-                    {item.unlocked ? 'کسب شد' : `${toFa(item.value)} از ${toFa(item.goal)}`}
-                  </span>
-                </div>
-              </div>
-              {!item.unlocked && <ProgressBar value={percent} max={100} color="var(--purple-ink)" height={4} className="mt-2.5" />}
-            </div>
-          );
-        })}
-      </div>
-    </section>
-  );
-}
-
 /* ══════════════════════════ Home ══════════════════════════ */
-export default function InternationalHome({ overview, exams, loading, onOpenExam, onStartFirstExam, onResume, onStartReview, onOpenMistakes }) {
+export default function InternationalHome({ overview, exams, loading, onOpenExam, onResume, onStartReview, onOpenMistakes }) {
   if (loading) {
     return (
       <div className="space-y-5" aria-hidden="true">
-        <Skeleton className="h-64 rounded-[2.5rem]" />
-        <Skeleton className="h-48 rounded-[2.5rem]" />
+        <Skeleton className="h-40 rounded-[2.5rem]" />
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <Skeleton className="h-60 rounded-[2rem]" />
           <Skeleton className="h-60 rounded-[2rem]" />
@@ -319,15 +187,9 @@ export default function InternationalHome({ overview, exams, loading, onOpenExam
 
   return (
     <div className="dash-stagger space-y-5">
-      <Hero onStart={onStartFirstExam} />
-
-      {overview && <ProgressDashboard stats={overview.stats} examProgress={overview.examProgress} />}
-
       {overview && <ActionCards overview={overview} onResume={onResume} onStartReview={onStartReview} onOpenMistakes={onOpenMistakes} />}
 
       <ExamExplorer exams={exams} onOpenExam={onOpenExam} />
-
-      {overview && <AchievementsStrip achievements={overview.achievements} />}
     </div>
   );
 }

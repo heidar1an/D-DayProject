@@ -38,6 +38,7 @@ import {
   formatFullTime,
   toFa,
 } from './bankShared';
+import useOverflowFlag from '../useOverflowFlag';
 
 const REPORT_REASONS = ['ایراد علمی', 'ایراد نگارشی', 'گزینه‌های مبهم', 'تصویر مشکل دارد', 'پاسخ اشتباه', 'سایر'];
 
@@ -160,14 +161,18 @@ function ExplanationPanel({ question, userAnswer, myAttempts }) {
   );
 }
 
-/* ── مودال گزارش سؤال ── */
+/* ── مودال گزارش سؤال ──
+   شناسهٔ سؤال به کاربر نشان داده نمی‌شود؛ فقط در بدنهٔ گزارش سرویس می‌رود.
+   انتخاب دلیل با رنگ قرمز پروژه مشخص می‌شود و با «سایر»، عنوان دلخواه (تا ۲۰ کاراکتر) گرفته می‌شود. */
 function ReportDialog({ userId, questionId, onClose }) {
   const [reason, setReason] = useState(REPORT_REASONS[0]);
+  const [otherTitle, setOtherTitle] = useState('');
   const [note, setNote] = useState('');
   const [sent, setSent] = useState(false);
 
   const submit = async () => {
-    await reportQuestion(userId, questionId, { reason, note });
+    const resolvedReason = reason === 'سایر' && otherTitle.trim() ? `سایر: ${otherTitle.trim()}` : reason;
+    await reportQuestion(userId, questionId, { reason: resolvedReason, note });
     setSent(true);
   };
 
@@ -194,7 +199,7 @@ function ReportDialog({ userId, questionId, onClose }) {
             <Icon name="flag" className="h-4.5 w-4.5 text-[var(--gold-ink)]" />
             گزارش مشکل سؤال
           </h3>
-          <p className="mt-1.5 text-xs text-[var(--faint)]">شناسه سؤال: {questionId}</p>
+          <p className="mt-1.5 text-xs text-[var(--faint)]">مشکل را انتخاب کن؛ توضیح بیشتر هم می‌تواند کمک‌کننده باشد.</p>
           <fieldset className="mt-4 grid grid-cols-2 gap-1.5">
             <legend className="sr-only">دلیل گزارش</legend>
             {REPORT_REASONS.map((item) => (
@@ -204,19 +209,32 @@ function ReportDialog({ userId, questionId, onClose }) {
                 onClick={() => setReason(item)}
                 aria-pressed={reason === item}
                 className={`cursor-pointer rounded-xl border px-3 py-2.5 text-[12.5px] transition-colors ${
-                  reason === item ? 'border-[#937fcd]/60 bg-[#937fcd]/10 text-white' : 'border-white/8 text-[var(--muted)] hover:border-white/20'
+                  reason === item
+                    ? 'border-[#e26d6d]/60 bg-[#e26d6d]/12 text-[var(--red-ink)]'
+                    : 'border-white/8 text-[var(--muted)] hover:border-white/20'
                 }`}
               >
                 {item}
               </button>
             ))}
           </fieldset>
+          {reason === 'سایر' && (
+            <input
+              type="text"
+              value={otherTitle}
+              onChange={(event) => setOtherTitle(event.target.value)}
+              maxLength={20}
+              placeholder="عنوان مشکل (حداکثر ۲۰ کاراکتر)…"
+              aria-label="عنوان مشکل"
+              className="mt-3 w-full rounded-xl border border-[#e26d6d]/40 bg-[var(--surface-soft)] px-3.5 py-2.5 text-sm text-white placeholder:text-[var(--ghost)] focus:border-[#e26d6d]/70 focus:outline-none"
+            />
+          )}
           <textarea
             value={note}
             onChange={(event) => setNote(event.target.value)}
             placeholder="توضیح اختیاری…"
             rows={2}
-            className="mt-3 w-full resize-none rounded-xl border border-white/10 bg-[var(--surface-soft)] px-3.5 py-2.5 text-sm text-white placeholder:text-[var(--ghost)] focus:border-[#61D192]/50 focus:outline-none"
+            className="mt-3 w-full resize-none rounded-xl border border-[#e26d6d]/40 bg-[var(--surface-soft)] px-3.5 py-2.5 text-sm text-white placeholder:text-[var(--ghost)] focus:border-[#e26d6d]/70 focus:outline-none"
           />
           <div className="mt-4 flex gap-2">
             <button
@@ -240,8 +258,12 @@ function ReportDialog({ userId, questionId, onClose }) {
   );
 }
 
-/* ── نویگیتور سؤال‌ها ── */
-function QuestionNavigator({ questions, answers, marked, currentIndex, reviewMode, onJump }) {
+/* ── نویگیتور سؤال‌ها ──
+   onExpand فقط در سایدبار دسکتاپ پاس داده می‌شود؛ وقتی گرید از ظرفیت کادر سرریز
+   کند، دکمهٔ «لیست کامل سؤال‌ها» برای باز کردن پاپ‌آپ نمایش داده می‌شود. */
+function QuestionNavigator({ questions, answers, marked, currentIndex, reviewMode, onJump, onExpand }) {
+  /* تشخیص سرریز — با هر تغییر تعداد سؤال‌ها دوباره اندازه می‌گیرد */
+  const [gridRef, overflowing] = useOverflowFlag(questions.length);
   const stateOf = (question, index) => {
     const answer = answers[question.id];
     if (index === currentIndex) return 'current';
@@ -254,26 +276,35 @@ function QuestionNavigator({ questions, answers, marked, currentIndex, reviewMod
 
   return (
     <div>
-      <div className="tb-navgrid" role="list" aria-label="ناوبری سؤال‌ها">
-        {questions.map((question, index) => {
-          const state = stateOf(question, index);
-          const isMarked = marked.includes(question.id);
-          return (
-            <button
-              key={question.id}
-              type="button"
-              role="listitem"
-              onClick={() => onJump(index)}
-              aria-label={`سؤال ${toFa(index + 1)}${state === 'answered' ? '، پاسخ داده شده' : state === 'wrong' ? '، غلط' : state === 'idle' ? '، حل‌نشده' : '، فعلی'}${isMarked ? '، علامت‌گذاری شده' : ''}`}
-              aria-current={index === currentIndex ? 'step' : undefined}
-              className={`tb-navchip ${state === 'answered' ? 'is-answered' : ''} ${state === 'wrong' ? 'is-wrong' : ''} ${state === 'current' ? 'is-current' : ''} ${isMarked ? 'is-marked' : ''}`}
-            >
-              {toFa(index + 1)}
-              {isMarked && <span className="tb-navchip__flag" aria-hidden="true" />}
-            </button>
-          );
-        })}
+      <div ref={gridRef} className={onExpand ? 'tb-navscroll' : undefined}>
+        <div className="tb-navgrid" role="list" aria-label="ناوبری سؤال‌ها">
+          {questions.map((question, index) => {
+            const state = stateOf(question, index);
+            const isMarked = marked.includes(question.id);
+            return (
+              <button
+                key={question.id}
+                type="button"
+                role="listitem"
+                onClick={() => onJump(index)}
+                aria-label={`سؤال ${toFa(index + 1)}${state === 'answered' ? '، پاسخ داده شده' : state === 'wrong' ? '، غلط' : state === 'idle' ? '، حل‌نشده' : '، فعلی'}${isMarked ? '، علامت‌گذاری شده' : ''}`}
+                aria-current={index === currentIndex ? 'step' : undefined}
+                className={`tb-navchip ${state === 'answered' ? 'is-answered' : ''} ${state === 'wrong' ? 'is-wrong' : ''} ${state === 'current' ? 'is-current' : ''} ${isMarked ? 'is-marked' : ''}`}
+              >
+                {toFa(index + 1)}
+                {isMarked && <span className="tb-navchip__flag" aria-hidden="true" />}
+              </button>
+            );
+          })}
+        </div>
       </div>
+
+      {onExpand && overflowing && (
+        <button type="button" onClick={onExpand} className="tb-navmore">
+          <Icon name="grid" className="h-3.5 w-3.5" />
+          لیست کامل سؤال‌ها ({toFa(questions.length)})
+        </button>
+      )}
 
       <ul className="mt-4 grid grid-cols-2 gap-x-3 gap-y-2 border-t border-white/8 pt-3 text-[11px] text-[var(--faint)]">
         <li className="flex items-center gap-2">
@@ -385,11 +416,14 @@ export default function BankSession({ userId, session, questions, onFinished, on
   const [bookmarks, setBookmarks] = useState([]); // qid[] — گلچین
   const [reviewFlags, setReviewFlags] = useState([]); // qid[] — نیاز به مرور
   const [navigatorOpen, setNavigatorOpen] = useState(false);
+  const [fullMapOpen, setFullMapOpen] = useState(false); // پاپ‌آپ لیست کامل سؤال‌ها در دسکتاپ
   const [reportOpen, setReportOpen] = useState(false);
   const [submitOpen, setSubmitOpen] = useState(false);
   const [elapsed, setElapsed] = useState(() => Math.floor((Date.now() - session.startedAt) / 1000));
   const [submitting, setSubmitting] = useState(false);
   const [questionStats, setQuestionStats] = useState(null); // شکست تلاش‌های کاربر روی سؤال جاری
+  const [statsTick, setStatsTick] = useState(0); // با هر ثبت پاسخ زیاد می‌شود تا «آمار این سؤال» تازه شود
+  const lastStatsQidRef = useRef(null);
   const questionStartRef = useRef(Date.now());
   const autoSubmittedRef = useRef(false);
 
@@ -413,21 +447,26 @@ export default function BankSession({ userId, session, questions, onFinished, on
     };
   }, [userId, isExam]);
 
-  /* شکست تلاش‌های کاربر روی سؤال جاری — با هر جابه‌جایی سؤال دوباره خوانده می‌شود */
+  /* شکست تلاش‌های کاربر روی سؤال جاری — با تعویض سؤال و با هر ثبت پاسخ دوباره خوانده می‌شود */
   useEffect(() => {
-    if (isReview || !question?.id) {
+    const qid = question?.id;
+    if (isReview || !qid) {
+      lastStatsQidRef.current = null;
       setQuestionStats(null);
       return undefined;
     }
     let alive = true;
-    setQuestionStats(null);
-    fetchQuestionAttemptStats(userId, question.id)
+    /* با تعویض سؤال، آمار قبلی پاک می‌شود؛ ولی پس از ثبت پاسخ روی همین سؤال، عدد قدیمی
+       می‌ماند تا پاسخ تازهٔ سرویس بدون فلش «در حال خواندن…» جایگزینش شود */
+    if (lastStatsQidRef.current !== qid) setQuestionStats(null);
+    lastStatsQidRef.current = qid;
+    fetchQuestionAttemptStats(userId, qid)
       .then((data) => alive && setQuestionStats(data))
       .catch(() => alive && setQuestionStats(null));
     return () => {
       alive = false;
     };
-  }, [userId, question?.id, isReview]);
+  }, [userId, question?.id, isReview, statsTick]);
 
   /* تایمر فقط در «آزمون» معنا دارد؛ تمرین‌های آموزشی بی‌زمان‌اند و شمارنده ندارند */
   useEffect(() => {
@@ -467,6 +506,7 @@ export default function BankSession({ userId, session, questions, onFinished, on
     setSelected(isReview ? answers[questions[next]?.id]?.selected ?? null : null);
     questionStartRef.current = Date.now();
     setNavigatorOpen(false);
+    setFullMapOpen(false);
     if (!isReview) persist({ currentIndex: next, answers });
   };
 
@@ -483,6 +523,8 @@ export default function BankSession({ userId, session, questions, onFinished, on
     const nextAnswers = { ...answers, [question.id]: entry };
     setAnswers(nextAnswers);
     persist({ answers: { [question.id]: entry } });
+    /* آمار سؤال (کل بار / درست / غلط / آخرین پاسخ) بلافاصله بعد از ثبت، دوباره خوانده می‌شود */
+    setStatsTick((tick) => tick + 1);
   };
 
   const toggleMark = () => {
@@ -555,7 +597,7 @@ export default function BankSession({ userId, session, questions, onFinished, on
   }
 
   return (
-    <div dir="rtl">
+    <div dir="rtl" className="mx-auto w-full max-w-[62rem]">
       {/* ── نوار کنترلی — بدون کادر و بدون عنوان سشن؛ شمارش پاسخ‌ها در پنل سمت چپ است ── */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <button
@@ -797,6 +839,7 @@ export default function BankSession({ userId, session, questions, onFinished, on
               currentIndex={currentIndex}
               reviewMode={isReview}
               onJump={goTo}
+              onExpand={() => setFullMapOpen(true)}
             />
           </div>
         </aside>
@@ -858,6 +901,29 @@ export default function BankSession({ userId, session, questions, onFinished, on
           </div>
         </>
       )}
+
+      {/* پاپ‌آپ لیست کامل سؤال‌ها — وقتی نقشهٔ سایدبار دسکتاپ سرریز شده */}
+      <Modal open={fullMapOpen} onClose={() => setFullMapOpen(false)} title="لیست کامل سؤال‌ها" width="min(26rem, 100%)">
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="flex items-center gap-2 text-base [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+            <Icon name="grid" className="h-4.5 w-4.5 text-[var(--green-ink)]" />
+            لیست کامل سؤال‌ها ({toFa(questions.length)})
+          </h3>
+          <button type="button" onClick={() => setFullMapOpen(false)} aria-label="بستن" className="cursor-pointer rounded-lg bg-white/6 p-1.5">
+            <Icon name="x" className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="tb-mapbody">
+          <QuestionNavigator
+            questions={questions}
+            answers={answers}
+            marked={marked}
+            currentIndex={currentIndex}
+            reviewMode={isReview}
+            onJump={goTo}
+          />
+        </div>
+      </Modal>
 
       {/* مودال پایان آزمون — تمرین هیچ مودالی ندارد و مستقیم تمام می‌شود */}
       <Modal open={submitOpen} onClose={() => setSubmitOpen(false)} title="پایان آزمون">

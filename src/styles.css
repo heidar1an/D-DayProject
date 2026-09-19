@@ -40,6 +40,21 @@
   font-display: swap;
 }
 
+/*
+ * Doran پروندهٔ ۶۰۰ ندارد؛ همین پروندهٔ Bold به‌عنوان ۶۰۰ هم ثبت می‌شود تا
+ * درخواستِ وزن ۶۰۰ تطبیق دقیق در خودِ این خانواده پیدا کند. بدون آن، رویهٔ
+ * ارقامِ Pinar بالا (بازهٔ ۱۰۰–۹۰۰ با unicode-range فقط ارقام) تنها تطبیقِ
+ * دقیقِ ۶۰۰ است و مرورگر چون حروف را در آن نمی‌پوشاند، کلاً از Doran عبور
+ * می‌کند و متنِ ۶۰۰ با Vazir یا Pinar رندر می‌شود.
+ */
+@font-face {
+  font-family: 'Doran';
+  src: url('../fonts/doran/Doran-Bold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
 @font-face {
   font-family: 'Pinar';
   src: url('../fonts/pinar/Pinar-VF[DSTY,KSHD,wght].woff2') format('woff2');
@@ -641,9 +656,13 @@ img {
   background: var(--green-bright);
 }
 
+/*
+ * هاور فقط رنگ و خط زیر را عوض می‌کند، نه وزن فونت را: Doran وزن ۶۰۰ ندارد
+ * (فایل‌های موجود ۴۰۰/۵۰۰/۷۰۰/۸۰۰/۹۰۰اند) و درخواستِ ۶۰۰ مرورگر را به Bold(۷۰۰)
+ * می‌پراند؛ نتیجه این بود که شکل حروف هنگام هاور عوض می‌شد.
+ */
 .site-nav a.site-nav__link--products:hover {
   color: var(--blue-ink);
-  font-weight: 600;
 }
 
 .site-nav__link--products:hover::after {
@@ -652,7 +671,6 @@ img {
 
 .site-nav a.site-nav__link--pricing:hover {
   color: var(--purple-ink);
-  font-weight: 600;
 }
 
 .site-nav__link--pricing:hover::after {
@@ -661,7 +679,6 @@ img {
 
 .site-nav a.site-nav__link--about:hover {
   color: var(--copper-ink);
-  font-weight: 600;
 }
 
 .site-nav__link--about:hover::after {
@@ -670,7 +687,6 @@ img {
 
 .site-nav a.site-nav__link--articles:hover {
   color: var(--green-ink);
-  font-weight: 600;
 }
 
 .site-nav__link--articles:hover::after {

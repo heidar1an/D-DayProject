@@ -40,11 +40,6 @@
   height: 18px;
 }
 
-/* در «محیط حل» فقط آیکن — کادر جمع‌وجور می‌شود */
-.tb-topbar__back--icon {
-  padding: 10px;
-}
-
 /* ─────────────── نشان‌ها ─────────────── */
 .tb-badge {
   display: inline-flex;
@@ -218,6 +213,65 @@
   border-radius: 999px;
   background: var(--gold);
   border: 2px solid var(--border-solid);
+}
+
+/* ظرف اسکرول نقشهٔ سؤال‌ها در سایدبار — وقتی سؤال‌ها از ظرفیت کادر بیشتر شوند
+   نقشه داخل همین ظرف اسکرول می‌شود (به‌جای سرریز از چهارچوب) و دکمهٔ لیست کامل می‌آید */
+.tb-navscroll {
+  max-height: max(10rem, calc(100vh - 27rem));
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--line-rgb) / 0.25) transparent;
+}
+
+.tb-navscroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.tb-navscroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgb(var(--line-rgb) / 0.25);
+}
+
+/* دکمهٔ «لیست کامل سؤال‌ها» — فقط وقتی نقشهٔ سایدبار سرریز شده باشد نمایش داده می‌شود */
+.tb-navmore {
+  margin-top: 0.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border-radius: 0.8rem;
+  border: 1px dashed rgb(var(--line-rgb) / 0.3);
+  background: rgb(var(--wash-rgb) / 0.04);
+  color: var(--muted);
+  font-size: 11px;
+  cursor: pointer;
+  transition: border-color 0.14s ease, background 0.14s ease, color 0.14s ease;
+}
+
+.tb-navmore:hover {
+  border-color: rgb(var(--line-rgb) / 0.55);
+  background: rgb(var(--wash-rgb) / 0.08);
+  color: var(--white);
+}
+
+/* بدنهٔ اسکرول‌شوندهٔ پاپ‌آپ لیست کامل سؤال‌ها */
+.tb-mapbody {
+  max-height: min(62vh, 34rem);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--line-rgb) / 0.25) transparent;
+}
+
+.tb-mapbody::-webkit-scrollbar {
+  width: 4px;
+}
+
+.tb-mapbody::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgb(var(--line-rgb) / 0.25);
 }
 
 /* ─────────────── تایمر ─────────────── */

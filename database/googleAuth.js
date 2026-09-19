@@ -26,6 +26,7 @@
 import { randomBytes, timingSafeEqual } from 'node:crypto';
 
 import { findUserById, publicUser, saveGoogleUser } from './usersStore.js';
+import { USER_SESSION_COOKIE, createUserSession } from './userSessions.js';
 
 const AUTH_ENDPOINT = 'https://accounts.google.com/o/oauth2/v2/auth';
 const TOKEN_ENDPOINT = 'https://oauth2.googleapis.com/token';
@@ -290,7 +291,26 @@ function handleHandoff(request, response) {
   appendCookie(response, `${HANDOFF_COOKIE}=; ${cookieSuffix(origin, 0)}`);
 
   const entry = token ? takeHandoff(token) : null;
-  sendJson(response, 200, { user: publicUser(entry ? findUserById(entry.userId) : null) });
+  const user = entry ? findUserById(entry.userId) : null;
+
+  /*
+   * سشن سایت روی همین پاسخ صادر می‌شود: کوکی HttpOnly فایل‌پشتیبان. از این پس
+   * هویت کاربر (از جمله Attemptهای آزمون) مرجع سروری دارد و localStorage فقط
+   * نمایشی است. SameSite=Strict — fetchهای هم‌مبدأ آن را می‌فرستند.
+   */
+  if (user) {
+    const session = createUserSession(user, {
+      ip: request.socket?.remoteAddress ?? '',
+      userAgent: request.headers?.['user-agent'] ?? '',
+    });
+    const secure = origin.startsWith('https://') ? '; Secure' : '';
+    appendCookie(
+      response,
+      `${USER_SESSION_COOKIE}=${session.token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${7 * 24 * 60 * 60}${secure}`,
+    );
+  }
+
+  sendJson(response, 200, { user: publicUser(user) });
 }
 
 /*

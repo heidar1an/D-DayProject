@@ -1,9 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import './microCourse.css';
 import { LAYER_IDS, useLayerRoute } from '../dashboardRoute';
+import MicroCourseReader from './micro/MicroCourseReader';
+import MicroTopics from './micro/MicroTopics';
+import { MicroContentService } from '../../../services/micro/microContentService';
 
-/* نمای آغازین لایهٔ میکرو درسنامه: بدون فیلتر و بدون درسِ لینک‌شده */
-const MICRO_VIEW = { filter: 'all', subject: null, deep: null };
+/* جریان لایهٔ میکرودرسنامه: شبکهٔ درس‌ها ← فهرست مبحث‌ها (topics) ← خوانندهٔ صفحه‌به‌صفحه (reader).
+   همهٔ درس‌ها به همین سیستم وصل‌اند؛ درس‌های بدون مبحث منتشرشده در فهرست مبحث‌ها
+   حالت «در حال ساخت» می‌بینند. */
+const MICRO_VIEW = { filter: 'all', subject: null, deep: null, topics: null, reader: null };
 
 const FA_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
 const toFa = (value) => String(value).replace(/\d/g, (digit) => FA_DIGITS[Number(digit)]);
@@ -182,8 +187,8 @@ export function NoteIcon({ type }) {
   );
 }
 
-/* کارت مربعی هر درس: کلیک یعنی ورود به لایهٔ همان درس در درسنامه جامع */
-function SubjectRow({ subject, onOpenSubject }) {
+/* کارت مربعی هر درس: کلیک یعنی ورود به فهرست مبحث‌های میکرودرسنامهٔ همان درس */
+function SubjectRow({ subject, onOpenSubject, hasMicro = false }) {
   const circumference = 2 * Math.PI * 15.5;
 
   return (
@@ -192,8 +197,9 @@ function SubjectRow({ subject, onOpenSubject }) {
       className="micr-row"
       style={{ '--accent': subject.accent }}
       onClick={() => onOpenSubject(subject.id)}
-      title={`ورود به ${subject.title}`}
+      title={`میکرودرسنامهٔ ${subject.title}`}
     >
+      {hasMicro && <span className="micr-row__micro">میکرودرس فعال</span>}
       <span className="micr-row__gauge">
         <svg className="micr-row__ring" viewBox="0 0 36 36" style={{ '--off': `${circumference * (1 - subject.progress / 100)}` }}>
           <circle className="micr-row__ring-track" cx="18" cy="18" r="15.5" />
@@ -218,19 +224,42 @@ function SubjectRow({ subject, onOpenSubject }) {
   );
 }
 
-export default function MicroCourseLayer({ onBack, onOpenComprehensive }) {
+export default function MicroCourseLayer({ onBack, userId = 'local-user' }) {
   /* فیلتر و درسِ لینک‌شده روی مسیر داشبورد می‌نشینند؛ متن کادر جست‌وجو محلی می‌ماند */
   const [view, , patchView] = useLayerRoute(LAYER_IDS.micro, MICRO_VIEW);
   const filter = view.filter ?? 'all';
+  const topicsView = view.topics ?? null;
+  const readerView = view.reader ?? null;
   const [query, setQuery] = useState('');
 
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if (event.key === 'Escape') onBack?.();
+      /* وقتی مبحث‌ها یا خواننده باز است، Escape مال خودش است تا پله‌پله برگردد */
+      if (event.key === 'Escape' && !readerView && !topicsView) onBack?.();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onBack]);
+  }, [onBack, readerView, topicsView]);
+
+  /* ورود به فهرست مبحث‌های درس — تنها مقصد کلیک روی کارت‌های این لایه */
+  const openSubject = (subjectId) => {
+    if (!subjectId) return;
+    patchView({
+      topics: { courseId: MicroContentService.courseIdForSubject(subjectId) ?? subjectId },
+      subject: null,
+      deep: null,
+    });
+    window.scrollTo({ top: 0 });
+  };
+
+  /* لینک عمیق مسیر سبز و کارت‌های «کار امروز» (subject در نمای لایه) → فهرست مبحث‌ها */
+  useEffect(() => {
+    if (topicsView || readerView) return;
+    const deepSubject = view.deep?.subject ?? view.subject;
+    if (!deepSubject) return;
+    openSubject(deepSubject);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view.deep, view.subject, topicsView, readerView]);
 
   const getStatus = (subject) => {
     if (subject.progress >= 100) return 'read';
@@ -261,10 +290,36 @@ export default function MicroCourseLayer({ onBack, onOpenComprehensive }) {
     [],
   );
 
-  /* ورود به لایهٔ درسنامه جامع؛ اگر از کارت «سه سوته» با درس مشخص آمده‌ایم، همان درس باز شود */
-  const openSubjectLayer = (subjectId) => {
-    onOpenComprehensive?.(subjectId ?? view.subject ?? view.deep?.subject ?? null);
-  };
+  /* اولین میکرودرسنامهٔ منتشرشده — برای CTA پایین صفحه */
+  const publishedCourse = MicroContentService.firstPublishedCourse();
+
+  /* ── لایهٔ مبحث‌ها و خواننده — بعد از همهٔ هوک‌ها تا ترتیب هوک‌ها پایدار بماند ── */
+  if (readerView) {
+    return (
+      <MicroCourseReader
+        courseId={readerView.courseId}
+        userId={userId}
+        view={readerView}
+        patchView={(partial) => patchView({ reader: { ...readerView, ...partial } })}
+        onExit={() => patchView({ reader: null })}
+      />
+    );
+  }
+
+  if (topicsView) {
+    const topicCourse = MicroContentService.getCourseSync(topicsView.courseId);
+    const subjectTitle = SUBJECTS.find((subject) => subject.id === topicsView.courseId)?.title;
+    return (
+      <MicroTopics
+        course={topicCourse}
+        subjectTitle={subjectTitle}
+        onBack={() => patchView({ topics: null })}
+        onOpenTopic={(topic) => patchView({
+          reader: { courseId: topicCourse?.id ?? topicsView.courseId, topicId: topic.id },
+        })}
+      />
+    );
+  }
 
   return (
     <section className="micr-layer" dir="rtl" aria-label="میکرو درسنامه علوم پایه">
@@ -342,21 +397,33 @@ export default function MicroCourseLayer({ onBack, onOpenComprehensive }) {
               <SubjectRow
                 key={subject.id}
                 subject={subject}
-                onOpenSubject={openSubjectLayer}
+                onOpenSubject={openSubject}
+                hasMicro={MicroContentService.hasCourseForSubject(subject.id)}
               />
             ))
           )}
         </div>
 
         <section className="micr-cta dash-stagger">
-          <h2>میکرو فقط شروع ماجراست</h2>
-          <p>خلاصه‌ها برای مرورند؛ عمق کامل هر درس با درسنامه جامع تپش جلوتر منتظرت است.</p>
-          <button type="button" onClick={() => openSubjectLayer(null)}>
-            رفتن به درسنامه جامع
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M19 12H5m6-6-6 6 6 6" />
-            </svg>
-          </button>
+          {publishedCourse ? (
+            <>
+              <h2>میکرودرسنامهٔ فعال تپش</h2>
+              <p>
+                «{publishedCourse.title}» صفحه‌به‌صفحه، با تست‌های میان راه از بانک تست تپش و نقشهٔ تسلط واقعی — همین حالا شروع کن.
+              </p>
+              <button type="button" onClick={() => openSubject(publishedCourse.subjectId)}>
+                ورود به میکرودرسنامهٔ {publishedCourse.title}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M19 12H5m6-6-6 6 6 6" />
+                </svg>
+              </button>
+            </>
+          ) : (
+            <>
+              <h2>میکرودرسنامه‌ها در راه‌اند</h2>
+              <p>خوانندهٔ صفحه‌به‌صفحهٔ تپش با تست‌های میان راه و نقشهٔ تسلط به‌زودی برای همهٔ درس‌ها منتشر می‌شود.</p>
+            </>
+          )}
         </section>
       </div>
     </section>

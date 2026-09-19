@@ -195,6 +195,14 @@
   --card-glow: rgba(224, 180, 92, 0.17);
 }
 
+.other-card--red {
+  --card-accent: var(--red);
+  --card-soft: rgba(226, 109, 109, 0.13);
+  --card-line: rgba(226, 109, 109, 0.26);
+  --card-line-strong: rgba(226, 109, 109, 0.5);
+  --card-glow: rgba(226, 109, 109, 0.17);
+}
+
 /* ── تبلت و دسکتاپ: کل بخش اندازهٔ صفحه ───────────────────────────────────── */
 
 @media (min-width: 701px) {

@@ -415,7 +415,8 @@ export function fetchQuestion(questionId) {
 
 /*
  * GET /api/bank/questions/:id/attempts — شکستِ تلاش‌های کاربر روی یک سؤال.
- * همهٔ عددها از سشن‌های ثبت‌شده مشتق می‌شوند (هیچ شمارندهٔ دستی ذخیره نمی‌شود):
+ * عددها از سشن‌ها مشتق می‌شوند (هیچ شمارندهٔ دستی ذخیره نمی‌شود): سشن‌های ثبت‌شده به‌علاوهٔ
+ * تمرین‌های در جریان که پاسخشان همان لحظه تصحیح می‌شود تا آمار بعد از هر ثبت پاسخ تازه بماند.
  *   attempts → بارهایی که پاسخ ثبت شده   |  correct / wrong → نتیجهٔ همان بارها
  *   skipped  → سؤال در سشن ثبت‌شده بوده ولی بی‌پاسخ مانده
  *   doubted  → در حین حل علامت‌گذاری شده («شک داشتم»)
@@ -435,8 +436,24 @@ export function fetchQuestionAttemptStats(userId, questionId) {
     let lastCorrect = null;
 
     for (const session of state.sessions) {
-      if (session.status === 'in_progress') continue;
       if (!session.questionIds?.includes(questionId)) continue;
+
+      /* تمرینِ در جریان: پاسخ همان لحظه تصحیح می‌شود، پس بلافاصله در آمار می‌نشیند؛
+         آزمونِ در جریان هنوز کلید ندارد و بعد از submit می‌شمارد. */
+      if (session.status === 'in_progress') {
+        const answer = session.answers?.[questionId];
+        if (session.mode !== 'exam' && answer) {
+          attempts += 1;
+          if (answer.isCorrect) correct += 1;
+          else wrong += 1;
+          const at = answer.answeredAt ?? 0;
+          if (at >= lastAnsweredAt) {
+            lastAnsweredAt = at;
+            lastCorrect = Boolean(answer.isCorrect);
+          }
+        }
+        continue;
+      }
 
       const answer = session.answers?.[questionId];
       if (answer) {

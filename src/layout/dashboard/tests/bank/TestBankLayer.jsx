@@ -389,40 +389,42 @@ export default function TestBankLayer({ userData, onBack }) {
         view.name === 'builder' ? 'flex min-h-full flex-col' : ''
       }`}
     >
-      {/* سربرگ لایه — بازگشت راست و (فقط در آزمون‌ساز شخصی) «ساخت آزمون» چپ، در یک خط */}
-      <header className="tb-topbar dash-stagger">
-        <button
-          type="button"
-          onClick={exitViews.includes(view.name) ? onBack : handleBack}
-          aria-label={view.name === 'live' ? 'خروج از محیط حل' : backLabel}
-          className={`tb-topbar__back ${view.name === 'live' ? 'tb-topbar__back--icon' : ''}`}
-        >
-          <Icon name="back" className="h-4.5 w-4.5" />
-          {/* در «محیط حل» فقط آیکن — عنوان حذف شده است */}
-          {view.name !== 'live' && backLabel}
-        </button>
-        <span className="ms-auto flex items-center gap-2.5">
-          {/* دامنهٔ فعال (نوع بانک/رشته) — روی نماها یادآوری می‌شود تا کاربر بداند داخل کدام بانک است */}
-          {activeScopeLabel && !['home', 'live'].includes(view.name) && (
-            <span className="tb-badge tb-badge--plain" title="دامنهٔ فعال این بانک">
-              <Icon name="filter" className="h-3.5 w-3.5" />
-              {activeScopeLabel}
-            </span>
-          )}
-          {/* «ساخت آزمون» — ورود به ویزارد کامل؛ هم‌خطِ «بازگشت به تست» مثل نوار فلش‌کارت.
-              با payload به PersonalExamBuilder سیگنال می‌رود تا ویزارد از مرحلهٔ ۱ باز شود. */}
-          {view.name === 'builder' && (
-            <button
-              type="button"
-              onClick={() => go('builder', { preset: 'advanced' })}
-              className="flex cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm transition-colors hover:border-[#61d192]/50 hover:bg-[#61d192]/12 [font-family:'Doran','Vazir',Tahoma,sans-serif]"
-            >
-              <Icon name="plus" className="h-4 w-4 text-[var(--green-soft-ink)]" />
-              ساخت آزمون
-            </button>
-          )}
-        </span>
-      </header>
+      {/* سربرگ لایه — بازگشت راست و (فقط در آزمون‌ساز شخصی) «ساخت آزمون» چپ، در یک خط
+          در «محیط حل» سربرگ کامل حذف می‌شود تا خروجِ تکراری بالای دکمهٔ «خروج» سشن نیاید */}
+      {view.name !== 'live' && (
+        <header className="tb-topbar dash-stagger">
+          <button
+            type="button"
+            onClick={exitViews.includes(view.name) ? onBack : handleBack}
+            aria-label={backLabel}
+            className="tb-topbar__back"
+          >
+            <Icon name="back" className="h-4.5 w-4.5" />
+            {backLabel}
+          </button>
+          <span className="ms-auto flex items-center gap-2.5">
+            {/* دامنهٔ فعال (نوع بانک/رشته) — روی نماها یادآوری می‌شود تا کاربر بداند داخل کدام بانک است */}
+            {activeScopeLabel && view.name !== 'home' && (
+              <span className="tb-badge tb-badge--plain" title="دامنهٔ فعال این بانک">
+                <Icon name="filter" className="h-3.5 w-3.5" />
+                {activeScopeLabel}
+              </span>
+            )}
+            {/* «ساخت آزمون» — ورود به ویزارد کامل؛ هم‌خطِ «بازگشت به تست» مثل نوار فلش‌کارت.
+                با payload به PersonalExamBuilder سیگنال می‌رود تا ویزارد از مرحلهٔ ۱ باز شود. */}
+            {view.name === 'builder' && (
+              <button
+                type="button"
+                onClick={() => go('builder', { preset: 'advanced' })}
+                className="flex cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm transition-colors hover:border-[#61d192]/50 hover:bg-[#61d192]/12 [font-family:'Doran','Vazir',Tahoma,sans-serif]"
+              >
+                <Icon name="plus" className="h-4 w-4 text-[var(--green-soft-ink)]" />
+                ساخت آزمون
+              </button>
+            )}
+          </span>
+        </header>
+      )}
 
       {busy && (
         <div className="space-y-4" aria-hidden="true">

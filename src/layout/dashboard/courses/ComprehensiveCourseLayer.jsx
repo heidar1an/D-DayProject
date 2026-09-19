@@ -3,13 +3,13 @@ import './comprehensiveCourse.css';
 import { LAYER_IDS, useLayerRoute } from '../dashboardRoute';
 import AnatomyLearningLayer from './learning/AnatomyLearningLayer';
 
-import anatomyImg from '../../../../images/courses/ChatGPT Image ۲۰ شهریور ۱۴۰۵، ۱۶_۴۴_۱۳.png';
-import physiologyImg from '../../../../images/courses/ChatGPT Image ۲۰ شهریور ۱۴۰۵، ۱۶_۴۵_۱۹.png';
-import biochemistryImg from '../../../../images/courses/ChatGPT Image ۲۲ شهریور ۱۴۰۵، ۱۰_۰۰_۰۸.png';
-import microbiologyImg from '../../../../images/courses/ChatGPT Image ۲۲ شهریور ۱۴۰۵، ۱۰_۰۱_۳۴.png';
-import parasitologyImg from '../../../../images/courses/ChatGPT Image ۲۲ شهریور ۱۴۰۵، ۱۰_۰۳_۱۴.png';
+import anatomyImg from '../../../../images/courses/QqVyc2R_BP6N6Tp05DDFVyP-Yiw-zCJJQASGSV6LQSjrdX1cXw.png';
+import physiologyImg from '../../../../images/courses/ChatGPT Image ۲۰ شهریور ۱۴۰۵، ۱۶_۴۴_۱۳.png';
+import biochemistryImg from '../../../../images/courses/ChatGPT Image ۲۰ شهریور ۱۴۰۵، ۱۶_۴۵_۱۹.png';
+import bacteriologyImg from '../../../../images/courses/ChatGPT Image ۲۲ شهریور ۱۴۰۵، ۱۰_۰۰_۰۸.png';
+import parasitologyImg from '../../../../images/courses/ChatGPT Image ۲۲ شهریور ۱۴۰۵، ۱۰_۰۱_۳۴.png';
+import mycologyImg from '../../../../images/courses/ChatGPT Image ۲۲ شهریور ۱۴۰۵، ۱۰_۰۳_۱۴.png';
 import histologyImg from '../../../../images/courses/QW2X7THz15isfPOypUmHX3UULX8-zM29LGSsSUChN3UXdLb3uQ.png';
-import mycologyImg from '../../../../images/courses/QqVyc2R_BP6N6Tp05DDFVyP-Yiw-zCJJQASGSV6LQSjrdX1cXw.png';
 import embryologyImg from '../../../../images/courses/Xl-anhwMGfYUHjBKcrVXxKV5D9A-lImzWgXHTKCbOIu437q6Kw.png';
 import entomologyImg from '../../../../images/courses/Asset 4.webp';
 import hygieneImg from '../../../../images/courses/Asset 5.webp';
@@ -30,18 +30,16 @@ export const SUBJECTS = [
   { id: 'anatomy', title: 'آناتومی', image: anatomyImg, accent: '#5b8cc7', progress: 35, chapters: 12, lessons: 24, tests: 940 },
   { id: 'physiology', title: 'فیزیولوژی', image: physiologyImg, accent: '#ab8e7c', progress: 25, chapters: 10, lessons: 18, tests: 760 },
   { id: 'biochemistry', title: 'بیوشیمی', image: biochemistryImg, accent: '#77b787', progress: 40, chapters: 8, lessons: 14, tests: 620 },
-  { id: 'genetics', title: 'ژنتیک', glyph: 'dna', accent: '#937fcd', progress: 5, chapters: 6, lessons: 9, tests: 380 },
   { id: 'immunology', title: 'ایمونولوژی', image: immunologyImg, accent: '#937fcd', progress: 25, chapters: 7, lessons: 11, tests: 450 },
-  { id: 'microbiology', title: 'میکروبیولوژی', image: microbiologyImg, accent: '#77b787', progress: 15, chapters: 9, lessons: 13, tests: 540 },
+  { id: 'microbiology', title: 'باکتری‌شناسی', image: bacteriologyImg, accent: '#77b787', progress: 15, chapters: 9, lessons: 13, tests: 540 },
   { id: 'virology', title: 'ویروس‌شناسی', image: virologyImg, accent: '#ab8e7c', progress: 0, chapters: 6, lessons: 8, tests: 320 },
   { id: 'mycology', title: 'قارچ‌شناسی', image: mycologyImg, accent: '#5b8cc7', progress: 0, chapters: 4, lessons: 6, tests: 240 },
   { id: 'parasitology', title: 'انگل‌شناسی', image: parasitologyImg, accent: '#937fcd', progress: 10, chapters: 7, lessons: 10, tests: 410 },
   { id: 'histology', title: 'بافت‌شناسی', image: histologyImg, accent: '#77b787', progress: 100, chapters: 6, lessons: 8, tests: 350 },
   { id: 'embryology', title: 'جنین‌شناسی', image: embryologyImg, accent: '#5b8cc7', progress: 0, chapters: 5, lessons: 7, tests: 290 },
-  { id: 'pathology', title: 'پاتولوژی', glyph: 'microscope', accent: '#ab8e7c', progress: 0, chapters: 9, lessons: 12, tests: 580 },
-  { id: 'pharmacology', title: 'فارماکولوژی', glyph: 'pill', accent: '#937fcd', progress: 0, chapters: 8, lessons: 11, tests: 520 },
   { id: 'entomology', title: 'حشره‌شناسی', image: entomologyImg, accent: '#77b787', progress: 0, chapters: 3, lessons: 4, tests: 160 },
   { id: 'hygiene', title: 'بهداشت عمومی', image: hygieneImg, accent: '#5b8cc7', progress: 20, chapters: 5, lessons: 6, tests: 220 },
+  { id: 'epidemiology', title: 'اپیدمیولوژی', glyph: 'epidemiology', accent: '#937fcd', progress: 0, chapters: 5, lessons: 7, tests: 240 },
   { id: 'english', title: 'زبان انگلیسی', image: englishImg, accent: '#ab8e7c', progress: 60, chapters: 4, lessons: 6, tests: 200 },
 ];
 
@@ -74,27 +72,13 @@ function SubjectGlyph({ name }) {
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      {name === 'dna' && (
+      {/* اپیدمیولوژی — ذره‌بینِ رصد با منحنی همه‌گیری درون لنز */}
+      {name === 'epidemiology' && (
         <>
-          <path d="M20 7c0 17 24 15 24 25s-24 8-24 25" />
-          <path d="M44 7c0 17-24 15-24 25s24 8 24 25" />
-          <path d="M25 15h14M22 26h20M25 38h14M22 49h20" opacity="0.55" />
-        </>
-      )}
-      {name === 'microscope' && (
-        <>
-          <path d="M30 7l11 6-9 16-11-6z" />
-          <path d="M26 27c-6 4-9 11-6 18" />
-          <path d="M17 51c3-9 10-14 18-14 5 0 9-4 9-9" opacity="0.55" />
-          <path d="M13 57h38" />
-        </>
-      )}
-      {name === 'pill' && (
-        <>
-          <rect x="23" y="6" width="18" height="52" rx="9" />
-          <path d="M23 32h18" />
-          <path d="M23 15a9 9 0 0 1 18 0z" fill="currentColor" fillOpacity="0.22" stroke="none" />
-          <path d="M48 46c5-9 13-10 10-18-7 2-11 8-10 18z" opacity="0.55" />
+          <circle cx="27" cy="27" r="15" />
+          <path d="M38 38l14 14" />
+          <path d="M20 33h14" opacity="0.4" />
+          <path d="M21 31l5-7 4 4 7-9" />
         </>
       )}
     </svg>
@@ -113,7 +97,7 @@ function deepLinkToAnatomyRoute(deepLink) {
   if (deepLink.unitId) {
     return { name: 'unit', moduleId: deepLink.moduleId, unitId: deepLink.unitId, stepId: deepLink.stepId };
   }
-  return { name: 'module', moduleId: deepLink.moduleId };
+  return { name: 'overview', moduleId: deepLink.moduleId };
 }
 
 function SubjectCard({ subject, index, onOpen, spot = false, registerRef }) {
@@ -131,7 +115,7 @@ function SubjectCard({ subject, index, onOpen, spot = false, registerRef }) {
         '--fill-delay': `${0.45 + index * 0.055}s`,
         '--bob-delay': `${(index % 4) * 0.45}s`,
       }}
-      aria-label={`${subject.title} — ${toFa(subject.chapters)} فصل، پیشرفت ${toFa(subject.progress)} درصد`}
+      aria-label={`${subject.title} — پیشرفت ${toFa(subject.progress)} درصد`}
     >
       {status === 'completed' && (
         <span className="dars-card__done">
@@ -154,24 +138,24 @@ function SubjectCard({ subject, index, onOpen, spot = false, registerRef }) {
       <div className="dars-card__body">
         <h3 className="dars-card__title">{subject.title}</h3>
         <p className="dars-card__meta">
-          {toFa(subject.lessons)} درسنامه · {toFa(subject.tests)} تست
+          {toFa(subject.lessons)} درسنامه
         </p>
-        <div className="dars-card__bar">
-          <span className="dars-card__bar-fill" />
+        <div className="dars-card__progress">
+          <div className="dars-card__bar">
+            <span className="dars-card__bar-fill" />
+          </div>
+          <span className="dars-card__go" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5m6-6-6 6 6 6" />
+            </svg>
+          </span>
         </div>
         <div className="dars-card__foot">
-          <span className="dars-card__chapters">{toFa(subject.chapters)} فصل</span>
           <span className="dars-card__percent">
             {status === 'completed' ? '۱۰۰٪' : `${toFa(subject.progress)}٪`}
           </span>
         </div>
       </div>
-
-      <span className="dars-card__go" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M19 12H5m6-6-6 6 6 6" />
-        </svg>
-      </span>
     </button>
   );
 }
@@ -284,7 +268,7 @@ export default function ComprehensiveCourseLayer({ onBack, userId = 'local-user'
               <span className="dars-hero__title-accent">علوم پایه</span>
             </h1>
             <p className="dars-hero__subtitle">
-              همه چیز برای قبولی در علوم پایه، یکجا؛ درسنامه، تست، فلش‌کارت و آزمون — با پوشش کامل ۱۶ درس تخصصی.
+              همه چیز برای قبولی در علوم پایه، یکجا؛ درسنامه، تست، فلش‌کارت و آزمون — با پوشش کامل ۱۴ درس تخصصی.
             </p>
           </div>
         </header>
@@ -359,26 +343,6 @@ export default function ComprehensiveCourseLayer({ onBack, userId = 'local-user'
             />
           ))}
         </div>
-
-        <section className="dars-cta dash-stagger">
-          <div className="dars-cta__glow" aria-hidden="true" />
-          <div className="dars-cta__copy">
-            <h2>از همین امروز، مسیر قبولی‌تو شروع کن</h2>
-            <p>با اشتراک پرو به هر ۱۶ درس، بیش از ۷۰۰ درسنامه و ۳۲ هزار تست دسترسی کامل داری.</p>
-          </div>
-          <div className="dars-cta__actions">
-            <button className="dars-cta__primary" type="button">
-              همین حالا شروع کنید
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M19 12H5m6-6-6 6 6 6" />
-              </svg>
-            </button>
-            <button className="dars-cta__ghost" type="button">
-              مشاهده تعرفه‌ها
-            </button>
-          </div>
-          <small className="dars-cta__trust">اعتماد بیش از ۳٬۵۰۰ دانشجوی پزشکی سراسر کشور</small>
-        </section>
       </div>
     </section>
   );

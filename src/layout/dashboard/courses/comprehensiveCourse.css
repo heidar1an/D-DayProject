@@ -261,7 +261,7 @@
 }
 
 .dars-overview__value {
-  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
   font-size: 1.3rem;
   color: var(--blue-soft-ink);
   font-variant-numeric: tabular-nums;
@@ -322,6 +322,7 @@
   padding: 0 6px;
   border-radius: 999px;
   background: rgb(var(--wash-rgb) / 0.08);
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
   font-style: normal;
   font-size: 0.75rem;
   font-variant-numeric: tabular-nums;
@@ -342,11 +343,17 @@
   background: rgba(91, 140, 199, 0.5);
 }
 
-/* ── گرید درس‌ها ── */
+/* ── گرید درس‌ها ──
+   فلکس وسط‌چین: اگر ردیف آخر پر نشد، کادرهای باقی‌مانده وسط می‌نشینند. */
 .dars-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 16px;
+}
+
+.dars-grid > .dars-card {
+  width: calc((100% - 48px) / 4);
 }
 
 .dars-card {
@@ -453,7 +460,15 @@
   color: var(--white);
 }
 
+/* ردیف پیشرفت: نوار کوتاه‌تر می‌شود تا جای فلش در ادامهٔ همان ردیف رزرو بماند */
+.dars-card__progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .dars-card__bar {
+  flex: 1 1 auto;
   height: 7px;
   border-radius: 999px;
   background: rgb(var(--wash-rgb) / 0.07);
@@ -477,13 +492,8 @@
   margin-top: 10px;
 }
 
-.dars-card__chapters {
-  color: var(--faint);
-  font-size: 0.78rem;
-}
-
 .dars-card__percent {
-  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
   font-weight: 700;
   font-size: 0.95rem;
   color: var(--accent);
@@ -516,11 +526,9 @@
   height: 13px;
 }
 
-/* فلش ظاهرشونده هنگام هاور */
+/* فلش ظاهرشونده هنگام هاور — در ادامهٔ نوار پیشرفت و در یک ردیف با آن */
 .dars-card__go {
-  position: absolute;
-  inset-inline-end: 16px;
-  bottom: 52px;
+  flex: 0 0 auto;
   display: grid;
   place-items: center;
   width: 34px;
@@ -567,138 +575,10 @@
   animation: dars-card-spot 3s ease 1;
 }
 
-/* ── CTA پایانی ── */
-.dars-cta {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 26px;
-  flex-wrap: wrap;
-  margin-top: 34px;
-  padding: clamp(28px, 4.5vh, 44px) clamp(24px, 3.5vw, 46px);
-  border-radius: 36px;
-  border: 1px solid rgba(147, 127, 205, 0.28);
-  background:
-    radial-gradient(480px 200px at 12% 0%, rgba(91, 140, 199, 0.2), transparent 65%),
-    radial-gradient(480px 240px at 90% 110%, rgba(147, 127, 205, 0.18), transparent 65%),
-    var(--background);
-  overflow: hidden;
-}
-
-.dars-cta__glow {
-  position: absolute;
-  top: -70%;
-  inset-inline-start: 30%;
-  width: 340px;
-  height: 340px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(127, 180, 227, 0.16), transparent 65%);
-  animation: dars-orb-drift 12s ease-in-out infinite alternate;
-  pointer-events: none;
-}
-
-.dars-cta__copy {
-  flex: 1 1 320px;
-  position: relative;
-}
-
-.dars-cta__copy h2 {
-  margin: 0;
-  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
-  font-weight: 800;
-  font-size: clamp(1.4rem, 2.6vw, 1.9rem);
-}
-
-.dars-cta__copy p {
-  margin: 10px 0 0;
-  color: var(--muted);
-  font-size: 0.95rem;
-  line-height: 1.9;
-}
-
-.dars-cta__actions {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.dars-cta__primary {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 15px 34px;
-  border: 0;
-  border-radius: 18px;
-  background: linear-gradient(120deg, var(--blue-bright), var(--purple));
-  color: var(--white);
-  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
-  font-size: 1.02rem;
-  cursor: pointer;
-  overflow: hidden;
-  transition: transform 180ms ease, box-shadow 220ms ease;
-}
-
-.dars-cta__primary svg {
-  width: 19px;
-  height: 19px;
-}
-
-.dars-cta__primary::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 46%;
-  inset-inline-start: -60%;
-  background: linear-gradient(100deg, transparent, rgb(var(--wash-rgb) / 0.25), transparent);
-  transform: skewX(-18deg);
-  animation: dars-shine 3.4s ease-in-out infinite;
-}
-
-.dars-cta__primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 14px 34px rgba(60, 110, 165, 0.4);
-}
-
-@keyframes dars-shine {
-  0%, 55% {
-    inset-inline-start: -60%;
-  }
-  100% {
-    inset-inline-start: 130%;
-  }
-}
-
-.dars-cta__ghost {
-  padding: 14px 26px;
-  border: 1px solid rgb(var(--line-rgb) / 0.16);
-  border-radius: 18px;
-  background: transparent;
-  color: var(--muted);
-  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: border-color 200ms ease, color 200ms ease;
-}
-
-.dars-cta__ghost:hover {
-  border-color: rgb(var(--line-rgb) / 0.4);
-  color: var(--white);
-}
-
-.dars-cta__trust {
-  flex-basis: 100%;
-  color: var(--faint);
-  font-size: 0.8rem;
-}
-
 /* ── ریسپانسیو ── */
 @media (max-width: 1180px) {
-  .dars-grid {
-    grid-template-columns: repeat(3, 1fr);
+  .dars-grid > .dars-card {
+    width: calc((100% - 32px) / 3);
   }
 }
 
@@ -709,8 +589,8 @@
 }
 
 @media (max-width: 760px) {
-  .dars-grid {
-    grid-template-columns: repeat(2, 1fr);
+  .dars-grid > .dars-card {
+    width: calc((100% - 16px) / 2);
   }
 
   .dars-topbar__crumb {
@@ -724,12 +604,8 @@
 }
 
 @media (max-width: 460px) {
-  .dars-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .dars-card__go {
-    bottom: 20px;
+  .dars-grid > .dars-card {
+    width: 100%;
   }
 }
 

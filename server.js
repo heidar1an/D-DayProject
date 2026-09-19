@@ -15,7 +15,9 @@ import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { handleApi } from './database/adminApi.js';
+import { handleExamApi } from './database/examApi.js';
 import { handleGoogleAuthApi } from './database/googleAuth.js';
+import { handleUsersApi } from './database/usersApi.js';
 
 const rootDir = dirname(fileURLToPath(import.meta.url));
 const distDir = resolve(rootDir, 'dist');
@@ -88,6 +90,14 @@ const server = createServer(async (request, response) => {
   try {
     const handled = await handleApi(request, response);
     if (handled) return;
+
+    /* API آزمون‌های هماهنگ — سشن کوکی، Attempt سرورمحور، تصحیح فقط سرور */
+    const handledExam = await handleExamApi(request, response);
+    if (handledExam) return;
+
+    /* ورود/ثبت‌نام با شماره — کوکی سشن کاربر سایت را صادر می‌کند */
+    const handledUsers = await handleUsersApi(request, response);
+    if (handledUsers) return;
 
     /* ورود/ثبت‌نام با گوگل — تنها API کاربری سایت که در پروداکشن لازم است */
     const handledGoogleAuth = await handleGoogleAuthApi(request, response);

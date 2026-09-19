@@ -29,6 +29,7 @@ import {
   toFa,
 } from './intlShared';
 import QuestionExplanation from './QuestionExplanation';
+import useOverflowFlag from './useOverflowFlag';
 
 /* ── دکمهٔ گزینهٔ سؤال ── */
 function OptionButton({ option, state, onSelect, langMode, disabled }) {
@@ -81,11 +82,15 @@ function OptionButton({ option, state, onSelect, langMode, disabled }) {
   );
 }
 
-/* ── نویگیتور سؤال: اعداد با وضعیت حل‌شده/غلط/گلچین/فعلی ── */
-function QuestionNavigator({ questions, currentIndex, answers, bookmarks, filter, onFilter, onJump }) {
+/* ── نویگیتور سؤال: اعداد با وضعیت حل‌شده/غلط/گلچین/فعلی ──
+   onExpand فقط در سایدبار دسکتاپ پاس داده می‌شود؛ وقتی گرید از ظرفیت کادر سرریز
+   کند، دکمهٔ «لیست کامل سؤال‌ها» برای باز کردن پاپ‌آپ نمایش داده می‌شود. */
+function QuestionNavigator({ questions, currentIndex, answers, bookmarks, filter, onFilter, onJump, onExpand }) {
   const filtered = filter
     ? questions.map((question, index) => ({ question, index })).filter((entry) => entry.question.difficulty === filter)
     : questions.map((question, index) => ({ question, index }));
+  /* تشخیص سرریز — با هر تغییر تعداد سؤال‌های فیلترشده دوباره اندازه می‌گیرد */
+  const [gridRef, overflowing] = useOverflowFlag(filtered.length);
 
   return (
     <div>
@@ -115,41 +120,50 @@ function QuestionNavigator({ questions, currentIndex, answers, bookmarks, filter
         ))}
       </div>
 
-      <div className="mt-4 grid grid-cols-5 gap-2" role="list" aria-label="ناوبری سؤال‌ها">
-        {filtered.map(({ question, index }) => {
-          const answer = answers[question.id];
-          const isCurrent = index === currentIndex;
-          const isBookmarked = bookmarks.includes(question.id);
-          return (
-            <button
-              key={question.id}
-              type="button"
-              role="listitem"
-              onClick={() => onJump(index)}
-              aria-label={`سؤال ${toFa(index + 1)}${
-                answer ? (answer.isCorrect ? '، صحیح' : '، غلط') : '، حل‌نشده'
-              }${isBookmarked ? '، گلچین‌شده' : ''}`}
-              aria-current={isCurrent ? 'step' : undefined}
-              className={`relative grid h-10 place-items-center cursor-pointer rounded-xl border text-sm [font-family:'Doran','Vazir',Tahoma,sans-serif] transition-colors ${
-                isCurrent
-                  ? 'border-[var(--purple-bright)] bg-[#937fcd]/25 text-white'
-                  : answer?.isCorrect
-                    ? 'border-[#77b787]/35 bg-[#77b787]/12 text-[var(--green-soft-ink)]'
-                    : answer && !answer.isCorrect
-                      ? 'border-[#e26d6d]/35 bg-[#e26d6d]/12 text-[var(--red-ink)]'
-                      : 'border-white/8 bg-white/[0.04] text-[var(--muted)] hover:border-white/25'
-              }`}
-            >
-              {toFa(index + 1)}
-              {isBookmarked && (
-                <span className="absolute -left-1 -top-1 grid h-4 w-4 place-items-center rounded-full bg-[var(--surface)] text-[var(--red-ink)]" aria-hidden="true">
-                  <Icon name="heart" className="h-2.5 w-2.5" strokeWidth={2.4} />
-                </span>
-              )}
-            </button>
-          );
-        })}
+      <div ref={gridRef} className={onExpand ? 'intl-navscroll mt-4' : 'mt-4'}>
+        <div className="grid grid-cols-5 gap-2" role="list" aria-label="ناوبری سؤال‌ها">
+          {filtered.map(({ question, index }) => {
+            const answer = answers[question.id];
+            const isCurrent = index === currentIndex;
+            const isBookmarked = bookmarks.includes(question.id);
+            return (
+              <button
+                key={question.id}
+                type="button"
+                role="listitem"
+                onClick={() => onJump(index)}
+                aria-label={`سؤال ${toFa(index + 1)}${
+                  answer ? (answer.isCorrect ? '، صحیح' : '، غلط') : '، حل‌نشده'
+                }${isBookmarked ? '، گلچین‌شده' : ''}`}
+                aria-current={isCurrent ? 'step' : undefined}
+                className={`relative grid h-10 place-items-center cursor-pointer rounded-xl border text-sm [font-family:'Doran','Vazir',Tahoma,sans-serif] transition-colors ${
+                  isCurrent
+                    ? 'border-[var(--purple-bright)] bg-[#937fcd]/25 text-white'
+                    : answer?.isCorrect
+                      ? 'border-[#77b787]/35 bg-[#77b787]/12 text-[var(--green-soft-ink)]'
+                      : answer && !answer.isCorrect
+                        ? 'border-[#e26d6d]/35 bg-[#e26d6d]/12 text-[var(--red-ink)]'
+                        : 'border-white/8 bg-white/[0.04] text-[var(--muted)] hover:border-white/25'
+                }`}
+              >
+                {toFa(index + 1)}
+                {isBookmarked && (
+                  <span className="absolute -left-1 -top-1 grid h-4 w-4 place-items-center rounded-full bg-[var(--surface)] text-[var(--red-ink)]" aria-hidden="true">
+                    <Icon name="heart" className="h-2.5 w-2.5" strokeWidth={2.4} />
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
+
+      {onExpand && overflowing && (
+        <button type="button" onClick={onExpand} className="intl-navmore">
+          <Icon name="grid" className="h-3.5 w-3.5" />
+          لیست کامل سؤال‌ها ({toFa(filtered.length)})
+        </button>
+      )}
 
       <ul className="mt-4 space-y-2 border-t border-white/8 pt-3 text-[11px] text-[var(--faint)]">
         <li className="flex items-center gap-2">
@@ -387,6 +401,7 @@ export default function QuestionLab({ userData, exam, questions, attempt, onExit
   const [filter, setFilter] = useState(null);
   const [navigatorOpen, setNavigatorOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [fullMapOpen, setFullMapOpen] = useState(false); // پاپ‌آپ لیست کامل سؤال‌ها در دسکتاپ
   const [collectionPop, setCollectionPop] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [elapsed, setElapsed] = useState(() => Math.floor((Date.now() - attempt.startedAt) / 1000));
@@ -442,8 +457,17 @@ export default function QuestionLab({ userData, exam, questions, attempt, onExit
     questionStartRef.current = Date.now();
     setCollectionPop(false);
     setNavigatorOpen(false);
+    setFullMapOpen(false);
     persistIndex(next);
   };
+
+  /* بستن پاپ‌آپ لیست کامل با Escape */
+  useEffect(() => {
+    if (!fullMapOpen) return undefined;
+    const handleKey = (event) => event.key === 'Escape' && setFullMapOpen(false);
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [fullMapOpen]);
 
   const handleSubmitAnswer = async () => {
     if (selected == null || revealed || submitting) return;
@@ -701,6 +725,7 @@ export default function QuestionLab({ userData, exam, questions, attempt, onExit
               filter={filter}
               onFilter={setFilter}
               onJump={goTo}
+              onExpand={() => setFullMapOpen(true)}
             />
             <div className="mt-4 border-t border-white/8 pt-3">
               <p className="mb-2 text-[11px] text-[var(--faint)]">زبان سؤال</p>
@@ -765,6 +790,43 @@ export default function QuestionLab({ userData, exam, questions, attempt, onExit
               onFilter={setFilter}
               onJump={goTo}
             />
+          </div>
+        </div>
+      )}
+
+      {/* پاپ‌آپ لیست کامل سؤال‌ها — وقتی نقشهٔ سایدبار دسکتاپ سرریز شده */}
+      {fullMapOpen && (
+        <div
+          className="intl-fade fixed inset-0 z-50 grid place-items-center bg-black/70 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label="لیست کامل سؤال‌ها"
+          onClick={() => setFullMapOpen(false)}
+        >
+          <div
+            className="intl-pop flex max-h-[85vh] w-[min(26rem,100%)] flex-col rounded-[2rem] border border-white/10 bg-[var(--surface-soft)] p-5"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="flex items-center gap-2 text-sm [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+                <Icon name="grid" className="h-4 w-4 text-[var(--purple-ink)]" />
+                لیست کامل سؤال‌ها
+              </h3>
+              <button type="button" onClick={() => setFullMapOpen(false)} aria-label="بستن" className="cursor-pointer rounded-lg bg-white/6 p-1.5">
+                <Icon name="x" className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="intl-mapbody">
+              <QuestionNavigator
+                questions={questions}
+                currentIndex={currentIndex}
+                answers={answers}
+                bookmarks={bookmarks}
+                filter={filter}
+                onFilter={setFilter}
+                onJump={goTo}
+              />
+            </div>
           </div>
         </div>
       )}

@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { ContentService, ProgressService } from '../../../../services/learning';
 import { LAYER_IDS, useLayerRoute } from '../../dashboardRoute';
 import AnatomyOverview from './AnatomyOverview';
-import AnatomyModulePage from './AnatomyModulePage';
 import UnitPage from './UnitPage';
 import { LearningStatePanel } from './LearningPrimitives';
 import './learning.css';
@@ -11,13 +10,14 @@ import './learning.css';
    تا رفرش و Back/Forward همان ماژول/واحد را برگردانند. */
 const ANATOMY_HOME = { name: 'overview' };
 
-/* initialRoute فقط هنگام ورود از لینک عمیق (کارت‌های «کار امروز» صفحه دوره‌ها) مقدار دارد */
+/* initialRoute فقط هنگام ورود از لینک عمیق (کارت‌های «کار امروز» صفحه دوره‌ها) مقدار دارد.
+   نمای واسط «صفحهٔ بخش» حذف شده است؛ مسیر module قدیمی به overview با بخش پیش‌انتخابی مپ می‌شود. */
 function normalizeRoute(route) {
   if (route?.name === 'unit' && route.moduleId && route.unitId) {
     return { name: 'unit', moduleId: route.moduleId, unitId: route.unitId, stepId: route.stepId };
   }
   if (route?.name === 'module' && route.moduleId) {
-    return { name: 'module', moduleId: route.moduleId };
+    return { name: 'overview', moduleId: route.moduleId };
   }
   return { name: 'overview' };
 }
@@ -57,13 +57,12 @@ export default function AnatomyLearningLayer({ onBack, userId = 'local-user', in
   useEffect(() => {
     const handleEscape = (event) => {
       if (event.key !== 'Escape') return;
-      if (route.name === 'unit') setRoute({ name: 'module', moduleId: route.moduleId });
-      else if (route.name === 'module') setRoute({ name: 'overview' });
+      if (normalizeRoute(route).name === 'unit') setRoute({ name: 'overview' });
       else onBack?.();
     };
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
-  }, [onBack, route]);
+  }, [onBack, route, setRoute]);
 
   const navigate = (nextRoute) => {
     setRoute(nextRoute);
@@ -103,7 +102,6 @@ export default function AnatomyLearningLayer({ onBack, userId = 'local-user', in
     );
   }
 
-  const openModule = (moduleId) => navigate({ name: 'module', moduleId });
   const openUnit = (unitId, stepId) => {
     const unit = ContentService.getUnit(course, unitId);
     if (!unit) return;
@@ -119,47 +117,31 @@ export default function AnatomyLearningLayer({ onBack, userId = 'local-user', in
     openUnit(unit.id, 'activate');
   };
 
-  const activeModule = route.moduleId ? ContentService.getModule(course, route.moduleId) : null;
   const activeUnit = route.unitId ? ContentService.getUnit(course, route.unitId) : null;
+  /* view ذخیره‌شده در URL ممکن است شکل قدیمی (module) باشد؛ قبل از رندر نرمال می‌شود */
+  const currentRoute = normalizeRoute(route);
 
   return (
     <section className="anatomy-learning-layer" dir="rtl" aria-label="سیستم یادگیری آناتومی">
-      {route.name === 'overview' && (
+      {currentRoute.name === 'overview' && (
         <AnatomyOverview
           course={course}
           progressState={progressState}
+          initialModuleId={currentRoute.moduleId}
           onBack={onBack}
-          onOpenModule={openModule}
           onOpenUnit={openUnit}
-          onRestartUnit={restartUnit}
         />
       )}
 
-      {route.name === 'module' && activeModule && (
-        <AnatomyModulePage
-          course={course}
-          module={activeModule}
-          units={ContentService.getUnits(course, activeModule.id)}
-          progressState={progressState}
-          onBack={() => navigate({ name: 'overview' })}
-          onCourseBack={onBack}
-          onOpenUnit={openUnit}
-          onRestartUnit={restartUnit}
-        />
-      )}
-
-      {route.name === 'unit' && activeModule && activeUnit && (
+      {currentRoute.name === 'unit' && activeUnit && (
         <UnitPage
           course={course}
-          module={activeModule}
           unit={activeUnit}
           progressState={progressState}
           setProgressState={setProgressState}
           userId={userId}
           initialStep={route.stepId}
-          onBack={() => navigate({ name: 'module', moduleId: activeModule.id })}
           onAnatomyBack={() => navigate({ name: 'overview' })}
-          onCourseBack={onBack}
         />
       )}
     </section>

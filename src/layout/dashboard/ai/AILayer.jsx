@@ -50,6 +50,19 @@ export default function AILayer({ onBack }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /* پرامپت اولیه از لایه‌های دیگر (مثل دکمهٔ «از تپش هوشمند بپرس» میکرودرسنامه):
+     در اولین ورود، بلافاصله ارسال و از مسیر پاک می‌شود تا رفرش دوباره نفرستد. */
+  const initialPromptRef = useRef(false);
+  useEffect(() => {
+    if (initialPromptRef.current) return;
+    initialPromptRef.current = true;
+    const prompt = (typeof view.prompt === 'string' ? view.prompt : '').trim();
+    if (!prompt) return;
+    patchView({ prompt: null });
+    ai.send(prompt);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     composerRef.current?.querySelector('textarea')?.focus();
   }, []);

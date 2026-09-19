@@ -250,6 +250,7 @@
 
 /* خود کارت، مربعی و کلیک‌پذیر: ورود به لایهٔ درس */
 .micr-row {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -272,6 +273,31 @@
   border-color: color-mix(in srgb, var(--accent) 55%, transparent);
   background: color-mix(in srgb, var(--accent) 8%, rgb(var(--wash-rgb) / 0.03));
   transform: translateY(-2px);
+}
+
+/* نشان «میکرودرس فعال» — درس‌هایی که خوانندهٔ صفحه‌به‌صفحه دارند */
+.micr-row__micro {
+  position: absolute;
+  top: 10px;
+  inset-inline-start: 10px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(147, 127, 205, 0.16);
+  border: 1px solid rgba(147, 127, 205, 0.4);
+  color: var(--purple-soft-ink);
+  font-size: 0.62rem;
+  white-space: nowrap;
+}
+
+.micr-row__micro::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--purple-bright);
+  margin-inline-end: 5px;
+  animation: micr-pulse 2.4s ease-out infinite;
 }
 
 .micr-row__idbox {
@@ -441,4 +467,187 @@
     width: 36px;
     height: 36px;
   }
+}
+
+/* ── لایهٔ «مبحث‌های درس» — بین کارت درس و خوانندهٔ میکرودرسنامه ──
+   کلیک روی درس، فهرست مبحث‌های همان درس را باز می‌کند؛ کلیک روی مبحث منتشرشده
+   خوانندهٔ صفحه‌به‌صفحه را باز می‌کند. مبحث‌های در راه با حالت «به‌زودی» می‌آیند. */
+
+.micr-topics {
+  width: var(--content-width);
+  margin: 0 auto;
+  padding: 14px 0 72px;
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
+  color: var(--white);
+}
+
+.micr-topics__inner { position: relative; }
+
+.micr-topics__head {
+  padding: clamp(30px, 5vh, 52px) 0 10px;
+}
+
+.micr-topics__head h1 {
+  margin: 0 0 8px;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: 1.6rem;
+  color: var(--accent, var(--purple-bright));
+}
+
+.micr-topics__head p {
+  margin: 0;
+  max-width: 640px;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 2;
+}
+
+.micr-topics__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  padding-top: 22px;
+}
+
+.micr-topic {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 22px;
+  border: 1px solid rgb(var(--line-rgb) / 0.09);
+  border-radius: 1.25rem;
+  background: rgb(var(--wash-rgb) / 0.03);
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  transition: border-color 240ms ease, background 240ms ease, transform 180ms ease;
+}
+
+.micr-topic.is-published { cursor: pointer; }
+
+.micr-topic.is-published:hover {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  background: color-mix(in srgb, var(--accent) 8%, rgb(var(--wash-rgb) / 0.03));
+  transform: translateY(-2px);
+}
+
+.micr-topic.is-soon { opacity: 0.55; }
+
+.micr-topic__ring {
+  position: relative;
+  flex: 0 0 auto;
+  width: 58px;
+  height: 58px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.micr-topic__ring svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.micr-topic__ring-track { fill: none; stroke: rgb(var(--line-rgb) / 0.12); stroke-width: 3; }
+
+.micr-topic__ring-fill {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 97.4;
+  stroke-dashoffset: 24;
+}
+
+.micr-topic__ring i {
+  position: relative;
+  font-style: normal;
+  font-size: 0.66rem;
+  color: var(--white);
+}
+
+.micr-topic__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.micr-topic__body strong {
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: 1.05rem;
+}
+
+.micr-topic__body span {
+  color: var(--faint);
+  font-size: 0.8rem;
+  line-height: 1.8;
+}
+
+.micr-topic__meta {
+  margin-inline-start: auto;
+  color: var(--ghost);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.micr-topic__go {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgb(var(--line-rgb) / 0.14);
+  color: var(--muted);
+  transition: color 200ms ease, border-color 200ms ease, transform 200ms ease;
+}
+
+.micr-topic__go svg { width: 15px; height: 15px; }
+
+.micr-topic.is-published:hover .micr-topic__go {
+  color: var(--white);
+  border-color: var(--accent);
+  transform: translateX(-3px);
+}
+
+.micr-topic__soon {
+  margin-inline-start: auto;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px dashed rgb(var(--line-rgb) / 0.25);
+  color: var(--faint);
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.micr-topics__soon {
+  margin-top: 26px;
+  padding: 34px 26px;
+  border: 1px dashed rgb(var(--line-rgb) / 0.2);
+  border-radius: 1.5rem;
+  text-align: center;
+}
+
+.micr-topics__soon strong {
+  display: block;
+  margin-bottom: 6px;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: 1.1rem;
+}
+
+.micr-topics__soon p {
+  margin: 0;
+  color: var(--faint);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 900px) {
+  .micr-topics__grid { grid-template-columns: minmax(0, 1fr); }
+  .micr-topic__meta { display: none; }
 }

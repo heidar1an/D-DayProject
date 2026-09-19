@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import DashboardHeader from './DashboardHeader';
 import SettingHeader from './setting/SettingHeader';
 import EditProfile from './setting/EditProfile';
@@ -22,6 +22,10 @@ import OtherSections from './OtherSections';
 import WikiLayer from './wiki/WikiLayer';
 import KnowledgeLayer from './knowledge/KnowledgeLayer';
 import AILayer from './ai/AILayer';
+
+/* لایهٔ آناتومی سه‌بعدی — موتور three.js و مدل‌های GLB فقط با ورود کاربر به این بخش
+   بارگذاری می‌شوند تا به بقیهٔ داشبورد گرَه نزنند. */
+const AnatomyLayer = lazy(() => import('./anatomy3d/AnatomyLayer'));
 import NotificationsSection from './NotificationsSection';
 import LeagueSection from './league/LeagueSection';
 import FlashcardSection from './flashcards/FlashcardSection';
@@ -229,6 +233,7 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
         onOpenSmartAI={handleOpenSmartAI}
         onOpenWiki={() => openLayer(LAYER_IDS.wiki)}
         onOpenKnowledge={() => openLayer(LAYER_IDS.knowledge)}
+        onOpenAnatomy={() => openLayer(LAYER_IDS.anatomy3d)}
       />
     ),
     league: <LeagueSection userData={userData} />,
@@ -272,10 +277,8 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
       case LAYER_IDS.micro:
         return (
           <MicroCourseLayer
+            userId={userData?.id ?? userData?.phone ?? 'guest'}
             onBack={closeLayer}
-            onOpenComprehensive={(subjectId) =>
-              openLayer(LAYER_IDS.comprehensive, subjectId ? { deep: { subject: subjectId } } : null)
-            }
           />
         );
 
@@ -305,6 +308,13 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
 
       case LAYER_IDS.knowledge:
         return <KnowledgeLayer userData={userData} onBack={closeLayer} />;
+
+      case LAYER_IDS.anatomy3d:
+        return (
+          <Suspense fallback={null}>
+            <AnatomyLayer onBack={closeLayer} />
+          </Suspense>
+        );
 
       default:
         return null;

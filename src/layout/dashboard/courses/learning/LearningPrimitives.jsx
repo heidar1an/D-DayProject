@@ -73,7 +73,6 @@ export function LearningStepper({ steps, currentStep, completedSteps, onStepSele
               </span>
               <span className="learning-stepper__copy">
                 <b>{step.label}</b>
-                <small lang="en">{step.english}</small>
               </span>
             </button>
           );
@@ -88,7 +87,7 @@ export function LearningStep({ step, kicker, title, description, children, aside
     <section className="learning-step" aria-labelledby={`learning-step-${step.id}`}>
       <header className="learning-step__header">
         <div>
-          <span className="learning-step__kicker">{kicker || step.english}</span>
+          {kicker && <span className="learning-step__kicker">{kicker}</span>}
           <h2 id={`learning-step-${step.id}`}>{title || step.label}</h2>
           {description && <p>{description}</p>}
         </div>

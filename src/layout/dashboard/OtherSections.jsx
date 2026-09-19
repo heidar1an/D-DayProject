@@ -63,6 +63,21 @@ function SupportIcon(props) {
   );
 }
 
+/* آناتومی سه‌بعدی — انسان وایرفریم‌گونه با برجستهٔ اسکلتی */
+function AnatomyIcon(props) {
+  return (
+    <svg {...iconProps} {...props}>
+      <circle cx="12" cy="4.4" r="2.1" />
+      <path d="M12 6.5v7" />
+      <path d="M12 8.3 7 10.6" />
+      <path d="M12 8.3l5 2.3" />
+      <path d="M12 13.5 9.2 20.6" />
+      <path d="M12 13.5l2.8 7.1" />
+      <path d="M6.6 20.8h4.6M12.8 20.8h4.6" />
+    </svg>
+  );
+}
+
 /* فلش ورود — در RTL رو به چپ */
 function ArrowIcon(props) {
   return (
@@ -76,6 +91,13 @@ function ArrowIcon(props) {
 /* ── دادهٔ کارت‌های ثانویه ──────────────────────────────────────────────────── */
 
 const SECONDARY_CARDS = [
+  {
+    id: 'anatomy-3d',
+    title: 'آناتومی سه‌بعدی',
+    description: 'مدل تعاملی بدن انسان با لایه‌های آناتومیک و جست‌وجوی ساختار',
+    accent: 'red',
+    Icon: AnatomyIcon,
+  },
   {
     id: 'knowledge-network',
     title: 'شبکه دانش',
@@ -110,7 +132,7 @@ function AICardSkeleton() {
   return <div className="other-sections__ai-skeleton" aria-hidden="true" />;
 }
 
-export default function OtherSections({ onOpenWiki, onOpenKnowledge, onOpenSmartAI }) {
+export default function OtherSections({ onOpenWiki, onOpenKnowledge, onOpenSmartAI, onOpenAnatomy }) {
   const handleSectionClick = (sectionId) => {
     /* مقالات به بخش عمومی سایت وصل است؛ دکمه Back کاربر را به داشبورد برمی‌گرداند */
     if (sectionId === 'articles') {
@@ -123,6 +145,10 @@ export default function OtherSections({ onOpenWiki, onOpenKnowledge, onOpenSmart
     }
     if (sectionId === 'knowledge-network') {
       onOpenKnowledge?.();
+      return;
+    }
+    if (sectionId === 'anatomy-3d') {
+      onOpenAnatomy?.();
       return;
     }
     console.log(`بخش انتخاب شد: ${sectionId}`);

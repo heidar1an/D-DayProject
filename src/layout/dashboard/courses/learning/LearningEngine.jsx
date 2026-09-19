@@ -11,7 +11,6 @@ import {
   AnatomyLabelQuiz,
   ConceptMap,
   LearningDiagnosis,
-  LearningOrientation,
   MicroLesson,
   PracticeQuestion,
   PriorKnowledgeActivation,
@@ -20,10 +19,8 @@ import {
 } from './LearningActivities';
 import {
   LearningNavigation,
-  LearningProgress,
   LearningStep,
   LearningStepper,
-  MasteryIndicator,
 } from './LearningPrimitives';
 import { toFa } from './learningUtils';
 import { ReviewNotebookService } from '../../../../services/reviewNotebook/reviewNotebookService';
@@ -33,11 +30,6 @@ const STEP_COPY = {
     title: 'دانسته‌های قبلی را روشن کن',
     description: 'قبل از دریافت اطلاعات تازه، مغزت را وادار کن نقشه‌ای که همین حالا دارد نشان دهد.',
     hint: 'یک پاسخ کوتاه بنویس یا آمادگی‌ات را تأیید کن.',
-  },
-  orient: {
-    title: 'اول نقشه، بعد جزئیات',
-    description: 'هدف‌ها، جایگاه این واحد و کاربرد بالینی آن را قبل از ورود به محتوا ببین.',
-    hint: 'نقشه مسیر را ببین و گزینه آمادگی را فعال کن.',
   },
   learn: {
     title: 'یادگیری در قطعه‌های کوچک',
@@ -83,12 +75,13 @@ export default function LearningEngine({
   setCourseState,
   userId = 'local-user',
   initialStep,
-  onBack,
   onCompleted,
 }) {
   const initialUnitState = ProgressService.getUnitState(courseState, unit);
-  const [activeStep, setActiveStep] = useState(initialStep || initialUnitState.currentStep || 'activate');
-  const [finished, setFinished] = useState(initialUnitState.status === 'completed');
+  /* getStep برای شناسه‌های حذف‌شده (مثل orient در stateهای قدیمی) به activate برمی‌گردد */
+  const [activeStep, setActiveStep] = useState(
+    () => LearningService.getStep(initialStep || initialUnitState.currentStep || 'activate').id,
+  );
   const practiceStartedAt = useRef(Date.now());
   const labelStartedAt = useRef(Date.now());
   const unitState = ProgressService.getUnitState(courseState, unit);
@@ -193,7 +186,6 @@ export default function LearningEngine({
         },
         { stepId: 'review', stepLabel: 'مرور', detail: 'واحد تکمیل شد' },
       ));
-      setFinished(true);
       ReviewNotebookService.registerLearning(userId, {
         sourceId: `${course.id}:${unit.id}`,
         title: unit.title,
@@ -229,7 +221,6 @@ export default function LearningEngine({
   const resetUnit = () => {
     saveState((previousCourseState) => ProgressService.resetUnit(previousCourseState, unit));
     setActiveStep('activate');
-    setFinished(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -237,16 +228,6 @@ export default function LearningEngine({
     switch (activeStep) {
       case 'activate':
         return <PriorKnowledgeActivation data={unit.learning.activate} activityState={unitState} onChange={patchUnit} />;
-      case 'orient':
-        return (
-          <LearningOrientation
-            data={unit.learning.orient}
-            objectives={unit.objectives}
-            prerequisites={unit.prerequisites}
-            activityState={unitState}
-            onChange={patchUnit}
-          />
-        );
       case 'learn':
         return <MicroLesson lessons={unit.learning.microLessons} activityState={unitState} onChange={patchUnit} />;
       case 'visualize':
@@ -302,50 +283,23 @@ export default function LearningEngine({
 
   return (
     <div className="learning-engine">
-      <div className="learning-engine__sticky">
-        <div className="learning-engine__sticky-copy">
-          <button type="button" className="learning-engine__back" onClick={onBack} aria-label="بازگشت به فهرست واحدها">
-            <span aria-hidden="true">→</span>
-            واحدها
-          </button>
-          <div>
-            <small>UNIT {toFa(String(unit.order).padStart(2, '0'))}</small>
-            <strong>{unit.title}</strong>
-          </div>
-        </div>
-        <LearningProgress value={unitState.progress} label="پیشرفت واحد" compact />
-        <button type="button" className="learn-text-button" onClick={resetUnit}>شروع دوباره واحد</button>
+      <div className="learning-engine__cycle">
+        <LearningStepper
+          steps={LEARNING_STEPS}
+          currentStep={activeStep}
+          completedSteps={unitState.completedSteps}
+          onStepSelect={selectStep}
+        />
+        <button type="button" className="learning-engine__reset" onClick={resetUnit}>
+          <span aria-hidden="true">↺</span>
+          شروع دوباره واحد
+        </button>
       </div>
-
-      {finished && (
-        <aside className="learning-engine__completed" role="status">
-          <span aria-hidden="true">✓</span>
-          <div>
-            <small>چرخه کامل شد</small>
-            <h2>این واحد را با الگوریتم تپش تکمیل کردی</h2>
-            <p>تسلط فعلی {toFa(unitState.mastery)}٪ است؛ مرور بعدی بر اساس نقاط ضعف پیشنهاد می‌شود.</p>
-          </div>
-          <button type="button" className="learn-button learn-button--soft" onClick={onBack}>بازگشت به واحدها</button>
-        </aside>
-      )}
-
-      <LearningStepper
-        steps={LEARNING_STEPS}
-        currentStep={activeStep}
-        completedSteps={unitState.completedSteps}
-        onStepSelect={selectStep}
-      />
 
       <LearningStep
         step={currentStep}
         title={STEP_COPY[activeStep].title}
         description={STEP_COPY[activeStep].description}
-        aside={(
-          <div className="learning-step__aside">
-            <span>مرحله {toFa(currentStepIndex + 1)} از {toFa(LEARNING_STEPS.length)}</span>
-            <MasteryIndicator value={unitState.mastery} size="small" label="تسلط" />
-          </div>
-        )}
       >
         {renderStep()}
       </LearningStep>

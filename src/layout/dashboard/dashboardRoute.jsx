@@ -51,6 +51,7 @@ export const LAYER_IDS = {
   wiki: 'wiki',
   knowledge: 'knowledge',
   ai: 'tapesh-ai',
+  anatomy3d: 'anatomy-3d',
 };
 
 export const OVERLAY_IDS = { settings: 'settings', notifications: 'notifications' };

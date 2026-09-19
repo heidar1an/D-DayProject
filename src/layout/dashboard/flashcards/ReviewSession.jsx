@@ -13,7 +13,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { fetchReviewQueue, rateCard, setCardBookmarked, setCardSuspended, buryCard, trackEvent } from '../../../services/flashcards/flashcardService';
 import { formatInterval, previewIntervals } from '../../../services/flashcards/spacedRepetition';
-import { Icon, InfoChip, Modal, Skeleton, StateChip, faNum, renderCloze, toFa } from './flashcardShared';
+import { Icon, InfoChip, Modal, Skeleton, StateChip, faNum, parseClozeBlanks, renderCloze, toFa } from './flashcardShared';
 import './flashcards.css';
 
 /*
@@ -408,6 +408,8 @@ export default function ReviewSession({ userData, config, onExit, onEditCard, sh
   }
 
   const { card, state } = current;
+  /* جای خالی‌های کارت کلوز — برای فهرست پاسخ هر جای خالی در بخش پاسخ */
+  const clozeBlanks = card.type === 'cloze' ? parseClozeBlanks(card.front) : [];
 
   return (
     <div className="fc-review-root -mx-2 min-h-[78vh] md:-mx-4">
@@ -488,9 +490,27 @@ export default function ReviewSession({ userData, config, onExit, onEditCard, sh
 
           {revealed && card.type !== 'mcq' && (
             <div className="fc-card-face mt-6 border-t border-white/8 pt-5">
-              <p className="text-base leading-8 text-[var(--white)] md:text-lg md:leading-9">
-                {card.type === 'cloze' ? renderCloze(card.front, { revealed: true }) : card.back}
-              </p>
+              {card.type === 'cloze' && clozeBlanks.length > 0 ? (
+                <div className="space-y-3">
+                  <p className="text-xs text-[var(--faint)]">پاسخ جای خالی‌ها</p>
+                  {clozeBlanks.map((blank) => (
+                    <p key={blank.index} className="flex flex-wrap items-center gap-2.5 text-base md:text-lg">
+                      <span className="shrink-0 rounded-lg bg-white/5 px-2.5 py-1 text-[11px] text-[var(--muted)]">
+                        جای خالی {toFa(blank.index)}
+                      </span>
+                      <mark className="fc-cloze fc-cloze--open">{blank.content.trim() || '…'}</mark>
+                    </p>
+                  ))}
+                  {card.back && (
+                    <p className="rounded-2xl bg-white/[0.04] px-4 py-3 text-sm leading-7 text-[var(--muted)]">
+                      <strong className="text-[var(--white)]">توضیح: </strong>
+                      {card.back}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-base leading-8 text-[var(--white)] md:text-lg md:leading-9">{card.back}</p>
+              )}
             </div>
           )}
 

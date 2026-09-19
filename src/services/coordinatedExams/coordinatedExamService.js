@@ -1,105 +1,84 @@
 /*
- * سرویس «آزمون‌های هماهنگ تپش» — قرارداد API به شکل واقعی طراحی شده؛ پیاده‌سازی فعلی
- * Mock است و وضعیت کاربر (ثبت‌نام، Attempt، کارنامه) در localStorage (کلید
- * tapesh:coordinated:v1:<userId>) ذخیره می‌شود. با اتصال Backend فقط بدنهٔ توابع
- * به fetch تبدیل می‌شود؛ امضای خروجی و شکل Entityها عوض نمی‌شود.
+ * سرویس «آزمون‌های هماهنگ تپش» — نسخهٔ Server-Authoritative.
  *
- * قراردادهای آینده (مطابق سند محصول):
- *   GET  /api/exams                            → fetchExams()
- *   GET  /api/exams/:slug                      → fetchExam()
- *   POST /api/exams/:slug/registration         → registerUser()
- *   DELETE /api/exams/:slug/registration       → cancelRegistration()
- *   GET  /api/exams/:slug/questions            → fetchExamQuestions()   (بدون کلید پاسخ)
- *   POST /api/exams/:slug/attempts             → startAttempt()         (زمان پایان از سرور)
- *   PUT  /api/attempts/:id/progress            → saveAttemptProgress()  (autosave)
- *   POST /api/attempts/:id/submit              → submitAttempt()        (تصحیح سمت سرور)
- *   GET  /api/exams/:slug/result               → fetchResult()
- *   GET  /api/exams/:slug/questions/review     → fetchReviewQuestions() (فقط بعد از submit)
- *   GET  /api/exams/:slug/ranking              → fetchRanking()
- *   GET  /api/server-time                      → getServerTime()
+ * نسخهٔ Mock/localStorage حذف شد: حالا هر تابع بدنهٔ خودش یک فراخوانی واقعی به
+ * API سرور است (`database/examApi.js` ← `examStore.js`) و همان قراردادی که از
+ * ابتدا در سربرگ این فایل مستند بود. امضای خروجی توابع عمداً حفظ شده تا UI
+ * (ExamHub/ExamDetail/ExamRoom/ExamResult/ExamReview) بدون تغییر بماند.
  *
- * اصول امنیتی:
- *  - fetchExamQuestions هرگز correctAnswer و explanation را برنمی‌گرداند؛ تصحیح فقط
- *    در submitAttempt انجام می‌شود تا هیچ UIای به دادهٔ ناامن وابسته نشود.
- *  - زمان پایان Attempt (endsAt) از سرویس صادر می‌شود نه از فرانت؛ Timer فقط آن را نمایش می‌دهد.
- *  - توزیع نمرات جامعهٔ آماری Deterministic است (seeded by examId) تا رتبه بین رفرش‌ها ثابت بماند.
+ * اصول امنیتی که این سرویس به آن‌ها پایبند است (سند امنیتی تپش):
+ *  - هیچ State امنیتی در localStorage نیست؛ هویت از سشن کوکی HttpOnly سرور
+ *    می‌آید و سرور مستقلاً مالکیت هر Attempt را چک می‌کند.
+ *  - `endsAt` و وضعیت‌ها همگی از سرور می‌آیند؛ `getServerTime` فقط اختلاف ساعت
+ *    سرور را (از `/api/exams/server-time`) روی ساعت محلی اعمال می‌کند.
+ *  - کلید پاسخ هرگز از سرور به این لایه نمی‌رسد؛ تصحیح فقط با submit سمت سرور.
+ *  - saveAttemptProgress فقط delta پاسخ‌ها را می‌فرستد و در قطعی شبکه در صف
+ *    درون‌حافظه‌ای می‌ماند تا بعد از اتصال دوباره بفرستد (idempotency سمت سرور
+ *    باعث می‌شود ارسال تکراری بی‌ضرر باشد). این صف «حقیقت» نیست؛ فقط بافر ارسال
+ *    است — تا لحظهٔ تأیید سرور هیچ پاسخی ثبت‌شده محسوب نمی‌شود.
  */
 
-import { COMMUNITY_META, EXAMS, QUESTIONS } from './mockData';
-
-const STATE_KEY_PREFIX = 'tapesh:coordinated:v1:';
-const LATENCY_MS = 320;
-
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-const respond = async (build) => {
-  await delay(LATENCY_MS + Math.random() * 180);
-  return build();
-};
+const API_BASE = '/api/exams';
+const SECURITY_HEADERS = { 'x-tapesh-exam': '1' };
 
 /* ────────────────────────── زمان سرور ────────────────────────── */
 
 /*
- * منبع واحد زمان برای Countdown و Timer. در نسخهٔ سرور، اینجا اختلاف ساعت
- * با Response سرور (serverTimeOffset) محاسبه می‌شود و کل UI از همین تابع تغذیه می‌کند.
+ * منبع واحد زمان برای Countdown و Timer. اختلاف ساعت با سرور (با جبران نصف RTT)
+ * محاسبه و کش می‌شود؛ پیش از اولین sync صفر است و تایمر روی ساعت محلی می‌افتد —
+ * فقط نمایش است؛ اعتبار زمانی همیشه در سرور بررسی می‌شود.
  */
+let timeOffsetMs = 0;
+
+export async function syncServerTime() {
+  try {
+    const startedAt = Date.now();
+    const data = await examApi('/server-time');
+    const rtt = Date.now() - startedAt;
+    timeOffsetMs = data.serverTime - (startedAt + Math.min(rtt / 2, 5000));
+  } catch {
+    /* سرور در دسترس نیست — offset قبلی می‌ماند؛ اعتبار نهایی با سرور است */
+  }
+}
+
 export function getServerTime() {
-  return Date.now();
+  return Date.now() + timeOffsetMs;
 }
 
-/* ────────────────────────── وضعیت کاربر (USER STATE) ────────────────────────── */
+if (typeof window !== 'undefined') {
+  setTimeout(syncServerTime, 0);
+  setInterval(syncServerTime, 10 * 60 * 1000);
+}
 
-const EMPTY_STATE = {
-  registrations: {}, // examId → timestamp ثبت‌نام
-  attempts: [],
-  seeded: false,
-};
+/* ────────────────────────── Transport ────────────────────────── */
+
+async function examApi(path, { method = 'GET', body } = {}) {
+  const response = await fetch(`${API_BASE}${path}`, {
+    method,
+    headers: {
+      Accept: 'application/json',
+      ...SECURITY_HEADERS,
+      ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
+    },
+    body: body !== undefined ? JSON.stringify(body) : undefined,
+  });
+
+  const payload = await response.json().catch(() => null);
+
+  if (!response.ok || payload?.success !== true) {
+    /* کد بیزینسی (reason) اولویت دارد تا UI مثل قبل روی 'not-registered' و… تصمیم بگیرد */
+    const reason = payload?.error?.reason ?? payload?.error?.code ?? 'request-failed';
+    throw new Error(reason);
+  }
+
+  return payload.data;
+}
+
+/* ────────────────────────── وضعیت آزمون (نمایشی) ────────────────────────── */
 
 /*
- * کلید فضای کاربر: هم رشتهٔ id و هم کل شیء userData پذیرفته می‌شود تا اگر جایی
- * اشیای کامل پاس داده شد، داده‌ها زیر کلید [object Object] نروند. id یا phone
- * پایدارترین شناسهٔ سشن است؛ در نبود هر دو، فضای مهمان.
- */
-function resolveUserKey(userRef) {
-  if (typeof userRef === 'string') return userRef || 'guest';
-  const identity = userRef?.id ?? userRef?.phone;
-  return identity ? String(identity) : 'guest';
-}
-
-function stateKey(userId) {
-  return `${STATE_KEY_PREFIX}${resolveUserKey(userId)}`;
-}
-
-function loadState(userId) {
-  if (typeof window === 'undefined') return { ...EMPTY_STATE };
-  try {
-    const parsed = JSON.parse(window.localStorage.getItem(stateKey(userId)) || 'null');
-    return parsed && typeof parsed === 'object' ? { ...EMPTY_STATE, ...parsed } : { ...EMPTY_STATE };
-  } catch {
-    return { ...EMPTY_STATE };
-  }
-}
-
-function saveState(userId, state) {
-  if (typeof window === 'undefined') return state;
-  try {
-    window.localStorage.setItem(stateKey(userId), JSON.stringify(state));
-  } catch {
-    /* محدودیت فضای localStorage وضعیت آزمون را نمی‌شکند */
-  }
-  return state;
-}
-
-function mutateState(userId, mutator) {
-  const state = loadState(userId);
-  mutator(state);
-  return saveState(userId, state);
-}
-
-/* ────────────────────────── وضعیت آزمون (EXAM STATUS) ────────────────────────── */
-
-/*
- * وضعیت آزمون از زمان‌ها مشتق می‌شود نه از فیلد دستی؛ در Backend همین منطق
- * server-authoritative خواهد بود. ترتیب بررسی مهم است.
+ * برچسب وضعیت برای UI — صرفاً نمایشی و از فیلدهای سروری مشتق می‌شود.
+ * تصمیم امنیتی (چه چیزی مجاز است) همیشه از `userState` سرور می‌آید.
  */
 export function computeExamStatus(exam, now = getServerTime()) {
   if (exam.cancelled) return 'CANCELLED';
@@ -134,548 +113,213 @@ export const TYPE_META = {
   mock: { label: 'آزمایشی', accent: '#b99a86' },
 };
 
-const getExam = (slugOrId) =>
-  EXAMS.find((exam) => exam.slug === slugOrId || exam.id === slugOrId) ?? null;
+/* ────────────────────────── پاداش لیگ (نمایشی) ────────────────────────── */
 
-const examQuestions = (examId) => QUESTIONS.filter((question) => question.examId === examId);
-
-/* سؤالِ «شسته‌شده» — بدون کلید پاسخ و تحلیل (اصل امنیتی سند) */
-const sanitizeQuestion = (question) => ({
-  id: question.id,
-  examId: question.examId,
-  subject: question.subject,
-  topic: question.topic,
-  difficulty: question.difficulty,
-  stem: question.stem,
-  options: question.options,
-});
-
-/* ────────────────────────── Attempt ────────────────────────── */
-
-const attemptForExam = (state, examId) =>
-  state.attempts
-    .filter((attempt) => attempt.examId === examId)
-    .sort((a, b) => b.startedAt - a.startedAt);
-
-function computeUserState(state, exam, now = getServerTime()) {
-  const status = computeExamStatus(exam, now);
-  const attempts = attemptForExam(state, exam.id);
-  const registered = Boolean(state.registrations[exam.id]);
-  const active = attempts.find((attempt) => attempt.status === 'in_progress') ?? null;
-  const completed = attempts.filter((attempt) => attempt.status !== 'in_progress');
-  const lastCompleted = completed[0] ?? null;
-  const resultReady =
-    status === 'RESULTS_AVAILABLE' && Boolean(lastCompleted) &&
-    (!exam.resultReleaseAt || now >= exam.resultReleaseAt);
-
-  return {
-    status,
-    statusMeta: STATUS_META[status],
-    registered,
-    registeredAt: state.registrations[exam.id] ?? null,
-    canRegister:
-      (status === 'REGISTRATION_OPEN' || (status === 'LIVE' && exam.type === 'quiz')) &&
-      !registered,
-    canCancelRegistration: registered && status === 'REGISTRATION_OPEN',
-    attemptsUsed: attempts.length,
-    attemptLimit: exam.rules.attemptLimit,
-    canStart:
-      status === 'AVAILABLE'
-        ? attempts.length < exam.rules.attemptLimit
-        : status === 'LIVE' && (registered || !exam.alwaysAvailable && exam.type === 'quiz') && attempts.length < exam.rules.attemptLimit,
-    activeAttemptId: active?.id ?? null,
-    activeProgress: active
-      ? {
-          answeredCount: Object.keys(active.answers ?? {}).length,
-          totalQuestions: active.questionIds.length,
-        }
-      : null,
-    lastAttemptId: lastCompleted?.id ?? null,
-    resultReady,
-    hasParticipated: attempts.length > 0,
-  };
-}
-
-function buildExamSummary(exam, state, now = getServerTime()) {
-  const bankCount = examQuestions(exam.id).length;
-  return {
-    ...exam,
-    endTime: exam.endTime,
-    status: undefined,
-    ...(() => {
-      const userState = computeUserState(state, exam, now);
-      return { ...userState, id: exam.id, slug: exam.slug };
-    })(),
-    bankCount,
-    // تعداد سؤال واقعی بانک تا UI هرگز عدد خیالی نشان ندهد
-    effectiveQuestionCount: bankCount || exam.questionCount,
-  };
-}
-
-/* ────────────────────────── توزیع جامعهٔ آماری (Deterministic) ────────────────────────── */
-
-function hashSeed(text) {
-  let hash = 2166136261;
-  for (let i = 0; i < text.length; i += 1) {
-    hash ^= text.charCodeAt(i);
-    hash = Math.imul(hash, 16777619);
-  }
-  return hash >>> 0;
-}
-
-function mulberry32(seed) {
-  let a = seed;
-  return function next() {
-    a |= 0;
-    a = (a + 0x6d2b79f5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-/*
- * توزیع نمرات شرکت‌کنندگان — Deterministic با seed ثابت هر آزمون تا رتبه کاربر
- * بین رفرش‌ها عوض نشود. در نسخهٔ Backend این توزیع واقعی از Results می‌آید.
- */
-function communityScores(exam) {
-  const meta = COMMUNITY_META[exam.id] ?? { medianPercent: 45, averagePercent: 47, topPercent: 96 };
-  const rng = mulberry32(hashSeed(exam.id));
-  const count = Math.max(exam.participantsCount ?? 100, 60);
-  const scores = new Array(count);
-  for (let i = 0; i < count; i += 1) {
-    /* تقریب نرمال با Box-Muller: میانگین کمی زیر میانهٔ اعلامی + دم راست برای قوی‌ها */
-    const u1 = Math.max(rng(), 1e-9);
-    const u2 = rng();
-    const normal = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
-    const value = meta.averagePercent + normal * 17;
-    scores[i] = Math.min(Math.max(value, 0), meta.topPercent);
-  }
-  scores.sort((a, b) => b - a);
-  return { scores, meta };
-}
-
-/* ────────────────────────── تصحیح و کارنامه (RESULT) ────────────────────────── */
-
-function gradeAttempt(attempt, exam) {
-  const answeredEntries = Object.entries(attempt.answers ?? {});
-  let correct = 0;
-  let wrong = 0;
-
-  for (const [questionId, answer] of answeredEntries) {
-    const question = QUESTIONS.find((item) => item.id === questionId);
-    if (!question) continue;
-    if (answer.selected === question.correctAnswer) correct += 1;
-    else wrong += 1;
-  }
-
-  const total = attempt.questionIds.length;
-  const unanswered = total - answeredEntries.length;
-  const negative = exam.rules.negativeMarking ?? 0;
-  const score = correct + wrong * negative;
-  const percentage = Math.max(0, Math.min(100, Math.round((score / Math.max(total, 1)) * 1000) / 10));
-
-  const subjectMap = new Map();
-  for (const questionId of attempt.questionIds) {
-    const question = QUESTIONS.find((item) => item.id === questionId);
-    if (!question) continue;
-    const entry = subjectMap.get(question.subject) ?? { subject: question.subject, correct: 0, wrong: 0, unanswered: 0, total: 0 };
-    entry.total += 1;
-    const answer = (attempt.answers ?? {})[questionId];
-    if (!answer) entry.unanswered += 1;
-    else if (answer.selected === question.correctAnswer) entry.correct += 1;
-    else entry.wrong += 1;
-    subjectMap.set(question.subject, entry);
-  }
-  const subjects = [...subjectMap.values()]
-    .map((entry) => ({ ...entry, percent: entry.total ? Math.round((entry.correct / entry.total) * 100) : 0 }))
-    .sort((a, b) => b.percent - a.percent);
-
-  return { correct, wrong, unanswered, total, score, percentage, subjects, negative };
-}
-
-function buildResult(attempt, exam, reason = 'user') {
-  const grade = gradeAttempt(attempt, exam);
-  const { scores, meta } = communityScores(exam);
-  const participants = scores.length;
-
-  /* نمرهٔ کاربر در مقیاس درصد جامعه — همان percentage با اعمال نمرهٔ منفی */
-  const better = scores.filter((value) => value > grade.percentage).length;
-  const rank = better + 1;
-  const percentile = Math.max(0, Math.round(((participants - rank) / participants) * 100));
-  const teraz = Math.round(4200 + grade.percentage * 53); // فرمول دموی تراز — در سرور واقعی محاسبه می‌شود
-
-  const timeSpent = Math.min(
-    Math.round(((attempt.submittedAt ?? getServerTime()) - attempt.startedAt) / 1000),
-    (exam.duration ?? 60) * 60,
-  );
-
-  return {
-    attemptId: attempt.id,
-    examId: exam.id,
-    examSlug: exam.slug,
-    examTitle: exam.title,
-    examType: exam.type,
-    submittedAt: attempt.submittedAt,
-    reason, // user | timeout | auto
-    timeSpent,
-    total: grade.total,
-    answered: grade.total - grade.unanswered,
-    correct: grade.correct,
-    wrong: grade.wrong,
-    unanswered: grade.unanswered,
-    score: Math.round(grade.score * 100) / 100,
-    maxScore: grade.total,
-    negativeMarking: grade.negative,
-    percentage: grade.percentage,
-    rank,
-    participantsCount: participants,
-    percentile,
-    teraz: exam.type === 'national' || exam.type === 'mock' ? teraz : null,
-    community: {
-      averagePercent: meta.averagePercent,
-      medianPercent: meta.medianPercent,
-      topPercent: meta.topPercent,
-    },
-    subjects: grade.subjects,
-  };
-}
-
-/* پاداش لیگ — قلب تپشی؛ منطق کامل اتصال به League بعداً سمت سرور اعمال می‌شود */
+/* همان فرمول سرور؛ سرور در پاسخ submit مقدار رسمی را می‌فرستد — اینجا فقط
+ * برای مسیرهای نمایشی (کارنامهٔ ذخیره‌شده) دوباره محاسبه می‌شود. */
 export function rewardOf(result, exam) {
+  if (!result || !exam) return null;
   const base = exam.type === 'quiz' ? 5 : 10;
   const bonus = Math.round(result.percentage / 10);
   return { hearts: base + bonus, base, bonus };
 }
 
-/* ────────────────────────── دادهٔ نمونه (DEMO SEED) ────────────────────────── */
-
-/*
- * برای اینکه کارنامه/تحلیل/مرور از همان اول قابل تجربه باشد، یک Attempt کامل‌شده
- * برای آزمون «موضوعی بیوشیمی» و ثبت‌نام برای آزمون LIVE در اولین بار seed می‌شود.
- */
-function ensureSeed(userId, state) {
-  if (state.seeded) return state;
-
-  const biochem = getExam('biochem-subject-01');
-  const physio = getExam('physio-heart-live-01');
-
-  if (biochem) {
-    const examQuestionsIds = examQuestions(biochem.id).map((question) => question.id);
-    const demoPicks = {
-      'q-bio-01': 1,
-      'q-bio-02': 1,
-      'q-bio-03': 0, // غلط
-      'q-bio-04': 2,
-      'q-bio-06': 2, // غلط
-    };
-    const answers = {};
-    examQuestionsIds.forEach((questionId, index) => {
-      if (demoPicks[questionId] !== undefined) {
-        answers[questionId] = {
-          selected: demoPicks[questionId],
-          marked: questionId === 'q-bio-05',
-          timeSpent: 90 + index * 55,
-          answeredAt: biochem.startTime + (index + 1) * 210000,
-        };
-      }
-    });
-    const attempt = {
-      id: `att-seed-${hashSeed(String(userId)).toString(36)}`,
-      userId: userId ?? 'guest',
-      examId: biochem.id,
-      startedAt: biochem.startTime,
-      endsAt: biochem.endTime,
-      submittedAt: biochem.endTime - 6 * 60000,
-      status: 'submitted',
-      questionIds: examQuestionsIds,
-      answers,
-      reason: 'user',
-    };
-    attempt.result = buildResult(attempt, biochem, 'user');
-    state.attempts.push(attempt);
-  }
-
-  if (physio) {
-    state.registrations[physio.id] = getServerTime() - DAY_MS;
-  }
-
-  state.seeded = true;
-  return state;
-}
-
-const DAY_MS = 86400000;
-
 /* ────────────────────────── API: محتوا ────────────────────────── */
 
-/* GET /api/exams — خلاصهٔ همهٔ آزمون‌ها + وضعیت کاربر برای هرکدام */
-export function fetchExams(userId) {
-  return respond(() => {
-    const state = ensureSeed(userId, loadState(userId));
-    saveState(userId, state);
-    const now = getServerTime();
-    return EXAMS.map((exam) => buildExamSummary(exam, state, now));
-  });
+/* GET /api/exams — خلاصهٔ همهٔ آزمون‌ها + وضعیت کاربر برای هرکدام (از سرور) */
+export async function fetchExams(_userId) {
+  const data = await examApi('');
+  return data.exams ?? [];
 }
 
 /* GET /api/exams/:slug */
-export function fetchExam(slug, userId) {
-  return respond(() => {
-    const exam = getExam(slug);
-    if (!exam) throw new Error('exam-not-found');
-    const state = ensureSeed(userId, loadState(userId));
-    const now = getServerTime();
-    const bank = examQuestions(exam.id);
-    return {
-      ...exam,
-      bankCount: bank.length,
-      effectiveQuestionCount: bank.length || exam.questionCount,
-      userState: computeUserState(state, exam, now),
-    };
-  });
-}
-
-/* GET /api/exams/:slug/questions — بدون کلید پاسخ (امن) */
-export function fetchExamQuestions(slug) {
-  return respond(() => {
-    const exam = getExam(slug);
-    if (!exam) throw new Error('exam-not-found');
-    return examQuestions(exam.id).map(sanitizeQuestion);
-  });
+export async function fetchExam(slug, _userId) {
+  return examApi(`/${encodeURIComponent(slug)}`);
 }
 
 /* ────────────────────────── API: ثبت‌نام ────────────────────────── */
 
 /* POST /api/exams/:slug/registration */
-export function registerUser(userId, slug) {
-  return respond(() => {
-    const exam = getExam(slug);
-    if (!exam) throw new Error('exam-not-found');
-    const status = computeExamStatus(exam);
-    if (status !== 'REGISTRATION_OPEN' && !(status === 'AVAILABLE')) {
-      throw new Error('registration-closed');
-    }
-    mutateState(userId, (state) => {
-      state.registrations[exam.id] = getServerTime();
-    });
-    trackEvent('exam_registered', { examId: exam.id });
-    return { ok: true, registeredAt: stateOf(userId).registrations[exam.id] };
-  });
+export function registerUser(_userId, slug) {
+  return examApi(`/${encodeURIComponent(slug)}/registration`, { method: 'POST' });
 }
 
 /* DELETE /api/exams/:slug/registration */
-export function cancelRegistration(userId, slug) {
-  return respond(() => {
-    const exam = getExam(slug);
-    if (!exam) throw new Error('exam-not-found');
-    mutateState(userId, (state) => {
-      delete state.registrations[exam.id];
-    });
-    trackEvent('exam_registration_cancelled', { examId: exam.id });
-    return { ok: true };
-  });
-}
-
-function stateOf(userId) {
-  return loadState(userId);
+export function cancelRegistration(_userId, slug) {
+  return examApi(`/${encodeURIComponent(slug)}/registration`, { method: 'DELETE' });
 }
 
 /* ────────────────────────── API: Attempt ────────────────────────── */
 
 /*
- * POST /api/exams/:slug/attempts — زمان پایان از «سرور» صادر می‌شود:
- *   deadlineMode exam_end → پایان هماهنگ برای همه
- *   deadlineMode per_attempt → startedAt + duration
+ * POST /api/exams/:slug/attempts — زمان پایان (endsAt) صریحاً از سرور می‌آید.
+ * دو بارکلیک/دو درخواست همزمان بی‌ضرر است: سرور همان Attempt باز قبلی را برمی‌گرداند.
  */
-export function startAttempt(userId, slug) {
-  return respond(() => {
-    const exam = getExam(slug);
-    if (!exam) throw new Error('exam-not-found');
-    const state = ensureSeed(userId, loadState(userId));
-    const status = computeExamStatus(exam);
-    const userState = computeUserState(state, exam);
-
-    if (!userState.canStart) throw new Error(status === 'LIVE' ? 'not-registered' : 'exam-not-open');
-    if (userState.attemptsUsed >= exam.rules.attemptLimit) throw new Error('attempt-limit-reached');
-
-    const bank = examQuestions(exam.id);
-    if (!bank.length) throw new Error('questions-not-published');
-
-    const now = getServerTime();
-    const attempt = {
-      id: `att-${now.toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
-      userId: userId ?? 'guest',
-      examId: exam.id,
-      examSlug: exam.slug,
-      startedAt: now,
-      endsAt: exam.rules.deadlineMode === 'exam_end' ? exam.endTime : now + exam.duration * 60000,
-      submittedAt: null,
-      status: 'in_progress',
-      questionIds: bank.map((question) => question.id),
-      answers: {}, // qid → { selected, timeSpent, answeredAt }
-      marked: [], // qid → علامت برای مرور
-    };
-
-    mutateState(userId, (draft) => {
-      draft.attempts.push(attempt);
-    });
-    trackEvent('coordinated_attempt_started', { examId: exam.id, attemptId: attempt.id });
-    return attempt;
-  });
+export function startAttempt(_userId, slug) {
+  return examApi(`/${encodeURIComponent(slug)}/attempts`, { method: 'POST' });
 }
 
-/* GET /api/attempts/:id — برای Resume بعد از Refresh */
-export function fetchAttempt(userId, attemptId) {
-  return respond(() => {
-    const state = loadState(userId);
-    const attempt = state.attempts.find((item) => item.id === attemptId);
-    if (!attempt) throw new Error('attempt-not-found');
-    return attempt;
-  });
+/* GET /api/attempts/:id — برای Resume بعد از Refresh (مالکیت سرور چک می‌شود) */
+export async function fetchAttempt(_userId, attemptId) {
+  const data = await examApi(`/attempts/${encodeURIComponent(attemptId)}`);
+  return data.attempt;
 }
 
-/* PUT /api/attempts/:id/progress — autosave هر تغییر پاسخ/علامت.
- * ادغام به‌جای جایگزینی: دو عمل پشت‌سرهم با closureهای نزدیک به‌هم نریزند. */
-export function saveAttemptProgress(userId, attempt) {
-  const state = mutateState(userId, (draft) => {
-    const index = draft.attempts.findIndex((item) => item.id === attempt.id);
-    if (index === -1) return;
-    const stored = draft.attempts[index];
-    draft.attempts[index] = {
-      ...stored,
-      ...attempt,
-      answers: { ...(stored.answers ?? {}), ...(attempt.answers ?? {}) },
-      marked: Array.isArray(attempt.marked) ? attempt.marked : (stored.marked ?? []),
-    };
-  });
-  const stored = state.attempts.find((item) => item.id === attempt.id);
-  return stored ?? attempt;
+/* GET /api/attempts/active — آخرین Attempt در جریان؛ بازگشت خودکار بعد از Refresh */
+export async function fetchActiveAttempt(_userId) {
+  const data = await examApi('/attempts/active');
+  return data.attempt;
 }
 
 /*
- * POST /api/attempts/:id/submit — تصحیح و صدور کارنامه.
- * فقط سمت این تابع کلید پاسخ خوانده می‌شود (در نسخهٔ سرور: کاملاً Backend).
+ * GET /api/attempts/:id/questions — تنها مسیر دریافت سؤال؛ سؤالِ بدون Attemptِ
+ * فعال اصلاً از سرور بیرون نمی‌رود (ضد Enumeration و ضد لو رفتن قبل از شروع).
  */
-export function submitAttempt(userId, attemptId, { reason = 'user' } = {}) {
-  return respond(() => {
-    const state = ensureSeed(userId, loadState(userId));
-    const attempt = state.attempts.find((item) => item.id === attemptId);
-    if (!attempt) throw new Error('attempt-not-found');
-    if (attempt.status !== 'in_progress') return attempt;
+export async function fetchAttemptQuestions(attemptId) {
+  return examApi(`/attempts/${encodeURIComponent(attemptId)}/questions`);
+}
 
-    const exam = getExam(attempt.examId);
-    const now = getServerTime();
-    const timedOut = reason === 'timeout' || now > attempt.endsAt;
+/* ────────────────────────── ذخیرهٔ خودکار (autosave) ────────────────────────── */
 
-    const submitted = {
-      ...attempt,
-      status: 'submitted',
-      submittedAt: Math.min(now, attempt.endsAt),
-      reason: timedOut ? 'timeout' : reason,
-    };
-    submitted.result = buildResult(submitted, exam, timedOut ? 'timeout' : reason);
+/*
+ * ادغام به‌جای جایگزینی — فقط delta پاسخ‌ها به سرور می‌رود (PUT /answers) و
+ * وضعیت نمایشی (marked/currentIndex/subjectTab/exitedAt) جداگانه (PUT /progress).
+ * در قطعی شبکه، deltaها در صف درون‌حافظه می‌مانند و در اولین فرصت دوباره
+ * ارسال می‌شوند؛ ارسال تکراری سمت سرور idempotent است.
+ */
+const lastSynced = new Map(); // attemptId → { answers: {qid: selected}, marked: [], exitedAt }
+let pendingOps = []; // [{ attemptId, delta, progress }]
+let flushing = null;
 
-    mutateState(userId, (draft) => {
-      const index = draft.attempts.findIndex((item) => item.id === attemptId);
-      if (index !== -1) draft.attempts[index] = submitted;
-    });
+function queueOp(op) {
+  pendingOps.push(op);
+}
 
-    trackEvent('coordinated_attempt_submitted', {
-      examId: exam.id,
-      attemptId,
-      percentage: submitted.result.percentage,
-      reason: submitted.reason,
-    });
-    return { attempt: submitted, result: submitted.result, reward: rewardOf(submitted.result, exam) };
-  });
+async function flushQueue() {
+  if (flushing) return flushing;
+  flushing = (async () => {
+    while (pendingOps.length) {
+      const op = pendingOps[0];
+      try {
+        await sendOp(op);
+        pendingOps.shift();
+      } catch {
+        break; /* هنوز آفلاینیم — برای دفعهٔ بعد می‌ماند */
+      }
+    }
+  })();
+  try {
+    await flushing;
+  } finally {
+    flushing = null;
+  }
+}
+
+function sendOp({ attemptId, delta, progress }) {
+  if (delta && Object.keys(delta).length) {
+    return examApi(`/attempts/${encodeURIComponent(attemptId)}/answers`, { method: 'PUT', body: { answers: delta } });
+  }
+  if (progress) {
+    return examApi(`/attempts/${encodeURIComponent(attemptId)}/progress`, { method: 'PUT', body: progress });
+  }
+  return Promise.resolve();
+}
+
+/* snapshot انتخاب‌های سالم (nullها ذخیره نمی‌شوند تا دوباره ارسال نشوند) */
+function snapshotOf(attempt) {
+  const answers = {};
+  for (const [questionId, value] of Object.entries(attempt.answers ?? {})) {
+    const selected = value?.selected ?? null;
+    if (selected !== null) answers[questionId] = selected;
+  }
+  return { answers, marked: [...(attempt.marked ?? [])], exitedAt: attempt.exitedAt ?? null };
+}
+
+export async function saveAttemptProgress(_userId, attempt) {
+  const attemptId = attempt?.id;
+  if (!attemptId) return attempt;
+
+  await flushQueue();
+
+  /* اولین sync برای هر Attempt از وضعیت خودِ سرور مقداردهی می‌شود تا resume
+     باعث ارسال مجدد همهٔ پاسخ‌های قبلی نشود */
+  const previous = lastSynced.get(attemptId) ?? snapshotOf(attempt);
+  const current = attempt.answers ?? {};
+
+  /* delta پاسخ‌ها — اضافه/تغییر/لغو (null) نسبت به آخرین sync موفق */
+  const delta = {};
+  for (const [questionId, value] of Object.entries(current)) {
+    const selected = value?.selected ?? null;
+    if (selected === null) {
+      if (previous.answers[questionId] !== undefined) delta[questionId] = null;
+      continue;
+    }
+    if (previous.answers[questionId] !== selected) delta[questionId] = { selected };
+  }
+  for (const [questionId, prevSelected] of Object.entries(previous.answers)) {
+    if (!(questionId in current) && prevSelected !== undefined) delta[questionId] = null;
+  }
+
+  const markedChanged = JSON.stringify(previous.marked) !== JSON.stringify(attempt.marked ?? []);
+  const exitedChanged = (attempt.exitedAt ?? null) !== previous.exitedAt;
+  const progress = markedChanged || exitedChanged
+    ? {
+        marked: attempt.marked ?? [],
+        ...(Number.isInteger(attempt.currentIndex) ? { currentIndex: attempt.currentIndex } : {}),
+        ...(attempt.subjectTab != null ? { subjectTab: attempt.subjectTab } : {}),
+        exitedAt: attempt.exitedAt ?? null,
+      }
+    : null;
+
+  if ((delta && Object.keys(delta).length) || progress) {
+    const op = { attemptId, delta, progress };
+    try {
+      await sendOp(op);
+      lastSynced.set(attemptId, snapshotOf(attempt));
+    } catch {
+      /* آفلاین/خطا — در صف می‌ماند؛ هیچ State محلی «حقیقت» نمی‌شود */
+      queueOp(op);
+    }
+  }
+
+  return attempt;
+}
+
+/*
+ * POST /api/attempts/:id/submit — تصحیح و صدور کارنامه کاملاً سمت سرور.
+ * قبل از submit صف autosave تخلیه می‌شود تا آخرین پاسخ‌ها رسیده باشند.
+ */
+export async function submitAttempt(_userId, attemptId, { reason = 'user' } = {}) {
+  await flushQueue();
+  return examApi(`/attempts/${encodeURIComponent(attemptId)}/submit`, { method: 'POST', body: { reason } });
 }
 
 /* ────────────────────────── API: کارنامه و مرور ────────────────────────── */
 
 /*
  * GET /api/exams/:slug/result — ماشین وضعیت صفحهٔ کارنامه:
- *   ready | processing (نتایج هنوز اعلام نشده) | not_participated | exam_not_finished
+ *   ready | processing | not_participated  (تصمیم با سرور)
  */
-export function fetchResult(userId, slug) {
-  return respond(() => {
-    const exam = getExam(slug);
-    if (!exam) throw new Error('exam-not-found');
-    const state = ensureSeed(userId, loadState(userId));
-    const now = getServerTime();
-    const status = computeExamStatus(exam, now);
-    const completed = attemptForExam(state, exam.id).filter((attempt) => attempt.status !== 'in_progress');
+export function fetchResult(_userId, slug) {
+  return examApi(`/${encodeURIComponent(slug)}/result`);
+}
 
-    if (!completed.length) {
-      if (status === 'LIVE' || status === 'AVAILABLE' || status === 'REGISTRATION_OPEN' || status === 'UPCOMING' || status === 'REGISTRATION_CLOSED') {
-        return { state: 'not_participated', exam };
-      }
-      return { state: 'not_participated', exam };
-    }
+/* GET /api/exams/:slug/questions/review — کلید پاسخ فقط اینجا و فقط سرور تصمیم می‌گیرد */
+export function fetchReviewQuestions(_userId, slug) {
+  return examApi(`/${encodeURIComponent(slug)}/questions/review`);
+}
 
-    const last = completed[0];
-    if (exam.resultReleaseAt && now < exam.resultReleaseAt && status !== 'AVAILABLE') {
-      return { state: 'processing', exam, releaseAt: exam.resultReleaseAt };
-    }
-    if (!last.result) {
-      /* Attempt قدیمی بدون نتیجهٔ محاسبه‌شده (مثلاً بعد از تغییر mock) — همین‌جا تصحیح می‌شود */
-      const result = buildResult(last, exam, last.reason ?? 'user');
-      mutateState(userId, (draft) => {
-        const index = draft.attempts.findIndex((item) => item.id === last.id);
-        if (index !== -1) draft.attempts[index] = { ...last, result };
-      });
-      return { state: 'ready', exam, result, attempt: last };
-    }
-    return { state: 'ready', exam, result: last.result, attempt: last };
+/* POST /api/questions/:id/report — گزارش ایراد سؤال (Append-Only سمت سرور) */
+export function reportQuestion(_userId, questionId, { reason, note = '', examId = null, attemptId = null } = {}) {
+  return examApi(`/questions/${encodeURIComponent(questionId)}/report`, {
+    method: 'POST',
+    body: { reason, note, examId, attemptId },
   });
 }
 
-/* GET /api/exams/:slug/questions/review — کلید پاسخ فقط بعد از submit */
-export function fetchReviewQuestions(userId, slug) {
-  return respond(() => {
-    const exam = getExam(slug);
-    if (!exam) throw new Error('exam-not-found');
-    const state = loadState(userId);
-    const completed = attemptForExam(state, exam.id).filter((attempt) => attempt.status !== 'in_progress');
-    if (!completed.length) throw new Error('review-not-allowed');
-
-    const attempt = completed[0];
-    const full = examQuestions(exam.id).map((question) => ({
-      ...question,
-      userAnswer: attempt.answers?.[question.id] ?? null,
-    }));
-    return { exam, attempt, questions: full };
-  });
-}
-
-/* GET /api/exams/:slug/ranking — مقایسهٔ جامعه‌محور (نه Leaderboard کامل) */
-export function fetchRanking(userId, slug) {
-  return respond(() => {
-    const exam = getExam(slug);
-    if (!exam) throw new Error('exam-not-found');
-    const state = ensureSeed(userId, loadState(userId));
-    const completed = attemptForExam(state, exam.id).find((attempt) => attempt.status !== 'in_progress');
-    const { scores, meta } = communityScores(exam);
-
-    const mine = completed?.result?.percentage ?? null;
-    const rank = mine === null ? null : scores.filter((value) => value > mine).length + 1;
-    const median = scores[Math.floor(scores.length / 2)];
-    const average = Math.round((scores.reduce((sum, value) => sum + value, 0) / scores.length) * 10) / 10;
-
-    return {
-      participantsCount: scores.length,
-      topPercent: Math.round(scores[0]),
-      medianPercent: Math.round(median),
-      averagePercent: average,
-      me: mine === null
-        ? null
-        : {
-            percentage: mine,
-            rank,
-            percentile: Math.max(0, Math.round(((scores.length - rank) / scores.length) * 100)),
-            teraz: exam.type === 'national' || exam.type === 'mock' ? Math.round(4200 + mine * 53) : null,
-          },
-    };
-  });
+/* GET /api/exams/:slug/ranking — مقایسهٔ جامعه‌محور (فقط دادهٔ تجمیعی) */
+export function fetchRanking(_userId, slug) {
+  return examApi(`/${encodeURIComponent(slug)}/ranking`);
 }
 
 /* ────────────────────────── Analytics stub ────────────────────────── */

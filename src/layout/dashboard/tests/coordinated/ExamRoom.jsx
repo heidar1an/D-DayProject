@@ -17,6 +17,7 @@ import {
   submitAttempt,
 } from '../../../../services/coordinatedExams/coordinatedExamService';
 import { Icon, faNum, formatElapsed, toFa } from './coordinatedShared';
+import useOverflowFlag from '../useOverflowFlag';
 
 const OPTION_LABELS = ['۱', '۲', '۳', '۴'];
 const WARN_THRESHOLDS = [
@@ -37,9 +38,10 @@ export default function ExamRoom({ userData, exam, attempt, questions, onFinishe
   const [answers, setAnswers] = useState(() => ({ ...(attempt.answers ?? {}) }));
   const [marked, setMarked] = useState(() => [...(attempt.marked ?? [])]);
   const [currentIndex, setCurrentIndex] = useState(() => {
-    /* resume: اولین سؤال بی‌پاسخ بعد از آخرین پاسخ داده‌شده */
+    /* resume: اول همان سؤالی که کاربر در آن بوده؛ نبودِ ذخیره = اولین سؤال بی‌پاسخ */
     const answeredCount = Object.keys(attempt.answers ?? {}).length;
-    return Math.min(answeredCount, attempt.questionIds.length - 1);
+    const saved = Number.isInteger(attempt.currentIndex) ? attempt.currentIndex : answeredCount;
+    return Math.max(0, Math.min(saved, attempt.questionIds.length - 1));
   });
   const [remaining, setRemaining] = useState(() => Math.max(0, Math.floor((attempt.endsAt - getServerTime()) / 1000)));
   const [warned, setWarned] = useState(() => new Set());
@@ -47,6 +49,7 @@ export default function ExamRoom({ userData, exam, attempt, questions, onFinishe
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
   const [showNavigator, setShowNavigator] = useState(false);
+  const [showFullMap, setShowFullMap] = useState(false); // پاپ‌آپ لیست کامل سؤال‌ها در دسکتاپ
   const [submitting, setSubmitting] = useState(false);
   const [isOnline, setIsOnline] = useState(() => typeof navigator === 'undefined' || navigator.onLine);
   const autoSubmittedRef = useRef(false);
@@ -99,19 +102,6 @@ export default function ExamRoom({ userData, exam, attempt, questions, onFinishe
     }
   }, [remaining, finishSubmit]);
 
-  /* ── ذخیرهٔ خودکار وضعیت ── */
-  const persist = useCallback(
-    (nextAnswers, nextMarked, nextIndex) => {
-      saveAttemptProgress(userId, {
-        ...attempt,
-        answers: nextAnswers,
-        marked: nextMarked,
-        currentIndex: nextIndex,
-      });
-    },
-    [attempt, userId],
-  );
-
   /* ── وضعیت آنلاین (Connection Lost UI) ── */
   useEffect(() => {
     const goOnline = () => setIsOnline(true);
@@ -126,15 +116,20 @@ export default function ExamRoom({ userData, exam, attempt, questions, onFinishe
 
   const selectAnswer = (optionIndex) => {
     if (!currentQuestion) return;
-    const nextAnswers = {
-      ...answers,
-      [currentQuestion.id]: {
+    const nextAnswers = { ...answers };
+    /* کلیک دوباره روی همان گزینه = لغو پاسخ؛ سؤال به حالت بی‌پاسخ برمی‌گردد */
+    const isDeselect = nextAnswers[currentQuestion.id]?.selected === optionIndex;
+    if (isDeselect) {
+      delete nextAnswers[currentQuestion.id];
+    } else {
+      nextAnswers[currentQuestion.id] = {
         selected: optionIndex,
         answeredAt: getServerTime(),
-      },
-    };
+      };
+    }
     setAnswers(nextAnswers);
-    persist(nextAnswers, marked, currentIndex);
+    /* برای لغو، مقدار null فرستاده می‌شود تا ادغام سمت سرویس هم کلید قبلی را حذف کند */
+    persist(isDeselect ? { ...nextAnswers, [currentQuestion.id]: null } : nextAnswers, marked, currentIndex);
   };
 
   const toggleMark = () => {
@@ -150,6 +145,7 @@ export default function ExamRoom({ userData, exam, attempt, questions, onFinishe
     const clamped = Math.max(0, Math.min(total - 1, index));
     setCurrentIndex(clamped);
     setShowNavigator(false);
+    setShowFullMap(false);
     persist(answers, marked, clamped);
   };
 
@@ -157,13 +153,18 @@ export default function ExamRoom({ userData, exam, attempt, questions, onFinishe
   useEffect(() => {
     const handleKey = (event) => {
       if (showSubmitModal || showExitModal) return;
+      if (event.key === 'Escape' && showFullMap) {
+        setShowFullMap(false);
+        return;
+      }
+      if (showFullMap) return;
       if (event.key === 'ArrowLeft') go(currentIndex + 1);
       if (event.key === 'ArrowRight') go(currentIndex - 1);
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentIndex, showSubmitModal, showExitModal, total]);
+  }, [currentIndex, showSubmitModal, showExitModal, showFullMap, total]);
 
   const stats = useMemo(() => {
     const answered = Object.keys(answers).length;
@@ -183,7 +184,24 @@ export default function ExamRoom({ userData, exam, attempt, questions, onFinishe
     [questions],
   );
   const multiSubject = subjects.length > 1;
-  const [subjectTab, setSubjectTab] = useState('all'); // 'all' = کل آزمون هماهنگ
+  /* ناوبری درس‌ها فقط بین خود درس‌هاست؛ پیش‌فرض اولین درس (یا درس ذخیره‌شده بعد از Refresh) */
+  const [subjectTab, setSubjectTab] = useState(() =>
+    subjects.includes(attempt.subjectTab) ? attempt.subjectTab : (subjects[0] ?? 'all'),
+  );
+
+  /* ── ذخیرهٔ خودکار وضعیت ── */
+  const persist = useCallback(
+    (nextAnswers, nextMarked, nextIndex) => {
+      saveAttemptProgress(userId, {
+        ...attempt,
+        answers: nextAnswers,
+        marked: nextMarked,
+        currentIndex: nextIndex,
+        subjectTab, /* برای بازگشت به همان درس بعد از Refresh */
+      });
+    },
+    [attempt, subjectTab, userId],
+  );
 
   const selectSubject = (subject) => {
     setSubjectTab(subject);
@@ -195,9 +213,6 @@ export default function ExamRoom({ userData, exam, attempt, questions, onFinishe
 
   const subjectTabs = multiSubject && (
     <div className="exm-navtabs" role="tablist" aria-label="بخش درس‌ها">
-      <button type="button" aria-pressed={subjectTab === 'all'} onClick={() => selectSubject('all')}>
-        کل آزمون
-      </button>
       {subjects.map((subject) => {
         const count = questions.filter((question) => question.subject === subject).length;
         return (
@@ -208,6 +223,51 @@ export default function ExamRoom({ userData, exam, attempt, questions, onFinishe
         );
       })}
     </div>
+  );
+
+  /* پیشرفت هر درس — مبنای دکمهٔ «رفتن به درس بعدی» وقتی سؤال‌های یک درس تمام شود */
+  const subjectStats = useMemo(
+    () =>
+      subjects.map((subject) => {
+        const ids = attempt.questionIds.filter((id) => subjectOf(id) === subject);
+        const answered = ids.filter((id) => answers[id] !== undefined).length;
+        return { subject, total: ids.length, answered, complete: ids.length > 0 && answered === ids.length };
+      }),
+    [subjects, attempt.questionIds, answers, subjectOf],
+  );
+
+  /* درس بعدی (با چرخش به ابتدای فهرست) — دکمهٔ پرش همواره زیر سؤال‌ها نمایش داده می‌شود */
+  const nextSubject = useMemo(() => {
+    if (!multiSubject) return null;
+    const currentIndex = subjects.indexOf(subjectTab);
+    return subjects[(currentIndex + 1) % subjects.length] ?? null;
+  }, [multiSubject, subjects, subjectTab]);
+
+  const currentSubjectComplete = subjectTab !== 'all' && (subjectStats.find((entry) => entry.subject === subjectTab)?.complete ?? false);
+
+  const visibleCount = useMemo(
+    () => attempt.questionIds.filter((questionId) => subjectTab === 'all' || subjectOf(questionId) === subjectTab).length,
+    [attempt.questionIds, subjectTab, subjectOf],
+  );
+  /* تشخیص سرریز نقشهٔ سؤال‌ها — با هر تغییر تعداد سؤال‌های نمایش‌داده‌شده دوباره اندازه می‌گیرد */
+  const [navScrollRef, navOverflowing] = useOverflowFlag(visibleCount);
+
+  /* راهنمای رنگ‌ها — مشترک بین سایدبار دسکتاپ و پاپ‌آپ لیست کامل */
+  const legendList = (
+    <ul className="mt-4 space-y-2 border-t border-white/[0.07] pt-3 text-[10.5px] text-[var(--faint)]">
+      <li className="flex items-center gap-2">
+        <span className="h-3 w-3 rounded bg-[#61D192]/50" aria-hidden="true" />
+        پاسخ داده‌شده ({faNum(stats.answered)})
+      </li>
+      <li className="flex items-center gap-2">
+        <span className="h-3 w-3 rounded border border-white/20 bg-white/5" aria-hidden="true" />
+        بی‌پاسخ ({faNum(stats.unanswered)})
+      </li>
+      <li className="flex items-center gap-2">
+        <span className="h-3 w-3 rounded bg-[#e0b45c]/60" aria-hidden="true" />
+        علامت‌گذاری‌شده ({faNum(stats.marked)})
+      </li>
+    </ul>
   );
 
   const level = timerLevel(remaining);
@@ -254,7 +314,7 @@ export default function ExamRoom({ userData, exam, attempt, questions, onFinishe
         {/* ── هدر آزمون — بدون پس‌زمینه ── */}
         <header className="sticky top-0 z-20 -mx-1 mb-6 flex flex-wrap items-center gap-3 px-1 py-3">
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-bold text-white [font-family:'Doran','Vazir',Tahoma,sans-serif]">{exam.title}</p>
+            <p className="truncate text-base font-bold text-white [font-family:'Doran','Vazir',Tahoma,sans-serif] md:text-lg">{exam.title}</p>
             <p className="mt-0.5 text-[11px] text-[var(--faint)]">
               سؤال {toFa(currentIndex + 1)} از {toFa(total)} • {faNum(stats.answered)} پاسخ داده‌شده
             </p>
@@ -362,6 +422,21 @@ export default function ExamRoom({ userData, exam, attempt, questions, onFinishe
                 پایان و ثبت آزمون
               </button>
             </div>
+
+            {/* دکمهٔ پرش به درس بعدی — همواره زیر سؤال‌ها در آزمون‌های چند‌درسی */}
+            {multiSubject && nextSubject && (
+              <div className="mx-auto mt-3 w-full max-w-[46rem]">
+                <button
+                  type="button"
+                  onClick={() => selectSubject(nextSubject)}
+                  className="flex w-full cursor-pointer flex-wrap items-center justify-center gap-2 rounded-xl border border-[#61D192]/30 bg-[#61D192]/[0.08] px-4 py-3 text-xs font-bold text-[var(--green-ink)] transition-colors hover:bg-[#61D192]/[0.16]"
+                >
+                  {currentSubjectComplete && <span>همهٔ سؤال‌های «{subjectTab}» پاسخ داده شد</span>}
+                  <Icon name="back" className="h-4 w-4 rotate-180" />
+                  <span>رفتن به درس «{nextSubject}»</span>
+                </button>
+              </div>
+            )}
           </div>
 
           {/* ── Navigator دسکتاپ: نقشهٔ سؤال‌ها + کادر حرکت بین درس‌ها (آزمون جامع) ── */}
@@ -371,21 +446,18 @@ export default function ExamRoom({ userData, exam, attempt, questions, onFinishe
                 <Icon name="grid" className="h-4 w-4 text-[var(--purple-ink)]" />
                 نقشهٔ سؤال‌ها
               </h2>
-              {navigatorGrid}
-              <ul className="mt-4 space-y-2 border-t border-white/[0.07] pt-3 text-[10.5px] text-[var(--faint)]">
-                <li className="flex items-center gap-2">
-                  <span className="h-3 w-3 rounded bg-[#61D192]/50" aria-hidden="true" />
-                  پاسخ داده‌شده ({faNum(stats.answered)})
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="h-3 w-3 rounded border border-white/20 bg-white/5" aria-hidden="true" />
-                  بی‌پاسخ ({faNum(stats.unanswered)})
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="h-3 w-3 rounded bg-[#e0b45c]/60" aria-hidden="true" />
-                  علامت‌گذاری‌شده ({faNum(stats.marked)})
-                </li>
-              </ul>
+              {/* وقتی تعداد سؤال‌ها از ظرفیت کادر بیشتر شود، نقشه داخل همین ظرف اسکرول
+                  می‌شود (به‌جای سرریز از چهارچوب) و دکمهٔ لیست کامل نمایش داده می‌شود */}
+              <div ref={navScrollRef} className="exm-navscroll">
+                {navigatorGrid}
+              </div>
+              {navOverflowing && (
+                <button type="button" onClick={() => setShowFullMap(true)} className="exm-navmore">
+                  <Icon name="grid" className="h-3.5 w-3.5" />
+                  لیست کامل سؤال‌ها ({faNum(visibleCount)})
+                </button>
+              )}
+              {legendList}
             </div>
 
             {multiSubject && (
@@ -468,6 +540,38 @@ export default function ExamRoom({ userData, exam, attempt, questions, onFinishe
             </ul>
           </div>
         </>
+      )}
+
+      {/* ── پاپ‌آپ لیست کامل سؤال‌ها (وقتی نقشهٔ سایدبار سرریز شده) ── */}
+      {showFullMap && (
+        <div
+          className="exm-modal__scrim"
+          role="dialog"
+          aria-modal="true"
+          aria-label="لیست کامل سؤال‌ها"
+          onClick={() => setShowFullMap(false)}
+        >
+          <div className="exm-modal exm-modal--map" onClick={(event) => event.stopPropagation()}>
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="flex items-center gap-2 text-base text-white [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+                <Icon name="grid" className="h-4.5 w-4.5 text-[var(--purple-ink)]" />
+                لیست کامل سؤال‌ها ({faNum(visibleCount)})
+              </h2>
+              <button
+                type="button"
+                onClick={() => setShowFullMap(false)}
+                className="cursor-pointer rounded-lg bg-white/[0.06] px-3 py-1.5 text-xs text-[var(--muted)] transition-colors hover:bg-white/[0.1] hover:text-white"
+              >
+                بستن
+              </button>
+            </div>
+            {multiSubject && subjectTabs}
+            <div className="exm-modal__mapbody">
+              {navigatorGrid}
+            </div>
+            {legendList}
+          </div>
+        </div>
       )}
 
       {/* ── مودال ثبت نهایی ── */}

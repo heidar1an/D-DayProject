@@ -15,7 +15,7 @@
  *
  * UI فقط Repository contract را می‌بیند. Mock و API جایگزین هم‌شکل‌اند.
  */
-import { EXAMS } from '../coordinatedExams/mockData';
+import { EXAMS } from '../coordinatedExams/examCatalog';
 import { loadAttemptHistory } from '../analytics/analyticsService';
 import { buildCurriculumGraph } from './curriculumEngine';
 import { buildResourcesForTopic } from './resourceEngine';

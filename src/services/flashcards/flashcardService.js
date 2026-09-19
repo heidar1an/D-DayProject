@@ -751,10 +751,13 @@ export function createCard(userData, deckId, draft) {
       version: 1,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      /* گزینه‌های کارت چهارگزینه‌ای — بدون این، کارت MCQ تازه‌ساخته در مرور گزینه‌هایش را از دست می‌دهد */
+      ...(Array.isArray(draft.options) && draft.options.length ? { options: draft.options } : {}),
     };
-    /* کارت تصویری می‌تواند بی‌متن باشد (عکس نقش صورت را دارد)؛ بقیه به صورت+پاسخ متنی نیاز دارند */
+    /* کارت تصویری می‌تواند بی‌متن باشد (عکس نقش صورت را دارد)؛ پاسخ کلوز همان جای خالی‌های
+       صورت کارت است و توضیحش اختیاری؛ بقیه به صورت+پاسخ متنی نیاز دارند */
     if (!card.front && !card.media?.frontImageUrl) throw new Error('front-required');
-    if (!card.back && card.type !== 'mcq') throw new Error('back-required');
+    if (!card.back && card.type !== 'mcq' && card.type !== 'cloze') throw new Error('back-required');
     if (card.type === 'image' && !card.media?.frontImageUrl) throw new Error('image-required');
 
     mutateUserSpace(userData, (space) => {

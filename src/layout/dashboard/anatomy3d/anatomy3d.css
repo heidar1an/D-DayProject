@@ -1,0 +1,763 @@
+/*
+ * استایل «آناتومی سه‌بعدی» — هم‌زبان با طراحی تپش (توکن‌های styles.css، فونت‌های Doran/Pinar).
+ * صحنهٔ سه‌بعدی قهرمان صفحه است؛ پنل‌ها مینیمال، شیشه‌ای و کم‌حجم طراحی شده‌اند.
+ */
+
+.anatomy-layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(1200px 700px at 50% 18%, color-mix(in srgb, var(--blue-bright) 7%, transparent), transparent 70%),
+    var(--deep);
+  color: var(--white);
+  z-index: 30;
+  overflow: hidden;
+}
+
+/* ── هدر لایه ─────────────────────────────────────────────────────────────── */
+
+.anatomy-layer__header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 22px;
+  border-bottom: 1px solid rgb(var(--line-rgb) / 0.08);
+  flex-shrink: 0;
+}
+
+.anatomy-layer__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px 9px 16px;
+  border: 1px solid rgb(var(--line-rgb) / 0.12);
+  border-radius: 14px;
+  background: rgb(var(--wash-rgb) / 0.04);
+  color: var(--white);
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border-color 200ms ease, background 200ms ease, transform 160ms ease;
+}
+
+.anatomy-layer__back:hover {
+  border-color: color-mix(in srgb, var(--blue-bright) 55%, transparent);
+  background: color-mix(in srgb, var(--blue-bright) 12%, transparent);
+  transform: translateY(-1px);
+}
+
+.anatomy-layer__title h1 {
+  margin: 0;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: 1.06rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.anatomy-layer__subtitle {
+  display: block;
+  margin-top: 2px;
+  color: var(--faint);
+  font-size: 0.78rem;
+}
+
+.anatomy-layer__source {
+  margin-inline-start: auto;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid rgb(var(--line-rgb) / 0.1);
+  color: var(--faint);
+  font-size: 0.72rem;
+}
+
+.anatomy-layer__stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ── صحنه ─────────────────────────────────────────────────────────────────── */
+
+.anatomy-viewer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.anatomy-viewer__host {
+  position: absolute;
+  inset: 0;
+}
+
+.anatomy-viewer__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none; /* OrbitControls خودش ژست‌ها را مدیریت می‌کند */
+  cursor: grab;
+}
+
+.anatomy-viewer__canvas:active {
+  cursor: grabbing;
+}
+
+/* ── نوار بالا: جست‌وجو + دوربین ──────────────────────────────────────────── */
+
+.anatomy-viewer__topbar {
+  position: absolute;
+  top: 14px;
+  inset-inline: 18px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  z-index: 6;
+  pointer-events: none;
+}
+
+.anatomy-viewer__topbar > * {
+  pointer-events: auto;
+}
+
+/* جست‌وجو */
+
+.anatomy-search {
+  position: relative;
+  flex: 1;
+  max-width: 380px;
+}
+
+.anatomy-search__box {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 14px;
+  border: 1px solid rgb(var(--line-rgb) / 0.14);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: var(--faint);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.16);
+  transition: border-color 180ms ease;
+}
+
+.anatomy-search__box:focus-within {
+  border-color: color-mix(in srgb, var(--blue-bright) 60%, transparent);
+}
+
+.anatomy-search__input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--white);
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
+  font-size: 0.88rem;
+}
+
+.anatomy-search__input::placeholder {
+  color: var(--faint);
+}
+
+.anatomy-search__input::-webkit-search-cancel-button {
+  filter: var(--icon-filter, none);
+}
+
+.anatomy-search__results {
+  position: absolute;
+  top: calc(100% + 8px);
+  inset-inline: 0;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  border: 1px solid rgb(var(--line-rgb) / 0.12);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 16px 40px rgb(0 0 0 / 0.28);
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 8;
+}
+
+.anatomy-search__result {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--white);
+  text-align: start;
+  cursor: pointer;
+  transition: background 140ms ease;
+}
+
+.anatomy-search__result:hover {
+  background: color-mix(in srgb, var(--blue-bright) 14%, transparent);
+}
+
+.anatomy-search__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--cat-color, var(--faint));
+  flex-shrink: 0;
+}
+
+.anatomy-search__fa {
+  font-size: 0.86rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.anatomy-search__en {
+  margin-inline-start: auto;
+  color: var(--faint);
+  font-size: 0.74rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 46%;
+}
+
+/* کنترل دوربین */
+
+.anatomy-cameras {
+  display: flex;
+  gap: 6px;
+  padding: 5px;
+  border: 1px solid rgb(var(--line-rgb) / 0.12);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.16);
+}
+
+.anatomy-cameras__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
+  font-size: 0.76rem;
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease;
+}
+
+.anatomy-cameras__btn:hover {
+  background: color-mix(in srgb, var(--blue-bright) 16%, transparent);
+  color: var(--white);
+}
+
+/* ── پنل لایه‌ها ──────────────────────────────────────────────────────────── */
+
+.anatomy-viewer__side {
+  position: absolute;
+  top: 74px;
+  inset-inline-end: 18px;
+  bottom: 18px;
+  width: 264px;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+}
+
+.anatomy-viewer__panel-toggle {
+  display: none;
+}
+
+.anatomy-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border: 1px solid rgb(var(--line-rgb) / 0.12);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--surface) 66%, transparent);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 14px 38px rgb(0 0 0 / 0.22);
+  pointer-events: auto;
+  overflow: hidden;
+}
+
+.anatomy-panel__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 16px 10px;
+}
+
+.anatomy-panel__title {
+  margin: 0;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.anatomy-panel__count {
+  margin-inline-start: auto;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--blue-bright) 16%, transparent);
+  color: color-mix(in srgb, var(--blue-bright) 70%, var(--white));
+  font-size: 0.72rem;
+}
+
+.anatomy-panel__group {
+  display: flex;
+  gap: 6px;
+  padding: 0 12px 12px;
+  flex-wrap: wrap;
+}
+
+.anatomy-panel__action {
+  padding: 5px 10px;
+  border: 1px solid rgb(var(--line-rgb) / 0.12);
+  border-radius: 9px;
+  background: rgb(var(--wash-rgb) / 0.03);
+  color: var(--muted);
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: border-color 140ms ease, color 140ms ease, background 140ms ease;
+}
+
+.anatomy-panel__action:hover {
+  border-color: color-mix(in srgb, var(--blue-bright) 50%, transparent);
+  color: var(--white);
+  background: color-mix(in srgb, var(--blue-bright) 10%, transparent);
+}
+
+.anatomy-panel__list {
+  margin: 0;
+  padding: 4px 8px 10px;
+  list-style: none;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.anatomy-panel__list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.anatomy-panel__list::-webkit-scrollbar-thumb {
+  background: rgb(var(--line-rgb) / 0.2);
+  border-radius: 99px;
+}
+
+.anatomy-layer-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 11px;
+  background: transparent;
+  color: var(--faint);
+  text-align: start;
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease;
+}
+
+.anatomy-layer-row:hover {
+  background: rgb(var(--wash-rgb) / 0.05);
+}
+
+.anatomy-layer-row.is-on {
+  color: var(--white);
+}
+
+.anatomy-layer-row__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--cat-color, var(--faint));
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--cat-color) 34%, transparent);
+  flex-shrink: 0;
+  transition: opacity 160ms ease, box-shadow 200ms ease;
+}
+
+.anatomy-layer-row.is-on .anatomy-layer-row__dot {
+  box-shadow: 0 0 9px 1px color-mix(in srgb, var(--cat-color) 40%, transparent);
+}
+
+.anatomy-layer-row:not(.is-on) .anatomy-layer-row__dot {
+  opacity: 0.3;
+}
+
+.anatomy-layer-row__name {
+  font-size: 0.84rem;
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
+}
+
+.anatomy-layer-row__en {
+  margin-inline-start: auto;
+  color: var(--faint);
+  font-size: 0.68rem;
+  opacity: 0.85;
+}
+
+.anatomy-layer-row__eye {
+  display: inline-flex;
+  opacity: 0.75;
+  flex-shrink: 0;
+}
+
+/* ── پنل اطلاعات ساختار ───────────────────────────────────────────────────── */
+
+.anatomy-viewer__info {
+  position: absolute;
+  bottom: 18px;
+  inset-inline-start: 18px;
+  width: 280px;
+  z-index: 5;
+}
+
+.anatomy-info {
+  border: 1px solid rgb(var(--line-rgb) / 0.14);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--surface) 78%, transparent);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 14px 38px rgb(0 0 0 / 0.24);
+  padding: 12px 14px;
+  animation: anatomy-info-in 200ms ease-out backwards;
+}
+
+@keyframes anatomy-info-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.anatomy-info__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.anatomy-info__badge {
+  width: 10px;
+  height: 10px;
+  margin-top: 6px;
+  border-radius: 999px;
+  background: var(--cat-color, var(--blue-bright));
+  box-shadow: 0 0 8px 1px color-mix(in srgb, var(--cat-color) 42%, transparent);
+  flex-shrink: 0;
+}
+
+.anatomy-info__titles {
+  min-width: 0;
+}
+
+.anatomy-info__fa {
+  display: block;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.anatomy-info__side {
+  color: var(--faint);
+  font-weight: 400;
+  font-size: 0.8rem;
+}
+
+.anatomy-info__en {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.76rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.anatomy-info__close {
+  margin-inline-start: auto;
+  display: inline-flex;
+  padding: 6px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--faint);
+  cursor: pointer;
+  transition: color 140ms ease, background 140ms ease;
+}
+
+.anatomy-info__close:hover {
+  color: var(--white);
+  background: rgb(var(--wash-rgb) / 0.07);
+}
+
+.anatomy-info__meta {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.anatomy-info__chip {
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--cat-color, var(--blue-bright)) 45%, transparent);
+  background: color-mix(in srgb, var(--cat-color, var(--blue-bright)) 13%, transparent);
+  font-size: 0.72rem;
+}
+
+.anatomy-info__chip--state {
+  border-color: rgb(var(--line-rgb) / 0.14);
+  background: rgb(var(--wash-rgb) / 0.04);
+  color: var(--muted);
+}
+
+/* ── hover و راهنما ───────────────────────────────────────────────────────── */
+
+.anatomy-viewer__hover {
+  position: absolute;
+  bottom: 18px;
+  inset-inline-start: 50%;
+  transform: translateX(50%);
+  padding: 7px 16px;
+  border-radius: 999px;
+  border: 1px solid rgb(var(--line-rgb) / 0.12);
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--white);
+  font-size: 0.82rem;
+  pointer-events: none;
+  z-index: 4;
+  box-shadow: 0 8px 22px rgb(0 0 0 / 0.2);
+}
+
+.anatomy-viewer__hints {
+  position: absolute;
+  bottom: 18px;
+  inset-inline-end: 18px;
+  display: flex;
+  gap: 12px;
+  color: var(--faint);
+  font-size: 0.7rem;
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* ── روکش بارگذاری / خطا ──────────────────────────────────────────────────── */
+
+.anatomy-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--deep) 82%, transparent);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 10;
+  transition: opacity 400ms ease;
+}
+
+.anatomy-viewer.is-ready .anatomy-overlay {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.anatomy-overlay__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 34px 44px;
+  border: 1px solid rgb(var(--line-rgb) / 0.12);
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  box-shadow: 0 24px 70px rgb(0 0 0 / 0.35);
+  text-align: center;
+  max-width: min(86vw, 380px);
+}
+
+.anatomy-overlay__glyph {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  color: var(--blue-bright);
+  background: color-mix(in srgb, var(--blue-bright) 13%, transparent);
+  margin-bottom: 8px;
+}
+
+.anatomy-overlay__glyph svg {
+  width: 32px;
+  height: 32px;
+  animation: anatomy-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes anatomy-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+.anatomy-overlay__glyph--error {
+  color: var(--red);
+  background: color-mix(in srgb, var(--red) 12%, transparent);
+}
+
+.anatomy-overlay__glyph--error svg {
+  animation: none;
+}
+
+.anatomy-overlay__title {
+  margin: 0;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: 1.02rem;
+  font-weight: 600;
+}
+
+.anatomy-overlay__hint {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.anatomy-overlay__bar {
+  width: 240px;
+  height: 6px;
+  border-radius: 99px;
+  background: rgb(var(--wash-rgb) / 0.08);
+  overflow: hidden;
+}
+
+.anatomy-overlay__fill {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--blue-bright), color-mix(in srgb, var(--blue-bright) 55%, #ffffff));
+  transition: width 240ms ease;
+}
+
+.anatomy-overlay__meta {
+  display: flex;
+  justify-content: space-between;
+  width: 240px;
+  margin-top: 7px;
+  color: var(--faint);
+  font-size: 0.74rem;
+}
+
+.anatomy-overlay__retry {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 10px 18px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--blue-bright);
+  color: #fff;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: filter 140ms ease, transform 140ms ease;
+}
+
+.anatomy-overlay__retry:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+/* ── ریسپانسیو موبایل ─────────────────────────────────────────────────────── */
+
+@media (max-width: 860px) {
+  .anatomy-layer__header {
+    padding: 10px 14px;
+    gap: 10px;
+  }
+
+  .anatomy-layer__subtitle,
+  .anatomy-layer__source {
+    display: none;
+  }
+
+  .anatomy-viewer__topbar {
+    inset-inline: 10px;
+    top: 10px;
+    flex-wrap: wrap;
+  }
+
+  .anatomy-search {
+    max-width: none;
+    flex: 1 1 100%;
+  }
+
+  .anatomy-cameras__btn span {
+    display: none; /* در موبایل فقط آیکون */
+  }
+
+  .anatomy-viewer__panel-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    position: absolute;
+    top: 62px;
+    inset-inline-end: 10px;
+    z-index: 7;
+    padding: 8px 14px;
+    border: 1px solid rgb(var(--line-rgb) / 0.14);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--surface) 78%, transparent);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    color: var(--white);
+    font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
+    font-size: 0.8rem;
+    cursor: pointer;
+  }
+
+  /* پنل لایه‌ها به‌صورت شیت پایین صفحه */
+  .anatomy-viewer__side {
+    top: auto;
+    inset-inline: 10px;
+    bottom: 10px;
+    width: auto;
+    max-height: 52vh;
+    transform: translateY(calc(100% + 20px));
+    transition: transform 260ms ease;
+  }
+
+  .anatomy-viewer__side.is-open {
+    transform: none;
+  }
+
+  .anatomy-viewer__info {
+    inset-inline: 10px;
+    bottom: 10px;
+    width: auto;
+  }
+
+  .anatomy-viewer__hover,
+  .anatomy-viewer__hints {
+    display: none;
+  }
+}

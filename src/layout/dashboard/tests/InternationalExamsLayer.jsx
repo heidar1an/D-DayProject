@@ -270,7 +270,8 @@ export default function InternationalExamsLayer({ userData, onBack }) {
   };
 
   const activeExamDetail = view.name === 'exam' && examDetail?.exam?.id === view.examId ? examDetail : null;
-  const showSubNav = view.name === 'home';
+  /* چیپ‌های ناوبری در هر چهار بخش خانه همیشه دیده می‌شوند تا جابه‌جایی مستقیم ممکن باشد */
+  const showSubNav = ['home', 'collections', 'builder', 'mistakes'].includes(view.name);
   const backTarget = view.name === 'exam' || view.name === 'collections' || view.name === 'builder' || view.name === 'mistakes' ? 'home' : null;
 
   return (
@@ -279,52 +280,71 @@ export default function InternationalExamsLayer({ userData, onBack }) {
       aria-label="آزمون‌های بین‌الملل"
       className="intl-layer mx-auto w-[var(--content-width)] py-8 text-white md:py-10 [font-family:'Pinar','Vazir',Tahoma,sans-serif]"
     >
-      {/* سربرگ لایه با دکمهٔ بازگشت */}
-      <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          {view.name !== 'home' && (
-            <button
-              type="button"
-              onClick={() => (backTarget === 'home' ? go({ name: 'home' }) : onBack?.())}
-              className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[var(--surface-soft)] px-3.5 py-2.5 text-xs transition-colors hover:bg-[var(--surface-strong)]"
-            >
-              <Icon name="back" className="h-3.5 w-3.5" />
-              بازگشت
-            </button>
-          )}
-          {view.name === 'lab' && (
-            <span className="text-xs text-[var(--faint)]">محیط حل سؤال — پیشرفتت همان لحظه ذخیره می‌شود</span>
-          )}
-        </div>
+      {/* نوار بالای لایه — هم‌خانوادهٔ فلش‌کارت: بازگشت راست، اقدام چپ */}
+      <div className="intl-topbar dash-stagger">
+        {view.name === 'home' ? (
+          <button type="button" onClick={onBack} className="intl-topbar__back">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M9 6l6 6-6 6" />
+            </svg>
+            بازگشت به تست
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => (backTarget === 'home' ? go({ name: 'home' }) : onBack?.())}
+            className="intl-topbar__back"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M9 6l6 6-6 6" />
+            </svg>
+            بازگشت
+          </button>
+        )}
         {view.name === 'home' && (
           <button
             type="button"
-            onClick={onBack}
-            className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[var(--surface-soft)] px-3.5 py-2.5 text-xs text-[var(--muted)] transition-colors hover:bg-[var(--surface-strong)] hover:text-white"
+            onClick={() => exams?.[0] && openExam(exams[0].id)}
+            className="intl-topbar__cta flex cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm transition-colors hover:border-[#937fcd]/50 hover:bg-[#937fcd]/12 [font-family:'Doran','Vazir',Tahoma,sans-serif]"
           >
-            <Icon name="back" className="h-3.5 w-3.5" />
-            بازگشت به تست
+            <Icon name="play" className="h-4 w-4 text-[var(--purple-soft-ink)]" />
+            شروع حل سؤال
           </button>
         )}
+      </div>
+
+      {/* سربرگ وسط‌چین — همان ساختار سرتیتر فلش‌کارت */}
+      <header className="intl-hero-head dash-stagger">
+        <h1 className="intl-hero-head__title">
+          <span className="intl-hero-head__title-top">تمرین با استانداردهای جهانی پزشکی</span>
+          <span className="intl-hero-head__title-accent">آزمون‌های بین‌الملل</span>
+        </h1>
+        <p className="intl-hero-head__subtitle">
+          سؤال‌های استاندارد جهانی را حل کن، تحلیل بگیر، اشتباه‌هات را بفهم و از دل همین سؤال‌ها برای خودت آزمون بساز.
+        </p>
       </header>
 
-      {/* ناوبری زیربخش‌های خانه */}
+      {/* ناوبری زیربخش‌های خانه — چیپ‌های هم‌شکل فلش‌کارت */}
       {showSubNav && (
-        <nav className="mb-6 flex gap-1.5 overflow-x-auto rounded-full bg-black/50 p-1.5" aria-label="بخش‌های آزمون‌های بین‌الملل">
-          {HOME_VIEWS.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              aria-current={view.name === item.id ? 'page' : undefined}
-              onClick={() => go({ name: item.id })}
-              className={`flex shrink-0 cursor-pointer items-center gap-2 rounded-full px-4 py-2.5 text-sm transition-colors [font-family:'Doran','Vazir',Tahoma,sans-serif] ${
-                view.name === item.id ? 'bg-[var(--purple-bright)] text-white' : 'text-[var(--muted)] hover:bg-white/5 hover:text-white'
-              }`}
-            >
-              <Icon name={item.icon} className="h-4 w-4" />
-              {item.label}
-            </button>
-          ))}
+        <nav className="intl-scroll-x dash-stagger mb-6 overflow-x-auto pb-2" aria-label="بخش‌های آزمون‌های بین‌الملل">
+          <div className="mx-auto flex w-max gap-2.5">
+            {HOME_VIEWS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                aria-current={view.name === item.id ? 'page' : undefined}
+                onClick={() => go({ name: item.id })}
+                className={`flex shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap rounded-full border px-4 py-2.5 text-[13px] transition-colors [font-family:'Doran','Vazir',Tahoma,sans-serif] ${
+                  view.name === item.id
+                    ? 'border-[#937fcd]/60 bg-[#937fcd]/15 text-white'
+                    : 'border-white/8 bg-[var(--surface)] text-[var(--muted)] hover:border-white/20 hover:bg-[var(--surface-soft)] hover:text-white'
+                }`}
+              >
+                <Icon name={item.icon} className="h-4 w-4 shrink-0 text-[var(--purple-soft-ink)]" />
+                {item.label}
+              </button>
+            ))}
+          </div>
         </nav>
       )}
 
@@ -339,7 +359,6 @@ export default function InternationalExamsLayer({ userData, onBack }) {
           exams={exams}
           overview={overview}
           onOpenExam={openExam}
-          onStartFirstExam={() => exams?.[0] && openExam(exams[0].id)}
           onResume={resumeAttempt}
           onStartReview={startSpacedReview}
           onOpenMistakes={() => go({ name: 'mistakes' })}

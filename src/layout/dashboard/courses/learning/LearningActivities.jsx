@@ -59,76 +59,6 @@ export function PriorKnowledgeActivation({ data, activityState, onChange }) {
   );
 }
 
-export function LearningOrientation({ data, objectives, prerequisites, activityState, onChange }) {
-  const acknowledged = Boolean(activityState.acknowledgedSteps?.orient);
-  return (
-    <div className="orientation-panel">
-      <div className="orientation-panel__questions">
-        <article>
-          <span aria-hidden="true">01</span>
-          <h3>چرا مهم است؟</h3>
-          <p>{data.why}</p>
-        </article>
-        <article>
-          <span aria-hidden="true">02</span>
-          <h3>کجای مسیر هستم؟</h3>
-          <p>{data.position}</p>
-        </article>
-        <article>
-          <span aria-hidden="true">03</span>
-          <h3>کجا به کار می‌آید؟</h3>
-          <p>{data.clinical}</p>
-        </article>
-      </div>
-
-      <section className="learning-map" aria-labelledby="learning-map-title">
-        <div className="learning-map__header">
-          <div>
-            <small>LEARNING MAP</small>
-            <h3 id="learning-map-title">نقشه این واحد</h3>
-          </div>
-          <span>جایگاه فعلی: شروع مسیر</span>
-        </div>
-        <div className="learning-map__flow">
-          {data.map.map((node, index) => (
-            <div className={index === 0 ? 'is-current' : ''} key={node}>
-              <span>{toFa(index + 1)}</span>
-              <b>{node}</b>
-              {index < data.map.length - 1 && <i aria-hidden="true">←</i>}
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <div className="orientation-panel__bottom">
-        <div>
-          <h3>در پایان می‌توانی</h3>
-          <ul>
-            {objectives.map((objective) => <li key={objective}>{objective}</li>)}
-          </ul>
-        </div>
-        <div>
-          <h3>پیش‌نیازهای کوتاه</h3>
-          <div className="learning-tags">
-            {prerequisites.map((item) => <span key={item}>{item}</span>)}
-          </div>
-        </div>
-      </div>
-
-      <button
-        type="button"
-        className={`learning-check ${acknowledged ? 'is-checked' : ''}`}
-        onClick={() => onChange({
-          acknowledgedSteps: { ...activityState.acknowledgedSteps, orient: !acknowledged },
-        })}
-      >
-        <span aria-hidden="true">{acknowledged ? '✓' : ''}</span>
-        نقشه را دیدم و می‌دانم دنبال چه چیزی هستم
-      </button>
-    </div>
-  );
-}
-
 export function ConceptCard({ title, description, meta, status, mastery }) {
   const statusMeta = getConceptStatus(status);
   return (
@@ -174,7 +104,6 @@ export function MicroLesson({ lessons, activityState, onChange }) {
     <div className="micro-lesson-layout">
       <aside className="micro-lesson-nav" aria-label="فهرست میکرودرس‌ها">
         <header>
-          <small>MICRO LESSONS</small>
           <strong>{toFa(completedLessons.length)} از {toFa(lessons.length)} کامل</strong>
         </header>
         {lessons.map((item, index) => (
@@ -413,7 +342,6 @@ export function ConceptMap({ relations, activityState, onChange }) {
       {relations.filter((relation) => relation.id === activeMap).map((relation) => (
         <section className="concept-map" key={relation.id} aria-label={relation.title}>
           <header>
-            <small>CONCEPT RELATIONSHIP</small>
             <h3>{relation.title}</h3>
           </header>
           <div className="concept-map__flow">
@@ -462,7 +390,7 @@ export function PracticeQuestion({ question, index, result, onAnswer }) {
     <article className="practice-question">
       <header>
         <div>
-          <small>MCQ · سؤال {toFa(index + 1)}</small>
+          <small>سؤال {toFa(index + 1)}</small>
           <h3>{question.question}</h3>
         </div>
         <span>{question.difficulty === 'clinical' ? 'بالینی' : 'مفهومی'}</span>
@@ -501,7 +429,6 @@ export function AnatomyLabelQuiz({ question, structures, result, onAnswer }) {
     <article className="label-quiz">
       <header>
         <div>
-          <small>IMAGE LABELING</small>
           <h3>{question.prompt}</h3>
         </div>
         <span>یک نقطه را انتخاب کن</span>
@@ -611,7 +538,6 @@ export function LearningDiagnosis({ diagnosis, activityState, onChange }) {
           <span>تسلط فعلی</span>
         </div>
         <div>
-          <small>LEARNING DIAGNOSIS</small>
           <h3>{diagnosis.message}</h3>
           <p>این نتیجه از پاسخ‌ها، تعداد تلاش، زمان پاسخ و اعتماد اعلام‌شده ساخته شده است.</p>
         </div>
@@ -631,7 +557,7 @@ export function LearningDiagnosis({ diagnosis, activityState, onChange }) {
             <small>وضعیت مفهوم‌ها</small>
             <h3>نقشه تسلط</h3>
           </div>
-          <span>از WEAK تا MASTERED</span>
+          <span>از {CONCEPT_STATUSES.WEAK} تا {CONCEPT_STATUSES.MASTERED}</span>
         </header>
         <div>
           {(diagnosis.concepts.length ? diagnosis.concepts : diagnosis.weakConcepts).map((concept) => (
@@ -702,7 +628,7 @@ export function ReviewPanel({ unit, unitState, recommendation, onReview, onExam 
 
       <section className="review-panel__flashcards">
         <header>
-          <div><small>FLASHCARDS</small><h3>سه کارت برای تثبیت</h3></div>
+          <div><h3>سه کارت برای تثبیت</h3></div>
           <span>برای دیدن پاسخ روی کارت بزن</span>
         </header>
         <div>

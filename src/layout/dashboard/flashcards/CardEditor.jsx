@@ -7,7 +7,7 @@
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { SUBJECTS } from '../../../services/flashcards/mockData';
-import { Icon, Modal, textFieldError, toFa } from './flashcardShared';
+import { Icon, Modal, parseClozeBlanks, textFieldError, toFa } from './flashcardShared';
 
 const CARD_TYPES = [
   { id: 'basic', label: 'پایه', note: 'سؤال و جواب' },
@@ -66,7 +66,12 @@ function QualityHints({ front, back, type, options }) {
   const hints = [];
   if (front.length > 160) hints.push('صورت کارت طولانی است؛ بهتر است فقط یک مفهوم را بپرسد.');
   if (back.length > 260) hints.push('پاسخ سنگین است؛ تقسیمش به دو کارت اتمیک یادگیری را بهتر می‌کند.');
-  if (type === 'cloze' && (front.match(/\{\{c\d+::/g) ?? []).length > 4) hints.push('بیش از ۴ جای خالی در یک کارت توصیه نمی‌شود.');
+  if (type === 'cloze') {
+    const blanks = parseClozeBlanks(front);
+    if (blanks.length > 4) hints.push('بیش از ۴ جای خالی در یک کارت توصیه نمی‌شود.');
+    const emptyBlank = blanks.find((blank) => !blank.content.trim() || blank.content.trim() === '…');
+    if (emptyBlank) hints.push(`پاسخ جای خالی ${toFa(emptyBlank.index)} هنوز خالی است؛ در بخش پاسخ بنویسش.`);
+  }
   if (type === 'mcq' && (options ?? []).filter((option) => option.correct).length !== 1) hints.push('دقیقاً یک گزینهٔ صحیح علامت بزن.');
 
   if (!hints.length) return null;
@@ -163,10 +168,22 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
     const start = el.selectionStart ?? front.length;
     const end = el.selectionEnd ?? front.length;
     const selected = front.slice(start, end) || '…';
-    clozeCounter.current = Math.max(clozeCounter.current, (front.match(/\{\{c(\d+)::/g) ?? []).length) + 1;
+    /* شمارهٔ بعدی = بیشترین شمارهٔ موجود + ۱؛ شمارشِ تعداد بعد از حذف یک جای خالی، شمارهٔ تکراری می‌ساخت */
+    const maxIndex = Math.max(0, ...[...front.matchAll(/\{\{c(\d+)::/g)].map((match) => Number(match[1])));
+    clozeCounter.current = Math.max(clozeCounter.current, maxIndex) + 1;
     const wrapped = `{{c${clozeCounter.current}::${selected}}}`;
     setFront(front.slice(0, start) + wrapped + front.slice(end));
     el.focus();
+  };
+
+  /* جای خالی‌های صورت کارت — مبنای کادرهای پاسخ پایین‌تر */
+  const clozeBlanks = type === 'cloze' ? parseClozeBlanks(front) : [];
+
+  /* ویرایش پاسخ هر جای خالی، مستقیم روی سینتکس {{cN::…}} در صورت کارت می‌نویسد
+     تا پاسخ و صورت کارت همیشه یک منبع واحد داشته باشند (جای خالیِ بی‌پاسخ در مرور بی‌جواب نمی‌ماند) */
+  const setBlankContent = (blankIndex, value) => {
+    const regex = new RegExp(`\\{\\{c${blankIndex}::(.*?)\\}\\}`, 'g');
+    setFront(front.replace(regex, () => `{{c${blankIndex}::${value}}}`));
   };
 
   const addTag = () => {
@@ -234,7 +251,18 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
       setError('صورت کارت را پر کن.');
       return;
     }
-    if (!back.trim() && type !== 'mcq') {
+    if (type === 'cloze') {
+      if (!clozeBlanks.length) {
+        setError('حداقل یک جای خالی در صورت کارت تعریف کن — متنی را انتخاب و «جای خالی از متن انتخابی» را بزن.');
+        return;
+      }
+      const emptyBlank = clozeBlanks.find((blank) => !blank.content.trim() || blank.content.trim() === '…');
+      if (emptyBlank) {
+        setError(`پاسخ جای خالی ${toFa(emptyBlank.index)} را در بخش پاسخ بنویس.`);
+        return;
+      }
+    }
+    if (!back.trim() && type !== 'mcq' && type !== 'cloze') {
       setError('پاسخ کارت را پر کن.');
       return;
     }
@@ -403,8 +431,47 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
           </div>
         )}
 
-        {/* پاسخ */}
-        {type !== 'mcq' && (
+        {/* پاسخ — در کارت کلوز به تعداد جای خالی‌های صورت کارت، کادر پاسخ جداگانه ساخته می‌شود */}
+        {type === 'cloze' && (
+          <div>
+            <p className="mb-2 text-xs text-[var(--muted)]">
+              پاسخ جای خالی‌ها <span className="text-[var(--ghost)]">— به تعداد جای خالی‌های صورت کارت</span>
+            </p>
+            {clozeBlanks.length > 0 ? (
+              <div className="space-y-2">
+                {clozeBlanks.map((blank) => (
+                  <div key={blank.index} className="flex items-center gap-2">
+                    <span className="shrink-0 rounded-lg bg-white/5 px-2.5 py-2 text-[11px] text-[var(--muted)]">
+                      جای خالی {toFa(blank.index)}
+                    </span>
+                    <input
+                      value={blank.content}
+                      onChange={(event) => setBlankContent(blank.index, event.target.value)}
+                      placeholder={`پاسخ جای خالی ${toFa(blank.index)}`}
+                      aria-label={`پاسخ جای خالی ${toFa(blank.index)}`}
+                      className="min-w-0 flex-1 rounded-xl border border-white/10 bg-black/30 px-3.5 py-2.5 text-sm outline-none transition-colors placeholder:text-[var(--ghost)] focus:border-[#5b8cc7]/50"
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="rounded-2xl border border-dashed border-white/15 bg-white/[0.02] px-4 py-3 text-xs leading-5 text-[var(--faint)]">
+                هنوز جای خالی‌ای تعریف نشده — در صورت کارت متنی را انتخاب کن و دکمهٔ «جای خالی از متن انتخابی» را بزن تا کادر پاسخش همین‌جا ساخته شود.
+              </p>
+            )}
+            <label htmlFor="fc-back" className="mb-2 mt-4 block text-xs text-[var(--muted)]">توضیح تکمیلی (اختیاری)</label>
+            <textarea
+              id="fc-back"
+              value={back}
+              onChange={(event) => setBack(event.target.value)}
+              rows={2}
+              placeholder="نکته‌ای که بعد از پاسخ جای خالی‌ها نمایش داده می‌شود…"
+              className="w-full resize-none rounded-2xl border border-white/10 bg-black/30 p-4 text-sm leading-7 outline-none transition-colors placeholder:text-[var(--ghost)] focus:border-[#5b8cc7]/50"
+            />
+          </div>
+        )}
+
+        {type !== 'mcq' && type !== 'cloze' && (
           <div>
             <label htmlFor="fc-back" className="mb-2 block text-xs text-[var(--muted)]">پاسخ</label>
             <textarea
@@ -412,7 +479,7 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
               value={back}
               onChange={(event) => setBack(event.target.value)}
               rows={3}
-              placeholder={type === 'cloze' ? 'توضیح تکمیلی (اختیاری)' : 'فعالیت پاراسمپاتیک از طریق عصب واگ…'}
+              placeholder="فعالیت پاراسمپاتیک از طریق عصب واگ…"
               className="w-full resize-none rounded-2xl border border-white/10 bg-black/30 p-4 text-sm leading-7 outline-none transition-colors placeholder:text-[var(--ghost)] focus:border-[#5b8cc7]/50"
             />
           </div>

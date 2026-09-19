@@ -6,15 +6,14 @@
  */
 
 export const LEARNING_STEPS = [
-  { id: 'activate', label: 'فعال‌سازی', english: 'ACTIVATE', action: 'دانسته‌های قبلی را بیدار کن' },
-  { id: 'orient', label: 'جهت‌یابی', english: 'ORIENT', action: 'نقشه مسیر را ببین' },
-  { id: 'learn', label: 'یادگیری', english: 'LEARN', action: 'مفهوم را در واحدهای کوچک یاد بگیر' },
-  { id: 'visualize', label: 'تصویرسازی', english: 'VISUALIZE', action: 'ساختار را فضایی ببین' },
-  { id: 'connect', label: 'ارتباط', english: 'CONNECT', action: 'رابطه مفاهیم را بساز' },
-  { id: 'practice', label: 'تمرین', english: 'PRACTICE', action: 'دانسته‌ها را به کار ببر' },
-  { id: 'retrieve', label: 'بازیابی', english: 'RETRIEVE', action: 'بدون کمک پاسخ را به یاد بیاور' },
-  { id: 'diagnose', label: 'تشخیص', english: 'DIAGNOSE', action: 'نقطه قوت و ضعف را پیدا کن' },
-  { id: 'review', label: 'مرور', english: 'REVIEW', action: 'حافظه را تثبیت کن' },
+  { id: 'activate', label: 'فعال‌سازی', action: 'دانسته‌های قبلی را بیدار کن' },
+  { id: 'learn', label: 'یادگیری', action: 'مفهوم را در واحدهای کوچک یاد بگیر' },
+  { id: 'visualize', label: 'تصویرسازی', action: 'ساختار را فضایی ببین' },
+  { id: 'connect', label: 'ارتباط', action: 'رابطه مفاهیم را بساز' },
+  { id: 'practice', label: 'تمرین', action: 'دانسته‌ها را به کار ببر' },
+  { id: 'retrieve', label: 'بازیابی', action: 'بدون کمک پاسخ را به یاد بیاور' },
+  { id: 'diagnose', label: 'تشخیص', action: 'نقطه قوت و ضعف را پیدا کن' },
+  { id: 'review', label: 'مرور', action: 'حافظه را تثبیت کن' },
 ];
 
 export const CONCEPT_STATUSES = {

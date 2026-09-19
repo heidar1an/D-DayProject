@@ -590,12 +590,58 @@
   border: 2px solid var(--border-solid);
 }
 
+/* ظرف اسکرول نقشهٔ سؤال‌ها در سایدبار — وقتی سؤال‌ها از ظرفیت کادر بیشتر شوند
+   نقشه داخل همین ظرف اسکرول می‌شود (به‌جای سرریز از چهارچوب) و دکمهٔ لیست کامل می‌آید.
+   سقف طوری حساب شده که کل ستون چپ (کادر نقشه + حرکت بین درس‌ها) همیشه داخل viewport
+   بماند و کادر حرکت بین درس‌ها از پایین صفحه بیرون نزند. */
+.exm-navscroll {
+  max-height: min(17.5rem, max(10rem, calc(100vh - 32rem)));
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--line-rgb) / 0.25) transparent;
+}
+
+.exm-navscroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.exm-navscroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgb(var(--line-rgb) / 0.25);
+}
+
+/* دکمهٔ «لیست کامل سؤال‌ها» — فقط وقتی نقشهٔ سایدبار سرریز شده باشد نمایش داده می‌شود */
+.exm-navmore {
+  margin-top: 0.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border-radius: 0.8rem;
+  border: 1px dashed rgb(var(--line-rgb) / 0.3);
+  background: rgb(var(--wash-rgb) / 0.04);
+  color: var(--muted);
+  font-size: 11px;
+  cursor: pointer;
+  transition: border-color 0.14s ease, background 0.14s ease, color 0.14s ease;
+}
+
+.exm-navmore:hover {
+  border-color: rgb(var(--line-rgb) / 0.55);
+  background: rgb(var(--wash-rgb) / 0.08);
+  color: var(--white);
+}
+
 /* Drawer موبایل برای Navigator */
 .exm-drawer {
   position: fixed;
   inset-inline: 0;
   bottom: 0;
   z-index: 90;
+  max-height: min(80vh, 40rem);
+  overflow-y: auto;
   border-radius: 1.8rem 1.8rem 0 0;
   background: var(--background);
   border-top: 1px solid rgb(var(--line-rgb) / 0.09);
@@ -634,6 +680,27 @@
   border: 1px solid rgb(var(--line-rgb) / 0.08);
   padding: 1.6rem;
   animation: exm-modal-in 0.18s ease;
+}
+
+/* پاپ‌آپ لیست کامل سؤال‌ها — عریض‌تر از مودال معمول، بدنهٔ اسکرول‌شونده */
+.exm-modal--map {
+  width: min(40rem, 100%);
+}
+
+.exm-modal__mapbody {
+  max-height: min(56vh, 32rem);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--line-rgb) / 0.25) transparent;
+}
+
+.exm-modal__mapbody::-webkit-scrollbar {
+  width: 4px;
+}
+
+.exm-modal__mapbody::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgb(var(--line-rgb) / 0.25);
 }
 
 @keyframes exm-modal-in {

@@ -9,15 +9,17 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
   cancelRegistration,
+  fetchActiveAttempt,
   fetchAttempt,
+  fetchAttemptQuestions,
   fetchExam,
-  fetchExamQuestions,
   fetchExams,
   fetchRanking,
   fetchResult,
   fetchReviewQuestions,
   registerUser,
   rewardOf,
+  saveAttemptProgress,
   startAttempt,
 } from '../../../../services/coordinatedExams/coordinatedExamService';
 import { Icon, Skeleton, faNum, formatDuration, formatTime } from './coordinatedShared';
@@ -108,14 +110,19 @@ export default function CoordinatedExamsLayer({ userData, onBack }) {
     refreshExams();
   };
 
-  /* ── ورود به محیط آزمون (شروع یا ادامه) ── */
+  /* ── ورود به محیط آزمون (شروع یا ادامه) ──
+     سؤال‌ها فقط از مسیر Attempt سرور تحویل می‌شوند؛ هیچ درخواست سؤالِ مستقل از
+     Attempt وجود ندارد (ضد Enumeration، سند امنیتی PHASE 8). */
   const enterRoom = async (attempt) => {
     const exam = await fetchExam(attempt.examSlug ?? examDetail?.slug, userId);
-    const questions = await fetchExamQuestions(attempt.examSlug ?? examDetail?.slug);
-    const ordered = attempt.questionIds
-      .map((id) => questions.find((question) => question.id === id))
+    const payload = await fetchAttemptQuestions(attempt.id);
+    const stored = payload.attempt;
+    const questions = attempt.questionIds
+      .map((id) => payload.questions.find((question) => question.id === id))
       .filter(Boolean);
-    setRoom({ exam, attempt, questions: ordered });
+    /* فلگ خروج آگاهانه پاک می‌شود تا Refresh بعدی داخل محیط آزمون بماند */
+    await saveAttemptProgress(userId, { ...stored, exitedAt: null });
+    setRoom({ exam, attempt: { ...stored, exitedAt: null }, questions });
     go({ name: 'live', slug: attempt.examSlug });
   };
 
@@ -145,9 +152,11 @@ export default function CoordinatedExamsLayer({ userData, onBack }) {
     }
   };
 
-  /* ── خروج از محیط: Attempt نیمه‌کاره باقی می‌ماند ── */
+  /* ── خروج از محیط: Attempt نیمه‌کاره باقی می‌ماند ──
+     با فلگ exitedAt؛ تا Resume خودکار بعد از Refresh فقط برای رفرشِ داخل آزمون رخ دهد */
   const exitRoom = () => {
     const slug = view.slug;
+    if (room?.attempt) saveAttemptProgress(userId, { ...room.attempt, exitedAt: Date.now() });
     setRoom(null);
     setBusy(true);
     fetchExam(slug, userId)
@@ -158,6 +167,23 @@ export default function CoordinatedExamsLayer({ userData, onBack }) {
       .finally(() => setBusy(false));
     refreshExams();
   };
+
+  /* ── بازگشت به محیط آزمون بعد از Refresh — تایمر مطلق (endsAt) متوقف نمی‌شود و
+     کاربر به همان سؤال و همان درسی برمی‌گردد که در آن بوده. خروج آگاهانه (exitRoom)
+     فلگ می‌خورد و resume خودکار نمی‌شود. ── */
+  useEffect(() => {
+    let alive = true;
+    fetchActiveAttempt(userId)
+      .then((attempt) => {
+        if (!alive || !attempt || attempt.exitedAt) return;
+        return enterRoom(attempt);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /* ── پایان آزمون → کارنامه ── */
   const finishAttempt = (payload) => {
@@ -242,9 +268,9 @@ export default function CoordinatedExamsLayer({ userData, onBack }) {
       aria-label="آزمون‌های هماهنگ تپش"
       className="mx-auto w-[var(--content-width)] py-8 text-white md:py-10 [font-family:'Pinar','Vazir',Tahoma,sans-serif]"
     >
-      {/* سربرگ لایه — فقط دکمهٔ بازگشت؛ در نمای کارنامه دکمهٔ سربرگ نمی‌آید چون
-          کارنامه خودش «بازگشت به آزمون‌ها» دارد و دو دکمه تکراری می‌شد */}
-      {view.name !== 'result' && (
+      {/* سربرگ لایه — فقط دکمهٔ بازگشت؛ در نمای کارنامه و مرور دکمهٔ سربرگ نمی‌آید چون
+          هرکدام دکمهٔ بازگشت خودشان را دارند و دو دکمهٔ تکراری می‌شد */}
+      {view.name !== 'result' && view.name !== 'review' && (
         <header className="exm-topbar dash-stagger">
           <button
             type="button"
@@ -253,11 +279,7 @@ export default function CoordinatedExamsLayer({ userData, onBack }) {
             aria-label={view.name === 'home' ? 'بازگشت به تست' : 'بازگشت'}
           >
             <Icon name="back" className="h-4.5 w-4.5" />
-            {view.name === 'home'
-              ? 'بازگشت به تست'
-              : view.name === 'review'
-                ? 'بازگشت به کارنامه'
-                : 'بازگشت'}
+            {view.name === 'home' ? 'بازگشت به تست' : 'بازگشت'}
           </button>
         </header>
       )}
@@ -306,6 +328,7 @@ export default function CoordinatedExamsLayer({ userData, onBack }) {
         ) : view.name === 'review' ? (
           <ExamReview
             exam={reviewPayload?.exam ?? null}
+            attempt={reviewPayload?.attempt ?? null}
             questions={reviewPayload?.questions ?? []}
             userData={userData}
             onBack={() => go({ name: 'result', slug: view.slug })}
