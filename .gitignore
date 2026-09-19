@@ -5,6 +5,18 @@ dist
 vendor
 database/publishing.secrets.json
 database/media.secrets.json
+Z-Anatomy-Beta
+# ── داده‌های امنیتی/شخصی — هرگز در گیت نیستند (سند امنیتی آزمون، PHASE 26/39) ──
+# بانک سؤال شامل کلید پاسخ است؛ سشن‌ها و کاربران شامل دادهٔ PII و هش رمز.
+database/users.json
+database/users.json.bak-avatar
+database/users.sessions.json
+database/content/exams.json
+database/content/examQuestions.json
+database/content/examAttempts.json
+database/content/examAudit.json
+database/content/examReports.json
+database/content/examAudit-*.json
 
 # ── زوائد بررسی (probe / bundle) — هرگز commit نشوند ──
 # هارنس واقعی (`scripts/verify-render.mjs`) خروجی موقتش را در
