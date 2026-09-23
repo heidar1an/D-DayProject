@@ -95,18 +95,22 @@
   transition: gap 0.22s ease, padding 0.22s ease;
 }
 
+/* نشان برند پنل — تصویرِ تک‌رنگِ شفافِ «موج تپش»؛ رنگش از `--icon-filter` می‌آید
+   (تم تیره سفید، تم روشن مشکی). ابعاد ۴۲px را عوض نکن: حسابِ ریل آیکونیِ نوار
+   کناری (`--ad-sidebar-w-min`) روی همین عدد بسته شده است. */
 .ad-sidebar__logo {
   width: 42px;
   height: 42px;
   flex-shrink: 0;
   display: grid;
   place-items: center;
-  border-radius: 1rem;
-  background: linear-gradient(140deg, var(--ad-accent), var(--purple-bright));
-  color: var(--white);
-  font-family: 'Doran', sans-serif;
-  font-size: 1.2rem;
-  font-weight: 700;
+}
+
+.ad-sidebar__logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: var(--icon-filter);
 }
 
 .ad-sidebar__brand strong {

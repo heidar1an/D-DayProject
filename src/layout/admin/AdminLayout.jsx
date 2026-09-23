@@ -8,6 +8,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import logoMark from '../../../images/pictures/600ppi/logo-mark.webp';
 import { auth, getMeta } from '../../services/admin/adminService';
 import ThemeToggle from '../ThemeToggle';
 import AdminLogin from './AdminLogin';
@@ -248,7 +249,9 @@ export function AdminShell({ admin, onExit, onLogout }) {
         className={`ad-sidebar ${sidebarOpen ? 'is-open' : ''} ${sidebarCollapsed ? 'is-collapsed' : ''}`}
       >
         <div className="ad-sidebar__brand">
-          <span className="ad-sidebar__logo" aria-hidden="true">ت</span>
+          <span className="ad-sidebar__logo" aria-hidden="true">
+            <img src={logoMark} alt="" />
+          </span>
           <div>
             <strong>تپش</strong>
             <small>پنل مدیریت محتوا</small>

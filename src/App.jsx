@@ -5,7 +5,7 @@ import greenTest from '../images/pictures/ChatGPT Image ۲۷ مرداد ۱۴۰۵
 import purpleBook from '../images/pictures/ChatGPT Image ۲۷ مرداد ۱۴۰۵، ۱۷_۰۹_۵۰.png';
 import professor from '../images/pictures/images (1).jpeg';
 import brownTest from '../images/pictures/01.png';
-import heartbeatMark from '../images/pictures/600ppi/Asset 6.webp';
+import heartbeatMark from '../images/pictures/600ppi/logo-mark.webp';
 import friendsDoctorsIllustration from '../images/pictures/Asset 3.webp';
 import baleSocialIcon from '../images/icons/Asset 13.webp';
 import eitaaSocialIcon from '../images/icons/eitaa.svg';

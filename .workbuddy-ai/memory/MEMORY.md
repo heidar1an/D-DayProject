@@ -5,6 +5,7 @@
 - توضیح نهایی کوتاه و مستقیم باشد. `npm install` و `npm run build` ممنوع؛ build پوشهٔ `dist/assets` را پاک می‌کند.
 - قبل از تغییر، README ریشه و README همان لایه را بخوان؛ طبق قرارداد پروژه هر تغییر مرتبط، مستندات همان بخش را هم‌زمان به‌روزرسانی کن.
 - برای تأیید React از `react-layer-headless-verify` و بررسی‌های بدون مرورگر/بدون build استفاده کن.
+- اسکیل `tapesh-design-system` یک **کپی** از `src/styles.css` است، نه ارجاع. هر تغییر توکن باید هم‌زمان در `references/tokens.css` آن اسکیل هم اعمال شود، وگرنه پروژهٔ مقصد از نسخهٔ قدیمی کپی می‌گیرد.
 
 ## معماری‌های حساس
 - داده از UI جداست: `src/services/<domain>/` و `src/layout/dashboard/<domain>/`.
@@ -28,6 +29,7 @@
 - selectorهای مشترک را به والد مقید کن؛ `.brand` فقط با `.site-header > .brand` تغییر کند.
 - در ریل آیکونی: آیکون `flex-shrink: 0`، `gap: 0`، برچسب `min-width: 0`.
 - `transition-delay` فقط روی opacity/transform باشد، نه border/color.
+- **مرجع دیزاین سیستم برای هرکس بیرون از پروژه: اسکیل `tapesh-design-system` (فایل `references/tokens.css` و `references/contract.md`) — نه کد JSX تپش.** اندازه‌گیری‌شده ۲۱ سپتامبر: ۴۲۱ کلاس `bg-[#hex]`/`text-[#hex]`/`via-[#hex]` در JSX باقی مانده (بیشترین: `QuestionLab.jsx` ۳۱، `BankSession.jsx` ۳۰) که از تم پیروی نمی‌کنند. هرکس از روی JSX الگو بردارد همین‌ها را یاد می‌گیرد. تصمیمی برای پاکسازی گرفته نشده.
 
 ## بررسی‌های مجاز
 - `npm run theme:check` بررسی جامع تم و رندر بدون build است.
@@ -56,3 +58,4 @@
 - `src/layout/admin/README.md` و README هر لایهٔ داشبورد: قرارداد همان لایه.
 - `src/layout/pricing/README.md`: مدل و تعاملات تعرفه‌ها.
 - `src/layout/products/README.md`: ریتم صفحهٔ محصولات، برگه‌ها، کادرهای چرخان، پیش‌نمایش‌ها و سنجه‌ها.
+- `~/.workbuddy-ai/skills/tapesh-design-system/`: بستهٔ انتقال دیزاین سیستم به پروژهٔ دیگر (توکن، فونت، سرویس تم، قرارداد، اسکریپت‌های بررسی).

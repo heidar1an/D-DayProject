@@ -761,12 +761,16 @@
   transform: scale(1.04);
 }
 
+/* نشان برند روی کاورِ جایگزین (پس‌زمینه گرادیان از والد می‌آید).
+   فایل لوگو شفاف و تک‌رنگ است، پس رنگش از `--icon-filter` می‌آید — سفید در تم
+   تیره و مشکی در تم روشن؛ وگرنه موجِ سفید روی زمینهٔ روشن محو می‌شد. */
 .ap-cover-art__mark {
   display: block;
   margin: auto;
   width: 30%;
   max-width: 150px;
   opacity: 0.13;
+  filter: var(--icon-filter);
   transition: transform 460ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
