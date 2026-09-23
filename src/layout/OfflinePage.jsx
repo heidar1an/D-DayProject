@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 
-import ThemeToggle from './ThemeToggle';
 import offlineIllustration from '../../images/pictures/ChatGPT Image ۲ شهریور ۱۴۰۵، ۱۱_۱۱_۵۸.png';
 
 export default function OfflinePage() {
@@ -36,8 +35,6 @@ export default function OfflinePage() {
 
   return (
     <main className="offline-page" dir="rtl">
-      <ThemeToggle className="offline-page__theme" />
-
       <section className="offline-page__content" aria-labelledby="offline-title">
         <div className="offline-page__illustration" aria-hidden="true">
           <img src={offlineIllustration} alt="" />

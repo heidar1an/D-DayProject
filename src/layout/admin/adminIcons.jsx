@@ -468,3 +468,162 @@ export function IconTrendUp(props) {
     </svg>
   );
 }
+
+/* ─── آیکون‌های لایه‌های تپش — رجیستری بخش «صفحات» ─── */
+
+/* فلش کارت — کارت جلوی کارت */
+export function IconFlashcard(props) {
+  return (
+    <svg {...base} {...props}>
+      <rect x="3.5" y="6.5" width="14" height="11" rx="2" />
+      <path d="M20.5 8.5v7.5a2.5 2.5 0 0 1-2.5 2.5H8" />
+      <path d="M7 10.5h7M7 13.5h4.5" />
+    </svg>
+  );
+}
+
+/* درسنامه جامع — کتاب باز */
+export function IconBookOpen(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M12 7C10.5 5.6 8.5 5 6.3 5c-.9 0-1.9.1-2.8.4v12.8c.9-.3 1.9-.4 2.8-.4 2.2 0 4.2.6 5.7 2 1.5-1.4 3.5-2 5.7-2 .9 0 1.9.1 2.8.4V5.4C19.6 5.1 18.6 5 17.7 5c-2.2 0-4.2.6-5.7 2Z" />
+      <path d="M12 7v12.8" />
+    </svg>
+  );
+}
+
+/* میکرو درسنامه — برگهٔ کوتاه با آذرخش */
+export function IconMicroLesson(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M7 3.5h7.5l4 4v13H7z" />
+      <path d="M14.5 3.5v4h4" />
+      <path d="m13.2 10.2-2.6 3.8h2.6l-2.6 3.8" />
+    </svg>
+  );
+}
+
+/* مسیر سبز — مسیر پرپیچ‌وخم با نشان مقصد */
+export function IconGreenPath(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M4.5 19.5c4 0 3.5-5 7-5s3-5 7-5" />
+      <circle cx="4.5" cy="19.5" r="1.7" />
+      <path d="M18.5 3.5a3.4 3.4 0 0 1 3.4 3.4c0 2.5-3.4 5.4-3.4 5.4s-3.4-2.9-3.4-5.4A3.4 3.4 0 0 1 18.5 3.5Z" />
+    </svg>
+  );
+}
+
+/* رفرنس — نشان‌صفحهٔ مرجع */
+export function IconReference(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M6.5 4.6a1.1 1.1 0 0 1 1.1-1.1h8.8a1.1 1.1 0 0 1 1.1 1.1v15.9L12 16.4l-5.5 4.1z" />
+      <path d="M9.5 8h5" />
+    </svg>
+  );
+}
+
+/* کرهٔ زمین — دوره‌های بین‌الملل */
+export function IconGlobe(props) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="12" cy="12" r="8.2" />
+      <path d="M3.8 12h16.4" />
+      <path d="M12 3.8c2.3 2.2 3.5 5 3.5 8.2s-1.2 6-3.5 8.2c-2.3-2.2-3.5-5-3.5-8.2s1.2-6 3.5-8.2Z" />
+    </svg>
+  );
+}
+
+/* بانک تست — انبار داده */
+export function IconTestBank(props) {
+  return (
+    <svg {...base} {...props}>
+      <ellipse cx="12" cy="6" rx="7" ry="2.6" />
+      <path d="M5 6v12c0 1.4 3.1 2.6 7 2.6s7-1.2 7-2.6V6" />
+      <path d="M5 12c0 1.4 3.1 2.6 7 2.6s7-1.2 7-2.6" />
+    </svg>
+  );
+}
+
+/* آزمون هماهنگ — پاسخ‌برگ با تیک */
+export function IconExamSheet(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M6.5 3.5h8l4 4v13h-12z" />
+      <path d="M14.5 3.5v4h4" />
+      <path d="m9 13 1.6 1.6 3.2-3.4" />
+      <path d="M9 17.5h6" />
+    </svg>
+  );
+}
+
+/* آزمون بین‌الملل — کره با تیک */
+export function IconGlobeExam(props) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="11" cy="12" r="7.5" />
+      <path d="M3.5 12h15" />
+      <path d="M11 4.5c2 2 3.2 4.6 3.2 7.5s-1.2 5.5-3.2 7.5c-2-2-3.2-4.6-3.2-7.5s1.2-5.5 3.2-7.5Z" />
+      <path d="m16.2 17 1.8 1.8 3.4-3.6" />
+    </svg>
+  );
+}
+
+/* لیگ — جام قهرمانی */
+export function IconTrophy(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M8 4.5h8V10a4 4 0 0 1-8 0z" />
+      <path d="M8 6.5H5.5V8A3 3 0 0 0 8 11" />
+      <path d="M16 6.5h2.5V8A3 3 0 0 1 16 11" />
+      <path d="M12 14v3" />
+      <path d="M8.5 19.5c0-1.4 1.6-2.5 3.5-2.5s3.5 1.1 3.5 2.5z" />
+    </svg>
+  );
+}
+
+/* شبکه دانش — گره‌های گراف */
+export function IconKnowledgeGraph(props) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="6" cy="6.5" r="2.2" />
+      <circle cx="18" cy="8" r="2.2" />
+      <circle cx="10.5" cy="17.5" r="2.2" />
+      <path d="m8.2 7 7.6.8M7.1 8.6l2.4 6.8M16.7 9.8l-4.9 5.8" />
+    </svg>
+  );
+}
+
+/* ویکی — کتاب قطور */
+export function IconWiki(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M7 3.5h11.5v15.2H7a2.2 2.2 0 0 0-2.2 2.2V5.7A2.2 2.2 0 0 1 7 3.5Z" />
+      <path d="M4.8 20.9A2.2 2.2 0 0 1 7 18.7h11.5" />
+      <path d="M9.2 8h6.3M9.2 11.5h4.3" />
+    </svg>
+  );
+}
+
+/* پاپ‌آپ — پنجرهٔ بازشو روی پنجرهٔ پشت */
+export function IconPopup(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M6.5 14.5H5A1.5 1.5 0 0 1 3.5 13V5A1.5 1.5 0 0 1 5 3.5h8A1.5 1.5 0 0 1 14.5 5v1.5" />
+      <rect x="9.5" y="9.5" width="11" height="10" rx="1.5" />
+      <path d="M9.5 12.5h11" />
+    </svg>
+  );
+}
+
+/* برگهٔ تبلیغاتی — بلندگوی اعلان */
+export function IconFlyer(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M4.5 9.5v5H7l8 4.5v-14L7 9.5z" />
+      <path d="M18.5 9a4.5 4.5 0 0 1 0 6" />
+      <path d="M7 14.5v4" />
+    </svg>
+  );
+}

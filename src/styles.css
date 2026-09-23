@@ -2260,15 +2260,6 @@ img {
   direction: rtl;
 }
 
-/* دکمهٔ تم در گوشهٔ پنل — لوگو وسط است، پس این گوشه آزاد می‌ماند */
-.auth-panel__theme {
-  --theme-toggle-size: 38px;
-
-  position: absolute;
-  top: 22px;
-  left: 22px;
-}
-
 .auth-panel__logo-button {
   display: grid;
   width: min(145px, 15vw);
@@ -2570,15 +2561,6 @@ img {
   color: var(--white);
 }
 
-/* دکمهٔ تم روی صفحهٔ آفلاین — گوشهٔ بالا-چپ */
-.offline-page__theme {
-  --theme-toggle-size: 40px;
-
-  position: absolute;
-  top: clamp(18px, 4vh, 34px);
-  left: clamp(18px, 4vw, 34px);
-}
-
 .offline-page__content {
   display: flex;
   width: min(100%, 900px);
@@ -2710,16 +2692,6 @@ img {
   transition:
     opacity 520ms ease,
     transform 680ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-/* دکمهٔ تم در گوشهٔ کارت ثبت‌نام — مثل کارت ورود */
-.onboarding-card__theme {
-  --theme-toggle-size: 38px;
-
-  position: absolute;
-  top: 22px;
-  left: 22px;
-  z-index: 2;
 }
 
 .onboarding-card.is-visible {

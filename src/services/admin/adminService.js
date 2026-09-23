@@ -156,6 +156,16 @@ export const pages = {
   remove: (id) => del(`/pages/${encodeURIComponent(id)}`),
 };
 
+/* ──────────────── کتابخانهٔ فلش‌کارت تپش (مجموعه‌ها و کارت‌ها) ──────────────── */
+
+export const flashcards = {
+  list: (params) => get(`/flashcards${toQuery(params)}`),
+  get: (id) => get(`/flashcards/${encodeURIComponent(id)}`),
+  create: (payload) => post('/flashcards', payload),
+  update: (id, payload) => put(`/flashcards/${encodeURIComponent(id)}`, payload),
+  remove: (id) => del(`/flashcards/${encodeURIComponent(id)}`),
+};
+
 /* ──────────────────────────────── رسانه ──────────────────────────────── */
 
 export const media = {
@@ -487,6 +497,6 @@ export function readFileAsBase64(file) {
 }
 
 export default {
-  auth, articles, categories, pages, media, banners, users, settings, logs, notes,
+  auth, articles, categories, pages, flashcards, media, banners, users, settings, logs, notes,
   publishing, analytics, mediaCenter, getStats, getMeta, toQuery, readFileAsBase64, AdminApiError,
 };

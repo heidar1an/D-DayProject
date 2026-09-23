@@ -8,7 +8,7 @@
  *   • جریان مطالعه (buildStudyFlow): صفحه‌ها و checkpointها در هم، با پیشروی واقعی
  *   • همگام‌سازی با مسیر داشبورد (view.pageId) برای رفرش و Back/Forward
  *   • اتصال به MicroProgressService (ذخیرهٔ وضعیت) و MicroTestEngine (انتخاب تست)
- *   • stateهای loading / error / not-published / completion و toast
+ *   • stateهای loading / error / not-published / topic-empty / completion و toast
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -431,7 +431,7 @@ export default function MicroCourseReader({ courseId, userId = 'local-user', vie
     );
   }
 
-  if (loadState === 'error' || !course || !unit) {
+  if (loadState === 'error' || !course) {
     return (
       <div className="micr-reader" dir="rtl">
         <div className="micr-empty" role="alert">
@@ -439,6 +439,22 @@ export default function MicroCourseReader({ courseId, userId = 'local-user', vie
           <p>ارتباط با محتوای درس برقرار نشد. یک‌بار دیگر تلاش کن.</p>
           <button type="button" className="micr-button micr-button--soft" onClick={() => setReloadToken((token) => token + 1)}>
             تلاش دوباره
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  /* مبحثی که هنوز واحد یادگیری و صفحه ندارد — خطای بارگذاری نیست، پس پیام روشن
+     با راه بازگشت نشان داده می‌شود (مبحث‌های فهرست همه فعال‌اند). */
+  if (!unit) {
+    return (
+      <div className="micr-reader" dir="rtl">
+        <div className="micr-empty">
+          <strong>صفحه‌های این مبحث هنوز آماده نشده</strong>
+          <p>محتوای این مبحث در حال نوشته‌شدن است؛ تا آن زمان مبحث‌های آمادهٔ همین درس را بخوان.</p>
+          <button type="button" className="micr-button micr-button--soft" onClick={exitReader}>
+            بازگشت به فهرست مبحث‌ها
           </button>
         </div>
       </div>

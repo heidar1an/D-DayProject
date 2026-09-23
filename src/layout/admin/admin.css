@@ -317,15 +317,6 @@
   box-shadow: 0 30px 70px rgb(var(--shadow-rgb) / calc(0.45 * var(--shadow-scale)));
 }
 
-/* دکمهٔ تم روی کارت ورود — تا پیش از احراز هویت هم بتوان تم را عوض کرد */
-.ad-login__theme {
-  --theme-toggle-size: 36px;
-
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-}
-
 .ad-login__head {
   text-align: center;
   display: flex;
@@ -772,6 +763,181 @@
 .ad-toolbar__hint {
   color: var(--ad-muted);
   font-size: 0.75rem;
+}
+
+/* ───────────────────── صفحات: رجیستری لایه‌های تپش ───────────────────── */
+
+/* تراشه‌های فیلتر گروه */
+.ad-chiprow {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.ad-chip {
+  border: 1px solid var(--ad-border);
+  background: transparent;
+  color: var(--ad-muted);
+  font: inherit;
+  font-size: 0.75rem;
+  padding: 0.38rem 0.85rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.ad-chip:hover {
+  color: var(--ad-text);
+  border-color: var(--ad-accent);
+}
+
+.ad-chip.is-active {
+  color: var(--ad-text);
+  background: var(--ad-accent-soft);
+  border-color: var(--ad-accent);
+  font-weight: 600;
+}
+
+/* سرگروه هر دستهٔ لایه */
+.ad-layergroup {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.ad-layergroup__head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.ad-layergroup__head h2 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.ad-layergroup__icon {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 0.7rem;
+  flex-shrink: 0;
+}
+
+.ad-layergroup__icon--learning { color: var(--ad-accent); background: var(--ad-accent-soft); }
+.ad-layergroup__icon--assessment { color: var(--ad-gold); background: rgba(230, 179, 65, 0.14); }
+.ad-layergroup__icon--knowledge { color: var(--ad-blue); background: rgba(96, 165, 250, 0.14); }
+.ad-layergroup__icon--marketing { color: var(--ad-green); background: var(--ad-green-soft); }
+
+/* شبکهٔ کارت‌های لایه */
+.ad-layergrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(272px, 1fr));
+  gap: 0.9rem;
+}
+
+.ad-layercard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 1rem 1.1rem;
+  border-radius: var(--ad-radius);
+  background: var(--ad-surface);
+  border: 1px solid var(--ad-border);
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.ad-layercard:hover {
+  border-color: var(--ad-accent);
+  transform: translateY(-2px);
+}
+
+.ad-layercard__top {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+}
+
+.ad-layercard__icon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 0.9rem;
+  flex-shrink: 0;
+}
+
+.ad-layercard__icon--learning { color: var(--ad-accent); background: var(--ad-accent-soft); }
+.ad-layercard__icon--assessment { color: var(--ad-gold); background: rgba(230, 179, 65, 0.14); }
+.ad-layercard__icon--knowledge { color: var(--ad-blue); background: rgba(96, 165, 250, 0.14); }
+.ad-layercard__icon--marketing { color: var(--ad-green); background: var(--ad-green-soft); }
+
+.ad-layercard__title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.ad-layercard__title .ad-linkcell {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.ad-layercard__desc {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.7;
+  color: var(--ad-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ad-layercard__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.ad-layercard__route,
+.ad-layercard__noroute {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  color: var(--ad-muted);
+}
+
+.ad-layercard__route {
+  color: var(--ad-accent);
+  text-decoration: none;
+}
+
+.ad-layercard__route:hover {
+  text-decoration: underline;
+}
+
+.ad-layercard__foot {
+  margin-top: auto;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--ad-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  .ad-layergrid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ───────────────────────────── جدول ───────────────────────────── */

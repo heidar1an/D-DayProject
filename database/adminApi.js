@@ -27,6 +27,7 @@ import {
   createAdmin,
   createArticle,
   createBanner,
+  createFlashcardDeck,
   createMedia,
   createNote,
   createPage,
@@ -36,12 +37,14 @@ import {
   deleteArticle,
   deleteBanner,
   deleteCategory,
+  deleteFlashcardDeck,
   deleteMedia,
   deleteNote,
   deletePage,
   destroySession,
   ensureStore,
   getArticle,
+  getFlashcardDeck,
   getNote,
   getPage,
   getSession,
@@ -51,6 +54,7 @@ import {
   listArticles,
   listBanners,
   listCategories,
+  listFlashcardDecks,
   listMedia,
   listNotes,
   listPages,
@@ -59,6 +63,7 @@ import {
   publicSettings,
   publishedArticles,
   publishedBanners,
+  publishedFlashcardDecks,
   readSettings,
   saveCategory,
   setArticleStatus,
@@ -67,6 +72,7 @@ import {
   updateAdmin,
   updateArticle,
   updateBanner,
+  updateFlashcardDeck,
   updateMedia,
   updateNote,
   updatePage,
@@ -662,6 +668,51 @@ const ROUTES = [
       entityId: page.id, entityLabel: page.title, ip: clientIp(ctx.request),
     });
     return { deleted: page.id };
+  }],
+
+  /* کتابخانهٔ فلش‌کارت تپش */
+  ['GET', '/api/admin/flashcards', 'flashcards.read', async (ctx) => listFlashcardDecks({
+    search: ctx.query.get('search') ?? '',
+    status: ctx.query.get('status') ?? 'all',
+    kind: ctx.query.get('kind') ?? 'all',
+    page: ctx.query.get('page') ?? 1,
+    perPage: ctx.query.get('perPage') ?? 10,
+  })],
+
+  ['GET', '/api/admin/flashcards/:id', 'flashcards.read', async (ctx) => {
+    const deck = getFlashcardDeck(ctx.params.id);
+    if (!deck) fail('NOT_FOUND', 'مجموعه پیدا نشد');
+    return { deck };
+  }],
+
+  ['POST', '/api/admin/flashcards', 'flashcards.create', async (ctx) => {
+    const deck = createFlashcardDeck(ctx.body, ctx.admin);
+    logActivity({
+      admin: ctx.admin, action: 'flashcard-deck.created', entityType: 'flashcard-deck',
+      entityId: deck.id, entityLabel: deck.title, ip: clientIp(ctx.request),
+    });
+    return { deck };
+  }],
+
+  ['PUT', '/api/admin/flashcards/:id', 'flashcards.update', async (ctx) => {
+    const deck = updateFlashcardDeck(ctx.params.id, ctx.body, ctx.admin);
+    if (!deck) fail('NOT_FOUND', 'مجموعه پیدا نشد');
+    logActivity({
+      admin: ctx.admin, action: 'flashcard-deck.updated', entityType: 'flashcard-deck',
+      entityId: deck.id, entityLabel: deck.title, metadata: { status: deck.status, cards: deck.cards.length },
+      ip: clientIp(ctx.request),
+    });
+    return { deck };
+  }],
+
+  ['DELETE', '/api/admin/flashcards/:id', 'flashcards.delete', async (ctx) => {
+    const deck = deleteFlashcardDeck(ctx.params.id);
+    if (!deck) fail('NOT_FOUND', 'مجموعه پیدا نشد');
+    logActivity({
+      admin: ctx.admin, action: 'flashcard-deck.deleted', entityType: 'flashcard-deck',
+      entityId: deck.id, entityLabel: deck.title, ip: clientIp(ctx.request),
+    });
+    return { deleted: deck.id };
   }],
 
   /* رسانه */
@@ -1913,6 +1964,8 @@ const PUBLIC_ROUTES = [
   ['/api/public/articles', async () => ({ articles: publishedArticles({ limit: 100 }) })],
   ['/api/public/banners', async () => ({ banners: publishedBanners() })],
   ['/api/public/settings', async () => ({ settings: publicSettings() })],
+  /* کتابخانهٔ رسمی فلش‌کارت تپش — فقط دک‌های منتشرشده (عادی + آناتومی تصویری) */
+  ['/api/public/flashcards/library', async () => ({ decks: publishedFlashcardDecks() })],
   ['/api/public/pages/:slug', async (ctx) => {
     const page = getPage(ctx.params.slug);
     if (!page) fail('NOT_FOUND', 'صفحه پیدا نشد');

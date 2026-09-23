@@ -812,8 +812,6 @@ export function AuthPage({ onBack, onLoginSuccess, onRegisterSuccess }) {
         </section>
 
         <section className="auth-panel" aria-labelledby="auth-title">
-          <ThemeToggle className="auth-panel__theme" />
-
           <button
             className="auth-panel__logo-button"
             type="button"

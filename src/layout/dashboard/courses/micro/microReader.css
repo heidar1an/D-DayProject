@@ -379,15 +379,15 @@
   font-size: 0.8rem;
 }
 
+/* دایرهٔ ایستگاه — همان قالب دایرهٔ صفحه‌ها با رنگ بنفش ایستگاه */
 .micr-outline__cpdot {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 1.5px dashed rgba(147, 127, 205, 0.5);
-  font-size: 0.7rem;
+  border-color: rgba(147, 127, 205, 0.5);
+  color: var(--green-bright);
+}
+
+.micr-outline__cp.is-done .micr-outline__cpdot {
+  border-color: var(--green-bright);
+  background: rgba(119, 183, 135, 0.14);
 }
 
 .micr-outline__foot {

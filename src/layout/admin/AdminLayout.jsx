@@ -3,7 +3,7 @@
  *
  * روتر داخلی دقیقاً همان قرارداد بقیهٔ لایه‌های پروژه است: یک state به شکل
  * `{ name, payload }`. برای اینکه رفرش صفحه بخش جاری را از دست ندهد، همین state
- * با hash آدرس (`#admin/articles`) هم‌گام نگه داشته می‌شود؛ اما منبع حقیقت state است.
+ * با hash آدرس (`#admin/pages`) هم‌گام نگه داشته می‌شود؛ اما منبع حقیقت state است.
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -13,12 +13,10 @@ import { auth, getMeta } from '../../services/admin/adminService';
 import ThemeToggle from '../ThemeToggle';
 import AdminLogin from './AdminLogin';
 import AdminDashboard from './views/AdminDashboard';
-import AdminArticles from './views/AdminArticles';
 import AdminContentEditor from './views/AdminContentEditor';
-import AdminCategories from './views/AdminCategories';
 import AdminPages from './views/AdminPages';
+import AdminFlashcards from './views/AdminFlashcards';
 import AdminMedia from './views/AdminMedia';
-import AdminBanners from './views/AdminBanners';
 import AdminPublishing from './views/AdminPublishing';
 import AdminUsers from './views/AdminUsers';
 import AdminSettings from './views/AdminSettings';
@@ -31,19 +29,17 @@ import {
   Button, Spinner, ToastProvider, faDate, toFa, useToast,
 } from './adminShared';
 import {
-  IconAnalytics, IconArticle, IconBanner, IconBroadcast, IconChevron, IconDashboard, IconLog, IconLogout,
-  IconMedia, IconMenu, IconNote, IconPage, IconSend, IconSettings, IconTag, IconUser,
+  IconAnalytics, IconBroadcast, IconChevron, IconDashboard, IconFlashcard, IconLog,
+  IconLogout, IconMedia, IconMenu, IconNote, IconPage, IconSend, IconSettings, IconUser,
 } from './adminIcons';
 
 const SECTIONS = [
   { id: 'dashboard', label: 'داشبورد', icon: IconDashboard, permission: null },
   { id: 'analytics', label: 'مرکز تحلیل', icon: IconAnalytics, permission: 'analytics.read' },
   { id: 'media-center', label: 'مدیریت رسانه و فضای مجازی', icon: IconBroadcast, permission: 'media.read' },
-  { id: 'articles', label: 'مقالات', icon: IconArticle, permission: 'articles.read' },
-  { id: 'categories', label: 'دسته‌بندی‌ها', icon: IconTag, permission: 'articles.read' },
   { id: 'pages', label: 'صفحات', icon: IconPage, permission: 'pages.read' },
+  { id: 'flashcards', label: 'کتابخانهٔ فلش‌کارت', icon: IconFlashcard, permission: 'flashcards.read' },
   { id: 'media', label: 'کتابخانهٔ رسانه', icon: IconMedia, permission: 'media.read' },
-  { id: 'banners', label: 'بنرها', icon: IconBanner, permission: 'articles.read' },
   { id: 'publishing', label: 'انتشار در کانال‌ها', icon: IconSend, permission: 'publishing.read' },
   { id: 'users', label: 'کاربران و نقش‌ها', icon: IconUser, permission: 'users.read' },
   { id: 'settings', label: 'تنظیمات سایت', icon: IconSettings, permission: 'settings.read' },
@@ -62,7 +58,6 @@ const SECTION_IDS = new Set(SECTIONS.map((section) => section.id));
  * نگاشت صریح جای حدس پیشوندی را می‌گیرد.
  */
 const SECTION_SUBVIEWS = {
-  'article-editor': 'articles',
   'page-editor': 'pages',
 };
 
@@ -71,7 +66,7 @@ function sectionOf(viewName) {
   return SECTION_SUBVIEWS[viewName] ?? viewName;
 }
 
-/* `#admin` یا `#admin/articles` یا `#admin/analytics/traffic` یا `#admin/articles/art-1234` */
+/* `#admin` یا `#admin/pages` یا `#admin/analytics/traffic` یا `#admin/pages/page-1234` */
 function parseHashView() {
   const hash = typeof window === 'undefined' ? '' : window.location.hash;
   const match = hash.match(/^#admin(?:\/([a-z-]+))?(?:\/([^/]+))?$/);
@@ -89,9 +84,6 @@ function parseHashView() {
   if (section === 'media-center') {
     return { name: 'media-center', payload: match[2] ? { tab: MEDIA_TAB_IDS.has(match[2]) ? match[2] : 'overview' } : null };
   }
-
-  /* در بخش مقالات، پاراگراف دوم شناسهٔ مقاله برای ویرایش است */
-  if (section === 'articles' && match[2]) return { name: 'article-editor', payload: { id: match[2] } };
 
   return { name: section, payload: null };
 }
@@ -122,15 +114,13 @@ export function AdminShell({ admin, onExit, onLogout }) {
     setView({ name, payload });
     setSidebarOpen(false);
 
-    const hash = name === 'article-editor' && payload?.id
-      ? `#admin/articles/${payload.id}`
-      : name === 'page-editor' && payload?.id
-        ? `#admin/pages/${payload.id}`
-        : name === 'analytics' && payload?.tab
-          ? `#admin/analytics/${payload.tab}`
-          : name === 'media-center' && payload?.tab
-            ? `#admin/media-center/${payload.tab}`
-            : `#admin/${name}`;
+    const hash = name === 'page-editor' && payload?.id
+      ? `#admin/pages/${payload.id}`
+      : name === 'analytics' && payload?.tab
+        ? `#admin/analytics/${payload.tab}`
+        : name === 'media-center' && payload?.tab
+          ? `#admin/media-center/${payload.tab}`
+          : `#admin/${name}`;
 
     if (window.location.hash !== hash) {
       window.history.replaceState(window.history.state, '', hash);
@@ -201,20 +191,14 @@ export function AdminShell({ admin, onExit, onLogout }) {
             onTabChange={(tab) => navigate('media-center', { tab })}
           />
         );
-      case 'articles':
-        return <AdminArticles {...editorProps} />;
-      case 'article-editor':
-        return <AdminContentEditor {...editorProps} kind="article" id={view.payload?.id ?? null} />;
       case 'pages':
         return <AdminPages {...editorProps} />;
+      case 'flashcards':
+        return <AdminFlashcards {...editorProps} />;
       case 'page-editor':
         return <AdminContentEditor {...editorProps} kind="page" id={view.payload?.id ?? null} />;
-      case 'categories':
-        return <AdminCategories {...editorProps} />;
       case 'media':
         return <AdminMedia {...editorProps} />;
-      case 'banners':
-        return <AdminBanners {...editorProps} />;
       case 'publishing':
         return <AdminPublishing {...editorProps} />;
       case 'users':

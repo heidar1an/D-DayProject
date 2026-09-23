@@ -1,6 +1,6 @@
 /*
  * فهرست صفحات میکرودرسنامه — ستون ساختار مبحث.
- * نمایش وضعیت هر صفحه (خوانده‌شده/نشان‌دار/دارای تست)، رخداد checkpointها در جریان
+ * نمایش وضعیت هر صفحه (خوانده‌شده/نشان‌دار/دارای تست)، رخداد ایستگاه‌ها (checkpoint)
  * و پرش به صفحهٔ مشخص. در موبایل به drawer تبدیل می‌شود (مدیریت نمایش با خواننده).
  */
 
@@ -8,11 +8,7 @@ import { toFa } from '../learning/learningUtils';
 
 function PageStateIcon({ status, bookmark }) {
   if (status === 'completed') {
-    return (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <path d="m5 12.5 4.5 4.5L19 7.5" />
-      </svg>
-    );
+    return <CheckIcon />;
   }
   if (bookmark) {
     return (
@@ -22,6 +18,14 @@ function PageStateIcon({ status, bookmark }) {
     );
   }
   return <i aria-hidden="true" />;
+}
+
+function CheckIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="m5 12.5 4.5 4.5L19 7.5" />
+    </svg>
+  );
 }
 
 export default function MicroOutline({
@@ -47,16 +51,20 @@ export default function MicroOutline({
           if (item.kind === 'checkpoint') {
             const state = checkpointStates[item.checkpoint.id];
             const done = state?.completed;
+            /* شمارهٔ ایستگاه از ترتیب ایستگاه‌های همان واحد می‌آید */
+            const stationNumber = (unit.checkpoints ?? []).findIndex((cp) => cp.id === item.checkpoint.id) + 1;
             /* برچسب «تست» دقیقاً روی رخداد checkpoint می‌نشیند — همان‌جایی که تست هست */
             return (
-              <li key={item.checkpoint.id} className="micr-outline__cp">
+              <li key={item.checkpoint.id} className={`micr-outline__cp${done ? ' is-done' : ''}`}>
                 <button
                   type="button"
                   className={`${index === currentIndex && activeKind === 'checkpoint' ? 'is-active' : ''}`}
                   onClick={() => onSelect(index)}
                 >
-                  <span className="micr-outline__cpdot" aria-hidden="true">{done ? '✓' : '·'}</span>
-                  <span>Checkpoint — بعد از صفحهٔ {toFa(unit.pages.find((page) => page.id === item.checkpoint.afterPage)?.order ?? '')}</span>
+                  <span className="micr-outline__state micr-outline__cpdot" aria-hidden="true">
+                    {done ? <CheckIcon /> : <i />}
+                  </span>
+                  <span>ایستگاه {toFa(stationNumber)} — بعد از صفحهٔ {toFa(unit.pages.find((page) => page.id === item.checkpoint.afterPage)?.order ?? '')}</span>
                   <span className="micr-outline__test">تست</span>
                 </button>
               </li>
@@ -86,7 +94,7 @@ export default function MicroOutline({
       </ol>
 
       <div className="micr-outline__foot">
-        <span>{toFa(unit.pages.length)} صفحه · {toFa(unit.checkpoints.length)} checkpoint</span>
+        <span>{toFa(unit.pages.length)} صفحه · {toFa(unit.checkpoints.length)} ایستگاه</span>
       </div>
     </nav>
   );

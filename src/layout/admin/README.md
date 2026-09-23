@@ -92,7 +92,7 @@ src/layout/admin/
     AdminArticles.jsx    فهرست مقالات
     AdminContentEditor.jsx  ویرایشگر مقاله و صفحه
     AdminCategories.jsx  دسته‌بندی‌ها
-    AdminPages.jsx       صفحات
+    AdminPages.jsx       صفحات (رجیستری لایه‌های تپش)
     AdminMedia.jsx       کتابخانهٔ رسانه
     AdminBanners.jsx     بنرها
   AdminPublishing.jsx  انتشار در کانال‌های پیام‌رسان (بله) — در مرکز رسانه هم embed شده
@@ -146,6 +146,18 @@ src/layout/admin/
   3. برچسب باید `min-width: 0` بگیرد، وگرنه `min-width: auto` فلیکس‌آیتم روی
      «بزرگ‌ترین کلمه» می‌ماند و `max-width: 0` را باطل می‌کند.
 
+- **فهرست فعلی بخش‌ها** از `SECTIONS` در `AdminLayout.jsx` می‌آید (به همین ترتیب):
+  داشبورد · مرکز تحلیل · مدیریت رسانه و فضای مجازی · صفحات · کتابخانهٔ رسانه ·
+  انتشار در کانال‌ها · کاربران و نقش‌ها · تنظیمات سایت · گزارش رویدادها · یادداشت‌ها.
+- «مقالات»، «دسته‌بندی‌ها» و «بنرها» **به درخواست کاربر از این فهرست برداشته شده‌اند.** چون
+  `SECTION_IDS` از همین `SECTIONS` ساخته می‌شود، `#admin/articles`، `#admin/categories` و
+  `#admin/banners` دیگر resolve نمی‌شوند و به داشبورد برمی‌گردند؛ زیرنمای `article-editor`
+  هم همراهشان حذف شد. سه فایل `views/AdminArticles.jsx`، `views/AdminCategories.jsx` و
+  `views/AdminBanners.jsx` روی دیسک مانده‌اند ولی دیگر جایی import نمی‌شوند. (داده و
+  APIشان دست‌نخورده است: جدول‌های `articles`/`categories`/`banners` و مسیرهای
+  `/api/admin/articles`، `/api/admin/categories` و `/api/admin/banners`. کارت آماری
+  «مقالات»/«بنرها» در `AdminDashboard.jsx` هم هنوز هست — فقط شمارش است و لینک نیست.)
+
 ---
 
 ## ۳. اجرا
@@ -197,7 +209,7 @@ PORT=4173
 | `admins` | `admins.json` | `id, username, name, email, passwordHash, role, isActive, mustChangePassword, lastLoginAt, createdAt, updatedAt` |
 | `articles` | `articles.json` | `id, title, slug, excerpt, contentHtml, cover, coverAlt, category, tags[], authorName, status, featured, recommended, readingTime, views, seo{}, publishedAt, createdAt, updatedAt, createdBy, updatedBy` |
 | `categories` | `categories.json` | `id, label, accent` |
-| `pages` | `pages.json` | `id, title, slug, contentHtml, cover, status, seo{}, publishedAt, createdAt, updatedAt` |
+| `pages` | `pages.json` | رجیستری ۱۵ لایهٔ تپش — `id, title, slug, group, icon, route, description, contentHtml, cover, status, seo{}, publishedAt, createdAt, updatedAt` |
 | `media` | `media.json` | `id, filename, originalName, mimeType, size, url, altText, createdAt, uploadedBy` |
 | `banners` | `banners.json` | `id, title, subtitle, image, buttonText, buttonUrl, isActive, sortOrder, startDate, endDate` |
 | `activity` | `activity.json` | `id, userId, userName, action, entityType, entityId, entityLabel, metadata, ip, userAgent, createdAt` |

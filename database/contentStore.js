@@ -42,6 +42,8 @@ export const PERMISSIONS = [
   'articles.create', 'articles.read', 'articles.update', 'articles.delete', 'articles.publish',
   'categories.create', 'categories.update', 'categories.delete',
   'pages.create', 'pages.read', 'pages.update', 'pages.delete',
+  /* کتابخانهٔ فلش‌کارت تپش — ساخت/ویرایش دک و کارت، انتشار در کتابخانهٔ عمومی */
+  'flashcards.create', 'flashcards.read', 'flashcards.update', 'flashcards.delete', 'flashcards.publish',
   'media.upload', 'media.read', 'media.delete',
   'banners.create', 'banners.update', 'banners.delete',
   'users.create', 'users.read', 'users.update', 'users.delete',
@@ -102,6 +104,7 @@ export const ROLES = {
       'articles.create', 'articles.read', 'articles.update', 'articles.publish',
       'categories.create', 'categories.read',
       'pages.read', 'pages.update',
+      'flashcards.read', 'flashcards.create', 'flashcards.update', 'flashcards.publish',
       'media.upload', 'media.read', 'media.delete',
       'notes.create', 'notes.read', 'notes.update', 'notes.delete',
       'publishing.read', 'publishing.send',
@@ -133,6 +136,9 @@ export function hasPermission(admin, permission) {
 const COLLECTIONS = [
   'admins', 'articles', 'categories', 'pages', 'media', 'banners', 'activity', 'notes',
   'events', 'alerts', 'publishChannels', 'publishLog',
+  /* کتابخانهٔ فلش‌کارت تپش — دک‌های رسمی که از پنل ساخته/منتشر می‌شوند؛
+     کارت‌ها داخل رکورد دک می‌مانند (دک و کارت یک موجودیت مدیریتی‌اند). */
+  'flashcardDecks',
   /*
    * مرکز رسانه و فضای مجازی — ۱۲ مجموعهٔ مستقل.
    * هر مجموعه یک Entity از مدل داده است؛ افزودن پلتفرم یا نوع محتوای تازه
@@ -203,12 +209,39 @@ const SEED_CATEGORIES = [
   { id: 'lifestyle', label: 'سبک زندگی دانشجویی', accent: 'mint' },
 ];
 
+/*
+ * لایه‌های تپش — رجیستری ثابت صفحاتِ بخش «صفحات» پنل.
+ *
+ * هر لایه یک قابلیت واقعی محصول است (فلش کارت، بانک تست، …) و رکورد متناظرش
+ * محتوای معرفی + سئو + وضعیت انتشار همان لایه را نگه می‌دارد. «گروه» فقط
+ * دسته‌بندی نمایشی در پنل است و «مسیر» لینک عمیق همان لایه در سایت؛ لایه‌های
+ * تبلیغاتی مسیر مستقل ندارند و فقط از طریق پنل مدیریت می‌شوند.
+ */
+const PAGE_GROUPS = ['learning', 'assessment', 'knowledge', 'marketing'];
+
 const SEED_PAGES = [
-  { title: 'درباره تپش', slug: 'about' },
-  { title: 'تماس با ما', slug: 'contact' },
-  { title: 'سوالات متداول', slug: 'faq' },
-  { title: 'حریم خصوصی', slug: 'privacy' },
-  { title: 'قوانین و مقررات', slug: 'terms' },
+  /* یادگیری و آموزش */
+  { title: 'فلش کارت', slug: 'flashcards', group: 'learning', icon: 'flashcard', route: '#dashboard?s=flashcards', description: 'مرور فعال با کارت‌های دو رو، دسته‌بندی درس‌ها و تکرار فاصله‌دار' },
+  { title: 'درسنامه جامع', slug: 'comprehensive-lesson', group: 'learning', icon: 'book-open', route: '#dashboard?l=course-comprehensive', description: 'دروس جامع علوم پایه با فصل‌بندی کامل، درسنامه و تمرین' },
+  { title: 'میکرو درسنامه', slug: 'micro-lesson', group: 'learning', icon: 'micro-lesson', route: '#dashboard?l=course-micro', description: 'درسنامه‌های کوتاه و موردی برای مرور سریع بین کلاس‌ها' },
+  { title: 'مسیر سبز', slug: 'green-path', group: 'learning', icon: 'green-path', route: '#dashboard?l=green-path', description: 'برنامهٔ مطالعهٔ هوشمند و نقشهٔ راه شخصی‌سازی‌شدهٔ هر کاربر' },
+  { title: 'رفرنس', slug: 'reference', group: 'learning', icon: 'reference', route: '#dashboard?l=course-reference', description: 'کتابخانهٔ منابع و مراجع درسی به تفکیک درس و فصل' },
+  { title: 'دوره‌های بین‌الملل', slug: 'international-courses', group: 'learning', icon: 'globe', route: '#dashboard?l=intl-courses', description: 'دوره‌های ویژهٔ آمادگی آزمون‌های بین‌المللی علوم پزشکی' },
+
+  /* ارزیابی، آزمون و رقابت */
+  { title: 'بانک تست', slug: 'test-bank', group: 'assessment', icon: 'test-bank', route: '#dashboard?l=test-bank', description: 'بانک سؤالات طبقه‌بندی‌شده با فیلتر موضوعی و تحلیل عملکرد' },
+  { title: 'آزمون‌های هماهنگ', slug: 'coordinated-exams', group: 'assessment', icon: 'exam-sheet', route: '#dashboard?l=coordinated-exams', description: 'آزمون‌های هماهنگ کشوری با محیط آزمون واقعی و کارنامه' },
+  { title: 'آزمون‌های بین‌الملل', slug: 'international-exams', group: 'assessment', icon: 'globe-exam', route: '#dashboard?l=intl-exams', description: 'آزمون‌های بین‌المللی با استاندارد برگزاری و تحلیل نتیجه' },
+  { title: 'لیگ تپش', slug: 'tapesh-league', group: 'assessment', icon: 'trophy', route: '#dashboard?s=league', description: 'رقابت دوره‌ای کاربران با جدول امتیازات و جوایز فصلی' },
+
+  /* دانش و محتوا */
+  { title: 'شبکه دانش', slug: 'knowledge-network', group: 'knowledge', icon: 'knowledge-graph', route: '#dashboard?l=knowledge', description: 'نقشهٔ گراف ارتباط مفاهیم درسی برای دیدن تصویر کلان' },
+  { title: 'ویکی تپش', slug: 'tapesh-wiki', group: 'knowledge', icon: 'wiki', route: '#dashboard?l=wiki', description: 'دانش‌نامهٔ تخصصی علوم پزشکی که با مشارکت کاربران کامل می‌شود' },
+  { title: 'مقالات تپش', slug: 'tapesh-articles', group: 'knowledge', icon: 'article', route: '#articles', description: 'مقالات آموزشی، تحلیل آزمون‌ها و اخبار علمی' },
+
+  /* تبلیغات و اطلاع‌رسانی */
+  { title: 'پاپ‌آپ‌ها', slug: 'popups', group: 'marketing', icon: 'popup', route: '', description: 'پیام‌های بازشو و اطلاع‌رسانی‌های درون‌سایتی' },
+  { title: 'برگه‌های تبلیغاتی', slug: 'flyers', group: 'marketing', icon: 'flyer', route: '', description: 'برگه‌های معرفی و تبلیغاتی تپش برای چاپ و اشتراک‌گذاری' },
 ];
 
 export const DEFAULT_SETTINGS = {
@@ -350,11 +383,15 @@ function seedArticles() {
 
 function seedPages() {
   const created = nowIso();
-  return SEED_PAGES.map((page) => ({
-    id: makeId('pg'),
+  return SEED_PAGES.map((page, index) => ({
+    id: `pg-layer-${String(index + 1).padStart(2, '0')}`,
     title: page.title,
     slug: page.slug,
-    contentHtml: '<p>این صفحه هنوز محتوایی ندارد.</p>',
+    group: page.group,
+    icon: page.icon,
+    route: page.route,
+    description: page.description,
+    contentHtml: '<p>این لایه هنوز محتوای معرفی ندارد.</p>',
     status: 'draft',
     cover: '',
     seo: { title: '', description: '', canonical: '', ogImage: '', robots: 'index,follow' },
@@ -394,6 +431,7 @@ function ensureStore() {
   ensureFile(files.articles, seedArticles());
   ensureFile(files.categories, SEED_CATEGORIES);
   ensureFile(files.pages, seedPages());
+  ensureFile(files.flashcardDecks, seedFlashcardDecks());
   ensureFile(files.media, []);
   ensureFile(files.banners, seedBanners());
   ensureFile(files.activity, []);
@@ -858,6 +896,11 @@ function pagePayload(input, existing = null) {
   return {
     title,
     slug: ensureUniqueSlug('pages', input.slug || title, existing?.id ?? null),
+    /* فرادادهٔ لایه — فقط از seed مقداردهی می‌شود و در ویرایش حفظ می‌شود */
+    group: PAGE_GROUPS.includes(input.group) ? input.group : (existing?.group ?? 'learning'),
+    icon: String(input.icon ?? existing?.icon ?? '').slice(0, 40),
+    route: String(input.route ?? existing?.route ?? '').slice(0, 300),
+    description: String(input.description ?? '').slice(0, 300),
     contentHtml: sanitizeHtml(input.contentHtml ?? ''),
     cover: String(input.cover ?? ''),
     status,
@@ -914,6 +957,237 @@ export function deletePage(id) {
 
   writeCollection('pages', pages.filter((page_) => page_.id !== id));
   return target;
+}
+
+/* ─────────────────────── کتابخانهٔ فلش‌کارت تپش ─────────────────────── */
+
+/*
+ * شکل داده با قرارداد فلش‌کارت سمت کاربر (mockData) یکی است:
+ *   دک   { title, description, subjectId, level, cover, shortTitle, anatomy, previewImage, status, cards[] }
+ *   کارت { type: basic|cloze|mcq|image-locate, front, back, hint, tags[], image{url,alt,points[]}, options[], explanation }
+ * دک تصویری (`anatomy: true`) کارت‌های image-locate دارد که روی تصویر نقطه مشخص می‌کنند.
+ */
+
+const FLASHCARD_CARD_TYPES = ['basic', 'cloze', 'mcq', 'image-locate'];
+
+function sanitizeCardPoints(points) {
+  if (!Array.isArray(points)) return [];
+  return points
+    .map((point) => ({
+      x: Math.min(100, Math.max(0, Number(point?.x) || 0)),
+      y: Math.min(100, Math.max(0, Number(point?.y) || 0)),
+    }))
+    .slice(0, 4);
+}
+
+function flashcardCardPayload(input) {
+  const type = FLASHCARD_CARD_TYPES.includes(input?.type) ? input.type : 'basic';
+  const front = String(input?.front ?? '').trim().slice(0, 2000);
+  const back = String(input?.back ?? '').trim().slice(0, 4000);
+
+  const card = {
+    id: input?.id ? String(input.id).slice(0, 40) : makeId('fcc'),
+    type,
+    front,
+    back,
+    hint: String(input?.hint ?? '').slice(0, 300),
+    tags: Array.isArray(input?.tags)
+      ? input.tags.map((tag) => String(tag).trim().slice(0, 40)).filter(Boolean).slice(0, 12)
+      : [],
+    subjectId: String(input?.subjectId ?? 'general').slice(0, 40),
+    topicId: String(input?.topicId ?? '').slice(0, 60),
+    explanation: String(input?.explanation ?? '').slice(0, 2000),
+    status: 'active',
+  };
+
+  if (type === 'image-locate') {
+    card.image = {
+      url: String(input?.image?.url ?? '').slice(0, 300),
+      alt: String(input?.image?.alt ?? '').slice(0, 200),
+      points: sanitizeCardPoints(input?.image?.points),
+    };
+  }
+
+  if (type === 'mcq') {
+    card.options = (Array.isArray(input?.options) ? input.options : [])
+      .map((option) => ({ text: String(option?.text ?? '').slice(0, 400), correct: Boolean(option?.correct) }))
+      .filter((option) => option.text)
+      .slice(0, 6);
+  }
+
+  return card;
+}
+
+function flashcardDeckPayload(input, existing = null) {
+  const title = String(input?.title ?? '').trim();
+  if (!title) throw Object.assign(new Error('عنوان مجموعه الزامی است'), { code: 'VALIDATION_ERROR' });
+
+  const cards = (Array.isArray(input?.cards) ? input.cards : (existing?.cards ?? []))
+    .map(flashcardCardPayload)
+    .filter((card) => card.front || card.type === 'mcq');
+
+  return {
+    title,
+    description: String(input?.description ?? '').slice(0, 500),
+    shortTitle: String(input?.shortTitle ?? '').slice(0, 60),
+    subjectId: String(input?.subjectId ?? 'general').slice(0, 40),
+    level: String(input?.level ?? '').slice(0, 60),
+    cover: /^#[0-9a-fA-F]{3,8}$/.test(String(input?.cover ?? '')) ? String(input.cover) : '#937fcd',
+    anatomy: Boolean(input?.anatomy),
+    previewImage: String(input?.previewImage ?? '').slice(0, 300),
+    status: ARTICLE_STATUSES.includes(input?.status) ? input.status : 'draft',
+    cards,
+  };
+}
+
+export function listFlashcardDecks({ search = '', status = 'all', kind = 'all', page = 1, perPage = 10 } = {}) {
+  const query = normalizeSearch(search);
+  const filtered = readCollection('flashcardDecks').filter((deck) => {
+    if (status !== 'all' && deck.status !== status) return false;
+    if (kind === 'anatomy' && !deck.anatomy) return false;
+    if (kind === 'normal' && deck.anatomy) return false;
+    if (!query) return true;
+    return [deck.title, deck.description].some((field) => normalizeSearch(field).includes(query));
+  });
+
+  filtered.sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''));
+  return paginate(filtered, { page, perPage });
+}
+
+export function getFlashcardDeck(id) {
+  return readCollection('flashcardDecks').find((deck) => deck.id === id) ?? null;
+}
+
+export function createFlashcardDeck(input, admin) {
+  const decks = readCollection('flashcardDecks');
+  const created = nowIso();
+
+  const deck = {
+    id: makeId('fcd'),
+    ...flashcardDeckPayload(input),
+    createdAt: created,
+    updatedAt: created,
+    createdBy: admin?.id ?? 'system',
+    updatedBy: admin?.id ?? 'system',
+  };
+
+  decks.unshift(deck);
+  writeCollection('flashcardDecks', decks);
+  return deck;
+}
+
+export function updateFlashcardDeck(id, input, admin) {
+  const decks = readCollection('flashcardDecks');
+  const index = decks.findIndex((deck) => deck.id === id);
+  if (index === -1) return null;
+
+  const updated = {
+    ...decks[index],
+    ...flashcardDeckPayload(input, decks[index]),
+    updatedAt: nowIso(),
+    updatedBy: admin?.id ?? 'system',
+  };
+
+  decks[index] = updated;
+  writeCollection('flashcardDecks', decks);
+  return updated;
+}
+
+export function deleteFlashcardDeck(id) {
+  const decks = readCollection('flashcardDecks');
+  const target = decks.find((deck) => deck.id === id);
+  if (!target) return null;
+
+  writeCollection('flashcardDecks', decks.filter((deck) => deck.id !== id));
+  return target;
+}
+
+/*
+ * کتابخانهٔ عمومی — دک‌های منتشرشده به شکل قرارداد فلش‌کارت سمت کاربر
+ * (type: 'tapesh' / byTapesh: true) تا بدون تبدیل در سرویس مصرف شوند.
+ */
+export function publishedFlashcardDecks() {
+  return readCollection('flashcardDecks')
+    .filter((deck) => deck.status === 'published')
+    .map((deck) => ({
+      id: deck.id,
+      userId: null,
+      title: deck.title,
+      shortTitle: deck.shortTitle || undefined,
+      description: deck.description,
+      type: 'tapesh',
+      visibility: 'public',
+      subjectId: deck.subjectId,
+      level: deck.level || undefined,
+      cover: deck.cover,
+      byTapesh: true,
+      anatomy: Boolean(deck.anatomy),
+      previewImage: deck.previewImage || undefined,
+      cardCount: deck.cards.length,
+      updatedAt: deck.updatedAt,
+      cards: deck.cards.map((card) => ({ ...card, deckId: deck.id })),
+    }));
+}
+
+function seedFlashcardDecks() {
+  const created = nowIso();
+  const base = { status: 'published', createdAt: created, updatedAt: created, createdBy: 'seed', updatedBy: 'seed' };
+
+  return [
+    {
+      ...base,
+      id: 'fcd-visual-heart',
+      title: 'آناتومی تصویری — قلب (پنل)',
+      shortTitle: 'قلب',
+      description: 'نمونهٔ مجموعهٔ تصویری ساخته‌شده از پنل مدیریت؛ ساختارهای قلب روی تصویر.',
+      subjectId: 'anatomy',
+      level: 'علوم پایه',
+      cover: '#e26d6d',
+      anatomy: true,
+      previewImage: '/anatomy/heart.svg',
+      cards: [
+        {
+          id: 'fcc-vh-1', type: 'image-locate',
+          front: 'ساختار مشخص‌شده با نقطهٔ سرخ روی تصویر قلب کدام است؟',
+          back: 'دهلیز راست — گیرندهٔ خون وریدی اجوف فوقانی و تحتانی.',
+          image: { url: '/anatomy/heart.svg', alt: 'نمای قدامی قلب', points: [{ x: 33, y: 39 }] },
+          tags: ['آناتومی', 'تصویری'], subjectId: 'anatomy', status: 'active',
+        },
+        {
+          id: 'fcc-vh-2', type: 'image-locate',
+          front: 'ساختار مشخص‌شده با نقطهٔ سرخ روی تصویر قلب کدام است؟',
+          back: 'بطن چپ — پمپ اصلی گردش سیستمیک با جدارهٔ ضخیم‌تر.',
+          image: { url: '/anatomy/heart.svg', alt: 'نمای قدامی قلب', points: [{ x: 65, y: 66 }] },
+          tags: ['آناتومی', 'تصویری'], subjectId: 'anatomy', status: 'active',
+        },
+      ],
+    },
+    {
+      ...base,
+      id: 'fcd-normal-physio',
+      title: 'فیزیولوژی تنفس (پنل)',
+      description: 'نمونهٔ مجموعهٔ متنی ساخته‌شده از پنل مدیریت؛ مبانی تنفس و مکانیک آن.',
+      subjectId: 'physiology',
+      level: 'علوم پایه',
+      cover: '#5b8cc7',
+      anatomy: false,
+      previewImage: '',
+      cards: [
+        {
+          id: 'fcc-np-1', type: 'basic',
+          front: 'عضلهٔ اصلی دم آرام چیست و عصب آن کدام است؟',
+          back: 'دیافراگم — عصب فرنیک (C3-C5).',
+          tags: ['فیزیولوژی', 'تنفس'], subjectId: 'physiology', status: 'active',
+        },
+        {
+          id: 'fcc-np-2', type: 'cloze',
+          front: 'سرفیس‌اکتیو توسط سلول‌های {{c1::نوع دوم آلوئولی}} ترشح می‌شود و {{c2::کشش سطحی}} را کاهش می‌دهد.',
+          back: 'کاهش کشش سطحی از اتلاپسی آلوئول‌ها جلوگیری می‌کند (نقش سورفکتانت).',
+          tags: ['تنفس', 'سورفکتانت'], subjectId: 'physiology', status: 'active',
+        },
+      ],
+    },
+  ];
 }
 
 /* ─────────────────────────────── بنرها ─────────────────────────────── */
