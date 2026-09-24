@@ -51,6 +51,11 @@
 - `npm run verify-render` لایهٔ یادداشت را پوشش نمی‌دهد؛ برای آن باید مسیر مرورگر واقعی رفت.
 - کاهش حرکت macOS روی این دستگاه روشن است (`defaults read com.apple.universalaccess reduceMotion` برابر 1) و Chrome `prefers-reduced-motion: reduce` گزارش می‌کند؛ «محتوا هست ولی انیمیشن نیست» معمولاً تنظیم سیستم است، نه باگ. تغییرش فقط از System Settings انجام می‌شود.
 
+## محیط و ابزار
+- macOS 26.0 (25A354). نصب CommandLineTools ناقص است: در `/Library/Developer/CommandLineTools/SDKs/` سیم‌لینک‌ها شکسته‌اند و مقصدشان وجود ندارد، پس `xcrun`/`strings`/`otool`/`/usr/bin/git` روی stderr پیام `unable to locate a suitable SDK` می‌دهند. این پیام کشنده نیست (کار عادی انجام می‌شود) ولی در پنل Source Control به‌عنوان خطا دیده می‌شود. اصلاح ریشه‌ای: `sudo rm -rf /Library/Developer/CommandLineTools && sudo xcode-select --install`.
+- `git` در این ماشین باید Homebrew باشد: `~/.local/bin/git` → `/opt/homebrew/bin/git` (۲٫۵۵). helper کیچین خودِ Homebrew (`git-credential-osxkeychain`) با `failed to get: 100001` خراب است؛ در `~/.gitconfig` لیست helper با یک `helper =` خالی ریست شده و به helper سالم خودِ git اپل (`/Library/Developer/CommandLineTools/usr/libexec/git-core/git-credential-osxkeychain`) اشاره می‌کند. این سیم‌لینک و override را برندار.
+- در سندباکس Bash نمی‌توان در `~/.gitconfig` نوشت و `security add-internet-password` هم «Operation not permitted» می‌دهد؛ برای فایل‌های خانه از ابزار Edit استفاده کن.
+
 ## مسیرهای مرجع
 - `README.md` ریشه: معماری، مسیرهای hash، تم، تایپوگرافی، بررسی‌ها و قواعد انیمیشن.
 - `src/layout/admin/README.md` و README هر لایهٔ داشبورد: قرارداد همان لایه.
