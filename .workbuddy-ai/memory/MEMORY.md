@@ -1,25 +1,44 @@
 # تپش وب — یادداشت بلندمدت
 
-## قواعد کار
-- تغییر حداقلی و هم‌رنگ ساختار موجود؛ بازطراحی/فایل تازه فقط با درخواست صریح. **قبل از حذف کامل، فهرست را بده و تأیید/commit بگیر.**
-- `npm install` و `npm run build` ممنوع (build پوشهٔ `dist/assets` را پاک می‌کند). README ریشه + README همان لایه را بخوان و هم‌زمان به‌روز کن.
-- تأیید React با اسکیل `react-layer-headless-verify` (بدون مرورگر/بیلد)؛ تست UI فقط با درخواست صریح.
-- مرجع: `README.md` ریشه، README هر لایه، `src/layout/admin/README.md`. توکن/رنگ/فونت در `src/styles.css` و اسکیل `tapesh-design-system`؛ هر تغییر توکن باید در `references/tokens.css` آن هم بیاید.
+## قواعد
+- تغییر حداقلی و هم‌رنگ ساختار موجود؛ فایل تازه فقط با درخواست صریح. **قبل از حذف کامل، فهرست بده و تأیید/commit بگیر.**
+- `npm install` و `npm run build` ممنوع (build `dist/assets` را پاک می‌کند). README ریشه و README همان لایه را هم‌زمان به‌روز کن.
+- تأیید React با اسکیل `react-layer-headless-verify`؛ تست UI فقط با درخواست صریح.
+- دیزاین: اسکیل `tapesh-design-system` (کپیِ `src/styles.css`)؛ هر تغییر توکن باید در `references/tokens.css` هم بیاید.
 
-## معماری حساس
-- جدایی داده از UI: `src/services/<domain>/` و `src/layout/dashboard/<domain>/`.
-- ناوبری داشبورد hash-driven در `dashboardRoute.jsx`؛ `useLayerRoute` باید `initialView` ثابت بیرون کامپوننت داشته باشد؛ نماهای موقت (`live/lab/result/review`) در URL نمی‌آیند.
-- OAuth گوگل فقط سروری (`database/googleAuth.js` + `/api/auth/google/*`)؛ secret در مرورگر نیست. تعرفه‌ها مستقل (`#pricing`)؛ اعداد فقط در `services/pricing/pricingService.js`.
-- پنج کارت کاتالوگ یک تعریف مشترک: `CatalogCourseCard`/`CATALOG_COURSES`/`CatalogIcon` از `CoursesSection.jsx`؛ مقصد فقط از `COURSE_LAYERS`.
-- «صفحات» پنل = رجیستری لایه‌های محصول (`AdminPages.jsx`، `LAYER_GROUPS`/`LAYER_ICONS`)؛ داده `contentStore.js` + `database/content/pages.json`.
-- زیرنمای پنل: نگاشت صریح `SECTION_SUBVIEWS` + `sectionOf()`. **زیرنمای تازه را با تشخیص پیشوندی نساز** (تلهٔ `media-center`). `SECTIONS` تنها منبع سایدبار پنل است (`AdminLayout.jsx`).
-- یادداشت‌ها: `LayerTopbar` با «بازگشت» + دکمهٔ ساخت؛ موضوع+تگ یک ردیف چیپ؛ تپش هوشمند **یک نقطهٔ ورود**؛ `AIAssist` برنگردد. **گارد `prefers-reduced-motion` نباید `.nt-card` را `animation: none` کند.**
-- میکرودرس: فهرست مبحث‌ها یکدست فعال؛ `.micr-topics__soon` = حالت خالی کل درس. حلقهٔ درصد: `strokeDashoffset` هم ویژگی SVG و هم انیمیشن با `fill-mode: both`.
+## معماری
+- داده از UI جدا: `src/services/<domain>/` و `src/layout/dashboard/<domain>/`.
+- داشبورد hash-driven در `dashboardRoute.jsx`؛ `useLayerRoute` باید `initialView` ثابت بیرون کامپوننت داشته باشد؛ نماهای موقت در URL نمی‌آیند.
+- OAuth گوگل فقط سروری. اعداد تعرفه فقط در `services/pricing/pricingService.js`. کارت‌های کاتالوگ یک تعریف مشترک در `CoursesSection.jsx`.
+- پنل: `SECTIONS` در `AdminLayout.jsx` تنها منبع سایدبار (۱۰ آیتم)؛ زیرنماها با نگاشت صریح `SECTION_SUBVIEWS` + `sectionOf()` — **هرگز با تشخیص پیشوندی** (تلهٔ `media-center`).
+- «صفحات» = رجیستری ۱۵ لایهٔ محصول؛ کارت لایه: `h3.ad-layercard__name` غیرکلیک‌پذیر + آیکون چشم + «ورود به لایه»؛ هاور هم‌رنگ آیکون گروه. `page-editor` از UI در دسترس نیست.
+- لایه‌های داخل پنل (سایدبار ثابت می‌ماند): `ROUTABLE_VIEWS` + `SECTION_SUBVIEWS`→`pages` + `VIEW_TITLES` + case در `renderView`. مقصد دکمهٔ «ورود به لایه» فقط از نگاشت `LAYER_VIEWS` در `AdminPages.jsx` می‌آید (`layerEntryTarget` شیء `{view,title}` برمی‌گرداند): `flashcards`→`flashcard-library` (گارد `canSendDeck`، ارسال = `PUT` با `status:'published'` → `/api/public/flashcards/library`) و `micro-lesson`→`micro-lesson` (→ `/api/public/micro/library`).
+- میکرو درسنامه: کل ساختار در **یک رکورد** `microCourses` (مبحث→واحد→صفحه→متن/بلوک→ایستگاه) ⇒ ذخیره یک `PUT` کامل و انتشار اتمیک با `POST /api/admin/micro/:id/status`. ایستگاه تست دو منبع دارد: `pinnedQuestionIds` (بانک) + `questions[]` (دستی، بر فیلتر بانک اولویت دارد). **دو مسیر زیرِ `/api/admin/micro` باید پیش از `/:id` در جدول ROUTES بیایند: `test-bank` و `subjects`.**
+- **رجیستری درس‌ها `src/data/micro/registry.js` تک منبع حقیقت است** (`MICRO_COURSE_REGISTRY` / `MICRO_COURSE_SOURCES` / `MICRO_SUBJECT_OPTIONS`)؛ هم سرور (`contentStore.js`) و هم `microContentService.js` از آن می‌خوانند. دو فهرست ۱۶تاییِ موازی قبلاً حذف شد. **پسوند `.js` در importهایش عمدی است** — همین فایل در Node هم خوانده می‌شود.
+- **seed میکرو = هر ۱۶ درس، سپس همگام‌سازی افزایشی.** `syncMicroCourses()` در `ensureStore()` درس‌های رجیستریِ بدون رکورد را `draft` اضافه می‌کند و `content` را برای صفحه‌های پیش از مهاجرت از بلوک‌ها پر می‌کند؛ هیچ رکورد موجودی را بازنویسی نمی‌کند. یک‌بار در عمر پروسه (`microSynced`) و با `writeJson` مستقیم — **`writeCollection` از داخل `ensureStore` حلقهٔ بی‌پایان می‌سازد.**
+- **متن صفحه = `page.content` (متن غنی)، نه بلوک.** ویرایشگر `RichTextEditor`؛ مبدل خالص `src/data/micro/blocksToHtml.js` بلوک‌های قدیمی را یک‌بار به HTML تبدیل می‌کند؛ سرور فقط وقتی `content` خالی است مشتق می‌گیرد (پس ویرایش ادمین هرگز بازنویسی نمی‌شود). `blocks[]` **حذف نشد** — آرشیو است. سه نوع `figure`/`flashcards`/`quickQuestion` (`INTERACTIVE_BLOCK_TYPES`) به HTML تبدیل نمی‌شوند و خواننده آن‌ها را زیر `micr-rich` رندر می‌کند؛ پیامد: بعد از مهاجرت به پایان صفحه می‌روند. خوانندهٔ داشبورد هنوز از رجیستری محلی می‌خواند (سوییچ به `/api/public/micro/library` نشده)، ولی چون رجیستری ۱۶/۱۶ است هیچ درسی «خالی» نیست.
+- **کتابخانهٔ فلش‌کارت کاربران = ثابت + منتشرشدهٔ پنل.** `flashcardService.js` (سرویس ماک کاربر) حالا `/api/public/flashcards/library` را `fetch` می‌کند و `tapeshDecks()`/`tapeshCards()` دک‌های منتشرشده را **جلوی** دک‌های ثابت `mockData.js` ادغام می‌کنند (TTL ۱۵ ثانیه + `forceLibrary: true` روی `fetchLibrary`/`fetchDeck`/`fetchMyDecks`/`fetchOverview`؛ سرور قطع ⇒ سقوط به دک‌های ثابت). **تلهٔ کلاسیک این پروژه: زنجیرهٔ سرور کامل بود ولی هیچ کد سمت کاربری مصرفش نمی‌کرد** ⇒ وقتی «تغییر پنل به کاربر نمی‌رسد»، اول بگرد ببین مسیر عمومی *مصرف* می‌شود یا نه.
+- ویرایشگر فلش‌کارت پنل: چیپ‌های پنج‌گانه `CARD_TYPES` ولی سرور ۴ نوع ⇒ `basic-hint` **فقط نمایش** است (`cardTypeOf`/`toStoredType`؛ سرنخ در `hint` می‌ماند). `validateDeck` سخت‌گیر (جلوی ذخیره را می‌گیرد) در مقابل `cardQualityHints` فقط هشدار. وضعیت انتشار سه‌گانه (`PUBLISH_OPTIONS`: انتشار/پیش‌نویس/بایگانی) + تنها دکمهٔ **«تأیید تغییرات»** در همان فرم (نه مرحلهٔ جدا).
+- **میکرودرسنامه کاملاً داده‌محور است — برای درس تازه هیچ کد UI ننویس.** کافی است فایل `src/data/micro/<subjectId>Course.js` ساخته و در `COURSE_REGISTRY` (`microContentService.js`) ثبت شود. حالا **۱۶ درس** ثبت است (۷۶ مبحث/۱۷ واحد/۹۰ صفحه/۵۷۸ بلوک). `id` درس = `subjectId` = کلید رجیستری. **فیزیولوژی عمداً اولین کلید است** چون `firstPublishedCourse()` اولین عضو را برمی‌گرداند. قرارداد کامل در `src/data/micro/README.md`.
+- سه دیاگرام **عمومی داده‌محور** در `microDiagrams.jsx`: `flow` (`data.steps`)، `bars` (`data.items`)، `cycle` (`data.stages`) — هر درس دیاگرام خودش را با `data` می‌سازد. کلید ناشناخته ⇒ `null`. سه دیاگرام دیگر (`pressure-timeline`/`wiggers`/`pv-loop`) ثابت و مخصوص فیزیولوژی قلب‌اند.
+- **`unit.testBank.subjectId` را با `unit.subjectId` قاطی نکن:** موتور اولی را ترجیح می‌دهد. دو override عمدی موجود: `genetics`→`biochemistry` و `english`→`esl`. `topicPath` باید مو‌به‌مو با مسیر بانک یکی باشد، وگرنه استخر بی‌صدا صفر می‌شود.
+- **شکاف پوشش بانک تست (اندازه‌گیری‌شده):** بانک ۵۹ سؤال دارد و فقط ۷ درس از ۱۶ را پوشش می‌دهد (physiology ۱۶ · biochemistry ۵ · anatomy ۴ · genetics ۲ · histology ۲ · microbiology ۲ · immunology ۱ · pathology ۱). **۹ واحد استخر صفر دارند** ⇒ ایستگاه/آزمون حالت خالی می‌گیرد. این عمدی است، نه باگ UI — اول `questionPoolOf` و مسیرهای `testBank` را چک کن.
+- یادداشت‌ها: تپش هوشمند یک نقطهٔ ورود؛ گارد `prefers-reduced-motion` نباید `.nt-card` را `animation:none` کند.
+- روی تصویر با `left/top` فیزیکی موقعیت بده نه `inset-inline-start` (تصویر با RTL آینه نمی‌شود). متن Pinar، تیتر Doran، اعداد `toFa`. دکمهٔ تم فقط در `App.jsx`/`DashboardHeader.jsx`/`AdminLayout.jsx`.
 
-## بررسی‌ها و تله‌ها
-- `npm run theme:check` — سه گام اول سالم؛ **گام آخر (`verify-render.mjs`) می‌افتد** (`node_modules/three` بدون `package.json`). `node database/adminApi.test.mjs` (۷۸ سنجه) و `node database/googleAuth.test.mjs`.
-- `esbuild --bundle` برای گرفتن خطای ESM (در zsh glob را کوتیشن بگذار، `--outfile` به `/tmp`). هارنس jsdom روی `import.meta.glob` می‌میرد؛ با پلاگین `onLoad` با `{}` جانشین کن.
-- **`SECTIONS` آیکون‌ها را از ایمپورت همان فایل می‌گیرد:** `IconX` استفاده‌شده و importنشده = `ReferenceError` سطح ماژول = سفیدی کل پنل.
-- `useAsync(loader, deps)`: شیء تازه در هر render حلقهٔ fetch می‌سازد؛ وابستگی پایدار بده. گارد باید `null` را صریح رد کند. افکت در SSR اجرا نمی‌شود و یک‌بار mount گارد `useRef` می‌خواهد.
-- هر تیک سبز باید دقیقاً همان ادعا را ثابت کند وگرنه `null` و `—`. سفیدی کل اپ = `root.innerHTML.length === 0`؛ `agent-browser click` همیشه نمی‌نشیند، از `eval` استفاده کن.
-- کاهش حرکت macOS روشن است؛ «محتوا هست ولی انیمیشن نیست» تنظیم سیستم است نه باگ. بازیابی فایل پاک‌شده بدون commit: کش کروم (`sourcesContent`) — جزئیات در لاگ ۲۳ سپتامبر.
+## بررسی و تله
+- `npm run theme:check` گام آخرش (`verify-render.mjs`) به‌خاطر `node_modules/three` می‌افتد (خطای پیش‌موجود). `node database/adminApi.test.mjs` = ۹۲ سنجه.
+- **`adminApi.test.mjs` فایل‌های `content/*.json` واقعی را بازنویسی می‌کند** (از `contentStore.js` مستقیم می‌نویسد): `events.json` (تلمتری) به `[]` پاک می‌شود، `activity.json` (لاگ audit) و `updatedAt/lastLoginAt` در `admins.json` عوض می‌شوند. ⇒ **قبل از اجرا بکاپ بگیر.** ولی `git checkout` کورکورانه نزن: `flashcardDecks.json` هم ویرایش محتوایی واقعی دارد (نه فقط نویز تست) و بازگردانی نابودش می‌کند. تفاوت را معنایی بسنج، بعد تصمیم بگیر.
+- **`grep` سندباکس `\|` را نمی‌فهمد** ⇒ منفی کاذب؛ از ابزار Grep استفاده کن.
+- esbuild: `--external` برای react، glob را کوتیشن بگذار، `--outfile` به `/tmp`. هارنس jsdom روی `import.meta.glob` می‌میرد (پلاگین `onLoad` با `{}`).
+- رندر سرور: `AdminShell` تا `meta` نیاید `renderView()` را صدا نمی‌زند ⇒ نما را مستقیم رندر کن.
+- `IconX` استفاده‌شده و importنشده در `AdminLayout.jsx` = سفیدی کل پنل.
+- `useAsync(loader,deps)`: وابستگی پایدار بده وگرنه حلقهٔ fetch. هر تیک سبز باید دقیقاً همان ادعا را ثابت کند.
+- **سنجش لایهٔ داده = هارنس قرارداد، نه رندر.** برای میکرودرسنامه هارنس خالص در `/tmp/*.src.mjs` بنویس (یکتایی `id`، پیوستگی `order`، زیرمجموعه بودن conceptهای صفحه، ارجاع `afterPage`/`scopePages`، فیلدهای الزامی هر block، تطابق طول `table.head` با ردیف‌ها، عضویت مسیرها در بانک) و با esbuild باندل کن. جزئیات در بخش «۶.۷» اسکیل `react-layer-headless-verify`.
+- `MicroCompletion.jsx` **default export ندارد** (فقط named: `MicroCompletion`/`FinalAssessment`/`AssessmentResult`) — فرض `export default` کل باندل را با `No matching export … for import "default"` می‌اندازد.
+- **نویسندهٔ هم‌زمان:** session دیگری ممکن است وسط کار همان فایل را بنویسد (خطای سینتکس گذرا). قبل از `git checkout` روی فایل سروری mtime/هش را چک کن. **واقعاً رخ داد (۲۳ سپتامبر ۲۰۲۶):** یک session موازی ۱۵ فایل درسِ میکرو ساخت و `microContentService.js` را پیش از شروع من عوض کرده بود. قبل از هر کار روی این مخزن، `git status` + mtime بگیر و ببین دیسک کجا ایستاده — خلاصهٔ گفتگو ممکن است کهنه باشد.
+- **هر `readCollection` حدود ۱۵۰ms است — از دادهٔ زیاد نیست (اندازه‌گیری‌شده: با ۱ درس ۱۵۱ms، با ۱۶ درس ۱۵۰ms).** علت: `ensureStore()` آرگومان‌های `ensureFile` را از پیش می‌سازد و `seedAdmins()` داخلش `scryptSync` صدا می‌زند. رفع = تنبل‌کردن seedها؛ لمس زیرساخت مشترک است، فقط با اجازهٔ کاربر.
+- **دو `Edit` موازی روی یک فایل، همدیگر را پاک می‌کنند** (هرکدام از اسنپ‌شات قبلی می‌نویسد). Editها را پشت‌سرهم بزن. علامتش: `ReferenceError: X is not defined` در باندل برای چیزی که «قطعاً import کرده‌ای».
+- **توقعِ کهنه را باگ نپندار.** وقتی سنجه‌ای سرخ می‌شود، اول *قرارداد فعلی* تابع/داده را بخوان: `layerEntryTarget` شیء `{view,title}` می‌دهد نه رشته، و شمارش `grep -c "id: 'deck-"` روی `mockData.js` `id` کارت‌ها را هم می‌شمارد (تعداد واقعی دک: `TAPESH_DECKS.length` = ۱۰).
+- **هارنس دو نیمه:** نیمهٔ سرور (`contentStore`) را **بدون باندل** با نود خالی اجرا کن — `import.meta.url` مسیر `content/` را می‌سازد و باندل می‌شکندش. فقط نیمهٔ React باندل می‌شود.
+- کاهش حرکت macOS روشن است ⇒ «محتوا هست، انیمیشن نیست» تنظیم سیستم است. بازیابی فایل پاک‌شدهٔ بدون commit: کش کروم (`sourcesContent`).

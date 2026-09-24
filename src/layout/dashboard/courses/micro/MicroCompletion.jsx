@@ -23,7 +23,7 @@ export function MicroCompletion({ summary, unit, onReviewWeak, onAssessment, onE
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
         </span>
         <h2>این بخش را تمام کردی!</h2>
-        <p>کل زنجیرهٔ «چرخهٔ قلبی» را خواندی و تست زدی — حالا نقشهٔ واقعی یادگیری‌ت را ببین.</p>
+        <p>«{unit.title}» را صفحه‌به‌صفحه خواندی و از ایستگاه‌هایش گذشتی — حالا نقشهٔ واقعی یادگیری‌ت را ببین.</p>
       </header>
 
       <div className="micr-done__stats">
@@ -97,7 +97,7 @@ export function FinalAssessment({ questions, onAnswer, onFinish, attempts, deepM
     <section className="micr-assess" aria-label="آزمون جمع‌بندی">
       <header className="micr-cp__head">
         <span className="micr-cp__badge">آزمون جمع‌بندی</span>
-        <h2 className="micr-cp__title">ده سؤال از مهم‌ترین مفاهیم این بخش</h2>
+        <h2 className="micr-cp__title">{toFa(questions.length)} سؤال از مهم‌ترین مفاهیم این بخش</h2>
         <p className="micr-cp__hint">سؤال‌ها از بانک تست تپش انتخاب شده‌اند؛ اولویت با سؤال‌هایی است که هنوز ندیده‌ای.</p>
       </header>
 

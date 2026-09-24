@@ -16,6 +16,7 @@ import AdminDashboard from './views/AdminDashboard';
 import AdminContentEditor from './views/AdminContentEditor';
 import AdminPages from './views/AdminPages';
 import AdminFlashcards from './views/AdminFlashcards';
+import AdminMicro from './views/AdminMicro';
 import AdminMedia from './views/AdminMedia';
 import AdminPublishing from './views/AdminPublishing';
 import AdminUsers from './views/AdminUsers';
@@ -29,7 +30,7 @@ import {
   Button, Spinner, ToastProvider, faDate, toFa, useToast,
 } from './adminShared';
 import {
-  IconAnalytics, IconBroadcast, IconChevron, IconDashboard, IconFlashcard, IconLog,
+  IconAnalytics, IconBroadcast, IconChevron, IconDashboard, IconLog,
   IconLogout, IconMedia, IconMenu, IconNote, IconPage, IconSend, IconSettings, IconUser,
 } from './adminIcons';
 
@@ -38,7 +39,6 @@ const SECTIONS = [
   { id: 'analytics', label: 'مرکز تحلیل', icon: IconAnalytics, permission: 'analytics.read' },
   { id: 'media-center', label: 'مدیریت رسانه و فضای مجازی', icon: IconBroadcast, permission: 'media.read' },
   { id: 'pages', label: 'صفحات', icon: IconPage, permission: 'pages.read' },
-  { id: 'flashcards', label: 'کتابخانهٔ فلش‌کارت', icon: IconFlashcard, permission: 'flashcards.read' },
   { id: 'media', label: 'کتابخانهٔ رسانه', icon: IconMedia, permission: 'media.read' },
   { id: 'publishing', label: 'انتشار در کانال‌ها', icon: IconSend, permission: 'publishing.read' },
   { id: 'users', label: 'کاربران و نقش‌ها', icon: IconUser, permission: 'users.read' },
@@ -50,6 +50,16 @@ const SECTIONS = [
 const SECTION_IDS = new Set(SECTIONS.map((section) => section.id));
 
 /*
+ * نماهایی که از راه hash باز می‌شوند ولی آیتم سایدبار نیستند.
+ *
+ * «کتابخانهٔ فلش‌کارت تپش» و «میکرو درسنامه تپش» دو لایهٔ داخل پنل‌اند که از
+ * کارت‌های همان لایه‌ها در بخش «صفحات» باز می‌شوند. بدون افزودنشان به این
+ * مجموعه، `#admin/flashcard-library` و `#admin/micro-lesson` ناشناخته می‌مانند و
+ * مستقیم به داشبورد برمی‌گشتند (رفرش، بخش را از دست می‌داد).
+ */
+const ROUTABLE_VIEWS = new Set([...SECTION_IDS, 'flashcard-library', 'micro-lesson']);
+
+/*
  * زیرنمایش‌هایی که شناسه‌شان با بخش مادرشان یکی نیست.
  *
  * قبلاً تشخیص آیتم فعال با پیشوند انجام می‌شد (`view.name.startsWith('media-')`)
@@ -59,12 +69,21 @@ const SECTION_IDS = new Set(SECTIONS.map((section) => section.id));
  */
 const SECTION_SUBVIEWS = {
   'page-editor': 'pages',
+  'flashcard-library': 'pages',
+  'micro-lesson': 'pages',
 };
 
 /* نام هر نمایش → شناسهٔ بخشی که به آن تعلق دارد */
 function sectionOf(viewName) {
   return SECTION_SUBVIEWS[viewName] ?? viewName;
 }
+
+/* عنوان سرصفحه برای نماهایی که آیتم سایدبار ندارند */
+const VIEW_TITLES = {
+  'page-editor': 'ویرایش محتوا',
+  'flashcard-library': 'کتابخانهٔ فلش‌کارت تپش',
+  'micro-lesson': 'میکرو درسنامه تپش',
+};
 
 /* `#admin` یا `#admin/pages` یا `#admin/analytics/traffic` یا `#admin/pages/page-1234` */
 function parseHashView() {
@@ -73,7 +92,7 @@ function parseHashView() {
   if (!match) return { name: 'dashboard', payload: null };
 
   const section = match[1];
-  if (!section || !SECTION_IDS.has(section)) return { name: 'dashboard', payload: null };
+  if (!section || !ROUTABLE_VIEWS.has(section)) return { name: 'dashboard', payload: null };
 
   /* مرکز تحلیل: پاراگراف دوم نام تب است (`#admin/analytics/traffic`) */
   if (section === 'analytics') {
@@ -193,8 +212,10 @@ export function AdminShell({ admin, onExit, onLogout }) {
         );
       case 'pages':
         return <AdminPages {...editorProps} />;
-      case 'flashcards':
-        return <AdminFlashcards {...editorProps} />;
+      case 'flashcard-library':
+        return <AdminFlashcards admin={admin} onBack={() => navigate('pages')} />;
+      case 'micro-lesson':
+        return <AdminMicro admin={admin} onBack={() => navigate('pages')} />;
       case 'page-editor':
         return <AdminContentEditor {...editorProps} kind="page" id={view.payload?.id ?? null} />;
       case 'media':
@@ -321,7 +342,7 @@ export function AdminShell({ admin, onExit, onLogout }) {
           </button>
 
           <div className="ad-header__title">
-            <h1>{view.name === 'profile' ? 'حساب من' : SECTIONS.find((s) => s.id === view.name)?.label ?? 'ویرایش محتوا'}</h1>
+            <h1>{view.name === 'profile' ? 'حساب من' : (VIEW_TITLES[view.name] ?? SECTIONS.find((s) => s.id === view.name)?.label ?? 'ویرایش محتوا')}</h1>
             <p>{meta ? `آخرین ورود: ${faDate(admin.lastLoginAt)}` : 'در حال آماده‌سازی…'}</p>
           </div>
 

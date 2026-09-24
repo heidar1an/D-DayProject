@@ -3,14 +3,22 @@
  * هر دیاگرام فقط با کلید (name) از block نوع figure صدا زده می‌شود تا محتوا
  * data-driven بماند؛ افزودن دیاگرام جدید یعنی افزودن یک کلید به همین فایل.
  * رنگ‌ها از توکن‌های تم می‌خوانند تا با تعویض تم روشن/تیره هم‌گام بمانند.
+ *
+ * دو خانوادهٔ دیاگرام:
+ *   • اختصاصی  — pressure-timeline / wiggers / pv-loop (شکل ثابت، مخصوص فیزیولوژی قلب)
+ *   • عمومی     — flow / bars / cycle (شکل را از `block.data` می‌گیرند؛ هر درس می‌تواند
+ *                 بدون کد تازه شکل خودش را داشته باشد — قرارداد داده بالای هر کامپوننت)
  */
 
 const AXIS = 'rgb(var(--line-rgb) / 0.25)';
 const LABEL = 'var(--faint)';
+/* متن داخل شکل باید با تم روشن/تیره همراه شود؛ پس از توکن می‌خواند نه رنگ ثابت */
+const NODE_TEXT = 'var(--muted)';
+const NODE_FILL = 'rgb(var(--wash-rgb) / 0.06)';
 
-function Frame({ children, title }) {
+function Frame({ children, title, height = 320 }) {
   return (
-    <svg viewBox="0 0 640 320" role="img" aria-label={title} className="micr-figure__svg">
+    <svg viewBox={`0 0 640 ${height}`} role="img" aria-label={title} className="micr-figure__svg">
       {children}
     </svg>
   );
@@ -160,19 +168,222 @@ function PvLoop() {
   );
 }
 
+/* ══════════════ دیاگرام‌های داده‌محورِ عمومی ══════════════
+   این سه کلید (flow / bars / cycle) به‌جای شکل ثابت، از `block.data` تغذیه می‌شوند تا
+   هر درسِ میکرودرسنامه بدون کد تازه، شکل اختصاصی خودش را داشته باشد — همان قاعده‌ای
+   که موتور را data-driven نگه می‌دارد. قرارداد داده:
+
+     figure: { type:'figure', diagram:'flow',  data:{ steps:[{label, note}] } }
+     figure: { type:'figure', diagram:'bars',  data:{ unit, items:[{label, value}] } }
+     figure: { type:'figure', diagram:'cycle', data:{ center, stages:[{label}] } }
+
+   رنگ‌ها همه از توکن‌های تم می‌آیند تا با تعویض تم روشن/تیره هم‌گام بمانند. */
+
+/* شکستن برچسب به چند خط — متن فارسی داخل شکل باید بدون CSS چندخطی شود */
+function wrapLabel(text, maxChars = 16, maxLines = 2) {
+  const words = String(text ?? '').split(/\s+/).filter(Boolean);
+  const lines = [];
+  let current = '';
+  for (const word of words) {
+    const candidate = current ? `${current} ${word}` : word;
+    if (candidate.length <= maxChars || !current) {
+      current = candidate;
+      continue;
+    }
+    lines.push(current);
+    current = word;
+    if (lines.length === maxLines) break;
+  }
+  if (lines.length < maxLines && current) lines.push(current);
+  return lines.slice(0, maxLines);
+}
+
+function LabelLines({ x, y, lines, fill = NODE_TEXT, size = 11.5, step = 14 }) {
+  return (
+    <text x={x} y={y} fill={fill} fontSize={size} textAnchor="middle">
+      {lines.map((line, index) => (
+        <tspan key={line + index} x={x} dy={index === 0 ? 0 : step}>{line}</tspan>
+      ))}
+    </text>
+  );
+}
+
+/* زنجیرهٔ مرحله‌ها (مسیرها، آبشارها، فرآیندها) — چیدمان راست‌به‌چپ، سطرهای سه‌تایی */
+function FlowDiagram({ data }) {
+  const steps = (data?.steps ?? []).filter((step) => step?.label);
+  if (!steps.length) return null;
+
+  const PER_ROW = 3;
+  const PAD = 26;
+  const GAP = 30;
+  const ROW_H = 84;
+  const ROW_GAP = 44;
+  const rows = [];
+  for (let index = 0; index < steps.length; index += PER_ROW) {
+    rows.push(steps.slice(index, index + PER_ROW));
+  }
+  const height = PAD + rows.length * ROW_H + (rows.length - 1) * ROW_GAP + PAD;
+  const colors = ['var(--brown-bright)', 'var(--gold)', 'var(--green-bright)', 'var(--purple-bright)', 'var(--red)'];
+  /* عرض جعبه بر اساس سطر کامل حساب می‌شود تا سطر ناقص (مثلاً ۳+۱) جعبهٔ غول نداشته باشد */
+  const boxW = (640 - PAD * 2 - GAP * (PER_ROW - 1)) / PER_ROW;
+  const rowStartX = (count) => 640 - PAD - boxW - (count - 1) * (boxW + GAP);
+
+  return (
+    <Frame title={data?.title ?? 'زنجیرهٔ مرحله‌ها'} height={height}>
+      {rows.map((row, rowIndex) => {
+        const y = PAD + rowIndex * (ROW_H + ROW_GAP);
+        const count = row.length;
+        const startX = rowStartX(count);
+        const nextRow = rows[rowIndex + 1];
+        return (
+          <g key={`row-${rowIndex}`}>
+            {row.map((step, index) => {
+              /* چیدمان راست‌به‌چپ: مرحلهٔ اول سمت راست */
+              const x = startX - index * (boxW + GAP);
+              const stepNumber = rowIndex * PER_ROW + index + 1;
+              return (
+                <g key={step.label + index}>
+                  <rect x={x} y={y} width={boxW} height={ROW_H} rx="12" fill={NODE_FILL} stroke={AXIS} />
+                  <rect x={x} y={y} width={boxW} height="3" rx="1.5" fill={colors[stepNumber % colors.length]} />
+                  <circle cx={x + boxW - 15} cy={y + 19} r="10" fill="none" stroke={colors[stepNumber % colors.length]} />
+                  <text x={x + boxW - 15} y={y + 23} fill={NODE_TEXT} fontSize="10.5" textAnchor="middle">{stepNumber}</text>
+                  <LabelLines x={x + boxW / 2} y={y + 42} lines={wrapLabel(step.label, 18, 2)} />
+                  {step.note && (
+                    <LabelLines x={x + boxW / 2} y={y + 68} lines={wrapLabel(step.note, 24, 1)} fill={LABEL} size={10} />
+                  )}
+                  {index < count - 1 && (
+                    <g stroke={LABEL} strokeWidth="1.8" fill="none">
+                      <line x1={x - 6} y1={y + ROW_H / 2} x2={x - GAP + 6} y2={y + ROW_H / 2} />
+                      <path d={`M${x - GAP + 10} ${y + ROW_H / 2} l-6 -4 v8 z`} fill={LABEL} stroke="none" />
+                    </g>
+                  )}
+                </g>
+              );
+            })}
+            {nextRow && (
+              /* شکست سطر: از آخرین جعبهٔ سطر (چپ‌ترین) به اولین جعبهٔ سطر بعد (راست‌ترین) */
+              <path
+                d={`M${startX + boxW / 2} ${y + ROW_H} v${ROW_GAP / 2} H${rowStartX(nextRow.length) + boxW / 2} v${ROW_GAP / 2}`}
+                fill="none"
+                stroke={LABEL}
+                strokeWidth="1.6"
+                strokeDasharray="5 5"
+              />
+            )}
+          </g>
+        );
+      })}
+    </Frame>
+  );
+}
+
+/* مقایسهٔ کمّی چند مقدار — نوارها نسبت به بیشترین مقدار نرمال می‌شوند */
+function BarsDiagram({ data }) {
+  const items = (data?.items ?? []).filter((item) => item?.label);
+  if (!items.length) return null;
+
+  const max = Math.max(1, ...items.map((item) => Math.abs(Number(item.value) || 0)));
+  const baseY = 258;
+  const topY = 42;
+  const usable = 640 - 90 * 2;
+  const slot = usable / items.length;
+  const barW = Math.min(74, slot * 0.52);
+  const colors = ['var(--brown-bright)', 'var(--gold)', 'var(--green-bright)', 'var(--purple-bright)', 'var(--red)'];
+
+  return (
+    <Frame title={data?.title ?? 'مقایسهٔ مقادیر'}>
+      <line x1="70" y1={baseY} x2="600" y2={baseY} stroke={AXIS} strokeWidth="1.5" />
+      {data?.unit && <text x="70" y="26" fill={LABEL} fontSize="11.5">{data.unit}</text>}
+      {items.map((item, index) => {
+        const value = Math.abs(Number(item.value) || 0);
+        const barH = Math.max(4, (value / max) * (baseY - topY));
+        const x = 640 - (90 + slot * (index + 1) - (slot - barW) / 2) - barW;
+        return (
+          <g key={item.label + index}>
+            <rect x={x} y={baseY - barH} width={barW} height={barH} rx="6" fill={colors[index % colors.length]} opacity="0.85" />
+            <text x={x + barW / 2} y={baseY - barH - 8} fill={NODE_TEXT} fontSize="11.5" textAnchor="middle">{item.value}</text>
+            <LabelLines x={x + barW / 2} y={baseY + 18} lines={wrapLabel(item.label, 14, 2)} fill={LABEL} size={11} />
+          </g>
+        );
+      })}
+    </Frame>
+  );
+}
+
+/* چرخهٔ بستهٔ مرحله‌ها (چرخهٔ قلبی، چرخهٔ اوره، چرخهٔ تنفس و…) — حداکثر ۶ گره */
+function CycleDiagram({ data }) {
+  const stages = (data?.stages ?? []).filter((stage) => stage?.label).slice(0, 6);
+  if (stages.length < 2) return null;
+
+  const cx = 320;
+  const cy = 160;
+  const R = 96;
+  const nodeW = 132;
+  const nodeH = 42;
+  const colors = ['var(--brown-bright)', 'var(--gold)', 'var(--green-bright)', 'var(--purple-bright)', 'var(--red)', 'var(--blue-bright)'];
+  const pointAt = (angleDeg) => ({
+    x: cx + R * Math.cos((angleDeg * Math.PI) / 180),
+    y: cy + R * Math.sin((angleDeg * Math.PI) / 180),
+  });
+  const step = 360 / stages.length;
+
+  return (
+    <Frame title={data?.title ?? 'چرخهٔ مرحله‌ها'}>
+      <circle cx={cx} cy={cy} r={R} fill="none" stroke={AXIS} strokeWidth="1.6" strokeDasharray="6 6" />
+
+      {/* سرِ فلش‌ها روی نیم‌فاصلهٔ هر دو گره، در جهت حرکت */}
+      {stages.map((stage, index) => {
+        const mid = -90 + step * (index + 0.5);
+        const point = pointAt(mid);
+        return (
+          <g key={`arrow-${stage.label}-${index}`} transform={`translate(${point.x} ${point.y}) rotate(${mid + 90})`}>
+            <path d="M-5 -5 L6 0 L-5 5 z" fill={colors[index % colors.length]} />
+          </g>
+        );
+      })}
+
+      {stages.map((stage, index) => {
+        const point = pointAt(-90 + step * index);
+        return (
+          <g key={`node-${stage.label}-${index}`}>
+            <rect
+              x={point.x - nodeW / 2}
+              y={point.y - nodeH / 2}
+              width={nodeW}
+              height={nodeH}
+              rx="12"
+              fill="rgb(var(--wash-rgb) / 0.08)"
+              stroke={colors[index % colors.length]}
+              strokeWidth="1.6"
+            />
+            <LabelLines x={point.x} y={point.y - 1} lines={wrapLabel(stage.label, 17, 2)} />
+          </g>
+        );
+      })}
+
+      {data?.center && (
+        <LabelLines x={cx} y={cy} lines={wrapLabel(data.center, 14, 2)} fill={LABEL} size={11.5} />
+      )}
+    </Frame>
+  );
+}
+
 const FIGURES = {
   'pressure-timeline': PressureTimeline,
   wiggers: WiggersDiagram,
   'pv-loop': PvLoop,
+  flow: FlowDiagram,
+  bars: BarsDiagram,
+  cycle: CycleDiagram,
 };
 
-export default function MicroFigure({ diagram, title, caption }) {
+export default function MicroFigure({ diagram, title, caption, data }) {
   const Diagram = FIGURES[diagram];
   if (!Diagram) return null;
   return (
     <figure className="micr-figure">
       <figcaption className="micr-figure__title">{title}</figcaption>
-      <Diagram />
+      <Diagram data={data} />
       <figcaption className="micr-figure__caption">{caption}</figcaption>
     </figure>
   );

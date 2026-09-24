@@ -42,6 +42,17 @@
   background: var(--gp-bg);
 }
 
+.gp-layer__header--back-only {
+  width: var(--content-width);
+  margin: 0 auto;
+  min-height: 48px;
+  padding: 0;
+  border-bottom: 0;
+  position: static;
+  justify-content: flex-start;
+  direction: rtl;
+}
+
 .gp-layer__brand {
   display: flex;
   align-items: center;
@@ -143,6 +154,26 @@
   color: var(--gp-faint);
   font-size: 0.74rem;
 }
+
+.gp-layer__back--course {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.65rem 0.9rem;
+  border: 1px solid rgb(var(--line-rgb) / 0.11);
+  border-radius: 0.85rem;
+  background: rgb(var(--wash-rgb) / 0.035);
+  font-size: 0.78rem;
+  transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+
+.gp-layer__back--course:hover {
+  border-color: color-mix(in srgb, var(--gp-green) 65%, transparent);
+  background: color-mix(in srgb, var(--gp-green) 12%, transparent);
+  transform: translateY(-1px);
+}
+
+.gp-layer__back--course svg { width: 1rem; height: 1rem; }
 
 .gp-layer__back:hover,
 .gp-back-button:hover {
@@ -597,9 +628,45 @@
 .gp-recommendation small { color: var(--gp-faint); font-size: 0.62rem; line-height: 1.7; }
 .gp-recommendation--high { border-right: 2px solid var(--gold-ink); }
 
-.gp-subhero { padding: 24px; }
+.gp-subhero {
+  padding: clamp(30px, 5vh, 56px) 0 8px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  text-align: center;
+}
+.gp-subhero::before { display: none; }
+.gp-subhero .gp-eyebrow {
+  padding: 7px 14px;
+  border: 1px solid color-mix(in srgb, var(--gp-green) 45%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--gp-green) 10%, transparent);
+  font-size: 0.9rem;
+  letter-spacing: 0.1em;
+}
+.gp-subhero .gp-eyebrow::before {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
 .gp-back-button { display: inline-flex; align-items: center; gap: 5px; padding: 0; color: var(--gp-muted); font-size: 0.7rem; }
-.gp-subhero h1 { font-size: clamp(1.8rem, 4vw, 3rem); }
+.gp-subhero h1 {
+  margin: 18px 0 6px;
+  font-size: clamp(3rem, 7vw, 5.2rem);
+  line-height: 1.25;
+  font-weight: 800;
+  background: linear-gradient(120deg, var(--gp-green) 15%, var(--gp-green) 85%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+.gp-subhero p {
+  max-width: 720px;
+  margin: 16px auto 0;
+  font-size: clamp(1.05rem, 1.7vw, 1.3rem);
+  line-height: 2;
+}
 .gp-subhero__stats { display: flex; align-items: center; gap: 16px; margin-top: 22px; }
 .gp-subhero__stats > div:last-child,
 .gp-week-summary span { display: flex; flex-direction: column; gap: 4px; }

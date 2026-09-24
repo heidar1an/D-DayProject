@@ -189,6 +189,14 @@ export default function GreenPathLayer({ userData, onBack }) {
 
   return (
     <section className="gp-layer" dir="rtl" aria-label="مسیر سبز — موتور هدایت مسیر تحصیلی">
+      {snapshot.needsOnboarding ? (
+        <header className="gp-layer__header gp-layer__header--back-only">
+          <button type="button" className="gp-layer__back gp-layer__back--course" onClick={onBack}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" /></svg>
+            بازگشت به دوره‌ها
+          </button>
+        </header>
+      ) : (
       <header className="gp-layer__header">
         <div className="gp-layer__brand"><span className="gp-layer__mark"><SparkIcon /></span><span><strong>مسیر سبز</strong><small>{snapshot.academicProfile.university} · ترم {snapshot.academicProfile.semester}</small></span></div>
         <nav className="gp-layer__nav" aria-label="بخش‌های مسیر سبز">
@@ -200,8 +208,9 @@ export default function GreenPathLayer({ userData, onBack }) {
           <button type="button" className={effectiveMode === 'recovery' ? 'is-active' : ''} onClick={() => go('recovery')} disabled={snapshot.needsOnboarding}>جبران</button>
           <button type="button" className={effectiveMode === 'setup' ? 'is-active' : ''} onClick={() => go('setup')}>تنظیم مسیر</button>
         </nav>
-        <button type="button" className="gp-layer__back" onClick={handleLayerBack}>{snapshot.needsOnboarding ? 'تکمیل تنظیمات' : view.mode === 'overview' ? 'بستن مسیر' : 'بازگشت'} <span aria-hidden="true">×</span></button>
+        <button type="button" className="gp-layer__back" onClick={handleLayerBack}>{view.mode === 'overview' ? 'بستن مسیر' : 'بازگشت'} <span aria-hidden="true">×</span></button>
       </header>
+      )}
 
       {effectiveMode === 'overview' && <GreenPathOverview snapshot={snapshot} onOpenOnboarding={() => go('setup')} onOpenCourse={(courseId) => go('course', { courseId })} onOpenTask={openTask} onComplete={handleComplete} onFocus={openTask} onOpenResource={handleResource} onReschedule={handleReschedule} onOpenPhase={(phaseId) => { setToast({ tone: 'info', message: snapshot.roadmap.phases.find((phase) => phase.phaseId === phaseId)?.description ?? 'این مرحله بخشی از Roadmap فعلی است.' }); }} />}
       {effectiveMode === 'year' && <GreenPathYearView snapshot={snapshot} onOpenMonth={(monthId) => go('month', { monthId })} onOpenCalendar={() => go('calendar', { calendarMonth: currentMonth?.startDate?.slice(0, 7) })} />}

@@ -27,7 +27,19 @@ import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from '
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { buildExcerpt, sanitizeHtml } from './sanitizeHtml.js';
+import { buildExcerpt, htmlToText, sanitizeHtml } from './sanitizeHtml.js';
+/*
+ * سه ماژول دادهٔ خالص پروژه که seed، «انتخاب از بانک تست» و تبدیل متن را تغذیه می‌کنند.
+ * هیچ‌کدام وابستگی بیرونی ندارند (فقط دادهٔ ثابت و توابع خالص‌اند)، پس شرط «سرور بدون
+ * نصب چیزی اجرا شود» دست‌نخورده می‌ماند.
+ */
+import { MICRO_COURSE_SOURCES, MICRO_SUBJECT_OPTIONS } from '../src/data/micro/registry.js';
+import { blocksToHtml } from '../src/data/micro/blocksToHtml.js';
+import {
+  DIFFICULTIES as TEST_BANK_DIFFICULTIES,
+  QUESTIONS as TEST_BANK_QUESTIONS,
+  SUBJECTS as TEST_BANK_SUBJECTS,
+} from '../src/services/testBank/mockData.js';
 
 const databaseDir = dirname(fileURLToPath(import.meta.url));
 const contentDir = resolve(databaseDir, 'content');
@@ -44,6 +56,8 @@ export const PERMISSIONS = [
   'pages.create', 'pages.read', 'pages.update', 'pages.delete',
   /* کتابخانهٔ فلش‌کارت تپش — ساخت/ویرایش دک و کارت، انتشار در کتابخانهٔ عمومی */
   'flashcards.create', 'flashcards.read', 'flashcards.update', 'flashcards.delete', 'flashcards.publish',
+  /* میکرو درسنامه — ویرایش ساختار درس، ایستگاه‌های تست و انتشار برای کاربران */
+  'micro.create', 'micro.read', 'micro.update', 'micro.delete', 'micro.publish',
   'media.upload', 'media.read', 'media.delete',
   'banners.create', 'banners.update', 'banners.delete',
   'users.create', 'users.read', 'users.update', 'users.delete',
@@ -105,6 +119,7 @@ export const ROLES = {
       'categories.create', 'categories.read',
       'pages.read', 'pages.update',
       'flashcards.read', 'flashcards.create', 'flashcards.update', 'flashcards.publish',
+      'micro.read', 'micro.create', 'micro.update', 'micro.publish',
       'media.upload', 'media.read', 'media.delete',
       'notes.create', 'notes.read', 'notes.update', 'notes.delete',
       'publishing.read', 'publishing.send',
@@ -139,6 +154,10 @@ const COLLECTIONS = [
   /* کتابخانهٔ فلش‌کارت تپش — دک‌های رسمی که از پنل ساخته/منتشر می‌شوند؛
      کارت‌ها داخل رکورد دک می‌مانند (دک و کارت یک موجودیت مدیریتی‌اند). */
   'flashcardDecks',
+  /* میکرو درسنامه — هر رکورد یک درسنامهٔ کامل است: مبحث‌ها، واحدهای یادگیری،
+     صفحه‌ها، بلوک‌های محتوا، ایستگاه‌های تست و مفاهیم. مثل فلش‌کارت، کل درسنامه
+     یک موجودیت مدیریتی است و در یک رکورد می‌ماند تا انتشار اتمیک باشد. */
+  'microCourses',
   /*
    * مرکز رسانه و فضای مجازی — ۱۲ مجموعهٔ مستقل.
    * هر مجموعه یک Entity از مدل داده است؛ افزودن پلتفرم یا نوع محتوای تازه
@@ -432,6 +451,9 @@ function ensureStore() {
   ensureFile(files.categories, SEED_CATEGORIES);
   ensureFile(files.pages, seedPages());
   ensureFile(files.flashcardDecks, seedFlashcardDecks());
+  ensureFile(files.microCourses, seedMicroCourses());
+  /* پروژه‌های موجود فقط فیزیولوژی را داشتند؛ درس‌های غایب رجیستری اینجا اضافه می‌شوند */
+  syncMicroCourses();
   ensureFile(files.media, []);
   ensureFile(files.banners, seedBanners());
   ensureFile(files.activity, []);
@@ -1188,6 +1210,626 @@ function seedFlashcardDecks() {
       ],
     },
   ];
+}
+
+/* ──────────────────────────── میکرو درسنامه ──────────────────────────── */
+
+/*
+ * میکرو درسنامه — همان قرارداد دادهٔ `src/data/micro/physiologyCourse.js`، فقط
+ * حالا ویرایش‌پذیر از پنل.
+ *
+ * سلسله‌مراتب: درسنامه → مبحث (کارت درس) → واحد یادگیری → صفحه (بلوک‌ها + مفاهیم)
+ *              → ایستگاه تست (checkpoint)
+ *
+ * چرا کل درسنامه در یک رکورد می‌ماند؟ چون انتشار اتمیک است: کاربر یا نسخهٔ کامل
+ * یک درسنامه را می‌بیند یا هیچ. اگر مبحث‌ها رکورد جدا بودند، نصفه‌منتشرشده‌شدن
+ * ممکن می‌شد و خوانندهٔ میکرو (که کل course را یک‌جا می‌خواند) ناسازگار می‌شد.
+ *
+ * «ایستگاه تست» دو راه تغذیه دارد و هر دو در همین رکورد نگه داشته می‌شوند:
+ *   ۱) انتخاب از بانک تست → `pinnedQuestionIds` + فیلتر `unit.testBank`
+ *   ۲) بارگذاری تست دستی  → `questions[]` روی خود checkpoint
+ * اگر `questions[]` پر باشد، موتور تست همان‌ها را بر فیلتر بانک ترجیح می‌دهد.
+ */
+
+const MICRO_STATUSES = ['draft', 'published', 'archived'];
+const MICRO_DIFFICULTIES = ['easy', 'medium', 'hard', 'very_hard'];
+
+/* انواع بلوک محتوای یک صفحه — عیناً همان قرارداد موتور خواننده */
+const MICRO_BLOCK_TYPES = [
+  'heading', 'intro', 'text', 'keyPoint', 'definition', 'example', 'comparison',
+  'table', 'warning', 'clinical', 'crossCourse', 'figure', 'flashcards',
+  'quickQuestion', 'summary',
+];
+
+const MICRO_ANSWER_KEYS = ['0', '1', '2', '3'];
+
+const microText = (value, max) => String(value ?? '').trim().slice(0, max);
+
+const microList = (value, max, itemMax) => (Array.isArray(value) ? value : [])
+  .map((item) => microText(item, itemMax))
+  .filter(Boolean)
+  .slice(0, max);
+
+const microInt = (value, fallback, min, max) => {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return fallback;
+  return Math.min(Math.max(Math.round(number), min), max);
+};
+
+const microHex = (value, fallback) => (
+  /^#[0-9a-fA-F]{3,8}$/.test(String(value ?? '')) ? String(value) : fallback
+);
+
+/* شناسهٔ امن: فقط حروف/عدد/خط تیره — چون شناسه در URL و در گره‌های شبکهٔ دانش می‌رود */
+const microId = (value, fallback) => {
+  const clean = String(value ?? '').trim().replace(/[^\w-]/g, '-').replace(/-+/g, '-').slice(0, 60);
+  return clean || fallback;
+};
+
+/* «مسیر مبحث» در بانک تست آرایه‌ای است؛ در فرم با «›» نوشته می‌شود */
+const microTopicPath = (value) => (Array.isArray(value) ? value : String(value ?? '').split('›'))
+  .map((part) => microText(part, 60))
+  .filter(Boolean)
+  .slice(0, 4);
+
+const microTopicPaths = (value, max = 12) => (Array.isArray(value) ? value : [])
+  .map(microTopicPath)
+  .filter((path) => path.length > 0)
+  .slice(0, max);
+
+/* سقف متن غنی یک صفحه — یک صفحهٔ درسنامه هرگز نباید به اندازهٔ یک کتاب شود */
+const MICRO_CONTENT_MAX = 60000;
+
+/*
+ * متن غنی صفحه. ورودی از ویرایشگر متن می‌آید، پس همان پاک‌ساز مشترک پروژه
+ * (`database/sanitizeHtml.js`) رویش اجرا می‌شود — نه فقط در کلاینت.
+ * اگر از سقف رد شد، در مرز آخرین تگ بریده می‌شود تا HTML نیمه‌کاره ذخیره نشود.
+ */
+const microHtml = (value) => {
+  const clean = sanitizeHtml(String(value ?? ''));
+  if (clean.length <= MICRO_CONTENT_MAX) return clean;
+  const cut = clean.slice(0, MICRO_CONTENT_MAX);
+  return cut.slice(0, cut.lastIndexOf('>') + 1);
+};
+
+function microBlockPayload(input) {
+  const type = MICRO_BLOCK_TYPES.includes(input?.type) ? input.type : 'text';
+  const block = { type };
+
+  if (type === 'table') {
+    block.title = microText(input?.title, 160);
+    block.head = microList(input?.head, 6, 60);
+    block.rows = (Array.isArray(input?.rows) ? input.rows : [])
+      .map((row) => microList(row, 6, 120))
+      .filter((row) => row.length)
+      .slice(0, 20);
+    return block;
+  }
+
+  if (type === 'comparison') {
+    block.title = microText(input?.title, 160);
+    block.left = {
+      label: microText(input?.left?.label, 80),
+      items: microList(input?.left?.items, 8, 200),
+    };
+    block.right = {
+      label: microText(input?.right?.label, 80),
+      items: microList(input?.right?.items, 8, 200),
+    };
+    return block;
+  }
+
+  if (type === 'figure') {
+    block.title = microText(input?.title, 160);
+    block.caption = microText(input?.caption, 300);
+    block.diagram = microId(input?.diagram, 'pressure-timeline');
+    return block;
+  }
+
+  if (type === 'flashcards') {
+    block.title = microText(input?.title, 160);
+    block.cards = (Array.isArray(input?.cards) ? input.cards : [])
+      .map((card) => ({ front: microText(card?.front, 300), back: microText(card?.back, 600) }))
+      .filter((card) => card.front || card.back)
+      .slice(0, 20);
+    return block;
+  }
+
+  if (type === 'quickQuestion') {
+    block.question = microText(input?.question, 400);
+    block.answer = microText(input?.answer, 1200);
+    return block;
+  }
+
+  if (type === 'summary' || type === 'crossCourse') {
+    if (type === 'crossCourse') block.title = microText(input?.title, 160);
+    block.items = microList(input?.items, 12, 300);
+    return block;
+  }
+
+  if (type === 'definition') {
+    block.term = microText(input?.term, 120);
+    block.english = microText(input?.english, 160);
+    block.text = microText(input?.text, 3000);
+    return block;
+  }
+
+  if (type === 'example' || type === 'clinical') {
+    block.title = microText(input?.title, 160);
+    block.text = microText(input?.text, 3000);
+    return block;
+  }
+
+  /* heading | intro | text | keyPoint | warning — همه فقط متن دارند */
+  block.text = microText(input?.text, 6000);
+  if (type === 'text' && input?.depth === 'extended') block.depth = 'extended';
+  return block;
+}
+
+/* سؤال دستیِ ایستگاه تست — همان شکل رکورد بانک تست، بدون آمار جامعه */
+function microQuestionPayload(input, fallbackId) {
+  const options = microList(input?.options, 6, 400);
+  const stem = microText(input?.stem, 2000);
+  if (!stem || options.length < 2) return null;
+
+  const correctAnswer = String(microInt(input?.correctAnswer, 0, 0, options.length - 1));
+
+  return {
+    id: microId(input?.id, fallbackId),
+    stem,
+    options,
+    correctAnswer: MICRO_ANSWER_KEYS.includes(correctAnswer) ? Number(correctAnswer) : 0,
+    difficulty: MICRO_DIFFICULTIES.includes(input?.difficulty) ? input.difficulty : 'medium',
+    topicPath: microTopicPath(input?.topicPath),
+    conceptIds: microList(input?.conceptIds, 8, 60),
+    tags: microList(input?.tags, 6, 40),
+    explanation: microText(input?.explanation, 2000),
+    source: 'manual',
+  };
+}
+
+function microCheckpointPayload(input, index) {
+  const questions = (Array.isArray(input?.questions) ? input.questions : [])
+    .map((question, questionIndex) => microQuestionPayload(question, `q${index + 1}-${questionIndex + 1}`))
+    .filter(Boolean)
+    .slice(0, 30);
+
+  return {
+    id: microId(input?.id, `cp${index + 1}`),
+    afterPage: microId(input?.afterPage, ''),
+    questionCount: microInt(input?.questionCount, 3, 1, 20),
+    required: Boolean(input?.required),
+    scopePages: microList(input?.scopePages, 40, 60),
+    /* انتخاب از بانک تست: یا شناسهٔ سؤال‌های سنجاق‌شده، یا فقط فیلتر واحد */
+    pinnedQuestionIds: microList(input?.pinnedQuestionIds, 60, 60),
+    questions,
+  };
+}
+
+function microPagePayload(input, index) {
+  const blocks = (Array.isArray(input?.blocks) ? input.blocks : []).map(microBlockPayload).slice(0, 40);
+
+  /*
+   * متن غنی صفحه، منبع اصلی نمایش است. اگر ادمین متنی ننوشته باشد، یک‌بار از
+   * بلوک‌های قدیمی مشتق می‌شود تا صفحه‌های موجود در ویرایشگر متنی خالی به چشم نیایند.
+   * بلوک‌ها دست‌نخورده می‌مانند (آرشیو) و متن نوشته‌شدهٔ ادمین همیشه بر مشتق‌شده
+   * اولویت دارد؛ پس ذخیرهٔ بعدی، ویرایش ادمین را بازنویسی نمی‌کند.
+   */
+  const content = microHtml(input?.content) || blocksToHtml(blocks);
+
+  return {
+    id: microId(input?.id, `p${index + 1}`),
+    order: microInt(input?.order, index + 1, 1, 999),
+    title: microText(input?.title, 200),
+    learningObjective: microText(input?.learningObjective, 1200),
+    estimatedTime: microInt(input?.estimatedTime, 4, 1, 180),
+    difficulty: MICRO_DIFFICULTIES.includes(input?.difficulty) ? input.difficulty : 'medium',
+    importance: microInt(input?.importance, 3, 1, 5),
+    examFrequency: ['low', 'medium', 'high'].includes(input?.examFrequency) ? input.examFrequency : 'medium',
+    keywords: microList(input?.keywords, 12, 40),
+    concepts: microList(input?.concepts, 20, 60),
+    content,
+    blocks,
+  };
+}
+
+function microConceptPayload(input, index) {
+  return {
+    id: microId(input?.id, `concept-${index + 1}`),
+    title: microText(input?.title, 160),
+    english: microText(input?.english, 160),
+    importance: microInt(input?.importance, 3, 1, 5),
+    examFrequency: ['low', 'medium', 'high'].includes(input?.examFrequency) ? input.examFrequency : 'medium',
+    crossCourse: (Array.isArray(input?.crossCourse) ? input.crossCourse : [])
+      .map((item) => ({
+        courseId: microId(item?.courseId, ''),
+        courseTitle: microText(item?.courseTitle, 120),
+        topic: microText(item?.topic, 160),
+      }))
+      .filter((item) => item.courseTitle)
+      .slice(0, 8),
+  };
+}
+
+function microUnitPayload(input, index) {
+  const pages = (Array.isArray(input?.pages) ? input.pages : [])
+    .map(microPagePayload)
+    .slice(0, 60)
+    .sort((a, b) => a.order - b.order)
+    .map((page, pageIndex) => ({ ...page, order: pageIndex + 1 }));
+
+  const checkpoints = (Array.isArray(input?.checkpoints) ? input.checkpoints : [])
+    .map(microCheckpointPayload)
+    .slice(0, 30);
+
+  return {
+    id: microId(input?.id, `unit-${index + 1}`),
+    title: microText(input?.title, 200),
+    learningObjective: microText(input?.learningObjective, 1500),
+    estimatedTime: microInt(input?.estimatedTime, 30, 1, 600),
+    difficulty: MICRO_DIFFICULTIES.includes(input?.difficulty) ? input.difficulty : 'medium',
+    checkpointInterval: microInt(input?.checkpointInterval, 4, 1, 30),
+    testBank: {
+      subjectId: microId(input?.testBank?.subjectId, ''),
+      topicPaths: microTopicPaths(input?.testBank?.topicPaths),
+      relatedTopicPaths: microTopicPaths(input?.testBank?.relatedTopicPaths),
+    },
+    finalAssessment: { questionCount: microInt(input?.finalAssessment?.questionCount, 10, 1, 60) },
+    concepts: (Array.isArray(input?.concepts) ? input.concepts : []).map(microConceptPayload).slice(0, 40),
+    pages,
+    checkpoints,
+  };
+}
+
+function microTopicPayload(input, index) {
+  return {
+    id: microId(input?.id, `topic-${index + 1}`),
+    title: microText(input?.title, 200),
+    description: microText(input?.description, 500),
+    accent: microHex(input?.accent, '#ab8e7c'),
+    published: Boolean(input?.published),
+    units: (Array.isArray(input?.units) ? input.units : []).map(microUnitPayload).slice(0, 20),
+  };
+}
+
+function microCoursePayload(input, existing = null) {
+  const title = microText(input?.title, 160);
+  if (!title) throw Object.assign(new Error('عنوان درسنامه الزامی است'), { code: 'VALIDATION_ERROR' });
+
+  const topics = (Array.isArray(input?.topics) ? input.topics : (existing?.topics ?? []))
+    .map(microTopicPayload)
+    .filter((topic) => topic.title)
+    .slice(0, 40);
+
+  return {
+    subjectId: microId(input?.subjectId, 'general'),
+    title,
+    englishTitle: microText(input?.englishTitle, 160),
+    kicker: microText(input?.kicker, 160),
+    description: microText(input?.description, 1000),
+    accent: microHex(input?.accent, '#ab8e7c'),
+    estimatedTime: microInt(input?.estimatedTime, 40, 1, 2000),
+    difficulty: MICRO_DIFFICULTIES.includes(input?.difficulty) ? input.difficulty : 'medium',
+    checkpointInterval: microInt(input?.checkpointInterval, 4, 1, 30),
+    status: MICRO_STATUSES.includes(input?.status) ? input.status : 'draft',
+    topics,
+  };
+}
+
+/* شمارنده‌های یک درسنامه — هم برای فهرست پنل، هم برای نوار آمار داخل لایه */
+export function microCourseCounts(course) {
+  const topics = course?.topics ?? [];
+  const units = topics.flatMap((topic) => topic.units ?? []);
+  const pages = units.flatMap((unit) => unit.pages ?? []);
+  const checkpoints = units.flatMap((unit) => unit.checkpoints ?? []);
+  return {
+    topics: topics.length,
+    publishedTopics: topics.filter((topic) => topic.published).length,
+    units: units.length,
+    pages: pages.length,
+    blocks: pages.reduce((total, page) => total + (page.blocks?.length ?? 0), 0),
+    /* صفحه‌هایی که متن غنی دارند — از زمان مهاجرت به ویرایشگر متنی، معیار «صفحهٔ پرشده» */
+    richPages: pages.filter((page) => htmlToText(page.content).length > 0).length,
+    checkpoints: checkpoints.length,
+    manualQuestions: checkpoints.reduce((total, checkpoint) => total + (checkpoint.questions?.length ?? 0), 0),
+    pinnedQuestions: checkpoints.reduce((total, checkpoint) => total + (checkpoint.pinnedQuestionIds?.length ?? 0), 0),
+    concepts: units.reduce((total, unit) => total + (unit.concepts?.length ?? 0), 0),
+  };
+}
+
+export function listMicroCourses({ search = '', status = 'all', page = 1, perPage = 20 } = {}) {
+  const query = normalizeSearch(search);
+  const filtered = readCollection('microCourses').filter((course) => {
+    if (status !== 'all' && course.status !== status) return false;
+    if (!query) return true;
+    return [course.title, course.englishTitle, course.description]
+      .some((field) => normalizeSearch(field).includes(query));
+  });
+
+  filtered.sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''));
+  const result = paginate(filtered, { page, perPage });
+
+  return {
+    ...result,
+    items: result.items.map((course) => ({
+      id: course.id,
+      subjectId: course.subjectId,
+      title: course.title,
+      englishTitle: course.englishTitle,
+      description: course.description,
+      accent: course.accent,
+      status: course.status,
+      counts: microCourseCounts(course),
+      publishedAt: course.publishedAt ?? null,
+      updatedAt: course.updatedAt,
+    })),
+  };
+}
+
+export function getMicroCourse(id) {
+  return readCollection('microCourses').find((course) => course.id === id) ?? null;
+}
+
+/*
+ * فهرست درس‌های رجیستری برای فرم «درسنامهٔ تازه» در پنل.
+ * از سرور می‌آید (نه import مستقیم در پنل) تا باندل پنل ۱۶ فایل درس را با خودش نکشد.
+ */
+export function microSubjectCatalog() {
+  return MICRO_SUBJECT_OPTIONS.map((subject) => ({ ...subject }));
+}
+
+export function createMicroCourse(input, admin) {
+  const courses = readCollection('microCourses');
+  const created = nowIso();
+
+  /*
+   * اگر درس از رجیستری انتخاب شده باشد و ادمین مبحثی نفرستاده باشد، ساختار همان درس
+   * کپی می‌شود تا «درسنامهٔ تازه» از یک الگوی واقعی شروع شود، نه از یک صفحهٔ خالی.
+   * این همان چیزی است که کاربر خواست: الگو و الگوریتم فیزیولوژی برای بقیهٔ درس‌ها هم باشد.
+   */
+  const subjectId = String(input?.subjectId ?? '').trim();
+  const source = MICRO_COURSE_SOURCES.find((entry) => entry.courseId === subjectId)?.course ?? null;
+  const payload = source && !(input?.topics ?? []).length
+    ? { ...source, ...input, topics: source.topics }
+    : input;
+
+  const course = {
+    id: makeId('mcr'),
+    ...microCoursePayload(payload),
+    publishedAt: null,
+    createdAt: created,
+    updatedAt: created,
+    createdBy: admin?.id ?? 'system',
+    updatedBy: admin?.id ?? 'system',
+  };
+
+  courses.unshift(course);
+  writeCollection('microCourses', courses);
+  return course;
+}
+
+export function updateMicroCourse(id, input, admin) {
+  const courses = readCollection('microCourses');
+  const index = courses.findIndex((course) => course.id === id);
+  if (index === -1) return null;
+
+  const updated = {
+    ...courses[index],
+    ...microCoursePayload(input, courses[index]),
+    updatedAt: nowIso(),
+    updatedBy: admin?.id ?? 'system',
+  };
+
+  courses[index] = updated;
+  writeCollection('microCourses', courses);
+  return updated;
+}
+
+/*
+ * انتشار/لغو انتشار. «انتشار» یعنی همین درسنامه از مسیر عمومی
+ * `/api/public/micro/library` به همهٔ کاربران تپش تحویل داده می‌شود؛ «لغو» یعنی
+ * از همان مسیر برداشته می‌شود ولی رکورد و محتوا دست‌نخورده می‌ماند.
+ */
+export function setMicroCourseStatus(id, status, admin) {
+  if (!MICRO_STATUSES.includes(status)) {
+    throw Object.assign(new Error('وضعیت نامعتبر'), { code: 'VALIDATION_ERROR' });
+  }
+
+  const courses = readCollection('microCourses');
+  const index = courses.findIndex((course) => course.id === id);
+  if (index === -1) return null;
+
+  courses[index] = {
+    ...courses[index],
+    status,
+    publishedAt: status === 'published' ? nowIso() : null,
+    updatedAt: nowIso(),
+    updatedBy: admin?.id ?? 'system',
+  };
+
+  writeCollection('microCourses', courses);
+  return courses[index];
+}
+
+export function deleteMicroCourse(id) {
+  const courses = readCollection('microCourses');
+  const target = courses.find((course) => course.id === id);
+  if (!target) return null;
+
+  writeCollection('microCourses', courses.filter((course) => course.id !== id));
+  return target;
+}
+
+/*
+ * تحویل عمومی — فقط درسنامه‌های منتشرشده و فقط با شکل قرارداد موتور میکرو
+ * (همان فیلدهایی که `src/data/micro/physiologyCourse.js` دارد). فرادادهٔ مدیریتی
+ * (status، createdBy، …) بیرون می‌ماند تا کلاینت کاربر چیزی از پنل نبیند.
+ */
+export function publishedMicroCourses() {
+  return readCollection('microCourses')
+    .filter((course) => course.status === 'published')
+    .map((course) => ({
+      id: course.id,
+      subjectId: course.subjectId,
+      title: course.title,
+      englishTitle: course.englishTitle,
+      kicker: course.kicker,
+      description: course.description,
+      accent: course.accent,
+      estimatedTime: course.estimatedTime,
+      difficulty: course.difficulty,
+      checkpointInterval: course.checkpointInterval,
+      source: 'tapesh',
+      updatedAt: course.updatedAt,
+      publishedAt: course.publishedAt,
+      topics: course.topics,
+    }));
+}
+
+/*
+ * «انتخاب از بانک تست» — جست‌وجو روی بانک تست علوم پایه تپش.
+ * این تابع تنها نقطهٔ خواندن بانک از سمت سرور است؛ وقتی بانک به Backend منتقل
+ * شود، فقط بدنهٔ همین تابع به کوئری تبدیل می‌شود.
+ */
+export function searchTestBankQuestions({
+  search = '', subjectId = '', topicPath = '', difficulty = 'all', limit = 40,
+} = {}) {
+  const query = normalizeSearch(search);
+  const path = microText(topicPath, 120);
+  const size = microInt(limit, 40, 1, 100);
+
+  const matched = TEST_BANK_QUESTIONS.filter((question) => {
+    if (subjectId && question.subject !== subjectId) return false;
+    if (difficulty !== 'all' && question.difficulty !== difficulty) return false;
+    if (path && !question.topicPath.join(' › ').includes(path)) return false;
+    if (!query) return true;
+    return normalizeSearch(question.stem).includes(query)
+      || normalizeSearch(question.topicPath.join(' › ')).includes(query);
+  });
+
+  return {
+    total: matched.length,
+    items: matched.slice(0, size).map((question) => ({
+      id: question.id,
+      subject: question.subject,
+      subjectTitle: TEST_BANK_SUBJECTS.find((subject) => subject.id === question.subject)?.name ?? question.subject,
+      topicPath: question.topicPath,
+      difficulty: question.difficulty,
+      difficultyLabel: TEST_BANK_DIFFICULTIES[question.difficulty]?.label ?? question.difficulty,
+      type: question.type,
+      year: question.year,
+      tags: question.tags ?? [],
+      stem: question.stem,
+      options: question.options,
+      correctAnswer: question.correctAnswer,
+      conceptIds: question.conceptIds ?? [],
+    })),
+    subjects: TEST_BANK_SUBJECTS.map((subject) => ({ id: subject.id, name: subject.name })),
+    difficulties: Object.entries(TEST_BANK_DIFFICULTIES)
+      .map(([id, meta]) => ({ id, label: meta?.label ?? id })),
+  };
+}
+
+/*
+ * یک رکورد درسنامه از یک درسِ رجیستری می‌سازد. تنها جایی که «درسِ کد» به «رکورد پنل»
+ * تبدیل می‌شود؛ هم seed اولیه و هم همگام‌سازی از همین تابع رد می‌شوند تا شکل داده
+ * یک‌نسخه بماند.
+ */
+function microCourseFromSource(courseId, source, created) {
+  const course = microCoursePayload({ ...source, status: 'draft' });
+
+  return {
+    id: `mcr-${courseId}`,
+    ...course,
+    publishedAt: null,
+    createdAt: created,
+    updatedAt: created,
+    createdBy: 'seed',
+    updatedBy: 'seed',
+  };
+}
+
+/*
+ * seed اولیه — هر ۱۶ درسِ رجیستری (`src/data/micro/registry.js`) با وضعیت `draft`.
+ * چرا draft؟ چون انتشار باید یک تصمیم صریح ادمین باشد، نه عارضهٔ جانبی seed.
+ *
+ * نتیجه memo می‌شود: `ensureStore` این تابع را به‌عنوان آرگومان `ensureFile` صدا
+ * می‌زند و آرگومان پیش از فراخوانی ساخته می‌شود؛ بدون memo، هر read/write کل
+ * رجیستری را دوباره نرمال می‌کرد.
+ */
+let microSeedCache = null;
+
+function seedMicroCourses() {
+  if (microSeedCache) return microSeedCache;
+
+  const created = nowIso();
+  microSeedCache = MICRO_COURSE_SOURCES
+    .map(({ courseId, course }) => microCourseFromSource(courseId, course, created));
+
+  return microSeedCache;
+}
+
+/*
+ * همگام‌سازی افزایشی: هر درسِ رجیستری که در فایل `microCourses.json` رکورد ندارد،
+ * به‌صورت draft اضافه می‌شود. این تابع هیچ رکورد موجودی را دست نمی‌زند، پس ویرایش‌های
+ * ادمین (و وضعیت انتشار) محفوظ می‌ماند. لازم است چون `ensureFile` فقط وقتی فایل
+ * نباشد seed می‌کند و پروژه‌های موجود با یک درس seed شده بودند.
+ *
+ * دو محافظ دارد:
+ *   • `microSynced` — یک‌بار در عمر هر پروسه اجرا می‌شود (ensureStore روی هر
+ *     read/write صدا زده می‌شود و این تابع نباید هر بار فایل را باز کند).
+ *   • `writeJson` مستقیم، نه `writeCollection` — وگرنه از داخل ensureStore به
+ *     ensureStore برمی‌گردیم و حلقهٔ بی‌پایان می‌شود.
+ */
+let microSynced = false;
+
+/*
+ * رکوردهای ذخیره‌شده پیش از مهاجرت به ویرایشگر متنی، فیلد `content` ندارند.
+ * این تابع فقط همان فیلد را از بلوک‌های موجود پر می‌کند و به هیچ فیلد دیگری دست
+ * نمی‌زند؛ اگر چیزی برای تغییر نبود `null` برمی‌گرداند تا نوشتن بی‌دلیل فایل رخ ندهد.
+ */
+function backfillMicroContent(course) {
+  let changed = false;
+
+  const topics = (course.topics ?? []).map((topic) => ({
+    ...topic,
+    units: (topic.units ?? []).map((unit) => ({
+      ...unit,
+      pages: (unit.pages ?? []).map((page) => {
+        if (microHtml(page.content)) return page;
+        const derived = blocksToHtml(page.blocks ?? []);
+        if (!derived) return page;
+        changed = true;
+        return { ...page, content: derived };
+      }),
+    })),
+  }));
+
+  return changed ? { ...course, topics } : null;
+}
+
+function syncMicroCourses() {
+  if (microSynced) return;
+  microSynced = true;
+
+  const stored = readJson(files.microCourses, []);
+  if (!Array.isArray(stored)) return;
+
+  const known = new Set(stored.map((course) => course.id));
+  const created = nowIso();
+  const missing = MICRO_COURSE_SOURCES
+    .filter(({ courseId }) => !known.has(`mcr-${courseId}`))
+    .map(({ courseId, course }) => microCourseFromSource(courseId, course, created));
+
+  let changed = false;
+  const backfilled = stored.map((course) => {
+    const next = backfillMicroContent(course);
+    if (next) changed = true;
+    return next ?? course;
+  });
+
+  if (!missing.length && !changed) return;
+  writeJson(files.microCourses, [...backfilled, ...missing]);
 }
 
 /* ─────────────────────────────── بنرها ─────────────────────────────── */

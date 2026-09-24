@@ -614,14 +614,33 @@ export default function MicroCourseReader({ courseId, userId = 'local-user', vie
         <main className="micr-content" data-testid="micr-content">
           {screen === 'assessment' && (
             <div key="assessment" className="micr-enter">
-              <FinalAssessment
-                questions={assessmentQuestions}
-                attempts={assessmentAttempts}
-                deepMode={deepMode}
-                onAnswer={handleAssessmentAnswer}
-                onFinish={finishAssessment}
-                onAskAI={askTapeshAI}
-              />
+              {assessmentQuestions.length ? (
+                <FinalAssessment
+                  questions={assessmentQuestions}
+                  attempts={assessmentAttempts}
+                  deepMode={deepMode}
+                  onAnswer={handleAssessmentAnswer}
+                  onFinish={finishAssessment}
+                  onAskAI={askTapeshAI}
+                />
+              ) : (
+                /* آزمون جمع‌بندی هم مثل ایستگاه‌ها از بانک تست تغذیه می‌شود؛ درسی که
+                   هنوز سؤال گره‌خورده ندارد باید راه بازگشت بگیرد، نه صفحهٔ خالی. */
+                <div className="micr-empty">
+                  <strong>سؤال‌های آزمون جمع‌بندی این مبحث آماده نشده</strong>
+                  <p>
+                    آزمون از بانک تست تپش انتخاب می‌شود؛ برای این مبحث هنوز سؤالی با گرهٔ
+                    مفهومی‌اش در بانک ثبت نشده است.
+                  </p>
+                  <button
+                    type="button"
+                    className="micr-button micr-button--soft"
+                    onClick={() => { setScreen('flow'); setFlowIndex(flow.length); }}
+                  >
+                    بازگشت به کارنامهٔ مبحث
+                  </button>
+                </div>
+              )}
             </div>
           )}
 

@@ -8,8 +8,10 @@
  *   • فلش‌کارت و quickQuestion تعامل «بازیابی فعال» را داخل همان صفحه می‌آورند.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import MicroFigure from './microDiagrams';
+import { sanitizeHtml } from '../../../../services/admin/sanitizeHtml';
+import { hasRichContent, interactiveBlocksOf } from '../../../../data/micro/blocksToHtml';
 
 export const HIGHLIGHT_COLORS = {
   important: { label: 'مهم', css: 'var(--gold)' },
@@ -227,9 +229,23 @@ export default function MicroBlocks({
     onRemoveHighlight,
   };
 
+  /*
+   * دو مدل محتوا، یک رندر:
+   *   • صفحهٔ مهاجرت‌کرده → `page.content` (متن غنی از ویرایشگر پنل) منبع نمایش است
+   *     و بلوک‌ها فقط برای چیزهایی می‌مانند که در HTML خالص قابل بیان نیستند
+   *     (دیاگرام، فلش‌کارت، خودآزمایی) — پس هیچ محتوایی گم نمی‌شود.
+   *   • صفحهٔ بلوکی قدیمی → همان مسیر قبلی، بدون تغییر.
+   */
+  const richContent = hasRichContent(page);
+  const richHtml = useMemo(
+    () => (richContent ? sanitizeHtml(page.content) : ''),
+    [richContent, page.content],
+  );
+  const sourceBlocks = richContent ? interactiveBlocksOf(page) : page.blocks;
+
   /* blockهای فقط-عمیق: extended، clinical و crossCourse در درس سریع جمع می‌شوند */
   const quickHidden = new Set(['clinical', 'crossCourse']);
-  const visibleBlocks = page.blocks.filter((block) => {
+  const visibleBlocks = sourceBlocks.filter((block) => {
     if (deepMode) return true;
     if (block.depth === 'extended') return false;
     if (quickHidden.has(block.type)) return false;
@@ -352,6 +368,8 @@ export default function MicroBlocks({
             diagram={block.diagram}
             title={block.title}
             caption={block.caption}
+            /* دیاگرام‌های عمومی (flow/bars/cycle) شکلشان را از خودِ block می‌گیرند */
+            data={block.data}
           />
         );
       case 'flashcards':
@@ -384,6 +402,14 @@ export default function MicroBlocks({
 
   return (
     <div className="micr-blocks" ref={containerRef}>
+      {richContent ? (
+        <div
+          className="micr-rich"
+          /* محتوا در سرور پاک‌سازی می‌شود (`database/sanitizeHtml.js`) و اینجا دوباره
+             پیش از رندر؛ پس حتی اگر رکورد دستی دست‌کاری شده باشد چیزی اجرا نمی‌شود. */
+          dangerouslySetInnerHTML={{ __html: richHtml }}
+        />
+      ) : null}
       {visibleBlocks.map(renderBlock)}
       <SelectionToolbar
         toolbar={toolbar}

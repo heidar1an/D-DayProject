@@ -9,6 +9,9 @@
  * هر ورود به checkpoint، سؤال‌ها دوباره برای حل‌کردن نمایش داده می‌شوند (تمرین مجدد).
  * چرخهٔ Learn → Test → Detect Weakness → Review → Retest همین‌جا کامل می‌شود و
  * سؤال‌های گیج‌کننده با یک کلیک به «تپش هوشمند» ارسال می‌شوند.
+ *
+ * ایستگاهِ بدون سؤال (درسی که هنوز سؤال گره‌خورده در بانک تست ندارد) بن‌بست نمی‌شود:
+ * پیام روشن + گذر آزاد به ادامهٔ مطالعه.
  */
 
 import { useMemo, useState } from 'react';
@@ -226,6 +229,29 @@ export default function MicroCheckpoint({
   };
 
   const requiredFailed = checkpoint.required && accuracy < REQUIRED_THRESHOLD && !retestMode;
+
+  /* استخر بانک تست برای این درس هنوز سؤالی ندارد (درس‌های تازه‌ثبت‌شدهٔ میکرودرسنامه).
+     ایستگاه نباید بن‌بست شود: پیام روشن + گذر آزاد، تا جریان مطالعه ادامه یابد. */
+  if (!questions.length) {
+    return (
+      <section className="micr-cp" aria-label={`Checkpoint ${checkpoint.id}`}>
+        <div className="micr-empty">
+          <strong>برای این ایستگاه هنوز سؤالی ثبت نشده</strong>
+          <p>
+            سؤال‌های ایستگاه از بانک تست تپش انتخاب می‌شوند؛ برای این مبحث هنوز سؤالی با
+            گرهٔ مفهومی‌اش در بانک نیست. مطالعهٔ صفحه‌های بعدی دست‌نخورده ادامه می‌یابد.
+          </p>
+          <button
+            type="button"
+            className="micr-button micr-button--primary"
+            onClick={() => finishCheckpoint({ requiredMet: true })}
+          >
+            ادامهٔ یادگیری
+          </button>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="micr-cp" aria-label={`Checkpoint ${checkpoint.id}`}>

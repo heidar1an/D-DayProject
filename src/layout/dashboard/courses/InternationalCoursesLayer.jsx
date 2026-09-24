@@ -147,7 +147,7 @@ function Icon({ name, className = 'h-5 w-5' }) {
     'aria-hidden': 'true',
   };
 
-  if (name === 'back') return <svg {...common}><path d="M19 12H5m6-6-6 6 6 6" /></svg>;
+  if (name === 'back') return <svg {...common}><path d="M5 12h14m-6-6 6 6-6 6" /></svg>;
   if (name === 'search') return <svg {...common}><circle cx="10.8" cy="10.8" r="6.3" /><path d="m16 16 4.2 4.2" /></svg>;
   if (name === 'play') return <svg {...common}><path d="m9 6 9 6-9 6z" fill="currentColor" stroke="none" /></svg>;
   if (name === 'pause') return <svg {...common}><path d="M8 6v12M16 6v12" strokeWidth="2.4" /></svg>;
@@ -213,7 +213,7 @@ function CourseCard({ course, onOpen }) {
   );
 }
 
-function DetailView({ course, onBack, onExit }) {
+function DetailView({ course, onBack }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [activeModule, setActiveModule] = useState(0);
 
@@ -224,7 +224,6 @@ function DetailView({ course, onBack, onExit }) {
           <Icon name="back" className="h-4 w-4" />
           بازگشت به دوره‌ها
         </button>
-        <button type="button" className="intl-courses-quiet-action" onClick={onExit}>خروج از دوره‌های بین‌الملل</button>
       </div>
 
       <div className="intl-courses-detail__hero">
@@ -315,7 +314,7 @@ export default function InternationalCoursesLayer({ onBack }) {
   }, [activeFilter, query, showFeaturedOnly]);
 
   if (selectedCourse) {
-    return <DetailView course={selectedCourse} onBack={() => setSelectedCourse(null)} onExit={onBack} />;
+    return <DetailView course={selectedCourse} onBack={() => setSelectedCourse(null)} />;
   }
 
   return (
@@ -326,10 +325,7 @@ export default function InternationalCoursesLayer({ onBack }) {
             <Icon name="back" className="h-4 w-4" />
             بازگشت به دوره‌ها
           </button>
-          <span className="intl-courses-header__divider" />
-          <span className="intl-courses-header__context">دوره‌های بین‌الملل</span>
         </div>
-        <div className="intl-courses-header__status"><span /> محتوای منتخب از منابع معتبر</div>
       </header>
 
       <div className="intl-courses-hero">

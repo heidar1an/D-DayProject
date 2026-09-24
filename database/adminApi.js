@@ -29,6 +29,7 @@ import {
   createBanner,
   createFlashcardDeck,
   createMedia,
+  createMicroCourse,
   createNote,
   createPage,
   createSession,
@@ -39,12 +40,14 @@ import {
   deleteCategory,
   deleteFlashcardDeck,
   deleteMedia,
+  deleteMicroCourse,
   deleteNote,
   deletePage,
   destroySession,
   ensureStore,
   getArticle,
   getFlashcardDeck,
+  getMicroCourse,
   getNote,
   getPage,
   getSession,
@@ -56,17 +59,22 @@ import {
   listCategories,
   listFlashcardDecks,
   listMedia,
+  listMicroCourses,
   listNotes,
   listPages,
   logActivity,
+  microSubjectCatalog,
   publicAdmin,
   publicSettings,
   publishedArticles,
   publishedBanners,
   publishedFlashcardDecks,
+  publishedMicroCourses,
   readSettings,
   saveCategory,
+  searchTestBankQuestions,
   setArticleStatus,
+  setMicroCourseStatus,
   setNotePinned,
   toggleNoteItem,
   updateAdmin,
@@ -74,6 +82,7 @@ import {
   updateBanner,
   updateFlashcardDeck,
   updateMedia,
+  updateMicroCourse,
   updateNote,
   updatePage,
   writeSettings,
@@ -713,6 +722,90 @@ const ROUTES = [
       entityId: deck.id, entityLabel: deck.title, ip: clientIp(ctx.request),
     });
     return { deleted: deck.id };
+  }],
+
+  /* ── میکرو درسنامه ──
+   *
+   * ساختار کامل درسنامه (مبحث → واحد → صفحه → بلوک‌ها → ایستگاه تست) در یک
+   * رکورد ذخیره می‌شود، پس ویرایش هم یک PUT کامل است؛ مثل مجموعهٔ فلش‌کارت.
+   * مجوزها جدا هستند: `micro.read` برای دیدن، `micro.update` برای ویرایش ساختار،
+   * `micro.publish` برای انتشار در دسترس همهٔ کاربران تپش.
+   */
+
+  ['GET', '/api/admin/micro', 'micro.read', async (ctx) => listMicroCourses({
+    search: ctx.query.get('search') ?? '',
+    status: ctx.query.get('status') ?? 'all',
+    page: ctx.query.get('page') ?? 1,
+    perPage: ctx.query.get('perPage') ?? 20,
+  })],
+
+  /* فهرست درس‌های رجیستری برای فرم «درسنامهٔ تازه» — مثل `test-bank` باید پیش از
+     مسیر `/:id` بیاید وگرنه «subjects» به‌عنوان شناسهٔ درسنامه تفسیر می‌شود. */
+  ['GET', '/api/admin/micro/subjects', 'micro.read', async () => ({
+    subjects: microSubjectCatalog(),
+  })],
+
+  /* انتخاب از بانک تست — باید **پیش از** مسیر `/:id` بیاید وگرنه «test-bank»
+     به‌عنوان شناسهٔ درسنامه تفسیر می‌شود. */
+  ['GET', '/api/admin/micro/test-bank', 'micro.read', async (ctx) => searchTestBankQuestions({
+    search: ctx.query.get('search') ?? '',
+    subjectId: ctx.query.get('subjectId') ?? '',
+    topicPath: ctx.query.get('topicPath') ?? '',
+    difficulty: ctx.query.get('difficulty') ?? 'all',
+    limit: ctx.query.get('limit') ?? 40,
+  })],
+
+  ['GET', '/api/admin/micro/:id', 'micro.read', async (ctx) => {
+    const course = getMicroCourse(ctx.params.id);
+    if (!course) fail('NOT_FOUND', 'درسنامه پیدا نشد');
+    return { course };
+  }],
+
+  ['POST', '/api/admin/micro', 'micro.create', async (ctx) => {
+    const course = createMicroCourse(ctx.body, ctx.admin);
+    logActivity({
+      admin: ctx.admin, action: 'micro-course.created', entityType: 'micro-course',
+      entityId: course.id, entityLabel: course.title, ip: clientIp(ctx.request),
+    });
+    return { course };
+  }],
+
+  ['PUT', '/api/admin/micro/:id', 'micro.update', async (ctx) => {
+    const course = updateMicroCourse(ctx.params.id, ctx.body, ctx.admin);
+    if (!course) fail('NOT_FOUND', 'درسنامه پیدا نشد');
+    logActivity({
+      admin: ctx.admin, action: 'micro-course.updated', entityType: 'micro-course',
+      entityId: course.id, entityLabel: course.title,
+      metadata: { status: course.status, topics: course.topics.length },
+      ip: clientIp(ctx.request),
+    });
+    return { course };
+  }],
+
+  /* انتشار / لغو انتشار — تنها راهی که محتوای میکرو به کاربران تپش می‌رسد */
+  ['POST', '/api/admin/micro/:id/status', 'micro.publish', async (ctx) => {
+    const course = setMicroCourseStatus(ctx.params.id, ctx.body?.status, ctx.admin);
+    if (!course) fail('NOT_FOUND', 'درسنامه پیدا نشد');
+
+    const published = course.status === 'published';
+    logActivity({
+      admin: ctx.admin,
+      action: published ? 'micro-course.published' : 'micro-course.unpublished',
+      entityType: 'micro-course', entityId: course.id, entityLabel: course.title,
+      metadata: { status: course.status, topics: course.topics.length },
+      ip: clientIp(ctx.request),
+    });
+    return { course };
+  }],
+
+  ['DELETE', '/api/admin/micro/:id', 'micro.delete', async (ctx) => {
+    const course = deleteMicroCourse(ctx.params.id);
+    if (!course) fail('NOT_FOUND', 'درسنامه پیدا نشد');
+    logActivity({
+      admin: ctx.admin, action: 'micro-course.deleted', entityType: 'micro-course',
+      entityId: course.id, entityLabel: course.title, ip: clientIp(ctx.request),
+    });
+    return { deleted: course.id };
   }],
 
   /* رسانه */
@@ -1966,6 +2059,12 @@ const PUBLIC_ROUTES = [
   ['/api/public/settings', async () => ({ settings: publicSettings() })],
   /* کتابخانهٔ رسمی فلش‌کارت تپش — فقط دک‌های منتشرشده (عادی + آناتومی تصویری) */
   ['/api/public/flashcards/library', async () => ({ decks: publishedFlashcardDecks() })],
+  /*
+   * میکرو درسنامه — درسنامه‌های منتشرشده برای همهٔ کاربران تپش.
+   * خروجی با قرارداد دادهٔ موتور میکرو یکسان است تا خوانندهٔ درسنامه بدون تبدیل
+   * مصرفش کند. آنچه منتشر نشده اینجا نیست.
+   */
+  ['/api/public/micro/library', async () => ({ courses: publishedMicroCourses() })],
   ['/api/public/pages/:slug', async (ctx) => {
     const page = getPage(ctx.params.slug);
     if (!page) fail('NOT_FOUND', 'صفحه پیدا نشد');

@@ -10,11 +10,15 @@
  * همهٔ مبحث‌ها در فهرست فعال‌اند و مبحث بدون واحد، پیام «آماده نشده» می‌گیرد.
  */
 
-import physiologyCourse from '../../data/micro/physiologyCourse';
-
-const COURSE_REGISTRY = {
-  physiology: physiologyCourse,
-};
+/*
+ * رجیستری درس‌ها از `src/data/micro/registry.js` می‌آید — همان فایلی که سرور
+ * (`database/contentStore.js`) هم برای seed و ساخت درسنامهٔ تازه می‌خواند.
+ * قبلاً این فهرست ۱۶تایی دو نسخه داشت و روزی که یک درس اضافه می‌شد، یکی عقب می‌ماند.
+ *
+ * ترتیب کلیدها مهم است: اولین عضو، درسِ پیش‌فرضِ ورود به میکرودرسنامه است
+ * (firstPublishedCourse). فیزیولوژی عمداً اول می‌ماند چون محتوای مرجع و کامل است.
+ */
+import { MICRO_COURSE_REGISTRY as COURSE_REGISTRY } from '../../data/micro/registry.js';
 
 const wait = (duration) => new Promise((resolve) => window.setTimeout(resolve, duration));
 

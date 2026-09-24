@@ -854,9 +854,22 @@
   transform: translateY(-2px);
 }
 
+/*
+ * رنگ حاشیهٔ هاور = رنگ آیکون همان گروه.
+ *
+ * این چهار قاعده عمداً **بعد از** قاعدهٔ پایه آمده‌اند: specificity هر دو برابر است
+ * (یک کلاس + `:hover`) و در تساوی، ترتیب منبع تعیین‌کننده است. اگر جابه‌جا شوند،
+ * حاشیه روی بنفشِ پیش‌فرض می‌ماند.
+ */
+.ad-layercard--learning:hover { border-color: var(--ad-accent); }
+.ad-layercard--assessment:hover { border-color: var(--ad-gold); }
+.ad-layercard--knowledge:hover { border-color: var(--ad-blue); }
+.ad-layercard--marketing:hover { border-color: var(--ad-green); }
+
 .ad-layercard__top {
   display: flex;
-  align-items: flex-start;
+  /* تراز عمودی عنوان با آیکون ۴۲px — با flex-start عنوان به بالای جعبهٔ آیکون می‌چسبید. */
+  align-items: center;
   gap: 0.7rem;
 }
 
@@ -874,17 +887,14 @@
 .ad-layercard__icon--knowledge { color: var(--ad-blue); background: rgba(96, 165, 250, 0.14); }
 .ad-layercard__icon--marketing { color: var(--ad-green); background: var(--ad-green-soft); }
 
-.ad-layercard__title {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  min-width: 0;
-}
-
-.ad-layercard__title .ad-linkcell {
+/* عنوان لایه دیگر لینک/دکمه نیست — یک سرتیتر ساده است (کاربر خواست کلیک‌پذیری‌اش برود). */
+.ad-layercard__name {
+  margin: 0;
   font-size: 0.95rem;
   font-weight: 700;
+  line-height: 1.5;
+  color: var(--ad-text);
+  min-width: 0;
 }
 
 .ad-layercard__desc {
@@ -2782,4 +2792,589 @@
   .ad-pub-check__msg {
     grid-column: 1 / -1;
   }
+}
+
+/* ──────────────── میکرو درسنامه: لایهٔ داخل پنل ────────────────
+ *
+ * دو ستون: درخت ساختار (مبحث → واحد → صفحه/ایستگاه) و ویرایشگر گرهٔ انتخابی.
+ * روی عرض کم، درخت بالای ویرایشگر می‌نشیند تا هر دو در یک ستون بمانند.
+ */
+
+.ad-grid3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+/* نوار بالای لایه: عنوان + شمارنده‌ها + انتشار/ذخیره */
+.ad-mic__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid var(--ad-border);
+  border-radius: var(--ad-radius);
+  background: var(--ad-surface);
+}
+
+.ad-mic__bartitle,
+.ad-mic__barmeta,
+.ad-mic__baractions {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.ad-mic__bartitle strong {
+  font-size: 0.95rem;
+}
+
+.ad-mic__bartitle svg {
+  color: var(--ad-accent);
+}
+
+.ad-mic__hint {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.9;
+  color: var(--ad-muted);
+}
+
+/* چیدمان دو ستونی */
+.ad-mic__layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 330px) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.ad-mic__tree {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.7rem;
+  border: 1px solid var(--ad-border);
+  border-radius: var(--ad-radius);
+  background: var(--ad-surface);
+  max-height: 78vh;
+  overflow-y: auto;
+}
+
+.ad-mic__branch {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* تورفتگی سطح‌ها: واحد زیر مبحث، صفحه/ایستگاه زیر واحد */
+.ad-mic__branch--unit {
+  margin-inline-start: 0.55rem;
+  padding-inline-start: 0.55rem;
+  border-inline-start: 1px dashed var(--ad-border);
+}
+
+.ad-mic__node {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: var(--ad-radius-sm);
+  padding-inline-end: 0.3rem;
+}
+
+.ad-mic__node:hover {
+  background: var(--ad-surface-2);
+}
+
+.ad-mic__node.is-active {
+  background: var(--ad-accent-soft);
+  box-shadow: inset 0 0 0 1px var(--ad-accent);
+}
+
+.ad-mic__node--leaf {
+  margin-inline-start: 0.55rem;
+}
+
+.ad-mic__node--cp {
+  color: var(--ad-muted);
+}
+
+.ad-mic__nodetoggle {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.42rem 0.5rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.8rem;
+  text-align: start;
+  cursor: pointer;
+}
+
+.ad-mic__nodelabel {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ad-mic__nodedot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--ad-border);
+  flex: none;
+}
+
+.ad-mic__node.is-active .ad-mic__nodedot {
+  background: var(--ad-accent);
+}
+
+.ad-mic__nodeactions {
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+  flex: none;
+}
+
+.ad-mic__addrow {
+  display: flex;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+  padding: 0.2rem 0.3rem;
+}
+
+/* ویرایشگر */
+.ad-mic__editor {
+  padding: 1.1rem 1.2rem;
+  border: 1px solid var(--ad-border);
+  border-radius: var(--ad-radius);
+  background: var(--ad-surface);
+  min-width: 0;
+}
+
+/* گروه‌بندی موضوعی داخل ویرایشگر (بانک تست، مفاهیم، متن‌ها) */
+.ad-mic__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--ad-border);
+  border-radius: var(--ad-radius-sm);
+  background: var(--ad-surface-2);
+}
+
+.ad-mic__grouphead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+
+.ad-mic__grouphead h4 {
+  margin: 0;
+  font-size: 0.86rem;
+}
+
+.ad-mic__group > h4 {
+  margin: 0;
+  font-size: 0.86rem;
+}
+
+/* ویرایشگر یک بلوک محتوا */
+.ad-mic__block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 0.85rem 0.95rem;
+  border: 1px solid var(--ad-border);
+  border-radius: var(--ad-radius-sm);
+  background: var(--ad-surface);
+}
+
+.ad-mic__blockhead {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.ad-mic__blockhead strong {
+  font-size: 0.8rem;
+  color: var(--ad-muted);
+}
+
+.ad-mic__blockhead .ad-input--select {
+  flex: 1;
+  min-width: 12rem;
+}
+
+/* ردیف‌های فهرستی (مفهوم، سؤال، کارت، شناسهٔ سنجاق‌شده) */
+.ad-mic__qlist {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.ad-mic__qrow {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.ad-mic__qrow > .ad-input,
+.ad-mic__qrow > input {
+  flex: 1;
+  min-width: 8rem;
+}
+
+/* سؤال‌های بانک در حالت انتخاب */
+.ad-mic__pick {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--ad-border);
+  border-radius: var(--ad-radius-sm);
+  background: var(--ad-surface-2);
+  cursor: pointer;
+}
+
+.ad-mic__pick.is-picked {
+  border-color: var(--ad-accent);
+  background: var(--ad-accent-soft);
+}
+
+.ad-mic__pick input {
+  margin-top: 0.2rem;
+  flex: none;
+}
+
+.ad-mic__pickbody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.ad-mic__pickstem {
+  font-size: 0.82rem;
+  line-height: 1.8;
+}
+
+.ad-mic__pickmeta {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  font-size: 0.72rem;
+  color: var(--ad-muted);
+}
+
+/* ── باز/بسته کردن گره‌های درخت ──
+   فلش جهت‌دار: بسته → رو به ابتدای سطر (چپ‌گرا)، باز → رو به پایین.
+   چرخش ۹۰ درجهٔ پادساعتگرد روی شورون چپ‌گرا، فلش رو به پایین می‌سازد. */
+.ad-mic__caret {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.3rem;
+  height: 1.3rem;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ad-muted);
+  cursor: pointer;
+}
+
+.ad-mic__caret svg {
+  transition: transform 0.16s ease;
+}
+
+.ad-mic__caret.is-open svg {
+  transform: rotate(-90deg);
+}
+
+.ad-mic__caret:hover {
+  background: var(--ad-surface-2);
+  color: var(--ad-text);
+}
+
+.ad-mic__treebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0 0.2rem 0.35rem;
+  border-bottom: 1px solid var(--ad-border);
+  margin-bottom: 0.35rem;
+}
+
+/* نقطهٔ رنگی درس در فرم ساخت درسنامهٔ تازه */
+.ad-mic__swatch {
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 999px;
+  margin-inline-end: 0.4rem;
+  vertical-align: middle;
+}
+
+.ad-hint--warn {
+  color: var(--ad-red);
+}
+
+@media (max-width: 1080px) {
+  .ad-mic__layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ad-mic__tree {
+    max-height: 22rem;
+  }
+}
+
+@media (max-width: 760px) {
+  .ad-grid3 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ─────────────────── کتابخانهٔ فلش‌کارت تپش (لایهٔ پنل) ───────────────────
+ *
+ * این کلاس‌ها فقط در لایهٔ «کتابخانهٔ فلش‌کارت تپش» به کار می‌روند؛ آن لایه از
+ * کارت فلش‌کارت در بخش «صفحات» باز می‌شود (`#admin/flashcard-library`) و آیتم
+ * «صفحات» در سایدبار فعال می‌ماند.
+ */
+
+/* نوار بالای لایه: دکمهٔ بازگشت + نام لایه */
+.ad-fclib__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.ad-fclib__hint {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.9;
+  color: var(--ad-muted);
+}
+
+/* ── ویرایشگر یک کارت (`.ad-fccard`) ── */
+
+.ad-fccard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--ad-border);
+  border-radius: var(--ad-radius-sm);
+  background: var(--ad-surface-2);
+}
+
+.ad-fccard__head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+/* عنوان کارت فضای میانی را می‌گیرد تا Select و دکمهٔ حذف به انتهای ردیف بروند */
+.ad-fccard__head strong {
+  margin-inline-end: auto;
+  font-size: 0.85rem;
+  color: var(--ad-text);
+}
+
+/* ردیف «ورودی + دکمه» — انتخاب تصویر، گزینهٔ چهارگزینه‌ای، … */
+.ad-fccard__option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ad-fccard__option > *:first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ad-fccard__option .ad-btn {
+  flex: 0 0 auto;
+}
+
+.ad-fccard__listhead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  padding-top: 0.3rem;
+}
+
+.ad-fccard__listhead strong {
+  font-size: 0.88rem;
+  color: var(--ad-text);
+}
+
+/* چرخهٔ رنگ کاور — دکمهٔ رنگی گرد. حلقهٔ داخلی از توکن تم می‌آید تا روی هر دو تم دیده شود. */
+.ad-fccard__swatch {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  box-shadow: inset 0 0 0 1px rgb(var(--scrim-rgb) / 0.25);
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.ad-fccard__swatch:hover {
+  transform: scale(1.08);
+}
+
+.ad-fccard__swatch.is-active {
+  border-color: var(--ad-text);
+}
+
+/* برچسب کوچک داخل کارت ویرایشگر */
+.ad-fccard__sub {
+  font-size: 0.7rem;
+  color: var(--ad-muted);
+}
+
+/* پیش‌نمایش زندهٔ کارت — روی و پشت، همان‌طور که کاربر در مرور می‌بیند */
+.ad-fccard__preview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 0.6rem;
+}
+
+.ad-fccard__face {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-height: 5.5rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--ad-border);
+  border-radius: var(--ad-radius-sm);
+  background: var(--ad-surface);
+}
+
+.ad-fccard__face--back {
+  background: var(--ad-surface-3);
+}
+
+.ad-fccard__face p {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.8;
+  color: var(--ad-text);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* جای خالی‌های کارت «جای خالی» (cloze) */
+.ad-fccard__blanks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.ad-fccard__blank {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.28rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--ad-border);
+  background: var(--ad-surface);
+  font-size: 0.72rem;
+  color: var(--ad-text);
+}
+
+/*
+ * بازخورد کیفیت کارت — بازخورد است نه مانع، پس رنگ هشدار ملایم (طلایی) دارد
+ * و نه قرمز خطا. فهرست فارسی است، پس فاصلهٔ نشانگر با ویژگی منطقی داده می‌شود.
+ */
+.ad-fccard__hints {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0;
+  padding-block: 0.6rem;
+  padding-inline: 1.6rem 0.85rem;
+  list-style: disc;
+  border-radius: var(--ad-radius-sm);
+  border: 1px solid rgba(230, 179, 65, 0.25);
+  background: rgba(230, 179, 65, 0.08);
+  font-size: 0.74rem;
+  line-height: 1.9;
+  color: var(--ad-gold);
+}
+
+/* انتخاب وضعیت انتشار، کنار دکمهٔ تأیید */
+.ad-fccard__publish {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--ad-border);
+  border-radius: var(--ad-radius-sm);
+  background: var(--ad-surface-2);
+}
+
+.ad-fccard__publish .ad-sub {
+  margin: 0;
+}
+
+/* ── کارت موقعیت‌یاب تصویری (image-locate) ──
+ *
+ * تصویر با `direction: rtl` آینه نمی‌شود، پس نقطه‌ها با `left`/`top` فیزیکی
+ * (نه ویژگی‌های منطقی) روی آن می‌نشینند؛ مختصات کلیک هم از لبهٔ چپ تصویر حساب
+ * می‌شود. با `inset-inline-start` نقطه در RTL آینه می‌شد و جای کلیک نمی‌افتاد.
+ */
+
+.ad-fccard__canvas-wrap {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  border: 1px solid var(--ad-border);
+  border-radius: var(--ad-radius-sm);
+  overflow: hidden;
+  background: var(--ad-surface-3);
+}
+
+.ad-fccard__canvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  cursor: crosshair;
+}
+
+.ad-fccard__point {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  /* نیمِ منفی عرض/ارتفاع = نقطه دقیقاً روی مختصات کلیک‌شده وسط‌چین می‌شود */
+  margin: -9px 0 0 -9px;
+  padding: 0;
+  border: 2px solid var(--pure);
+  border-radius: 50%;
+  background: var(--ad-accent);
+  box-shadow: 0 0 0 2px rgb(var(--scrim-rgb) / 0.35);
+  cursor: pointer;
+}
+
+.ad-fccard__point:hover {
+  background: var(--ad-red);
 }

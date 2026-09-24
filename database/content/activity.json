@@ -1,5 +1,2670 @@
 [
   {
+    "id": "log-19934a59",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.deleted",
+    "entityType": "micro-course",
+    "entityId": "mcr-939385fd",
+    "entityLabel": "ژنتیک (کپی از رجیستری)",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T20:05:34.650Z"
+  },
+  {
+    "id": "log-c273fccf",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.deleted",
+    "entityType": "micro-course",
+    "entityId": "mcr-9f29eaaf",
+    "entityLabel": "درسنامهٔ تست میکرو",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T20:05:33.940Z"
+  },
+  {
+    "id": "log-f8c0b003",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "channel.deleted",
+    "entityType": "channel",
+    "entityId": "ch-yo14hvhlf",
+    "entityLabel": "کانال تست بله",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T20:05:33.292Z"
+  },
+  {
+    "id": "log-8f1e5aef",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "admin.deleted",
+    "entityType": "admin",
+    "entityId": "adm-ad270018",
+    "entityLabel": "editor-test",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T20:05:32.318Z"
+  },
+  {
+    "id": "log-e2447994",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "article.deleted",
+    "entityType": "article",
+    "entityId": "art-42d89dc2",
+    "entityLabel": "مقاله تست امنیت",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T20:05:31.754Z"
+  },
+  {
+    "id": "log-b6609799",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "note.deleted",
+    "entityType": "note",
+    "entityId": "note-23a59f14",
+    "entityLabel": "یادداشت تست",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T20:05:31.193Z"
+  },
+  {
+    "id": "log-bc83acb2",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "analytics.reset",
+    "entityType": "analytics",
+    "entityId": "events",
+    "entityLabel": "پاک‌سازی رویدادهای تحلیل",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T20:05:30.637Z"
+  },
+  {
+    "id": "log-15d75bc2",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.unpublished",
+    "entityType": "micro-course",
+    "entityId": "mcr-9f29eaaf",
+    "entityLabel": "درسنامهٔ تست میکرو",
+    "metadata": {
+      "status": "draft",
+      "topics": 1
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T20:05:29.751Z"
+  },
+  {
+    "id": "log-a628e8f1",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.published",
+    "entityType": "micro-course",
+    "entityId": "mcr-9f29eaaf",
+    "entityLabel": "درسنامهٔ تست میکرو",
+    "metadata": {
+      "status": "published",
+      "topics": 1
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T20:05:28.966Z"
+  },
+  {
+    "id": "log-505952fb",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.created",
+    "entityType": "micro-course",
+    "entityId": "mcr-939385fd",
+    "entityLabel": "ژنتیک (کپی از رجیستری)",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T20:05:28.365Z"
+  },
+  {
+    "id": "log-a5838779",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.updated",
+    "entityType": "micro-course",
+    "entityId": "mcr-9f29eaaf",
+    "entityLabel": "درسنامهٔ تست میکرو",
+    "metadata": {
+      "status": "draft",
+      "topics": 1
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T20:05:27.766Z"
+  },
+  {
+    "id": "log-33b9a4d4",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.created",
+    "entityType": "micro-course",
+    "entityId": "mcr-9f29eaaf",
+    "entityLabel": "درسنامهٔ تست میکرو",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T20:05:27.164Z"
+  },
+  {
+    "id": "log-a4909751",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "channel.credentials-tested",
+    "entityType": "channel",
+    "entityId": null,
+    "entityLabel": "@tapesh",
+    "metadata": {
+      "ok": false,
+      "complete": false
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T20:05:24.982Z"
+  },
+  {
+    "id": "log-f58a30ea",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "publish.sent",
+    "entityType": "publish",
+    "entityId": "ch-yo14hvhlf",
+    "entityLabel": "کانال تست بله",
+    "metadata": {
+      "sent": 0,
+      "failed": 0,
+      "dryRun": 1
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T20:05:22.225Z"
+  },
+  {
+    "id": "log-d3238feb",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "publish.sent",
+    "entityType": "publish",
+    "entityId": "ch-yo14hvhlf",
+    "entityLabel": "کانال تست بله",
+    "metadata": {
+      "sent": 0,
+      "failed": 0,
+      "dryRun": 1
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T20:05:21.327Z"
+  },
+  {
+    "id": "log-b07bba7e",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "channel.token-cleared",
+    "entityType": "channel",
+    "entityId": "ch-yo14hvhlf",
+    "entityLabel": "",
+    "metadata": {
+      "hasToken": false
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T20:05:19.826Z"
+  },
+  {
+    "id": "log-d9027e24",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "channel.token-set",
+    "entityType": "channel",
+    "entityId": "ch-yo14hvhlf",
+    "entityLabel": "",
+    "metadata": {
+      "hasToken": true
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T20:05:17.958Z"
+  },
+  {
+    "id": "log-dd5c7164",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "channel.created",
+    "entityType": "channel",
+    "entityId": "ch-yo14hvhlf",
+    "entityLabel": "کانال تست بله",
+    "metadata": {
+      "platform": "bale",
+      "chatId": "@tapesh_test"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T20:05:15.568Z"
+  },
+  {
+    "id": "log-fb8f20d6",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "alert.deleted",
+    "entityType": "alert",
+    "entityId": "al-muej8ctk-iab1",
+    "entityLabel": "هشدار تست",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T20:05:11.901Z"
+  },
+  {
+    "id": "log-6c8ded9b",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "alert.created",
+    "entityType": "alert",
+    "entityId": "al-muej8ctk-iab1",
+    "entityLabel": "هشدار تست",
+    "metadata": {
+      "metric": "error_rate",
+      "threshold": 7
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T20:05:09.381Z"
+  },
+  {
+    "id": "log-7a7197cb",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "note.created",
+    "entityType": "note",
+    "entityId": "note-23a59f14",
+    "entityLabel": "یادداشت تست",
+    "metadata": {
+      "kind": "checklist"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T20:04:53.376Z"
+  },
+  {
+    "id": "log-bae17ecf",
+    "userId": "adm-ad270018",
+    "userName": "نویسنده تست",
+    "action": "auth.login",
+    "entityType": "admin",
+    "entityId": "adm-ad270018",
+    "entityLabel": "editor-test",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T20:04:51.845Z"
+  },
+  {
+    "id": "log-e1160c6e",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "admin.created",
+    "entityType": "admin",
+    "entityId": "adm-ad270018",
+    "entityLabel": "editor-test",
+    "metadata": {
+      "role": "editor"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T20:04:51.150Z"
+  },
+  {
+    "id": "log-ad698aac",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "article.created",
+    "entityType": "article",
+    "entityId": "art-42d89dc2",
+    "entityLabel": "مقاله تست امنیت",
+    "metadata": {
+      "status": "published",
+      "category": "physiology"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T20:04:48.851Z"
+  },
+  {
+    "id": "log-8a770320",
+    "userId": "system",
+    "userName": "سیستم",
+    "action": "auth.login-failed",
+    "entityType": "admin",
+    "entityId": "",
+    "entityLabel": "0135",
+    "metadata": {
+      "reason": "invalid-credentials"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T20:04:47.747Z"
+  },
+  {
+    "id": "log-6bb01773",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "auth.login",
+    "entityType": "admin",
+    "entityId": "adm-5e246f08",
+    "entityLabel": "0135",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T20:04:47.305Z"
+  },
+  {
+    "id": "log-a79bd549",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.deleted",
+    "entityType": "micro-course",
+    "entityId": "mcr-4498671b",
+    "entityLabel": "ژنتیک (کپی از رجیستری)",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:55:19.429Z"
+  },
+  {
+    "id": "log-b30d1650",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.deleted",
+    "entityType": "micro-course",
+    "entityId": "mcr-a098859b",
+    "entityLabel": "درسنامهٔ تست میکرو",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:55:18.839Z"
+  },
+  {
+    "id": "log-f544f777",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "channel.deleted",
+    "entityType": "channel",
+    "entityId": "ch-vl5cmpbfn",
+    "entityLabel": "کانال تست بله",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:55:18.242Z"
+  },
+  {
+    "id": "log-b2d9e24a",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "admin.deleted",
+    "entityType": "admin",
+    "entityId": "adm-122c503d",
+    "entityLabel": "editor-test",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:55:17.580Z"
+  },
+  {
+    "id": "log-a1e5faa6",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "article.deleted",
+    "entityType": "article",
+    "entityId": "art-8c5e9e10",
+    "entityLabel": "مقاله تست امنیت",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:55:17.028Z"
+  },
+  {
+    "id": "log-877438d3",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "note.deleted",
+    "entityType": "note",
+    "entityId": "note-d8c06413",
+    "entityLabel": "یادداشت تست",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:55:16.476Z"
+  },
+  {
+    "id": "log-f4d03f38",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "analytics.reset",
+    "entityType": "analytics",
+    "entityId": "events",
+    "entityLabel": "پاک‌سازی رویدادهای تحلیل",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:55:15.924Z"
+  },
+  {
+    "id": "log-12c3c818",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.unpublished",
+    "entityType": "micro-course",
+    "entityId": "mcr-a098859b",
+    "entityLabel": "درسنامهٔ تست میکرو",
+    "metadata": {
+      "status": "draft",
+      "topics": 1
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:55:15.046Z"
+  },
+  {
+    "id": "log-f07b059b",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.published",
+    "entityType": "micro-course",
+    "entityId": "mcr-a098859b",
+    "entityLabel": "درسنامهٔ تست میکرو",
+    "metadata": {
+      "status": "published",
+      "topics": 1
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:55:14.263Z"
+  },
+  {
+    "id": "log-84a87b00",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.created",
+    "entityType": "micro-course",
+    "entityId": "mcr-4498671b",
+    "entityLabel": "ژنتیک (کپی از رجیستری)",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:55:13.667Z"
+  },
+  {
+    "id": "log-d57aaa86",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.updated",
+    "entityType": "micro-course",
+    "entityId": "mcr-a098859b",
+    "entityLabel": "درسنامهٔ تست میکرو",
+    "metadata": {
+      "status": "draft",
+      "topics": 1
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:55:13.072Z"
+  },
+  {
+    "id": "log-6e58f5c5",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.created",
+    "entityType": "micro-course",
+    "entityId": "mcr-a098859b",
+    "entityLabel": "درسنامهٔ تست میکرو",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:55:12.480Z"
+  },
+  {
+    "id": "log-e85770b4",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "channel.credentials-tested",
+    "entityType": "channel",
+    "entityId": null,
+    "entityLabel": "@tapesh",
+    "metadata": {
+      "ok": false,
+      "complete": false
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:55:10.326Z"
+  },
+  {
+    "id": "log-d15e07ed",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "publish.sent",
+    "entityType": "publish",
+    "entityId": "ch-vl5cmpbfn",
+    "entityLabel": "کانال تست بله",
+    "metadata": {
+      "sent": 0,
+      "failed": 0,
+      "dryRun": 1
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:55:07.548Z"
+  },
+  {
+    "id": "log-c16fe0bc",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "publish.sent",
+    "entityType": "publish",
+    "entityId": "ch-vl5cmpbfn",
+    "entityLabel": "کانال تست بله",
+    "metadata": {
+      "sent": 0,
+      "failed": 0,
+      "dryRun": 1
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:55:06.673Z"
+  },
+  {
+    "id": "log-38ec7325",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "channel.token-cleared",
+    "entityType": "channel",
+    "entityId": "ch-vl5cmpbfn",
+    "entityLabel": "",
+    "metadata": {
+      "hasToken": false
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:55:05.223Z"
+  },
+  {
+    "id": "log-d469200f",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "channel.token-set",
+    "entityType": "channel",
+    "entityId": "ch-vl5cmpbfn",
+    "entityLabel": "",
+    "metadata": {
+      "hasToken": true
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:55:03.408Z"
+  },
+  {
+    "id": "log-28f2abb9",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "channel.created",
+    "entityType": "channel",
+    "entityId": "ch-vl5cmpbfn",
+    "entityLabel": "کانال تست بله",
+    "metadata": {
+      "platform": "bale",
+      "chatId": "@tapesh_test"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:55:01.054Z"
+  },
+  {
+    "id": "log-f3f3fa74",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "alert.deleted",
+    "entityType": "alert",
+    "entityId": "al-mueiv6rs-druf",
+    "entityLabel": "هشدار تست",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:54:57.451Z"
+  },
+  {
+    "id": "log-c0ef230b",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "alert.created",
+    "entityType": "alert",
+    "entityId": "al-mueiv6rs-druf",
+    "entityLabel": "هشدار تست",
+    "metadata": {
+      "metric": "error_rate",
+      "threshold": 7
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:54:55.008Z"
+  },
+  {
+    "id": "log-e48d58cc",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "note.created",
+    "entityType": "note",
+    "entityId": "note-d8c06413",
+    "entityLabel": "یادداشت تست",
+    "metadata": {
+      "kind": "checklist"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:54:39.413Z"
+  },
+  {
+    "id": "log-b5a5b6ab",
+    "userId": "adm-122c503d",
+    "userName": "نویسنده تست",
+    "action": "auth.login",
+    "entityType": "admin",
+    "entityId": "adm-122c503d",
+    "entityLabel": "editor-test",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:54:37.847Z"
+  },
+  {
+    "id": "log-1fd8dd2f",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "admin.created",
+    "entityType": "admin",
+    "entityId": "adm-122c503d",
+    "entityLabel": "editor-test",
+    "metadata": {
+      "role": "editor"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:54:37.154Z"
+  },
+  {
+    "id": "log-ddafe945",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "article.created",
+    "entityType": "article",
+    "entityId": "art-8c5e9e10",
+    "entityLabel": "مقاله تست امنیت",
+    "metadata": {
+      "status": "published",
+      "category": "physiology"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:54:34.903Z"
+  },
+  {
+    "id": "log-52413746",
+    "userId": "system",
+    "userName": "سیستم",
+    "action": "auth.login-failed",
+    "entityType": "admin",
+    "entityId": "",
+    "entityLabel": "0135",
+    "metadata": {
+      "reason": "invalid-credentials"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:54:33.785Z"
+  },
+  {
+    "id": "log-d1074e62",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "auth.login",
+    "entityType": "admin",
+    "entityId": "adm-5e246f08",
+    "entityLabel": "0135",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:54:33.336Z"
+  },
+  {
+    "id": "log-05beab58",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "auth.login",
+    "entityType": "admin",
+    "entityId": "adm-5e246f08",
+    "entityLabel": "0135",
+    "metadata": {},
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+    "createdAt": "2026-09-23T19:50:49.626Z"
+  },
+  {
+    "id": "log-109d66f5",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.deleted",
+    "entityType": "micro-course",
+    "entityId": "mcr-9ec3e0a4",
+    "entityLabel": "درسنامهٔ تست میکرو",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:50:41.635Z"
+  },
+  {
+    "id": "log-78b3b55a",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "channel.deleted",
+    "entityType": "channel",
+    "entityId": "ch-ixu0i3a5g",
+    "entityLabel": "کانال تست بله",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:50:41.038Z"
+  },
+  {
+    "id": "log-804c8638",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "admin.deleted",
+    "entityType": "admin",
+    "entityId": "adm-563a6398",
+    "entityLabel": "editor-test",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:50:40.417Z"
+  },
+  {
+    "id": "log-0e8922c0",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "article.deleted",
+    "entityType": "article",
+    "entityId": "art-9c4b9a06",
+    "entityLabel": "مقاله تست امنیت",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:50:39.865Z"
+  },
+  {
+    "id": "log-b3ee1cbc",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "note.deleted",
+    "entityType": "note",
+    "entityId": "note-d8ed012b",
+    "entityLabel": "یادداشت تست",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:50:39.311Z"
+  },
+  {
+    "id": "log-dc8b6b77",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "analytics.reset",
+    "entityType": "analytics",
+    "entityId": "events",
+    "entityLabel": "پاک‌سازی رویدادهای تحلیل",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:50:38.759Z"
+  },
+  {
+    "id": "log-ed70ebac",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.unpublished",
+    "entityType": "micro-course",
+    "entityId": "mcr-9ec3e0a4",
+    "entityLabel": "درسنامهٔ تست میکرو",
+    "metadata": {
+      "status": "draft",
+      "topics": 1
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:50:37.816Z"
+  },
+  {
+    "id": "log-2cdd4cfc",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.published",
+    "entityType": "micro-course",
+    "entityId": "mcr-9ec3e0a4",
+    "entityLabel": "درسنامهٔ تست میکرو",
+    "metadata": {
+      "status": "published",
+      "topics": 1
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:50:36.972Z"
+  },
+  {
+    "id": "log-6335d61e",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.created",
+    "entityType": "micro-course",
+    "entityId": "mcr-9ec3e0a4",
+    "entityLabel": "درسنامهٔ تست میکرو",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:50:36.011Z"
+  },
+  {
+    "id": "log-4b3e14df",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "channel.credentials-tested",
+    "entityType": "channel",
+    "entityId": null,
+    "entityLabel": "@tapesh",
+    "metadata": {
+      "ok": false,
+      "complete": false
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:50:31.929Z"
+  },
+  {
+    "id": "log-09988aca",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "publish.sent",
+    "entityType": "publish",
+    "entityId": "ch-ixu0i3a5g",
+    "entityLabel": "کانال تست بله",
+    "metadata": {
+      "sent": 0,
+      "failed": 0,
+      "dryRun": 1
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:50:27.953Z"
+  },
+  {
+    "id": "log-c50e300c",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "publish.sent",
+    "entityType": "publish",
+    "entityId": "ch-ixu0i3a5g",
+    "entityLabel": "کانال تست بله",
+    "metadata": {
+      "sent": 0,
+      "failed": 0,
+      "dryRun": 1
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:50:26.956Z"
+  },
+  {
+    "id": "log-ada8cfc7",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "channel.token-cleared",
+    "entityType": "channel",
+    "entityId": "ch-ixu0i3a5g",
+    "entityLabel": "",
+    "metadata": {
+      "hasToken": false
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:50:24.345Z"
+  },
+  {
+    "id": "log-51ca1cb1",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "channel.token-set",
+    "entityType": "channel",
+    "entityId": "ch-ixu0i3a5g",
+    "entityLabel": "",
+    "metadata": {
+      "hasToken": true
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:50:22.347Z"
+  },
+  {
+    "id": "log-393525db",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "channel.created",
+    "entityType": "channel",
+    "entityId": "ch-ixu0i3a5g",
+    "entityLabel": "کانال تست بله",
+    "metadata": {
+      "platform": "bale",
+      "chatId": "@tapesh_test"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:50:19.577Z"
+  },
+  {
+    "id": "log-fb869fe1",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "alert.deleted",
+    "entityType": "alert",
+    "entityId": "al-mueip48t-2c6v",
+    "entityLabel": "هشدار تست",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:50:14.218Z"
+  },
+  {
+    "id": "log-2cc4cb26",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "alert.created",
+    "entityType": "alert",
+    "entityId": "al-mueip48t-2c6v",
+    "entityLabel": "هشدار تست",
+    "metadata": {
+      "metric": "error_rate",
+      "threshold": 7
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:50:11.800Z"
+  },
+  {
+    "id": "log-e322f2bc",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "note.created",
+    "entityType": "note",
+    "entityId": "note-d8ed012b",
+    "entityLabel": "یادداشت تست",
+    "metadata": {
+      "kind": "checklist"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:49:55.876Z"
+  },
+  {
+    "id": "log-db39a6ff",
+    "userId": "adm-563a6398",
+    "userName": "نویسنده تست",
+    "action": "auth.login",
+    "entityType": "admin",
+    "entityId": "adm-563a6398",
+    "entityLabel": "editor-test",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:49:54.240Z"
+  },
+  {
+    "id": "log-3c038e92",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "admin.created",
+    "entityType": "admin",
+    "entityId": "adm-563a6398",
+    "entityLabel": "editor-test",
+    "metadata": {
+      "role": "editor"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:49:53.540Z"
+  },
+  {
+    "id": "log-0f8ac1ea",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "article.created",
+    "entityType": "article",
+    "entityId": "art-9c4b9a06",
+    "entityLabel": "مقاله تست امنیت",
+    "metadata": {
+      "status": "published",
+      "category": "physiology"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:49:51.288Z"
+  },
+  {
+    "id": "log-f312bc40",
+    "userId": "system",
+    "userName": "سیستم",
+    "action": "auth.login-failed",
+    "entityType": "admin",
+    "entityId": "",
+    "entityLabel": "0135",
+    "metadata": {
+      "reason": "invalid-credentials"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:49:50.141Z"
+  },
+  {
+    "id": "log-62b5a738",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "auth.login",
+    "entityType": "admin",
+    "entityId": "adm-5e246f08",
+    "entityLabel": "0135",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:49:49.698Z"
+  },
+  {
+    "id": "log-3f88f3d9",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.deleted",
+    "entityType": "micro-course",
+    "entityId": "mcr-15786bce",
+    "entityLabel": "درسنامهٔ تست میکرو",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:40:14.248Z"
+  },
+  {
+    "id": "log-0016623f",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "channel.deleted",
+    "entityType": "channel",
+    "entityId": "ch-v267tkv3z",
+    "entityLabel": "کانال تست بله",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:40:13.678Z"
+  },
+  {
+    "id": "log-7b979246",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "admin.deleted",
+    "entityType": "admin",
+    "entityId": "adm-65eb053e",
+    "entityLabel": "editor-test",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:40:13.054Z"
+  },
+  {
+    "id": "log-6e71ee56",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "article.deleted",
+    "entityType": "article",
+    "entityId": "art-b926d11e",
+    "entityLabel": "مقاله تست امنیت",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:40:12.497Z"
+  },
+  {
+    "id": "log-8c6d4a8c",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "note.deleted",
+    "entityType": "note",
+    "entityId": "note-4f99df3a",
+    "entityLabel": "یادداشت تست",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:40:11.941Z"
+  },
+  {
+    "id": "log-23d5f1e9",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "analytics.reset",
+    "entityType": "analytics",
+    "entityId": "events",
+    "entityLabel": "پاک‌سازی رویدادهای تحلیل",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:40:11.325Z"
+  },
+  {
+    "id": "log-66bfff50",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.unpublished",
+    "entityType": "micro-course",
+    "entityId": "mcr-15786bce",
+    "entityLabel": "درسنامهٔ تست میکرو",
+    "metadata": {
+      "status": "draft",
+      "topics": 1
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:40:10.470Z"
+  },
+  {
+    "id": "log-e6d00426",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.published",
+    "entityType": "micro-course",
+    "entityId": "mcr-15786bce",
+    "entityLabel": "درسنامهٔ تست میکرو",
+    "metadata": {
+      "status": "published",
+      "topics": 1
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:40:09.657Z"
+  },
+  {
+    "id": "log-7ebdba71",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.created",
+    "entityType": "micro-course",
+    "entityId": "mcr-15786bce",
+    "entityLabel": "درسنامهٔ تست میکرو",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:40:09.061Z"
+  },
+  {
+    "id": "log-01132abd",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "channel.credentials-tested",
+    "entityType": "channel",
+    "entityId": null,
+    "entityLabel": "@tapesh",
+    "metadata": {
+      "ok": false,
+      "complete": false
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:40:05.860Z"
+  },
+  {
+    "id": "log-b53985e3",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "publish.sent",
+    "entityType": "publish",
+    "entityId": "ch-v267tkv3z",
+    "entityLabel": "کانال تست بله",
+    "metadata": {
+      "sent": 0,
+      "failed": 0,
+      "dryRun": 1
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:40:02.623Z"
+  },
+  {
+    "id": "log-70a715b4",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "publish.sent",
+    "entityType": "publish",
+    "entityId": "ch-v267tkv3z",
+    "entityLabel": "کانال تست بله",
+    "metadata": {
+      "sent": 0,
+      "failed": 0,
+      "dryRun": 1
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:40:01.617Z"
+  },
+  {
+    "id": "log-dabbf3cf",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "channel.token-cleared",
+    "entityType": "channel",
+    "entityId": "ch-v267tkv3z",
+    "entityLabel": "",
+    "metadata": {
+      "hasToken": false
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:40:00.068Z"
+  },
+  {
+    "id": "log-e5141c42",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "channel.token-set",
+    "entityType": "channel",
+    "entityId": "ch-v267tkv3z",
+    "entityLabel": "",
+    "metadata": {
+      "hasToken": true
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:39:58.064Z"
+  },
+  {
+    "id": "log-115cf574",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "channel.created",
+    "entityType": "channel",
+    "entityId": "ch-v267tkv3z",
+    "entityLabel": "کانال تست بله",
+    "metadata": {
+      "platform": "bale",
+      "chatId": "@tapesh_test"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:39:53.430Z"
+  },
+  {
+    "id": "log-1f58f3dc",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "alert.deleted",
+    "entityType": "alert",
+    "entityId": "al-mueibqfn-vsfz",
+    "entityLabel": "هشدار تست",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:39:49.807Z"
+  },
+  {
+    "id": "log-4130d0e3",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "alert.created",
+    "entityType": "alert",
+    "entityId": "al-mueibqfn-vsfz",
+    "entityLabel": "هشدار تست",
+    "metadata": {
+      "metric": "error_rate",
+      "threshold": 7
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:39:47.381Z"
+  },
+  {
+    "id": "log-c14ec77b",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "note.created",
+    "entityType": "note",
+    "entityId": "note-4f99df3a",
+    "entityLabel": "یادداشت تست",
+    "metadata": {
+      "kind": "checklist"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:39:27.256Z"
+  },
+  {
+    "id": "log-228ba78a",
+    "userId": "adm-65eb053e",
+    "userName": "نویسنده تست",
+    "action": "auth.login",
+    "entityType": "admin",
+    "entityId": "adm-65eb053e",
+    "entityLabel": "editor-test",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:39:25.759Z"
+  },
+  {
+    "id": "log-50ebeb12",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "admin.created",
+    "entityType": "admin",
+    "entityId": "adm-65eb053e",
+    "entityLabel": "editor-test",
+    "metadata": {
+      "role": "editor"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:39:25.043Z"
+  },
+  {
+    "id": "log-82867ca9",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "article.created",
+    "entityType": "article",
+    "entityId": "art-b926d11e",
+    "entityLabel": "مقاله تست امنیت",
+    "metadata": {
+      "status": "published",
+      "category": "physiology"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:39:22.724Z"
+  },
+  {
+    "id": "log-c8698db8",
+    "userId": "system",
+    "userName": "سیستم",
+    "action": "auth.login-failed",
+    "entityType": "admin",
+    "entityId": "",
+    "entityLabel": "0135",
+    "metadata": {
+      "reason": "invalid-credentials"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:39:21.603Z"
+  },
+  {
+    "id": "log-692666e9",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "auth.login",
+    "entityType": "admin",
+    "entityId": "adm-5e246f08",
+    "entityLabel": "0135",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:39:21.118Z"
+  },
+  {
+    "id": "log-280008a2",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.deleted",
+    "entityType": "micro-course",
+    "entityId": "mcr-50024aa9",
+    "entityLabel": "درسنامهٔ تست میکرو",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:37:09.469Z"
+  },
+  {
+    "id": "log-6a3c4681",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "channel.deleted",
+    "entityType": "channel",
+    "entityId": "ch-g0llyyztc",
+    "entityLabel": "کانال تست بله",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:37:08.913Z"
+  },
+  {
+    "id": "log-c1bc5929",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "admin.deleted",
+    "entityType": "admin",
+    "entityId": "adm-d7451078",
+    "entityLabel": "editor-test",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:37:08.275Z"
+  },
+  {
+    "id": "log-3d0cba16",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "article.deleted",
+    "entityType": "article",
+    "entityId": "art-b51f5a7e",
+    "entityLabel": "مقاله تست امنیت",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:37:07.737Z"
+  },
+  {
+    "id": "log-3f4a8adc",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "note.deleted",
+    "entityType": "note",
+    "entityId": "note-5718ccf7",
+    "entityLabel": "یادداشت تست",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:37:07.203Z"
+  },
+  {
+    "id": "log-8039155c",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "analytics.reset",
+    "entityType": "analytics",
+    "entityId": "events",
+    "entityLabel": "پاک‌سازی رویدادهای تحلیل",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:37:06.644Z"
+  },
+  {
+    "id": "log-2e6acddf",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.unpublished",
+    "entityType": "micro-course",
+    "entityId": "mcr-50024aa9",
+    "entityLabel": "درسنامهٔ تست میکرو",
+    "metadata": {
+      "status": "draft",
+      "topics": 1
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:37:05.817Z"
+  },
+  {
+    "id": "log-a7b3f311",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.published",
+    "entityType": "micro-course",
+    "entityId": "mcr-50024aa9",
+    "entityLabel": "درسنامهٔ تست میکرو",
+    "metadata": {
+      "status": "published",
+      "topics": 1
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:37:05.104Z"
+  },
+  {
+    "id": "log-96e5d027",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.created",
+    "entityType": "micro-course",
+    "entityId": "mcr-50024aa9",
+    "entityLabel": "درسنامهٔ تست میکرو",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:37:04.552Z"
+  },
+  {
+    "id": "log-0153f923",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "channel.credentials-tested",
+    "entityType": "channel",
+    "entityId": null,
+    "entityLabel": "@tapesh",
+    "metadata": {
+      "ok": false,
+      "complete": false
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:37:02.752Z"
+  },
+  {
+    "id": "log-85ec6faa",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "publish.sent",
+    "entityType": "publish",
+    "entityId": "ch-g0llyyztc",
+    "entityLabel": "کانال تست بله",
+    "metadata": {
+      "sent": 0,
+      "failed": 0,
+      "dryRun": 1
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:36:59.215Z"
+  },
+  {
+    "id": "log-33a6fb03",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "publish.sent",
+    "entityType": "publish",
+    "entityId": "ch-g0llyyztc",
+    "entityLabel": "کانال تست بله",
+    "metadata": {
+      "sent": 0,
+      "failed": 0,
+      "dryRun": 1
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:36:58.296Z"
+  },
+  {
+    "id": "log-9863e0d2",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "channel.token-cleared",
+    "entityType": "channel",
+    "entityId": "ch-g0llyyztc",
+    "entityLabel": "",
+    "metadata": {
+      "hasToken": false
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:36:56.818Z"
+  },
+  {
+    "id": "log-cf479bac",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "channel.token-set",
+    "entityType": "channel",
+    "entityId": "ch-g0llyyztc",
+    "entityLabel": "",
+    "metadata": {
+      "hasToken": true
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:36:55.102Z"
+  },
+  {
+    "id": "log-c55e6fc6",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "channel.created",
+    "entityType": "channel",
+    "entityId": "ch-g0llyyztc",
+    "entityLabel": "کانال تست بله",
+    "metadata": {
+      "platform": "bale",
+      "chatId": "@tapesh_test"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:36:52.910Z"
+  },
+  {
+    "id": "log-2b3f5937",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "alert.deleted",
+    "entityType": "alert",
+    "entityId": "al-muei7v97-w5xx",
+    "entityLabel": "هشدار تست",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:36:49.407Z"
+  },
+  {
+    "id": "log-308cb6e4",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "alert.created",
+    "entityType": "alert",
+    "entityId": "al-muei7v97-w5xx",
+    "entityLabel": "هشدار تست",
+    "metadata": {
+      "metric": "error_rate",
+      "threshold": 7
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:36:47.000Z"
+  },
+  {
+    "id": "log-c98b694f",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "note.created",
+    "entityType": "note",
+    "entityId": "note-5718ccf7",
+    "entityLabel": "یادداشت تست",
+    "metadata": {
+      "kind": "checklist"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:36:30.804Z"
+  },
+  {
+    "id": "log-04671a56",
+    "userId": "adm-d7451078",
+    "userName": "نویسنده تست",
+    "action": "auth.login",
+    "entityType": "admin",
+    "entityId": "adm-d7451078",
+    "entityLabel": "editor-test",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:36:29.303Z"
+  },
+  {
+    "id": "log-b1a3cc10",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "admin.created",
+    "entityType": "admin",
+    "entityId": "adm-d7451078",
+    "entityLabel": "editor-test",
+    "metadata": {
+      "role": "editor"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:36:28.621Z"
+  },
+  {
+    "id": "log-f00f3a55",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "article.created",
+    "entityType": "article",
+    "entityId": "art-b51f5a7e",
+    "entityLabel": "مقاله تست امنیت",
+    "metadata": {
+      "status": "published",
+      "category": "physiology"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:36:26.297Z"
+  },
+  {
+    "id": "log-5df2a7e6",
+    "userId": "system",
+    "userName": "سیستم",
+    "action": "auth.login-failed",
+    "entityType": "admin",
+    "entityId": "",
+    "entityLabel": "0135",
+    "metadata": {
+      "reason": "invalid-credentials"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:36:25.243Z"
+  },
+  {
+    "id": "log-5e83ec57",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "auth.login",
+    "entityType": "admin",
+    "entityId": "adm-5e246f08",
+    "entityLabel": "0135",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:36:24.801Z"
+  },
+  {
+    "id": "log-fc1984df",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.deleted",
+    "entityType": "micro-course",
+    "entityId": "mcr-24897ad1",
+    "entityLabel": "درسنامهٔ تست میکرو",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:27:31.571Z"
+  },
+  {
+    "id": "log-92f2f904",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "channel.deleted",
+    "entityType": "channel",
+    "entityId": "ch-t0au7pn8v",
+    "entityLabel": "کانال تست بله",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:27:31.051Z"
+  },
+  {
+    "id": "log-26da0218",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "admin.deleted",
+    "entityType": "admin",
+    "entityId": "adm-bb8ccf4d",
+    "entityLabel": "editor-test",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:27:30.492Z"
+  },
+  {
+    "id": "log-7dc03a6e",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "article.deleted",
+    "entityType": "article",
+    "entityId": "art-8859b01d",
+    "entityLabel": "مقاله تست امنیت",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:27:29.983Z"
+  },
+  {
+    "id": "log-ce23a21f",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "note.deleted",
+    "entityType": "note",
+    "entityId": "note-b28f158e",
+    "entityLabel": "یادداشت تست",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:27:29.452Z"
+  },
+  {
+    "id": "log-21f88052",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "analytics.reset",
+    "entityType": "analytics",
+    "entityId": "events",
+    "entityLabel": "پاک‌سازی رویدادهای تحلیل",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:27:28.731Z"
+  },
+  {
+    "id": "log-88346df7",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.unpublished",
+    "entityType": "micro-course",
+    "entityId": "mcr-24897ad1",
+    "entityLabel": "درسنامهٔ تست میکرو",
+    "metadata": {
+      "status": "draft",
+      "topics": 1
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:27:27.945Z"
+  },
+  {
+    "id": "log-e3954015",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.published",
+    "entityType": "micro-course",
+    "entityId": "mcr-24897ad1",
+    "entityLabel": "درسنامهٔ تست میکرو",
+    "metadata": {
+      "status": "published",
+      "topics": 1
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:27:27.294Z"
+  },
+  {
+    "id": "log-aa78d12a",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.created",
+    "entityType": "micro-course",
+    "entityId": "mcr-24897ad1",
+    "entityLabel": "درسنامهٔ تست میکرو",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:27:26.783Z"
+  },
+  {
+    "id": "log-98f87f5b",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "channel.credentials-tested",
+    "entityType": "channel",
+    "entityId": null,
+    "entityLabel": "@tapesh",
+    "metadata": {
+      "ok": false,
+      "complete": false
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:27:25.110Z"
+  },
+  {
+    "id": "log-6b464a30",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "publish.sent",
+    "entityType": "publish",
+    "entityId": "ch-t0au7pn8v",
+    "entityLabel": "کانال تست بله",
+    "metadata": {
+      "sent": 0,
+      "failed": 0,
+      "dryRun": 1
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:27:22.562Z"
+  },
+  {
+    "id": "log-6b36b499",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "publish.sent",
+    "entityType": "publish",
+    "entityId": "ch-t0au7pn8v",
+    "entityLabel": "کانال تست بله",
+    "metadata": {
+      "sent": 0,
+      "failed": 0,
+      "dryRun": 1
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:27:21.743Z"
+  },
+  {
+    "id": "log-771719b9",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "channel.token-cleared",
+    "entityType": "channel",
+    "entityId": "ch-t0au7pn8v",
+    "entityLabel": "",
+    "metadata": {
+      "hasToken": false
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:27:20.391Z"
+  },
+  {
+    "id": "log-5a09745a",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "channel.token-set",
+    "entityType": "channel",
+    "entityId": "ch-t0au7pn8v",
+    "entityLabel": "",
+    "metadata": {
+      "hasToken": true
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:27:18.808Z"
+  },
+  {
+    "id": "log-ae433638",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "channel.created",
+    "entityType": "channel",
+    "entityId": "ch-t0au7pn8v",
+    "entityLabel": "کانال تست بله",
+    "metadata": {
+      "platform": "bale",
+      "chatId": "@tapesh_test"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:27:16.737Z"
+  },
+  {
+    "id": "log-da562ebb",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "alert.deleted",
+    "entityType": "alert",
+    "entityId": "al-muehviyn-zkra",
+    "entityLabel": "هشدار تست",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:27:13.478Z"
+  },
+  {
+    "id": "log-ba108196",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "alert.created",
+    "entityType": "alert",
+    "entityId": "al-muehviyn-zkra",
+    "entityLabel": "هشدار تست",
+    "metadata": {
+      "metric": "error_rate",
+      "threshold": 7
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:27:11.184Z"
+  },
+  {
+    "id": "log-8a78e661",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "note.created",
+    "entityType": "note",
+    "entityId": "note-b28f158e",
+    "entityLabel": "یادداشت تست",
+    "metadata": {
+      "kind": "checklist"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:26:56.940Z"
+  },
+  {
+    "id": "log-2ecd2b13",
+    "userId": "adm-bb8ccf4d",
+    "userName": "نویسنده تست",
+    "action": "auth.login",
+    "entityType": "admin",
+    "entityId": "adm-bb8ccf4d",
+    "entityLabel": "editor-test",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:26:55.543Z"
+  },
+  {
+    "id": "log-aa4154d0",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "admin.created",
+    "entityType": "admin",
+    "entityId": "adm-bb8ccf4d",
+    "entityLabel": "editor-test",
+    "metadata": {
+      "role": "editor"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:26:54.899Z"
+  },
+  {
+    "id": "log-7d11a78d",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "article.created",
+    "entityType": "article",
+    "entityId": "art-8859b01d",
+    "entityLabel": "مقاله تست امنیت",
+    "metadata": {
+      "status": "published",
+      "category": "physiology"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:26:52.779Z"
+  },
+  {
+    "id": "log-d6695daf",
+    "userId": "system",
+    "userName": "سیستم",
+    "action": "auth.login-failed",
+    "entityType": "admin",
+    "entityId": "",
+    "entityLabel": "0135",
+    "metadata": {
+      "reason": "invalid-credentials"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:26:51.749Z"
+  },
+  {
+    "id": "log-4aa67a9b",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "auth.login",
+    "entityType": "admin",
+    "entityId": "adm-5e246f08",
+    "entityLabel": "0135",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:26:51.334Z"
+  },
+  {
+    "id": "log-807eb07d",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.deleted",
+    "entityType": "micro-course",
+    "entityId": "mcr-d1acedc7",
+    "entityLabel": "درسنامهٔ آزمون موقت",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:26:11.799Z"
+  },
+  {
+    "id": "log-daa4af82",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.unpublished",
+    "entityType": "micro-course",
+    "entityId": "mcr-d1acedc7",
+    "entityLabel": "درسنامهٔ آزمون موقت",
+    "metadata": {
+      "status": "draft",
+      "topics": 1
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:26:10.645Z"
+  },
+  {
+    "id": "log-50dedd7a",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.published",
+    "entityType": "micro-course",
+    "entityId": "mcr-d1acedc7",
+    "entityLabel": "درسنامهٔ آزمون موقت",
+    "metadata": {
+      "status": "published",
+      "topics": 1
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:26:09.981Z"
+  },
+  {
+    "id": "log-0cb2e1ee",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.created",
+    "entityType": "micro-course",
+    "entityId": "mcr-d1acedc7",
+    "entityLabel": "درسنامهٔ آزمون موقت",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:26:09.437Z"
+  },
+  {
+    "id": "log-c9a8a9f7",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "auth.login",
+    "entityType": "admin",
+    "entityId": "adm-5e246f08",
+    "entityLabel": "0135",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:26:07.047Z"
+  },
+  {
+    "id": "log-7a204aee",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "channel.deleted",
+    "entityType": "channel",
+    "entityId": "ch-zxbd4jtp3",
+    "entityLabel": "کانال تست بله",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:26:03.242Z"
+  },
+  {
+    "id": "log-90536de5",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "admin.deleted",
+    "entityType": "admin",
+    "entityId": "adm-e08da02c",
+    "entityLabel": "editor-test",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:26:02.645Z"
+  },
+  {
+    "id": "log-fc26152b",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "article.deleted",
+    "entityType": "article",
+    "entityId": "art-1188b326",
+    "entityLabel": "مقاله تست امنیت",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:26:02.126Z"
+  },
+  {
+    "id": "log-379c08ed",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "note.deleted",
+    "entityType": "note",
+    "entityId": "note-56f3bd5c",
+    "entityLabel": "یادداشت تست",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:26:01.618Z"
+  },
+  {
+    "id": "log-55e2ac2f",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "analytics.reset",
+    "entityType": "analytics",
+    "entityId": "events",
+    "entityLabel": "پاک‌سازی رویدادهای تحلیل",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:26:01.110Z"
+  },
+  {
+    "id": "log-1696601f",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "channel.credentials-tested",
+    "entityType": "channel",
+    "entityId": null,
+    "entityLabel": "@tapesh",
+    "metadata": {
+      "ok": false,
+      "complete": false
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:26:00.438Z"
+  },
+  {
+    "id": "log-e14564be",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "publish.sent",
+    "entityType": "publish",
+    "entityId": "ch-zxbd4jtp3",
+    "entityLabel": "کانال تست بله",
+    "metadata": {
+      "sent": 0,
+      "failed": 0,
+      "dryRun": 1
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:25:57.783Z"
+  },
+  {
+    "id": "log-4baad7ee",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "publish.sent",
+    "entityType": "publish",
+    "entityId": "ch-zxbd4jtp3",
+    "entityLabel": "کانال تست بله",
+    "metadata": {
+      "sent": 0,
+      "failed": 0,
+      "dryRun": 1
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:25:56.937Z"
+  },
+  {
+    "id": "log-de23de17",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "channel.token-cleared",
+    "entityType": "channel",
+    "entityId": "ch-zxbd4jtp3",
+    "entityLabel": "",
+    "metadata": {
+      "hasToken": false
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:25:55.402Z"
+  },
+  {
+    "id": "log-f7a05227",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "channel.token-set",
+    "entityType": "channel",
+    "entityId": "ch-zxbd4jtp3",
+    "entityLabel": "",
+    "metadata": {
+      "hasToken": true
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:25:53.806Z"
+  },
+  {
+    "id": "log-daf58982",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "channel.created",
+    "entityType": "channel",
+    "entityId": "ch-zxbd4jtp3",
+    "entityLabel": "کانال تست بله",
+    "metadata": {
+      "platform": "bale",
+      "chatId": "@tapesh_test"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:25:51.779Z"
+  },
+  {
+    "id": "log-e1d69902",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "alert.deleted",
+    "entityType": "alert",
+    "entityId": "al-muehtpl2-l14q",
+    "entityLabel": "هشدار تست",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:25:48.631Z"
+  },
+  {
+    "id": "log-792b6878",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "alert.created",
+    "entityType": "alert",
+    "entityId": "al-muehtpl2-l14q",
+    "entityLabel": "هشدار تست",
+    "metadata": {
+      "metric": "error_rate",
+      "threshold": 7
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:25:46.452Z"
+  },
+  {
+    "id": "log-61953a46",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "note.created",
+    "entityType": "note",
+    "entityId": "note-56f3bd5c",
+    "entityLabel": "یادداشت تست",
+    "metadata": {
+      "kind": "checklist"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:25:32.516Z"
+  },
+  {
+    "id": "log-879847f6",
+    "userId": "adm-e08da02c",
+    "userName": "نویسنده تست",
+    "action": "auth.login",
+    "entityType": "admin",
+    "entityId": "adm-e08da02c",
+    "entityLabel": "editor-test",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:25:31.145Z"
+  },
+  {
+    "id": "log-f00cf8e4",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "admin.created",
+    "entityType": "admin",
+    "entityId": "adm-e08da02c",
+    "entityLabel": "editor-test",
+    "metadata": {
+      "role": "editor"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:25:30.474Z"
+  },
+  {
+    "id": "log-2163a2e9",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "article.created",
+    "entityType": "article",
+    "entityId": "art-1188b326",
+    "entityLabel": "مقاله تست امنیت",
+    "metadata": {
+      "status": "published",
+      "category": "physiology"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:25:28.469Z"
+  },
+  {
+    "id": "log-7efe53b8",
+    "userId": "system",
+    "userName": "سیستم",
+    "action": "auth.login-failed",
+    "entityType": "admin",
+    "entityId": "",
+    "entityLabel": "0135",
+    "metadata": {
+      "reason": "invalid-credentials"
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:25:27.468Z"
+  },
+  {
+    "id": "log-57483ad8",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "auth.login",
+    "entityType": "admin",
+    "entityId": "adm-5e246f08",
+    "entityLabel": "0135",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:25:27.059Z"
+  },
+  {
+    "id": "log-955d0910",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "flashcard-deck.updated",
+    "entityType": "flashcard-deck",
+    "entityId": "fcd-visual-heart",
+    "entityLabel": "آناتومی تصویری — قلب (پنل)",
+    "metadata": {
+      "status": "published",
+      "cards": 4
+    },
+    "ip": "::1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:22:58.336Z"
+  },
+  {
+    "id": "log-c2bfb1cb",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "auth.login",
+    "entityType": "admin",
+    "entityId": "adm-5e246f08",
+    "entityLabel": "0135",
+    "metadata": {},
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+    "createdAt": "2026-09-23T19:20:03.047Z"
+  },
+  {
+    "id": "log-e96d44c3",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.deleted",
+    "entityType": "micro-course",
+    "entityId": "mcr-6320739d",
+    "entityLabel": "درسنامهٔ آزمون موقت",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:19:39.550Z"
+  },
+  {
+    "id": "log-96ed4141",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.unpublished",
+    "entityType": "micro-course",
+    "entityId": "mcr-6320739d",
+    "entityLabel": "درسنامهٔ آزمون موقت",
+    "metadata": {
+      "status": "draft",
+      "topics": 1
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:19:38.659Z"
+  },
+  {
+    "id": "log-e8d2f4d7",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.published",
+    "entityType": "micro-course",
+    "entityId": "mcr-6320739d",
+    "entityLabel": "درسنامهٔ آزمون موقت",
+    "metadata": {
+      "status": "published",
+      "topics": 1
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:19:37.971Z"
+  },
+  {
+    "id": "log-17a4b28f",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.created",
+    "entityType": "micro-course",
+    "entityId": "mcr-6320739d",
+    "entityLabel": "درسنامهٔ آزمون موقت",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:19:37.457Z"
+  },
+  {
+    "id": "log-50b01df9",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "auth.login",
+    "entityType": "admin",
+    "entityId": "adm-5e246f08",
+    "entityLabel": "0135",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:19:36.067Z"
+  },
+  {
+    "id": "log-a3cb4e53",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.deleted",
+    "entityType": "micro-course",
+    "entityId": "mcr-d026f4dd",
+    "entityLabel": "درسنامهٔ آزمون موقت",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:19:19.603Z"
+  },
+  {
+    "id": "log-ff918757",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.unpublished",
+    "entityType": "micro-course",
+    "entityId": "mcr-d026f4dd",
+    "entityLabel": "درسنامهٔ آزمون موقت",
+    "metadata": {
+      "status": "draft",
+      "topics": 1
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:19:18.138Z"
+  },
+  {
+    "id": "log-60370c78",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.published",
+    "entityType": "micro-course",
+    "entityId": "mcr-d026f4dd",
+    "entityLabel": "درسنامهٔ آزمون موقت",
+    "metadata": {
+      "status": "published",
+      "topics": 1
+    },
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:19:17.292Z"
+  },
+  {
+    "id": "log-ca5f2489",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "micro-course.created",
+    "entityType": "micro-course",
+    "entityId": "mcr-d026f4dd",
+    "entityLabel": "درسنامهٔ آزمون موقت",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:19:16.543Z"
+  },
+  {
+    "id": "log-83977504",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "auth.login",
+    "entityType": "admin",
+    "entityId": "adm-5e246f08",
+    "entityLabel": "0135",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:19:13.756Z"
+  },
+  {
+    "id": "log-0e06c132",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "auth.login",
+    "entityType": "admin",
+    "entityId": "adm-5e246f08",
+    "entityLabel": "0135",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:18:47.115Z"
+  },
+  {
+    "id": "log-48d93181",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "auth.login",
+    "entityType": "admin",
+    "entityId": "adm-5e246f08",
+    "entityLabel": "0135",
+    "metadata": {},
+    "ip": "127.0.0.1",
+    "userAgent": "",
+    "createdAt": "2026-09-23T19:18:21.071Z"
+  },
+  {
+    "id": "log-a167b19b",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "auth.login",
+    "entityType": "admin",
+    "entityId": "adm-5e246f08",
+    "entityLabel": "0135",
+    "metadata": {},
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+    "createdAt": "2026-09-23T19:09:24.143Z"
+  },
+  {
     "id": "log-5fbe7698",
     "userId": "adm-5e246f08",
     "userName": "مدیر تپش",
@@ -4571,2701 +7236,5 @@
     "ip": "::1",
     "userAgent": "",
     "createdAt": "2026-09-17T06:59:25.933Z"
-  },
-  {
-    "id": "log-37ea3c9e",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "auth.login",
-    "entityType": "admin",
-    "entityId": "adm-5e246f08",
-    "entityLabel": "0135",
-    "metadata": {},
-    "ip": "::1",
-    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
-    "createdAt": "2026-09-17T06:57:40.564Z"
-  },
-  {
-    "id": "log-44d99a34",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.deleted",
-    "entityType": "channel",
-    "entityId": "ch-11utdc94q",
-    "entityLabel": "کانال تست بله",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:58:56.146Z"
-  },
-  {
-    "id": "log-23ebbf83",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "admin.deleted",
-    "entityType": "admin",
-    "entityId": "adm-76b436aa",
-    "entityLabel": "editor-test",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:58:55.813Z"
-  },
-  {
-    "id": "log-4cbb5148",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "article.deleted",
-    "entityType": "article",
-    "entityId": "art-aa443a02",
-    "entityLabel": "مقاله تست امنیت",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:58:55.515Z"
-  },
-  {
-    "id": "log-701553b3",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "note.deleted",
-    "entityType": "note",
-    "entityId": "note-54cfd4af",
-    "entityLabel": "یادداشت تست",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:58:55.214Z"
-  },
-  {
-    "id": "log-b9dfdf3b",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "analytics.reset",
-    "entityType": "analytics",
-    "entityId": "events",
-    "entityLabel": "پاک‌سازی رویدادهای تحلیل",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:58:54.914Z"
-  },
-  {
-    "id": "log-9a584d1a",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.credentials-tested",
-    "entityType": "channel",
-    "entityId": null,
-    "entityLabel": "@tapesh",
-    "metadata": {
-      "ok": false,
-      "complete": false
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:58:54.511Z"
-  },
-  {
-    "id": "log-7050d384",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "publish.sent",
-    "entityType": "publish",
-    "entityId": "ch-11utdc94q",
-    "entityLabel": "کانال تست بله",
-    "metadata": {
-      "sent": 0,
-      "failed": 0,
-      "dryRun": 1
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:58:52.996Z"
-  },
-  {
-    "id": "log-c63915a0",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "publish.sent",
-    "entityType": "publish",
-    "entityId": "ch-11utdc94q",
-    "entityLabel": "کانال تست بله",
-    "metadata": {
-      "sent": 0,
-      "failed": 0,
-      "dryRun": 1
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:58:52.523Z"
-  },
-  {
-    "id": "log-aaaea0cb",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.token-cleared",
-    "entityType": "channel",
-    "entityId": "ch-11utdc94q",
-    "entityLabel": "",
-    "metadata": {
-      "hasToken": false
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:58:51.729Z"
-  },
-  {
-    "id": "log-3dcc42a1",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.token-set",
-    "entityType": "channel",
-    "entityId": "ch-11utdc94q",
-    "entityLabel": "",
-    "metadata": {
-      "hasToken": true
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:58:50.782Z"
-  },
-  {
-    "id": "log-4b512c8c",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.created",
-    "entityType": "channel",
-    "entityId": "ch-11utdc94q",
-    "entityLabel": "کانال تست بله",
-    "metadata": {
-      "platform": "bale",
-      "chatId": "@tapesh_test"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:58:49.551Z"
-  },
-  {
-    "id": "log-34443375",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "alert.deleted",
-    "entityType": "alert",
-    "entityId": "al-mu4ix6op-dqff",
-    "entityLabel": "هشدار تست",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:58:47.673Z"
-  },
-  {
-    "id": "log-718087a1",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "alert.created",
-    "entityType": "alert",
-    "entityId": "al-mu4ix6op-dqff",
-    "entityLabel": "هشدار تست",
-    "metadata": {
-      "metric": "error_rate",
-      "threshold": 7
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:58:46.382Z"
-  },
-  {
-    "id": "log-449f25e1",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "note.created",
-    "entityType": "note",
-    "entityId": "note-54cfd4af",
-    "entityLabel": "یادداشت تست",
-    "metadata": {
-      "kind": "checklist"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:58:38.142Z"
-  },
-  {
-    "id": "log-2ceb411f",
-    "userId": "adm-76b436aa",
-    "userName": "نویسنده تست",
-    "action": "auth.login",
-    "entityType": "admin",
-    "entityId": "adm-76b436aa",
-    "entityLabel": "editor-test",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:58:37.322Z"
-  },
-  {
-    "id": "log-661d5c71",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "admin.created",
-    "entityType": "admin",
-    "entityId": "adm-76b436aa",
-    "entityLabel": "editor-test",
-    "metadata": {
-      "role": "editor"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:58:36.943Z"
-  },
-  {
-    "id": "log-c32930cc",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "article.created",
-    "entityType": "article",
-    "entityId": "art-aa443a02",
-    "entityLabel": "مقاله تست امنیت",
-    "metadata": {
-      "status": "published",
-      "category": "physiology"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:58:35.696Z"
-  },
-  {
-    "id": "log-13e4afc7",
-    "userId": "system",
-    "userName": "سیستم",
-    "action": "auth.login-failed",
-    "entityType": "admin",
-    "entityId": "",
-    "entityLabel": "0135",
-    "metadata": {
-      "reason": "invalid-credentials"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:58:35.085Z"
-  },
-  {
-    "id": "log-61ad6415",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "auth.login",
-    "entityType": "admin",
-    "entityId": "adm-5e246f08",
-    "entityLabel": "0135",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:58:34.843Z"
-  },
-  {
-    "id": "log-df7c53fe",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.deleted",
-    "entityType": "channel",
-    "entityId": "ch-hooy61r44",
-    "entityLabel": "کانال تست بله",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:51:32.661Z"
-  },
-  {
-    "id": "log-04df33eb",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "admin.deleted",
-    "entityType": "admin",
-    "entityId": "adm-5d4fc405",
-    "entityLabel": "editor-test",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:51:32.336Z"
-  },
-  {
-    "id": "log-2bf26fcb",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "article.deleted",
-    "entityType": "article",
-    "entityId": "art-84b833be",
-    "entityLabel": "مقاله تست امنیت",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:51:32.041Z"
-  },
-  {
-    "id": "log-0575d59a",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "note.deleted",
-    "entityType": "note",
-    "entityId": "note-bbc63518",
-    "entityLabel": "یادداشت تست",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:51:31.726Z"
-  },
-  {
-    "id": "log-3e90d586",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "analytics.reset",
-    "entityType": "analytics",
-    "entityId": "events",
-    "entityLabel": "پاک‌سازی رویدادهای تحلیل",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:51:31.429Z"
-  },
-  {
-    "id": "log-c32ea177",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.credentials-tested",
-    "entityType": "channel",
-    "entityId": null,
-    "entityLabel": "@tapesh",
-    "metadata": {
-      "ok": false,
-      "complete": false
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:51:31.032Z"
-  },
-  {
-    "id": "log-64aac83d",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "publish.sent",
-    "entityType": "publish",
-    "entityId": "ch-hooy61r44",
-    "entityLabel": "کانال تست بله",
-    "metadata": {
-      "sent": 0,
-      "failed": 0,
-      "dryRun": 1
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:51:29.595Z"
-  },
-  {
-    "id": "log-bd163b66",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "publish.sent",
-    "entityType": "publish",
-    "entityId": "ch-hooy61r44",
-    "entityLabel": "کانال تست بله",
-    "metadata": {
-      "sent": 0,
-      "failed": 0,
-      "dryRun": 1
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:51:29.119Z"
-  },
-  {
-    "id": "log-d368407d",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.token-cleared",
-    "entityType": "channel",
-    "entityId": "ch-hooy61r44",
-    "entityLabel": "",
-    "metadata": {
-      "hasToken": false
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:51:28.366Z"
-  },
-  {
-    "id": "log-970b2b76",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.token-set",
-    "entityType": "channel",
-    "entityId": "ch-hooy61r44",
-    "entityLabel": "",
-    "metadata": {
-      "hasToken": true
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:51:27.450Z"
-  },
-  {
-    "id": "log-95256d37",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.created",
-    "entityType": "channel",
-    "entityId": "ch-hooy61r44",
-    "entityLabel": "کانال تست بله",
-    "metadata": {
-      "platform": "bale",
-      "chatId": "@tapesh_test"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:51:26.296Z"
-  },
-  {
-    "id": "log-0a1c34dd",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "alert.deleted",
-    "entityType": "alert",
-    "entityId": "al-mu4inoli-nhv2",
-    "entityLabel": "هشدار تست",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:51:24.432Z"
-  },
-  {
-    "id": "log-1208b3aa",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "alert.created",
-    "entityType": "alert",
-    "entityId": "al-mu4inoli-nhv2",
-    "entityLabel": "هشدار تست",
-    "metadata": {
-      "metric": "error_rate",
-      "threshold": 7
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:51:23.034Z"
-  },
-  {
-    "id": "log-f2c535d6",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "note.created",
-    "entityType": "note",
-    "entityId": "note-bbc63518",
-    "entityLabel": "یادداشت تست",
-    "metadata": {
-      "kind": "checklist"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:51:14.812Z"
-  },
-  {
-    "id": "log-26db59a6",
-    "userId": "adm-5d4fc405",
-    "userName": "نویسنده تست",
-    "action": "auth.login",
-    "entityType": "admin",
-    "entityId": "adm-5d4fc405",
-    "entityLabel": "editor-test",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:51:13.889Z"
-  },
-  {
-    "id": "log-8db95936",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "admin.created",
-    "entityType": "admin",
-    "entityId": "adm-5d4fc405",
-    "entityLabel": "editor-test",
-    "metadata": {
-      "role": "editor"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:51:13.525Z"
-  },
-  {
-    "id": "log-b3ea9c94",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "article.created",
-    "entityType": "article",
-    "entityId": "art-84b833be",
-    "entityLabel": "مقاله تست امنیت",
-    "metadata": {
-      "status": "published",
-      "category": "physiology"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:51:12.313Z"
-  },
-  {
-    "id": "log-a27fd950",
-    "userId": "system",
-    "userName": "سیستم",
-    "action": "auth.login-failed",
-    "entityType": "admin",
-    "entityId": "",
-    "entityLabel": "0135",
-    "metadata": {
-      "reason": "invalid-credentials"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:51:11.740Z"
-  },
-  {
-    "id": "log-49ac5d0e",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "auth.login",
-    "entityType": "admin",
-    "entityId": "adm-5e246f08",
-    "entityLabel": "0135",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T19:51:11.508Z"
-  },
-  {
-    "id": "log-787409cf",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "note.deleted",
-    "entityType": "note",
-    "entityId": "note-293f4d1b",
-    "entityLabel": "عمومی",
-    "metadata": {},
-    "ip": "::1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T17:26:16.881Z"
-  },
-  {
-    "id": "log-eecdd401",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "note.deleted",
-    "entityType": "note",
-    "entityId": "note-c1d5a6ea",
-    "entityLabel": "یادداشت تست",
-    "metadata": {},
-    "ip": "::1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T16:34:59.466Z"
-  },
-  {
-    "id": "log-78966486",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.tested",
-    "entityType": "channel",
-    "entityId": "ch-cgf90es69",
-    "entityLabel": "",
-    "metadata": {
-      "ok": true,
-      "complete": true
-    },
-    "ip": "::1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T16:34:32.709Z"
-  },
-  {
-    "id": "log-c8ff1dcc",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "media.deleted",
-    "entityType": "media",
-    "entityId": "md-e7372f2a",
-    "entityLabel": "HeidarianMan 2026-09-05 at 09.57.42.png",
-    "metadata": {},
-    "ip": "::1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:57:34.070Z"
-  },
-  {
-    "id": "log-ecdadf7e",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.tested",
-    "entityType": "channel",
-    "entityId": "ch-hjon8c962",
-    "entityLabel": "امیرحسین حیدریان",
-    "metadata": {
-      "ok": true,
-      "complete": true
-    },
-    "ip": "::1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:55:20.497Z"
-  },
-  {
-    "id": "log-5ee5b0eb",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.tested",
-    "entityType": "channel",
-    "entityId": "ch-xl89cu7mx",
-    "entityLabel": "tapeshbot",
-    "metadata": {
-      "ok": true,
-      "complete": true
-    },
-    "ip": "::1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:55:19.732Z"
-  },
-  {
-    "id": "log-b649bb90",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "publish.sent",
-    "entityType": "publish",
-    "entityId": "ch-cgf90es69,ch-xl89cu7mx,ch-hjon8c962",
-    "entityLabel": "تپش، تپش — تلگرام، تپش — ایتا",
-    "metadata": {
-      "sent": 3,
-      "failed": 0,
-      "dryRun": 0
-    },
-    "ip": "::1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:55:19.644Z"
-  },
-  {
-    "id": "log-419849fe",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.tested",
-    "entityType": "channel",
-    "entityId": "ch-cgf90es69",
-    "entityLabel": "",
-    "metadata": {
-      "ok": true,
-      "complete": true
-    },
-    "ip": "::1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:55:17.295Z"
-  },
-  {
-    "id": "log-c23b7255",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "auth.login",
-    "entityType": "admin",
-    "entityId": "adm-5e246f08",
-    "entityLabel": "0135",
-    "metadata": {},
-    "ip": "::1",
-    "userAgent": "curl/8.7.1",
-    "createdAt": "2026-09-16T15:55:15.724Z"
-  },
-  {
-    "id": "log-17ea01b0",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "auth.login",
-    "entityType": "admin",
-    "entityId": "adm-5e246f08",
-    "entityLabel": "0135",
-    "metadata": {},
-    "ip": "::1",
-    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
-    "createdAt": "2026-09-16T15:54:50.109Z"
-  },
-  {
-    "id": "log-70aa7bf3",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "auth.login",
-    "entityType": "admin",
-    "entityId": "adm-5e246f08",
-    "entityLabel": "0135",
-    "metadata": {},
-    "ip": "::1",
-    "userAgent": "curl/8.7.1",
-    "createdAt": "2026-09-16T15:54:38.539Z"
-  },
-  {
-    "id": "log-9ec54f9e",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.deleted",
-    "entityType": "channel",
-    "entityId": "ch-1szmndh8w",
-    "entityLabel": "کانال تست بله",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:53:30.387Z"
-  },
-  {
-    "id": "log-b34134c8",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "admin.deleted",
-    "entityType": "admin",
-    "entityId": "adm-f6cfdc88",
-    "entityLabel": "editor-test",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:53:29.789Z"
-  },
-  {
-    "id": "log-e51436cf",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "article.deleted",
-    "entityType": "article",
-    "entityId": "art-9f3b8d6c",
-    "entityLabel": "مقاله تست امنیت",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:53:29.246Z"
-  },
-  {
-    "id": "log-c50b559d",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "note.deleted",
-    "entityType": "note",
-    "entityId": "note-a950f94f",
-    "entityLabel": "یادداشت تست",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:53:28.510Z"
-  },
-  {
-    "id": "log-04b5120a",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "analytics.reset",
-    "entityType": "analytics",
-    "entityId": "events",
-    "entityLabel": "پاک‌سازی رویدادهای تحلیل",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:53:27.877Z"
-  },
-  {
-    "id": "log-fc7d6576",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.credentials-tested",
-    "entityType": "channel",
-    "entityId": null,
-    "entityLabel": "@tapesh",
-    "metadata": {
-      "ok": false,
-      "complete": false
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:53:27.164Z"
-  },
-  {
-    "id": "log-a313dbbb",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "publish.sent",
-    "entityType": "publish",
-    "entityId": "ch-1szmndh8w",
-    "entityLabel": "کانال تست بله",
-    "metadata": {
-      "sent": 0,
-      "failed": 0,
-      "dryRun": 1
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:53:24.573Z"
-  },
-  {
-    "id": "log-12b7a503",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "publish.sent",
-    "entityType": "publish",
-    "entityId": "ch-1szmndh8w",
-    "entityLabel": "کانال تست بله",
-    "metadata": {
-      "sent": 0,
-      "failed": 0,
-      "dryRun": 1
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:53:23.739Z"
-  },
-  {
-    "id": "log-aeb12680",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.token-cleared",
-    "entityType": "channel",
-    "entityId": "ch-1szmndh8w",
-    "entityLabel": "",
-    "metadata": {
-      "hasToken": false
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:53:22.103Z"
-  },
-  {
-    "id": "log-8ce76423",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.token-set",
-    "entityType": "channel",
-    "entityId": "ch-1szmndh8w",
-    "entityLabel": "",
-    "metadata": {
-      "hasToken": true
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:53:19.810Z"
-  },
-  {
-    "id": "log-eda7f516",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.created",
-    "entityType": "channel",
-    "entityId": "ch-1szmndh8w",
-    "entityLabel": "کانال تست بله",
-    "metadata": {
-      "platform": "bale",
-      "chatId": "@tapesh_test"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:53:16.893Z"
-  },
-  {
-    "id": "log-b2010f9c",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "alert.deleted",
-    "entityType": "alert",
-    "entityId": "al-mu4a5az6-ebzl",
-    "entityLabel": "هشدار تست",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:53:12.126Z"
-  },
-  {
-    "id": "log-750f7113",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "alert.created",
-    "entityType": "alert",
-    "entityId": "al-mu4a5az6-ebzl",
-    "entityLabel": "هشدار تست",
-    "metadata": {
-      "metric": "error_rate",
-      "threshold": 7
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:53:08.831Z"
-  },
-  {
-    "id": "log-75bcf4e9",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "note.created",
-    "entityType": "note",
-    "entityId": "note-a950f94f",
-    "entityLabel": "یادداشت تست",
-    "metadata": {
-      "kind": "checklist"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:52:51.476Z"
-  },
-  {
-    "id": "log-e88f7228",
-    "userId": "adm-f6cfdc88",
-    "userName": "نویسنده تست",
-    "action": "auth.login",
-    "entityType": "admin",
-    "entityId": "adm-f6cfdc88",
-    "entityLabel": "editor-test",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:52:50.025Z"
-  },
-  {
-    "id": "log-c67cb573",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "admin.created",
-    "entityType": "admin",
-    "entityId": "adm-f6cfdc88",
-    "entityLabel": "editor-test",
-    "metadata": {
-      "role": "editor"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:52:49.363Z"
-  },
-  {
-    "id": "log-f37da840",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "article.created",
-    "entityType": "article",
-    "entityId": "art-9f3b8d6c",
-    "entityLabel": "مقاله تست امنیت",
-    "metadata": {
-      "status": "published",
-      "category": "physiology"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:52:47.216Z"
-  },
-  {
-    "id": "log-81d4b4bf",
-    "userId": "system",
-    "userName": "سیستم",
-    "action": "auth.login-failed",
-    "entityType": "admin",
-    "entityId": "",
-    "entityLabel": "0135",
-    "metadata": {
-      "reason": "invalid-credentials"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:52:46.155Z"
-  },
-  {
-    "id": "log-d8820213",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "auth.login",
-    "entityType": "admin",
-    "entityId": "adm-5e246f08",
-    "entityLabel": "0135",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:52:45.725Z"
-  },
-  {
-    "id": "log-716a367b",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "publish.sent",
-    "entityType": "publish",
-    "entityId": "ch-xl89cu7mx",
-    "entityLabel": "تپش — تلگرام",
-    "metadata": {
-      "sent": 1,
-      "failed": 0,
-      "dryRun": 0
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:52:06.286Z"
-  },
-  {
-    "id": "log-19c34a28",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.credentials-tested",
-    "entityType": "channel",
-    "entityId": null,
-    "entityLabel": "-1004445358153",
-    "metadata": {
-      "ok": true,
-      "complete": true
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:52:05.136Z"
-  },
-  {
-    "id": "log-3856ed9f",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.updated",
-    "entityType": "channel",
-    "entityId": "ch-xl89cu7mx",
-    "entityLabel": "تپش — تلگرام",
-    "metadata": {
-      "platform": "telegram",
-      "isActive": true
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:52:01.483Z"
-  },
-  {
-    "id": "log-b9b9ee7f",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "auth.login",
-    "entityType": "admin",
-    "entityId": "adm-5e246f08",
-    "entityLabel": "0135",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:51:59.865Z"
-  },
-  {
-    "id": "log-c0846629",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "publish.sent",
-    "entityType": "publish",
-    "entityId": "ch-cgf90es69,ch-xl89cu7mx,ch-hjon8c962",
-    "entityLabel": "تپش، تپش — تلگرام، تپش — ایتا",
-    "metadata": {
-      "sent": 2,
-      "failed": 1,
-      "dryRun": 0
-    },
-    "ip": "::1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:49:14.981Z"
-  },
-  {
-    "id": "log-41217e0d",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "auth.login",
-    "entityType": "admin",
-    "entityId": "adm-5e246f08",
-    "entityLabel": "0135",
-    "metadata": {},
-    "ip": "::1",
-    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
-    "createdAt": "2026-09-16T15:48:59.054Z"
-  },
-  {
-    "id": "log-9ff2a49e",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.deleted",
-    "entityType": "channel",
-    "entityId": "ch-wi2qvbced",
-    "entityLabel": "کانال تست بله",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:44:48.755Z"
-  },
-  {
-    "id": "log-5777c649",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "admin.deleted",
-    "entityType": "admin",
-    "entityId": "adm-31d65b13",
-    "entityLabel": "editor-test",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:44:48.173Z"
-  },
-  {
-    "id": "log-95d1556b",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "article.deleted",
-    "entityType": "article",
-    "entityId": "art-3ac8eb52",
-    "entityLabel": "مقاله تست امنیت",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:44:47.624Z"
-  },
-  {
-    "id": "log-e3342c8e",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "note.deleted",
-    "entityType": "note",
-    "entityId": "note-0cc423c0",
-    "entityLabel": "یادداشت تست",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:44:47.104Z"
-  },
-  {
-    "id": "log-a58c8dd3",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "analytics.reset",
-    "entityType": "analytics",
-    "entityId": "events",
-    "entityLabel": "پاک‌سازی رویدادهای تحلیل",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:44:46.578Z"
-  },
-  {
-    "id": "log-c450e258",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.credentials-tested",
-    "entityType": "channel",
-    "entityId": null,
-    "entityLabel": "@tapesh",
-    "metadata": {
-      "ok": false,
-      "complete": false
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:44:45.900Z"
-  },
-  {
-    "id": "log-1b25e5b4",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "publish.sent",
-    "entityType": "publish",
-    "entityId": "ch-wi2qvbced",
-    "entityLabel": "کانال تست بله",
-    "metadata": {
-      "sent": 0,
-      "failed": 0,
-      "dryRun": 1
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:44:43.345Z"
-  },
-  {
-    "id": "log-e5442d61",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "publish.sent",
-    "entityType": "publish",
-    "entityId": "ch-wi2qvbced",
-    "entityLabel": "کانال تست بله",
-    "metadata": {
-      "sent": 0,
-      "failed": 0,
-      "dryRun": 1
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:44:42.488Z"
-  },
-  {
-    "id": "log-2489ef76",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.token-cleared",
-    "entityType": "channel",
-    "entityId": "ch-wi2qvbced",
-    "entityLabel": "",
-    "metadata": {
-      "hasToken": false
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:44:41.127Z"
-  },
-  {
-    "id": "log-1f7b6ec3",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.token-set",
-    "entityType": "channel",
-    "entityId": "ch-wi2qvbced",
-    "entityLabel": "",
-    "metadata": {
-      "hasToken": true
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:44:39.465Z"
-  },
-  {
-    "id": "log-18cac875",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.created",
-    "entityType": "channel",
-    "entityId": "ch-wi2qvbced",
-    "entityLabel": "کانال تست بله",
-    "metadata": {
-      "platform": "bale",
-      "chatId": "@tapesh_test"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:44:37.337Z"
-  },
-  {
-    "id": "log-7c36ee52",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "alert.deleted",
-    "entityType": "alert",
-    "entityId": "al-mu49u814-xfbm",
-    "entityLabel": "هشدار تست",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:44:33.965Z"
-  },
-  {
-    "id": "log-0095a8f6",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "alert.created",
-    "entityType": "alert",
-    "entityId": "al-mu49u814-xfbm",
-    "entityLabel": "هشدار تست",
-    "metadata": {
-      "metric": "error_rate",
-      "threshold": 7
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:44:31.673Z"
-  },
-  {
-    "id": "log-50a77f2f",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "note.created",
-    "entityType": "note",
-    "entityId": "note-0cc423c0",
-    "entityLabel": "یادداشت تست",
-    "metadata": {
-      "kind": "checklist"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:44:17.079Z"
-  },
-  {
-    "id": "log-7876440a",
-    "userId": "adm-31d65b13",
-    "userName": "نویسنده تست",
-    "action": "auth.login",
-    "entityType": "admin",
-    "entityId": "adm-31d65b13",
-    "entityLabel": "editor-test",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:44:15.646Z"
-  },
-  {
-    "id": "log-b37d9d47",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "admin.created",
-    "entityType": "admin",
-    "entityId": "adm-31d65b13",
-    "entityLabel": "editor-test",
-    "metadata": {
-      "role": "editor"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:44:14.959Z"
-  },
-  {
-    "id": "log-551e0128",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "article.created",
-    "entityType": "article",
-    "entityId": "art-3ac8eb52",
-    "entityLabel": "مقاله تست امنیت",
-    "metadata": {
-      "status": "published",
-      "category": "physiology"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:44:12.832Z"
-  },
-  {
-    "id": "log-ee779e9f",
-    "userId": "system",
-    "userName": "سیستم",
-    "action": "auth.login-failed",
-    "entityType": "admin",
-    "entityId": "",
-    "entityLabel": "0135",
-    "metadata": {
-      "reason": "invalid-credentials"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:44:11.795Z"
-  },
-  {
-    "id": "log-2b89bed7",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "auth.login",
-    "entityType": "admin",
-    "entityId": "adm-5e246f08",
-    "entityLabel": "0135",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:44:11.369Z"
-  },
-  {
-    "id": "log-6f167454",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.deleted",
-    "entityType": "channel",
-    "entityId": "ch-sjf0ca1tp",
-    "entityLabel": "کانال تست بله",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:42:14.954Z"
-  },
-  {
-    "id": "log-c52dcd7d",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "admin.deleted",
-    "entityType": "admin",
-    "entityId": "adm-4948205f",
-    "entityLabel": "editor-test",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:42:14.371Z"
-  },
-  {
-    "id": "log-0123f37f",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "article.deleted",
-    "entityType": "article",
-    "entityId": "art-4d1978f8",
-    "entityLabel": "مقاله تست امنیت",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:42:13.851Z"
-  },
-  {
-    "id": "log-4632c6c0",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "note.deleted",
-    "entityType": "note",
-    "entityId": "note-c9cc109f",
-    "entityLabel": "یادداشت تست",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:42:13.330Z"
-  },
-  {
-    "id": "log-0a6485dc",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "analytics.reset",
-    "entityType": "analytics",
-    "entityId": "events",
-    "entityLabel": "پاک‌سازی رویدادهای تحلیل",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:42:12.808Z"
-  },
-  {
-    "id": "log-40f222b3",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.credentials-tested",
-    "entityType": "channel",
-    "entityId": null,
-    "entityLabel": "@tapesh",
-    "metadata": {
-      "ok": false,
-      "complete": false
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:42:12.135Z"
-  },
-  {
-    "id": "log-fa88590e",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "publish.sent",
-    "entityType": "publish",
-    "entityId": "ch-sjf0ca1tp",
-    "entityLabel": "کانال تست بله",
-    "metadata": {
-      "sent": 0,
-      "failed": 0,
-      "dryRun": 1
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:42:09.620Z"
-  },
-  {
-    "id": "log-be222317",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "publish.sent",
-    "entityType": "publish",
-    "entityId": "ch-sjf0ca1tp",
-    "entityLabel": "کانال تست بله",
-    "metadata": {
-      "sent": 0,
-      "failed": 0,
-      "dryRun": 1
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:42:08.804Z"
-  },
-  {
-    "id": "log-018ea898",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.token-cleared",
-    "entityType": "channel",
-    "entityId": "ch-sjf0ca1tp",
-    "entityLabel": "",
-    "metadata": {
-      "hasToken": false
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:42:07.418Z"
-  },
-  {
-    "id": "log-e99f0ff0",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.token-set",
-    "entityType": "channel",
-    "entityId": "ch-sjf0ca1tp",
-    "entityLabel": "",
-    "metadata": {
-      "hasToken": true
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:42:05.761Z"
-  },
-  {
-    "id": "log-e774fd3f",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.created",
-    "entityType": "channel",
-    "entityId": "ch-sjf0ca1tp",
-    "entityLabel": "کانال تست بله",
-    "metadata": {
-      "platform": "bale",
-      "chatId": "@tapesh_test"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:42:03.662Z"
-  },
-  {
-    "id": "log-8a9ccd75",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "alert.deleted",
-    "entityType": "alert",
-    "entityId": "al-mu49qxid-p10v",
-    "entityLabel": "هشدار تست",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:42:00.386Z"
-  },
-  {
-    "id": "log-e2859dfa",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "alert.created",
-    "entityType": "alert",
-    "entityId": "al-mu49qxid-p10v",
-    "entityLabel": "هشدار تست",
-    "metadata": {
-      "metric": "error_rate",
-      "threshold": 7
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:41:58.075Z"
-  },
-  {
-    "id": "log-a1eeaa68",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "note.created",
-    "entityType": "note",
-    "entityId": "note-c9cc109f",
-    "entityLabel": "یادداشت تست",
-    "metadata": {
-      "kind": "checklist"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:41:43.753Z"
-  },
-  {
-    "id": "log-20f82af9",
-    "userId": "adm-4948205f",
-    "userName": "نویسنده تست",
-    "action": "auth.login",
-    "entityType": "admin",
-    "entityId": "adm-4948205f",
-    "entityLabel": "editor-test",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:41:42.340Z"
-  },
-  {
-    "id": "log-b7fa2899",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "admin.created",
-    "entityType": "admin",
-    "entityId": "adm-4948205f",
-    "entityLabel": "editor-test",
-    "metadata": {
-      "role": "editor"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:41:41.682Z"
-  },
-  {
-    "id": "log-6bcf554e",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "article.created",
-    "entityType": "article",
-    "entityId": "art-4d1978f8",
-    "entityLabel": "مقاله تست امنیت",
-    "metadata": {
-      "status": "published",
-      "category": "physiology"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:41:39.579Z"
-  },
-  {
-    "id": "log-8ad01ee0",
-    "userId": "system",
-    "userName": "سیستم",
-    "action": "auth.login-failed",
-    "entityType": "admin",
-    "entityId": "",
-    "entityLabel": "0135",
-    "metadata": {
-      "reason": "invalid-credentials"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:41:38.545Z"
-  },
-  {
-    "id": "log-ef9739a5",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "auth.login",
-    "entityType": "admin",
-    "entityId": "adm-5e246f08",
-    "entityLabel": "0135",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:41:38.125Z"
-  },
-  {
-    "id": "log-774f7819",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.deleted",
-    "entityType": "channel",
-    "entityId": "ch-b3xtdgwcp",
-    "entityLabel": "کانال تست بله",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:39:47.849Z"
-  },
-  {
-    "id": "log-963489d8",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "admin.deleted",
-    "entityType": "admin",
-    "entityId": "adm-04fdb6ac",
-    "entityLabel": "editor-test",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:39:47.273Z"
-  },
-  {
-    "id": "log-12046631",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "article.deleted",
-    "entityType": "article",
-    "entityId": "art-d9c6bf3f",
-    "entityLabel": "مقاله تست امنیت",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:39:46.758Z"
-  },
-  {
-    "id": "log-27361132",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "note.deleted",
-    "entityType": "note",
-    "entityId": "note-81a99df6",
-    "entityLabel": "یادداشت تست",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:39:46.243Z"
-  },
-  {
-    "id": "log-2edc5921",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "analytics.reset",
-    "entityType": "analytics",
-    "entityId": "events",
-    "entityLabel": "پاک‌سازی رویدادهای تحلیل",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:39:45.724Z"
-  },
-  {
-    "id": "log-612752fc",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.credentials-tested",
-    "entityType": "channel",
-    "entityId": null,
-    "entityLabel": "@tapesh",
-    "metadata": {
-      "ok": false,
-      "complete": false
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:39:45.055Z"
-  },
-  {
-    "id": "log-9d3bf0ee",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "publish.sent",
-    "entityType": "publish",
-    "entityId": "ch-b3xtdgwcp",
-    "entityLabel": "کانال تست بله",
-    "metadata": {
-      "sent": 0,
-      "failed": 0,
-      "dryRun": 1
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:39:42.524Z"
-  },
-  {
-    "id": "log-90724084",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "publish.sent",
-    "entityType": "publish",
-    "entityId": "ch-b3xtdgwcp",
-    "entityLabel": "کانال تست بله",
-    "metadata": {
-      "sent": 0,
-      "failed": 0,
-      "dryRun": 1
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:39:41.712Z"
-  },
-  {
-    "id": "log-96553c79",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.token-cleared",
-    "entityType": "channel",
-    "entityId": "ch-b3xtdgwcp",
-    "entityLabel": "",
-    "metadata": {
-      "hasToken": false
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:39:40.384Z"
-  },
-  {
-    "id": "log-dc176270",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.token-set",
-    "entityType": "channel",
-    "entityId": "ch-b3xtdgwcp",
-    "entityLabel": "",
-    "metadata": {
-      "hasToken": true
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:39:38.693Z"
-  },
-  {
-    "id": "log-be78ad32",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.created",
-    "entityType": "channel",
-    "entityId": "ch-b3xtdgwcp",
-    "entityLabel": "کانال تست بله",
-    "metadata": {
-      "platform": "bale",
-      "chatId": "@tapesh_test"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:39:36.604Z"
-  },
-  {
-    "id": "log-c3eefbce",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "alert.deleted",
-    "entityType": "alert",
-    "entityId": "al-mu49ns2x-vqgq",
-    "entityLabel": "هشدار تست",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:39:33.298Z"
-  },
-  {
-    "id": "log-b55cc2a7",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "alert.created",
-    "entityType": "alert",
-    "entityId": "al-mu49ns2x-vqgq",
-    "entityLabel": "هشدار تست",
-    "metadata": {
-      "metric": "error_rate",
-      "threshold": 7
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:39:31.067Z"
-  },
-  {
-    "id": "log-81aefc5c",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "note.created",
-    "entityType": "note",
-    "entityId": "note-81a99df6",
-    "entityLabel": "یادداشت تست",
-    "metadata": {
-      "kind": "checklist"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:39:16.741Z"
-  },
-  {
-    "id": "log-367680c3",
-    "userId": "adm-04fdb6ac",
-    "userName": "نویسنده تست",
-    "action": "auth.login",
-    "entityType": "admin",
-    "entityId": "adm-04fdb6ac",
-    "entityLabel": "editor-test",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:39:15.307Z"
-  },
-  {
-    "id": "log-a7737c45",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "admin.created",
-    "entityType": "admin",
-    "entityId": "adm-04fdb6ac",
-    "entityLabel": "editor-test",
-    "metadata": {
-      "role": "editor"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:39:14.658Z"
-  },
-  {
-    "id": "log-ec7cbf24",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "article.created",
-    "entityType": "article",
-    "entityId": "art-d9c6bf3f",
-    "entityLabel": "مقاله تست امنیت",
-    "metadata": {
-      "status": "published",
-      "category": "physiology"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:39:12.581Z"
-  },
-  {
-    "id": "log-e41115ff",
-    "userId": "system",
-    "userName": "سیستم",
-    "action": "auth.login-failed",
-    "entityType": "admin",
-    "entityId": "",
-    "entityLabel": "0135",
-    "metadata": {
-      "reason": "invalid-credentials"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:39:11.546Z"
-  },
-  {
-    "id": "log-51570dbb",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "auth.login",
-    "entityType": "admin",
-    "entityId": "adm-5e246f08",
-    "entityLabel": "0135",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:39:11.130Z"
-  },
-  {
-    "id": "log-61e67c8b",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "publish.sent",
-    "entityType": "publish",
-    "entityId": "ch-xl89cu7mx,ch-hjon8c962",
-    "entityLabel": "تپش — تلگرام، تپش — ایتا",
-    "metadata": {
-      "sent": 1,
-      "failed": 1,
-      "dryRun": 0
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:38:03.950Z"
-  },
-  {
-    "id": "log-dc17b670",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.credentials-tested",
-    "entityType": "channel",
-    "entityId": null,
-    "entityLabel": "11252784",
-    "metadata": {
-      "ok": true,
-      "complete": true
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:38:01.451Z"
-  },
-  {
-    "id": "log-ab170c66",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.updated",
-    "entityType": "channel",
-    "entityId": "ch-hjon8c962",
-    "entityLabel": "تپش — ایتا",
-    "metadata": {
-      "platform": "eitaa",
-      "isActive": true
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:38:00.420Z"
-  },
-  {
-    "id": "log-61a73680",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "auth.login",
-    "entityType": "admin",
-    "entityId": "adm-5e246f08",
-    "entityLabel": "0135",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:37:58.813Z"
-  },
-  {
-    "id": "log-77051bbc",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "publish.sent",
-    "entityType": "publish",
-    "entityId": "ch-hjon8c962",
-    "entityLabel": "تپش — ایتا",
-    "metadata": {
-      "sent": 0,
-      "failed": 1,
-      "dryRun": 0
-    },
-    "ip": "::1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:35:02.118Z"
-  },
-  {
-    "id": "log-938e993b",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.tested",
-    "entityType": "channel",
-    "entityId": "ch-hjon8c962",
-    "entityLabel": "امیرحسین حیدریان",
-    "metadata": {
-      "ok": true,
-      "complete": true
-    },
-    "ip": "::1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:34:29.729Z"
-  },
-  {
-    "id": "log-d008f4c1",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "publish.sent",
-    "entityType": "publish",
-    "entityId": "ch-hjon8c962",
-    "entityLabel": "تپش — ایتا",
-    "metadata": {
-      "sent": 0,
-      "failed": 1,
-      "dryRun": 0
-    },
-    "ip": "::1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:33:18.783Z"
-  },
-  {
-    "id": "log-e1888ff1",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "publish.sent",
-    "entityType": "publish",
-    "entityId": "ch-cgf90es69,ch-xl89cu7mx,ch-hjon8c962",
-    "entityLabel": "تپش، تپش — تلگرام، تپش — ایتا",
-    "metadata": {
-      "sent": 2,
-      "failed": 1,
-      "dryRun": 0
-    },
-    "ip": "::1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:29:07.626Z"
-  },
-  {
-    "id": "log-9689b466",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.tested",
-    "entityType": "channel",
-    "entityId": "ch-hjon8c962",
-    "entityLabel": "امیرحسین حیدریان",
-    "metadata": {
-      "ok": true,
-      "complete": true
-    },
-    "ip": "::1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:28:52.049Z"
-  },
-  {
-    "id": "log-f3ae007e",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.tested",
-    "entityType": "channel",
-    "entityId": "ch-hjon8c962",
-    "entityLabel": "امیرحسین حیدریان",
-    "metadata": {
-      "ok": true,
-      "complete": true
-    },
-    "ip": "::1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:28:46.881Z"
-  },
-  {
-    "id": "log-94dc3e20",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.tested",
-    "entityType": "channel",
-    "entityId": "ch-xl89cu7mx",
-    "entityLabel": "tapeshbot",
-    "metadata": {
-      "ok": true,
-      "complete": true
-    },
-    "ip": "::1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:28:42.072Z"
-  },
-  {
-    "id": "log-c3960b7b",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "auth.login",
-    "entityType": "admin",
-    "entityId": "adm-5e246f08",
-    "entityLabel": "0135",
-    "metadata": {},
-    "ip": "::1",
-    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
-    "createdAt": "2026-09-16T15:28:26.019Z"
-  },
-  {
-    "id": "log-51166d57",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.deleted",
-    "entityType": "channel",
-    "entityId": "ch-yvyrvoqo0",
-    "entityLabel": "کانال تست بله",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:23:20.380Z"
-  },
-  {
-    "id": "log-980659ed",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "admin.deleted",
-    "entityType": "admin",
-    "entityId": "adm-234c8d28",
-    "entityLabel": "editor-test",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:23:19.816Z"
-  },
-  {
-    "id": "log-1a4a7e6e",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "article.deleted",
-    "entityType": "article",
-    "entityId": "art-309d3444",
-    "entityLabel": "مقاله تست امنیت",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:23:19.311Z"
-  },
-  {
-    "id": "log-edd99b1c",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "note.deleted",
-    "entityType": "note",
-    "entityId": "note-316b9b64",
-    "entityLabel": "یادداشت تست",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:23:18.772Z"
-  },
-  {
-    "id": "log-6de59ec7",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "analytics.reset",
-    "entityType": "analytics",
-    "entityId": "events",
-    "entityLabel": "پاک‌سازی رویدادهای تحلیل",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:23:18.267Z"
-  },
-  {
-    "id": "log-3ee611ac",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.credentials-tested",
-    "entityType": "channel",
-    "entityId": null,
-    "entityLabel": "@tapesh",
-    "metadata": {
-      "ok": false,
-      "complete": false
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:23:17.614Z"
-  },
-  {
-    "id": "log-8b306a5b",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "publish.sent",
-    "entityType": "publish",
-    "entityId": "ch-yvyrvoqo0",
-    "entityLabel": "کانال تست بله",
-    "metadata": {
-      "sent": 0,
-      "failed": 0,
-      "dryRun": 1
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:23:15.190Z"
-  },
-  {
-    "id": "log-3d20f0b6",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "publish.sent",
-    "entityType": "publish",
-    "entityId": "ch-yvyrvoqo0",
-    "entityLabel": "کانال تست بله",
-    "metadata": {
-      "sent": 0,
-      "failed": 0,
-      "dryRun": 1
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:23:14.393Z"
-  },
-  {
-    "id": "log-e2df5459",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.token-cleared",
-    "entityType": "channel",
-    "entityId": "ch-yvyrvoqo0",
-    "entityLabel": "",
-    "metadata": {
-      "hasToken": false
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:23:13.051Z"
-  },
-  {
-    "id": "log-0c5c273e",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.token-set",
-    "entityType": "channel",
-    "entityId": "ch-yvyrvoqo0",
-    "entityLabel": "",
-    "metadata": {
-      "hasToken": true
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:23:11.469Z"
-  },
-  {
-    "id": "log-6fd78deb",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.created",
-    "entityType": "channel",
-    "entityId": "ch-yvyrvoqo0",
-    "entityLabel": "کانال تست بله",
-    "metadata": {
-      "platform": "bale",
-      "chatId": "@tapesh_test"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:23:09.457Z"
-  },
-  {
-    "id": "log-ad1abc18",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.deleted",
-    "entityType": "channel",
-    "entityId": "ch-p5yo48cgn",
-    "entityLabel": "کانال تست بله",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:23:08.278Z"
-  },
-  {
-    "id": "log-445dd16e",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "alert.deleted",
-    "entityType": "alert",
-    "entityId": "al-mu492lym-vbyg",
-    "entityLabel": "هشدار تست",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:23:05.577Z"
-  },
-  {
-    "id": "log-dcad9670",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "alert.created",
-    "entityType": "alert",
-    "entityId": "al-mu492lym-vbyg",
-    "entityLabel": "هشدار تست",
-    "metadata": {
-      "metric": "error_rate",
-      "threshold": 7
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:23:03.358Z"
-  },
-  {
-    "id": "log-041dd3de",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "note.created",
-    "entityType": "note",
-    "entityId": "note-316b9b64",
-    "entityLabel": "یادداشت تست",
-    "metadata": {
-      "kind": "checklist"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:22:49.453Z"
-  },
-  {
-    "id": "log-e813a228",
-    "userId": "adm-234c8d28",
-    "userName": "نویسنده تست",
-    "action": "auth.login",
-    "entityType": "admin",
-    "entityId": "adm-234c8d28",
-    "entityLabel": "editor-test",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:22:48.051Z"
-  },
-  {
-    "id": "log-6c13a7a0",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "admin.created",
-    "entityType": "admin",
-    "entityId": "adm-234c8d28",
-    "entityLabel": "editor-test",
-    "metadata": {
-      "role": "editor"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:22:47.417Z"
-  },
-  {
-    "id": "log-a0390b1e",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "article.created",
-    "entityType": "article",
-    "entityId": "art-309d3444",
-    "entityLabel": "مقاله تست امنیت",
-    "metadata": {
-      "status": "published",
-      "category": "physiology"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:22:45.394Z"
-  },
-  {
-    "id": "log-086a3904",
-    "userId": "system",
-    "userName": "سیستم",
-    "action": "auth.login-failed",
-    "entityType": "admin",
-    "entityId": "",
-    "entityLabel": "0135",
-    "metadata": {
-      "reason": "invalid-credentials"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:22:44.392Z"
-  },
-  {
-    "id": "log-6fbca8d4",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "auth.login",
-    "entityType": "admin",
-    "entityId": "adm-5e246f08",
-    "entityLabel": "0135",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:22:43.987Z"
-  },
-  {
-    "id": "log-0d3d00e9",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.deleted",
-    "entityType": "channel",
-    "entityId": "ch-yesz65eje",
-    "entityLabel": "کانال تست بله",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:22:18.367Z"
-  },
-  {
-    "id": "log-426b56f2",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "admin.deleted",
-    "entityType": "admin",
-    "entityId": "adm-9caeb20a",
-    "entityLabel": "editor-test",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:22:17.809Z"
-  },
-  {
-    "id": "log-eb2685bb",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "article.deleted",
-    "entityType": "article",
-    "entityId": "art-584272cb",
-    "entityLabel": "مقاله تست امنیت",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:22:17.306Z"
-  },
-  {
-    "id": "log-9f50f0c1",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "note.deleted",
-    "entityType": "note",
-    "entityId": "note-bc8f3992",
-    "entityLabel": "یادداشت تست",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:22:16.803Z"
-  },
-  {
-    "id": "log-280d8861",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "analytics.reset",
-    "entityType": "analytics",
-    "entityId": "events",
-    "entityLabel": "پاک‌سازی رویدادهای تحلیل",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:22:16.282Z"
-  },
-  {
-    "id": "log-2f6b3452",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.credentials-tested",
-    "entityType": "channel",
-    "entityId": null,
-    "entityLabel": "@tapesh",
-    "metadata": {
-      "ok": false,
-      "complete": false
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:22:15.604Z"
-  },
-  {
-    "id": "log-e52b18c3",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "publish.sent",
-    "entityType": "publish",
-    "entityId": "ch-yesz65eje",
-    "entityLabel": "کانال تست بله",
-    "metadata": {
-      "sent": 0,
-      "failed": 0,
-      "dryRun": 1
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:22:13.058Z"
-  },
-  {
-    "id": "log-c4fe6035",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "publish.sent",
-    "entityType": "publish",
-    "entityId": "ch-yesz65eje",
-    "entityLabel": "کانال تست بله",
-    "metadata": {
-      "sent": 0,
-      "failed": 0,
-      "dryRun": 1
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:22:12.267Z"
-  },
-  {
-    "id": "log-8188cd2f",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.token-cleared",
-    "entityType": "channel",
-    "entityId": "ch-yesz65eje",
-    "entityLabel": "",
-    "metadata": {
-      "hasToken": false
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:22:10.977Z"
-  },
-  {
-    "id": "log-24d6b58a",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.token-set",
-    "entityType": "channel",
-    "entityId": "ch-yesz65eje",
-    "entityLabel": "",
-    "metadata": {
-      "hasToken": true
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:22:09.257Z"
-  },
-  {
-    "id": "log-dbe7bd84",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.created",
-    "entityType": "channel",
-    "entityId": "ch-yesz65eje",
-    "entityLabel": "کانال تست بله",
-    "metadata": {
-      "platform": "bale",
-      "chatId": "@tapesh_test"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:22:07.080Z"
-  },
-  {
-    "id": "log-1300dad7",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "alert.deleted",
-    "entityType": "alert",
-    "entityId": "al-mu491b4n-l9ib",
-    "entityLabel": "هشدار تست",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:22:04.866Z"
-  },
-  {
-    "id": "log-a604157f",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "alert.created",
-    "entityType": "alert",
-    "entityId": "al-mu491b4n-l9ib",
-    "entityLabel": "هشدار تست",
-    "metadata": {
-      "metric": "error_rate",
-      "threshold": 7
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:22:02.661Z"
-  },
-  {
-    "id": "log-f1048660",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "note.created",
-    "entityType": "note",
-    "entityId": "note-bc8f3992",
-    "entityLabel": "یادداشت تست",
-    "metadata": {
-      "kind": "checklist"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:21:48.812Z"
-  },
-  {
-    "id": "log-bb71790b",
-    "userId": "adm-9caeb20a",
-    "userName": "نویسنده تست",
-    "action": "auth.login",
-    "entityType": "admin",
-    "entityId": "adm-9caeb20a",
-    "entityLabel": "editor-test",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:21:47.447Z"
-  },
-  {
-    "id": "log-3c3a7204",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "admin.created",
-    "entityType": "admin",
-    "entityId": "adm-9caeb20a",
-    "entityLabel": "editor-test",
-    "metadata": {
-      "role": "editor"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:21:46.782Z"
-  },
-  {
-    "id": "log-b24d452b",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "article.created",
-    "entityType": "article",
-    "entityId": "art-584272cb",
-    "entityLabel": "مقاله تست امنیت",
-    "metadata": {
-      "status": "published",
-      "category": "physiology"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:21:44.765Z"
-  },
-  {
-    "id": "log-64bbb24f",
-    "userId": "system",
-    "userName": "سیستم",
-    "action": "auth.login-failed",
-    "entityType": "admin",
-    "entityId": "",
-    "entityLabel": "0135",
-    "metadata": {
-      "reason": "invalid-credentials"
-    },
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:21:43.741Z"
-  },
-  {
-    "id": "log-57ed589a",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "auth.login",
-    "entityType": "admin",
-    "entityId": "adm-5e246f08",
-    "entityLabel": "0135",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:21:43.305Z"
-  },
-  {
-    "id": "log-0e4ca5a1",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "channel.deleted",
-    "entityType": "channel",
-    "entityId": "ch-zaizxrwo8",
-    "entityLabel": "کانال تست بله",
-    "metadata": {},
-    "ip": "127.0.0.1",
-    "userAgent": "",
-    "createdAt": "2026-09-16T15:21:08.547Z"
   }
 ]

@@ -133,6 +133,7 @@ D-DayProject/
 │   ├── App.jsx             ۲۰۸۷ خط — صفحهٔ اصلی سایت + روتر کل + ورود/ثبت‌نام (+ ورود با گوگل)
 │   ├── styles.css          دیزاین سیستم پایه (فونت‌ها، متغیرها، کلاس‌های سایت)
 │   ├── data/learning/      anatomyCourse.js — محتوای دورهٔ آناتومی
+│   ├── data/micro/         ۱۶ درس میکرودرسنامه — فقط داده، بدون React (+ README)
 │   ├── layout/             ← تمام UI
 │   │   ├── ThemeToggle.jsx  دکمهٔ مشترک تم تیره/روشن (در ۶ سطح استفاده می‌شود)
 │   │   ├── OfflinePage.jsx / SecondaryRegistrationLayout.jsx
@@ -232,6 +233,8 @@ src/layout/**  (UI)  ──import──▶  src/services/**  (منطق + داد�
 | `#admin/media-center/<tab>` | مدیریت رسانه و فضای مجازی | `MediaCenter` |
 | `#admin/publishing` | انتشار در کانال‌ها (بله/تلگرام/ایتا) | `AdminPublishing` |
 | `#admin/analytics/<tab>` | مرکز تحلیل ۱۶ بخشی | `AnalyticsCenter` |
+| `#admin/micro-lesson` | میکرو درسنامه تپش — لایهٔ داخل پنل (از کارت میکرو درسنامه در «صفحات») | `AdminMicro` |
+| `#admin/flashcard-library` | کتابخانهٔ فلش‌کارت تپش — لایهٔ داخل پنل (از کارت فلش‌کارت در «صفحات») | `AdminFlashcards` |
 | — | آفلاین (`navigator.onLine === false`) | `OfflinePage` — **پیش از همهٔ مسیرها** بررسی می‌شود |
 
 **ترتیب اولویت در `App`:** آفلاین → `adminOpen` → `onboardingOpen` → `dashboardOpen` →
@@ -372,6 +375,12 @@ const [view, setView, patchView] = useLayerRoute(LAYER_IDS.wiki, WIKI_HOME_VIEW,
   می‌افتاد (آن زمان `--deep` هنوز سیاهِ خالص بود؛ امروز `#121212` است ولی قاعده سرِ جایش
   می‌ماند: پس‌زمینهٔ صفحه `--background` است، نه `--deep`).
   بقیهٔ بخش‌ها پس‌زمینه نمی‌کشند و خودشان از پوسته ارث می‌برند.
+- **میکرودرسنامه کاملاً داده‌محور است:** الگوریتم درس (مبحث‌بندی → واحد → صفحه → block →
+  ایستگاه) یک‌بار در موتور و UI نوشته شده و برای **هر ۱۶ درس** همان کد اجرا می‌شود. تفاوت
+  درس‌ها فقط در فایل داده است (`src/data/micro/<subjectId>Course.js` + ثبت در
+  `COURSE_REGISTRY`). سه دیاگرام `flow`/`bars`/`cycle` هم با `data` از خود درس ساخته
+  می‌شوند؛ پس درس تازه هیچ کد UI لازم ندارد. قرارداد و شکاف پوشش بانک تست در
+  `src/data/micro/README.md`.
 - **لایهٔ تپش هوشمند** دو مصرف‌کننده دارد: کارت مینیمال در «سایر بخش‌ها» و پاپ‌آپ شناور. هر دو از
   یک استور ماژول‌سطح (`ai/aiStore.js`) تغذیه می‌شوند، پس بستن پاپ‌آپ مکالمه را از دست نمی‌دهد.
 
@@ -390,13 +399,14 @@ const [view, setView, patchView] = useLayerRoute(LAYER_IDS.wiki, WIKI_HOME_VIEW,
 | `articles/` | مقالات سایت | `articlesService.js`, `userState.js` |
 | `coordinatedExams/` | آزمون‌های هماهنگ (ثبت‌نام، سالن، کارنامه، رتبه) | `coordinatedExamService.js` |
 | `examBuilder/` | آزمون‌ساز شخصی | `selectionEngine.js`, `presets.js` |
-| `flashcards/` | فلش‌کارت + الگوریتم SM-2 | `flashcardService.js`, `spacedRepetition.js` |
+| `flashcards/` | فلش‌کارت + الگوریتم SM-2 | `flashcardService.js` (دک‌های منتشرشدهٔ پنل از `/api/public/flashcards/library` را جلوی دک‌های ثابت `mockData.js` ادغام می‌کند), `spacedRepetition.js` |
 | `hearts/` | اقتصاد قلب (نمودار داشبورد) | `heartSeries.js`, `heartStatsService.js` |
 | `group/` | اشتراک گروهی: کد اشتراک، پله‌های تخفیف، چرخهٔ ساخت/پیوستن/چرخش/خروج | `groupService.js` |
 | `international/` | آزمون‌های بین‌الملل (USMLE/PLAB/…) | `internationalService.js` |
 | `knowledge/` | گراف دانش (۵۶ نود، ۸۸ یال) | `graphData.js`, `graphModel.js`, `knowledgeService.js` |
 | `league/` | لیگ، رتبه‌بندی، چالش، اعلان‌ها | `leagueService.js` |
 | `learning/` | موتور درسنامهٔ جامع | `index.js` (ری‌اکسپورت ۶ سرویس) |
+| `micro/` | موتور میکرودرسنامه: محتوا، پیشرفت، انتخاب تست، وضعیت مفهوم | `microContentService.js` (رجیستری ۱۶ درس), `microProgressService.js`, `microTestEngine.js`, `microLearningEngine.js` |
 | `notes/` | دفترچهٔ یادداشت | `notesService.js` |
 | `products/` | صفحهٔ محصولات: هدرِ بدون هاله، برگه‌های چسبان و ورق‌خور دوره‌ها، کادرهای کلیکی بانک تست، ویکی/مقالات، تصویر شبکهٔ دانش، دفترچهٔ مرور و اکوسیستم متحرک؛ با **مقصد واقعی** هر محصول | `productsService.js` |
 | `pricing/` | تعرفه‌ها: پلن‌ها، دوره‌های پرداخت، ماتریس قابلیت، `quote()` | `pricingService.js` |
@@ -429,6 +439,7 @@ const [view, setView, patchView] = useLayerRoute(LAYER_IDS.wiki, WIKI_HOME_VIEW,
 | `tapesh:coordinated:v1:<userId>` | آزمون‌های هماهنگ |
 | `tapesh:analytics:v1:<userId>` | تحلیل عملکرد |
 | `tapesh:learning:v1:<userId>:<courseId>` | پیشرفت درسنامه |
+| `tapesh:micro:v1:<userId>:<courseId>` | پیشرفت میکرودرسنامه (وضعیت صفحه، ایستگاه، تسلط مفهوم) |
 | `tapesh:knowledge:v1:<userId>` | گراف دانش |
 | `tapesh:flashcards:v1`, `tapesh:notes:v1`, `tapesh:hearts:v1`, `tapesh:wiki:v1`, `tapesh:articles` | بدون تفکیک کاربر |
 | `tapesh:group:v1`, `tapesh:group:v1:viewer` | اشتراک گروهی — **عمداً بدون تفکیک کاربر**: هویت «من» شناسهٔ همین دستگاه است، نه حساب، تا گروهِ ساخته‌شده با ورود/خروج از حساب گم نشود |
@@ -463,12 +474,16 @@ const [view, setView, patchView] = useLayerRoute(LAYER_IDS.wiki, WIKI_HOME_VIEW,
 POST   /api/admin/auth/login | logout | password
 GET    /api/admin/auth/me                     نشست جاری + توکن CSRF
 GET    /api/admin/stats | meta
-CRUD   /api/admin/{articles,categories,pages,media,banners,users,notes}
+CRUD   /api/admin/{articles,categories,pages,media,banners,users,notes,flashcards,micro}
+GET    /api/admin/micro/subjects               فهرست درس‌های رجیستری (فرم «درسنامهٔ تازه»)
+GET    /api/admin/micro/test-bank              انتخاب سؤال از بانک تست
+POST   /api/admin/micro/:id/status             انتشار/لغو انتشار میکرو درسنامه
 GET/PUT /api/admin/settings
 GET    /api/admin/logs
 GET    /api/admin/analytics/{sources,ping,export,alerts} + ۱۶ بخش تحلیل
 POST   /api/public/analytics/collect           تلمتری مرورگر (تنها مسیر عمومی غیر-GET)
 GET    /api/public/{articles,banners,settings,pages/:slug}
+GET    /api/public/{flashcards,micro}/library   کتابخانهٔ منتشرشدهٔ فلش‌کارت / میکرو درسنامه
 GET    /api/auth/google/{status,start,callback,handoff}   ورود/ثبت‌نام با گوگل
 ```
 
@@ -1090,6 +1105,23 @@ fetch. مقدار `JSON.stringify(filters)` را پاس بده یا شیء را 
 سنجهٔ رندر خودِ `render()` هم باید اول بیاید تا شکست، صریح گزارش شود:
 «رندر صفحهٔ … بدون خطا — capacity is not defined».
 
+### ۱۸) ایستگاه خالی میکرودرسنامه = شکاف بانک تست، نه باگ UI
+
+میکرودرسنامه سؤال خودش را نمی‌سازد؛ همه از `src/services/testBank/` می‌آید. بانک فعلی
+۵۹ سؤال دارد و فقط ۷ درس از ۱۶ درس را پوشش می‌دهد (`physiology` ۱۶، `biochemistry` ۵،
+`anatomy` ۴، `genetics` ۲، `histology` ۲، `microbiology` ۲، `immunology` ۱، `pathology` ۱).
+پس ۹ واحد عمداً استخر خالی دارند و ایستگاهشان پیام «هنوز سؤالی ثبت نشده» می‌گیرد.
+
+**قاعده:** اگر ایستگاه خالی دیدی، اول `questionPoolOf` و مسیرهای `unit.testBank` را چک کن،
+نه CSS و نه شرط رندر. دو اشتباه رایج:
+
+- **`subjectId` بانک را با `unit.subjectId` قاطی کنی.** مثال واقعی: بانک درس «ژنتیک» مستقل
+  ندارد و سؤال‌های مولکولی زیر `biochemistry` است؛ اگر `testBank.subjectId: 'genetics'`
+  بگذاری، استخر همیشه خالی می‌ماند. موتور عمداً `unit.testBank.subjectId` را ترجیح می‌دهد.
+- **مسیر مبحث را حدسی بنویسی.** `topicPath` باید **مو‌به‌مو** با مسیر بانک یکی باشد
+  (مثل `['قلب و عروق','چرخهٔ قلبی']`)؛ یک کاراکتر اختلاف = صفر سؤال. مسیر درست را از خود
+  بانک بردار، حدس نزن.
+
 
 ---
 
@@ -1099,6 +1131,7 @@ fetch. مقدار `JSON.stringify(filters)` را پاس بده یا شیء را 
 
 | سند | چه چیزی را کامل توضیح می‌دهد |
 |---|---|
+| `src/data/micro/README.md` | میکرودرسنامه: قرارداد داده (سلسله‌مراتب، انواع block، دیاگرام‌ها)، اتصال به بانک تست، وضعیت واقعی پوشش ۱۶ درس |
 | `src/layout/admin/README.md` | CMS: معماری، مدل داده، API، امنیت، عیب‌یابی، وضعیت فازها |
 | `src/layout/products/README.md` | صفحهٔ محصولات: ریتم روایت، مدل داده، پیش‌نمایش‌ها، مقصدها، نکات نگهداری |
 | `src/layout/pricing/README.md` | تعرفه‌ها: مدل داده، لایه‌های صفحه، تعامل‌ها، واکنش‌گرایی، نکات نگهداری |

@@ -9,14 +9,18 @@
  * چیدمان: نوار آمار + نوار فیلتر (جست‌وجو، وضعیت، گروه) + کارت‌های گروه‌بندی‌شده.
  * چون تعداد لایه‌ها ثابت و محدود است، واکشی با perPage بالا انجام می‌شود و
  * صفحه‌بندی جدولی جای خودش را به گروه‌بندی کارتی داده است.
+ *
+ * دکمهٔ «ورود به لایه» فقط روی کارت‌هایی کار می‌کند که در `LAYER_VIEWS` مقصد
+ * دارند (فلش‌کارت → کتابخانهٔ فلش‌کارت تپش، میکرو درسنامه → میکرو درسنامه تپش)؛
+ * بقیهٔ کارت‌ها عمداً بی‌عمل‌اند.
  */
 
 import { useCallback, useMemo, useState } from 'react';
 
 import { pages as pagesApi } from '../../../services/admin/adminService';
 import {
-  Badge, Button, EmptyState, ErrorState, IconButton, LoadingBlock, SearchInput,
-  Select, StatusBadge, faDateTime, faNumber, useAsync, useToast,
+  Badge, Button, EmptyState, ErrorState, LoadingBlock, SearchInput,
+  Select, faDateTime, faNumber, useAsync,
 } from '../adminShared';
 import {
   IconArticle, IconBookOpen, IconExamSheet, IconEdit, IconEye, IconFlashcard, IconFlyer,
@@ -62,12 +66,26 @@ function layerIcon(page) {
   return LAYER_ICONS[page.icon] ?? IconFlashcard;
 }
 
-export default function AdminPages({ navigate, admin }) {
-  const notify = useToast();
-  const [filters, setFilters] = useState({ search: '', status: 'all', group: 'all' });
-  const [pendingStatusId, setPendingStatusId] = useState(null);
+/*
+ * لایه‌های داخل پنل — نگاشت `slug` رکورد لایه به نمای داخل پنل خودش.
+ *
+ * فقط همین دو کارت مقصد دارند؛ بقیهٔ کارت‌ها عمداً `null` برمی‌گردانند تا دکمهٔ
+ * «ورود به لایه»شان بی‌عمل بماند (درخواست کاربر: «لینک‌دهی نداشته باشند»).
+ * یک‌جا نگه داشته شده تا نام نما با روتر (`AdminLayout`: ROUTABLE_VIEWS +
+ * SECTION_SUBVIEWS + VIEW_TITLES) از هم دور نیفتد.
+ */
+const LAYER_VIEWS = {
+  flashcards: { view: 'flashcard-library', title: 'مدیریت کتابخانهٔ فلش‌کارت تپش' },
+  'micro-lesson': { view: 'micro-lesson', title: 'مدیریت میکرو درسنامه و انتشارش برای کاربران تپش' },
+};
 
-  const can = (permission) => admin.permissions?.includes(permission);
+export function layerEntryTarget(page) {
+  return LAYER_VIEWS[page?.slug] ?? null;
+}
+
+export default function AdminPages({ navigate }) {
+  const [filters, setFilters] = useState({ search: '', status: 'all', group: 'all' });
+
   const load = useCallback(
     () => pagesApi.list({ search: filters.search, status: filters.status, page: 1, perPage: 100 }),
     [filters.search, filters.status],
@@ -97,24 +115,6 @@ export default function AdminPages({ navigate, admin }) {
   }, [data]);
 
   const patch = (changes) => setFilters((current) => ({ ...current, ...changes }));
-
-  /*
-   * تغییر سریع وضعیت از روی کارت — کل رکورد برمی‌گردد تا فرادادهٔ لایه
-   * (گروه، آیکون، مسیر) در همان پاسخ سرور حفظ شود.
-   */
-  const toggleStatus = async (page) => {
-    const nextStatus = page.status === 'published' ? 'draft' : 'published';
-    setPendingStatusId(page.id);
-    try {
-      await pagesApi.update(page.id, { ...page, status: nextStatus });
-      notify(nextStatus === 'published' ? `«${page.title}» منتشر شد` : `انتشار «${page.title}» لغو شد`);
-      reload();
-    } catch (actionError) {
-      notify(actionError.message, 'error');
-    } finally {
-      setPendingStatusId(null);
-    }
-  };
 
   const resetFilters = () => setFilters({ search: '', status: 'all', group: 'all' });
 
@@ -206,18 +206,14 @@ export default function AdminPages({ navigate, admin }) {
             <div className="ad-layergrid">
               {group.pages.map((page) => {
                 const Icon = layerIcon(page);
+                const entryTarget = layerEntryTarget(page);
                 return (
-                  <article key={page.id} className="ad-layercard">
+                  <article key={page.id} className={`ad-layercard ad-layercard--${page.group}`}>
                     <div className="ad-layercard__top">
                       <span className={`ad-layercard__icon ad-layercard__icon--${page.group}`} aria-hidden="true">
                         <Icon width={20} height={20} />
                       </span>
-                      <div className="ad-layercard__title">
-                        <button type="button" className="ad-linkcell" onClick={() => navigate('page-editor', { id: page.id })}>
-                          {page.title}
-                        </button>
-                        <StatusBadge status={page.status} />
-                      </div>
+                      <h3 className="ad-layercard__name">{page.title}</h3>
                     </div>
 
                     <p className="ad-layercard__desc">{page.description || 'بدون توضیح.'}</p>
@@ -225,9 +221,15 @@ export default function AdminPages({ navigate, admin }) {
                     <div className="ad-layercard__meta">
                       <code className="ad-code" dir="ltr">/{page.slug}</code>
                       {page.route ? (
-                        <a className="ad-layercard__route" href={page.route} target="_blank" rel="noreferrer" title="مشاهدهٔ لایه در سایت">
-                          <IconEye width={14} height={14} />
-                          مشاهده در سایت
+                        <a
+                          className="ad-layercard__route"
+                          href={page.route}
+                          target="_blank"
+                          rel="noreferrer"
+                          title="مشاهدهٔ لایه در سایت"
+                          aria-label="مشاهدهٔ لایه در سایت"
+                        >
+                          <IconEye width={16} height={16} />
                         </a>
                       ) : (
                         <span className="ad-layercard__noroute">فقط از طریق پنل</span>
@@ -237,19 +239,21 @@ export default function AdminPages({ navigate, admin }) {
                     <footer className="ad-layercard__foot">
                       <span className="ad-sub">آخرین ویرایش {faDateTime(page.updatedAt)}</span>
                       <div className="ad-rowactions">
-                        <IconButton label="ویرایش محتوا" onClick={() => navigate('page-editor', { id: page.id })}>
-                          <IconEdit width={16} height={16} />
-                        </IconButton>
-                        {can('pages.update') ? (
+                        {/*
+                         * فقط کارت‌هایی که در LAYER_VIEWS مقصد دارند وارد لایه می‌شوند؛
+                         * بقیهٔ دکمه‌ها عمداً بی‌عمل‌اند (درخواست کاربر).
+                         */}
+                        {entryTarget ? (
                           <Button
-                            variant={page.status === 'published' ? 'ghost' : 'primary'}
                             size="sm"
-                            loading={pendingStatusId === page.id}
-                            onClick={() => toggleStatus(page)}
+                            onClick={() => navigate?.(entryTarget.view)}
+                            title={entryTarget.title}
                           >
-                            {page.status === 'published' ? 'لغو انتشار' : 'انتشار'}
+                            ورود به لایه
                           </Button>
-                        ) : null}
+                        ) : (
+                          <Button size="sm">ورود به لایه</Button>
+                        )}
                       </div>
                     </footer>
                   </article>

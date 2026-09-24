@@ -32,6 +32,7 @@
  *  ۲۷) آداپتور ایتا: sendFile/file، نبود getChat، سنجهٔ null، شناسهٔ عددی، و توصیف پلتفرم
  *  ۲۸) ۴۰۳ «ربات ادمین نیست» است نه «توکن باطل» (ترجمهٔ درست خطای دسترسی)
  *  ۲۹) تلگرام: «کانال دیده می‌شود» با «ربات اجازهٔ ارسال دارد» یکی نیست
+ *  ۳۰) میکرو درسنامه: فهرست/جزئیات، انتخاب از بانک تست، ساخت، انتشار و تحویل عمومی
  */
 
 import assert from 'node:assert/strict';
@@ -770,12 +771,153 @@ check(
     && tgNotAdmin.checks.some((check_) => check_.id === 'admin' && check_.ok === false && /ادمین/.test(check_.message)),
 );
 
+/* ────────────────── ۳۰) میکرو درسنامه: ساخت، انتشار، تحویل ────────────────── */
+
+const microList = await call('GET', '/api/admin/micro', { cookies });
+check(
+  '۳۰. فهرست درسنامه‌ها + شمارندهٔ ساختار (مبحث/صفحه/ایستگاه)',
+  microList.status === 200 && microList.payload.data.items.length > 0
+    && typeof microList.payload.data.items[0].counts.pages === 'number',
+);
+
+const seedMicro = microList.payload.data.items[0];
+const microDetail = await call('GET', `/api/admin/micro/${seedMicro.id}`, { cookies });
+check(
+  '۳۰. خواندن درسنامهٔ کامل: مبحث → واحد → صفحه',
+  microDetail.status === 200 && microDetail.payload.data.course.topics[0].units[0].pages.length > 0,
+);
+
+/* مسیر بانک تست باید پیش از `/:id` گرفته شود، وگرنه «test-bank» شناسهٔ درسنامه می‌شود */
+const bankSearch = await call('GET', '/api/admin/micro/test-bank?subjectId=physiology&difficulty=easy&limit=5', { cookies });
+check(
+  '۳۰. انتخاب از بانک تست: فیلتر درس و سطح درست اعمال می‌شود',
+  bankSearch.status === 200 && bankSearch.payload.data.items.length > 0
+    && bankSearch.payload.data.items.every((row) => row.subject === 'physiology' && row.difficulty === 'easy'),
+);
+
+/* فهرست درس‌های رجیستری — باید پیش از `/:id` گرفته شود، درست مثل test-bank */
+const microSubjects = await call('GET', '/api/admin/micro/subjects', { cookies });
+const subjectList = microSubjects.payload.data?.subjects ?? [];
+check(
+  '۳۰. فهرست درس‌های رجیستری برای فرم «درسنامهٔ تازه»',
+  microSubjects.status === 200 && subjectList.length === 16
+    && subjectList.every((row) => row.id && row.title && row.accent),
+);
+
+/* درس‌هایی که بعداً به رجیستری اضافه شوند باید خودبه‌خود به پنل راه پیدا کنند */
+check(
+  '۳۰. همهٔ درس‌های رجیستری در پنل رکورد دارند (همگام‌سازی افزایشی seed)',
+  microList.payload.data.items.length >= 16,
+);
+
+const seedPage = microDetail.payload.data.course.topics[0].units[0].pages[0];
+check(
+  '۳۰. صفحهٔ درسنامه متن غنی دارد (مشتق‌شده از بلوک‌های قدیمی)',
+  typeof seedPage.content === 'string' && seedPage.content.length > 0,
+);
+
+const microCreated = await call('POST', '/api/admin/micro', {
+  cookies,
+  csrf,
+  body: {
+    title: 'درسنامهٔ تست میکرو',
+    subjectId: 'physiology',
+    topics: [{
+      id: 't1',
+      title: 'مبحث تست',
+      published: true,
+      units: [{
+        id: 'u1',
+        title: 'واحد تست',
+        testBank: { subjectId: 'physiology', topicPaths: ['قلب و عروق › ECG'] },
+        pages: [{ id: 'p1', title: 'صفحهٔ تست', blocks: [{ type: 'text', text: 'متن', depth: 'extended' }] }],
+        checkpoints: [{
+          id: 'cp1', afterPage: 'p1', questionCount: 2, scopePages: ['p1'], pinnedQuestionIds: ['tb-phy-01'],
+        }],
+      }],
+    }],
+  },
+});
+const microId = microCreated.payload.data?.course?.id;
+check('۳۰. ساخت درسنامه از پنل', microCreated.status === 200 && Boolean(microId));
+
+/* صفحهٔ تازه بلوک متنی دارد و content ندارد → سرور متن غنی را از همان بلوک می‌سازد */
+const createdPageContent = microCreated.payload.data?.course?.topics?.[0]?.units?.[0]?.pages?.[0]?.content ?? '';
+check('۳۰. متن غنی صفحهٔ تازه از بلوک‌ها مشتق می‌شود', createdPageContent.includes('متن'));
+
+/* همان درسنامه با متن آلوده بازنویسی می‌شود: پاک‌ساز سرور باید script را حذف کند */
+const microSanitize = await call('PUT', `/api/admin/micro/${microId}`, {
+  cookies,
+  csrf,
+  body: {
+    ...microCreated.payload.data.course,
+    topics: microCreated.payload.data.course.topics.map((topic, topicIndex) => (topicIndex !== 0 ? topic : {
+      ...topic,
+      units: topic.units.map((unit, unitIndex) => (unitIndex !== 0 ? unit : {
+        ...unit,
+        pages: unit.pages.map((page, pageIndex) => (pageIndex !== 0 ? page : {
+          ...page,
+          content: '<p>سالم</p><script>alert(1)</script>',
+        })),
+      })),
+    })),
+  },
+});
+const sanitizedContent = microSanitize.payload.data?.course?.topics?.[0]?.units?.[0]?.pages?.[0]?.content ?? '';
+check(
+  '۳۰. متن غنی در سرور پاک‌سازی می‌شود (script هرگز ذخیره نمی‌شود)',
+  microSanitize.status === 200 && sanitizedContent.includes('سالم') && !sanitizedContent.includes('script'),
+);
+
+/* ساخت از درس رجیستری — همان الگویی که برای همهٔ درس‌ها خواسته شده بود */
+const microFromRegistry = await call('POST', '/api/admin/micro', {
+  cookies,
+  csrf,
+  body: { subjectId: 'genetics', title: 'ژنتیک (کپی از رجیستری)' },
+});
+const registryId = microFromRegistry.payload.data?.course?.id;
+check(
+  '۳۰. ساخت درسنامه از درس رجیستری، مبحث‌های همان درس را می‌آورد',
+  microFromRegistry.status === 200
+    && (microFromRegistry.payload.data?.course?.topics?.length ?? 0) > 0,
+);
+
+const microPublished = await call('POST', `/api/admin/micro/${microId}/status`, {
+  cookies, csrf, body: { status: 'published' },
+});
+check(
+  '۳۰. انتشار درسنامه',
+  microPublished.payload.data?.course?.status === 'published' && Boolean(microPublished.payload.data.course.publishedAt),
+);
+
+const publicMicro = await call('GET', '/api/public/micro/library');
+const publicCourse = publicMicro.payload.data?.courses?.find((course) => course.id === microId);
+check(
+  '۳۰. تحویل عمومی درسنامهٔ منتشرشده، بدون فرادادهٔ مدیریتی',
+  Boolean(publicCourse) && publicCourse.topics.length === 1
+    && !('status' in publicCourse) && !('createdBy' in publicCourse),
+);
+
+await call('POST', `/api/admin/micro/${microId}/status`, { cookies, csrf, body: { status: 'draft' } });
+const publicMicro2 = await call('GET', '/api/public/micro/library');
+check(
+  '۳۰. لغو انتشار → درسنامه از مسیر عمومی برداشته می‌شود',
+  !(publicMicro2.payload.data?.courses ?? []).some((course) => course.id === microId),
+);
+
+const microBadStatus = await call('POST', `/api/admin/micro/${microId}/status`, {
+  cookies, csrf, body: { status: 'weird' },
+});
+check('۳۰. وضعیت نامعتبر رد می‌شود', microBadStatus.status >= 400);
+
 /* پاک‌سازی داده‌های تست */
 await call('POST', '/api/admin/analytics/reset', { cookies, csrf });
 await call('DELETE', `/api/admin/notes/${savedNote.id}`, { cookies, csrf });
 await call('DELETE', `/api/admin/articles/${article.id}`, { cookies, csrf });
 await call('DELETE', `/api/admin/users/${editor.payload.data.admin.id}`, { cookies, csrf });
 await call('DELETE', `/api/admin/publishing/channels/${testChannel.id}`, { cookies, csrf });
+await call('DELETE', `/api/admin/micro/${microId}`, { cookies, csrf });
+await call('DELETE', `/api/admin/micro/${registryId}`, { cookies, csrf });
 
 /*
  * رکوردهای تاریخچهٔ همین کانال تست پاک می‌شوند — و **فقط** همین‌ها.
