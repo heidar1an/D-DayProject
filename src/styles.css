@@ -547,21 +547,27 @@ img {
   line-height: 0.8;
 }
 
+/*
+ * ── نشان برند ──
+ * فایلِ لوگو شفاف است و فقط «موج تپش» را دارد؛ کادرِ تیرهٔ گوشه‌گردی که در
+ * فایل قدیمی پخته شده بود حذف شد. پس اینجا هیچ پس‌زمینه‌ای نیست و رنگِ موج از
+ * `--icon-filter` می‌آید: تم تیره ⇒ سفید، تم روشن ⇒ مشکی. همان توکنی که بقیهٔ
+ * آیکون‌های تک‌فام پروژه مصرف می‌کنند.
+ * `object-fit: contain` الزامی است: موج افقی است (نسبت ۱٫۶۷:۱) و با `cover`
+ * نوکِ قله‌ها بریده می‌شد.
+ */
 .brand__mark {
   display: grid;
   width: 46px;
   height: 46px;
-  overflow: hidden;
   place-items: center;
-  border-radius: 15px;
-  background: var(--deep);
 }
 
 .brand__mark img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  filter: brightness(1.4);
+  object-fit: contain;
+  filter: var(--icon-filter);
 }
 
 .site-nav {
@@ -2254,15 +2260,6 @@ img {
   direction: rtl;
 }
 
-/* دکمهٔ تم در گوشهٔ پنل — لوگو وسط است، پس این گوشه آزاد می‌ماند */
-.auth-panel__theme {
-  --theme-toggle-size: 38px;
-
-  position: absolute;
-  top: 22px;
-  left: 22px;
-}
-
 .auth-panel__logo-button {
   display: grid;
   width: min(145px, 15vw);
@@ -2270,10 +2267,8 @@ img {
   flex: 0 0 auto;
   place-items: center;
   padding: 0;
-  overflow: hidden;
   border: 0;
-  border-radius: 34px;
-  background: var(--deep);
+  background: none;
   cursor: pointer;
   align-self: center;
 }
@@ -2281,7 +2276,8 @@ img {
 .auth-panel__logo-button img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  filter: var(--icon-filter);
 }
 
 .auth-panel h1 {
@@ -2565,15 +2561,6 @@ img {
   color: var(--white);
 }
 
-/* دکمهٔ تم روی صفحهٔ آفلاین — گوشهٔ بالا-چپ */
-.offline-page__theme {
-  --theme-toggle-size: 40px;
-
-  position: absolute;
-  top: clamp(18px, 4vh, 34px);
-  left: clamp(18px, 4vw, 34px);
-}
-
 .offline-page__content {
   display: flex;
   width: min(100%, 900px);
@@ -2705,16 +2692,6 @@ img {
   transition:
     opacity 520ms ease,
     transform 680ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-/* دکمهٔ تم در گوشهٔ کارت ثبت‌نام — مثل کارت ورود */
-.onboarding-card__theme {
-  --theme-toggle-size: 38px;
-
-  position: absolute;
-  top: 22px;
-  left: 22px;
-  z-index: 2;
 }
 
 .onboarding-card.is-visible {
@@ -3522,7 +3499,6 @@ img {
 .site-footer__brand .brand__mark {
   width: 55px;
   height: 55px;
-  border-radius: 17px;
 }
 
 .site-footer__brand .brand__word {
@@ -3724,10 +3700,6 @@ img {
     padding-inline: 24px;
   }
 
-  .auth-panel__logo-button {
-    border-radius: 26px;
-  }
-
   .site-nav {
     gap: 24px;
     font-size: 1.05rem;
@@ -3844,7 +3816,6 @@ img {
 
   .auth-panel__logo-button {
     width: 112px;
-    border-radius: 32px;
   }
 
   .auth-panel h1 {
@@ -4025,7 +3996,6 @@ img {
   .brand__mark {
     width: 38px;
     height: 38px;
-    border-radius: 12px;
   }
 
   .menu-toggle {

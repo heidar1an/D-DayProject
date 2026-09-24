@@ -53,11 +53,8 @@
   height: 18px;
 }
 
-.micr-topbar__crumb {
-  margin-inline-start: auto;
-  color: var(--faint);
-  font-size: 0.88rem;
-}
+/* مسیر متنی نوار بالا (`.micr-topbar__crumb`) به درخواست کاربر از همهٔ نماهای
+   میکرودرسنامه برداشته شد؛ قاعدهٔ CSS آن هم پاک شد. */
 
 /* ── هیرو: متن وسط‌چین ── */
 .micr-hero {
@@ -102,12 +99,7 @@
   color: transparent;
 }
 
-.micr-hero__kicker {
-  margin: 0;
-  color: var(--muted);
-  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
-  font-size: clamp(1.25rem, 2.4vw, 1.7rem);
-}
+/* کیکر هیرو (`.micr-hero__kicker`) به درخواست کاربر حذف شد؛ قاعدهٔ CSS آن هم پاک شد. */
 
 .micr-hero__subtitle {
   max-width: 720px;
@@ -275,30 +267,7 @@
   transform: translateY(-2px);
 }
 
-/* نشان «میکرودرس فعال» — درس‌هایی که خوانندهٔ صفحه‌به‌صفحه دارند */
-.micr-row__micro {
-  position: absolute;
-  top: 10px;
-  inset-inline-start: 10px;
-  padding: 3px 9px;
-  border-radius: 999px;
-  background: rgba(147, 127, 205, 0.16);
-  border: 1px solid rgba(147, 127, 205, 0.4);
-  color: var(--purple-soft-ink);
-  font-size: 0.62rem;
-  white-space: nowrap;
-}
-
-.micr-row__micro::before {
-  content: '';
-  display: inline-block;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--purple-bright);
-  margin-inline-end: 5px;
-  animation: micr-pulse 2.4s ease-out infinite;
-}
+/* نشان «میکرودرس فعال» به درخواست کاربر حذف شد؛ قاعده‌های .micr-row__micro هم برداشته شدند. */
 
 .micr-row__idbox {
   display: flex;
@@ -344,7 +313,9 @@
 .micr-row__ring-fill {
   stroke: var(--accent);
   stroke-linecap: round;
-  animation: micr-ring-fill 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.4s backwards;
+  /* fill-mode باید both باشد: با backwards بعد از پایان انیمیشن، حلقه به مقدار
+     پایهٔ stroke-dashoffset برمی‌گشت و کاملِ کامل (۱۰۰٪) دیده می‌شد. */
+  animation: micr-ring-fill 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both;
 }
 
 .micr-row__percent {
@@ -380,56 +351,7 @@
   font-size: 0.9rem;
 }
 
-/* ── CTA پایانی: خط‌چین، دعوت به جامع ── */
-.micr-cta {
-  margin-top: 34px;
-  padding: 34px 24px;
-  border: 1.5px dashed rgba(91, 140, 199, 0.55);
-  border-radius: 2rem;
-  background: rgba(91, 140, 199, 0.07);
-  text-align: center;
-}
-
-.micr-cta h2 {
-  margin: 0;
-  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
-  font-size: clamp(1.2rem, 2.4vw, 1.6rem);
-  color: var(--white);
-}
-
-.micr-cta p {
-  margin: 10px auto 0;
-  max-width: 480px;
-  color: var(--muted);
-  font-size: 0.95rem;
-  line-height: 1.95;
-}
-
-.micr-cta button {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 20px;
-  padding: 12px 26px;
-  border: none;
-  border-radius: 999px;
-  background: linear-gradient(120deg, var(--blue-bright), var(--blue-deep));
-  color: var(--white);
-  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: transform 180ms ease, box-shadow 180ms ease;
-}
-
-.micr-cta button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 30px rgba(77, 132, 196, 0.35);
-}
-
-.micr-cta button svg {
-  width: 17px;
-  height: 17px;
-}
+/* ── CTA پایانی به درخواست کاربر حذف شد؛ قاعده‌های .micr-cta هم برداشته شدند. ── */
 
 /* ── انیمیشن‌های اختصاصی لایه ── */
 @keyframes micr-pulse {
@@ -470,8 +392,8 @@
 }
 
 /* ── لایهٔ «مبحث‌های درس» — بین کارت درس و خوانندهٔ میکرودرسنامه ──
-   کلیک روی درس، فهرست مبحث‌های همان درس را باز می‌کند؛ کلیک روی مبحث منتشرشده
-   خوانندهٔ صفحه‌به‌صفحه را باز می‌کند. مبحث‌های در راه با حالت «به‌زودی» می‌آیند. */
+   کلیک روی درس، فهرست مبحث‌های همان درس را باز می‌کند؛ کلیک روی هر مبحث خوانندهٔ
+   صفحه‌به‌صفحه را باز می‌کند. همهٔ مبحث‌ها فعال‌اند و حالت «به‌زودی» ندارند. */
 
 .micr-topics {
   width: var(--content-width);
@@ -511,7 +433,8 @@
 
 .micr-topic {
   position: relative;
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 16px;
   padding: 20px 22px;
@@ -532,7 +455,8 @@
   transform: translateY(-2px);
 }
 
-.micr-topic.is-soon { opacity: 0.55; }
+/* حالت «به‌زودی» برداشته شد؛ همهٔ مبحث‌ها فعال‌اند (`.micr-topic.is-soon` و
+   `.micr-topic__soon` حذف شدند). */
 
 .micr-topic__ring {
   position: relative;
@@ -554,19 +478,20 @@
 
 .micr-topic__ring-track { fill: none; stroke: rgb(var(--line-rgb) / 0.12); stroke-width: 3; }
 
+/* درصد پیشرفت واقعی مبحث — به‌جای متن «شروع»، حلقه با درصدِ ذخیره‌شده پر می‌شود */
 .micr-topic__ring-fill {
   fill: none;
   stroke: var(--accent);
   stroke-width: 3;
   stroke-linecap: round;
-  stroke-dasharray: 97.4;
-  stroke-dashoffset: 24;
+  transition: stroke-dashoffset 600ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .micr-topic__ring i {
   position: relative;
   font-style: normal;
-  font-size: 0.66rem;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: 0.72rem;
   color: var(--white);
 }
 
@@ -589,7 +514,7 @@
 }
 
 .micr-topic__meta {
-  margin-inline-start: auto;
+  align-self: center;
   color: var(--ghost);
   font-size: 0.75rem;
   white-space: nowrap;
@@ -597,6 +522,7 @@
 
 .micr-topic__go {
   flex: 0 0 auto;
+  align-self: center;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -614,16 +540,6 @@
   color: var(--white);
   border-color: var(--accent);
   transform: translateX(-3px);
-}
-
-.micr-topic__soon {
-  margin-inline-start: auto;
-  padding: 4px 12px;
-  border-radius: 999px;
-  border: 1px dashed rgb(var(--line-rgb) / 0.25);
-  color: var(--faint);
-  font-size: 0.72rem;
-  white-space: nowrap;
 }
 
 .micr-topics__soon {

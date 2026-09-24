@@ -2,7 +2,7 @@
 
 import { useEffect, useSyncExternalStore } from 'react';
 
-import heartbeatMark from '../../../images/pictures/600ppi/Asset 6.webp';
+import heartbeatMark from '../../../images/pictures/600ppi/logo-mark.webp';
 import { categoryAccent, categoryLabel, getAuthorById } from '../../services/articles/articlesService';
 import { getArticleHighlights, getArticleUserState, subscribe, toggleBookmark } from '../../services/articles/userState';
 

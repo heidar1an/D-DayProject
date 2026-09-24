@@ -5,19 +5,24 @@
  * عوض نمی‌شود (قرارداد آینده: GET /api/micro/courses/:courseId).
  *
  * سلسله‌مراتب: درس (subject) → مبحث (topic) → واحد یادگیری → صفحه‌های میکرو.
- * مبحث‌های published: false در فهرست مباحث با حالت «به‌زودی» دیده می‌شوند و
- * خواننده برای آن‌ها باز نمی‌شود.
+ * پرچم `published` فقط «آمادگی محتوا» را نشان می‌دهد (مسیر پیش‌فرض ورود به خواننده و
+ * انتخاب مبحث پیش‌فرض در getTopic)؛ در رابط کاربری هیچ حالتی را پنهان نمی‌کند —
+ * همهٔ مبحث‌ها در فهرست فعال‌اند و مبحث بدون واحد، پیام «آماده نشده» می‌گیرد.
  */
 
-import physiologyCourse from '../../data/micro/physiologyCourse';
-
-const COURSE_REGISTRY = {
-  physiology: physiologyCourse,
-};
+/*
+ * رجیستری درس‌ها از `src/data/micro/registry.js` می‌آید — همان فایلی که سرور
+ * (`database/contentStore.js`) هم برای seed و ساخت درسنامهٔ تازه می‌خواند.
+ * قبلاً این فهرست ۱۶تایی دو نسخه داشت و روزی که یک درس اضافه می‌شد، یکی عقب می‌ماند.
+ *
+ * ترتیب کلیدها مهم است: اولین عضو، درسِ پیش‌فرضِ ورود به میکرودرسنامه است
+ * (firstPublishedCourse). فیزیولوژی عمداً اول می‌ماند چون محتوای مرجع و کامل است.
+ */
+import { MICRO_COURSE_REGISTRY as COURSE_REGISTRY } from '../../data/micro/registry.js';
 
 const wait = (duration) => new Promise((resolve) => window.setTimeout(resolve, duration));
 
-/* درس‌های میکرودرسنامهٔ منتشرشده — پایهٔ «درس فعال» در نمای فهرست */
+/* درس‌های میکرودرسنامهٔ ثبت‌شده — منبع نگاشت درسِ فهرست به میکرودرسنامه */
 export const AVAILABLE_MICRO_COURSES = Object.keys(COURSE_REGISTRY);
 
 /* نگاشت درسِ فهرست (subjectId مثل physiology) → میکرودرسنامهٔ همان درس */
@@ -26,10 +31,10 @@ export const courseIdForSubject = (subjectId) =>
 
 export const hasCourseForSubject = (subjectId) => Boolean(courseIdForSubject(subjectId));
 
-/* اولین میکرودرسنامهٔ منتشرشده — برای CTA فهرست */
+/* اولین میکرودرسنامهٔ ثبت‌شده — مسیر پیش‌فرض ورود به میکرودرسنامه */
 export const firstPublishedCourse = () => Object.values(COURSE_REGISTRY)[0] ?? null;
 
-/* اولین مبحث منتشرشدهٔ یک درس — مسیر پیش‌فرض ورود به خواننده */
+/* اولین مبحث دارای محتوا — مسیر پیش‌فرض ورود به خواننده */
 export const firstPublishedTopicOf = (course) =>
   course.topics.find((topic) => topic.published) ?? course.topics[0] ?? null;
 

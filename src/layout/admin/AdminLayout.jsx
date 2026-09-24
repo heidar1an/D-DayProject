@@ -3,21 +3,21 @@
  *
  * روتر داخلی دقیقاً همان قرارداد بقیهٔ لایه‌های پروژه است: یک state به شکل
  * `{ name, payload }`. برای اینکه رفرش صفحه بخش جاری را از دست ندهد، همین state
- * با hash آدرس (`#admin/articles`) هم‌گام نگه داشته می‌شود؛ اما منبع حقیقت state است.
+ * با hash آدرس (`#admin/pages`) هم‌گام نگه داشته می‌شود؛ اما منبع حقیقت state است.
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import logoMark from '../../../images/pictures/600ppi/logo-mark.webp';
 import { auth, getMeta } from '../../services/admin/adminService';
 import ThemeToggle from '../ThemeToggle';
 import AdminLogin from './AdminLogin';
 import AdminDashboard from './views/AdminDashboard';
-import AdminArticles from './views/AdminArticles';
 import AdminContentEditor from './views/AdminContentEditor';
-import AdminCategories from './views/AdminCategories';
 import AdminPages from './views/AdminPages';
+import AdminFlashcards from './views/AdminFlashcards';
+import AdminMicro from './views/AdminMicro';
 import AdminMedia from './views/AdminMedia';
-import AdminBanners from './views/AdminBanners';
 import AdminPublishing from './views/AdminPublishing';
 import AdminUsers from './views/AdminUsers';
 import AdminSettings from './views/AdminSettings';
@@ -30,19 +30,16 @@ import {
   Button, Spinner, ToastProvider, faDate, toFa, useToast,
 } from './adminShared';
 import {
-  IconAnalytics, IconArticle, IconBanner, IconBroadcast, IconChevron, IconDashboard, IconLog, IconLogout,
-  IconMedia, IconMenu, IconNote, IconPage, IconSend, IconSettings, IconTag, IconUser,
+  IconAnalytics, IconBroadcast, IconChevron, IconDashboard, IconLog,
+  IconLogout, IconMedia, IconMenu, IconNote, IconPage, IconSend, IconSettings, IconUser,
 } from './adminIcons';
 
 const SECTIONS = [
   { id: 'dashboard', label: 'داشبورد', icon: IconDashboard, permission: null },
   { id: 'analytics', label: 'مرکز تحلیل', icon: IconAnalytics, permission: 'analytics.read' },
   { id: 'media-center', label: 'مدیریت رسانه و فضای مجازی', icon: IconBroadcast, permission: 'media.read' },
-  { id: 'articles', label: 'مقالات', icon: IconArticle, permission: 'articles.read' },
-  { id: 'categories', label: 'دسته‌بندی‌ها', icon: IconTag, permission: 'articles.read' },
   { id: 'pages', label: 'صفحات', icon: IconPage, permission: 'pages.read' },
   { id: 'media', label: 'کتابخانهٔ رسانه', icon: IconMedia, permission: 'media.read' },
-  { id: 'banners', label: 'بنرها', icon: IconBanner, permission: 'articles.read' },
   { id: 'publishing', label: 'انتشار در کانال‌ها', icon: IconSend, permission: 'publishing.read' },
   { id: 'users', label: 'کاربران و نقش‌ها', icon: IconUser, permission: 'users.read' },
   { id: 'settings', label: 'تنظیمات سایت', icon: IconSettings, permission: 'settings.read' },
@@ -53,6 +50,16 @@ const SECTIONS = [
 const SECTION_IDS = new Set(SECTIONS.map((section) => section.id));
 
 /*
+ * نماهایی که از راه hash باز می‌شوند ولی آیتم سایدبار نیستند.
+ *
+ * «کتابخانهٔ فلش‌کارت تپش» و «میکرو درسنامه تپش» دو لایهٔ داخل پنل‌اند که از
+ * کارت‌های همان لایه‌ها در بخش «صفحات» باز می‌شوند. بدون افزودنشان به این
+ * مجموعه، `#admin/flashcard-library` و `#admin/micro-lesson` ناشناخته می‌مانند و
+ * مستقیم به داشبورد برمی‌گشتند (رفرش، بخش را از دست می‌داد).
+ */
+const ROUTABLE_VIEWS = new Set([...SECTION_IDS, 'flashcard-library', 'micro-lesson']);
+
+/*
  * زیرنمایش‌هایی که شناسه‌شان با بخش مادرشان یکی نیست.
  *
  * قبلاً تشخیص آیتم فعال با پیشوند انجام می‌شد (`view.name.startsWith('media-')`)
@@ -61,8 +68,9 @@ const SECTION_IDS = new Set(SECTIONS.map((section) => section.id));
  * نگاشت صریح جای حدس پیشوندی را می‌گیرد.
  */
 const SECTION_SUBVIEWS = {
-  'article-editor': 'articles',
   'page-editor': 'pages',
+  'flashcard-library': 'pages',
+  'micro-lesson': 'pages',
 };
 
 /* نام هر نمایش → شناسهٔ بخشی که به آن تعلق دارد */
@@ -70,14 +78,21 @@ function sectionOf(viewName) {
   return SECTION_SUBVIEWS[viewName] ?? viewName;
 }
 
-/* `#admin` یا `#admin/articles` یا `#admin/analytics/traffic` یا `#admin/articles/art-1234` */
+/* عنوان سرصفحه برای نماهایی که آیتم سایدبار ندارند */
+const VIEW_TITLES = {
+  'page-editor': 'ویرایش محتوا',
+  'flashcard-library': 'کتابخانهٔ فلش‌کارت تپش',
+  'micro-lesson': 'میکرو درسنامه تپش',
+};
+
+/* `#admin` یا `#admin/pages` یا `#admin/analytics/traffic` یا `#admin/pages/page-1234` */
 function parseHashView() {
   const hash = typeof window === 'undefined' ? '' : window.location.hash;
   const match = hash.match(/^#admin(?:\/([a-z-]+))?(?:\/([^/]+))?$/);
   if (!match) return { name: 'dashboard', payload: null };
 
   const section = match[1];
-  if (!section || !SECTION_IDS.has(section)) return { name: 'dashboard', payload: null };
+  if (!section || !ROUTABLE_VIEWS.has(section)) return { name: 'dashboard', payload: null };
 
   /* مرکز تحلیل: پاراگراف دوم نام تب است (`#admin/analytics/traffic`) */
   if (section === 'analytics') {
@@ -88,9 +103,6 @@ function parseHashView() {
   if (section === 'media-center') {
     return { name: 'media-center', payload: match[2] ? { tab: MEDIA_TAB_IDS.has(match[2]) ? match[2] : 'overview' } : null };
   }
-
-  /* در بخش مقالات، پاراگراف دوم شناسهٔ مقاله برای ویرایش است */
-  if (section === 'articles' && match[2]) return { name: 'article-editor', payload: { id: match[2] } };
 
   return { name: section, payload: null };
 }
@@ -121,15 +133,13 @@ export function AdminShell({ admin, onExit, onLogout }) {
     setView({ name, payload });
     setSidebarOpen(false);
 
-    const hash = name === 'article-editor' && payload?.id
-      ? `#admin/articles/${payload.id}`
-      : name === 'page-editor' && payload?.id
-        ? `#admin/pages/${payload.id}`
-        : name === 'analytics' && payload?.tab
-          ? `#admin/analytics/${payload.tab}`
-          : name === 'media-center' && payload?.tab
-            ? `#admin/media-center/${payload.tab}`
-            : `#admin/${name}`;
+    const hash = name === 'page-editor' && payload?.id
+      ? `#admin/pages/${payload.id}`
+      : name === 'analytics' && payload?.tab
+        ? `#admin/analytics/${payload.tab}`
+        : name === 'media-center' && payload?.tab
+          ? `#admin/media-center/${payload.tab}`
+          : `#admin/${name}`;
 
     if (window.location.hash !== hash) {
       window.history.replaceState(window.history.state, '', hash);
@@ -200,20 +210,16 @@ export function AdminShell({ admin, onExit, onLogout }) {
             onTabChange={(tab) => navigate('media-center', { tab })}
           />
         );
-      case 'articles':
-        return <AdminArticles {...editorProps} />;
-      case 'article-editor':
-        return <AdminContentEditor {...editorProps} kind="article" id={view.payload?.id ?? null} />;
       case 'pages':
         return <AdminPages {...editorProps} />;
+      case 'flashcard-library':
+        return <AdminFlashcards admin={admin} onBack={() => navigate('pages')} />;
+      case 'micro-lesson':
+        return <AdminMicro admin={admin} onBack={() => navigate('pages')} />;
       case 'page-editor':
         return <AdminContentEditor {...editorProps} kind="page" id={view.payload?.id ?? null} />;
-      case 'categories':
-        return <AdminCategories {...editorProps} />;
       case 'media':
         return <AdminMedia {...editorProps} />;
-      case 'banners':
-        return <AdminBanners {...editorProps} />;
       case 'publishing':
         return <AdminPublishing {...editorProps} />;
       case 'users':
@@ -248,7 +254,9 @@ export function AdminShell({ admin, onExit, onLogout }) {
         className={`ad-sidebar ${sidebarOpen ? 'is-open' : ''} ${sidebarCollapsed ? 'is-collapsed' : ''}`}
       >
         <div className="ad-sidebar__brand">
-          <span className="ad-sidebar__logo" aria-hidden="true">ت</span>
+          <span className="ad-sidebar__logo" aria-hidden="true">
+            <img src={logoMark} alt="" />
+          </span>
           <div>
             <strong>تپش</strong>
             <small>پنل مدیریت محتوا</small>
@@ -334,7 +342,7 @@ export function AdminShell({ admin, onExit, onLogout }) {
           </button>
 
           <div className="ad-header__title">
-            <h1>{view.name === 'profile' ? 'حساب من' : SECTIONS.find((s) => s.id === view.name)?.label ?? 'ویرایش محتوا'}</h1>
+            <h1>{view.name === 'profile' ? 'حساب من' : (VIEW_TITLES[view.name] ?? SECTIONS.find((s) => s.id === view.name)?.label ?? 'ویرایش محتوا')}</h1>
             <p>{meta ? `آخرین ورود: ${faDate(admin.lastLoginAt)}` : 'در حال آماده‌سازی…'}</p>
           </div>
 

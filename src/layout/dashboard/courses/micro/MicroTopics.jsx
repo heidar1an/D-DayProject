@@ -1,25 +1,54 @@
 /*
  * لایهٔ مبحث‌های یک درس — بین کارت درس و خوانندهٔ میکرودرسنامه.
- * کلیک روی درس (مثل فیزیولوژی) این فهرست را باز می‌کند؛ کلیک روی مبحث منتشرشده
- * (مثل قلب و گردش خون) خوانندهٔ صفحه‌به‌صفحه را باز می‌کند. مبحث‌های در راه با
- * حالت «به‌زودی» نمایش داده می‌شوند.
+ * کلیک روی درس (مثل فیزیولوژی) این فهرست را باز می‌کند؛ کلیک روی هر مبحث، خوانندهٔ
+ * صفحه‌به‌صفحه را باز می‌کند. همهٔ مبحث‌ها فعال‌اند و حالت «به‌زودی» وجود ندارد؛
+ * مبحث‌هایی که هنوز واحد یادگیری ندارند، پیام «آماده نشده» را داخل خودِ خواننده می‌بینند.
  */
 
+import { useMemo } from 'react';
 import { toFa } from '../learning/learningUtils';
+import { MicroProgressService } from '../../../../services/micro/microProgressService';
 
-export default function MicroTopics({ course, subjectTitle, onBack, onOpenTopic }) {
+/* درصد پیشرفت واقعی یک مبحث — نسبت صفحه‌های completed هر واحد (به وزن تعداد صفحه) */
+function topicProgress(course, topic, userId) {
+  const units = topic.units ?? [];
+  if (!units.length) return 0;
+  const state = MicroProgressService.load(course, userId);
+  let totalPages = 0;
+  let completedPages = 0;
+  for (const unit of units) {
+    totalPages += unit.pages.length;
+    const unitState = state.units?.[unit.id];
+    if (!unitState) continue;
+    completedPages += unit.pages.filter((page) => unitState.pages?.[page.id]?.status === 'completed').length;
+  }
+  return totalPages ? Math.round((completedPages / totalPages) * 100) : 0;
+}
+
+export default function MicroTopics({ course, subjectTitle, onBack, onOpenTopic, userId = 'local-user' }) {
   /* عنوان درس برای درس‌های بدون میکرودرسنامهٔ منتشرشده از خود SUBJECTS می‌آید */
   const title = course?.title ?? subjectTitle ?? 'این درس';
   const accent = course?.accent ?? '#937fcd';
-  const published = course?.topics?.filter((topic) => topic.published) ?? [];
-  const upcoming = course?.topics?.filter((topic) => !topic.published) ?? [];
+  /* همهٔ مبحث‌های درس فعال و قابل ورودند — حالت «به‌زودی» به درخواست کاربر برداشته شد.
+     مبحث‌هایی که هنوز صفحه ندارند، خودِ خواننده پیام روشن نشان می‌دهد. */
+  const topics = course?.topics ?? [];
 
-  /* مبحث منتشرشده: تعداد صفحه‌ها و checkpointها برای نمایش روی کارت */
+  /* مبحث منتشرشده: تعداد صفحه‌ها و ایستگاه‌ها برای نمایش روی کارت */
   const topicStats = (topic) => {
     const unit = topic.units?.[0];
     if (!unit) return null;
     return { pages: unit.pages.length, checkpoints: unit.checkpoints?.length ?? 0 };
   };
+
+  /* درصد پیشرفت هر مبحث — دوباره خوانده می‌شود هر بار این لایه سوار می‌شود */
+  const topicProgressMap = useMemo(() => {
+    const map = new Map();
+    if (!course) return map;
+    for (const topic of course.topics ?? []) {
+      map.set(topic.id, topicProgress(course, topic, userId));
+    }
+    return map;
+  }, [course, userId]);
 
   return (
     <section className="micr-topics" dir="rtl" aria-label={`مبحث‌های ${title}`}>
@@ -31,7 +60,6 @@ export default function MicroTopics({ course, subjectTitle, onBack, onOpenTopic 
             </svg>
             بازگشت به میکرو درس‌ها
           </button>
-          <span className="micr-topbar__crumb">میکرو درسنامه / {title}</span>
         </div>
 
         <header className="micr-topics__head dash-stagger" style={{ '--accent': accent }}>
@@ -42,15 +70,18 @@ export default function MicroTopics({ course, subjectTitle, onBack, onOpenTopic 
           </p>
         </header>
 
-        {published.length === 0 && upcoming.length === 0 ? (
+        {topics.length === 0 ? (
           <div className="micr-topics__soon dash-stagger">
             <strong>هنوز مبحثی برای این درس منتشر نشده</strong>
             <p>میکرودرسنامهٔ این درس به‌زودی با اولین مبحثش در دسترس قرار می‌گیرد.</p>
           </div>
         ) : (
           <div className="micr-topics__grid dash-stagger">
-            {published.map((topic) => {
+            {topics.map((topic) => {
               const stats = topicStats(topic);
+              const progress = topicProgressMap.get(topic.id) ?? 0;
+              const circumference = 2 * Math.PI * 15.5;
+              const offset = circumference * (1 - progress / 100);
               return (
                 <button
                   key={topic.id}
@@ -62,9 +93,14 @@ export default function MicroTopics({ course, subjectTitle, onBack, onOpenTopic 
                   <span className="micr-topic__ring" aria-hidden="true">
                     <svg viewBox="0 0 36 36">
                       <circle className="micr-topic__ring-track" cx="18" cy="18" r="15.5" />
-                      <circle className="micr-topic__ring-fill" cx="18" cy="18" r="15.5" />
+                      <circle
+                        className="micr-topic__ring-fill"
+                        cx="18" cy="18" r="15.5"
+                        strokeDasharray={`${circumference} ${circumference}`}
+                        strokeDashoffset={offset}
+                      />
                     </svg>
-                    <i>شروع</i>
+                    <i>{toFa(progress)}٪</i>
                   </span>
                   <span className="micr-topic__body">
                     <strong>{topic.title}</strong>
@@ -72,7 +108,7 @@ export default function MicroTopics({ course, subjectTitle, onBack, onOpenTopic 
                   </span>
                   {stats && (
                     <span className="micr-topic__meta">
-                      {toFa(stats.pages)} صفحه · {toFa(stats.checkpoints)} checkpoint
+                      {toFa(stats.pages)} صفحه · {toFa(stats.checkpoints)} ایستگاه
                     </span>
                   )}
                   <span className="micr-topic__go" aria-hidden="true">
@@ -81,16 +117,6 @@ export default function MicroTopics({ course, subjectTitle, onBack, onOpenTopic 
                 </button>
               );
             })}
-
-            {upcoming.map((topic) => (
-              <div key={topic.id} className="micr-topic is-soon" style={{ '--accent': topic.accent ?? accent }}>
-                <span className="micr-topic__body">
-                  <strong>{topic.title}</strong>
-                  <span>{topic.description}</span>
-                </span>
-                <span className="micr-topic__soon">به‌زودی</span>
-              </div>
-            ))}
           </div>
         )}
       </div>

@@ -156,6 +156,40 @@ export const pages = {
   remove: (id) => del(`/pages/${encodeURIComponent(id)}`),
 };
 
+/* ──────────────── کتابخانهٔ فلش‌کارت تپش (مجموعه‌ها و کارت‌ها) ──────────────── */
+
+export const flashcards = {
+  list: (params) => get(`/flashcards${toQuery(params)}`),
+  get: (id) => get(`/flashcards/${encodeURIComponent(id)}`),
+  create: (payload) => post('/flashcards', payload),
+  update: (id, payload) => put(`/flashcards/${encodeURIComponent(id)}`, payload),
+  remove: (id) => del(`/flashcards/${encodeURIComponent(id)}`),
+};
+
+/* ──────────────── میکرو درسنامه (لایهٔ داخل پنل) ────────────────
+ *
+ * ساختار کامل درسنامه (مبحث → واحد → صفحه → بلوک → ایستگاه تست) در یک رکورد
+ * است، پس ویرایش یک PUT کامل می‌فرستد و ذخیره اتمیک می‌ماند. `setStatus` تنها
+ * راه انتشار است: با `published` درسنامه از مسیر عمومی `/api/public/micro/library`
+ * در دسترس همهٔ کاربران تپش می‌گذارد.
+ */
+
+export const micro = {
+  list: (params) => get(`/micro${toQuery(params)}`),
+  get: (id) => get(`/micro/${encodeURIComponent(id)}`),
+  create: (payload) => post('/micro', payload),
+  update: (id, payload) => put(`/micro/${encodeURIComponent(id)}`, payload),
+  setStatus: (id, status) => post(`/micro/${encodeURIComponent(id)}/status`, { status }),
+  remove: (id) => del(`/micro/${encodeURIComponent(id)}`),
+
+  /* انتخاب از بانک تست — برای ایستگاه‌های تست */
+  testBank: (params) => get(`/micro/test-bank${toQuery(params)}`),
+
+  /* درس‌های رجیستری برای فرم «درسنامهٔ تازه» — از سرور می‌آید تا باندل پنل
+     مجبور نباشد ۱۶ فایل درس را با خودش حمل کند */
+  subjects: () => get('/micro/subjects'),
+};
+
 /* ──────────────────────────────── رسانه ──────────────────────────────── */
 
 export const media = {
@@ -487,6 +521,6 @@ export function readFileAsBase64(file) {
 }
 
 export default {
-  auth, articles, categories, pages, media, banners, users, settings, logs, notes,
+  auth, articles, categories, pages, flashcards, micro, media, banners, users, settings, logs, notes,
   publishing, analytics, mediaCenter, getStats, getMeta, toQuery, readFileAsBase64, AdminApiError,
 };

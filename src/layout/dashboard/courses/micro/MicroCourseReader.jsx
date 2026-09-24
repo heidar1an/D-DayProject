@@ -8,7 +8,7 @@
  *   • جریان مطالعه (buildStudyFlow): صفحه‌ها و checkpointها در هم، با پیشروی واقعی
  *   • همگام‌سازی با مسیر داشبورد (view.pageId) برای رفرش و Back/Forward
  *   • اتصال به MicroProgressService (ذخیرهٔ وضعیت) و MicroTestEngine (انتخاب تست)
- *   • stateهای loading / error / not-published / completion و toast
+ *   • stateهای loading / error / not-published / topic-empty / completion و toast
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -431,7 +431,7 @@ export default function MicroCourseReader({ courseId, userId = 'local-user', vie
     );
   }
 
-  if (loadState === 'error' || !course || !unit) {
+  if (loadState === 'error' || !course) {
     return (
       <div className="micr-reader" dir="rtl">
         <div className="micr-empty" role="alert">
@@ -439,6 +439,22 @@ export default function MicroCourseReader({ courseId, userId = 'local-user', vie
           <p>ارتباط با محتوای درس برقرار نشد. یک‌بار دیگر تلاش کن.</p>
           <button type="button" className="micr-button micr-button--soft" onClick={() => setReloadToken((token) => token + 1)}>
             تلاش دوباره
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  /* مبحثی که هنوز واحد یادگیری و صفحه ندارد — خطای بارگذاری نیست، پس پیام روشن
+     با راه بازگشت نشان داده می‌شود (مبحث‌های فهرست همه فعال‌اند). */
+  if (!unit) {
+    return (
+      <div className="micr-reader" dir="rtl">
+        <div className="micr-empty">
+          <strong>صفحه‌های این مبحث هنوز آماده نشده</strong>
+          <p>محتوای این مبحث در حال نوشته‌شدن است؛ تا آن زمان مبحث‌های آمادهٔ همین درس را بخوان.</p>
+          <button type="button" className="micr-button micr-button--soft" onClick={exitReader}>
+            بازگشت به فهرست مبحث‌ها
           </button>
         </div>
       </div>
@@ -598,14 +614,33 @@ export default function MicroCourseReader({ courseId, userId = 'local-user', vie
         <main className="micr-content" data-testid="micr-content">
           {screen === 'assessment' && (
             <div key="assessment" className="micr-enter">
-              <FinalAssessment
-                questions={assessmentQuestions}
-                attempts={assessmentAttempts}
-                deepMode={deepMode}
-                onAnswer={handleAssessmentAnswer}
-                onFinish={finishAssessment}
-                onAskAI={askTapeshAI}
-              />
+              {assessmentQuestions.length ? (
+                <FinalAssessment
+                  questions={assessmentQuestions}
+                  attempts={assessmentAttempts}
+                  deepMode={deepMode}
+                  onAnswer={handleAssessmentAnswer}
+                  onFinish={finishAssessment}
+                  onAskAI={askTapeshAI}
+                />
+              ) : (
+                /* آزمون جمع‌بندی هم مثل ایستگاه‌ها از بانک تست تغذیه می‌شود؛ درسی که
+                   هنوز سؤال گره‌خورده ندارد باید راه بازگشت بگیرد، نه صفحهٔ خالی. */
+                <div className="micr-empty">
+                  <strong>سؤال‌های آزمون جمع‌بندی این مبحث آماده نشده</strong>
+                  <p>
+                    آزمون از بانک تست تپش انتخاب می‌شود؛ برای این مبحث هنوز سؤالی با گرهٔ
+                    مفهومی‌اش در بانک ثبت نشده است.
+                  </p>
+                  <button
+                    type="button"
+                    className="micr-button micr-button--soft"
+                    onClick={() => { setScreen('flow'); setFlowIndex(flow.length); }}
+                  >
+                    بازگشت به کارنامهٔ مبحث
+                  </button>
+                </div>
+              )}
             </div>
           )}
 

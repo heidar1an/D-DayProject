@@ -1,0 +1,145 @@
+[
+  {
+    "status": "published",
+    "createdAt": "2026-09-23T08:30:33.267Z",
+    "updatedAt": "2026-09-23T19:22:58.256Z",
+    "createdBy": "seed",
+    "updatedBy": "adm-5e246f08",
+    "id": "fcd-visual-heart",
+    "title": "آناتومی تصویری — قلب (پنل)",
+    "shortTitle": "قلب آزمایشی",
+    "description": "نمونهٔ مجموعهٔ تصویری ساخته‌شده از پنل مدیریت؛ ساختارهای قلب روی تصویر.",
+    "subjectId": "anatomy",
+    "level": "علوم پایه",
+    "cover": "#937fcd",
+    "anatomy": true,
+    "previewImage": "/anatomy/heart.svg",
+    "cards": [
+      {
+        "id": "fcc-vh-1",
+        "type": "image-locate",
+        "front": "ساختار مشخص‌شده با نقطهٔ سرخ روی تصویر قلب کدام است؟",
+        "back": "دهلیز راست — گیرندهٔ خون وریدی اجوف فوقانی و تحتانی.",
+        "hint": "",
+        "tags": [
+          "آناتومی",
+          "تصویری"
+        ],
+        "subjectId": "anatomy",
+        "topicId": "",
+        "explanation": "",
+        "status": "active",
+        "image": {
+          "url": "/anatomy/heart.svg",
+          "alt": "نمای قدامی قلب",
+          "points": [
+            {
+              "x": 33,
+              "y": 50
+            }
+          ]
+        }
+      },
+      {
+        "id": "fcc-vh-2",
+        "type": "image-locate",
+        "front": "ساختار مشخص‌شده با نقطهٔ سرخ روی تصویر قلب کدام است؟",
+        "back": "بطن چپ — پمپ اصلی گردش سیستمیک با جدارهٔ ضخیم‌تر.",
+        "hint": "",
+        "tags": [
+          "آناتومی",
+          "تصویری"
+        ],
+        "subjectId": "anatomy",
+        "topicId": "",
+        "explanation": "",
+        "status": "active",
+        "image": {
+          "url": "/anatomy/heart.svg",
+          "alt": "نمای قدامی قلب",
+          "points": [
+            {
+              "x": 65,
+              "y": 66
+            }
+          ]
+        }
+      },
+      {
+        "id": "fcc-a6e7b3c8",
+        "type": "image-locate",
+        "front": "سوال یک",
+        "back": "یک",
+        "hint": "",
+        "tags": [],
+        "subjectId": "general",
+        "topicId": "",
+        "explanation": "",
+        "status": "active",
+        "image": {
+          "url": "",
+          "alt": "",
+          "points": []
+        }
+      },
+      {
+        "id": "fcc-7910eeb8",
+        "type": "image-locate",
+        "front": "سوال دو",
+        "back": "دو",
+        "hint": "",
+        "tags": [],
+        "subjectId": "general",
+        "topicId": "",
+        "explanation": "",
+        "status": "active",
+        "image": {
+          "url": "",
+          "alt": "",
+          "points": []
+        }
+      }
+    ]
+  },
+  {
+    "status": "published",
+    "createdAt": "2026-09-23T08:30:33.267Z",
+    "updatedAt": "2026-09-23T08:30:33.267Z",
+    "createdBy": "seed",
+    "updatedBy": "seed",
+    "id": "fcd-normal-physio",
+    "title": "فیزیولوژی تنفس (پنل)",
+    "description": "نمونهٔ مجموعهٔ متنی ساخته‌شده از پنل مدیریت؛ مبانی تنفس و مکانیک آن.",
+    "subjectId": "physiology",
+    "level": "علوم پایه",
+    "cover": "#5b8cc7",
+    "anatomy": false,
+    "previewImage": "",
+    "cards": [
+      {
+        "id": "fcc-np-1",
+        "type": "basic",
+        "front": "عضلهٔ اصلی دم آرام چیست و عصب آن کدام است؟",
+        "back": "دیافراگم — عصب فرنیک (C3-C5).",
+        "tags": [
+          "فیزیولوژی",
+          "تنفس"
+        ],
+        "subjectId": "physiology",
+        "status": "active"
+      },
+      {
+        "id": "fcc-np-2",
+        "type": "cloze",
+        "front": "سرفیس‌اکتیو توسط سلول‌های {{c1::نوع دوم آلوئولی}} ترشح می‌شود و {{c2::کشش سطحی}} را کاهش می‌دهد.",
+        "back": "کاهش کشش سطحی از اتلاپسی آلوئول‌ها جلوگیری می‌کند (نقش سورفکتانت).",
+        "tags": [
+          "تنفس",
+          "سورفکتانت"
+        ],
+        "subjectId": "physiology",
+        "status": "active"
+      }
+    ]
+  }
+]

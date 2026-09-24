@@ -188,8 +188,11 @@ export function NoteIcon({ type }) {
 }
 
 /* کارت مربعی هر درس: کلیک یعنی ورود به فهرست مبحث‌های میکرودرسنامهٔ همان درس */
-function SubjectRow({ subject, onOpenSubject, hasMicro = false }) {
+function SubjectRow({ subject, onOpenSubject }) {
   const circumference = 2 * Math.PI * 15.5;
+  /* مقدار استراحتِ حلقه، همان‌جا هم به‌عنوان ویژگی SVG داده می‌شود تا بعد از پایان
+     انیمیشن (و وقتی انیمیشن خاموش است) حلقه با درصد واقعی درس بایستد. */
+  const offset = circumference * (1 - subject.progress / 100);
 
   return (
     <button
@@ -199,9 +202,8 @@ function SubjectRow({ subject, onOpenSubject, hasMicro = false }) {
       onClick={() => onOpenSubject(subject.id)}
       title={`میکرودرسنامهٔ ${subject.title}`}
     >
-      {hasMicro && <span className="micr-row__micro">میکرودرس فعال</span>}
       <span className="micr-row__gauge">
-        <svg className="micr-row__ring" viewBox="0 0 36 36" style={{ '--off': `${circumference * (1 - subject.progress / 100)}` }}>
+        <svg className="micr-row__ring" viewBox="0 0 36 36" style={{ '--off': `${offset}` }}>
           <circle className="micr-row__ring-track" cx="18" cy="18" r="15.5" />
           <circle
             className="micr-row__ring-fill"
@@ -209,6 +211,7 @@ function SubjectRow({ subject, onOpenSubject, hasMicro = false }) {
             cy="18"
             r="15.5"
             strokeDasharray={`${circumference} ${circumference}`}
+            strokeDashoffset={offset}
           />
         </svg>
         <span className="micr-row__percent">{toFa(subject.progress)}٪</span>
@@ -290,9 +293,6 @@ export default function MicroCourseLayer({ onBack, userId = 'local-user' }) {
     [],
   );
 
-  /* اولین میکرودرسنامهٔ منتشرشده — برای CTA پایین صفحه */
-  const publishedCourse = MicroContentService.firstPublishedCourse();
-
   /* ── لایهٔ مبحث‌ها و خواننده — بعد از همهٔ هوک‌ها تا ترتیب هوک‌ها پایدار بماند ── */
   if (readerView) {
     return (
@@ -313,6 +313,7 @@ export default function MicroCourseLayer({ onBack, userId = 'local-user' }) {
       <MicroTopics
         course={topicCourse}
         subjectTitle={subjectTitle}
+        userId={userId}
         onBack={() => patchView({ topics: null })}
         onOpenTopic={(topic) => patchView({
           reader: { courseId: topicCourse?.id ?? topicsView.courseId, topicId: topic.id },
@@ -331,7 +332,6 @@ export default function MicroCourseLayer({ onBack, userId = 'local-user' }) {
             </svg>
             بازگشت به دوره‌ها
           </button>
-          <span className="micr-topbar__crumb">دوره‌ها / میکرو درسنامه علوم پایه</span>
         </div>
 
         <header className="micr-hero dash-stagger">
@@ -341,7 +341,6 @@ export default function MicroCourseLayer({ onBack, userId = 'local-user' }) {
               نسخهٔ فشرده برای مرور سریع
             </span>
             <h1 className="micr-hero__title">میکرو درسنامه</h1>
-            <p className="micr-hero__kicker">علوم پایه — هر درس، فقط چند نکتهٔ همان‌جایی</p>
             <p className="micr-hero__subtitle">
               خلاصه‌های جمع‌وجور برای یک نگاه؛ مخصوص شب قبل از آزمون و مرورهای روزانه.
             </p>
@@ -394,37 +393,10 @@ export default function MicroCourseLayer({ onBack, userId = 'local-user' }) {
             </div>
           ) : (
             visibleSubjects.map((subject) => (
-              <SubjectRow
-                key={subject.id}
-                subject={subject}
-                onOpenSubject={openSubject}
-                hasMicro={MicroContentService.hasCourseForSubject(subject.id)}
-              />
+              <SubjectRow key={subject.id} subject={subject} onOpenSubject={openSubject} />
             ))
           )}
         </div>
-
-        <section className="micr-cta dash-stagger">
-          {publishedCourse ? (
-            <>
-              <h2>میکرودرسنامهٔ فعال تپش</h2>
-              <p>
-                «{publishedCourse.title}» صفحه‌به‌صفحه، با تست‌های میان راه از بانک تست تپش و نقشهٔ تسلط واقعی — همین حالا شروع کن.
-              </p>
-              <button type="button" onClick={() => openSubject(publishedCourse.subjectId)}>
-                ورود به میکرودرسنامهٔ {publishedCourse.title}
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M19 12H5m6-6-6 6 6 6" />
-                </svg>
-              </button>
-            </>
-          ) : (
-            <>
-              <h2>میکرودرسنامه‌ها در راه‌اند</h2>
-              <p>خوانندهٔ صفحه‌به‌صفحهٔ تپش با تست‌های میان راه و نقشهٔ تسلط به‌زودی برای همهٔ درس‌ها منتشر می‌شود.</p>
-            </>
-          )}
-        </section>
       </div>
     </section>
   );

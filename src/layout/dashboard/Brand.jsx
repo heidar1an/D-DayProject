@@ -1,4 +1,4 @@
-import heartbeatMark from '../../../images/pictures/600ppi/Asset 6.webp';
+import heartbeatMark from '../../../images/pictures/600ppi/logo-mark.webp';
 
 export default function Brand() {
   return (

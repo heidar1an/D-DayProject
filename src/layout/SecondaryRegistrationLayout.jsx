@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 
-import ThemeToggle from './ThemeToggle';
 import baleIcon from '../../images/icons/Asset 13.webp';
 import experienceIcon from '../../images/icons/Asset 8.webp';
 import graduationIcon from '../../images/icons/Asset 15 (2).webp';
@@ -212,8 +211,6 @@ export default function SecondaryRegistrationLayout({ onBack, onComplete, userDa
   return (
     <main className="onboarding-page" dir="rtl">
       <section className={`onboarding-card ${isEntered ? 'is-visible' : ''}`}>
-        <ThemeToggle className="onboarding-card__theme" />
-
         <div className="onboarding-card__mascot">
           <img src={onboardingMascot} alt="شخصیت کارتونی تپش" />
         </div>

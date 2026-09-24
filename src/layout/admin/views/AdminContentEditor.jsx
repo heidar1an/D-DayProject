@@ -33,8 +33,16 @@ const EMPTY_ARTICLE = {
 };
 
 const EMPTY_PAGE = {
-  title: '', slug: '', contentHtml: '', cover: '', status: 'draft',
+  title: '', slug: '', description: '', contentHtml: '', cover: '', status: 'draft',
   seo: { title: '', description: '', canonical: '', ogImage: '', robots: 'index,follow' },
+};
+
+/* برچسب گروه‌های لایه — با seedِ contentStore و رجیستری AdminPages هم‌خوان است */
+const PAGE_GROUP_LABELS = {
+  learning: 'یادگیری و آموزش',
+  assessment: 'ارزیابی، آزمون و رقابت',
+  knowledge: 'دانش و محتوا',
+  marketing: 'تبلیغات و اطلاع‌رسانی',
 };
 
 const CONFIG = {
@@ -48,9 +56,9 @@ const CONFIG = {
   page: {
     empty: EMPTY_PAGE,
     listView: 'pages',
-    title: 'صفحه',
+    title: 'لایه',
     api: pagesApi,
-    backLabel: 'بازگشت به صفحات',
+    backLabel: 'بازگشت به لایه‌ها',
   },
 };
 
@@ -130,7 +138,7 @@ export default function AdminContentEditor({ kind, id, navigate, categories, adm
       notify(isNew ? `${config.title} ایجاد شد` : 'تغییرات ذخیره شد');
 
       if (isNew) {
-        navigate('article-editor', { id: data[kind].id });
+        navigate(`${kind === 'article' ? 'article' : 'page'}-editor`, { id: data[kind].id });
         setSlugLocked(true);
       } else {
         setForm({ ...config.empty, ...data[kind], seo: { ...config.empty.seo, ...(data[kind].seo ?? {}) } });
@@ -170,7 +178,7 @@ export default function AdminContentEditor({ kind, id, navigate, categories, adm
             <Input
               value={form.title}
               onChange={(event) => handleTitleChange(event.target.value)}
-              placeholder={kind === 'article' ? 'عنوان مقاله…' : 'عنوان صفحه…'}
+              placeholder={kind === 'article' ? 'عنوان مقاله…' : 'عنوان لایه…'}
             />
           </Field>
 
@@ -192,7 +200,17 @@ export default function AdminContentEditor({ kind, id, navigate, categories, adm
                 placeholder="یک پاراگراف کوتاه برای کارت مقاله…"
               />
             </Field>
-          ) : null}
+          ) : (
+            <Field label="توضیح کوتاه لایه" hint="زیر عنوان لایه در رجیستری «صفحات» پنل نمایش داده می‌شود.">
+              <Textarea
+                value={form.description ?? ''}
+                rows={2}
+                maxLength={300}
+                onChange={(event) => setField('description', event.target.value)}
+                placeholder="یک خط توضیح دربارهٔ این لایه…"
+              />
+            </Field>
+          )}
 
           <div className="ad-editor__content">
             <span className="ad-field__label">متن محتوا</span>
@@ -301,6 +319,23 @@ export default function AdminContentEditor({ kind, id, navigate, categories, adm
             ) : null}
           </div>
         </Card>
+
+        {kind === 'page' && form.group ? (
+          <Card title="هویت لایه" description="مشخصات لایه از رجیستری بخش «صفحات» می‌آید و اینجا فقط خواندنی است">
+            <dl className="ad-deflist">
+              <div><dt>گروه</dt><dd>{PAGE_GROUP_LABELS[form.group] ?? form.group}</dd></div>
+              <div><dt>نشانی رجیستری</dt><dd><code className="ad-code" dir="ltr">/{form.slug}</code></dd></div>
+              <div>
+                <dt>مسیر در سایت</dt>
+                <dd>
+                  {form.route ? (
+                    <a className="ad-linkcell" href={form.route} target="_blank" rel="noreferrer" dir="ltr">{form.route}</a>
+                  ) : 'بدون مسیر مستقیم — فقط از طریق پنل'}
+                </dd>
+              </div>
+            </dl>
+          </Card>
+        ) : null}
 
         {kind === 'article' ? (
           <Card title="نمایش در سایت">

@@ -51,7 +51,73 @@ const LATENCY_MS = 420;
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function respond(build) {
+/*
+ * ── کتابخانهٔ منتشرشدهٔ پنل ──
+ *
+ * دک‌هایی که مدیر در پنل ساخته و «ارسال به کاربران تپش» کرده است، منبعشان سرور
+ * است (`GET /api/public/flashcards/library`) نه `mockData`. تا وقتی این‌ها خوانده
+ * نمی‌شدند، هیچ مجموعهٔ ساخته‌شده در پنل در کتابخانهٔ کاربران دیده نمی‌شد و ویرایش
+ * عنوان یا کارت‌ها هم اثری نداشت — چون UI فقط `TAPESH_DECKS`/`TAPESH_CARDS` ثابت
+ * را می‌خواند.
+ *
+ * کش کوتاه‌مدت است: این توابع پرتکرارند (هر مرور یک‌بار `allCards` را می‌خواند) ولی
+ * «باز کردن کتابخانه» همیشه تازه می‌گیرد (`forceLibrary`).
+ */
+const PUBLISHED_TTL_MS = 15000;
+
+let publishedDecks = [];
+let publishedAt = 0;
+let publishedPending = null;
+
+export async function loadPublishedDecks({ force = false } = {}) {
+  if (!force && publishedAt && Date.now() - publishedAt < PUBLISHED_TTL_MS) return publishedDecks;
+  if (publishedPending) return publishedPending;
+
+  publishedPending = (async () => {
+    try {
+      const response = await fetch('/api/public/flashcards/library', {
+        headers: { Accept: 'application/json' },
+      });
+      if (!response.ok) throw new Error(`library-http-${response.status}`);
+      const payload = await response.json();
+      const decks = payload?.data?.decks;
+      if (Array.isArray(decks)) publishedDecks = decks.filter((deck) => deck?.id);
+    } catch {
+      /*
+       * سرور در دسترس نیست (پیش‌نمایش استاتیک، قطع شبکه) — کتابخانهٔ ثابت تپش
+       * سرجایش می‌ماند. عمداً خطا بالا نمی‌دهد: نبودِ مجموعه‌های پنل نباید کل
+       * فلش‌کارت را از کار بیندازد.
+       */
+    } finally {
+      publishedAt = Date.now();
+      publishedPending = null;
+    }
+    return publishedDecks;
+  })();
+
+  return publishedPending;
+}
+
+/* دک‌های تپش = منتشرشده‌های پنل + مجموعهٔ ثابت `mockData`
+   (کارت‌ها از فهرست دک جدا می‌شوند تا شکل خروجی با دک‌های ثابت یکی بماند؛
+    کارت‌ها فقط از `tapeshCards()` می‌آیند.) */
+function tapeshDecks() {
+  return [
+    ...publishedDecks.map(({ cards, ...deck }) => deck),
+    ...TAPESH_DECKS,
+  ];
+}
+
+/* کارت‌های دک‌های تپش — کارت‌های پنل `deckId` را همراه دارند */
+function tapeshCards() {
+  return [
+    ...publishedDecks.flatMap((deck) => (deck.cards ?? []).map((card) => ({ ...card, deckId: deck.id }))),
+    ...TAPESH_CARDS,
+  ];
+}
+
+async function respond(build, { forceLibrary = false } = {}) {
+  await loadPublishedDecks({ force: forceLibrary });
   await delay(LATENCY_MS + Math.random() * 180);
   return build();
 }
@@ -224,8 +290,8 @@ function seedUserSpace(userData) {
 /* ── مجموعهٔ کامل کارت‌ها (تپش + کاربر) ── */
 
 function allCards(space) {
-  const tapeshCards = TAPESH_CARDS.filter((card) => space.libraryAdded.includes(card.deckId));
-  return [...tapeshCards, ...space.userCards];
+  const fromTapesh = tapeshCards().filter((card) => space.libraryAdded.includes(card.deckId));
+  return [...fromTapesh, ...space.userCards];
 }
 
 function cardById(space, cardId) {
@@ -442,7 +508,7 @@ export function fetchOverview(userData) {
 
     const deckList = space.decks
       .map((deck) => deckStats(space, deck))
-      .concat(space.libraryAdded.map((id) => TAPESH_DECKS.find((deck) => deck.id === id)).filter(Boolean).map((deck) => deckStats(space, deck)));
+      .concat(space.libraryAdded.map((id) => tapeshDecks().find((deck) => deck.id === id)).filter(Boolean).map((deck) => deckStats(space, deck)));
 
     const allCardIds = allCards(space).filter((card) => card.status === 'active').map((card) => card.id);
     const totals = summarizeStates(space, allCardIds);
@@ -489,6 +555,7 @@ export function fetchOverview(userData) {
 
 /* GET /api/flashcards/decks — فقط دک‌های من + دک‌های تپشِ اضافه‌شده */
 export function fetchMyDecks(userData) {
+  /* `forceLibrary` چون این فهرست بعد از ویرایش در پنل باید تازه باشد */
   return respond(() => {
     if (simulateFailure) {
       simulateFailure = false;
@@ -498,13 +565,13 @@ export function fetchMyDecks(userData) {
     return {
       userDecks: space.decks.map((deck) => deckStats(space, deck)),
       tapeshDecks: space.libraryAdded
-        .map((id) => TAPESH_DECKS.find((deck) => deck.id === id))
+        .map((id) => tapeshDecks().find((deck) => deck.id === id))
         .filter(Boolean)
         .map((deck) => deckStats(space, deck)),
       subjects: SUBJECTS,
       colors: undefined, // رنگ‌ها از DECK_COLORS در UI import می‌شوند
     };
-  });
+  }, { forceLibrary: true });
 }
 
 /* GET /api/flashcards/library — کتابخانهٔ رسمی تپش */
@@ -515,14 +582,15 @@ export function fetchLibrary(userData) {
       throw new Error('network-error');
     }
     const space = getUserSpace(userData);
+    const cards = tapeshCards();
     return {
-      decks: TAPESH_DECKS.map((deck) => ({
+      decks: tapeshDecks().map((deck) => ({
         ...deck,
         added: space.libraryAdded.includes(deck.id),
-        cardCount: TAPESH_CARDS.filter((card) => card.deckId === deck.id).length,
+        cardCount: cards.filter((card) => card.deckId === deck.id).length,
       })),
     };
-  });
+  }, { forceLibrary: true });
 }
 
 /* POST /api/flashcards/library/:deckId/add — افزودن دک تپش + seed وضعیت‌های جدید */
@@ -556,7 +624,7 @@ export function fetchDeck(userData, deckId) {
     }
     const space = getUserSpace(userData);
     const deck = space.decks.find((item) => item.id === deckId)
-      ?? TAPESH_DECKS.find((item) => item.id === deckId && space.libraryAdded.includes(deckId));
+      ?? tapeshDecks().find((item) => item.id === deckId && space.libraryAdded.includes(deckId));
     if (!deck) throw new Error('deck-not-found');
 
     const cards = allCards(space)
@@ -571,7 +639,7 @@ export function fetchDeck(userData, deckId) {
       cards,
       preview: previewIntervals(stateFor(), space.settings.algorithmConfig),
     };
-  });
+  }, { forceLibrary: true });
 }
 
 /* POST /api/flashcards/decks */
@@ -780,7 +848,7 @@ export function updateCard(userData, cardId, patch) {
         return;
       }
       /* ویرایش کارت تپش: نسخهٔ کاربر محفوظ می‌ماند (نسخه‌بندی card.version) */
-      const tapeshCard = TAPESH_CARDS.find((item) => item.id === cardId);
+      const tapeshCard = tapeshCards().find((item) => item.id === cardId);
       if (tapeshCard) {
         const local = { ...tapeshCard, ...patch, version: tapeshCard.version + 1, updatedAt: new Date().toISOString() };
         const index = space.userCards.findIndex((item) => item.id === cardId);
