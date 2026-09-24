@@ -1,17 +1,5 @@
 [
   {
-    "id": "note-745029a0",
-    "authorId": "adm-5e246f08",
-    "authorName": "مدیر تپش",
-    "title": "تست: آزمون های هماهنگ",
-    "kind": "text",
-    "body": "- حل کردن مسئله امنیت   آزمون های هماهنگ",
-    "items": [],
-    "pinned": false,
-    "createdAt": "2026-09-16T09:01:12.007Z",
-    "updatedAt": "2026-09-19T12:20:06.389Z"
-  },
-  {
     "id": "note-720d66ab",
     "authorId": "adm-5e246f08",
     "authorName": "مدیر تپش",
@@ -58,18 +46,6 @@
     "pinned": false,
     "createdAt": "2026-09-16T08:01:05.329Z",
     "updatedAt": "2026-09-16T08:03:34.639Z"
-  },
-  {
-    "id": "note-a1baedaa",
-    "authorId": "adm-5e246f08",
-    "authorName": "مدیر تپش",
-    "title": "دوره ها - مسیر سبز",
-    "kind": "text",
-    "body": "- برنامه ریزی و زدن کد های اولیه این واحد",
-    "items": [],
-    "pinned": false,
-    "createdAt": "2026-09-16T07:55:30.664Z",
-    "updatedAt": "2026-09-16T07:55:30.664Z"
   },
   {
     "id": "note-7c633a07",
