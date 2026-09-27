@@ -1,5 +1,31 @@
 [
   {
+    "id": "log-e751b997",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "auth.login",
+    "entityType": "admin",
+    "entityId": "adm-5e246f08",
+    "entityLabel": "0135",
+    "metadata": {},
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15",
+    "createdAt": "2026-09-27T09:46:11.679Z"
+  },
+  {
+    "id": "log-668e6af4",
+    "userId": "adm-5e246f08",
+    "userName": "مدیر تپش",
+    "action": "auth.login",
+    "entityType": "admin",
+    "entityId": "adm-5e246f08",
+    "entityLabel": "0135",
+    "metadata": {},
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+    "createdAt": "2026-09-25T06:56:27.905Z"
+  },
+  {
     "id": "log-19934a59",
     "userId": "adm-5e246f08",
     "userName": "مدیر تپش",
@@ -7207,34 +7233,5 @@
     "ip": "::1",
     "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
     "createdAt": "2026-09-17T07:29:54.576Z"
-  },
-  {
-    "id": "log-a0809421",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "auth.login",
-    "entityType": "admin",
-    "entityId": "adm-5e246f08",
-    "entityLabel": "0135",
-    "metadata": {},
-    "ip": "::1",
-    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
-    "createdAt": "2026-09-17T07:28:11.175Z"
-  },
-  {
-    "id": "log-a9486f2d",
-    "userId": "adm-5e246f08",
-    "userName": "مدیر تپش",
-    "action": "media.account.tested",
-    "entityType": "media-account",
-    "entityId": "acc-seed6",
-    "entityLabel": "",
-    "metadata": {
-      "ok": false,
-      "complete": false
-    },
-    "ip": "::1",
-    "userAgent": "",
-    "createdAt": "2026-09-17T06:59:25.933Z"
   }
 ]
