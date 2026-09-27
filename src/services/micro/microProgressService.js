@@ -99,6 +99,19 @@ export const MicroProgressService = {
     return nextState;
   },
 
+  /*
+   * آیا کاربر خواندن این درسنامه را شروع کرده؟ بدون ساختن seed و بدون بارگذاری کل
+   * محتوا — فقط نگاه می‌کند آیا واحدی شروع شده یا صفحه‌ای از «نادیده» گذشته است.
+   * مصرف‌کننده: کارت «عملکرد بر اساس درس» در لایهٔ آنالیز وضعیت.
+   */
+  hasStartedReading(courseId, userId = 'local-user') {
+    const saved = safeRead(storageKey(courseId, userId));
+    if (!saved?.units) return false;
+    return Object.values(saved.units).some(
+      (unit) => Boolean(unit?.startedAt) || Object.values(unit?.pages ?? {}).some((page) => page?.status && page.status !== 'unseen'),
+    );
+  },
+
   getUnitState(state, unit) {
     return {
       ...emptyUnitState(),

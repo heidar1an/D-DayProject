@@ -235,6 +235,7 @@ src/layout/**  (UI)  ──import──▶  src/services/**  (منطق + داد�
 | `#admin/analytics/<tab>` | مرکز تحلیل ۱۶ بخشی | `AnalyticsCenter` |
 | `#admin/micro-lesson` | میکرو درسنامه تپش — لایهٔ داخل پنل (از کارت میکرو درسنامه در «صفحات») | `AdminMicro` |
 | `#admin/flashcard-library` | کتابخانهٔ فلش‌کارت تپش — لایهٔ داخل پنل (از کارت فلش‌کارت در «صفحات») | `AdminFlashcards` |
+| `#admin/reference-library` | مراجع تپش — لایهٔ داخل پنل (از کارت رفرنس در «صفحات») | `AdminReferences` |
 | — | آفلاین (`navigator.onLine === false`) | `OfflinePage` — **پیش از همهٔ مسیرها** بررسی می‌شود |
 
 **ترتیب اولویت در `App`:** آفلاین → `adminOpen` → `onboardingOpen` → `dashboardOpen` →
@@ -321,7 +322,7 @@ const [view, setView, patchView] = useLayerRoute(LAYER_IDS.wiki, WIKI_HOME_VIEW,
 | `review-notebook` | `ReviewNotebook` | دفترچهٔ مرور G5 با تقویم شمسی |
 | `other` | `OtherSections` | تپش هوشمند، شبکهٔ دانش، ویکی، مقالات، پشتیبان |
 | `league` | `LeagueSection` | لیگ، رتبه‌بندی، چالش، دستاورد |
-| `pomodoro` | `Pomodoro` | تایمر تمرکز (state آن در `DashboardLayout` می‌ماند) |
+| `pomodoro` | `Pomodoro` | تایمر تمرکز + نمودار خطی پومودوی هفت روز اخیر (state در `DashboardLayout`، دفتر روزانه در `localStorage`) |
 
 ### ۱۲ لایه (`LAYER_IDS`)
 
@@ -332,7 +333,7 @@ const [view, setView, patchView] = useLayerRoute(LAYER_IDS.wiki, WIKI_HOME_VIEW,
 | `course-comprehensive` | `courses/ComprehensiveCourseLayer` | کارت «درسنامه جامع» |
 | `course-micro` | `courses/MicroCourseLayer` | کارت «میکرو درسنامه» |
 | `course-reference` | `courses/ReferenceLayer` | کارت «رفرنس» (خوانندهٔ کتاب با `reader/`) |
-| `intl-courses` | `courses/InternationalCoursesLayer` | کارت «دوره‌های بین‌الملل» |
+| `intl-courses` | `courses/InternationalCoursesLayer` | کارت «دوره‌های بین‌الملل» + نمای داخل هر دوره |
 | `intl-exams` | `tests/InternationalExamsLayer` | کارت «آزمون‌های بین‌الملل» |
 | `coordinated-exams` | `tests/coordinated/CoordinatedExamsLayer` | کارت «آزمون‌های هماهنگ» |
 | `test-bank` | `tests/bank/TestBankLayer` | کارت بزرگ «بانک تست علوم پایه» |
@@ -351,6 +352,15 @@ const [view, setView, patchView] = useLayerRoute(LAYER_IDS.wiki, WIKI_HOME_VIEW,
 - **کاتالوگ دوره‌ها:** ۵ کارت ثابت در `CoursesSection.jsx` → `CATALOG_COURSES` و آیکن هر دوره در
   `CatalogIcon`. نگاشت کارت به لایه در `DashboardLayout.jsx` → `COURSE_LAYERS` — **هر پنج کارت
   لایهٔ واقعی دارند، از جمله مسیر سبز.**
+- **مقصد کارت‌های «کار امروز» و «سه‌سوته»:** ردیف «کار امروز» → لایهٔ `course-comprehensive` با
+  لینک عمیق `{subject, moduleId?}` و ردیف «سه‌سوته» → لایهٔ `course-micro` با `{subject}`.
+  هیچ‌کدام مستقیم وارد یک واحد نمی‌شوند؛ اول لایهٔ درسنامهٔ همان درس باز می‌شود.
+- **درسنامهٔ جامعِ همهٔ درس‌ها یک ساختار دارد:** `ContentService` برای آناتومی مسیر دست‌نویس
+  (`data/learning/anatomyCourse.js`) و برای بقیهٔ درس‌ها یک درس از میکرودرسنامهٔ همان درس
+  می‌سازد (`courseFromMicro`: هر مبحث = یک کادر سرتیتر، واحدهای همان مبحث = کارت‌های ستون چپ).
+  پس «تعداد درسنامه» هر کارت = `ContentService.countSections(subjectId)`، نه فهرست دستی.
+  نسخهٔ منتشرشدهٔ پنل (`/api/public/comprehensive/library`) **جای** نسخهٔ ثابت را می‌گیرد —
+  همان الگوی میکرو و فلش‌کارت؛ نبودِ سرور فقط یعنی برگشت به رجیستری ثابت.
 - **همان پنج کارت روی صفحهٔ اصلی:** بلافاصله زیر دکمهٔ «از الان شروع کنید» هیرو، در
   `.hero__courses`، با **همان کامپوننت مشترک** `CatalogCourseCard` و همان شبکه رندر می‌شوند؛ پس
   کارت صفحهٔ اصلی هرگز از کارت داشبورد جدا نمی‌افتد. کاربر واردشده با کلیک مستقیم به لایهٔ همان
@@ -360,12 +370,44 @@ const [view, setView, patchView] = useLayerRoute(LAYER_IDS.wiki, WIKI_HOME_VIEW,
 - **`myCoursesCatalog.js`** منبع واحد «دوره‌های من» است و از سه خانوادهٔ واقعی دوره‌ها
   (`SUBJECTS` درسنامه جامع، `SUBJECTS` میکرو، `COURSES` بین‌الملل) تغذیه می‌شود؛ `COURSE_KINDS`
   هویت بصری هر خانواده (رنگ، آیکون، مدل نوار پیشرفت) را نگه می‌دارد.
-- **یادگیری آناتومی** (`courses/learning/`): سه سطح `overview → module → unit`. مسیر داخلی در
-  `view.anatomy` (slot) ذخیره می‌شود. سه راه ورود: کارت آناتومی در «درسنامه جامع» / ردیف آناتومی
-  در «میکرو درسنامه» / کارت‌های «کار امروز» با لینک عمیق `{subject, moduleId, unitId, stepId}`.
+- **نمای داخل دوره‌های بین‌الملل** در `courses/InternationalCoursesLayer.jsx` با همان مسیر داخلی لایه ساخته شده است: کارت دوره → کادر اطلاعات (هشتک‌ها/عنوان/ناشر/پسندیدن/گزارش) در **بالای** پخش‌کننده، بعد در ستون اصلی پخش‌کننده و **زیر ویدیو کادر `LessonInfo`** (عنوان و توضیح همان ویدیو + دکمهٔ یادداشت‌برداری که با `createNote` در بخش «یادداشت‌ها» ذخیره می‌شود) و در ستون کنار فهرست ویدیوها و دورهٔ پیشنهادی؛ `view.name = 'detail'` و `view.courseId` در hash می‌نشینند و بازگشت به کاتالوگ با `view.name = 'catalog'` انجام می‌شود. عرض این نما هم `var(--content-width)` است (هم‌اندازهٔ هدر داشبورد). پخش‌کننده: پخش/توقف، تنظیم صدا و نور (`PlayerStepper`)، خط زمانی **چپ‌به‌راست** با زمان در سمت چپ نوار، زیرنویس (`SUBTITLE_LANGS` در همین فایل) و تمام‌صفحه. استایل‌ها با پیشوند `intl-course-*` در `internationalCourses.css` هستند. لایه `userId` می‌گیرد (از `DashboardLayout`).
+- **لایهٔ منبع** (`view.name = 'provider'` + `view.providerId` + `view.fromCourseId`): کلیک روی نام دانشگاه/نهاد در کادر اطلاعات دوره، این نما را باز می‌کند — معرفی منبع از `PROVIDER_DATA` (کشور، سال بنیان، تمرکزها) + دوره‌های همان منبع در تپش (`COURSES[].providerId`) + «دوره‌های مرتبط در همین حوزه». بازگشت به همان دورهٔ قبلی می‌رود. استایل‌ها با پیشوند `intl-provider-*`.
+- **لایهٔ یادگیری یک درس** (`courses/learning/`، کامپوننت `AnatomyLearningLayer`): دو سطح
+  `overview → unit` — نمای «کل درسنامه‌ها» (ستون راست: کادرهای سرتیتر، ستون چپ: کارت‌های واحد)
+  و صفحهٔ واحد. مسیر داخلی **هر درس جدا** در `view.<subjectId>` (slot) ذخیره می‌شود.
+  ورودی‌ها: کارت درس در «درسنامه جامع» / «دوره‌های من» / کارت‌های «کار امروز».
+  - درس با مسیر دست‌نویس (آناتومی) → کلیک واحد به `UnitPage` (موتور یادگیری) می‌رود.
+  - درس برگرفته از میکرودرسنامه → واحد پرچم `micro` دارد و به خوانندهٔ همان مبحث
+    (`MicroCourseReader`) می‌رسد؛ خواننده **در سطح خودِ لایه** رندر می‌شود، نه داخل قالب
+    باریک‌ترِ لایه (دو بار `var(--content-width)` = باریک‌شدن).
+  - بخش پیش‌فرض ستون چپ، اولین بخشی است که واحد منتشرشده دارد.
+- **موتور یک واحد (`UnitPage` → `LearningEngine`) پنج مرحله دارد:** `activate → learn → visualize →
+  practice → test` (تنها منبع: `LEARNING_STEPS` در `data/learning/anatomyCourse.js`). مراحل
+  `connect/retrieve/diagnose/review` و کل کدشان (ConceptMap، RetrievalPrompt، LearningDiagnosis،
+  ReviewPanel، `AssessmentService.diagnose`، `recommendationService.js`) حذف شده‌اند — دوباره اضافه‌شان نکن.
+  - **ردیف بالای واحد:** دکمهٔ بازگشت + نوار پنج‌مرحله‌ای + ابزارها (یادداشت، گزارش ایراد) +
+    «شروع دوباره واحد» همه در یک ردیف (`.learning-engine__cycle`). نوار مراحل
+    `repeat(5, minmax(0,1fr))` است تا فضای خالی نماند.
+  - **سرتیتر داخل مرحله وجود ندارد:** `LearningStep` فقط قاب است؛ عنوان مرحله در همان نوار بالاست.
+  - **یادداشت و گزارش ایراد، پاپ‌آپ شناورند:** آیکون یادداشت (✎) و آیکون گزارش ایراد (⚠) کنار
+    «شروع دوباره» هستند؛ هرکدام یک `.unit-pop` مطلق زیر همان ردیف باز می‌کنند (بدون پوشاندن محتوای
+    مرحله). یادداشت با `createNote` مستقیم در بخش «یادداشت‌ها» می‌نشاند (`sourceType: 'lesson'`,
+    `subjectId = course.id`)؛ گزارش ایراد با همان قرارداد درخواست‌های پشتیبانی
+    (`tapesh:support-requests`، دستهٔ «گزارش اشکال») ثبت می‌شود.
+  - **ورود دوباره به واحد، فعال‌سازی را تازه می‌کند:** با هر mount، `recallResponses` پاک می‌شود تا
+    تست‌های گرم‌کردن دوباره پاسخ‌پذیر باشند؛ اگر یک بار جواب داده شده باشد، `activate` در
+    `completedSteps` می‌ماند/اضافه می‌شود و تیکش در نوار مراحل دیده می‌شود.
+  - **مرحلهٔ «تست» یک میز کنش است، نه کارنامه:** `UnitTest` پنج کارت بزرگ ستونی (طول صفحه را
+    می‌گیرد) می‌دهد و هر کارت رنگِ بخش مقصدش را دارد — تست‌ها سبز، دفترچهٔ مرور آبی، آزمون طلایی،
+    فلش‌کارت بنفش، تپش هوشمند مسی: تست‌های همین بخش (رفتن به `practice`)، افزودن/حذف واحد در
+    دفترچهٔ مرور (`ReviewNotebookService`)، آزمون از این واحد (حالت آزمون درون‌خطی با تایمر و
+    کارنامه)، ساخت فلش‌کارت (`createDeck` + `createCard` با `source.sourceType = 'lesson'`)، و
+    پرس‌وجو با تپش هوشمند (پوش لایهٔ `tapesh-ai` با پرامپت آماده).
+  - **اعداد این لایه Pinar هستند:** یک قاعدهٔ `:is(...)` در `learning.css` روی همهٔ عناصر عددی
+    لایه اعمال می‌شود (قرارداد پروژه: متن Doran، عدد Pinar).
 - **قاعدهٔ لینک عمیق:** هر جابه‌جایی صفحه باید **هم** کلید صفحه و **هم** `deep` را بنویسد، وگرنه
   الگوی `view.X ?? deepLink.X` دوباره همان صفحه را باز می‌کند.
-  (`setOpenSubject({ subject, deep: null, anatomy: null })`، `setSelectedCourse({ courseId, deep: null })`.)
+  (`setOpenSubject({ subject, deep: null, [subjectId]: null })`، `setSelectedCourse({ courseId, deep: null })`.)
 - **اعلان‌ها یک سطح واحد دارند:** فقط `NotificationsSection` (زنگولهٔ هدر). نه کادر پروفایل خانه و
   نه سربرگ لیگ، اعلان جداگانه ندارند. منبع: `services/league/leagueService.js`.
 - **پس‌زمینهٔ داشبورد هم‌رنگ صفحهٔ اصلی است:** `.dashboard` و `.dashboard-header` از
@@ -381,8 +423,20 @@ const [view, setView, patchView] = useLayerRoute(LAYER_IDS.wiki, WIKI_HOME_VIEW,
   `COURSE_REGISTRY`). سه دیاگرام `flow`/`bars`/`cycle` هم با `data` از خود درس ساخته
   می‌شوند؛ پس درس تازه هیچ کد UI لازم ندارد. قرارداد و شکاف پوشش بانک تست در
   `src/data/micro/README.md`.
+- **رفرنس‌ها (`course-reference`) هیچ حالت «به‌زودی» ندارند:** همهٔ فصل‌های هر سه مرجع
+  (آناتومی گری · بافت‌شناسی جان کوئیرا · فیزیولوژی گایتون) باز و قابل ورودند، پس پرچم
+  `available` در `referenceCatalog.js` **عمداً وجود ندارد** — دوباره اضافه‌اش نکن. فقط ۴ فصل
+  متن نوشته‌شده دارند (`gray-ch1` · `jun-ch1` · `guy-ch1` · `guy-ch2` در `REFERENCE_CONTENTS`)
+  و بقیه داخل خودِ خواننده پیام «متن این فصل هنوز آماده نشده» می‌گیرند — همان الگویی که در
+  میکرو درسنامه اجرا شد. سرتیتر هیرو و تختهٔ زیر کارت‌ها رنگ خودِ مرجع را می‌گیرند
+  (`--gold-ink` / `--accent`)، نه قهوه‌ای ثابت `--gold-deep`/`--red-deep`.
 - **لایهٔ تپش هوشمند** دو مصرف‌کننده دارد: کارت مینیمال در «سایر بخش‌ها» و پاپ‌آپ شناور. هر دو از
   یک استور ماژول‌سطح (`ai/aiStore.js`) تغذیه می‌شوند، پس بستن پاپ‌آپ مکالمه را از دست نمی‌دهد.
+- **پومودو:** state تایمر در `usePomodoro` (`Pomodoro.jsx`) می‌ماند و `DashboardLayout` همان را به
+  هدر و لایه پاس می‌دهد. دفتر روزانه در `tapesh:pomodoro-history` (`YYYY-MM-DD` → `{count, seconds}`)
+  نگه داشته می‌شود و نمودار هفتگی کادر پایین‌راست لایه از همان می‌خواند (امروز از state زنده می‌آید).
+  **شمارندهٔ پومودو فقط با جلسهٔ کامل ۲۵ دقیقه‌ای بالا می‌رود**؛ جلسهٔ نیمه‌کاره تنها «مجموع دقایق
+  مطالعهٔ امروز» را زیاد می‌کند. نقطهٔ سبز وضعیت در هدر داشبورد عمداً حذف شده است.
 
 ---
 
@@ -396,16 +450,16 @@ const [view, setView, patchView] = useLayerRoute(LAYER_IDS.wiki, WIKI_HOME_VIEW,
 | `ai/` | دستیار هوشمند (انتزاع Provider) | `aiService.js`, `mockAI.js`, `aiContext.js` |
 | `analytics/` | تحلیل عملکرد دانشجو (لایهٔ داشبورد، نه پنل) | `analyticsService.js`, `analyticsEngine.js` |
 | `greenPath/` | موتور مسیر سبز: Curriculum Graph، Goal/Priority، Roadmap، Scheduler، Recovery، Progress، Resource و Repository | `greenPathService.js`, `greenPathRepository.js`, `roadmapEngine.js` |
-| `articles/` | مقالات سایت | `articlesService.js`, `userState.js` |
+| `articles/` | مقالات سایت | `articlesService.js` (مقالات منتشرشدهٔ پنل از `/api/public/articles` را جلوی ۱۲ مقالهٔ ثابت ادغام می‌کند و هم‌`slug`ها را از فهرست ثابت حذف می‌کند تا یک مقاله دو بار نیاید), `articleCatalog.js` (کاتالوگ خالص و بی‌دریافت — یک منبع حقیقت، دو مصرف‌کننده: سایت و seed سرور), `mockData.js` (نگاشت تصویرها روی کاتالوگ), `userState.js` |
 | `coordinatedExams/` | آزمون‌های هماهنگ (ثبت‌نام، سالن، کارنامه، رتبه) | `coordinatedExamService.js` |
 | `examBuilder/` | آزمون‌ساز شخصی | `selectionEngine.js`, `presets.js` |
-| `flashcards/` | فلش‌کارت + الگوریتم SM-2 | `flashcardService.js` (دک‌های منتشرشدهٔ پنل از `/api/public/flashcards/library` را جلوی دک‌های ثابت `mockData.js` ادغام می‌کند), `spacedRepetition.js` |
+| `flashcards/` | فلش‌کارت + الگوریتم SM-2 | `flashcardService.js` (دک‌های منتشرشدهٔ پنل از `/api/public/flashcards/library` را جلوی دک‌های ثابت `mockData.js` ادغام می‌کند و هم‌شناسه‌ها را از فهرست ثابت حذف می‌کند تا یک مجموعه دو بار نیاید), `spacedRepetition.js`. تصویر کارت تصویری: فهرست فرمت مشترک + سقف ۴ مگابایت (`CARD_IMAGE_*` در `mockData.js`)، و `createCard`/`updateCard` در پر شدن حافظهٔ مرورگر `storage-full` می‌دهند و تغییر را برمی‌گردانند |
 | `hearts/` | اقتصاد قلب (نمودار داشبورد) | `heartSeries.js`, `heartStatsService.js` |
 | `group/` | اشتراک گروهی: کد اشتراک، پله‌های تخفیف، چرخهٔ ساخت/پیوستن/چرخش/خروج | `groupService.js` |
 | `international/` | آزمون‌های بین‌الملل (USMLE/PLAB/…) | `internationalService.js` |
 | `knowledge/` | گراف دانش (۵۶ نود، ۸۸ یال) | `graphData.js`, `graphModel.js`, `knowledgeService.js` |
 | `league/` | لیگ، رتبه‌بندی، چالش، اعلان‌ها | `leagueService.js` |
-| `learning/` | موتور درسنامهٔ جامع | `index.js` (ری‌اکسپورت ۶ سرویس) |
+| `learning/` | موتور درسنامهٔ جامع | `index.js` (ری‌اکسپورت ۵ سرویس) |
 | `micro/` | موتور میکرودرسنامه: محتوا، پیشرفت، انتخاب تست، وضعیت مفهوم | `microContentService.js` (رجیستری ۱۶ درس), `microProgressService.js`, `microTestEngine.js`, `microLearningEngine.js` |
 | `notes/` | دفترچهٔ یادداشت | `notesService.js` |
 | `products/` | صفحهٔ محصولات: هدرِ بدون هاله، برگه‌های چسبان و ورق‌خور دوره‌ها، کادرهای کلیکی بانک تست، ویکی/مقالات، تصویر شبکهٔ دانش، دفترچهٔ مرور و اکوسیستم متحرک؛ با **مقصد واقعی** هر محصول | `productsService.js` |
@@ -421,12 +475,11 @@ const [view, setView, patchView] = useLayerRoute(LAYER_IDS.wiki, WIKI_HOME_VIEW,
 
 | سرویس | نقش |
 |---|---|
-| `ContentService` | بارگذاری دوره/ماژول/واحد (`getCourse`, `getModule`, `getUnits`, `getUnit`) |
+| `ContentService` | بارگذاری دوره/ماژول/واحد (`getCourse`, `getModule`, `getUnits`, `getUnit`, `hasCourse`, `countSections`). رجیستری درس‌ها: آناتومی دست‌نویس، بقیه ساخته‌شده از `data/micro/registry.js` (`courseFromMicro`). رکورد منتشرشدهٔ پنل از `/api/public/comprehensive/library` (کش ۱۵ ثانیه) جای نسخهٔ ثابت را می‌گیرد؛ بی‌سرور به رجیستری برمی‌گردد |
 | `ProgressService` | ذخیره/بازیابی پیشرفت (`load`, `save`, `getUnitState`, `updateUnit`, `getModuleSummary`, `getCourseSummary`) |
 | `MyCoursesService` | فهرست «دوره‌های من» (`getActivity`, `getProgress`) |
-| `AssessmentService` | ارزیابی پاسخ و تشخیص ضعف (`evaluateQuestion`, `evaluateLabel`, `diagnose`) |
-| `RecommendationService` | پیشنهاد بعدی (`forCourse`, `forUnit`) |
-| `LearningService` | ماشین مراحل درس (`getStep`, `getNextStep`, `calculateProgress`, `completeStep`) |
+| `AssessmentService` | ارزیابی پاسخ MCQ و Label Quiz (`evaluateQuestion`, `evaluateLabel`, `mergeAttempt`) — متد `diagnose` با حذف مراحل تشخیص/مرور پاک شد |
+| `LearningService` | ماشین مراحل درس (`getStep`, `getNextStep`, `getPreviousStep`, `calculateProgress`, `completeStep`) — حرکت بین مراحل آزاد است و هیچ گره‌ای مسیر را قفل نمی‌کند |
 
 ### کلیدهای `localStorage` (به تفکیک کاربر)
 
@@ -437,7 +490,7 @@ const [view, setView, patchView] = useLayerRoute(LAYER_IDS.wiki, WIKI_HOME_VIEW,
 | `tapesh:exams:v1:<userId>` | آزمون‌ساز شخصی |
 | `tapesh:intl:v1:<userId>` | آزمون‌های بین‌الملل |
 | `tapesh:coordinated:v1:<userId>` | آزمون‌های هماهنگ |
-| `tapesh:analytics:v1:<userId>` | تحلیل عملکرد |
+| `tapesh:analytics:v1:<userId>` | تحلیل عملکرد — **باستان‌شده**: تحلیل حالا فقط از سشن‌های واقعی بانک تست می‌خواند و این کلید دیگر نوشته/خوانده نمی‌شود |
 | `tapesh:learning:v1:<userId>:<courseId>` | پیشرفت درسنامه |
 | `tapesh:micro:v1:<userId>:<courseId>` | پیشرفت میکرودرسنامه (وضعیت صفحه، ایستگاه، تسلط مفهوم) |
 | `tapesh:knowledge:v1:<userId>` | گراف دانش |
@@ -445,7 +498,7 @@ const [view, setView, patchView] = useLayerRoute(LAYER_IDS.wiki, WIKI_HOME_VIEW,
 | `tapesh:group:v1`, `tapesh:group:v1:viewer` | اشتراک گروهی — **عمداً بدون تفکیک کاربر**: هویت «من» شناسهٔ همین دستگاه است، نه حساب، تا گروهِ ساخته‌شده با ورود/خروج از حساب گم نشود |
 | `tapesh:ai:conversations:v1`, `tapesh:ai:saved-messages` | دستیار هوشمند |
 | `tapesh:telemetry:off:v1`, `tapesh:telemetry:sid:v1` | ردیاب |
-| `tapesh:pomodoro-stats`, `tapesh:reader`, `tapesh:security-settings`, `tapesh:support-requests`, `tapesh:review-notebook:v1` | متفرقه |
+| `tapesh:pomodoro-stats`, `tapesh:pomodoro-history`, `tapesh:reader`, `tapesh:security-settings`, `tapesh:support-requests`, `tapesh:review-notebook:v1` | متفرقه |
 
 **ریست کامل یک دامنه:** `localStorage.removeItem('tapesh:<domain>:v1')` — داده از نو seed می‌شود.
 
@@ -539,7 +592,7 @@ Google Cloud Console. خودِ جریان کد کامل است، ولی `client_
 ### مجموعه‌های دادهٔ CMS (`database/content/*.json`)
 
 `admins` · `articles` · `categories` · `pages` · `media` · `banners` · `activity` · `notes` ·
-`settings` · `alerts` · `events`
+`settings` · `alerts` · `events` · `flashcardDecks` · `references` · `microCourses`
 
 در اولین درخواست خودکار ساخته و seed می‌شوند (`ensureStore`).
 **بازنشانی کامل:** `rm -rf database/content` (توجه: رویدادهای واقعی تحلیل هم پاک می‌شوند).
@@ -860,7 +913,10 @@ SPA است، پس آن لحظه = لحظهٔ رندر React، یعنی دانل�
   به ریل آیکونی `--ad-sidebar-w-min: 79px` جمع می‌کند. انیمیشن روی `width`/`flex-basis`
   است و نوار در جریان می‌ماند (اورلی نیست) ⇒ محتوا فضای آزادشده را می‌گیرد.
   در حالت جمع، `title` هر آیتم به‌صورت راهنمای شناور می‌آید. زیر ۸۶۱px (کشوی موبایل)
-  کلید پنهان است و نوار همیشه با عنوان می‌ماند. جزئیات در `src/layout/admin/README.md`.
+  کلید پنهان است و نوار همیشه با عنوان می‌ماند. **سرصفحهٔ پنل** فقط عنوان بخش +
+  «آخرین ورود» (هم‌ردیف) + کلید تم است و پس‌زمینه‌اش `var(--ad-bg)` — هم‌رنگ پس‌زمینهٔ
+  کلی پنل. **بلوک حساب کاربری در فوتر نوار کناری (کادر سمت راست) نشسته، نه در هدر.**
+  دکمهٔ همبرگری هدر **فقط زیر ۸۶۱px** دیده می‌شود. جزئیات در `src/layout/admin/README.md`.
 - Tailwind فقط در چند بخش استفاده شده (کلاس‌های inline مثل `bg-[var(--surface-soft)]`) — بیشتر
   استایل‌ها CSS خالص‌اند. برای تغییر یک بخش، **همان الگوی همان بخش** را ادامه بده.
 - **لایهٔ «دربارهٔ تپش» (`#about`)** یک روایت ۱۰ مرحله‌ای دارد (۱۱ بخش DOM چون اکوسیستم
@@ -1024,6 +1080,14 @@ fetch. مقدار `JSON.stringify(filters)` را پاس بده یا شیء را 
 (`.site-header > .brand`)، و همین‌طور برای پنل به `.ad-*`.
 گارد رگرسیون: سنجهٔ «قاعدهٔ ستون‌های هدر به .site-header مقید است» در
 `verify-render.mjs`.
+
+**همین تله با «ترتیب منبع» هم می‌زند:** کلید همبرگری هدر پنل کلاس
+`ad-iconbtn ad-header__menu` را داشت؛ `.ad-header__menu { display: none }` بالای
+`admin.css` بود و `.ad-iconbtn { display: inline-grid }` پایین‌تر. هر دو یک
+specificity داشتند ⇒ **قاعدهٔ دیرتر برد** و آیکون در همهٔ عرض‌ها کنار عنوان هر بخش
+دیده می‌شد (قاعدهٔ پنهان‌کردن مرده بود و هیچ خطایی هم نمی‌داد). رفع: انتخاب‌گر ترکیبی
+`.ad-iconbtn.ad-header__menu`. **قاعده:** هر `display`/`flex`ی که روی یک عنصر
+«کلاس‌پایه + کلاس‌حالت» می‌گذاری، ترکیبی بنویس؛ وگرنه ترتیب فایل سرنوشتش را عوض می‌کند.
 
 ### ۱۲) در ریل آیکونی، آیکون را فشرده نکن و `gap` را صفر کن
 
@@ -1233,9 +1297,13 @@ fetch. مقدار `JSON.stringify(filters)` را پاس بده یا شیء را 
 **ورود واقعی را فقط یک‌بار با حساب گوگل خودت می‌شود ثابت کرد** و تا آن‌جا هیچ تیک سبزی برای
 «ورود موفق» ادعا نمی‌شود.
 
-**فاز ۸:** `articlesService.js` طوری گسترش می‌یابد که مقاله‌های منتشرشدهٔ CMS را با مقاله‌های
-ایستای فعلی ادغام کند (CMS اولویت دارد) و `ArticlePage` در صورت وجود `contentHtml` همان را
-رندر کند. تغییرات فقط افزایشی است و در نبود API، سایت دقیقاً مثل امروز کار می‌کند.
+**فاز ۸ — انجام شد:** `articlesService.js` مقاله‌های منتشرشدهٔ پنل را با مقاله‌های ایستای فعلی
+ادغام می‌کند و **نسخهٔ پنل جای نسخهٔ ایستا** می‌نشیند (تطبیق با `slug`، نه کنارش — وگرنه هر
+مقاله دو بار در فهرست می‌آمد). `ArticlePage` اگر `contentHtml` باشد همان را با `sanitizeHtml`
++ شناسهٔ سرتیترها رندر می‌کند وگرنه مسیر بلوکی (با هایلایت و یادداشتِ کاربر) دست‌نخورده
+می‌ماند. دوازده مقالهٔ ثابت حالا در سرور رکورد پنل دارند (`origin: 'tapesh'`) و از لایهٔ
+«مقالات تپش» در بخش «صفحات» قابل مدیریت‌اند (متن غنی مثل میکرو درسنامه + تصویر شاخص +
+انتشار). در نبود API، سایت دقیقاً مثل امروز کار می‌کند.
 
 **آماده‌های آینده که مدل و مسیر API‌شان تعریف شده ولی UI نهایی ندارند:** دوئل لیگ،
 تولید سؤال با Seed، اتصال گراف دانش به ProgressService، Sync-Queue فلش‌کارت و یادداشت.

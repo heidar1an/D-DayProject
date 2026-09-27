@@ -17,6 +17,8 @@ import sparklesIcon from '../../images/icons/Asset 9.webp';
 import telegramIcon from '../../images/icons/Asset 11.webp';
 import onboardingMascot from '../../images/pictures/ChatGPT Image ۲ شهریور ۱۴۰۵، ۱۳_۲۴_۴۵.png';
 
+import { UNIVERSITIES } from '../services/league/mockData';
+
 const registrationSteps = [
   {
     title: 'لطفا اطلاعات خواسته شده را وارد نمایید',
@@ -271,15 +273,11 @@ export default function SecondaryRegistrationLayout({ onBack, onComplete, userDa
                           <option value="" disabled>
                             دانشگاه محل تحصیل
                           </option>
-                          <option value="دانشگاه علوم پزشکی تهران">
-                            دانشگاه علوم پزشکی تهران
-                          </option>
-                          <option value="دانشگاه علوم پزشکی ایران">
-                            دانشگاه علوم پزشکی ایران
-                          </option>
-                          <option value="دانشگاه علوم پزشکی شهید بهشتی">
-                            دانشگاه علوم پزشکی شهید بهشتی
-                          </option>
+                          {UNIVERSITIES.map(({ id, name }) => (
+                            <option key={id} value={name}>
+                              {name}
+                            </option>
+                          ))}
                           <option value="سایر دانشگاه‌ها">سایر دانشگاه‌ها</option>
                         </select>
                       </label>

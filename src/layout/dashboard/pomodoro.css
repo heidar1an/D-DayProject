@@ -401,16 +401,281 @@
   font-weight: 600;
 }
 
-/* فقط پس‌زمینه‌ی نمودار؛ خود نمودار بعداً اضافه می‌شود */
-.pomodoro-card__chart-body {
+/* ── نمودار خطی پومودوی هفت روز اخیر ──
+   هم‌زبان نمودار قلب داشبورد (شبکهٔ محور، ناحیهٔ گرادیانی، منحنی، تولتیپ و
+   ستون‌های هاور) اما با پالت آبی پومودو.
+   جهت LTR است تا ترتیب روزها (قدیم به جدید، چپ به راست) با محورهای svg یکی بماند. */
+.pomodoro-chart__plot {
+  position: relative;
   flex: 1 1 auto;
-  min-height: 180px;
-  margin-top: 20px;
+  min-height: 168px;
+  margin-top: 18px;
   border-radius: 30px;
-  background:
-    linear-gradient(rgba(91, 140, 199, 0.08) 1px, transparent 1px) 0 0 / 100% 25%,
-    linear-gradient(90deg, rgba(91, 140, 199, 0.08) 1px, transparent 1px) 0 0 / 12.5% 100%,
-    var(--surface);
+  background: var(--surface);
+  direction: ltr;
+}
+
+.pomodoro-chart__svg {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: visible;
+}
+
+.pomodoro-chart__grid {
+  stroke: rgb(var(--ink-rgb) / 0.06);
+}
+
+.pomodoro-chart__grid--base {
+  stroke: rgb(var(--ink-rgb) / 0.13);
+}
+
+.pomodoro-chart__ylabel {
+  fill: var(--faint);
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
+  font-size: 10.5px;
+}
+
+/* ناحیهٔ زیر خط + رسم تدریجی خط (مسیر با pathLength=1 نرمال شده) */
+.pomodoro-chart__area {
+  animation: pomodoro-area-in 620ms ease-out 220ms backwards;
+}
+
+.pomodoro-chart__line {
+  fill: none;
+  stroke: var(--blue-ink);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  filter: drop-shadow(0 4px 14px rgba(91, 140, 199, 0.3));
+  animation: pomodoro-line-draw 900ms cubic-bezier(0.4, 0.05, 0.25, 1) forwards;
+}
+
+.pomodoro-chart__guide {
+  stroke: rgba(91, 140, 199, 0.3);
+  stroke-width: 1;
+  stroke-dasharray: 3 5;
+  stroke-linecap: round;
+}
+
+.pomodoro-chart__dot-wrap {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pomodoro-dot-in 420ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(var(--i) * 32ms + 420ms);
+}
+
+.pomodoro-chart__dot-halo {
+  fill: rgba(91, 140, 199, 0.16);
+}
+
+.pomodoro-chart__dot {
+  fill: var(--surface);
+  stroke: var(--blue-ink);
+  stroke-width: 2;
+  transition: opacity 160ms ease;
+}
+
+.pomodoro-chart__dot.is-today {
+  fill: var(--blue-ink);
+  stroke: var(--blue-soft-ink);
+}
+
+.pomodoro-chart__dot.is-hover {
+  fill: var(--blue-soft-ink);
+  stroke: var(--blue-soft-ink);
+}
+
+.pomodoro-chart__plot.is-hovering .pomodoro-chart__dot-wrap:not(.is-hover) .pomodoro-chart__dot {
+  opacity: 0.42;
+}
+
+/* ضربان «امروز» — نقطهٔ زنده روی آخرین نقطهٔ نمودار */
+.pomodoro-chart__pulse-dot {
+  fill: var(--blue-soft-ink);
+}
+
+.pomodoro-chart__pulse-ring {
+  fill: none;
+  stroke: var(--blue-soft-ink);
+  stroke-width: 1.5;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pomodoro-pulse 2.2s ease-out infinite;
+}
+
+.pomodoro-chart__xlabel {
+  fill: var(--faint);
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
+  font-size: 10.5px;
+  text-anchor: middle;
+  animation: pomodoro-label-fade 420ms ease both;
+  animation-delay: calc(var(--i) * 32ms + 140ms);
+}
+
+.pomodoro-chart__xlabel--sub {
+  font-size: 9.5px;
+}
+
+.pomodoro-chart__xlabel.is-today {
+  fill: var(--blue-soft-ink);
+  font-weight: 600;
+}
+
+/* ── ستون‌های شفاف هاور/focus ──
+   چپ و عرض هر ستون از هندسهٔ svg به‌صورت inline می‌آید، پس هاله دقیقاً روی همان
+   ستونی می‌نشیند که زیر نشانگر است. */
+.pomodoro-chart__overlay {
+  position: absolute;
+  inset: 0;
+  direction: ltr;
+}
+
+.pomodoro-chart__column {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  outline: none;
+}
+
+.pomodoro-chart__column::before {
+  position: absolute;
+  inset: 6px 2px var(--chart-pad-bottom, 32px);
+  border-radius: 14px;
+  background-image: linear-gradient(
+    180deg,
+    rgba(91, 140, 199, 0.2) 0%,
+    rgba(91, 140, 199, 0.08) 34%,
+    rgba(91, 140, 199, 0.02) 68%,
+    transparent 100%
+  );
+  content: '';
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 170ms ease;
+}
+
+.pomodoro-chart__column.is-hover::before,
+.pomodoro-chart__column:focus-visible::before {
+  opacity: 1;
+}
+
+/* ── تولتیپ روز ── */
+.pomodoro-chart__tooltip {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  min-width: 140px;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 14px;
+  border: 1px solid rgb(var(--line-rgb) / 0.09);
+  border-radius: 14px;
+  background: var(--background);
+  box-shadow: 0 14px 32px rgb(var(--shadow-rgb) / calc(0.55 * var(--shadow-scale)));
+  direction: rtl;
+  text-align: right;
+  pointer-events: none;
+  transform: translateX(-50%);
+  animation: pomodoro-tooltip-in 150ms ease both;
+}
+
+.pomodoro-chart__tooltip-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--muted);
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
+  font-size: 11px;
+}
+
+.pomodoro-chart__tooltip-title em {
+  flex-shrink: 0;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(91, 140, 199, 0.16);
+  color: var(--blue-soft-ink);
+  font-size: 9.5px;
+  font-style: normal;
+}
+
+.pomodoro-chart__tooltip-value {
+  color: var(--white);
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
+  font-size: 15.5px;
+  font-weight: 700;
+}
+
+.pomodoro-chart__tooltip-value i {
+  color: var(--muted);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 500;
+}
+
+/* ── انیمیشن‌های نمودار ── */
+@keyframes pomodoro-line-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes pomodoro-area-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pomodoro-dot-in {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pomodoro-label-fade {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pomodoro-tooltip-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes pomodoro-pulse {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.85;
+  }
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
 }
 
 .pomodoro-card--today {
@@ -488,32 +753,6 @@
   box-shadow: inset 3px 0 var(--green-bright);
 }
 
-/* نقطه وضعیت در گوشهٔ بالا-راست کادر می‌نشیند تا روی آیکون ساعتِ سمت چپ نیفتد */
-.dashboard-header__time.is-running::after,
-.dashboard-header__time.is-break::after {
-  content: '';
-  position: absolute;
-  top: 7px;
-  inset-inline-start: 9px;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--green-bright);
-  animation: pomodoro-header-dot 1.6s ease-in-out infinite;
-}
-
-@keyframes pomodoro-header-dot {
-  0%,
-  100% {
-    opacity: 1;
-    box-shadow: 0 0 0 0 rgba(95, 174, 124, 0.55);
-  }
-  50% {
-    opacity: 0.55;
-    box-shadow: 0 0 0 5px rgba(95, 174, 124, 0);
-  }
-}
-
 /* پایان پومودو وقتی کاربر در لایه دیگری است: کادر آبی هدر چشمک می‌زند */
 .dashboard-header__time.is-finished {
   animation: pomodoro-header-blink 1.1s ease-in-out infinite;
@@ -574,9 +813,15 @@
     border-radius: 36px;
   }
 
-  .pomodoro-card__chart-body {
-    min-height: 150px;
+  .pomodoro-chart__plot {
+    min-height: 148px;
+    margin-top: 14px;
     border-radius: 22px;
+  }
+
+  .pomodoro-chart__ylabel,
+  .pomodoro-chart__xlabel {
+    font-size: 9.5px;
   }
 }
 
@@ -598,5 +843,19 @@
 
   .pomodoro__water {
     transition: none;
+  }
+
+  /* نمودار: بدون انیمیشن رسم، خط و نقاط یک‌جا دیده شوند */
+  .pomodoro-chart__area,
+  .pomodoro-chart__dot-wrap,
+  .pomodoro-chart__xlabel,
+  .pomodoro-chart__tooltip,
+  .pomodoro-chart__pulse-ring {
+    animation: none;
+  }
+
+  .pomodoro-chart__line {
+    stroke-dashoffset: 0;
+    animation: none;
   }
 }

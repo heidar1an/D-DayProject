@@ -30,7 +30,6 @@ import {
   Icon,
   Modal,
   Skeleton,
-  SourceBadge,
   TrackBadge,
   TypeBadge,
   faNum,
@@ -308,6 +307,7 @@ function QuestionResultCard({ entry, onSolve, onToggleBookmark }) {
           {subject?.name}
         </span>
         <span className="text-[11px] text-[var(--faint)]">{question.topicPath.join(' › ')}</span>
+        <BankKindBadge kind={bankKindOf(question)} question={question} />
         <span className="ms-auto flex items-center gap-1.5">
           <span className={`rounded-full px-2.5 py-1 text-[10px] ${statusBadge.className}`}>{statusBadge.label}</span>
           <DifficultyBadge difficulty={question.difficulty} />
@@ -318,13 +318,10 @@ function QuestionResultCard({ entry, onSolve, onToggleBookmark }) {
 
       <footer className="mt-4 flex flex-wrap items-center gap-2 text-[11px] text-[var(--faint)]">
         <TypeBadge type={question.type} />
-        <BankKindBadge kind={bankKindOf(question)} />
         <TrackBadge track={trackOf(question)} />
         {question.figure && (
           <span className="rounded-full bg-white/6 px-2.5 py-1 text-[10px]">شکل‌دار</span>
         )}
-        <span className="rounded-full bg-white/6 px-2.5 py-1 text-[10px]">{toFa(question.year)}</span>
-        <SourceBadge source={question.source} className="!px-2.5 !py-1 !text-[10px]" />
         <span className="flex items-center gap-1 rounded-full bg-white/6 px-2.5 py-1 text-[10px]">
           <Icon name="users" className="h-3 w-3" />
           {toFa(question.stats.correctPercent)}٪ پاسخ صحیح

@@ -52,17 +52,6 @@ function ArticleIcon(props) {
   );
 }
 
-/* درخواست پشتیبان — هدست */
-function SupportIcon(props) {
-  return (
-    <svg {...iconProps} {...props}>
-      <path d="M5 15.2v-3.4a7 7 0 0 1 14 0v3.4" />
-      <rect x="3" y="13.4" width="4.3" height="6.6" rx="2.15" />
-      <rect x="16.7" y="13.4" width="4.3" height="6.6" rx="2.15" />
-    </svg>
-  );
-}
-
 /* آناتومی سه‌بعدی — انسان وایرفریم‌گونه با برجستهٔ اسکلتی */
 function AnatomyIcon(props) {
   return (
@@ -118,13 +107,6 @@ const SECONDARY_CARDS = [
     description: 'نوشته‌ها و یادداشت‌های آموزشی تپش',
     accent: 'brown',
     Icon: ArticleIcon,
-  },
-  {
-    id: 'support-request',
-    title: 'درخواست پشتیبان',
-    description: 'سؤال یا مشکلت را با تیم تپش در میان بگذار',
-    accent: 'gold',
-    Icon: SupportIcon,
   },
 ];
 

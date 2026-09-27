@@ -20,6 +20,23 @@
   direction: ltr;
 }
 
+.heart-chart__total {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 10px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--red-ink);
+  font: 600 12px 'Pinar', 'Vazir', Tahoma, sans-serif;
+  pointer-events: none;
+}
+
+.heart-chart__insight--total b {
+  color: var(--red-ink);
+}
+
 .heart-chart__svg {
   position: absolute;
   inset: 0;

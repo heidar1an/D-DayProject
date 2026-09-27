@@ -33,6 +33,11 @@ export function TextBlock({ block }) {
   );
 }
 
+/* HTML متن مبحث در سرور هنگام ذخیره پاک‌سازی شده است. */
+export function HtmlBlock({ block }) {
+  return <div className="rdr-html" data-block-id={block.id} dangerouslySetInnerHTML={{ __html: block.html }} />;
+}
+
 export function HeadingBlock({ block }) {
   const Tag = block.type; // h1 | h2 | h3
   return (

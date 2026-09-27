@@ -15,15 +15,4 @@ export const getLearningStatus = (status) => {
   return statuses[status] ?? statuses.fresh;
 };
 
-export const getConceptStatus = (status) => {
-  const statuses = {
-    NOT_STARTED: { label: 'شروع‌نشده', tone: 'muted' },
-    LEARNING: { label: 'در حال یادگیری', tone: 'blue' },
-    WEAK: { label: 'نیازمند مرور', tone: 'brown' },
-    FAMILIAR: { label: 'آشنا', tone: 'purple' },
-    MASTERED: { label: 'مسلط', tone: 'green' },
-  };
-  return statuses[status] ?? statuses.NOT_STARTED;
-};
-
 export const clamp = (value, min, max) => Math.min(max, Math.max(min, value));

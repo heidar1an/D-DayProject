@@ -35,17 +35,12 @@ function readerDefaults() {
 export const HIGHLIGHT_COLORS = ['yellow', 'green', 'blue', 'pink'];
 
 export function ReaderProvider({ reference, initialPosition, onExit, children }) {
-  const availableChapters = useMemo(
-    () => reference.chapters.filter((chapter) => chapter.available),
-    [reference],
-  );
-
+  /* همهٔ فصل‌ها فعال‌اند (حالت «به‌زودی» از کل لایه برداشته شد)، پس فصل شروع
+     یا موقعیت ذخیره‌شده است یا اولین فصل کتاب. */
   const [chapterId, setChapterId] = useState(
-    initialPosition?.chapterId ??
-      availableChapters[0]?.id ??
-      reference.chapters[0]?.id ??
-      null,
+    initialPosition?.chapterId ?? reference.chapters[0]?.id ?? null,
   );
+  const [contentRevision, setContentRevision] = useState(0);
   const [content, setContent] = useState(null);
   const [chapterLoading, setChapterLoading] = useState(true);
   const [chapterError, setChapterError] = useState(null);
@@ -105,7 +100,14 @@ export function ReaderProvider({ reference, initialPosition, onExit, children })
     api
       .getChapterContent(reference.id, chapterId)
       .then((data) => {
-        if (alive) setContent(data);
+        if (alive) {
+          setContent(data);
+          setActiveSectionId((current) =>
+            data.sections.some((section) => section.id === scrollRestore.current?.sectionId)
+              ? scrollRestore.current.sectionId
+              : data.sections.some((section) => section.id === current)
+                ? current : data.sections[0]?.id ?? null);
+        }
       })
       .catch((error) => {
         if (alive) {
@@ -119,7 +121,7 @@ export function ReaderProvider({ reference, initialPosition, onExit, children })
     return () => {
       alive = false;
     };
-  }, [reference.id, chapterId]);
+  }, [reference.id, chapterId, contentRevision]);
 
   const showToast = useCallback((message, variant = 'info') => {
     const id = Math.random().toString(36).slice(2);
@@ -269,20 +271,25 @@ export function ReaderProvider({ reference, initialPosition, onExit, children })
 
   /* ── ناوبری فصل‌ها ── */
   const openChapter = useCallback((targetChapterId, position) => {
-    setChapterId(targetChapterId);
-    setActiveSectionId(null);
-    setContent(null);
+    if (targetChapterId !== chapterId) {
+      setChapterId(targetChapterId);
+      setContent(null);
+    } else {
+      setContentRevision((revision) => revision + 1);
+    }
+    setActiveSectionId(position?.sectionId ?? null);
     scrollRestore.current = position ?? { top: 0 };
-  }, []);
+  }, [chapterId]);
 
   const goToBlock = useCallback((targetBlockId) => {
     const [targetChapter, targetSection] = String(targetBlockId).split('|');
     if (targetChapter !== chapterId) {
       setChapterId(targetChapter);
-      setActiveSectionId(null);
+      setActiveSectionId(targetSection);
       setContent(null);
       scrollRestore.current = { sectionId: targetSection, blockId: targetBlockId };
     } else {
+      setActiveSectionId(targetSection);
       scrollRestore.current = { sectionId: targetSection, blockId: targetBlockId };
     }
   }, [chapterId]);
@@ -297,7 +304,6 @@ export function ReaderProvider({ reference, initialPosition, onExit, children })
   const value = {
     reference,
     chapters: reference.chapters,
-    availableChapters,
     chapter,
     chapterId,
     content,

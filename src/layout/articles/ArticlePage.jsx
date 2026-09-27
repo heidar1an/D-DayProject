@@ -11,6 +11,8 @@ import {
   categoryLabel,
   getAuthorById,
 } from '../../services/articles/articlesService';
+import { headingsFromHtml, withHeadingIds } from '../../services/articles/articleCatalog';
+import { sanitizeHtml } from '../../services/admin/sanitizeHtml';
 import {
   addHighlight,
   ensureStarted,
@@ -493,14 +495,25 @@ export default function ArticlePage({ slug }) {
     [article],
   );
 
-  /* فهرست مطالب از همین ایندکس‌بلوک‌های h2 که در رندر استفاده می‌شود */
+  /* فهرست مطالب از همین ایندکس‌بلوک‌های h2 که در رندر استفاده می‌شود.
+     مقاله‌ای که متنش در پنل ویرایش شده (`contentHtml`) بلوک ندارد، پس سرتیترهایش
+     از خودِ HTML خوانده می‌شوند؛ شناسه‌ها هم همان‌جا با `withHeadingIds` تزریق
+     می‌شوند، پس پرشِ فهرست در هر دو حالت کار می‌کند. */
   const tocItems = useMemo(() => {
     if (!article) return [];
-    return article.content
+    if (article.contentHtml) return headingsFromHtml(article.contentHtml);
+    return (article.content ?? [])
       .map((block, index) => ({ block, index }))
       .filter(({ block }) => block.type === 'h2')
       .map(({ block }, order) => ({ id: `sec-${order}`, text: block.text }));
   }, [article]);
+
+  /* متن غنیِ پنل — قبل از رندر پاک‌سازی می‌شود و بعد شناسهٔ سرتیترها می‌نشیند
+     (پاک‌ساز `id` را از فهرست سفید عبور نمی‌دهد، پس ترتیب مهم است). */
+  const articleHtml = useMemo(
+    () => (article?.contentHtml ? withHeadingIds(sanitizeHtml(article.contentHtml)) : ''),
+    [article],
+  );
 
   const jumpToHeading = (id) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -752,9 +765,19 @@ export default function ArticlePage({ slug }) {
           <div className="ap-article__content" ref={contentRef}>
             <TableOfContents items={tocItems} activeId={activeHeading} onJump={jumpToHeading} variant="mobile" />
 
-            <div className="ap-article__blocks">
-              <ContentBlocks blocks={article.content} highlights={highlights} />
-            </div>
+            {article.contentHtml ? (
+              /* متنِ ویرایش‌شده در پنل — همان کلاس‌های بلوکی (`ap-*`) را می‌گیرد،
+                 چون تایپوگرافی `.ap-article__blocks` با سلکتور فرزندی کار می‌کند. */
+              <div
+                className="ap-article__blocks"
+                // eslint-disable-next-line react/no-danger
+                dangerouslySetInnerHTML={{ __html: articleHtml }}
+              />
+            ) : (
+              <div className="ap-article__blocks">
+                <ContentBlocks blocks={article.content ?? []} highlights={highlights} />
+              </div>
+            )}
 
             {highlights.length > 0 && (
               <section className="ap-notes" aria-label="نکته‌ها و یادداشت‌های من">

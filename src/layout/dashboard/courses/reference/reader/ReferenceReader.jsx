@@ -59,6 +59,7 @@ function ReaderInner() {
     mobilePanel,
     setMobilePanel,
     settingsOpen,
+    setSettingsOpen,
     setAsideTab,
     viewerImage,
     setViewerImage,
@@ -79,6 +80,7 @@ function ReaderInner() {
       const isTyping = event.target.closest?.('input, textarea');
       if (event.key === 'Escape' && !isTyping) {
         if (viewerImage) setViewerImage(null);
+        else if (settingsOpen) setSettingsOpen(false);
         else if (mobilePanel) setMobilePanel(null);
         else onExit?.();
         return;
@@ -93,7 +95,7 @@ function ReaderInner() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [viewerImage, mobilePanel, setViewerImage, setMobilePanel, setAsideTab, onExit]);
+  }, [viewerImage, settingsOpen, mobilePanel, setViewerImage, setSettingsOpen, setMobilePanel, setAsideTab, onExit]);
 
   return (
     <div

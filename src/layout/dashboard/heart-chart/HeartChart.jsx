@@ -127,9 +127,7 @@ function PercentDelta({ current, previous }) {
 function ChartSkeleton() {
   return (
     <div className="heart-chart__skeleton" aria-hidden="true">
-      {[42, 68, 30, 84, 56, 74, 38, 92, 60, 48, 78, 34].map((height, index) => (
-        <span key={index} style={{ '--h': `${height}%`, '--i': index }} />
-      ))}
+      <span style={{ '--h': '0%' }} />
     </div>
   );
 }
@@ -198,6 +196,7 @@ function HeartChartPlot({ data, mode }) {
         if (!event.currentTarget.contains(event.relatedTarget)) clearHover();
       }}
     >
+      <span className="heart-chart__total" dir="rtl">کل قلب‌ها: {faNum.format(data.allTimeTotal)}</span>
       <svg
         className="heart-chart__svg"
         width={size.width}
@@ -425,6 +424,9 @@ function ChartInsights({ data }) {
 
   return (
     <footer className="heart-chart__insights">
+      <span className="heart-chart__insight heart-chart__insight--total">
+        کل قلب‌های کسب‌شده <b>{faNum.format(data.allTimeTotal)}</b>
+      </span>
       <span className="heart-chart__insight">
         مجموع دوره <b>{faNum.format(summary.total)}</b> قلب
       </span>
@@ -454,6 +456,11 @@ export default function HeartChart({ range = 'daily', mode = 'bar' }) {
   const { data, loading, error, retry } = useAsyncData(() => fetchHeartSeries({ range }), [range]);
   const [renderMode, setRenderMode] = useState(mode);
   const [isSwitching, setIsSwitching] = useState(false);
+
+  useEffect(() => {
+    window.addEventListener('tapesh:hearts:changed', retry);
+    return () => window.removeEventListener('tapesh:hearts:changed', retry);
+  }, [retry]);
 
   useEffect(() => {
     if (mode === renderMode) return undefined;
@@ -494,6 +501,11 @@ export default function HeartChart({ range = 'daily', mode = 'bar' }) {
       {loading || !data ? (
         <div className="heart-chart__plot">
           <ChartSkeleton />
+        </div>
+      ) : data.summary.total === 0 ? (
+        <div className="heart-chart__plot flex items-center justify-center text-sm text-[var(--faint)]">
+          <span className="heart-chart__total" dir="rtl">کل قلب‌ها: {faNum.format(data.allTimeTotal)}</span>
+          در این بازه قلبی ثبت نشده است.
         </div>
       ) : (
         <div className={`heart-chart__stage ${isSwitching ? 'is-switching' : ''}`}>

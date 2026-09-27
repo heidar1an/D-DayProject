@@ -1,13 +1,35 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import './internationalCourses.css';
 import { LAYER_IDS, useLayerRoute } from '../dashboardRoute';
+import { createNote } from '../../../services/notes/notesService';
+/* لوگوهای نوار متحرک — از وب گرفته و در `images/logos/` ذخیره شده‌اند (تصویر لوگویی در پروژه نبود). */
+import harvardMedLogo from '../../../../images/logos/harvard-med.png';
+import johnsHopkinsLogo from '../../../../images/logos/johns-hopkins.png';
+import stanfordMedLogo from '../../../../images/logos/stanford-med.png';
+import oxfordLogo from '../../../../images/logos/oxford.png';
+import cambridgeLogo from '../../../../images/logos/cambridge.png';
+import nejmLogo from '../../../../images/logos/nejm.png';
+import courseraLogo from '../../../../images/logos/coursera.png';
+import whoLogo from '../../../../images/logos/who.png';
+import khanAcademyLogo from '../../../../images/logos/khan-academy.png';
+import harvardUniversityLogo from '../../../../images/logos/harvard.png';
+import mitLogo from '../../../../images/logos/mit.png';
+import bbcLogo from '../../../../images/logos/bbc.png';
+import torontoLogo from '../../../../images/logos/toronto.png';
+/* تصویر کارت هر دوره — از تصویرهای خودِ پروژه (تصویر تازه‌ای دانلود نشد) */
+import globalHealthImage from '../../../../images/courses/Asset 6.webp';
+import visualScienceImage from '../../../../images/courses/immono.webp';
+import scientificEnglishImage from '../../../../images/courses/english.webp';
+import mediaLiteracyImage from '../../../../images/pictures/character-search.png';
+import neuroscienceImage from '../../../../images/pictures/images (1).jpeg';
+import researchMethodsImage from '../../../../images/courses/Asset 5.webp';
 
 const FA_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
 const toFa = (value) => String(value).replace(/\d/g, (digit) => FA_DIGITS[Number(digit)]);
 
-/* نمای پیش‌فرض لایه — کاتالوگ با فیلتر «همه دوره‌ها» و بدون دورهٔ باز.
+/* نمای پیش‌فرض لایه — کاتالوگ با فیلتر «همه دوره‌ها».
    باید ثابت و بیرون از کامپوننت بماند (قرارداد useLayerRoute). */
-const INTL_COURSES_VIEW = { filter: 'all', featured: false, courseId: null, deep: null };
+const INTL_COURSES_VIEW = { name: 'catalog', filter: 'all' };
 
 const FILTERS = [
   { id: 'all', label: 'همه دوره‌ها' },
@@ -21,6 +43,9 @@ const FILTERS = [
 export const COURSES = [
   {
     id: 'global-health',
+    providerId: 'harvard',
+    providerLogo: harvardUniversityLogo,
+    image: globalHealthImage,
     title: 'نگاهی جهانی به سلامت',
     provider: 'دانشگاه هاروارد',
     providerEn: 'Harvard University',
@@ -35,10 +60,12 @@ export const COURSES = [
     badge: 'پربازدید',
     description: 'در این مسیر با چالش‌های سلامت عمومی، نابرابری‌های درمانی و راهکارهای اثرگذار در جوامع مختلف آشنا می‌شوی.',
     tags: ['سلامت عمومی', 'اپیدمیولوژی', 'جامعه'],
-    modules: ['مقدمه‌ای بر سلامت جهانی', 'نابرابری در دسترسی به درمان', 'سیاست‌گذاری سلامت', 'پروژه پایانی'],
   },
   {
     id: 'visual-science',
+    providerId: 'mit',
+    providerLogo: mitLogo,
+    image: visualScienceImage,
     title: 'علم را چطور ببینیم؟',
     provider: 'موسسه فناوری ماساچوست',
     providerEn: 'MIT OpenCourseWare',
@@ -53,10 +80,12 @@ export const COURSES = [
     badge: 'جدید',
     description: 'یک دوره تصویری برای فهم بهتر مدل‌ها، آزمایش‌ها و ایده‌های علمی؛ از مشاهده دقیق تا ساختن یک توضیح قابل اعتماد.',
     tags: ['تفکر علمی', 'مدل‌سازی', 'آزمایش'],
-    modules: ['مشاهده و پرسش‌گری', 'ساخت مدل ذهنی', 'خواندن یک آزمایش', 'توضیح دادن علم'],
   },
   {
     id: 'scientific-english',
+    providerId: 'cambridge',
+    providerLogo: cambridgeLogo,
+    image: scientificEnglishImage,
     title: 'انگلیسی برای مطالعه علمی',
     provider: 'دانشگاه کمبریج',
     providerEn: 'University of Cambridge',
@@ -71,10 +100,12 @@ export const COURSES = [
     badge: 'پیشنهاد تپش',
     description: 'واژگان و الگوهای ضروری برای خواندن مقاله، دنبال کردن ویدیوهای دانشگاهی و نوشتن خلاصه‌های دقیق.',
     tags: ['Academic English', 'مقاله‌خوانی', 'واژگان'],
-    modules: ['ساختار مقاله علمی', 'واژگان پرتکرار', 'یادداشت‌برداری از ویدیو', 'خلاصه‌نویسی'],
   },
   {
     id: 'media-literacy',
+    providerId: 'bbc',
+    providerLogo: bbcLogo,
+    image: mediaLiteracyImage,
     title: 'سواد رسانه‌ای در عصر داده',
     provider: 'بی‌بی‌سی ماندارین',
     providerEn: 'BBC Learning',
@@ -89,10 +120,12 @@ export const COURSES = [
     badge: 'کوتاه و کاربردی',
     description: 'با چند ابزار ساده، خبرها و محتوای آنلاین را دقیق‌تر بخوان، منبع را ارزیابی کن و گرفتار شایعه نشو.',
     tags: ['خبرخوانی', 'منبع‌شناسی', 'داده'],
-    modules: ['خبر چگونه ساخته می‌شود؟', 'تشخیص منبع معتبر', 'الگوریتم و حباب اطلاعاتی', 'تمرین تحلیل خبر'],
   },
   {
     id: 'neuroscience',
+    providerId: 'toronto',
+    providerLogo: torontoLogo,
+    image: neuroscienceImage,
     title: 'مغز، یادگیری و حافظه',
     provider: 'دانشگاه تورنتو',
     providerEn: 'University of Toronto',
@@ -107,10 +140,12 @@ export const COURSES = [
     badge: 'منتخب سردبیر',
     description: 'سفر تصویری از نورون تا رفتار؛ سازوکارهای یادگیری، حافظه و شکل‌گیری عادت‌ها را با مثال‌های روزمره دنبال کن.',
     tags: ['علوم اعصاب', 'یادگیری', 'حافظه'],
-    modules: ['نورون و شبکه عصبی', 'توجه و حافظه کاری', 'حافظه بلندمدت', 'عادت و تغییر'],
   },
   {
     id: 'research-methods',
+    providerId: 'oxford',
+    providerLogo: oxfordLogo,
+    image: researchMethodsImage,
     title: 'از سؤال تا پژوهش معتبر',
     provider: 'دانشگاه آکسفورد',
     providerEn: 'University of Oxford',
@@ -125,15 +160,137 @@ export const COURSES = [
     badge: 'پیشرفته',
     description: 'از تبدیل یک ایده به سؤال پژوهشی تا طراحی مطالعه، خواندن نتایج و ارائه یک نتیجه‌گیری مسئولانه.',
     tags: ['روش تحقیق', 'نقد مقاله', 'داده‌خوانی'],
-    modules: ['صورت‌بندی مسئله', 'انتخاب روش مناسب', 'خطا و سوگیری', 'ارائه نتیجه'],
   },
 ];
 
-const STATS = [
-  { value: 18, label: 'دانشگاه و رسانه معتبر', icon: 'globe' },
-  { value: 76, label: 'دوره و مجموعه آموزشی', icon: 'book' },
-  { value: 420, label: 'ساعت محتوای ویدیویی', icon: 'play' },
+/* اطلاعات منابع (دانشگاه/نهاد) — برای لایهٔ هر منبع که با کلیک روی نام ناشر باز می‌شود.
+   کلیدها همان `providerId` هر دوره است؛ لوگو و نام نمایشی از خود دوره خوانده می‌شود. */
+const PROVIDER_DATA = {
+  harvard: {
+    nameEn: 'Harvard University',
+    country: 'ایالات متحده',
+    founded: '۱۶۳۶',
+    description: 'قدیمی‌ترین دانشگاه آمریکا و یکی از قطب‌های پژوهش سلامت در جهان؛ دانشکدهٔ پزشکی و مدرسهٔ سلامت عمومی آن مرجع آموزش اپیدمیولوژی و سیاست‌گذاری درمانی‌اند.',
+    focus: ['سلامت عمومی', 'اپیدمیولوژی', 'سیاست سلامت'],
+  },
+  mit: {
+    nameEn: 'MIT OpenCourseWare',
+    country: 'ایالات متحده',
+    founded: '۱۸۶۱',
+    description: 'مؤسسهٔ فناوری ماساچوست با انتشار آزاد درس‌هایش، مدل‌های علمی را ساده و تصویری توضیح می‌دهد؛ تمرکزش بر روش‌شناسی و تفکر کمّی است.',
+    focus: ['تفکر علمی', 'مدل‌سازی', 'آموزش باز'],
+  },
+  cambridge: {
+    nameEn: 'University of Cambridge',
+    country: 'بریتانیا',
+    founded: '۱۲۰۹',
+    description: 'دانشگاه کمبریج در آموزش زبان آکادمیک و مهارت‌های مطالعهٔ منابع انگلیسی پیشتاز است؛ دوره‌هایش برای خواندن مقاله و سخنرانی دانشگاهی طراحی شده‌اند.',
+    focus: ['زبان آکادمیک', 'مقاله‌خوانی', 'نوشتن علمی'],
+  },
+  bbc: {
+    nameEn: 'BBC Learning',
+    country: 'بریتانیا',
+    founded: '۱۹۲۲',
+    description: 'بخش آموزشی بی‌بی‌سی محتوای کوتاه و کاربردی برای سواد رسانه‌ای می‌سازد؛ تمرکزش بر ارزیابی منبع، تشخیص شایعه و خواندن درست داده است.',
+    focus: ['سواد رسانه‌ای', 'منبع‌شناسی', 'تفکر انتقادی'],
+  },
+  toronto: {
+    nameEn: 'University of Toronto',
+    country: 'کانادا',
+    founded: '۱۸۲۷',
+    description: 'دانشگاه تورنتو یکی از قطب‌های علوم اعصاب و روان‌شناسی شناختی است؛ پژوهش‌هایش دربارهٔ حافظه، توجه و شکل‌گیری عادت در دوره‌هایش بازتاب یافته.',
+    focus: ['علوم اعصاب', 'حافظه', 'یادگیری'],
+  },
+  oxford: {
+    nameEn: 'University of Oxford',
+    country: 'بریتانیا',
+    founded: '۱۰۹۶',
+    description: 'دانشگاه آکسفورد با سنت پژوهش کیفی و کمّی، چارچوبی روشن برای طراحی مطالعه، نقد مقاله و نتیجه‌گیری مسئولانه ارائه می‌دهد.',
+    focus: ['روش تحقیق', 'نقد مقاله', 'داده‌خوانی'],
+  },
+};
+
+const COURSE_DETAIL_DATA = {
+  'global-health': {
+    duration: '۰۸:۴۲:۰۰',
+    lessons: [
+      { id: 'gh-01', time: '۰۰:۰۰', title: 'چرا سلامت عمومی به مرزها محدود نیست؟', desc: 'تفاوت نگاه فردمحور و جامعه‌محور به سلامت و این‌که چرا یک بیماری محلی می‌تواند مسئله‌ای جهانی شود.' },
+      { id: 'gh-02', time: '۰۵:۱۵', title: 'نابرابری درمانی و نقش جامعه', desc: 'چگونه درآمد، محل زندگی و دسترسی به خدمات، نتیجهٔ درمان را تغییر می‌دهد.' },
+      { id: 'gh-03', time: '۲۲:۲۵', title: 'خواندن داده‌های سلامت در جهان', desc: 'با شاخص‌های پایه مثل امید به زندگی و مرگ‌ومیر کودکان، وضعیت یک جامعه را بخوان.' },
+      { id: 'gh-04', time: '۳۴:۵۰', title: 'طراحی مداخله‌های اثرگذار', desc: 'از تشخیص مسئله تا انتخاب مداخله‌ای که واقعاً قابل اجرا و سنجش باشد.' },
+      { id: 'gh-05', time: '۵۰:۳۰', title: 'جمع‌بندی: از مسئله تا اثر', desc: 'مرور مسیر کامل یک پروژهٔ سلامت عمومی و معیارهای سنجش اثر آن.' },
+    ],
+  },
+  'visual-science': {
+    duration: '۰۶:۱۸:۰۰',
+    lessons: [
+      { id: 'vs-01', time: '۰۰:۰۰', title: 'دیدن پیش از توضیح دادن', desc: 'تفاوت مشاهدهٔ دقیق با تفسیر شتاب‌زده و تمرین ثبت آنچه واقعاً دیده می‌شود.' },
+      { id: 'vs-02', time: '۰۷:۴۰', title: 'مدل‌ها چگونه فکر ما را شکل می‌دهند؟', desc: 'مدل‌های علمی ابزار ساده‌سازی‌اند؛ با مثال می‌بینی کجا کمک می‌کنند و کجا گمراه.' },
+      { id: 'vs-03', time: '۲۱:۱۰', title: 'آزمایش خوب چه چیزی را جدا می‌کند؟', desc: 'نقش گروه شاهد، متغیر و تکرار در این‌که نتیجه به یک علت نسبت داده شود.' },
+      { id: 'vs-04', time: '۳۹:۲۵', title: 'تصویرسازی برای فهم داده', desc: 'انتخاب شکل درست نمودار و پرهیز از تصویرهایی که داده را بزرگ‌تر از واقع نشان می‌دهند.' },
+      { id: 'vs-05', time: '۵۲:۴۰', title: 'ساختن یک توضیح قابل اعتماد', desc: 'از مشاهده تا فرضیه و از فرضیه تا توضیحی که دیگران بتوانند بیازمایند.' },
+    ],
+  },
+  'scientific-english': {
+    duration: '۰۵:۰۵:۰۰',
+    lessons: [
+      { id: 'se-01', time: '۰۰:۰۰', title: 'نقشهٔ یک مقالهٔ علمی', desc: 'ساختار استاندارد چکیده، روش، نتیجه و بحث و این‌که هر بخش را با چه سرعتی بخوانی.' },
+      { id: 'se-02', time: '۰۶:۲۵', title: 'واژگان پرتکرار در چکیده‌ها', desc: 'فهرست کوتاهی از فعل‌ها و عبارت‌هایی که در بیشتر چکیده‌ها تکرار می‌شوند.' },
+      { id: 'se-03', time: '۱۹:۴۰', title: 'دنبال کردن یک سخنرانی دانشگاهی', desc: 'نشانه‌های گفتاری که ساختار سخنرانی را لو می‌دهند و کمکت می‌کنند جا نمانی.' },
+      { id: 'se-04', time: '۳۳:۱۵', title: 'خلاصه‌نویسی بدون از دست دادن معنا', desc: 'الگوهای جمله‌سازی برای خلاصه‌ای دقیق و بی‌طرف از یک متن علمی.' },
+      { id: 'se-05', time: '۴۴:۵۰', title: 'تمرین خواندن سریع و دقیق', desc: 'تمرین عملی اسکن متن برای یافتن عدد، نتیجه و محدودیت‌های مطالعه.' },
+    ],
+  },
+  'media-literacy': {
+    duration: '۰۴:۱۲:۰۰',
+    lessons: [
+      { id: 'ml-01', time: '۰۰:۰۰', title: 'چرا هر چیزی که می‌بینیم خبر نیست؟', desc: 'تفاوت خبر، گزارش، تبلیغ و نظر شخصی و این‌که چرا مرزشان در شبکه‌ها محو می‌شود.' },
+      { id: 'ml-02', time: '۰۴:۵۰', title: 'ردیابی منبع و تاریخ انتشار', desc: 'چند پرسش ساده برای فهمیدن این‌که خبر از کجا آمده و چه‌قدر تازه است.' },
+      { id: 'ml-03', time: '۱۷:۲۰', title: 'تصویر، تیتر و خطای ذهن', desc: 'چگونه تیتر و تصویر بیرون از متن، برداشت ما را جهت می‌دهند.' },
+      { id: 'ml-04', time: '۲۸:۴۰', title: 'خواندن داده در شبکه‌های اجتماعی', desc: 'تشخیص نمودارهای بریده و آمارهای بی‌منبع در محتوای پرطرفدار.' },
+      { id: 'ml-05', time: '۳۸:۰۰', title: 'چک‌لیست یک خوانندهٔ دقیق', desc: 'چک‌لیست کوتاه و قابل استفادهٔ روزمره پیش از بازنشر هر محتوا.' },
+    ],
+  },
+  neuroscience: {
+    duration: '۰۷:۲۶:۰۰',
+    lessons: [
+      { id: 'ns-01', time: '۰۰:۰۰', title: 'مغز چگونه یادگیری را ثبت می‌کند؟', desc: 'از نورون تا رفتار؛ مرور سادهٔ سازوکاری که تجربه را به حافظه تبدیل می‌کند.' },
+      { id: 'ns-02', time: '۰۸:۱۰', title: 'توجه، حافظهٔ کاری و حواس‌پرتی', desc: 'چرا ظرفیت توجه محدود است و چه‌طور محیط مطالعه آن را می‌بلعد.' },
+      { id: 'ns-03', time: '۲۴:۳۵', title: 'نقش خواب در تثبیت خاطره', desc: 'آنچه در خواب با آموخته‌های روز اتفاق می‌افتد و اثر کم‌خوابی بر یادگیری.' },
+      { id: 'ns-04', time: '۴۲:۲۰', title: 'ساختن عادت‌های پایدار', desc: 'حلقهٔ نشانه، رفتار و پاداش و راه ساختن عادت مطالعهٔ روزانه.' },
+      { id: 'ns-05', time: '۵۹:۱۰', title: 'تمرین: طراحی برنامهٔ یادگیری', desc: 'تمرین گام‌به‌گام برای چیدن یک برنامهٔ هفتگی بر پایهٔ یافته‌های این دوره.' },
+    ],
+  },
+  'research-methods': {
+    duration: '۰۹:۱۰:۰۰',
+    lessons: [
+      { id: 'rm-01', time: '۰۰:۰۰', title: 'از کنجکاوی تا سؤال پژوهشی', desc: 'تبدیل یک ایدهٔ کلی به سؤالی دقیق، قابل سنجش و قابل پاسخ.' },
+      { id: 'rm-02', time: '۰۹:۳۰', title: 'انتخاب طراحی مطالعه', desc: 'مقایسهٔ طراحی‌های مقطعی، کوهورت و کارآزمایی و تناسب هرکدام با سؤال.' },
+      { id: 'rm-03', time: '۲۶:۴۵', title: 'خواندن نتایج بدون فریب آماری', desc: 'فاصلهٔ اطمینان، اندازهٔ اثر و معناداری؛ چه چیزی واقعاً مهم است.' },
+      { id: 'rm-04', time: '۴۶:۱۰', title: 'نقد مقاله با یک چارچوب ثابت', desc: 'چهار پرسش ثابت که با آن‌ها هر مقاله را در چند دقیقه ارزیابی می‌کنی.' },
+      { id: 'rm-05', time: '۶۷:۲۰', title: 'نوشتن نتیجه‌گیری مسئولانه', desc: 'مرز میان یافته‌های مطالعه و ادعاهایی که داده پشتیبانشان نیست.' },
+    ],
+  },
+};
+
+/* لوگوهای نوار متحرک زیر هیرو — دانشگاه‌ها و مراجع آموزش پزشکی مطرح جهان (به ترتیب نمایش).
+   `name` فقط برای screen reader است؛ در نوار چیزی جز لوگو دیده نمی‌شود. */
+const SOURCE_LOGOS = [
+  { name: 'دانشکدهٔ پزشکی هاروارد', logo: harvardMedLogo },
+  { name: 'دانشگاه جانز هاپکینز', logo: johnsHopkinsLogo },
+  { name: 'دانشکدهٔ پزشکی استنفورد', logo: stanfordMedLogo },
+  { name: 'دانشگاه آکسفورد', logo: oxfordLogo },
+  { name: 'دانشگاه کمبریج', logo: cambridgeLogo },
+  { name: 'ژورنال پزشکی نیوانگلند', logo: nejmLogo },
+  { name: 'کورسرا', logo: courseraLogo },
+  { name: 'سازمان جهانی بهداشت', logo: whoLogo },
+  { name: 'خان آکادمی', logo: khanAcademyLogo },
 ];
+
+/* نوار بی‌پایان: فهرست **چهار بار** تکرار می‌شود و انیمیشن فقط به اندازهٔ یک نسخه
+   (۲۵٪ کل ترک) جابه‌جا می‌شود. با دو نسخه، به‌ازای صفحه‌های پهن، «یک نسخه» از پنجرهٔ
+   دید باریک‌تر می‌شد و انتهای چرخه جای خالی دیده می‌شد. */
+const MARQUEE_LOGOS = [...SOURCE_LOGOS, ...SOURCE_LOGOS, ...SOURCE_LOGOS, ...SOURCE_LOGOS];
 
 function Icon({ name, className = 'h-5 w-5' }) {
   const common = {
@@ -150,45 +307,34 @@ function Icon({ name, className = 'h-5 w-5' }) {
   if (name === 'back') return <svg {...common}><path d="M5 12h14m-6-6 6 6-6 6" /></svg>;
   if (name === 'search') return <svg {...common}><circle cx="10.8" cy="10.8" r="6.3" /><path d="m16 16 4.2 4.2" /></svg>;
   if (name === 'play') return <svg {...common}><path d="m9 6 9 6-9 6z" fill="currentColor" stroke="none" /></svg>;
-  if (name === 'pause') return <svg {...common}><path d="M8 6v12M16 6v12" strokeWidth="2.4" /></svg>;
   if (name === 'clock') return <svg {...common}><circle cx="12" cy="12" r="8.7" /><path d="M12 7v5l3.2 2" /></svg>;
-  if (name === 'book') return <svg {...common}><path d="M5 5.8A2.8 2.8 0 0 1 7.8 3H19v16H7.8A2.8 2.8 0 0 0 5 21.8z" /><path d="M5 5.8v16M8 7h7" /></svg>;
-  if (name === 'globe') return <svg {...common}><circle cx="12" cy="12" r="8.8" /><path d="M3.6 12h16.8M12 3.2c2.1 2.3 3.2 5.2 3.2 8.8S14.1 18.5 12 20.8C9.9 18.5 8.8 15.6 8.8 12S9.9 5.5 12 3.2z" /></svg>;
-  if (name === 'bookmark') return <svg {...common}><path d="M6.5 4.2A1.7 1.7 0 0 1 8.2 2.5h7.6a1.7 1.7 0 0 1 1.7 1.7v17.3L12 18.2l-5.5 3.3z" /></svg>;
-  if (name === 'check') return <svg {...common}><path d="m5 12.5 4.2 4.2L19 7" /></svg>;
-  if (name === 'arrow') return <svg {...common}><path d="M19 12H5m6-6-6 6 6 6" /></svg>;
-  if (name === 'spark') return <svg {...common}><path d="m12 3 1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5z" /><path d="m19 15 .7 2.3L22 18l-2.3.7L19 21l-.7-2.3L16 18l2.3-.7z" /></svg>;
+  if (name === 'pause') return <svg {...common}><path d="M9 6v12M15 6v12" /></svg>;
+  if (name === 'volume') return <svg {...common}><path d="M5 10v4h3l4 3V7l-4 3H5Z" /><path d="M16 9.5a4 4 0 0 1 0 5M18.5 7a7.2 7.2 0 0 1 0 10" /></svg>;
+  if (name === 'settings') return <svg {...common}><circle cx="12" cy="12" r="3.1" /><path d="M12 3v2.4M12 18.6V21M4.2 7.5l2.1 1.2M17.7 15.3l2.1 1.2M4.2 16.5l2.1-1.2M17.7 8.7l2.1-1.2" /></svg>;
+  if (name === 'chevron') return <svg {...common}><path d="M15 6l-6 6 6 6" /></svg>;
+  if (name === 'more') return <svg {...common}><circle cx="6" cy="12" r="1" fill="currentColor" /><circle cx="12" cy="12" r="1" fill="currentColor" /><circle cx="18" cy="12" r="1" fill="currentColor" /></svg>;
+  if (name === 'heart') return <svg {...common}><path d="M20.8 8.7c0 5.2-8.8 10-8.8 10s-8.8-4.8-8.8-10A4.7 4.7 0 0 1 12 6.1a4.7 4.7 0 0 1 8.8 2.6Z" /></svg>;
+  if (name === 'flag') return <svg {...common}><path d="M6 21V4" /><path d="M6 4h11l-2.2 4L17 12H6" /></svg>;
+  if (name === 'expand') return <svg {...common}><path d="M9 4H4v5M15 4h5v5M15 20h5v-5M9 20H4v-5" /></svg>;
+  if (name === 'bright') return <svg {...common}><circle cx="12" cy="12" r="3.8" /><path d="M12 2.9v2M12 19.1v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2.9 12h2M19.1 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>;
+  if (name === 'subtitle') return <svg {...common}><rect x="3" y="5" width="18" height="14" rx="2.4" /><path d="M6.6 14h4.2M13.2 14h4.2" /></svg>;
+  if (name === 'note') return <svg {...common}><path d="M4 20h4L18 10l-4-4L4 16v4Z" /><path d="m14.4 5.6 4 4" /></svg>;
   return null;
-}
-
-function CourseArtwork({ course, compact = false }) {
-  return (
-    <div className={`intl-courses-artwork ${compact ? 'intl-courses-artwork--compact' : ''}`} style={{ '--course-accent': course.accent, '--course-soft': course.accentSoft }} aria-hidden="true">
-      <span className="intl-courses-artwork__orb intl-courses-artwork__orb--one" />
-      <span className="intl-courses-artwork__orb intl-courses-artwork__orb--two" />
-      <span className="intl-courses-artwork__grid" />
-      <span className="intl-courses-artwork__label">{course.providerEn}</span>
-      <span className="intl-courses-artwork__title">{course.title}</span>
-      <span className="intl-courses-artwork__line" />
-      <span className="intl-courses-artwork__code">TAPESH / INTL</span>
-    </div>
-  );
 }
 
 function CourseCard({ course, onOpen }) {
   return (
     <article className="intl-courses-card" style={{ '--course-accent': course.accent, '--course-soft': course.accentSoft }}>
+      {/* بخش تصویر کارت: تصویر واقعی دوره + پردهٔ تیره تا عنوان روی آن خوانا بماند */}
       <div className="intl-courses-card__artwork-wrap">
-        <CourseArtwork course={course} compact />
-        <span className="intl-courses-card__badge">{course.badge}</span>
-        <button type="button" className="intl-courses-card__save" aria-label={`ذخیره ${course.title}`}>
-          <Icon name="bookmark" className="h-4 w-4" />
-        </button>
+        <img className="intl-courses-card__photo" src={course.image} alt="" loading="lazy" decoding="async" />
+        <span className="intl-courses-card__shade" aria-hidden="true" />
+        <span className="intl-courses-card__title">{course.title}</span>
       </div>
 
       <div className="intl-courses-card__body">
         <div className="intl-courses-card__provider">
-          <span className="intl-courses-provider-mark">{course.provider.slice(0, 2)}</span>
+          <img className="intl-courses-card__provider-logo" src={course.providerLogo} alt="" loading="lazy" decoding="async" />
           <span>{course.provider}</span>
         </div>
         <h3>{course.title}</h3>
@@ -196,125 +342,367 @@ function CourseCard({ course, onOpen }) {
         <div className="intl-courses-card__meta">
           <span><Icon name="clock" className="h-3.5 w-3.5" /> {toFa(course.duration)} ساعت</span>
           <span><Icon name="play" className="h-3.5 w-3.5" /> {toFa(course.lessons)} ویدیو</span>
-          <span>{course.level}</span>
+          {course.progress > 0 && (
+            <div className="intl-courses-card__progress-track" aria-label={`پیشرفت ${toFa(course.progress)} درصد`}>
+              <i style={{ width: `${course.progress}%` }} />
+            </div>
+          )}
         </div>
-        {course.progress > 0 && (
-          <div className="intl-courses-card__progress" aria-label={`پیشرفت ${toFa(course.progress)} درصد`}>
-            <div><span>پیشرفت تو</span><strong>{toFa(course.progress)}٪</strong></div>
-            <span className="intl-courses-card__progress-track"><span style={{ width: `${course.progress}%` }} /></span>
-          </div>
-        )}
-        <button type="button" className="intl-courses-card__cta" onClick={() => onOpen(course)}>
-          {course.progress > 0 ? 'ادامه تماشا' : 'مشاهده دوره'}
-          <Icon name="arrow" className="h-4 w-4" />
+        <button type="button" className="intl-courses-card__enter" onClick={() => onOpen(course.id)}>
+          <Icon name="play" className="h-3.5 w-3.5" />
+          ورود به دوره
         </button>
       </div>
     </article>
   );
 }
 
-function DetailView({ course, onBack }) {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [activeModule, setActiveModule] = useState(0);
+/* زبان‌های زیرنویس — پیش از اتصال به سرویس، همین‌جا تعریف می‌شوند */
+const SUBTITLE_LANGS = [
+  { id: 'fa', label: 'فارسی' },
+  { id: 'en', label: 'English' },
+  { id: 'ar', label: 'العربية' },
+];
+
+/* تنظیم عددی (صدا/نور) — دکمهٔ کم و زیاد */
+function PlayerStepper({ label, icon, value, onChange, min = 0, max = 100, step = 10 }) {
+  const clamp = (next) => Math.min(max, Math.max(min, next));
+  return (
+    <span className="intl-course-player__stepper" role="group" aria-label={label}>
+      <button type="button" aria-label={`کم کردن ${label}`} onClick={() => onChange(clamp(value - step))}>−</button>
+      <span className="intl-course-player__stepper-value" title={label}>
+        <Icon name={icon} className="h-4 w-4" />
+        {toFa(value)}٪
+      </span>
+      <button type="button" aria-label={`زیاد کردن ${label}`} onClick={() => onChange(clamp(value + step))}>+</button>
+    </span>
+  );
+}
+
+function CoursePlayer({ course, detail, lesson, lessonIndex }) {
+  const [playing, setPlaying] = useState(false);
+  const [volume, setVolume] = useState(70);
+  const [brightness, setBrightness] = useState(100);
+  const [subtitle, setSubtitle] = useState(null);
+  const [subtitleOpen, setSubtitleOpen] = useState(false);
+  const shellRef = useRef(null);
+  const activeSubtitle = SUBTITLE_LANGS.find((item) => item.id === subtitle);
+
+  const togglePlay = () => setPlaying((value) => !value);
+
+  const toggleFullscreen = () => {
+    const node = shellRef.current;
+    if (!node) return;
+    if (document.fullscreenElement) document.exitFullscreen?.();
+    else node.requestFullscreen?.();
+  };
 
   return (
-    <div className="intl-courses-detail">
-      <div className="intl-courses-detail__topbar">
-        <button type="button" className="intl-courses-back" onClick={onBack}>
-          <Icon name="back" className="h-4 w-4" />
-          بازگشت به دوره‌ها
+    <div className="intl-course-player" aria-label={`پخش ${lesson.title}`} ref={shellRef}>
+      <img
+        className="intl-course-player__image"
+        src={course.image}
+        alt=""
+        style={{ filter: `brightness(${brightness / 100})` }}
+      />
+      <span className="intl-course-player__shade" aria-hidden="true" />
+      <button
+        type="button"
+        className="intl-course-player__play"
+        aria-label={playing ? 'توقف ویدیو' : 'پخش ویدیو'}
+        aria-pressed={playing}
+        onClick={togglePlay}
+      >
+        <Icon name={playing ? 'pause' : 'play'} className="h-8 w-8" />
+      </button>
+
+      {activeSubtitle && <span className="intl-course-player__caption">زیرنویس {activeSubtitle.label} روشن است</span>}
+
+      <div className="intl-course-player__controls">
+        <button type="button" aria-label={playing ? 'توقف ویدیو' : 'پخش ویدیو'} onClick={togglePlay}>
+          <Icon name={playing ? 'pause' : 'play'} className="h-4 w-4" />
         </button>
-      </div>
-
-      <div className="intl-courses-detail__hero">
-        <div className="intl-courses-detail__copy">
-          <div className="intl-courses-eyebrow"><span>{course.categoryLabel}</span><i /> <span>{course.providerEn}</span></div>
-          <h1>{course.title}</h1>
-          <p>{course.description}</p>
-          <div className="intl-courses-detail__tags">
-            {course.tags.map((tag) => <span key={tag}>{tag}</span>)}
-          </div>
-          <div className="intl-courses-detail__actions">
-            <button type="button" className="intl-courses-primary-button" onClick={() => setIsPlaying((value) => !value)}>
-              <Icon name={isPlaying ? 'pause' : 'play'} className="h-4 w-4" />
-              {isPlaying ? 'توقف پخش' : course.progress > 0 ? 'ادامه ویدیوی آخر' : 'شروع دوره'}
-            </button>
-            <button type="button" className="intl-courses-secondary-button"><Icon name="bookmark" className="h-4 w-4" /> ذخیره دوره</button>
-          </div>
-        </div>
-        <CourseArtwork course={course} />
-      </div>
-
-      <div className="intl-courses-detail__stats">
-        <span><strong>{toFa(course.lessons)}</strong> ویدیوی آموزشی</span>
-        <span><strong>{toFa(course.duration)}</strong> ساعت محتوای منتخب</span>
-        <span><strong>{course.level}</strong> سطح دوره</span>
-      </div>
-
-      <div className="intl-courses-player-layout">
-        <div className={`intl-courses-player ${isPlaying ? 'is-playing' : ''}`}>
-          <div className="intl-courses-player__topline"><span>ویدیوی {toFa(activeModule + 1)} از {toFa(course.lessons)}</span><span>{course.providerEn}</span></div>
-          <div className="intl-courses-player__screen">
-            <span className="intl-courses-player__scanline" />
-            <span className="intl-courses-player__watermark">TAPESH</span>
-            <div className="intl-courses-player__center">
-              <button type="button" className="intl-courses-player__play" onClick={() => setIsPlaying((value) => !value)} aria-label={isPlaying ? 'توقف پخش' : 'پخش ویدیو'}>
-                <Icon name={isPlaying ? 'pause' : 'play'} className="h-7 w-7" />
-              </button>
-              <strong>{isPlaying ? 'پخش نمونه ویدیو' : 'برای شروع، پخش را بزن'}</strong>
-              <span>این قاب برای اتصال به سرویس ویدیوی دوره آماده است.</span>
-            </div>
-            <div className="intl-courses-player__controls"><span className="intl-courses-player__timeline"><i style={{ width: isPlaying ? '34%' : `${course.progress}%` }} /></span><span>۰۱:۲۴ / ۱۲:۴۸</span><Icon name="play" className="h-4 w-4" /></div>
-          </div>
-        </div>
-
-        <aside className="intl-courses-syllabus">
-          <div className="intl-courses-syllabus__heading"><div><span>فهرست دوره</span><strong>{toFa(course.modules.length)} فصل</strong></div><span>{toFa(course.lessons)} ویدیو</span></div>
-          <div className="intl-courses-syllabus__list">
-            {course.modules.map((module, index) => (
-              <button type="button" key={module} className={`intl-courses-syllabus__item ${activeModule === index ? 'is-active' : ''}`} onClick={() => setActiveModule(index)}>
-                <span className="intl-courses-syllabus__number">{index < 1 && course.progress > 0 ? <Icon name="check" className="h-3.5 w-3.5" /> : toFa(index + 1)}</span>
-                <span><strong>{module}</strong><small>{toFa(index + 3)} ویدیو · {toFa(index + 12)} دقیقه</small></span>
-                <Icon name="arrow" className="h-3.5 w-3.5" />
-              </button>
-            ))}
-          </div>
-        </aside>
+        <PlayerStepper label="صدا" icon="volume" value={volume} onChange={setVolume} />
+        <PlayerStepper label="نور" icon="bright" value={brightness} onChange={setBrightness} min={50} />
+        <div className="intl-course-player__progress" aria-hidden="true"><span style={{ width: `${Math.max(18, (lessonIndex + 1) * 16)}%` }} /></div>
+        <span className="intl-course-player__time">{lesson.time} / {detail.duration}</span>
+        <span className="intl-course-player__subtitle">
+          <button
+            type="button"
+            aria-label="زیرنویس"
+            aria-expanded={subtitleOpen}
+            className={subtitle ? 'is-active' : ''}
+            onClick={() => setSubtitleOpen((value) => !value)}
+          >
+            <Icon name="subtitle" className="h-4 w-4" />
+          </button>
+          {subtitleOpen && (
+            <span className="intl-course-player__menu" role="menu" aria-label="انتخاب زبان زیرنویس">
+              <button type="button" role="menuitemradio" aria-checked={!subtitle} onClick={() => { setSubtitle(null); setSubtitleOpen(false); }}>خاموش</button>
+              {SUBTITLE_LANGS.map((lang) => (
+                <button key={lang.id} type="button" role="menuitemradio" aria-checked={subtitle === lang.id} onClick={() => { setSubtitle(lang.id); setSubtitleOpen(false); }}>{lang.label}</button>
+              ))}
+            </span>
+          )}
+        </span>
+        <button type="button" aria-label="تنظیمات پخش"><Icon name="settings" className="h-4 w-4" /></button>
+        <button type="button" aria-label="تمام‌صفحه" onClick={toggleFullscreen}><Icon name="expand" className="h-4 w-4" /></button>
       </div>
     </div>
   );
 }
 
-export default function InternationalCoursesLayer({ onBack }) {
-  /* صفحهٔ لایه (کاتالوگ ↔ جزئیات دوره) روی مسیر داشبورد می‌نشیند؛ متن کادر جست‌وجو محلی می‌ماند */
-  const [view, , patchView] = useLayerRoute(LAYER_IDS.intlCourses, INTL_COURSES_VIEW, {
-    screenOf: (current) =>
-      current?.courseId || current?.deep?.courseId ? 'detail' : 'catalog',
-  });
+/* زیر ویدیو: عنوان و توضیح همان ویدیو + یادداشت‌برداری */
+function LessonInfo({ course, lesson, userId }) {
+  const [open, setOpen] = useState(false);
+  const [body, setBody] = useState('');
+  const [saved, setSaved] = useState(false);
+
+  const save = async () => {
+    if (!body.trim()) return;
+    await createNote({ id: userId }, {
+      title: `یادداشت — ${lesson.title}`,
+      kind: 'text',
+      body,
+      subjectId: course.id,
+      tags: ['یادداشت ویدیو'],
+      sourceType: 'lesson',
+      sourceTitle: `${course.title} · ${lesson.title}`,
+    });
+    setBody('');
+    setOpen(false);
+    setSaved(true);
+  };
+
+  return (
+    <section className="intl-course-lesson" aria-label="اطلاعات این ویدیو">
+      <div className="intl-course-lesson__head">
+        <h2>{lesson.title}</h2>
+        <button type="button" className={`intl-course-lesson__note${open ? ' is-active' : ''}`} aria-expanded={open} onClick={() => { setOpen((value) => !value); setSaved(false); }}>
+          <Icon name="note" className="h-4 w-4" />
+          یادداشت‌برداری
+        </button>
+      </div>
+      <p>{lesson.desc}</p>
+
+      {open && (
+        <div className="intl-course-lesson__form">
+          <textarea value={body} onChange={(event) => setBody(event.target.value)} rows={3} placeholder="نکته‌ای که می‌خواهی بمانَد…" aria-label="متن یادداشت" />
+          <div>
+            <button type="button" className="is-primary" onClick={save} disabled={!body.trim()}>ذخیره در یادداشت‌ها</button>
+            <button type="button" onClick={() => setOpen(false)}>انصراف</button>
+          </div>
+        </div>
+      )}
+      {saved && !open && <p className="intl-course-lesson__saved">یادداشت ذخیره شد؛ در بخش «یادداشت‌ها» پیدایش می‌کنی.</p>}
+    </section>
+  );
+}
+
+/* سرصفحهٔ دوره — کادر اطلاعات (هشتک‌ها، عنوان، ناشر، کنش‌ها).
+   طبق بازخورد کاربر این کادر **بالای ویدیوهای دوره** می‌نشیند. */
+function CourseInfoHead({ course, liked, onToggleLike, onOpenProvider }) {
+  return (
+    <header className="intl-course-detail__head">
+      <div className="intl-course-detail__tags">
+        {course.tags.map((tag) => <span key={tag}>{tag}</span>)}
+        <span>{course.categoryLabel}</span>
+      </div>
+      <h1>{course.title}</h1>
+      <p className="intl-course-detail__lead">{course.description}</p>
+      <div className="intl-course-detail__meta-row">
+        <button type="button" className="intl-course-detail__author" onClick={() => onOpenProvider(course.providerId)}>
+          <img src={course.providerLogo} alt="" />
+          <span><strong>{course.provider}</strong><small>{course.providerEn}</small></span>
+          <Icon name="chevron" className="h-4 w-4" />
+        </button>
+        <div className="intl-course-detail__actions">
+          <button type="button" className={liked ? 'is-active' : ''} aria-pressed={liked} onClick={onToggleLike}>
+            <Icon name="heart" className="h-4 w-4" />
+            <span>{liked ? 'پسندیده شد' : 'پسندیدن'}</span>
+          </button>
+          <button type="button">
+            <Icon name="flag" className="h-4 w-4" />
+            <span>گزارش</span>
+          </button>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function CourseDetailView({ course, userId, onBack, onOpenCourse, onOpenProvider }) {
+  const detail = COURSE_DETAIL_DATA[course.id] ?? COURSE_DETAIL_DATA['global-health'];
+  const [lessonIndex, setLessonIndex] = useState(1);
+  const [liked, setLiked] = useState(false);
+  const lesson = detail.lessons[lessonIndex] ?? detail.lessons[0];
+  const suggestedCourse = COURSES.find((item) => item.id !== course.id);
+
+  return (
+    <section className="intl-course-detail" aria-label={`دورهٔ ${course.title}`} style={{ '--course-accent': course.accent }}>
+      <div className="intl-course-detail__topbar">
+        <button type="button" className="intl-course-detail__back" onClick={onBack}>
+          <Icon name="back" className="h-4 w-4" />
+          بازگشت به دوره‌ها
+        </button>
+        <span className="intl-course-detail__crumb">دوره‌های بین‌الملل <b>/</b> {course.provider}</span>
+      </div>
+
+      <CourseInfoHead
+        course={course}
+        liked={liked}
+        onToggleLike={() => setLiked((value) => !value)}
+        onOpenProvider={onOpenProvider}
+      />
+
+      <div className="intl-course-detail__layout">
+        <main className="intl-course-detail__main">
+          <CoursePlayer course={course} detail={detail} lesson={lesson} lessonIndex={lessonIndex} />
+          <LessonInfo course={course} lesson={lesson} userId={userId} />
+        </main>
+
+        <aside className="intl-course-detail__aside">
+          <section className="intl-course-playlist" aria-labelledby="intl-playlist-title">
+            <header>
+              <div><h2 id="intl-playlist-title">محتوای دوره</h2><span>{toFa(course.lessons)} ویدیو · {course.level}</span></div>
+              <button type="button" aria-label="گزینه‌های فهرست"><Icon name="more" className="h-4 w-4" /></button>
+            </header>
+            <ol>
+              {detail.lessons.map((item, index) => (
+                <li key={item.id} className={index === lessonIndex ? 'is-active' : ''}>
+                  <button type="button" onClick={() => setLessonIndex(index)} aria-current={index === lessonIndex ? 'true' : undefined}>
+                    <span className="intl-course-playlist__frame">
+                      <img src={course.image} alt="" />
+                      <span className="intl-course-playlist__time">{item.time}</span>
+                    </span>
+                    <span className="intl-course-playlist__title">{item.title}</span>
+                  </button>
+                </li>
+              ))}
+            </ol>
+          </section>
+
+          <section className="intl-course-suggestions" aria-labelledby="intl-suggestions-title">
+            <h2 id="intl-suggestions-title">دوره‌های پیشنهادی</h2>
+            {suggestedCourse && (
+              <button type="button" className="intl-course-suggestion" onClick={() => onOpenCourse(suggestedCourse.id)}>
+                <img src={suggestedCourse.image} alt="" />
+                <span><strong>{suggestedCourse.title}</strong><small>{suggestedCourse.description}</small></span>
+              </button>
+            )}
+          </section>
+        </aside>
+      </div>
+    </section>
+  );
+}
+
+/* لایهٔ «منبع» — با کلیک روی نام دانشگاه/نهاد باز می‌شود: معرفی منبع + دوره‌های همان منبع در تپش. */
+function ProviderView({ providerId, onBack, onOpenCourse }) {
+  const provider = PROVIDER_DATA[providerId];
+  const ownCourses = COURSES.filter((course) => course.providerId === providerId);
+  if (!provider || ownCourses.length === 0) return null;
+
+  const head = ownCourses[0];
+  const siblingCourses = COURSES.filter((course) => course.providerId !== providerId && course.category === head.category);
+
+  return (
+    <section className="intl-provider" aria-label={`منبع ${head.provider}`} style={{ '--course-accent': head.accent }}>
+      <div className="intl-course-detail__topbar">
+        <button type="button" className="intl-course-detail__back" onClick={onBack}>
+          <Icon name="back" className="h-4 w-4" />
+          بازگشت
+        </button>
+        <span className="intl-course-detail__crumb">منابع بین‌الملل <b>/</b> {head.provider}</span>
+      </div>
+
+      <header className="intl-provider__hero">
+        <img className="intl-provider__logo" src={head.providerLogo} alt="" />
+        <div className="intl-provider__identity">
+          <h1>{head.provider}</h1>
+          <span>{provider.nameEn}</span>
+          <div className="intl-provider__facts">
+            <span>کشور: {provider.country}</span>
+            <span>سال بنیان: {provider.founded}</span>
+            <span>{toFa(ownCourses.length)} دوره در تپش</span>
+          </div>
+        </div>
+        <p className="intl-provider__description">{provider.description}</p>
+        <div className="intl-provider__focus">
+          {provider.focus.map((item) => <span key={item}>{item}</span>)}
+        </div>
+      </header>
+
+      <section className="intl-provider__courses" aria-labelledby="intl-provider-courses-title">
+        <h2 id="intl-provider-courses-title">دوره‌های این منبع در تپش</h2>
+        <div className="intl-courses-grid">
+          {ownCourses.map((course) => <CourseCard key={course.id} course={course} onOpen={onOpenCourse} />)}
+        </div>
+      </section>
+
+      {siblingCourses.length > 0 && (
+        <section className="intl-provider__courses" aria-labelledby="intl-provider-related-title">
+          <h2 id="intl-provider-related-title">دوره‌های مرتبط در همین حوزه</h2>
+          <div className="intl-courses-grid">
+            {siblingCourses.map((course) => <CourseCard key={course.id} course={course} onOpen={onOpenCourse} />)}
+          </div>
+        </section>
+      )}
+    </section>
+  );
+}
+
+export default function InternationalCoursesLayer({ userId = 'guest', onBack }) {
+  /* فیلتر و دورهٔ باز روی مسیر داشبورد می‌نشینند؛ متن کادر جست‌وجو محلی می‌ماند */
+  const [view, setView, patchView] = useLayerRoute(LAYER_IDS.intlCourses, INTL_COURSES_VIEW);
   const [query, setQuery] = useState('');
-  /* لینک عمیق از «دوره‌های من»: مستقیم وارد جزئیات همان دوره می‌شود */
-  const courseId = view.courseId ?? view.deep?.courseId ?? null;
-  const selectedCourse = courseId ? COURSES.find((course) => course.id === courseId) ?? null : null;
   const activeFilter = view.filter ?? 'all';
-  const showFeaturedOnly = view.featured ?? false;
-  const setActiveFilter = (filter) => patchView({ filter });
-  const setShowFeaturedOnly = () => patchView({ featured: !showFeaturedOnly });
-  /* بازگشت از جزئیات باید deep را هم پاک کند، وگرنه courseId دوباره از لینک عمیق
-     خوانده می‌شود و همان دوره باز می‌ماند. */
-  const setSelectedCourse = (course) => patchView({ courseId: course?.id ?? null, deep: null });
+  const selectedCourse = view.name === 'detail' ? COURSES.find((course) => course.id === view.courseId) : null;
+  const setActiveFilter = (filter) => patchView({ name: 'catalog', filter });
+  const openCourse = (courseId) => setView({ name: 'detail', courseId, filter: activeFilter });
+  const closeCourse = () => setView({ name: 'catalog', filter: activeFilter });
+  const openProvider = (providerId) => setView({ name: 'provider', providerId, fromCourseId: view.courseId, filter: activeFilter });
+  const closeProvider = () => setView(
+    view.fromCourseId
+      ? { name: 'detail', courseId: view.fromCourseId, filter: activeFilter }
+      : { name: 'catalog', filter: activeFilter },
+  );
+
+  /* جابه‌جایی نماها باید از بالای لایه شروع شود؛ اسکرول باید **بعد از** رندر انجام شود،
+     وگرنه مرورگر ارتفاع صفحهٔ قبلی را نگه می‌دارد و نما از میان لایه باز می‌شود. */
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [view.name, view.courseId, view.providerId]);
 
   const filteredCourses = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase('fa');
     return COURSES.filter((course) => {
       const matchesFilter = activeFilter === 'all' || course.category === activeFilter;
       const matchesQuery = !normalizedQuery || [course.title, course.provider, course.providerEn, ...course.tags].some((value) => value.toLocaleLowerCase('fa').includes(normalizedQuery));
-      const matchesFeatured = !showFeaturedOnly || course.badge === 'منتخب سردبیر' || course.badge === 'پربازدید';
-      return matchesFilter && matchesQuery && matchesFeatured;
+      return matchesFilter && matchesQuery;
     });
-  }, [activeFilter, query, showFeaturedOnly]);
+  }, [activeFilter, query]);
 
   if (selectedCourse) {
-    return <DetailView course={selectedCourse} onBack={() => setSelectedCourse(null)} />;
+    return (
+      <section dir="rtl" aria-label={`دورهٔ ${selectedCourse.title}`} className="intl-courses-layer">
+        <CourseDetailView
+          course={selectedCourse}
+          userId={userId}
+          onBack={closeCourse}
+          onOpenCourse={openCourse}
+          onOpenProvider={openProvider}
+        />
+      </section>
+    );
+  }
+
+  if (view.name === 'provider') {
+    return (
+      <section dir="rtl" aria-label="منبع بین‌الملل" className="intl-courses-layer">
+        <ProviderView providerId={view.providerId} onBack={closeProvider} onOpenCourse={openCourse} />
+      </section>
+    );
   }
 
   return (
@@ -328,53 +716,37 @@ export default function InternationalCoursesLayer({ onBack }) {
         </div>
       </header>
 
-      <div className="intl-courses-hero">
-        <div className="intl-courses-hero__copy">
-          <span className="intl-courses-kicker"><Icon name="globe" className="h-4 w-4" /> یادگیری فراتر از مرزها</span>
-          <h1>دانش جهانی،<br /><em>به زبان تپش</em></h1>
-          <p>ویدیوها و دوره‌های آموزشی منتخب از دانشگاه‌ها و رسانه‌های معتبر جهان؛ یک‌جا، دسته‌بندی‌شده و آماده برای یادگیری عمیق.</p>
-          <div className="intl-courses-hero__actions">
-            <button type="button" className="intl-courses-primary-button" onClick={() => document.getElementById('intl-course-catalog')?.scrollIntoView({ behavior: 'smooth' })}>کشف دوره‌ها <Icon name="arrow" className="h-4 w-4" /></button>
-            <button type="button" className="intl-courses-hero__text-button" onClick={() => setShowFeaturedOnly()}><Icon name="spark" className="h-4 w-4" /> {showFeaturedOnly ? 'نمایش همه دوره‌ها' : 'منتخب سردبیر'}</button>
-          </div>
-        </div>
-        <div className="intl-courses-hero__visual" aria-hidden="true">
-          <div className="intl-courses-orbit intl-courses-orbit--one" />
-          <div className="intl-courses-orbit intl-courses-orbit--two" />
-          <div className="intl-courses-hero__globe"><Icon name="globe" className="h-24 w-24" /><span>INTL<br /><small>LEARNING</small></span></div>
-          <span className="intl-courses-floating-label intl-courses-floating-label--one">UNIVERSITIES</span>
-          <span className="intl-courses-floating-label intl-courses-floating-label--two">OPEN MEDIA</span>
-          <span className="intl-courses-floating-label intl-courses-floating-label--three">420 H</span>
+      {/* سربرگ وسط‌چین — عین تیتر هیروی بخش فلش‌کارت */}
+      <header className="intl-courses-hero dash-stagger">
+        <h1 className="intl-courses-hero__title">
+          <span className="intl-courses-hero__title-top">یادگیری فراتر از مرزها</span>
+          <span className="intl-courses-hero__title-accent">دانش جهانی، به زبان تپش</span>
+        </h1>
+        <p className="intl-courses-hero__subtitle">ویدیوها و دوره‌های آموزشی منتخب از دانشگاه‌ها و رسانه‌های معتبر جهان؛ یک‌جا، دسته‌بندی‌شده و آماده برای یادگیری عمیق.</p>
+      </header>
+
+      {/* نوار لوگوهای متحرک — یک ردیف بی‌پایان از مراجع آموزش پزشکی جهان.
+          `loading="lazy"` اینجا ممنوع است: مرورگر تصمیم تنبل‌بودن را از **جای چیدمانی**
+          تصویر می‌گیرد و ترکِ نوار با `transform` جابه‌جا می‌شود، پس تصویرهایی که در
+          چیدمان بیرون از پنجره‌اند هیچ‌وقت وارد پنجره نمی‌شوند و هرگز بارگذاری نمی‌شوند
+          (نتیجه: انتهای هر نسخه خالی می‌ماند و نوار «تمام» به نظر می‌رسد). */}
+      <div className="intl-courses-marquee" aria-label="دانشگاه‌ها و مراجع آموزش پزشکی جهان">
+        <div className="intl-courses-marquee__track">
+          {MARQUEE_LOGOS.map((source, index) => (
+            <span className="intl-courses-marquee__logo" key={`${source.name}-${index}`} aria-hidden={index >= SOURCE_LOGOS.length ? 'true' : undefined}>
+              <img src={source.logo} alt={source.name} loading="eager" decoding="async" />
+            </span>
+          ))}
         </div>
       </div>
-
-      <div className="intl-courses-stats" aria-label="آمار دوره‌های بین‌الملل">
-        {STATS.map((stat) => <div className="intl-courses-stat" key={stat.label}><span className="intl-courses-stat__icon"><Icon name={stat.icon} className="h-4 w-4" /></span><strong>{toFa(stat.value)}+</strong><span>{stat.label}</span></div>)}
-      </div>
-
-      <section className="intl-courses-featured" aria-labelledby="intl-featured-title">
-        <div className="intl-courses-featured__visual"><CourseArtwork course={COURSES[0]} /></div>
-        <div className="intl-courses-featured__copy">
-          <span className="intl-courses-section-kicker">شروع پیشنهادی تپش</span>
-          <h2 id="intl-featured-title">نگاهی جهانی به سلامت</h2>
-          <p>یک مسیر هشت‌ساعته برای فهم چالش‌های سلامت عمومی از نگاه دانشگاه هاروارد؛ مناسب برای شروع سفر یادگیری بین‌المللی.</p>
-          <div className="intl-courses-featured__meta"><span><Icon name="clock" className="h-4 w-4" /> ۸ ساعت</span><span><Icon name="play" className="h-4 w-4" /> ۲۴ ویدیو</span><span><Icon name="book" className="h-4 w-4" /> سطح مقدماتی</span></div>
-          <button type="button" className="intl-courses-featured__button" onClick={() => setSelectedCourse(COURSES[0])}>ورود به دوره <Icon name="arrow" className="h-4 w-4" /></button>
-        </div>
-      </section>
 
       <section id="intl-course-catalog" className="intl-courses-catalog" aria-labelledby="intl-catalog-title">
-        <div className="intl-courses-catalog__heading"><div><span className="intl-courses-section-kicker">کتابخانه بین‌المللی</span><h2 id="intl-catalog-title">دوره مناسب خودت را پیدا کن</h2></div><span className="intl-courses-catalog__count">{toFa(filteredCourses.length)} دوره قابل نمایش</span></div>
+        <div className="intl-courses-catalog__heading"><h2 id="intl-catalog-title">دوره مناسب خودت را پیدا کن</h2></div>
         <div className="intl-courses-toolbar">
           <label className="intl-courses-search"><Icon name="search" className="h-4 w-4" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="جست‌وجوی دوره، دانشگاه یا موضوع..." aria-label="جست‌وجوی دوره‌ها" /></label>
           <div className="intl-courses-filters" role="tablist" aria-label="دسته‌بندی دوره‌ها">{FILTERS.map((filter) => <button type="button" role="tab" aria-selected={activeFilter === filter.id} className={activeFilter === filter.id ? 'is-active' : ''} key={filter.id} onClick={() => setActiveFilter(filter.id)}>{filter.label}</button>)}</div>
         </div>
-        {filteredCourses.length > 0 ? <div className="intl-courses-grid">{filteredCourses.map((course) => <CourseCard key={course.id} course={course} onOpen={setSelectedCourse} />)}</div> : <div className="intl-courses-empty"><Icon name="search" className="h-7 w-7" /><strong>دوره‌ای با این مشخصات پیدا نشد</strong><span>عبارت جست‌وجو یا فیلتر را تغییر بده و دوباره امتحان کن.</span></div>}
-      </section>
-
-      <section className="intl-courses-sources" aria-labelledby="intl-sources-title">
-        <div><span className="intl-courses-section-kicker">منابع قابل اعتماد</span><h2 id="intl-sources-title">یادگیری از جایی که اعتبار دارد</h2><p>هر دوره با نام منبع، زبان محتوا و مسیر یادگیری مشخص وارد کتابخانه تپش می‌شود تا بدانی چه چیزی می‌بینی و از کجا آمده است.</p></div>
-        <div className="intl-courses-source-list"><span>HARVARD</span><span>MIT OCW</span><span>CAMBRIDGE</span><span>OXFORD</span><span>BBC LEARNING</span></div>
+        {filteredCourses.length > 0 ? <div className="intl-courses-grid">{filteredCourses.map((course) => <CourseCard key={course.id} course={course} onOpen={openCourse} />)}</div> : <div className="intl-courses-empty"><Icon name="search" className="h-7 w-7" /><strong>دوره‌ای با این مشخصات پیدا نشد</strong><span>عبارت جست‌وجو یا فیلتر را تغییر بده و دوباره امتحان کن.</span></div>}
       </section>
     </section>
   );

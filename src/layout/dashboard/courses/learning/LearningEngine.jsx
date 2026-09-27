@@ -1,72 +1,28 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { LEARNING_STEPS } from '../../../../data/learning/anatomyCourse';
 import {
   AssessmentService,
   LearningService,
   ProgressService,
-  RecommendationService,
 } from '../../../../services/learning';
 import {
   AnatomyImageViewer,
   AnatomyLabelQuiz,
-  ConceptMap,
-  LearningDiagnosis,
   MicroLesson,
   PracticeQuestion,
   PriorKnowledgeActivation,
-  RetrievalPrompt,
-  ReviewPanel,
+  UnitTest,
 } from './LearningActivities';
 import {
   LearningNavigation,
   LearningStep,
   LearningStepper,
+  UnitNotes,
+  UnitReport,
 } from './LearningPrimitives';
 import { toFa } from './learningUtils';
+import { LAYER_IDS, useDashboardRoute } from '../../dashboardRoute';
 import { ReviewNotebookService } from '../../../../services/reviewNotebook/reviewNotebookService';
-
-const STEP_COPY = {
-  activate: {
-    title: 'دانسته‌های قبلی را روشن کن',
-    description: 'قبل از دریافت اطلاعات تازه، مغزت را وادار کن نقشه‌ای که همین حالا دارد نشان دهد.',
-    hint: 'یک پاسخ کوتاه بنویس یا آمادگی‌ات را تأیید کن.',
-  },
-  learn: {
-    title: 'یادگیری در قطعه‌های کوچک',
-    description: 'هر میکرودرس فقط یک هدف دارد؛ آن را بفهم، ثبت کن و سراغ قطعه بعد برو.',
-    hint: 'همه میکرودرس‌های این واحد را به‌عنوان فهمیده‌شده ثبت کن.',
-  },
-  visualize: {
-    title: 'ساختار را فضایی ببین',
-    description: 'اطلس را لمس کن، Labelها و لایه‌ها را تغییر بده و Landmarkها را در فضا پیدا کن.',
-    hint: 'حداقل دو ساختار را در اطلس انتخاب و بررسی کن.',
-  },
-  connect: {
-    title: 'Factها را به شبکه تبدیل کن',
-    description: 'ساختار، عصب، حرکت و پیامد بالینی را در زنجیره‌های قابل بازیابی ببین.',
-    hint: 'یک زنجیره را توضیح بده و انجام آن را ثبت کن.',
-  },
-  practice: {
-    title: 'بلافاصله به کار ببر',
-    description: 'با MCQ و Label Quiz بررسی کن آیا می‌توانی مفهوم را در موقعیت تازه تشخیص دهی.',
-    hint: 'به همه سؤال‌های چهارگزینه‌ای و تصویری پاسخ بده.',
-  },
-  retrieve: {
-    title: 'بدون متن، از حافظه بساز',
-    description: 'پاسخ را پیش از دیدن مدل پاسخ تولید کن و اعتماد خودت را هم ثبت کن.',
-    hint: 'حداقل به یک سؤال بازیابی پاسخ بده.',
-  },
-  diagnose: {
-    title: 'نقشه واقعی یادگیری‌ات را ببین',
-    description: 'دقت، تلاش، زمان پاسخ و اعتماد کنار هم قرار می‌گیرند تا نقطه ضعف واقعی مشخص شود.',
-    hint: 'تشخیص را بررسی و دریافت آن را تأیید کن.',
-  },
-  review: {
-    title: 'فقط همان چیزی را مرور کن که لازم داری',
-    description: 'خلاصه، خطاها، فلش‌کارت‌ها و سؤال‌های منتخب بر اساس عملکردت در یک جا جمع شده‌اند.',
-    hint: '',
-  },
-};
 
 export default function LearningEngine({
   course,
@@ -76,7 +32,10 @@ export default function LearningEngine({
   userId = 'local-user',
   initialStep,
   onCompleted,
+  onBack,
+  backLabel,
 }) {
+  const dashboardRoute = useDashboardRoute();
   const initialUnitState = ProgressService.getUnitState(courseState, unit);
   /* getStep برای شناسه‌های حذف‌شده (مثل orient در stateهای قدیمی) به activate برمی‌گردد */
   const [activeStep, setActiveStep] = useState(
@@ -87,6 +46,14 @@ export default function LearningEngine({
   const unitState = ProgressService.getUnitState(courseState, unit);
   const currentStep = LearningService.getStep(activeStep);
   const currentStepIndex = LearningService.getStepIndex(activeStep);
+
+  const reviewSourceId = `${course.id}:${unit.id}`;
+  const [reviewItemId, setReviewItemId] = useState(() => {
+    const item = ReviewNotebookService.getAll(userId).find((entry) => entry.sourceId === reviewSourceId);
+    return item?.id ?? null;
+  });
+  const [notesOpen, setNotesOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
 
   const saveState = (updater) => {
     setCourseState((previousCourseState) => {
@@ -113,20 +80,23 @@ export default function LearningEngine({
     ));
   };
 
+  /* ورود دوباره به واحد: بخش فعال‌سازی به حالت تازه برمی‌گردد (پاسخ‌های قبلی پاک می‌شوند)،
+     ولی اگر یک بار به این بخش جواب داده شده باشد، تیکش در نوار مراحل می‌ماند. */
+  useEffect(() => {
+    if (!Object.keys(initialUnitState.recallResponses ?? {}).length) return;
+    patchUnit({
+      recallResponses: {},
+      completedSteps: [...new Set([...(initialUnitState.completedSteps ?? []), 'activate'])],
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const selectStep = (stepId) => {
     const step = LearningService.getStep(stepId);
     setActiveStep(step.id);
     patchUnit({ currentStep: step.id }, { stepId: step.id, stepLabel: step.label, detail: `مرحله ${step.label}` });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
-
-  useEffect(() => {
-    if (activeStep !== 'diagnose' || unitState.diagnosis) return;
-    const diagnosis = AssessmentService.diagnose(unit, unitState);
-    patchUnit({ diagnosis, mastery: diagnosis.mastery, status: 'learning' });
-    // تشخیص فقط هنگام ورود و نبودن داده ساخته می‌شود.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeStep, unitState.diagnosis, unit]);
 
   const handleQuestionAnswer = (question, selectedAnswer) => {
     const responseTime = Math.max(1, Math.round((Date.now() - practiceStartedAt.current) / 1000));
@@ -137,7 +107,6 @@ export default function LearningEngine({
         ...unitState.practiceResults,
         [question.id]: mergedResult,
       },
-      diagnosis: null,
     });
     practiceStartedAt.current = Date.now();
   };
@@ -152,7 +121,6 @@ export default function LearningEngine({
         ...unitState.practiceResults,
         [question.id]: mergedResult,
       },
-      diagnosis: null,
     });
     labelStartedAt.current = Date.now();
   };
@@ -161,33 +129,68 @@ export default function LearningEngine({
     patchUnit({ exploredStructures: [...new Set([...unitState.exploredStructures, structureId])] });
   };
 
-  const canContinue = LearningService.canCompleteStep(activeStep, unit, unitState);
-  const recommendation = useMemo(
-    () => RecommendationService.forUnit(unit, unitState.diagnosis),
-    [unit, unitState.diagnosis],
-  );
+  /* دفترچهٔ مرور: همان رکورد واحدی که پس از تکمیل هم ثبت می‌شود (یک رکورد، بدون تکرار). */
+  const toggleReview = () => {
+    if (reviewItemId) {
+      ReviewNotebookService.remove(userId, reviewItemId);
+      setReviewItemId(null);
+      return;
+    }
+    const item = ReviewNotebookService.add(userId, {
+      sourceType: 'course-unit',
+      sourceId: reviewSourceId,
+      title: unit.title,
+      subject: course.title,
+      description: 'واحد درسنامهٔ جامع',
+      activityType: 'learning',
+      metadata: { courseId: course.id, moduleId: unit.moduleId, unitId: unit.id },
+    });
+    setReviewItemId(item.id);
+  };
+
+  /* پرس‌وجو با تپش هوشمند — رفتن به لایهٔ AI با پرامپت آمادهٔ همین واحد */
+  const askTapeshAI = () => {
+    const currentRoute = dashboardRoute.routeRef?.current;
+    if (!dashboardRoute.push || !currentRoute) return;
+    dashboardRoute.push({
+      ...currentRoute,
+      layer: LAYER_IDS.ai,
+      view: {
+        conversationId: null,
+        prompt: `واحد «${unit.title}» از درسنامهٔ ${course.title} را توضیح بده؛ مفاهیم کلیدی، نکات پرتکرار آزمونی و اشتباه‌های رایج را بگو.`,
+      },
+      overlay: null,
+    });
+    window.scrollTo({ top: 0 });
+  };
+
+  const openNotes = () => {
+    const currentRoute = dashboardRoute.routeRef?.current;
+    if (!dashboardRoute.push || !currentRoute) return;
+    dashboardRoute.push({ ...currentRoute, section: 'notes', layer: null, view: null, overlay: null });
+    window.scrollTo({ top: 0 });
+  };
 
   const goNext = () => {
-    if (!canContinue) return;
     const completedState = LearningService.completeStep(unitState, activeStep);
     const nextStep = LearningService.getNextStep(activeStep);
 
     if (!nextStep) {
-      const finalMastery = unitState.diagnosis?.mastery ?? Math.max(completedState.mastery, 70);
+      const finalMastery = Math.max(completedState.mastery, 70);
       saveState((previousCourseState) => ProgressService.updateUnit(
         previousCourseState,
         unit,
         {
           ...completedState,
-          currentStep: 'review',
+          currentStep: 'test',
           progress: 100,
           mastery: finalMastery,
           status: 'completed',
         },
-        { stepId: 'review', stepLabel: 'مرور', detail: 'واحد تکمیل شد' },
+        { stepId: 'test', stepLabel: 'تست', detail: 'واحد تکمیل شد' },
       ));
       ReviewNotebookService.registerLearning(userId, {
-        sourceId: `${course.id}:${unit.id}`,
+        sourceId: reviewSourceId,
         title: unit.title,
         subject: course.title,
         description: 'واحد تکمیل‌شده در درسنامه جامع',
@@ -198,6 +201,7 @@ export default function LearningEngine({
           mastery: finalMastery,
         },
       });
+      setReviewItemId(ReviewNotebookService.getAll(userId).find((entry) => entry.sourceId === reviewSourceId)?.id ?? null);
       onCompleted?.(unit.id);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
@@ -238,16 +242,13 @@ export default function LearningEngine({
             onExplore={handleExplore}
           />
         );
-      case 'connect':
-        return <ConceptMap relations={unit.learning.relations} activityState={unitState} onChange={patchUnit} />;
       case 'practice':
         return (
           <div className="practice-stack">
-            {unit.learning.practice.map((question, index) => (
+            {unit.learning.practice.map((question) => (
               <PracticeQuestion
                 key={question.id}
                 question={question}
-                index={index}
                 result={unitState.practiceResults[question.id]}
                 onAnswer={(answer) => handleQuestionAnswer(question, answer)}
               />
@@ -262,18 +263,19 @@ export default function LearningEngine({
             )}
           </div>
         );
-      case 'retrieve':
-        return <RetrievalPrompt prompts={unit.learning.retrieval} activityState={unitState} onChange={patchUnit} />;
-      case 'diagnose':
-        return <LearningDiagnosis diagnosis={unitState.diagnosis} activityState={unitState} onChange={patchUnit} />;
-      case 'review':
+      case 'test':
         return (
-          <ReviewPanel
+          <UnitTest
+            course={course}
             unit={unit}
             unitState={unitState}
-            recommendation={recommendation}
-            onReview={() => selectStep('retrieve')}
-            onExam={() => selectStep('practice')}
+            userId={userId}
+            inReview={Boolean(reviewItemId)}
+            onToggleReview={toggleReview}
+            onOpenTests={() => selectStep('practice')}
+            onOpenNotes={openNotes}
+            onAskAI={askTapeshAI}
+            onDeckCreated={(deckId) => patchUnit({ flashcardDeckId: deckId })}
           />
         );
       default:
@@ -284,32 +286,82 @@ export default function LearningEngine({
   return (
     <div className="learning-engine">
       <div className="learning-engine__cycle">
+        <button type="button" className="learning-engine__back" onClick={onBack}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M9 6l6 6-6 6" />
+          </svg>
+          {backLabel || 'بازگشت'}
+        </button>
+
         <LearningStepper
           steps={LEARNING_STEPS}
           currentStep={activeStep}
           completedSteps={unitState.completedSteps}
           onStepSelect={selectStep}
         />
-        <button type="button" className="learning-engine__reset" onClick={resetUnit}>
-          <span aria-hidden="true">↺</span>
-          شروع دوباره واحد
-        </button>
+
+        <div className="learning-engine__tools">
+          <button
+            type="button"
+            className={`learning-engine__tool ${notesOpen ? 'is-active' : ''}`}
+            title="یادداشت این مرحله"
+            aria-label="یادداشت این مرحله"
+            aria-expanded={notesOpen}
+            onClick={() => {
+              setNotesOpen((current) => !current);
+              setReportOpen(false);
+            }}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M12 20h9" />
+              <path d="M16.4 3.6a2.1 2.1 0 0 1 3 3L7.4 18.6l-3.9 1 1-3.9z" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            className={`learning-engine__tool ${reportOpen ? 'is-active' : ''}`}
+            title="گزارش ایراد یا خطا"
+            aria-label="گزارش ایراد یا خطا"
+            aria-expanded={reportOpen}
+            onClick={() => {
+              setReportOpen((current) => !current);
+              setNotesOpen(false);
+            }}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" />
+              <path d="M12 9v4" />
+              <path d="M12 17h.01" />
+            </svg>
+          </button>
+          <button type="button" className="learning-engine__reset" onClick={resetUnit}>
+            <span aria-hidden="true">↺</span>
+            شروع دوباره واحد
+          </button>
+
+          <UnitNotes
+            open={notesOpen}
+            onClose={() => setNotesOpen(false)}
+            userId={userId}
+            courseId={course.id}
+            unitTitle={unit.title}
+            onOpenNotes={openNotes}
+          />
+          <UnitReport
+            open={reportOpen}
+            onClose={() => setReportOpen(false)}
+            courseTitle={course.title}
+            unitTitle={unit.title}
+          />
+        </div>
       </div>
 
-      <LearningStep
-        step={currentStep}
-        title={STEP_COPY[activeStep].title}
-        description={STEP_COPY[activeStep].description}
-      >
-        {renderStep()}
-      </LearningStep>
+      <LearningStep step={currentStep}>{renderStep()}</LearningStep>
 
       <LearningNavigation
         onPrevious={currentStepIndex > 0 ? goPrevious : undefined}
         onNext={goNext}
-        canContinue={canContinue}
         isLast={currentStepIndex === LEARNING_STEPS.length - 1}
-        hint={STEP_COPY[activeStep].hint}
       />
     </div>
   );

@@ -4,7 +4,7 @@
  * کتابخانه‌ای نیستند تا با سبک خطی داشبورد یکی باشند. هر نمودار Label متنی و
  * aria دارد تا اطلاعات فقط با رنگ منتقل نشود (دسترس‌پذیری).
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { toFa, faNum } from '../league/leagueShared';
 import { MASTERY_STATUSES, ERROR_TYPES, PERFORMANCE_WEIGHTS } from '../../../services/analytics/analyticsEngine';
 import { DIFFICULTIES } from '../../../services/testBank/testBankService';
@@ -330,13 +330,77 @@ export function RingScore({ score, size = 132, stroke = 11, accent = '#61D192', 
   );
 }
 
-/* ── نمودار خطی روند (X: زمان، Y: سنجه) ── */
+/* ── هندسهٔ مشترک نمودارها — هم‌زبان نمودار داشبورد (heart-chart) ── */
+const CHART_PAD = { top: 26, right: 46, bottom: 30, left: 10 };
+const clampNum = (value, min, max) => Math.min(Math.max(value, min), max);
+const round2 = (value) => Math.round(value * 100) / 100;
+
+/* پله‌های خوش‌خوان برای محور عمودی */
+const CHART_NICE_STEPS = [1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10];
+function niceCeil(value) {
+  if (!value || value <= 0) return 1;
+  const magnitude = 10 ** Math.floor(Math.log10(value));
+  const normalized = value / magnitude;
+  return (CHART_NICE_STEPS.find((step) => normalized <= step) ?? 10) * magnitude;
+}
+
+/* میله با گوشه‌های گرد فقط در سمت بالا — همان ریاضی heart-chart */
+function topRoundedBar(x, y, w, h, r) {
+  const rr = Math.min(r, w / 2, h);
+  if (rr <= 0) return `M${x},${y} H${x + w} V${y + h} H${x} Z`;
+  return [
+    `M${x},${y + h}`,
+    `V${y + rr}`,
+    `Q${x},${y} ${x + rr},${y}`,
+    `H${x + w - rr}`,
+    `Q${x + w},${y} ${x + w},${y + rr}`,
+    `V${y + h}`,
+    'Z',
+  ].join(' ');
+}
+
+/* منحنی نرم (Catmull-Rom → بزیه) با کنترل‌پوینت کلمپ‌شده — همان ریاضی heart-chart */
+function smoothLinePath(coords, top, bottom) {
+  if (coords.length === 0) return '';
+  if (coords.length === 1) return `M${round2(coords[0].x)},${round2(coords[0].y)}`;
+  const tension = 0.18;
+  let d = `M${round2(coords[0].x)},${round2(coords[0].y)}`;
+  for (let i = 0; i < coords.length - 1; i += 1) {
+    const p0 = coords[i - 1] ?? coords[i];
+    const p1 = coords[i];
+    const p2 = coords[i + 1];
+    const p3 = coords[i + 2] ?? p2;
+    const c1x = p1.x + (p2.x - p0.x) * tension;
+    const c1y = clampNum(p1.y + (p2.y - p0.y) * tension, top, bottom);
+    const c2x = p2.x - (p3.x - p1.x) * tension;
+    const c2y = clampNum(p2.y - (p3.y - p1.y) * tension, top, bottom);
+    d += ` C${round2(c1x)},${round2(c1y)} ${round2(c2x)},${round2(c2y)} ${round2(p2.x)},${round2(p2.y)}`;
+  }
+  return d;
+}
+
+/* اندازهٔ واقعی پلات با ResizeObserver — svg با پیکسل واقعی ساخته می‌شود، بدون کشیدگی */
+function useElementSize() {
+  const ref = useRef(null);
+  const [size, setSize] = useState({ width: 0, height: 0 });
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    const observer = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect;
+      setSize({ width: Math.round(width), height: Math.round(height) });
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+  return [ref, size];
+}
+
+/* ── نمودار خطی روند (X: زمان، Y: سنجه) — هم‌زبان نمودار داشبورد ── */
 /*
- * نمودار روند روی کل دادهٔ بازه رسم می‌شود:
- *  - یک نقطه برای هر روز؛ روزهای بدون داده خط را نمی‌شکنند (segment جدا).
- *  - محور عمودی مقداردار (به فارسی) + خط‌چین میانگین بازه.
- *  - تعامل hover: خط راهنما + تولتیپ تاریخ/مقدار/تعداد تست.
- *  - نشانگر آزمون‌ها با tooltip عنوان آزمون.
+ * زبان بصری heart-chart: محور عمودی راست (RTL)، منحنی نرم با ناحیهٔ گرادیانی،
+ * خط‌چین میانگین با چیپ شناور، ستون‌های hover با هاله و تولتیپ کارتی،
+ * ضربان روی آخرین روزِ دارای داده و نشانگر طلایی آزمون‌ها.
  */
 export function TrendChart({
   points,
@@ -350,14 +414,18 @@ export function TrendChart({
   valueFormat,
   unit = '',
 }) {
-  const [hoverIndex, setHoverIndex] = useState(null);
-  const width = 640;
-  const padLeft = 46;
-  const padRight = 16;
-  const padTop = 20;
-  const padBottom = 32;
-  const innerW = width - padLeft - padRight;
-  const innerH = height - padTop - padBottom;
+  const [plotRef, size] = useElementSize();
+  const [hover, setHover] = useState(null);
+  const areaId = useId();
+
+  /*
+   * height='auto' → ارتفاع نمودار از کادرِ کنارش می‌آید (مثلاً ستون کادرهای خلاصه)
+   * تا دو ستون هم‌قد شوند؛ کف ۲۱۶ پیکسل تا در ستون تک‌نفره لاغر نشود.
+   */
+  const autoHeight = height === 'auto';
+  const boxHeight = autoHeight ? Math.max(size.height || 0, 216) : height;
+
+  const format = valueFormat ?? ((value) => `${faNum(Math.round(value))}${unit}`);
   const valid = points.filter((point) => point.value !== null && point.value !== undefined);
 
   if (valid.length < 2) {
@@ -368,222 +436,279 @@ export function TrendChart({
     );
   }
 
+  const width = size.width;
+  if (width < 80) {
+    return <div ref={plotRef} className="an-chart__plot" style={{ height }} aria-label={ariaLabel} />;
+  }
+
+  const pad = CHART_PAD;
+  const plotW = Math.max(0, width - pad.left - pad.right);
+  const plotH = boxHeight - pad.top - pad.bottom;
+  const baseline = pad.top + plotH;
   const span = Math.max(1, yMax - yMin);
-  const step = points.length > 1 ? innerW / (points.length - 1) : 0;
-  const xOf = (index) => padLeft + index * step;
-  const yOf = (value) => padTop + innerH * (1 - (Math.max(yMin, Math.min(yMax, value)) - yMin) / span);
+  const slot = plotW / points.length;
+  const centerX = (index) => pad.left + slot * index + slot / 2;
+  const topY = (value) => baseline - ((clampNum(value, yMin, yMax) - yMin) / span) * plotH;
 
-  /* پنج خط راهنمای افقی با مقدار — نمودار بدون مقیاس، خوانا نیست */
-  const tickValues = [0, 0.25, 0.5, 0.75, 1].map((ratio) => yMax - ratio * span);
-  const average = valid.reduce((total, point) => total + point.value, 0) / valid.length;
-  const format = valueFormat ?? ((value) => `${faNum(Math.round(value))}${unit}`);
-
-  /* خط شکسته: از روزهای بدون داده عبور نمی‌کند */
-  const segments = [];
-  let current = [];
+  const coords = [];
   points.forEach((point, index) => {
-    if (point.value === null || point.value === undefined) {
-      if (current.length) segments.push(current);
-      current = [];
-    } else {
-      current.push({ index, x: xOf(index), y: yOf(point.value) });
-    }
+    if (point.value !== null && point.value !== undefined) coords.push({ x: centerX(index), y: topY(point.value), point, index });
   });
-  if (current.length) segments.push(current);
 
-  /*
-   * پل ارتباطی: در بازه‌های کم‌تراکم (سشن‌ها هر ۲-۳ روز) خط تکه‌تکه می‌شود و
-   * نمودار به چند نقطهٔ جدا تبدیل می‌شود. این خط‌چین کم‌رنگ همهٔ نقاط واقعی را
-   * به هم وصل می‌کند تا «روند» خوانده شود، بی‌آنکه روزهای بی‌داده مقدار جعلی بگیرند.
-   */
-  const bridge = valid.map((point) => ({ x: xOf(point.index), y: yOf(point.value) }));
+  const linePath = smoothLinePath(coords, pad.top, baseline);
+  const areaPath = coords.length > 1 ? `${linePath} L${round2(coords[coords.length - 1].x)},${baseline} L${round2(coords[0].x)},${baseline} Z` : '';
+
+  const average = valid.reduce((total, point) => total + point.value, 0) / valid.length;
+  const avgY = topY(average);
+  const showAvg = avgY > pad.top + 10;
 
   const lastIndex = points.map((point) => point.value != null).lastIndexOf(true);
-  const lastPoint = lastIndex >= 0 ? { x: xOf(lastIndex), y: yOf(points[lastIndex].value) } : null;
-  const hovered = hoverIndex !== null ? points[hoverIndex] : null;
-  const hoveredHasValue = hovered && hovered.value !== null && hovered.value !== undefined;
-  const hoverLeft = hoverIndex !== null ? (xOf(hoverIndex) / width) * 100 : 0;
-  /* در نیمهٔ بالای نمودار تولتیپ زیر نقطه می‌نشیند تا از کادر بیرون نزند */
-  const hoverPlaceBelow = hoveredHasValue && yOf(hovered.value) / height < 0.34;
+  const current = lastIndex >= 0 ? { x: centerX(lastIndex), y: topY(points[lastIndex].value) } : null;
 
-  const handleMove = (event) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    if (!rect.width || !step) return;
-    const xInView = ((event.clientX - rect.left) / rect.width) * width;
-    const index = Math.round((xInView - padLeft) / step);
-    setHoverIndex(Math.max(0, Math.min(points.length - 1, index)));
-  };
+  const hovered = hover !== null ? points[hover] : null;
+  const hoveredHasValue = hovered && hovered.value !== null && hovered.value !== undefined;
+  const tooltipBottom = hoveredHasValue
+    ? clampNum(topY(hovered.value) + 14, 0, boxHeight - 88)
+    : clampNum(boxHeight * 0.42, 0, boxHeight - 88);
 
   return (
-    <div dir="ltr" className="relative">
-      <svg
-        viewBox={`0 0 ${width} ${height}`}
-        className="w-full touch-pan-y"
-        role="img"
-        aria-label={ariaLabel}
-        onPointerMove={handleMove}
-        onPointerLeave={() => setHoverIndex(null)}
-      >
+    <div
+      ref={plotRef}
+      className={`an-chart__plot ${hover !== null ? 'is-hovering' : ''}`}
+      style={{
+        height: autoHeight ? undefined : boxHeight,
+        minHeight: autoHeight ? 216 : undefined,
+        '--an-accent': accent,
+        '--an-accent-soft': `${accent}2b`,
+        '--an-pad-bottom': `${pad.bottom}px`,
+      }}
+      role="img"
+      aria-label={ariaLabel}
+      onMouseLeave={() => setHover(null)}
+    >
+      <svg className="an-chart__svg" width={width} height={boxHeight} viewBox={`0 0 ${width} ${boxHeight}`} aria-hidden="true">
         <defs>
-          <linearGradient id="an-trend-area" x1="0" y1="0" x2="0" y2="1">
+          <linearGradient id={areaId} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor={accent} stopOpacity="0.3" />
+            <stop offset="62%" stopColor={accent} stopOpacity="0.08" />
             <stop offset="100%" stopColor={accent} stopOpacity="0" />
           </linearGradient>
         </defs>
 
-        {/* ناحیهٔ تعامل — کل پلات hoverپذیر می‌شود */}
-        <rect x={padLeft} y={padTop} width={innerW} height={innerH} fill="transparent" />
+        {/* خطوط راهنما + محور عمودی سمت راست — هم‌چینش heart-chart */}
+        {[0, 1, 2, 3, 4].map((tick) => {
+          const value = yMax - (span / 4) * tick;
+          const y = pad.top + (plotH / 4) * tick;
+          return (
+            <g key={`tick-${tick}`}>
+              <line className={`an-chart__grid ${tick === 4 ? 'an-chart__grid--base' : ''}`} x1={pad.left} x2={pad.left + plotW} y1={y} y2={y} />
+              <text className="an-chart__ylabel" x={width - 8} y={y + 3.5} textAnchor="end">
+                {faNum(Math.round(value))}
+              </text>
+            </g>
+          );
+        })}
 
-        {/* خطوط راهنما + مقیاس محور عمودی */}
-        {tickValues.map((value, index) => (
-          <g key={`tick-${index}`}>
-            <line x1={padLeft} x2={width - padRight} y1={yOf(value)} y2={yOf(value)} stroke="rgb(var(--wash-rgb) / 0.07)" strokeWidth="1" />
-            <text x={padLeft - 8} y={yOf(value) + 3.5} textAnchor="end" fontSize="10" fill="var(--faint)">
-              {faNum(Math.round(value))}
-            </text>
-          </g>
-        ))}
-
-        {/* میانگین کل بازه */}
-        <line
-          x1={padLeft}
-          x2={width - padRight}
-          y1={yOf(average)}
-          y2={yOf(average)}
-          stroke={accent}
-          strokeOpacity="0.4"
-          strokeWidth="1"
-          strokeDasharray="5 4"
-        />
-
-        {/* نشانگرهای آزمون */}
+        {/* نشانگر آزمون‌های بازه */}
         {markerEvents.map((event) => (
           <g key={event.id}>
-            <line
-              x1={xOf(event.dayIndex)}
-              x2={xOf(event.dayIndex)}
-              y1={padTop - 6}
-              y2={padTop + innerH}
-              stroke="rgba(224,180,92,0.42)"
-              strokeWidth="1.2"
-              strokeDasharray="3 3"
-            >
+            <line x1={centerX(event.dayIndex)} x2={centerX(event.dayIndex)} y1={pad.top - 6} y2={baseline} stroke="rgba(224,180,92,0.42)" strokeWidth="1.2" strokeDasharray="3 3">
               <title>{event.title}</title>
             </line>
-            <circle cx={xOf(event.dayIndex)} cy={padTop - 8} r="3.2" fill="var(--gold-ink)">
+            <circle cx={centerX(event.dayIndex)} cy={pad.top - 8} r="3.2" fill="var(--gold-ink)">
               <title>{event.title}</title>
             </circle>
           </g>
         ))}
 
-        {/* سطح زیر خط — روی همان پل ارتباطی، تا در بازه‌های کم‌تراکم تکه‌تکه نشود */}
-        {bridge.length > 1 && (
-          <polygon
-            points={[
-              ...bridge,
-              { x: bridge[bridge.length - 1].x, y: yOf(yMin) },
-              { x: bridge[0].x, y: yOf(yMin) },
-            ]
-              .map((point) => `${point.x},${point.y}`)
-              .join(' ')}
-            fill="url(#an-trend-area)"
-          />
-        )}
-
-        {/* پل ارتباطی بین روزهای دارای داده — روند را خوانا می‌کند */}
-        {bridge.length > 1 && (
-          <polyline
-            points={bridge.map((point) => `${point.x},${point.y}`).join(' ')}
-            fill="none"
-            stroke={accent}
-            strokeOpacity="0.32"
-            strokeWidth="1.6"
-            strokeDasharray="5 5"
-            strokeLinecap="round"
-          />
-        )}
-
-        {/* خط روند — فقط روزهای پیوسته */}
-        {segments.map((segment, index) => (
-          <polyline
-            key={`line-${index}`}
-            points={segment.map((point) => `${point.x},${point.y}`).join(' ')}
-            fill="none"
-            stroke={accent}
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        ))}
-
-        {/* نقاط روزهای دارای داده — در بازه‌های بلند ریزتر */}
-        {valid.map((point) => (
-          <circle key={`dot-${point.key ?? point.index}`} cx={xOf(point.index)} cy={yOf(point.value)} r={points.length > 45 ? 1.6 : 2.5} fill={accent} fillOpacity="0.85" />
-        ))}
-
-        {lastPoint && <circle cx={lastPoint.x} cy={lastPoint.y} r="4" fill={accent} stroke="var(--ink-deep)" strokeWidth="2" />}
+        {/* ناحیهٔ گرادیانی زیر منحنی */}
+        {areaPath && <path d={areaPath} fill={`url(#${areaId})`} />}
 
         {/* خط راهنمای hover */}
-        {hovered && (
+        {hover !== null && hoveredHasValue && (
+          <line className="an-chart__guide" x1={centerX(hover)} x2={centerX(hover)} y1={pad.top} y2={baseline} />
+        )}
+
+        {/* منحنی نرم روند */}
+        <path className="an-chart__line-stroke" d={linePath} pathLength="1" />
+
+        {/* نقاط داده */}
+        {coords.map((coord, dotIndex) => (
+          <g key={`dot-${coord.point.key ?? coord.index}`} className={`an-chart__dot-wrap ${hover === coord.index ? 'is-hover' : ''}`} style={{ '--i': dotIndex }}>
+            {hover === coord.index && <circle cx={coord.x} cy={coord.y} r="9" fill={`${accent}24`} />}
+            <circle
+              className={`an-chart__dot ${coord.index === lastIndex ? 'is-current' : ''} ${hover === coord.index ? 'is-hover' : ''}`}
+              cx={coord.x}
+              cy={coord.y}
+              r={points.length > 45 ? 2 : 3.1}
+            />
+          </g>
+        ))}
+
+        {/* ضربان آخرین روزِ دارای داده */}
+        {current && (
           <g>
-            <line x1={xOf(hoverIndex)} x2={xOf(hoverIndex)} y1={padTop} y2={padTop + innerH} stroke="rgb(var(--wash-rgb) / 0.26)" strokeWidth="1" />
-            {hoveredHasValue && <circle cx={xOf(hoverIndex)} cy={yOf(hovered.value)} r="4.4" fill={accent} stroke="var(--ink-deep)" strokeWidth="2" />}
+            <circle className="an-chart__pulse-ring" cx={current.x} cy={current.y} r="4" />
+            <circle className="an-chart__pulse-dot" cx={current.x} cy={current.y} r="3" />
+          </g>
+        )}
+
+        {/* خط‌چین میانگین بازه */}
+        {showAvg && (
+          <g className="an-chart__avg">
+            <line x1={pad.left} x2={pad.left + plotW} y1={avgY} y2={avgY} strokeDasharray="3 7" strokeLinecap="round" />
           </g>
         )}
       </svg>
 
+      {/* چیپ میانگین — شناور روی ناحیهٔ ترسیم */}
+      {showAvg && (
+        <span className="an-chart__avg-chip" style={{ top: `${round2(avgY)}px` }}>
+          میانگین {format(average)}
+        </span>
+      )}
+
+      {/* ستون‌های hover — چپ و عرض از همان هندسهٔ svg */}
+      <div className="an-chart__overlay">
+        {points.map((point, index) => (
+          <div
+            key={`col-${point.key ?? index}`}
+            className={`an-chart__column ${hover === index ? 'is-hover' : ''}`}
+            style={{ left: `${round2(pad.left + slot * index)}px`, width: `${round2(slot)}px` }}
+            aria-hidden="true"
+            onMouseEnter={() => setHover(index)}
+          />
+        ))}
+      </div>
+
       {/* تولتیپ روز انتخاب‌شده */}
       {hovered && (
-        <div
-          dir="rtl"
-          className={`pointer-events-none absolute z-10 -translate-x-1/2 rounded-xl border border-white/12 bg-[#1b1b1e]/95 px-3 py-2 text-[11px] whitespace-nowrap shadow-xl ${hoverPlaceBelow ? 'translate-y-[22%]' : '-translate-y-[135%]'}`}
-          style={{ left: `${Math.min(90, Math.max(10, hoverLeft))}%`, top: `${((hoveredHasValue ? yOf(hovered.value) : padTop) / height) * 100}%` }}
-        >
-          <strong className="block text-[11.5px] text-[var(--white)]">{hovered.fullLabel ?? hovered.label}</strong>
-          <span className="mt-0.5 block font-semibold" style={{ color: accent }}>
-            {hoveredHasValue ? format(hovered.value) : 'بدون داده'}
-          </span>
-          <span className="mt-0.5 block text-[10px] text-[var(--faint)]">
-            {faNum(hovered.count ?? 0)} تست در این روز
-          </span>
+        <div className="an-chart__tooltip" style={{ left: `${clampNum(centerX(hover), 84, width - 84)}px`, bottom: `${tooltipBottom}px` }}>
+          <span className="an-chart__tooltip-title">{hovered.fullLabel ?? hovered.label}</span>
+          <strong className="an-chart__tooltip-value">{hoveredHasValue ? format(hovered.value) : 'بدون داده'}</strong>
+          <span className="an-chart__tooltip-sub">{faNum(hovered.count ?? 0)} تست در این روز</span>
         </div>
       )}
 
-      {/* برچسب‌های محور افقی — هم‌جهت با نمودار (چپ: قدیمی‌ترین، راست: امروز) */}
-      <div className="relative mt-1 h-4 text-[10px] text-[var(--faint)]" dir="ltr">
-        <span className="absolute" style={{ left: `${(padLeft / width) * 100}%` }}>
-          {points[0]?.label}
-        </span>
-        <span className="absolute -translate-x-1/2" style={{ left: `${(xOf(Math.floor((points.length - 1) / 2)) / width) * 100}%` }}>
-          {points[Math.floor((points.length - 1) / 2)]?.label}
-        </span>
-        <span className="absolute -translate-x-full" style={{ left: `${((width - padRight) / width) * 100}%` }}>
-          {points[points.length - 1]?.isToday ? 'امروز' : points[points.length - 1]?.label}
-        </span>
+      {/* برچسب‌های محور افقی — داخل پلات، هم‌چینش heart-chart */}
+      <div className="pointer-events-none absolute bottom-1 flex items-start justify-between text-[10px] text-[var(--faint)]" dir="ltr" style={{ left: pad.left, right: pad.right + 8 }}>
+        <span>{points[0]?.label}</span>
+        <span>{points[Math.floor((points.length - 1) / 2)]?.label}</span>
+        <span>{points[points.length - 1]?.isToday ? 'امروز' : points[points.length - 1]?.label}</span>
       </div>
     </div>
   );
 }
 
-/* ── ستون‌های عمودی (توزیع) ── */
+/* ── ستون‌های عمودی (توزیع) — هم‌زبان حالت میله‌ای heart-chart ── */
 export function ColumnChart({ columns, height = 160, ariaLabel }) {
-  const max = Math.max(...columns.map((column) => column.value ?? 0), 1);
+  const [plotRef, size] = useElementSize();
+  const [hover, setHover] = useState(null);
+  const gradientId = useId();
+
+  const width = size.width;
+  const values = columns.map((column) => column.value ?? 0);
+  const max = Math.max(...values, 1);
+  const yMax = max > 100 ? niceCeil(max * 1.06) : 100;
+
+  if (columns.length === 0) return null;
+
+  if (width < 80) {
+    return <div ref={plotRef} className="an-chart__plot" style={{ height }} aria-label={ariaLabel} />;
+  }
+
+  const pad = CHART_PAD;
+  const plotW = Math.max(0, width - pad.left - pad.right);
+  const plotH = height - pad.top - pad.bottom;
+  const baseline = pad.top + plotH;
+  const slot = plotW / columns.length;
+  const barW = clampNum(slot * 0.52, 12, 32);
+  const centerX = (index) => pad.left + slot * index + slot / 2;
+  const topY = (value) => baseline - ((value ?? 0) / yMax) * plotH;
+
+  const accents = [...new Set(columns.map((column) => column.accent))];
+  const hovered = hover !== null ? columns[hover] : null;
+
   return (
-    <div className="flex items-end justify-around gap-2" role="img" aria-label={ariaLabel} style={{ height }}>
-      {columns.map((column) => {
-        const ratio = (column.value ?? 0) / max;
-        return (
-          <div key={column.key} className="flex min-w-0 flex-1 flex-col items-center gap-1.5">
-            <span className="text-[11px] font-semibold" style={{ color: column.accent }}>
+    <div
+      ref={plotRef}
+      className={`an-chart__plot ${hover !== null ? 'is-hovering' : ''}`}
+      style={{ height, '--an-pad-bottom': `${pad.bottom}px` }}
+      role="img"
+      aria-label={ariaLabel}
+      onMouseLeave={() => setHover(null)}
+    >
+      <svg className="an-chart__svg" width={width} height={height} viewBox={`0 0 ${width} ${height}`} aria-hidden="true">
+        <defs>
+          {accents.map((accent) => (
+            <linearGradient key={accent} id={`${gradientId}-${accent.slice(1)}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={accent} stopOpacity="0.95" />
+              <stop offset="100%" stopColor={accent} stopOpacity="0.55" />
+            </linearGradient>
+          ))}
+        </defs>
+
+        {/* خطوط راهنما + محور عمودی سمت راست */}
+        {[0, 1, 2, 3, 4].map((tick) => {
+          const value = yMax - (yMax / 4) * tick;
+          const y = pad.top + (plotH / 4) * tick;
+          return (
+            <g key={`tick-${tick}`}>
+              <line className={`an-chart__grid ${tick === 4 ? 'an-chart__grid--base' : ''}`} x1={pad.left} x2={pad.left + plotW} y1={y} y2={y} />
+              <text className="an-chart__ylabel" x={width - 8} y={y + 3.5} textAnchor="end">
+                {faNum(Math.round(value))}
+              </text>
+            </g>
+          );
+        })}
+
+        {/* میله‌های گرد گرادیانی + شبح مقدار خالی */}
+        {columns.map((column, index) => {
+          const x = pad.left + slot * index + (slot - barW) / 2;
+          const value = column.value ?? 0;
+          const barHeight = value > 0 ? Math.max(4, (value / yMax) * plotH) : 0;
+          const y = baseline - barHeight;
+          return (
+            <g key={column.key} className={`an-chart__bar ${hover === index ? 'is-hover' : ''}`} style={{ '--i': index }}>
+              {value > 0 && <path d={topRoundedBar(x, y, barW, barHeight, Math.min(8, barW / 2))} fill={`url(#${gradientId}-${column.accent.slice(1)})`} />}
+              {!value && <rect className="an-chart__ghost" x={x} y={baseline - 3} width={barW} height={3} rx={1.5} />}
+            </g>
+          );
+        })}
+
+        {/* مقدار بالای میله + برچسب پایین — بیرون از گروه میله تا با scaleY کج نشوند */}
+        {columns.map((column, index) => (
+          <g key={`label-${column.key}`}>
+            <text className="an-chart__ylabel" x={centerX(index)} y={topY(column.value) - 8} textAnchor="middle" style={{ fill: column.value ? column.accent : 'var(--faint)', fontWeight: 600 }}>
               {column.value === null ? '—' : (column.display ?? faNum(Math.round(column.value)))}
-            </span>
-            <div className="w-full max-w-12 rounded-t-lg bg-white/[0.05]" style={{ height: Math.max(4, ratio * (height - 52)) }}>
-              <div className="an-bar__fill h-full rounded-t-lg" style={{ width: '100%', background: column.accent, height: `${ratio * 100}%` }} />
-            </div>
-            <span className="max-w-full truncate text-center text-[10.5px] leading-4 text-[var(--faint)]">{column.label}</span>
-          </div>
-        );
-      })}
+            </text>
+            <text className="an-chart__ylabel" x={centerX(index)} y={height - 10} textAnchor="middle">
+              {column.label}
+            </text>
+          </g>
+        ))}
+      </svg>
+
+      {/* ستون‌های hover */}
+      <div className="an-chart__overlay">
+        {columns.map((column, index) => (
+          <div
+            key={`col-${column.key}`}
+            className={`an-chart__column ${hover === index ? 'is-hover' : ''}`}
+            style={{ left: `${round2(pad.left + slot * index)}px`, width: `${round2(slot)}px` }}
+            aria-hidden="true"
+            onMouseEnter={() => setHover(index)}
+          />
+        ))}
+      </div>
+
+      {/* تولتیپ ستون */}
+      {hovered && (
+        <div className="an-chart__tooltip" style={{ left: `${clampNum(centerX(hover), 84, Math.max(168, width - 84))}px`, bottom: `${clampNum(topY(hovered.value) + 14, 0, height - 88)}px` }}>
+          <span className="an-chart__tooltip-title">{hovered.label}</span>
+          <strong className="an-chart__tooltip-value">{hovered.value === null ? '—' : (hovered.display ?? faNum(Math.round(hovered.value)))}</strong>
+        </div>
+      )}
     </div>
   );
 }

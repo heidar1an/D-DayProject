@@ -10,8 +10,10 @@
  * (`userSessions.js`) — هویت آزمون‌ها از همین کوکی می‌آید.
  */
 
+import { randomBytes } from 'node:crypto';
 import { findUserByPhone, publicUser, saveUser, verifyUser } from './usersStore.js';
-import { USER_SESSION_COOKIE, createUserSession } from './userSessions.js';
+import { USER_SESSION_COOKIE, createUserSession, destroyUserSession, getUserSession } from './userSessions.js';
+import { getUserHeartRewards, recordTestBankAnswers, transferGuestTestBankProgress } from './contentStore.js';
 
 function sendJson(response, status, payload) {
   const body = JSON.stringify(payload);
@@ -50,6 +52,8 @@ function readBody(request) {
  * (همان `{user}` قبلی) — فقط هویت سروری کنار آن نشسته می‌شود.
  */
 function setSessionCookie(response, user, request) {
+  const previous = sessionFromRequest(request);
+  if (previous?.user.anonymous) transferGuestTestBankProgress(previous.user.id, user.id);
   const session = createUserSession(user, {
     ip: request.socket?.remoteAddress ?? '',
     userAgent: request.headers?.['user-agent'] ?? '',
@@ -59,6 +63,30 @@ function setSessionCookie(response, user, request) {
     'Set-Cookie',
     `${USER_SESSION_COOKIE}=${session.token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${7 * 24 * 60 * 60}${secure}`,
   );
+}
+
+function sessionFromRequest(request) {
+  return getUserSession(sessionTokenFromRequest(request));
+}
+
+function sessionTokenFromRequest(request) {
+  return String(request.headers.cookie ?? '').split(';').map((part) => part.trim())
+    .find((part) => part.startsWith(`${USER_SESSION_COOKIE}=`))?.slice(USER_SESSION_COOKIE.length + 1);
+}
+
+function createGuestSession(response, request) {
+  const guestTtlMs = 365 * 24 * 60 * 60 * 1000;
+  const id = `guest-${randomBytes(16).toString('hex')}`;
+  const session = createUserSession({ id }, {
+    anonymous: true,
+    ttlMs: guestTtlMs,
+    ip: request.socket?.remoteAddress ?? '',
+    userAgent: request.headers?.['user-agent'] ?? '',
+  });
+  const secure = (request.headers?.['x-forwarded-proto'] ?? '') === 'https' ? '; Secure' : '';
+  response.setHeader('Set-Cookie',
+    `${USER_SESSION_COOKIE}=${session.token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${guestTtlMs / 1000}${secure}`);
+  return { user: { id, anonymous: true }, session };
 }
 
 /*
@@ -72,6 +100,47 @@ export async function handleUsersApi(request, response) {
   const path = url.pathname.replace(/\/$/, '').slice('/api/users'.length);
 
   try {
+    if (request.method === 'POST' && path === '/logout') {
+      const origin = request.headers.origin;
+      const host = String(request.headers['x-forwarded-host'] ?? request.headers.host ?? '').split(',')[0].trim();
+      if (!origin || new URL(origin).host !== host) {
+        sendJson(response, 403, { error: 'forbidden' });
+        return true;
+      }
+      destroyUserSession(sessionTokenFromRequest(request));
+      response.setHeader('Set-Cookie', `${USER_SESSION_COOKIE}=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0`);
+      sendJson(response, 200, { ok: true });
+      return true;
+    }
+
+    if (request.method === 'GET' && path === '/hearts') {
+      const session = sessionFromRequest(request);
+      sendJson(response, 200, { awards: session ? getUserHeartRewards(session.user.id) : [] });
+      return true;
+    }
+
+    if (request.method === 'POST' && path === '/test-bank/answers') {
+      const origin = request.headers.origin;
+      const host = String(request.headers['x-forwarded-host'] ?? request.headers.host ?? '').split(',')[0].trim();
+      if (!origin || new URL(origin).host !== host) {
+        sendJson(response, 403, { error: 'forbidden' });
+        return true;
+      }
+      if (!String(request.headers['content-type'] ?? '').startsWith('application/json')) {
+        sendJson(response, 415, { error: 'unsupported-media-type' });
+        return true;
+      }
+      const payload = await readBody(request);
+      if (!Array.isArray(payload.answers)) {
+        sendJson(response, 400, { error: 'bad-request' });
+        return true;
+      }
+      const session = sessionFromRequest(request) ?? createGuestSession(response, request);
+      const result = recordTestBankAnswers(session.user.id, payload.answers);
+      sendJson(response, 200, { ok: true, ...result });
+      return true;
+    }
+
     if (request.method === 'GET' && (path === '' || path === '/lookup')) {
       const user = findUserByPhone(url.searchParams.get('phone'));
       sendJson(response, 200, { user: publicUser(user) });

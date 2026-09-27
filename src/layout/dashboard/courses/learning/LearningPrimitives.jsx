@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { toFa } from './learningUtils';
+import { createNote } from '../../../../services/notes/notesService';
 
 export function LearningProgress({ value = 0, label = 'پیشرفت', detail, compact = false }) {
   const safeValue = Math.max(0, Math.min(100, Math.round(value)));
@@ -45,23 +47,19 @@ export function LearningObjective({ children, index }) {
 }
 
 export function LearningStepper({ steps, currentStep, completedSteps, onStepSelect }) {
-  const currentIndex = steps.findIndex((step) => step.id === currentStep);
-
   return (
     <nav className="learning-stepper" aria-label="مراحل الگوریتم یادگیری">
       <div className="learning-stepper__track">
         {steps.map((step, index) => {
           const completed = completedSteps.includes(step.id);
           const active = step.id === currentStep;
-          const reachable = completed || active || index <= currentIndex;
           return (
             <button
               key={step.id}
               type="button"
               className={`learning-stepper__step ${active ? 'is-active' : ''} ${completed ? 'is-complete' : ''}`}
               aria-current={active ? 'step' : undefined}
-              disabled={!reachable}
-              onClick={() => reachable && onStepSelect?.(step.id)}
+              onClick={() => onStepSelect?.(step.id)}
               title={step.action}
             >
               <span className="learning-stepper__number" aria-hidden="true">
@@ -82,17 +80,10 @@ export function LearningStepper({ steps, currentStep, completedSteps, onStepSele
   );
 }
 
-export function LearningStep({ step, kicker, title, description, children, aside }) {
+/* قاب مرحله: بدون سرتیتر — محتوای هر مرحله خودش گویاست و عنوان مرحله در نوار بالا هست. */
+export function LearningStep({ step, children }) {
   return (
-    <section className="learning-step" aria-labelledby={`learning-step-${step.id}`}>
-      <header className="learning-step__header">
-        <div>
-          {kicker && <span className="learning-step__kicker">{kicker}</span>}
-          <h2 id={`learning-step-${step.id}`}>{title || step.label}</h2>
-          {description && <p>{description}</p>}
-        </div>
-        {aside}
-      </header>
+    <section className="learning-step" aria-label={step.label}>
       <div className="learning-step__body">{children}</div>
     </section>
   );
@@ -126,34 +117,12 @@ export function ContinueLearning({ location, onContinue, onRestart, compact = fa
   );
 }
 
-export function RecommendationCard({ recommendation, onAction, compact = false }) {
-  if (!recommendation) return null;
-  return (
-    <aside className={`recommendation-card recommendation-card--${recommendation.type} ${compact ? 'recommendation-card--compact' : ''}`}>
-      <span className="recommendation-card__spark" aria-hidden="true">✦</span>
-      <div>
-        <small>{recommendation.eyebrow}</small>
-        <h3>{recommendation.title}</h3>
-        <p>{recommendation.description}</p>
-      </div>
-      {onAction && (
-        <button type="button" className="learn-button learn-button--soft" onClick={onAction}>
-          {recommendation.action}
-          <span aria-hidden="true">←</span>
-        </button>
-      )}
-    </aside>
-  );
-}
-
 export function LearningNavigation({
   onPrevious,
   onNext,
   previousLabel,
   nextLabel,
-  canContinue = true,
   isLast = false,
-  hint,
 }) {
   return (
     <footer className="learning-navigation">
@@ -166,14 +135,10 @@ export function LearningNavigation({
         <span aria-hidden="true">→</span>
         {previousLabel || 'مرحله قبلی'}
       </button>
-      <div className="learning-navigation__hint" role="status">
-        {!canContinue && (hint || 'برای ادامه، فعالیت کوتاه این مرحله را انجام بده.')}
-      </div>
       <button
         type="button"
         className="learn-button learn-button--primary learning-navigation__next"
         onClick={onNext}
-        disabled={!canContinue}
       >
         {isLast ? 'تکمیل واحد' : nextLabel || 'ثبت و مرحله بعد'}
         <span aria-hidden="true">←</span>
@@ -217,5 +182,146 @@ export function Breadcrumb({ items }) {
         ))}
       </ol>
     </nav>
+  );
+}
+
+/* یادداشت این مرحله — پاپ‌آپ شناور کنار ردیف بالای واحد؛ روی محتوای مرحله نمی‌افتد.
+   یادداشت با همان قرارداد سرویس یادداشت ساخته می‌شود و بلافاصله در بخش «یادداشت‌ها» می‌نشیند. */
+export function UnitNotes({ open, onClose, userId, courseId, unitTitle, onOpenNotes }) {
+  const [title, setTitle] = useState(`${unitTitle} — یادداشت`);
+  const [body, setBody] = useState('');
+  const [state, setState] = useState('idle'); /* idle | saving | saved | error */
+
+  if (!open) return null;
+
+  const save = async () => {
+    if (!body.trim() || state === 'saving') return;
+    setState('saving');
+    try {
+      await createNote({ id: userId }, {
+        title,
+        kind: 'text',
+        body,
+        subjectId: courseId,
+        tags: ['یادداشت درس'],
+        sourceType: 'lesson',
+        sourceTitle: unitTitle,
+      });
+      setBody('');
+      setState('saved');
+    } catch {
+      setState('error');
+    }
+  };
+
+  return (
+    <div className="unit-pop" role="dialog" aria-label="یادداشت این مرحله">
+      <header className="unit-pop__head">
+        <b>یادداشت این مرحله</b>
+        {state === 'saved' && <em>ذخیره شد</em>}
+        <button type="button" className="unit-pop__close" onClick={onClose} aria-label="بستن یادداشت">×</button>
+      </header>
+      <div className="unit-pop__body">
+        <input
+          type="text"
+          aria-label="عنوان یادداشت"
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+          placeholder="عنوان یادداشت"
+        />
+        <textarea
+          rows={5}
+          aria-label="متن یادداشت"
+          value={body}
+          onChange={(event) => {
+            setBody(event.target.value);
+            if (state !== 'saving') setState('idle');
+          }}
+          placeholder="نکته‌ای که می‌خواهی بماند…"
+        />
+        <div className="unit-notes__actions">
+          <button
+            type="button"
+            className="learn-button learn-button--primary"
+            onClick={save}
+            disabled={!body.trim() || state === 'saving'}
+          >
+            {state === 'saving' ? 'در حال ذخیره…' : 'افزودن به یادداشت‌ها'}
+          </button>
+          <button type="button" className="learn-button learn-button--quiet" onClick={onOpenNotes}>
+            مشاهدهٔ یادداشت‌ها
+          </button>
+        </div>
+        {state === 'error' && <p className="unit-notes__error">ذخیره نشد؛ دوباره تلاش کن.</p>}
+      </div>
+    </div>
+  );
+}
+
+const REPORT_KINDS = ['گزارش اشکال محتوایی', 'خطای فنی', 'پیشنهاد بهبود'];
+
+/* گزارش ایراد/خطای همین واحد — با همان قرارداد درخواست‌های پشتیبانی (tapesh:support-requests)
+   و دستهٔ «گزارش اشکال» ثبت می‌شود تا همهٔ گزارش‌ها یک‌جا بمانند. */
+export function UnitReport({ open, onClose, courseTitle, unitTitle }) {
+  const [kind, setKind] = useState(REPORT_KINDS[0]);
+  const [note, setNote] = useState('');
+  const [state, setState] = useState('idle'); /* idle | sent | error */
+
+  if (!open) return null;
+
+  const submit = (event) => {
+    event.preventDefault();
+    if (!note.trim() || state === 'sending') return;
+    try {
+      const stored = JSON.parse(window.localStorage.getItem('tapesh:support-requests') || '[]');
+      stored.push({
+        subject: `گزارش ایراد — ${unitTitle}`,
+        category: 'گزارش اشکال',
+        message: `${kind}\n${note.trim()}\n\n— از واحد «${unitTitle}» در درسنامهٔ ${courseTitle}`,
+        createdAt: new Date().toISOString(),
+      });
+      window.localStorage.setItem('tapesh:support-requests', JSON.stringify(stored));
+      setNote('');
+      setState('sent');
+    } catch {
+      setState('error');
+    }
+  };
+
+  return (
+    <div className="unit-pop" role="dialog" aria-label="گزارش ایراد یا خطا">
+      <header className="unit-pop__head">
+        <b>گزارش ایراد یا خطا</b>
+        {state === 'sent' && <em>ثبت شد</em>}
+        <button type="button" className="unit-pop__close" onClick={onClose} aria-label="بستن گزارش">×</button>
+      </header>
+      <form className="unit-pop__body" onSubmit={submit}>
+        <label className="unit-field">
+          <span>نوع گزارش</span>
+          <select value={kind} onChange={(event) => setKind(event.target.value)}>
+            {REPORT_KINDS.map((item) => <option key={item} value={item}>{item}</option>)}
+          </select>
+        </label>
+        <label className="unit-field">
+          <span>توضیح</span>
+          <textarea
+            rows={4}
+            aria-label="متن گزارش"
+            value={note}
+            onChange={(event) => {
+              setNote(event.target.value);
+              if (state !== 'sending') setState('idle');
+            }}
+            placeholder={`چه ایرادی در «${unitTitle}» دیدی؟`}
+          />
+        </label>
+        <div className="unit-notes__actions">
+          <button type="submit" className="learn-button learn-button--primary" disabled={!note.trim()}>
+            ارسال گزارش
+          </button>
+        </div>
+        {state === 'error' && <p className="unit-notes__error">ثبت نشد؛ دوباره تلاش کن.</p>}
+      </form>
+    </div>
   );
 }

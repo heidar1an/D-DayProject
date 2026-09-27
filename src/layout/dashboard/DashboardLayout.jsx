@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useMemo, useState } from 'react';
+import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
 import DashboardHeader from './DashboardHeader';
 import SettingHeader from './setting/SettingHeader';
 import EditProfile from './setting/EditProfile';
@@ -42,6 +42,8 @@ import {
 import {
   fetchFriendsLeagueNotifications,
   fetchLeagueNotifications,
+  markFriendsLeagueNotificationsRead,
+  markLeagueNotificationsRead,
 } from '../../services/league/leagueService';
 
 const settingsTabLabels = {
@@ -68,6 +70,8 @@ export const COURSE_LAYERS = {
  */
 function useUnreadNotificationsCount(isLayerOpen) {
   const [count, setCount] = useState(0);
+  const isLayerOpenRef = useRef(isLayerOpen);
+  isLayerOpenRef.current = isLayerOpen;
 
   useEffect(() => {
     let alive = true;
@@ -76,7 +80,7 @@ function useUnreadNotificationsCount(isLayerOpen) {
     const poll = () => {
       Promise.all([fetchFriendsLeagueNotifications(), fetchLeagueNotifications()])
         .then(([friends, league]) => {
-          if (alive) setCount(friends.unreadCount + league.unreadCount);
+          if (alive && !isLayerOpenRef.current) setCount(friends.unreadCount + league.unreadCount);
         })
         .catch(() => {
           /* در حالت آفلاین آخرین تعداد حفظ می‌شود */
@@ -93,7 +97,7 @@ function useUnreadNotificationsCount(isLayerOpen) {
     };
   }, []);
 
-  /* وقتی لایهٔ اعلان‌ها باز و خوانده شد، بج صفر می‌شود */
+  /* زنگوله پس از ورود به اعلان‌ها خالی می‌شود؛ خود پیام‌ها تا خروج جدید می‌مانند. */
   useEffect(() => {
     if (isLayerOpen) setCount(0);
   }, [isLayerOpen]);
@@ -115,6 +119,20 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
   const areNotificationsOpen = route.overlay === OVERLAY_IDS.notifications;
   const settingsTab = route.tab;
   const unreadNotificationsCount = useUnreadNotificationsCount(areNotificationsOpen);
+  const wasNotificationsOpen = useRef(areNotificationsOpen);
+  const pendingNotificationsRead = useRef(null);
+
+  useEffect(() => {
+    if (wasNotificationsOpen.current && !areNotificationsOpen) {
+      pendingNotificationsRead.current = Promise.all([
+        markFriendsLeagueNotificationsRead(),
+        markLeagueNotificationsRead(),
+      ]).catch(() => {
+        /* در صورت خطا، اعلان‌ها در بازدید بعدی همچنان جدید می‌مانند. */
+      });
+    }
+    wasNotificationsOpen.current = areNotificationsOpen;
+  }, [areNotificationsOpen]);
   const {
     secondsLeft,
     isRunning,
@@ -122,6 +140,7 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
     isFinished,
     todayCount,
     todayMinutes,
+    weekCounts,
     toggle: togglePomodoro,
     finish: finishPomodoro,
     startBreak,
@@ -245,6 +264,7 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
         isFinished={isFinished}
         todayCount={todayCount}
         todayMinutes={todayMinutes}
+        weekCounts={weekCounts}
         onToggle={togglePomodoro}
         onFinish={finishPomodoro}
         onStartBreak={startBreak}
@@ -286,7 +306,12 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
         return <ReferenceLayer onBack={closeLayer} />;
 
       case LAYER_IDS.intlCourses:
-        return <InternationalCoursesLayer onBack={closeLayer} />;
+        return (
+          <InternationalCoursesLayer
+            userId={userData?.id ?? userData?.phone ?? 'guest'}
+            onBack={closeLayer}
+          />
+        );
 
       case LAYER_IDS.myCourses:
         return <MyCoursesLayer onBack={closeLayer} onOpenCourse={handleOpenCourse} />;
@@ -376,7 +401,7 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
             </div>
           </div>
         ) : areNotificationsOpen ? (
-          <NotificationsSection />
+          <NotificationsSection pendingRead={pendingNotificationsRead.current} />
         ) : activeLayer ? (
           <div className="dashboard__section dashboard-layer-reveal" key={activeLayer}>
             {layerContent}

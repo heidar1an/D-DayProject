@@ -43,6 +43,9 @@ export default function ReadingSettings({ onClose }) {
 
   return (
     <div className="rdr-settings" ref={popRef} role="dialog" aria-label="تنظیمات مطالعه">
+      <button type="button" className="rdr-settings__close rdr-icon-btn" onClick={onClose} aria-label="بستن تنظیمات" title="بستن تنظیمات">
+        <Icon name="close" />
+      </button>
       <div className="rdr-settings__row">
         <span className="rdr-settings__label">اندازه متن</span>
         <div className="rdr-settings__stepper">

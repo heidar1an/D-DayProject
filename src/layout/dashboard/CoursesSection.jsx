@@ -10,12 +10,10 @@ const toFa = (value) => String(value).replace(/\d/g, (digit) => FA_DIGITS[Number
 const subjectById = Object.fromEntries(COMPREHENSIVE_SUBJECTS.map((subject) => [subject.id, subject]));
 
 /* «کار امروز را به فردا نسپار» — برنامه امروز.
-   هر کارت یک درس اصلی است؛ کلیک روی آن به بخش مربوطه همان درس لینک می‌شود. */
+   هر کارت یک درس اصلی است؛ کلیک روی آن، درسنامهٔ همان درس را باز می‌کند (نه یک واحد).
+   `moduleId` فقط بخش پیش‌انتخابی همان درسنامه است. */
 const TODAY_LESSONS = [
-  {
-    subjectId: 'anatomy', moduleId: 'upper-limb', unitId: 'upper-limb-01', stepId: 'learn',
-    time: 55, tests: 48, progress: 22,
-  },
+  { subjectId: 'anatomy', moduleId: 'upper-limb', time: 55, tests: 48, progress: 22 },
   { subjectId: 'physiology', time: 45, tests: 38 },
   { subjectId: 'biochemistry', time: 40, tests: 32 },
   { subjectId: 'immunology', time: 35, tests: 30 },
@@ -50,24 +48,6 @@ function ChevronIcon({ direction, className = 'h-4.5 w-4.5' }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       {direction === 'left' ? <path d="M19 12H5m6-6-6 6 6 6" /> : <path d="M5 12h14m-6-6 6 6-6 6" />}
-    </svg>
-  );
-}
-
-/* آیکن «سرعت» برای کارت‌های سه سوته */
-function BoltIcon({ className = 'h-3 w-3' }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M13.5 3 6.8 12.4h4.4L10.5 21l6.7-9.4h-4.4z" />
-    </svg>
-  );
-}
-
-/* جرقهٔ چهارپر — نشان مینیمال بخش پرو */
-function SparkIcon({ className = 'h-3.5 w-3.5' }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M12 2.6c1.1 6 3.3 8.2 9.4 9.4-6.1 1.2-8.3 3.4-9.4 9.4-1.1-6-3.3-8.2-9.4-9.4 6.1-1.2 8.3-3.4 9.4-9.4z" />
     </svg>
   );
 }
@@ -396,17 +376,6 @@ function MiniLessonCard({ subject, onOpen }) {
         style={{ background: `radial-gradient(50% 60% at 50% 50%, ${subject.accent}, transparent 72%)` }}
       />
 
-      {/* سربرگ: برچسب «سه سوته» */}
-      <span className="relative flex items-center justify-between">
-        <span
-          className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] md:text-[11px] [font-family:'Doran','Vazir',Tahoma,sans-serif]"
-          style={{ backgroundColor: `${subject.accent}26`, color: subject.accent }}
-        >
-          <BoltIcon className="h-3 w-3" />
-          سه سوته
-        </span>
-      </span>
-
       {/* دستهٔ سه برگهٔ نکته */}
       <span aria-hidden="true" className="relative mx-auto my-auto block h-[112px] w-[94px] md:h-[128px] md:w-[108px]">
         <span className="absolute inset-0 origin-bottom rotate-[-13deg] rounded-2xl border border-white/10 bg-white/[0.05] transition-transform duration-300 group-hover:-translate-x-3.5 group-hover:rotate-[-18deg]" />
@@ -541,70 +510,6 @@ export default function CoursesSection({ onOpenCourse, onOpenAllCourses }) {
           ))}
         </div>
       </section>
-
-      {/* ── آگهی پرو ── */}
-      <aside className="relative overflow-hidden rounded-[2.5rem] border border-[#e0b45c]/20 bg-[var(--blue-deep)] md:rounded-[3rem]">
-        {/* هالهٔ نرم طلایی */}
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute -top-32 left-1/2 h-64 w-[42rem] -translate-x-1/2 rounded-full opacity-[0.18] blur-3xl"
-          style={{ background: 'radial-gradient(50% 50% at 50% 50%, var(--gold), transparent 72%)' }}
-        />
-
-        {/* الگوی مینیمال: کمان‌های نازک */}
-        <svg
-          aria-hidden="true"
-          viewBox="0 0 260 260"
-          className="pointer-events-none absolute -bottom-24 -left-20 h-[280px] w-[280px] opacity-[0.13] md:-bottom-32 md:-left-24 md:h-[380px] md:w-[380px]"
-        >
-          <g fill="none" stroke="var(--gold-ink)" strokeWidth="1">
-            <circle cx="130" cy="130" r="52" />
-            <circle cx="130" cy="130" r="84" />
-            <circle cx="130" cy="130" r="116" />
-          </g>
-        </svg>
-
-        <div className="relative flex flex-col items-center gap-8 px-6 py-10 text-center md:flex-row md:items-center md:justify-between md:gap-12 md:px-14 md:py-12 md:text-right">
-          <div className="flex flex-col items-center md:items-start">
-            <span className="flex items-center gap-2 rounded-full border border-[#e0b45c]/30 bg-[#e0b45c]/10 px-3.5 py-1.5 text-[11px] text-[var(--gold-ink)] md:text-xs [font-family:'Doran','Vazir',Tahoma,sans-serif]">
-              <SparkIcon className="h-3.5 w-3.5" />
-              پرو تپش
-            </span>
-
-            <h2 className="mt-4 text-2xl leading-9 text-white md:mt-5 md:text-[2rem] md:leading-[3rem] [font-family:'Doran','Vazir',Tahoma,sans-serif]">
-              همین حالا اشتراک پرو تپش را تهیه کنید
-            </h2>
-
-            <p className="mt-2 text-sm text-white/55 md:mt-3 md:text-lg">
-              با بیش از ۲۰٪ تخفیف تا پایان امروز
-            </p>
-
-            <button
-              type="button"
-              className="mt-7 cursor-pointer rounded-2xl bg-[var(--gold)] px-7 py-3 text-sm text-[#1c1508] transition duration-200 hover:-translate-y-0.5 hover:brightness-110 md:mt-8 md:rounded-[1.25rem] md:px-9 md:py-3.5 md:text-base [font-family:'Doran','Vazir',Tahoma,sans-serif]"
-            >
-              اشتراک پرو را از اینجا دریافت کنید
-            </button>
-          </div>
-
-          {/* نشان مینیمال پرو */}
-          <div aria-hidden="true" className="relative grid h-32 w-32 shrink-0 place-items-center md:h-44 md:w-44">
-            <span
-              className="absolute inset-0 rounded-full opacity-30 blur-2xl"
-              style={{ background: 'radial-gradient(50% 50% at 50% 50%, var(--gold), transparent 70%)' }}
-            />
-            <svg viewBox="0 0 160 160" className="relative h-full w-full">
-              <circle cx="80" cy="80" r="62" fill="none" stroke="var(--gold-ink)" strokeOpacity="0.22" strokeWidth="1" />
-              <circle cx="80" cy="80" r="48" fill="none" stroke="var(--gold-ink)" strokeOpacity="0.35" strokeWidth="1" strokeDasharray="3 7" />
-              <path
-                d="M80 50c3.4 18.6 11 26.2 29.6 29.6C91 83 83.4 90.6 80 109.2 76.6 90.6 69 83 50.4 79.6 69 76.2 76.6 68.6 80 50z"
-                fill="var(--gold-ink)"
-                fillOpacity="0.9"
-              />
-            </svg>
-          </div>
-        </div>
-      </aside>
 
       {/* ── کار امروز را به فردا نسپار ── */}
       <LessonRail

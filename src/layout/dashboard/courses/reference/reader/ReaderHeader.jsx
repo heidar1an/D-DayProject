@@ -16,7 +16,9 @@ export default function ReaderHeader({ progressRef }) {
     tocOpen,
     setAsideOpen,
     setAsideTab,
+    settingsOpen,
     setSettingsOpen,
+    mobilePanel,
     setMobilePanel,
     onExit,
   } = useReader();
@@ -25,15 +27,6 @@ export default function ReaderHeader({ progressRef }) {
     <header className="rdr-header">
       <div className="rdr-header__row">
         <div className="rdr-header__side">
-          <button
-            type="button"
-            className="rdr-icon-btn"
-            onClick={() => setTocOpen(!tocOpen)}
-            title={tocOpen ? 'بستن فهرست مطالب' : 'نمایش فهرست مطالب'}
-            aria-label="فهرست مطالب"
-          >
-            <Icon name="list" />
-          </button>
           <button type="button" className="rdr-icon-btn" onClick={onExit} title="خروج از مطالعه" aria-label="خروج از مطالعه">
             <Icon name="exit" />
           </button>
@@ -67,19 +60,6 @@ export default function ReaderHeader({ progressRef }) {
             type="button"
             className="rdr-icon-btn"
             onClick={() => {
-              setAsideTab('search');
-              setAsideOpen(true);
-              setMobilePanel('aside');
-            }}
-            title="جست‌وجو (Ctrl+F)"
-            aria-label="جست‌وجو"
-          >
-            <Icon name="search" />
-          </button>
-          <button
-            type="button"
-            className="rdr-icon-btn"
-            onClick={() => {
               setAsideTab('notes');
               setAsideOpen(true);
               setMobilePanel('aside');
@@ -92,11 +72,26 @@ export default function ReaderHeader({ progressRef }) {
           <button
             type="button"
             className="rdr-icon-btn"
-            onClick={() => setSettingsOpen(true)}
+            onMouseDown={(event) => event.stopPropagation()}
+            onClick={() => setSettingsOpen((open) => !open)}
             title="تنظیمات مطالعه — فونت، فاصله، تم"
             aria-label="تنظیمات مطالعه"
+            aria-expanded={settingsOpen}
           >
             <Icon name="settings" />
+          </button>
+          <button
+            type="button"
+            className="rdr-icon-btn"
+            onClick={() => {
+              if (window.innerWidth <= 900) setMobilePanel((panel) => panel === 'toc' ? null : 'toc');
+              else setTocOpen((open) => !open);
+            }}
+            title="نمایش یا بستن فهرست مطالب"
+            aria-label="فهرست مطالب"
+            aria-expanded={window.innerWidth <= 900 ? mobilePanel === 'toc' : tocOpen}
+          >
+            <Icon name="list" />
           </button>
         </div>
       </div>

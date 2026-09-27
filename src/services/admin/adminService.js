@@ -156,6 +156,21 @@ export const pages = {
   remove: (id) => del(`/pages/${encodeURIComponent(id)}`),
 };
 
+export const testBank = {
+  list: (params) => get(`/test-bank${toQuery(params)}`),
+  get: (id) => get(`/test-bank/${encodeURIComponent(id)}`),
+  create: (payload) => bankMutation(post('/test-bank', payload)),
+  update: (id, payload) => bankMutation(put(`/test-bank/${encodeURIComponent(id)}`, payload)),
+  remove: (id) => bankMutation(del(`/test-bank/${encodeURIComponent(id)}`)),
+};
+
+async function bankMutation(promise) {
+  const result = await promise;
+  try { window.localStorage.setItem('tapesh:testbank:changed', `${Date.now()}-${Math.random()}`); } catch { /* اعلان همان تب همچنان کار می‌کند */ }
+  window.dispatchEvent(new Event('tapesh:testbank:changed'));
+  return result;
+}
+
 /* ──────────────── کتابخانهٔ فلش‌کارت تپش (مجموعه‌ها و کارت‌ها) ──────────────── */
 
 export const flashcards = {
@@ -164,6 +179,35 @@ export const flashcards = {
   create: (payload) => post('/flashcards', payload),
   update: (id, payload) => put(`/flashcards/${encodeURIComponent(id)}`, payload),
   remove: (id) => del(`/flashcards/${encodeURIComponent(id)}`),
+};
+
+/* ──────────────── مراجع تپش (لایهٔ داخل پنل) ────────────────
+ *
+ * هر مرجع یک رکورد کامل است (فراداده + بخش‌ها + متن هر بخش)، پس ویرایش یک
+ * PUT کامل می‌فرستد — درست مثل میکرو درسنامه. انتشار با همان PUT و فیلد
+ * `status` است و مرجع را روی `/api/public/references/library` می‌گذارد.
+ */
+
+export const references = {
+  list: (params) => get(`/references${toQuery(params)}`),
+  get: (id) => get(`/references/${encodeURIComponent(id)}`),
+  create: (payload) => post('/references', payload),
+  update: (id, payload) => put(`/references/${encodeURIComponent(id)}`, payload),
+  remove: (id) => del(`/references/${encodeURIComponent(id)}`),
+};
+
+/* ──────────────── درسنامه جامع (لایهٔ داخل پنل) ────────────────
+ *
+ * هر درس یک رکورد کامل است (مبحث‌ها + واحدها + متن و تست هر واحد)، پس ویرایش
+ * یک PUT کامل می‌فرستد و انتشار اتمیک می‌ماند — همان قرارداد مراجع و میکرو.
+ * انتشار با فیلد `status` است و درسنامهٔ منتشرشده روی مسیر عمومی
+ * `/api/public/comprehensive/library` در دسترس لایهٔ یادگیری می‌گذارد.
+ */
+
+export const comprehensive = {
+  list: (params) => get(`/comprehensive${toQuery(params)}`),
+  get: (id) => get(`/comprehensive/${encodeURIComponent(id)}`),
+  update: (id, payload) => put(`/comprehensive/${encodeURIComponent(id)}`, payload),
 };
 
 /* ──────────────── میکرو درسنامه (لایهٔ داخل پنل) ────────────────
@@ -521,6 +565,6 @@ export function readFileAsBase64(file) {
 }
 
 export default {
-  auth, articles, categories, pages, flashcards, micro, media, banners, users, settings, logs, notes,
+  auth, articles, categories, pages, flashcards, references, comprehensive, micro, media, banners, users, settings, logs, notes,
   publishing, analytics, mediaCenter, getStats, getMeta, toQuery, readFileAsBase64, AdminApiError,
 };

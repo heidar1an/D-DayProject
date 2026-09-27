@@ -60,6 +60,11 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
  * عنوان یا کارت‌ها هم اثری نداشت — چون UI فقط `TAPESH_DECKS`/`TAPESH_CARDS` ثابت
  * را می‌خواند.
  *
+ * همین مسیر، دک‌های ثابتِ داخل کد را هم حمل می‌کند: سرور هر مجموعهٔ ثابت را یک‌بار
+ * به رکورد پنل تبدیل می‌کند (`syncFlashcardDecks`) و چون همان رکورد `published`
+ * است، ویرایش ادمین روی آن هم به کاربران می‌رسد. فیلتر `publishedDeckIds()` پایین
+ * جلوی دو بار آمدنِ یک مجموعه را می‌گیرد.
+ *
  * کش کوتاه‌مدت است: این توابع پرتکرارند (هر مرور یک‌بار `allCards` را می‌خواند) ولی
  * «باز کردن کتابخانه» همیشه تازه می‌گیرد (`forceLibrary`).
  */
@@ -100,19 +105,30 @@ export async function loadPublishedDecks({ force = false } = {}) {
 
 /* دک‌های تپش = منتشرشده‌های پنل + مجموعهٔ ثابت `mockData`
    (کارت‌ها از فهرست دک جدا می‌شوند تا شکل خروجی با دک‌های ثابت یکی بماند؛
-    کارت‌ها فقط از `tapeshCards()` می‌آیند.) */
+    کارت‌ها فقط از `tapeshCards()` می‌آیند.)
+
+   دک‌های ثابتِ داخل کد و رکورد پنل هم‌شناسه‌اند: سرور هر مجموعهٔ ثابت را با
+   `syncFlashcardDecks()` به رکورد تبدیل می‌کند و همان رکورد را در همین مسیر عمومی
+   منتشر می‌کند. پس نسخهٔ منتشرشده **جای** نسخهٔ ثابت را می‌گیرد، نه کنارش — وگرنه
+   هر مجموعه دو بار در کتابخانه می‌آمد و ویرایش پنل هم بی‌اثر می‌ماند. */
+function publishedDeckIds() {
+  return new Set(publishedDecks.map((deck) => deck.id));
+}
+
 function tapeshDecks() {
+  const published = publishedDeckIds();
   return [
     ...publishedDecks.map(({ cards, ...deck }) => deck),
-    ...TAPESH_DECKS,
+    ...TAPESH_DECKS.filter((deck) => !published.has(deck.id)),
   ];
 }
 
 /* کارت‌های دک‌های تپش — کارت‌های پنل `deckId` را همراه دارند */
 function tapeshCards() {
+  const published = publishedDeckIds();
   return [
     ...publishedDecks.flatMap((deck) => (deck.cards ?? []).map((card) => ({ ...card, deckId: deck.id }))),
-    ...TAPESH_CARDS,
+    ...TAPESH_CARDS.filter((card) => !published.has(card.deckId)),
   ];
 }
 
@@ -133,6 +149,10 @@ export function __setFailure(next) {
 /* کش درون‌حافظه — منبع حقیقت نشست. اگر localStorage بنویسد و پر باشد (مثلاً
  * با حجم صدا/تصویر زیاد) خواندن‌های بعدی دادهٔ کهنه برنمی‌گردانند؛ وگرنه
  * «افزودن شد ولی در فهرست نمی‌آمد» اتفاق می‌افتاد. */
+/* نتیجهٔ آخرین نوشتن — مسیر کارت از همین می‌فهمد که تصویر بزرگ حافظه را پر کرده
+   و باید به کاربر بگوید، به‌جای شکست بی‌صدا. */
+let lastWriteOk = true;
+
 let storeCache = null;
 
 function readStore() {
@@ -148,10 +168,16 @@ function readStore() {
 
 function writeStore(store) {
   storeCache = store;
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined') {
+    lastWriteOk = true;
+    return;
+  }
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+    lastWriteOk = true;
   } catch {
+    /* پر شدن حافظه — نتیجه برای مسیر کارت نگه داشته می‌شود */
+    lastWriteOk = false;
     /* حافظه پر یا غیرفعال — نشست جاری در حافظه ادامه می‌یابد؛ فقط ماندگاری
        بین رفرش‌ها کم می‌شود (در نسخهٔ واقعی: Sync-Queue سمت سرور) */
   }
@@ -828,10 +854,18 @@ export function createCard(userData, deckId, draft) {
     if (!card.back && card.type !== 'mcq' && card.type !== 'cloze') throw new Error('back-required');
     if (card.type === 'image' && !card.media?.frontImageUrl) throw new Error('image-required');
 
-    mutateUserSpace(userData, (space) => {
-      space.userCards.push(card);
-      space.cardStates[card.id] = stateFor();
+    const space = mutateUserSpace(userData, (current) => {
+      current.userCards.push(card);
+      current.cardStates[card.id] = stateFor();
     });
+    /* تصویر کارت به‌صورت Data-URL روی کارت می‌ماند؛ اگر حافظهٔ مرورگر پر شود نوشتن
+       انجام نشده — پس کارت را از کش هم برمی‌داریم تا وضعیت با دیسک یکی بماند و
+       «ذخیره شد» بی‌پشتوانه گفته نشود. */
+    if (!lastWriteOk) {
+      space.userCards = space.userCards.filter((item) => item.id !== card.id);
+      delete space.cardStates[card.id];
+      throw new Error('storage-full');
+    }
     return card;
   });
 }
@@ -840,24 +874,32 @@ export function createCard(userData, deckId, draft) {
 export function updateCard(userData, cardId, patch) {
   return respond(() => {
     let updated = null;
-    mutateUserSpace(userData, (space) => {
-      const card = space.userCards.find((item) => item.id === cardId);
-      if (card) {
-        Object.assign(card, patch, { updatedAt: new Date().toISOString() });
-        updated = { ...card };
+    /* برای بازگردانی در صورت پر شدن حافظه: کارت قبلی (یا نبودش) */
+    let before = null;
+    const space = mutateUserSpace(userData, (current) => {
+      const index = current.userCards.findIndex((item) => item.id === cardId);
+      if (index >= 0) {
+        before = { index, card: { ...current.userCards[index] } };
+        Object.assign(current.userCards[index], patch, { updatedAt: new Date().toISOString() });
+        updated = { ...current.userCards[index] };
         return;
       }
       /* ویرایش کارت تپش: نسخهٔ کاربر محفوظ می‌ماند (نسخه‌بندی card.version) */
       const tapeshCard = tapeshCards().find((item) => item.id === cardId);
       if (tapeshCard) {
         const local = { ...tapeshCard, ...patch, version: tapeshCard.version + 1, updatedAt: new Date().toISOString() };
-        const index = space.userCards.findIndex((item) => item.id === cardId);
-        if (index >= 0) space.userCards[index] = local;
-        else space.userCards.push(local);
+        before = { index: -1, card: null };
+        current.userCards.push(local);
         updated = local;
       }
     });
     if (!updated) throw new Error('card-not-found');
+    /* تصویر بزرگ می‌تواند حافظهٔ مرورگر را پر کند؛ در آن صورت ویرایش برمی‌گردد */
+    if (!lastWriteOk) {
+      if (before?.card) space.userCards[before.index] = before.card;
+      else if (before) space.userCards.pop();
+      throw new Error('storage-full');
+    }
     return updated;
   });
 }

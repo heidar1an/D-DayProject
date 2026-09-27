@@ -17,70 +17,78 @@
   to { background-position: -200% 0; }
 }
 
-/* ─────────────── سرتیتر لایه ───────────────
-   هم‌خانواده با سرتیتر «میکرو درسنامه»: چیپ بالا، عنوان گرادیانی بزرگ،
-   یک خط تأکید و یک توضیح کوتاه. فقط رنگ به هویت سبز همین لایه چرخیده است. */
-.an-hero {
+/* ─────────────── سرتیتر هیرو لایه ───────────────
+   پیشوند `an-status-hero` است نه `an-hero`: کلاس `.an-hero` در مرکز تحلیل پنل
+   (که از App.jsx سراسری بارگذاری می‌شود) پس‌زمینه/کادر/فاصلهٔ خودش را دارد و
+   روی این هیرو می‌افتاد. اینجا فقط عنوان بزرگ، یک خط تأکید و یک توضیح کوتاه —
+   بدون پس‌زمینه و بدون گرادیان متن. */
+.an-status-hero {
   padding: clamp(14px, 2.6vh, 30px) 0 4px;
 }
 
-.an-hero__content {
+.an-status-hero__content {
   max-width: 820px;
   margin: 0 auto;
   text-align: center;
 }
 
-.an-hero__chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 14px;
-  border: 1px solid rgba(97, 209, 146, 0.4);
-  border-radius: 999px;
-  background: rgba(97, 209, 146, 0.1);
-  color: var(--green-soft-ink);
-  font-size: 0.9rem;
-}
-
-.an-hero__chip i {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--green-vivid);
-  animation: an-hero-pulse 2.4s ease-out infinite;
-}
-
-@keyframes an-hero-pulse {
-  0% { box-shadow: 0 0 0 0 rgba(97, 209, 146, 0.55); }
-  70% { box-shadow: 0 0 0 9px rgba(97, 209, 146, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(97, 209, 146, 0); }
-}
-
-.an-hero__title {
+.an-status-hero__title {
   margin: 14px 0 6px;
   font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-weight: 800;
   font-size: clamp(2.6rem, 6.4vw, 4.6rem);
   line-height: 1.25;
-  background: linear-gradient(120deg, var(--green-vivid) 15%, var(--green) 85%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
+  color: var(--white);
 }
 
-.an-hero__kicker {
+.an-status-hero__kicker {
   margin: 0;
   color: var(--muted);
   font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
   font-size: clamp(1.15rem, 2.2vw, 1.55rem);
 }
 
-.an-hero__subtitle {
+.an-status-hero__subtitle {
   max-width: 700px;
   margin: 12px auto 0;
   color: var(--muted);
   font-size: clamp(0.95rem, 1.5vw, 1.12rem);
   line-height: 2;
+}
+
+/* ─────────────── سربرگ لایه — عین بانک تست علوم پایه: فقط دکمهٔ بازگشت ─────────────── */
+.an-topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.an-topbar__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px 10px 14px;
+  border: 1px solid rgb(var(--line-rgb) / 0.1);
+  border-radius: 16px;
+  background: rgb(var(--wash-rgb) / 0.04);
+  color: var(--white);
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: border-color 200ms ease, background 200ms ease, transform 160ms ease;
+}
+
+.an-topbar__back:hover {
+  border-color: rgba(97, 209, 146, 0.6);
+  background: rgba(97, 209, 146, 0.12);
+  transform: translateY(-1px);
+}
+
+.an-topbar__back svg {
+  width: 18px;
+  height: 18px;
 }
 
 /* ─────────────── چیپ فیلتر ─────────────── */
@@ -292,6 +300,241 @@
   to { transform: translateY(0) scale(1); opacity: 1; }
 }
 
+/* ─────────────── نمودارها — هم‌زبان نمودار داشبورد (heart-chart) ───────────────
+   هندسه و تولتیپ همان قرارداد نمودار قلب است؛ رنگ از --an-accent (inline) می‌آید
+   تا هر سنجه با رنگ خودش روی همین زبان بصری بنشیند. */
+.an-chart__plot {
+  position: relative;
+  direction: ltr;
+}
+
+.an-chart__svg {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: visible;
+}
+
+.an-chart__grid {
+  stroke: rgb(var(--ink-rgb) / 0.06);
+}
+
+.an-chart__grid--base {
+  stroke: rgb(var(--ink-rgb) / 0.13);
+}
+
+.an-chart__ylabel {
+  fill: var(--faint);
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
+  font-size: 10.5px;
+}
+
+.an-chart__avg line {
+  stroke: var(--an-accent, #61d192);
+  opacity: 0.5;
+}
+
+.an-chart__avg-chip {
+  position: absolute;
+  left: 10px;
+  z-index: 3;
+  padding: 3px 10px;
+  border: 1px solid rgb(var(--line-rgb) / 0.14);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--an-accent, #61d192);
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
+  font-size: 10.5px;
+  line-height: 1.6;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.an-chart__bar {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: an-bar-rise 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--i) * 32ms);
+  transition: opacity 160ms ease;
+}
+
+.an-chart__bar.is-hover path {
+  filter: brightness(1.14);
+}
+
+.an-chart__plot.is-hovering .an-chart__bar:not(.is-hover) {
+  opacity: 0.42;
+}
+
+.an-chart__ghost {
+  fill: rgb(var(--ink-rgb) / 0.09);
+}
+
+.an-chart__pulse-dot {
+  fill: var(--an-accent, #61d192);
+}
+
+.an-chart__pulse-ring {
+  fill: none;
+  stroke: var(--an-accent, #61d192);
+  stroke-width: 1.5;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: an-chart-pulse 2.2s ease-out infinite;
+}
+
+.an-chart__guide {
+  stroke: var(--an-accent-soft, rgba(97, 209, 146, 0.28));
+  stroke-width: 1;
+  stroke-dasharray: 3 5;
+  stroke-linecap: round;
+}
+
+.an-chart__line-stroke {
+  fill: none;
+  stroke: var(--an-accent, #61d192);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: an-line-draw 900ms cubic-bezier(0.4, 0.05, 0.25, 1) forwards;
+}
+
+.an-chart__dot-wrap {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: an-dot-in 420ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(var(--i) * 32ms + 420ms);
+}
+
+.an-chart__dot {
+  fill: var(--ghost);
+  stroke: var(--an-accent, #61d192);
+  stroke-width: 2;
+  transition: opacity 160ms ease;
+}
+
+.an-chart__dot.is-current {
+  fill: var(--an-accent, #61d192);
+}
+
+.an-chart__plot.is-hovering .an-chart__dot-wrap:not(.is-hover) .an-chart__dot {
+  opacity: 0.42;
+}
+
+/* ستون‌های hover/focus — چپ و عرض از همان هندسهٔ svg می‌آید */
+.an-chart__overlay {
+  position: absolute;
+  inset: 0;
+  direction: ltr;
+}
+
+.an-chart__column {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  outline: none;
+}
+
+.an-chart__column::before {
+  position: absolute;
+  inset: 6px 2px var(--an-pad-bottom, 30px);
+  border-radius: 14px;
+  background-color: rgb(var(--wash-rgb) / 0.018);
+  background-image: linear-gradient(180deg, var(--an-accent-soft, rgba(97, 209, 146, 0.16)) 0%, transparent 100%);
+  content: '';
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 170ms ease;
+}
+
+.an-chart__column::after {
+  position: absolute;
+  inset-inline: 6px;
+  bottom: var(--an-pad-bottom, 30px);
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--an-accent, #61d192), transparent);
+  content: '';
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 170ms ease;
+}
+
+.an-chart__column.is-hover::before,
+.an-chart__column:focus-visible::before,
+.an-chart__column.is-hover::after,
+.an-chart__column:focus-visible::after {
+  opacity: 1;
+}
+
+/* تولتیپ — همان ساختار تولتیپ نمودار داشبورد */
+.an-chart__tooltip {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  min-width: 148px;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 14px;
+  border: 1px solid rgb(var(--line-rgb) / 0.09);
+  border-radius: 14px;
+  background: var(--background);
+  box-shadow: 0 14px 32px rgb(var(--shadow-rgb) / calc(0.55 * var(--shadow-scale)));
+  direction: rtl;
+  text-align: right;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.an-chart__tooltip-title {
+  color: var(--muted);
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
+  font-size: 11px;
+}
+
+.an-chart__tooltip-value {
+  color: var(--white);
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
+  font-size: 15.5px;
+  font-weight: 700;
+}
+
+.an-chart__tooltip-value i {
+  color: var(--muted);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 500;
+}
+
+.an-chart__tooltip-sub {
+  color: var(--faint);
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
+  font-size: 10px;
+}
+
+@keyframes an-bar-rise {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+
+@keyframes an-line-draw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes an-dot-in {
+  from { opacity: 0; transform: scale(0.4); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes an-chart-pulse {
+  0% { transform: scale(0.5); opacity: 0.85; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+
 /* ─────────────── Reduced motion ─────────────── */
 @media (prefers-reduced-motion: reduce) {
   .an-sk {
@@ -303,13 +546,25 @@
     animation: none;
   }
 
+  .an-chart__bar,
+  .an-chart__dot-wrap,
+  .an-chart__pulse-ring,
+  .an-chart__column::before,
+  .an-chart__column::after,
   .an-chip,
   .an-bar__fill,
   .an-ring circle,
   .an-qtable tbody tr,
   .an-row-click,
-  .an-rec {
+  .an-rec,
+  .an-topbar__back {
+    animation: none;
     transition: none;
+  }
+
+  .an-chart__line-stroke {
+    stroke-dashoffset: 0;
+    animation: none;
   }
 }
 

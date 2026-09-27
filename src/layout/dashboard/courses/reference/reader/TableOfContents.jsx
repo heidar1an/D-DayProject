@@ -5,7 +5,7 @@ import { useReader } from './readerContext';
 const FA_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
 const toFa = (value) => String(value).replace(/\d/g, (digit) => FA_DIGITS[Number(digit)]);
 
-/* فهرست مطالب (سمت چپ): فصل‌ها + بخش‌ها، با جست‌وجو، درصد پیشرفت و نشانگر موقعیت جاری */
+/* فهرست مطالب: فصل‌ها و زیرمبحث‌های واقعی همان نسخهٔ منتشرشده */
 export default function TableOfContents() {
   const {
     reference,
@@ -13,10 +13,8 @@ export default function TableOfContents() {
     chapterId,
     content,
     activeSectionId,
-    progress,
     openChapter,
     setActiveSectionId,
-    setTocOpen,
   } = useReader();
   const [expanded, setExpanded] = useState(() => new Set([chapterId]));
   const [query, setQuery] = useState('');
@@ -38,9 +36,10 @@ export default function TableOfContents() {
   }, [activeSectionId, chapterId]);
 
   const toggleChapter = (id) => {
+    if (id !== chapterId) openChapter(id);
     setExpanded((current) => {
       const next = new Set(current);
-      if (next.has(id)) next.delete(id);
+      if (id === chapterId && next.has(id)) next.delete(id);
       else next.add(id);
       return next;
     });
@@ -48,15 +47,16 @@ export default function TableOfContents() {
 
   const filteredChapters = useMemo(() => {
     const term = query.trim().toLowerCase();
-    if (!term) return chapters.map((chapter) => ({ chapter, sections: null }));
+    if (!term) return chapters.map((chapter) => ({
+      chapter,
+      sections: chapter.topics ?? (chapterId === chapter.id ? content?.sections ?? [] : []),
+    }));
     return chapters
       .map((chapter) => {
         const chapterMatch = chapter.title.toLowerCase().includes(term);
-        const sections = (chapterId === chapter.id && content
-          ? content.sections.map((s) => ({ id: s.id, title: s.title }))
-          : []
-        ).filter((s) => s.title.toLowerCase().includes(term));
-        if (chapterMatch || sections.length) return { chapter, sections: sections.length ? sections : null };
+        const allSections = chapter.topics ?? (chapterId === chapter.id ? content?.sections ?? [] : []);
+        const sections = chapterMatch ? allSections : allSections.filter((s) => s.title.toLowerCase().includes(term));
+        if (chapterMatch || sections.length) return { chapter, sections };
         return null;
       })
       .filter(Boolean);
@@ -66,15 +66,6 @@ export default function TableOfContents() {
     <nav className="rdr-toc" aria-label="فهرست مطالب مرجع">
       <div className="rdr-toc__head">
         <strong>{reference.title}</strong>
-        <button
-          type="button"
-          className="rdr-icon-btn"
-          onClick={() => setTocOpen(false)}
-          title="بستن فهرست"
-          aria-label="بستن فهرست مطالب"
-        >
-          <Icon name="close" />
-        </button>
       </div>
 
       <div className="rdr-toc__search">
@@ -91,31 +82,22 @@ export default function TableOfContents() {
       <div className="rdr-toc__scroll" ref={scrollRef}>
         {filteredChapters.map(({ chapter, sections }) => {
           const isCurrent = chapter.id === chapterId;
-          const pct = progress[chapter.id]?.pct ?? 0;
-          const isOpen = expanded.has(chapter.id) || isCurrent;
+          const isOpen = Boolean(query.trim()) || expanded.has(chapter.id);
           return (
             <div className="rdr-toc__chapter" key={chapter.id}>
               <button
                 type="button"
-                className={`rdr-toc__chapter-row ${isCurrent ? 'is-current' : ''} ${chapter.available ? '' : 'is-locked'}`}
-                onClick={() => (chapter.available ? toggleChapter(chapter.id) : toggleChapter(chapter.id))}
+                className={`rdr-toc__chapter-row ${isCurrent ? 'is-current' : ''}`}
+                onClick={() => toggleChapter(chapter.id)}
                 aria-expanded={isOpen}
               >
                 <Icon name="chevron" size={14} className={`rdr-toc__chev ${isOpen ? 'is-open' : ''}`} />
                 <span className="rdr-toc__number">{toFa(chapter.number)}</span>
-                <span className="rdr-toc__title">
-                  {chapter.title}
-                  {!chapter.available && <em>به‌زودی</em>}
-                </span>
-                <span className="rdr-toc__pct">{toFa(pct)}٪</span>
+                <span className="rdr-toc__title">{chapter.title}</span>
               </button>
 
-              <span className="rdr-toc__bar" aria-hidden="true">
-                <span style={{ width: `${pct}%` }} />
-              </span>
-
-              {isOpen && sections && (
-                <div className="rdr-toc__sections">
+              {isOpen && sections.length > 0 && (
+                <div className="rdr-toc__sections" aria-label={`زیرمبحث‌های ${chapter.title}`}>
                   {sections.map((section) => (
                     <button
                       key={section.id}
@@ -123,11 +105,14 @@ export default function TableOfContents() {
                       data-current={section.id === activeSectionId || undefined}
                       className="rdr-toc__section"
                       onClick={() => {
-                        openChapter(chapter.id, { sectionId: section.id });
+                        if (isCurrent && section.id === activeSectionId) {
+                          document.querySelector('.rdr-content')?.scrollTo({ top: 0, behavior: 'smooth' });
+                        } else openChapter(chapter.id, { sectionId: section.id });
                         setActiveSectionId(section.id);
                       }}
                     >
-                      {section.title}
+                      <span className="rdr-toc__section-dot" aria-hidden="true" />
+                      <span>{section.title}</span>
                     </button>
                   ))}
                 </div>

@@ -40,7 +40,89 @@ const BLOCK_OPTIONS = [
   { value: 'H4', label: 'تیتر ۴' },
 ];
 
-export default function RichTextEditor({ value = '', onChange, placeholder = 'متن خود را اینجا بنویسید…' }) {
+/*
+ * دکمهٔ نوار ابزار — **بیرون از کامپوننت** تعریف شده و باید همین‌جا بماند.
+ *
+ * اگر داخل `RichTextEditor` تعریف شود، هر رندر یک «نوع کامپوننت» تازه است و ری‌اکت
+ * مجبور می‌شود همهٔ دکمه‌های نوار را از نو بسازد. آن نوسان DOM دو اثر بد داشت (هر دو
+ * با پروب واقعی مرورگر تأیید شد): فوکوس ویرایشگر می‌رفت، و کلیک دومِ دابل‌کلیک روی متن
+ * به دکمهٔ «واگرد» نسبت داده می‌شد ⇒ `undo` اجرا و آخرین تغییر کاربر پاک می‌شد.
+ */
+function ToolButton({ label, icon: Icon, isActive = false, onClick }) {
+  return (
+    <button
+      type="button"
+      className={`ad-rte__btn ${isActive ? 'is-active' : ''}`}
+      title={label}
+      aria-label={label}
+      aria-pressed={isActive}
+      onMouseDown={(event) => event.preventDefault()}
+      onClick={onClick}
+    >
+      {Icon ? <Icon /> : <span className="ad-rte__letter">{label}</span>}
+    </button>
+  );
+}
+
+/*
+ * متنِ راهنما را داخل ویرایشگر پیدا و انتخاب می‌کند تا کاربر با تایپ جایگزینش کند.
+ * بدون این، متن راهنمای کادر («متن نکته را اینجا بنویسید…») می‌توانست اشتباهی منتشر شود.
+ */
+function selectTextIn(root, needle) {
+  if (!root || !needle) return false;
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  let node;
+  while ((node = walker.nextNode())) {
+    const at = node.textContent.indexOf(needle);
+    if (at < 0) continue;
+    const range = document.createRange();
+    range.setStart(node, at);
+    range.setEnd(node, at + needle.length);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    return true;
+  }
+  return false;
+}
+
+/*
+ * پوسته‌های بلوکیِ متن — همان کادرها و جدول‌هایی که از قبل داخل محتوا هستند.
+ *
+ * چرا لازم است: وقتی کاربر کل محتوای یک کادر را انتخاب و حذف می‌کند، مرورگر خودِ
+ * `div` را نگه می‌دارد و فقط داخلش را خالی می‌کند. نتیجه یک «قاب خالی» است که نه
+ * متنی دارد که کلیک شود و نه راهی برای انتخاب‌شدن — یعنی کادر حذف‌نشدنی می‌ماند.
+ * پس حذفِ بلوکی را خودمان انجام می‌دهیم (پایین‌تر، `handleKeyDown`).
+ *
+ * کلاس‌های `ap-*` همان کادرها، جدول‌ها و تصویرهای مقاله‌اند؛ چون فقط داخل متنِ
+ * مقالات پیدا می‌شوند، این گارد در بقیهٔ ویرایشگرهای پنل بی‌اثر می‌ماند (opt-in).
+ */
+const WRAPPER_SELECTOR = '.micr-callout, .micr-summary, .micr-table, .ap-callout, .ap-table-wrap, .ap-figure';
+
+/* نزدیک‌ترین پوستهٔ بلوکیِ نگه‌دارندهٔ یک گره، محدود به خود ویرایشگر */
+function wrapperOf(node, editor) {
+  let current = node?.nodeType === 1 ? node : node?.parentElement;
+  while (current && current !== editor) {
+    if (current.matches?.(WRAPPER_SELECTOR)) return current;
+    current = current.parentElement;
+  }
+  return null;
+}
+
+/*
+ * دو ابزار اختیاری که فراخوان می‌تواند روشن کند:
+ *   tones   — فهرست رنگ‌های متن `[{ value, label }]`؛ انتخاب کاربر را در
+ *             `<span class="micr-tone--value">` می‌پیچد. `value` خالی رنگ را برمی‌دارد.
+ *   inserts — دکمه‌های «کادر آماده» `[{ label, hint, html }]` که HTML را در محل نشانگر درج می‌کنند.
+ * هر دو عمداً opt-in‌اند تا ویرایشگرهای دیگر پنل رفتارشان عوض نشود.
+ *
+ * چرا رنگ با کلاس و نه `execCommand('foreColor')`؟ چون پاک‌ساز (`database/sanitizeHtml.js`)
+ * هر `style` را دور می‌ریزد و رنگِ درون‌خطی از ذخیره جان سالم نمی‌برد؛ کلاس از فهرست سفید
+ * عبور می‌کند و از توکن‌های تم رنگ می‌گیرد، پس در هر دو تم درست می‌ماند.
+ */
+export default function RichTextEditor({
+  value = '', onChange, placeholder = 'متن خود را اینجا بنویسید…', tones = null, inserts = null,
+}) {
   const notify = useToast();
   const editorRef = useRef(null);
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
@@ -48,6 +130,8 @@ export default function RichTextEditor({ value = '', onChange, placeholder = 'م
   const [pickerOpen, setPickerOpen] = useState(false);
   const [block, setBlock] = useState('P');
   const [active, setActive] = useState({});
+  /* رنگ جاری — با دکمه‌های رنگ «از قبل» تعیین می‌شود و دابل‌کلیک روی واژه‌ها آن را می‌نشاند */
+  const [tone, setTone] = useState(null);
 
   /* محتوای DOM فقط وقتی از بیرون بازنویسی می‌شود که واقعاً تفاوت داشته باشد؛
      وگرنه نشانگر متن هنگام تایپ می‌پرد. */
@@ -92,11 +176,126 @@ export default function RichTextEditor({ value = '', onChange, placeholder = 'م
     refreshState();
   }, [emit, refreshState]);
 
-  const insertHtml = useCallback((html) => {
-    editorRef.current?.focus();
+  /* درج HTML آماده. `select` متنِ راهنمای کادر است و بعد از درج انتخاب می‌شود تا
+     کاربر فقط تایپ کند و جایگزین شود. */
+  const insertHtml = useCallback((html, select) => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    editor.focus();
     document.execCommand('insertHTML', false, sanitizeHtml(html));
+    if (select) selectTextIn(editor, select);
     emit();
   }, [emit]);
+
+  /* رنگ متن: انتخاب فعلی در یک `span` با کلاس تُن پیچیده می‌شود. تُن‌های قبلیِ داخل انتخاب
+     باز می‌شوند تا رنگ تازه جای قبلی را بگیرد (وگرنه span داخلی‌تر برنده می‌شود). */
+  const applyTone = useCallback((tone) => {
+    const editor = editorRef.current;
+    const selection = window.getSelection();
+    if (!editor || !selection || selection.rangeCount === 0) return;
+
+    const range = selection.getRangeAt(0);
+    /* انتخابِ خالی اینجا خطا نیست: رنگ فقط «جاری» می‌شود تا با دابل‌کلیک بنشیند */
+    if (range.collapsed || !editor.contains(range.commonAncestorContainer)) return;
+
+    try {
+      const content = range.extractContents();
+      content.querySelectorAll('[class*="micr-tone--"]').forEach((node) => node.replaceWith(...node.childNodes));
+
+      if (!tone) {
+        range.insertNode(content);
+        selection.removeAllRanges();
+      } else {
+        const span = document.createElement('span');
+        span.className = `micr-tone--${tone}`;
+        span.appendChild(content);
+        range.insertNode(span);
+        selection.removeAllRanges();
+        const next = document.createRange();
+        next.selectNodeContents(span);
+        selection.addRange(next);
+      }
+    } catch {
+      notify('رنگ‌کردن این بخش ممکن نشد', 'error');
+      return;
+    }
+
+    emit();
+  }, [emit, notify]);
+
+  /*
+   * انتخاب یک رنگ از پالت.
+   *   • اگر متنی انتخاب باشد، همان‌جا اعمال می‌شود (رفتار قبلی).
+   *   • اگر چیزی انتخاب نباشد، فقط رنگ «جاری» عوض می‌شود تا بعد با دابل‌کلیک روی
+   *     هر واژه/جمله بنشیند — همان «تعیین رنگ از قبل» که کاربر خواست.
+   */
+  const pickTone = useCallback((value) => {
+    setTone(value);
+    const editor = editorRef.current;
+    const selection = window.getSelection();
+    const hasSelection = Boolean(editor && selection && !selection.isCollapsed
+      && editor.contains(selection.anchorNode));
+    if (hasSelection) applyTone(value);
+  }, [applyTone]);
+
+  /* دابل‌کلیک روی یک واژه (یا جمله): مرورگر خودش واژه را انتخاب می‌کند و ما فقط
+     رنگ جاری را روی همان انتخاب می‌نشانیم. */
+  const handleDoubleClick = () => {
+    if (tone === null) return;
+    applyTone(tone);
+  };
+
+  /*
+   * حذف کادر به‌جای خالی‌کردنش.
+   *
+   * مرورگر وقتی محتوای یک `div` بلوکی حذف شود، خودِ `div` را نگه می‌دارد؛ آن قاب
+   * خالی بعداً نه قابل کلیک است و نه قابل انتخاب، پس کاربر عملاً «نمی‌تواند کادر را
+   * حذف کند». اینجا در دو حالت خودمان پوسته را برمی‌داریم:
+   *
+   *   ۱) کاربر کل محتوای کادر را انتخاب کرده و Backspace/Delete زده است.
+   *   ۲) کادر همین حالا خالی است و نشانگر داخل آن نشسته است.
+   *
+   * حالت «کاراکتر‌به‌کاراکتر خالی می‌کنم تا دوباره بنویسم» عمداً دست‌نخورده می‌ماند؛
+   * کادر فقط وقتی می‌رود که کاربر حذفِ کل بلوک را خواسته باشد.
+   */
+  const handleKeyDown = (event) => {
+    if (event.key !== 'Backspace' && event.key !== 'Delete') return;
+
+    const editor = editorRef.current;
+    const selection = window.getSelection();
+    if (!editor || !selection || selection.rangeCount === 0) return;
+
+    const range = selection.getRangeAt(0);
+    const wrapper = wrapperOf(range.commonAncestorContainer, editor);
+    if (!wrapper || !editor.contains(wrapper)) return;
+
+    const boxText = wrapper.textContent.trim();
+    const wholeBoxSelected = !range.collapsed && boxText === range.toString().trim();
+    const emptyAndFocused = !boxText && wrapper.contains(range.commonAncestorContainer);
+    if (!wholeBoxSelected && !emptyAndFocused) return;
+
+    event.preventDefault();
+
+    /* نشانگر باید جایی بنشیند که کادر بود؛ وگرنه ویرایشگر بی‌نشانگر می‌ماند */
+    const parent = wrapper.parentNode;
+    const index = Array.from(parent.childNodes).indexOf(wrapper);
+    wrapper.remove();
+
+    if (!editor.children.length) {
+      const placeholderBlock = document.createElement('p');
+      placeholderBlock.appendChild(document.createElement('br'));
+      editor.appendChild(placeholderBlock);
+    }
+
+    const target = parent.childNodes[Math.min(index, parent.childNodes.length - 1)] || editor.lastElementChild || editor;
+    const caret = document.createRange();
+    caret.selectNodeContents(target);
+    caret.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(caret);
+
+    emit();
+  };
 
   const handlePaste = (event) => {
     const html = event.clipboardData?.getData('text/html');
@@ -135,22 +334,18 @@ export default function RichTextEditor({ value = '', onChange, placeholder = 'م
     insertHtml(`<table><thead><tr><th>سرستون</th><th>سرستون</th><th>سرستون</th></tr></thead><tbody>${rows}</tbody></table><p></p>`);
   };
 
-  const ToolButton = ({ label, command, commandValue, icon: Icon, isActive = false, onClick }) => (
-    <button
-      type="button"
-      className={`ad-rte__btn ${isActive ? 'is-active' : ''}`}
-      title={label}
-      aria-label={label}
-      aria-pressed={isActive}
-      onMouseDown={(event) => event.preventDefault()}
-      onClick={onClick ?? (() => exec(command, commandValue))}
-    >
-      {Icon ? <Icon /> : <span className="ad-rte__letter">{label}</span>}
-    </button>
-  );
-
   return (
-    <div className="ad-rte">
+    <div
+      className="ad-rte"
+      /*
+       * کلیک داخل ویرایشگر هرگز نباید به والد برسد.
+       * اگر والد یک `<label>` باشد (مثل `Field`)، مرورگر کلیک روی محتوای غیرتعاملی را
+       * به «کنترلِ» آن هم می‌فرستد و چون نخستین عنصر labelable داخل ویرایشگر، دکمهٔ
+       * «واگرد» است، هر کلیک روی متن یک `undo` هم اجرا می‌کرد و تغییر کاربر پاک می‌شد.
+       * این گارد ویرایشگر را از هر والدِ برچسب‌داری مستقل می‌کند.
+       */
+      onClick={(event) => event.stopPropagation()}
+    >
       <div className="ad-rte__bar" role="toolbar" aria-label="ابزارهای ویرایش متن">
         <div className="ad-rte__group">
           <ToolButton label="واگرد" icon={Icons.undo} onClick={() => exec('undo')} />
@@ -169,23 +364,23 @@ export default function RichTextEditor({ value = '', onChange, placeholder = 'م
         </div>
 
         <div className="ad-rte__group">
-          <ToolButton label="B" command="bold" isActive={active.bold} />
-          <ToolButton label="I" command="italic" isActive={active.italic} />
-          <ToolButton label="U" command="underline" isActive={active.underline} />
-          <ToolButton label="S" command="strikeThrough" isActive={active.strikeThrough} />
+          <ToolButton label="B" isActive={active.bold} onClick={() => exec('bold')} />
+          <ToolButton label="I" isActive={active.italic} onClick={() => exec('italic')} />
+          <ToolButton label="U" isActive={active.underline} onClick={() => exec('underline')} />
+          <ToolButton label="S" isActive={active.strikeThrough} onClick={() => exec('strikeThrough')} />
         </div>
 
         <div className="ad-rte__group">
-          <ToolButton label="فهرست نقطه‌ای" icon={Icons.ul} command="insertUnorderedList" isActive={active.insertUnorderedList} />
-          <ToolButton label="فهرست شماره‌دار" icon={Icons.ol} command="insertOrderedList" isActive={active.insertOrderedList} />
+          <ToolButton label="فهرست نقطه‌ای" icon={Icons.ul} isActive={active.insertUnorderedList} onClick={() => exec('insertUnorderedList')} />
+          <ToolButton label="فهرست شماره‌دار" icon={Icons.ol} isActive={active.insertOrderedList} onClick={() => exec('insertOrderedList')} />
           <ToolButton label="نقل‌قول" icon={Icons.quote} onClick={() => exec('formatBlock', 'BLOCKQUOTE')} />
           <ToolButton label="بلوک کد" icon={Icons.code} onClick={() => exec('formatBlock', 'PRE')} />
         </div>
 
         <div className="ad-rte__group">
-          <ToolButton label="راست‌چین" icon={Icons.alignRight} command="justifyRight" />
-          <ToolButton label="وسط‌چین" icon={Icons.alignCenter} command="justifyCenter" />
-          <ToolButton label="چپ‌چین" icon={Icons.alignLeft} command="justifyLeft" />
+          <ToolButton label="راست‌چین" icon={Icons.alignRight} onClick={() => exec('justifyRight')} />
+          <ToolButton label="وسط‌چین" icon={Icons.alignCenter} onClick={() => exec('justifyCenter')} />
+          <ToolButton label="چپ‌چین" icon={Icons.alignLeft} onClick={() => exec('justifyLeft')} />
         </div>
 
         <div className="ad-rte__group">
@@ -194,6 +389,43 @@ export default function RichTextEditor({ value = '', onChange, placeholder = 'م
           <ToolButton label="افزودن جدول" icon={Icons.table} onClick={insertTable} />
           <ToolButton label="حذف قالب" icon={Icons.erase} onClick={() => exec('removeFormat')} />
         </div>
+
+        {tones?.length ? (
+          <div className="ad-rte__group" role="group" aria-label="رنگ متن">
+            {tones.map((item) => (
+              <button
+                key={item.value || 'none'}
+                type="button"
+                className={`ad-rte__btn ad-rte__tone${item.value ? '' : ' ad-rte__tone--none'}${item.value === tone ? ' is-active' : ''}`}
+                title={`${item.label} — با دابل‌کلیک روی واژه‌ها هم می‌نشیند`}
+                aria-label={`رنگ متن: ${item.label}`}
+                aria-pressed={item.value === tone}
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => pickTone(item.value)}
+              >
+                <span className={`ad-rte__letter${item.value ? ` micr-tone--${item.value}` : ''}`}>A</span>
+              </button>
+            ))}
+          </div>
+        ) : null}
+
+        {inserts?.length ? (
+          <div className="ad-rte__group" role="group" aria-label="کادرهای آماده">
+            {inserts.map((item) => (
+              <button
+                key={item.label}
+                type="button"
+                className="ad-rte__btn ad-rte__btn--text"
+                title={item.hint ?? item.label}
+                aria-label={item.label}
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => insertHtml(item.html, item.select)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        ) : null}
       </div>
 
       <div
@@ -207,9 +439,11 @@ export default function RichTextEditor({ value = '', onChange, placeholder = 'م
         suppressContentEditableWarning
         onInput={emit}
         onBlur={emit}
+        onKeyDown={handleKeyDown}
         onPaste={handlePaste}
         onKeyUp={refreshState}
         onMouseUp={refreshState}
+        onDoubleClick={handleDoubleClick}
       />
 
       <div className="ad-rte__foot">

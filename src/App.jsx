@@ -1759,7 +1759,12 @@ function App() {
   };
 
   /* خروج از حساب: فقط سشن پاک می‌شود تا حساب کاربر برای ورود بعدی باقی بماند */
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/users/logout', { method: 'POST', credentials: 'same-origin' });
+    } catch {
+      /* پاک‌سازی رابط کاربر حتی هنگام قطع ارتباط انجام می‌شود. */
+    }
     trackLogout();
     identify(null);
     clearStoredUser();

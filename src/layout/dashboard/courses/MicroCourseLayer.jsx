@@ -3,7 +3,7 @@ import './microCourse.css';
 import { LAYER_IDS, useLayerRoute } from '../dashboardRoute';
 import MicroCourseReader from './micro/MicroCourseReader';
 import MicroTopics from './micro/MicroTopics';
-import { MicroContentService } from '../../../services/micro/microContentService';
+import { MicroContentService, loadPublishedCourses } from '../../../services/micro/microContentService';
 
 /* جریان لایهٔ میکرودرسنامه: شبکهٔ درس‌ها ← فهرست مبحث‌ها (topics) ← خوانندهٔ صفحه‌به‌صفحه (reader).
    همهٔ درس‌ها به همین سیستم وصل‌اند؛ درس‌های بدون مبحث منتشرشده در فهرست مبحث‌ها
@@ -234,6 +234,18 @@ export default function MicroCourseLayer({ onBack, userId = 'local-user' }) {
   const topicsView = view.topics ?? null;
   const readerView = view.reader ?? null;
   const [query, setQuery] = useState('');
+
+  /* کتابخانهٔ منتشرشدهٔ پنل — یک‌بار ورود به لایه گرم می‌شود تا فهرست مبحث‌ها هم
+     نسخهٔ ویرایش‌شدهٔ ادمین را نشان دهد. خواننده مسیر async خودش را دارد.
+     مقدار شمارنده خوانده نمی‌شود؛ فقط یک رندر تازه می‌سازد تا `getCourseSync` که
+     کشِ گرم‌شده را ترجیح می‌دهد، نسخهٔ تازه را ببیند. */
+  const [, setLibraryVersion] = useState(0);
+
+  useEffect(() => {
+    let alive = true;
+    loadPublishedCourses().then(() => { if (alive) setLibraryVersion((value) => value + 1); });
+    return () => { alive = false; };
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (event) => {

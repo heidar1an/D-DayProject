@@ -52,12 +52,6 @@
   height: 18px;
 }
 
-.ref-topbar__crumb {
-  margin-inline-start: auto;
-  color: var(--faint);
-  font-size: 0.88rem;
-}
-
 /* ── هیرو ── */
 .ref-hero {
   padding: clamp(30px, 5.5vh, 60px) 0 10px;
@@ -80,11 +74,14 @@
   color: var(--muted);
 }
 
+/* سرتیتر هیرو هم‌رنگ خودِ مرجع است (زرد/طلایی). از `--gold-ink` و `--gold-soft-ink`
+   می‌آید نه `--gold` خام: این دو در تم روشن بازتعریف می‌شوند و متن روی زمینهٔ روشن
+   خوانا می‌ماند (`--gold` در تم روشن بازنویسی نمی‌شود). */
 .ref-hero__title-accent {
   font-weight: 800;
   font-size: clamp(2.6rem, 6vw, 4.6rem);
   line-height: 1.3;
-  background: linear-gradient(120deg, var(--blue-bright) 15%, var(--purple-bright) 85%);
+  background: linear-gradient(120deg, var(--gold-ink) 12%, var(--gold-soft-ink) 58%, var(--gold-ink) 94%);
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
@@ -98,7 +95,7 @@
   line-height: 2;
 }
 
-/* ── کارت وضعیت دیجیتال‌سازی + آمار کتابخانه ── */
+/* هالهٔ تپشِ نشانگر وضعیت — در نوار وضعیت خواننده مصرف می‌شود */
 @keyframes ref-ping {
   0% {
     box-shadow: 0 0 0 0 rgba(171, 142, 124, 0.55);
@@ -106,103 +103,6 @@
   70%, 100% {
     box-shadow: 0 0 0 12px rgba(171, 142, 124, 0);
   }
-}
-
-.ref-overview {
-  display: flex;
-  align-items: center;
-  gap: 28px;
-  flex-wrap: wrap;
-  margin-top: 20px;
-  padding: 22px 28px;
-  border-radius: 26px;
-  border: 1px solid rgb(var(--line-rgb) / 0.07);
-  background:
-    radial-gradient(600px 120px at 85% 0%, rgba(91, 140, 199, 0.12), transparent 70%),
-    rgb(var(--wash-rgb) / 0.022);
-}
-
-.ref-overview__badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 14px;
-  border-radius: 999px;
-  border: 1px solid rgba(171, 142, 124, 0.45);
-  background: rgba(171, 142, 124, 0.1);
-  color: var(--gold-soft-ink);
-  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
-  font-size: 0.78rem;
-}
-
-.ref-overview__badge i {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--brown-bright);
-  animation: ref-ping 2.2s ease-out infinite;
-}
-
-.ref-overview__copy h2 {
-  margin: 10px 0 0;
-  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
-  font-weight: 700;
-  font-size: 1.2rem;
-}
-
-.ref-overview__copy p {
-  max-width: 480px;
-  margin: 8px 0 0;
-  color: var(--faint);
-  font-size: 0.88rem;
-  line-height: 1.9;
-}
-
-.ref-overview__stats {
-  display: flex;
-  align-items: center;
-  gap: 26px;
-  flex-wrap: wrap;
-  margin-inline-start: auto;
-}
-
-.ref-stat {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.ref-stat__icon {
-  display: grid;
-  place-items: center;
-  width: 46px;
-  height: 46px;
-  border-radius: 16px;
-  border: 1px solid rgba(91, 140, 199, 0.35);
-  background: rgba(91, 140, 199, 0.1);
-  color: var(--blue-soft-ink);
-}
-
-.ref-stat__icon svg {
-  width: 21px;
-  height: 21px;
-}
-
-.ref-stat__copy {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.ref-stat__copy strong {
-  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
-  font-size: 1.15rem;
-  font-variant-numeric: tabular-nums;
-}
-
-.ref-stat__copy small {
-  color: var(--faint);
-  font-size: 0.76rem;
 }
 
 /* ── قفسه کتاب‌ها ── */
@@ -371,31 +271,9 @@
   background: radial-gradient(ellipse, rgb(var(--shadow-rgb) / 0.55), transparent 70%);
 }
 
-/* کتاب هنگام هاور کمی متمایل و بلند می‌شود */
+/* کتاب هنگام هاور بلند می‌شود ولی کج نمی‌شود — چرخش `rotate` به درخواست کاربر برداشته شد */
 .ref-card:hover .ref-book__body {
-  transform: translateY(-8px) rotate(-2.5deg);
-}
-
-/* ── تخته قفسه ── */
-.ref-card__board {
-  width: 82%;
-  height: 10px;
-  margin-top: 26px;
-  border-radius: 6px;
-  background: linear-gradient(to bottom,
-    color-mix(in srgb, var(--accent) 32%, var(--red-deep)),
-    var(--gold-deep) 65%);
-  box-shadow:
-    0 6px 14px rgb(var(--shadow-rgb) / calc(0.45 * var(--shadow-scale))),
-    inset 0 1px 0 color-mix(in srgb, var(--accent) 45%, transparent);
-  transition: box-shadow 260ms ease;
-}
-
-.ref-card:hover .ref-card__board {
-  box-shadow:
-    0 6px 14px rgb(var(--shadow-rgb) / calc(0.45 * var(--shadow-scale))),
-    0 0 20px color-mix(in srgb, var(--accent) 32%, transparent),
-    inset 0 1px 0 color-mix(in srgb, var(--accent) 65%, transparent);
+  transform: translateY(-8px);
 }
 
 /* ── بدنه کارت ── */
@@ -440,24 +318,6 @@
   border-color: rgb(var(--line-rgb) / 0.1);
   background: rgb(var(--wash-rgb) / 0.04);
   color: var(--muted);
-}
-
-/* نشان «به‌زودی» گوشه کارت */
-.ref-card__soon {
-  position: absolute;
-  top: 14px;
-  inset-inline-end: 14px;
-  z-index: 2;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 6px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(171, 142, 124, 0.45);
-  background: rgba(171, 142, 124, 0.14);
-  color: var(--gold-soft-ink);
-  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
-  font-size: 0.72rem;
 }
 
 /* فلش ظاهرشونده هنگام هاور */
@@ -695,17 +555,9 @@
   .ref-shelf {
     grid-template-columns: repeat(2, 1fr);
   }
-
-  .ref-overview__stats {
-    margin-inline-start: 0;
-  }
 }
 
 @media (max-width: 760px) {
-  .ref-topbar__crumb {
-    display: none;
-  }
-
   .ref-reader__head {
     gap: 20px;
   }

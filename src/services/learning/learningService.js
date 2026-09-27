@@ -23,32 +23,6 @@ export const LearningService = {
     return Math.round((completedCount / LEARNING_STEPS.length) * 100);
   },
 
-  canCompleteStep(stepId, unit, unitState) {
-    switch (stepId) {
-      case 'activate':
-        return Boolean(unitState.acknowledgedSteps?.activate)
-          || Object.values(unitState.recallResponses ?? {}).some((value) => value?.trim());
-      case 'learn':
-        return unit.learning.microLessons.every((lesson) => unitState.completedLessons?.includes(lesson.id));
-      case 'visualize':
-        return (unitState.exploredStructures?.length ?? 0) >= Math.min(2, unit.learning.visualize.structures.length);
-      case 'connect':
-        return Boolean(unitState.acknowledgedSteps?.connect);
-      case 'practice': {
-        const required = unit.learning.practice.length + (unit.learning.labelQuiz ? 1 : 0);
-        return Object.keys(unitState.practiceResults ?? {}).length >= required;
-      }
-      case 'retrieve':
-        return Object.values(unitState.retrievalResponses ?? {}).some((response) => response?.text?.trim());
-      case 'diagnose':
-        return Boolean(unitState.diagnosis && unitState.acknowledgedSteps?.diagnose);
-      case 'review':
-        return true;
-      default:
-        return false;
-    }
-  },
-
   completeStep(unitState, stepId) {
     const completedSteps = [...new Set([...(unitState.completedSteps ?? []), stepId])];
     const progress = Math.round((completedSteps.length / LEARNING_STEPS.length) * 100);

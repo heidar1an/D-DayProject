@@ -5,21 +5,26 @@
  * (`navigate('flashcard-library')`) باز می‌شود و `onBack` آن را به همان بخش
  * برمی‌گرداند. در سایدبار آیتم جداگانه‌ای ندارد و آیتم «صفحات» فعال می‌ماند.
  *
+ * این فهرست **همان کتابخانهٔ فلش‌کارت کاربران** است، نه فقط مجموعه‌های پنل:
+ * سرور هر مجموعهٔ ثابتِ تپش را یک‌بار به رکورد تبدیل می‌کند (`syncFlashcardDecks`
+ * در `contentStore.js`) و آن رکورد را `published` نگه می‌دارد. پس ده مجموعهٔ
+ * رسمی هم اینجا دیده می‌شوند و هم ویرایش‌پذیرند. دک‌های ساختهٔ پنل `origin:
+ * 'panel'` و دک‌های ثابت `origin: 'tapesh'` دارند.
+ *
  * هر مجموعه (دک) یا «عادی» است (کارت‌های متنی: basic/cloze/mcq) یا «آناتومی
  * تصویری» (کارت‌های image-locate: نقطهٔ مشخص‌شده روی تصویر). انتشار یک دک
  * (status: published) یعنی همان دک در «کتابخانهٔ تپش» بخش فلش‌کارت داشبورد
  * کاربران ظاهر می‌شود — شکل داده با قرارداد سرویس فلش‌کارت کاربر یکی است.
- * عمل «ارسال به کاربران تپش» در همین فایل فقط وضعیت را published می‌کند؛
- * مسیر تحویل به کاربر همان `/api/public/flashcards/library` است.
  *
- * کارت‌ها داخل فرم دک ویرایش می‌شوند و با کل رکورد ذخیره می‌شوند؛ نقطه‌های
- * کارت تصویری با کلیک روی پیش‌نمایش تصویر ثبت می‌شوند (درصدی، ۰ تا ۱۰۰).
+ * کارت‌ها مثل رابط کاربران در یک پنجرهٔ مستقل ویرایش می‌شوند (`CardEditorModal`)
+ * و با کل رکورد دک ذخیره می‌شوند؛ نقطه‌های کارت تصویری با کلیک روی پیش‌نمایش
+ * تصویر ثبت می‌شوند (درصدی، ۰ تا ۱۰۰).
  */
 
 import { useCallback, useEffect, useState } from 'react';
 
 import { flashcards as flashcardsApi } from '../../../services/admin/adminService';
-import { DECK_COLORS, SUBJECTS } from '../../../services/flashcards/mockData';
+import { CARD_IMAGE_ACCEPT, CARD_IMAGE_MAX_MB, DECK_COLORS, SUBJECTS } from '../../../services/flashcards/mockData';
 import {
   Badge, Button, ConfirmDialog, EmptyState, ErrorState, Field, IconButton, Input, LoadingBlock,
   Modal, SearchInput, Select, StatusBadge, TableWrap, Textarea, Toggle, faDateTime, faNumber,
@@ -70,6 +75,11 @@ const EMPTY_CARD = (anatomy) => ({
   options: [],
 });
 
+/*
+ * پیش‌فرضِ وضعیت یک مجموعهٔ تازه `published` است، چون کار پنل و کتابخانهٔ کاربران
+ * یک چیز واحد است: مجموعه‌ای که همین حالا ساخته می‌شود باید در بخش کاربران دیده
+ * شود. اگر مدیر بخواهد خصوصی بماند، در همان فرم «پیش‌نویس» را انتخاب می‌کند.
+ */
 const EMPTY_DECK = {
   title: '',
   description: '',
@@ -79,7 +89,7 @@ const EMPTY_DECK = {
   cover: DECK_COLORS[1],
   anatomy: false,
   previewImage: '',
-  status: 'draft',
+  status: 'published',
   cards: [],
 };
 
@@ -127,6 +137,12 @@ export function cardTypeOf(card) {
 /* نوعی که سرور می‌فهمد */
 export function toStoredType(displayType) {
   return displayType === 'basic-hint' ? 'basic' : displayType;
+}
+
+/* برچسب فارسی نوع کارت — برای ردیف فهرست کارت‌های مجموعه */
+export function cardTypeLabel(card) {
+  const display = cardTypeOf(card);
+  return CARD_TYPES.find((type) => type.id === display)?.label ?? 'پایه';
 }
 
 /* جای خالی‌های `{{c1::…}}` — همان قالب رابط کاربران */
@@ -218,7 +234,26 @@ export function validateDeck(deck) {
   return problems;
 }
 
-function CardEditor({ card, onChange, onRemove, onPickImage, index }) {
+/*
+ * بدنهٔ ویرایشگر کارت — همان چیزی که کاربر در «ساخت کارت» می‌بیند: چیپ‌های نوع،
+ * پیش‌نمایش زنده، شمارش جای خالی‌ها، گزینه‌های چهارگزینه‌ای، تصویر موقعیت‌یاب و
+ * بازخورد نرم کیفیت. جدا از پنجره نگه داشته شده تا پنجرهٔ کارت فقط پوستهٔ
+ * تأیید/انصراف باشد و بدنه قابل رندر مستقیم بماند.
+ */
+/* درصد نسبت به جعبهٔ خودِ تصویر — نقاط با درصد همین جعبه چیده می‌شوند، پس مرجع
+   اندازه‌گیری هم باید همان باشد (نه جعبهٔ بزرگ‌ترِ والد؛ همان تله‌ای که نقطه را
+   جای دیگر نشان می‌داد). جعبهٔ صفر (تصویر هنوز لود نشده) نادیده گرفته می‌شود. */
+export function pointPercent(rect, clientX, clientY) {
+  if (!rect?.width || !rect?.height) return null;
+  return {
+    x: Math.round(((clientX - rect.left) / rect.width) * 100),
+    y: Math.round(((clientY - rect.top) / rect.height) * 100),
+  };
+}
+
+/* بدنهٔ ویرایشگر کارت — جدا نگه داشته شده تا پنجرهٔ کارت فقط پوستهٔ تأیید/انصراف
+   باشد و بدنه قابل رندر مستقیم بماند (هارنس headless از همین استفاده می‌کند). */
+export function CardForm({ card, onChange, onPickImage }) {
   const displayType = cardTypeOf(card);
   const hints = cardQualityHints(card);
   const blanks = displayType === 'cloze' ? parseClozeBlanks(card.front) : [];
@@ -244,19 +279,13 @@ function CardEditor({ card, onChange, onRemove, onPickImage, index }) {
   };
 
   const addPoint = (event) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const x = Math.round(((event.clientX - rect.left) / rect.width) * 100);
-    const y = Math.round(((event.clientY - rect.top) / rect.height) * 100);
-    setImage({ points: [...(card.image?.points ?? []), { x, y }].slice(0, 4) });
+    const point = pointPercent(event.currentTarget.getBoundingClientRect(), event.clientX, event.clientY);
+    if (!point) return;
+    setImage({ points: [...(card.image?.points ?? []), point].slice(0, 4) });
   };
 
   return (
     <div className="ad-fccard">
-      <div className="ad-fccard__head">
-        <strong>کارت {faNumber(index + 1)}</strong>
-        <IconButton label="حذف کارت" tone="danger" onClick={onRemove}><IconTrash width={15} height={15} /></IconButton>
-      </div>
-
       {/* انتخاب نوع کارت — چیپ، مثل رابط کاربران (نه فهرست کشویی) */}
       <div className="ad-chiprow" role="group" aria-label="نوع کارت">
         {CARD_TYPES.map((type) => (
@@ -322,7 +351,7 @@ function CardEditor({ card, onChange, onRemove, onPickImage, index }) {
               <div key={optionIndex} className="ad-fccard__option">
                 <input
                   type="radio"
-                  name={`fc-correct-${index}`}
+                  name="fc-correct"
                   checked={option.correct}
                   onChange={() => onChange({ ...card, options: card.options.map((o, i) => ({ ...o, correct: i === optionIndex })) })}
                   aria-label="گزینهٔ درست"
@@ -344,7 +373,7 @@ function CardEditor({ card, onChange, onRemove, onPickImage, index }) {
 
       {card.type === 'image-locate' ? (
         <>
-          <Field label="تصویر" hint="از کتابخانهٔ رسانه انتخاب کنید.">
+          <Field label="تصویر" hint="از کتابخانهٔ رسانه انتخاب کنید — فرمت‌های رایج (PNG، JPG، WEBP، GIF، AVIF، HEIC، TIFF و…) تا ۴ مگابایت.">
             <div className="ad-fccard__option">
               <Input dir="ltr" value={card.image?.url ?? ''} onChange={(event) => setImage({ url: event.target.value })} placeholder="/uploads/…" />
               <Button variant="ghost" size="sm" onClick={onPickImage}>انتخاب</Button>
@@ -371,11 +400,16 @@ function CardEditor({ card, onChange, onRemove, onPickImage, index }) {
                    */
                   style={{ left: `${point.x}%`, top: `${point.y}%` }}
                   onClick={() => setImage({ points: card.image.points.filter((_, i) => i !== pointIndex) })}
-                  title="حذف نقطه"
+                  title={`حذف نقطهٔ ${faNumber(pointIndex + 1)}`}
                   aria-label={`حذف نقطهٔ ${faNumber(pointIndex + 1)}`}
-                />
+                >
+                  {faNumber(pointIndex + 1)}
+                </button>
               ))}
             </div>
+          ) : null}
+          {card.image?.url ? (
+            <p className="ad-sub">روی تصویر کلیک کن تا نقطه اضافه شود؛ شمارهٔ هر نقطه روی خودش است و با زدن روی همان دایره برداشته می‌شود.</p>
           ) : null}
           <Field label="متن جانشین تصویر">
             <Input value={card.image?.alt ?? ''} onChange={(event) => setImage({ alt: event.target.value })} placeholder="مثلاً: نمای قدامی قلب" />
@@ -406,6 +440,52 @@ function CardEditor({ card, onChange, onRemove, onPickImage, index }) {
   );
 }
 
+/*
+ * پنجرهٔ یک کارت — همان جریان رابط کاربران: از فهرست کارت‌های مجموعه، «کارت جدید»
+ * یا کلیک روی هر کارت این پنجره باز می‌شود و «تأیید کارت» نتیجه را به فرم مجموعه
+ * برمی‌گرداند. پیش‌نویس داخل همین پنجره می‌ماند تا «انصراف» چیزی را عوض نکند.
+ *
+ * کلید این کامپوننت را والد از روی شمارهٔ کارت می‌دهد؛ پس باز شدن کارت دیگر یک
+ * mount تازه است و پیش‌نویس از نو ساخته می‌شود (نیازی به effect همگام‌سازی نیست).
+ */
+function CardEditorModal({ card, index, anatomy, onSave, onClose }) {
+  const [draft, setDraft] = useState(() => card ?? EMPTY_CARD(anatomy));
+  const [pickerOpen, setPickerOpen] = useState(false);
+
+  return (
+    <>
+      <Modal
+        open
+        title={index === null ? 'کارت جدید' : `ویرایش کارت ${faNumber(index + 1)}`}
+        subtitle="همان ویرایشگر کارت کاربران تپش؛ با «تأیید کارت» به مجموعه اضافه می‌شود"
+        onClose={onClose}
+        size="lg"
+      >
+        <div className="ad-stack">
+          <CardForm card={draft} onChange={setDraft} onPickImage={() => setPickerOpen(true)} />
+
+          <div className="ad-editor__actions">
+            <Button onClick={() => onSave(draft)}>تأیید کارت</Button>
+            <p className="ad-sub">تا وقتی تأیید نزنید این کارت در مجموعه ذخیره نمی‌شود.</p>
+          </div>
+        </div>
+      </Modal>
+
+      <MediaPicker
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        /* تصویر کارت تصویری: فهرست فرمت‌های رایج + سقف ۴ مگابایت (سرور مرجع است) */
+        accept={CARD_IMAGE_ACCEPT}
+        maxMb={CARD_IMAGE_MAX_MB}
+        onSelect={(item) => {
+          setDraft((current) => ({ ...current, image: { ...(current.image ?? { alt: '', points: [] }), url: item.url } }));
+          setPickerOpen(false);
+        }}
+      />
+    </>
+  );
+}
+
 /* ── ویرایشگر دک (فرم اصلی) ── */
 
 function DeckEditor({ deckId, onClose, onSaved, notify }) {
@@ -413,7 +493,8 @@ function DeckEditor({ deckId, onClose, onSaved, notify }) {
   const [form, setForm] = useState(isNew ? newDeckForm() : null);
   const [saving, setSaving] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [pickerTarget, setPickerTarget] = useState(null); // 'preview' | index کارت
+  /* null = بسته؛ `{ index: null }` یعنی کارت تازه، `{ index: n }` یعنی ویرایش کارت n */
+  const [cardModal, setCardModal] = useState(null);
 
   useEffect(() => {
     if (isNew) return undefined;
@@ -461,7 +542,12 @@ function DeckEditor({ deckId, onClose, onSaved, notify }) {
     }
   };
 
-  const pickFor = (target) => { setPickerTarget(target); setPickerOpen(true); };
+  /* نتیجهٔ پنجرهٔ کارت: کارت تازه به ته فهرست می‌رود، کارت موجود سر جایش عوض می‌شود */
+  const saveCard = (draft) => {
+    if (cardModal.index === null) setField('cards', [...form.cards, draft]);
+    else setCard(cardModal.index, draft);
+    setCardModal(null);
+  };
 
   return (
     <>
@@ -521,7 +607,7 @@ function DeckEditor({ deckId, onClose, onSaved, notify }) {
                 <Field label="تصویر پیش‌نمایش مجموعه" hint="در کارت مجموعه در کتابخانه نمایش داده می‌شود">
                   <div className="ad-fccard__option">
                     <Input dir="ltr" value={form.previewImage} onChange={(event) => setField('previewImage', event.target.value)} placeholder="/uploads/…" />
-                    <Button variant="ghost" size="sm" onClick={() => pickFor('preview')}>انتخاب</Button>
+                    <Button variant="ghost" size="sm" onClick={() => setPickerOpen(true)}>انتخاب</Button>
                   </div>
                 </Field>
               </div>
@@ -529,23 +615,39 @@ function DeckEditor({ deckId, onClose, onSaved, notify }) {
 
             <div className="ad-fccard__listhead">
               <strong>کارت‌ها ({faNumber(form.cards.length)})</strong>
-              <Button variant="ghost" size="sm" onClick={() => setField('cards', [...form.cards, EMPTY_CARD(form.anatomy)])}>
+              <Button variant="ghost" size="sm" onClick={() => setCardModal({ index: null })}>
                 <IconPlus width={14} height={14} /> کارت جدید
               </Button>
             </div>
 
+            {/*
+              * فهرست کارت‌ها — مثل رابط کاربران کوتاه و ردیفی است و ویرایش هر کارت
+              * در پنجرهٔ خودش باز می‌شود (نه فرمِ بازِ زیر هم).
+              */}
             {form.cards.length === 0 ? (
               <EmptyState title="کارتی ندارد" description="با «کارت جدید» اولین کارت این مجموعه را بسازید." />
-            ) : form.cards.map((card, index) => (
-              <CardEditor
-                key={index}
-                index={index}
-                card={card}
-                onChange={(next) => setCard(index, next)}
-                onRemove={() => setField('cards', form.cards.filter((_, i) => i !== index))}
-                onPickImage={() => pickFor(index)}
-              />
-            ))}
+            ) : (
+              <ul className="ad-fccard__rows">
+                {form.cards.map((card, index) => (
+                  <li key={index} className="ad-fccard__row">
+                    <span className="ad-fccard__rowtype">{cardTypeLabel(card)}</span>
+                    <button type="button" className="ad-linkcell ad-fccard__rowtext" onClick={() => setCardModal({ index })}>
+                      {card.front.trim() || card.back.trim() || 'بدون متن'}
+                    </button>
+                    <div className="ad-rowactions">
+                      <IconButton label="ویرایش کارت" onClick={() => setCardModal({ index })}><IconEdit width={15} height={15} /></IconButton>
+                      <IconButton
+                        label="حذف کارت"
+                        tone="danger"
+                        onClick={() => setField('cards', form.cards.filter((_, i) => i !== index))}
+                      >
+                        <IconTrash width={15} height={15} />
+                      </IconButton>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
 
             {/*
               * مرحلهٔ آخر: انتخاب وضعیت انتشار + دکمهٔ تأیید.
@@ -587,12 +689,20 @@ function DeckEditor({ deckId, onClose, onSaved, notify }) {
       <MediaPicker
         open={pickerOpen}
         onClose={() => setPickerOpen(false)}
-        onSelect={(item) => {
-          if (pickerTarget === 'preview') setField('previewImage', item.url);
-          else if (typeof pickerTarget === 'number') setCard(pickerTarget, { ...form.cards[pickerTarget], image: { ...(form.cards[pickerTarget].image ?? { alt: '', points: [] }), url: item.url } });
-          setPickerOpen(false);
-        }}
+        onSelect={(item) => { setField('previewImage', item.url); setPickerOpen(false); }}
       />
+
+      {/* ویرایشگر کارت در پنجرهٔ خودش — همان جریان «ساخت کارت» کاربران */}
+      {cardModal ? (
+        <CardEditorModal
+          key={cardModal.index ?? 'new'}
+          index={cardModal.index}
+          card={cardModal.index === null ? null : form.cards[cardModal.index]}
+          anatomy={form.anatomy}
+          onSave={saveCard}
+          onClose={() => setCardModal(null)}
+        />
+      ) : null}
     </>
   );
 }
@@ -661,8 +771,10 @@ export default function AdminFlashcards({ admin, onBack }) {
       ) : null}
 
       <p className="ad-fclib__hint">
-        مجموعه‌های «منتشرشده» در کتابخانهٔ فلش‌کارت کاربران تپش نمایش داده می‌شوند.
-        برای فرستادن یک مجموعه به کاربران، در ستون عملیات دکمهٔ «ارسال به کاربران تپش» را بزنید.
+        این فهرست همان کتابخانهٔ فلش‌کارت کاربران تپش است: مجموعه‌های ثابت تپش (با نشان «تپش»)
+        به‌همراه هر مجموعه‌ای که در پنل ساخته شده. ساخت مجموعه و افزودن یا برداشتن کارت‌ها
+        بی‌درنگ به بخش کاربران می‌رود؛ فقط مجموعه‌هایی که وضعیت «پیش‌نویس» یا «بایگانی» دارند
+        برای کاربران دیده نمی‌شوند — برای منتشرکردنشان دکمهٔ «ارسال به کاربران تپش» را بزنید.
         فیلتر «نوع مجموعه» بین مجموعه‌های عادی و آناتومی تصویری جابه‌جا می‌شود.
       </p>
 
@@ -699,9 +811,13 @@ export default function AdminFlashcards({ admin, onBack }) {
             {data.items.map((deck) => (
               <tr key={deck.id}>
                 <td>
-                  <button type="button" className="ad-linkcell" onClick={() => setEditing(deck.id)}>
-                    {deck.title}
-                  </button>
+                  <span className="ad-deckcell">
+                    <button type="button" className="ad-linkcell" onClick={() => setEditing(deck.id)}>
+                      {deck.title}
+                    </button>
+                    {/* نشان منبع: مجموعه‌های ثابتِ داخل کد که سرور به رکورد تبدیل کرده است */}
+                    {deck.origin === 'tapesh' ? <Badge tone="neutral">تپش</Badge> : null}
+                  </span>
                 </td>
                 <td>{deck.anatomy ? <Badge tone="neutral">آناتومی تصویری</Badge> : <Badge tone="neutral">عادی</Badge>}</td>
                 <td><span className="ad-sub">{SUBJECTS.find((s) => s.id === deck.subjectId)?.title ?? deck.subjectId}</span></td>

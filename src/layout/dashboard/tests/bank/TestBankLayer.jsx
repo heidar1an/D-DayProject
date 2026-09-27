@@ -14,6 +14,7 @@ import {
   fetchSession,
   fetchSessionQuestions,
   normalizeFilters,
+  refreshPublishedTestBankQuestions,
   scopeLabel,
   scopeToFilters,
   trackEvent,
@@ -99,6 +100,7 @@ export default function TestBankLayer({ userData, onBack }) {
   const [returnView, setReturnView] = useState(null); // مقصد بازگشت پس از خروج از محیط حل
   const [scope, setScope] = useState(EMPTY_SCOPE); // دامنهٔ بانک: نوع بانک (کشوری/تألیفی) × رشته
   const [overview, setOverview] = useState(null);
+  const [contentVersion, setContentVersion] = useState(0);
   const [room, setRoom] = useState(null); // { session, questions }
   const [resultSession, setResultSession] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -133,6 +135,38 @@ export default function TestBankLayer({ userData, onBack }) {
   }, [userId, scope]);
 
   useEffect(() => refreshOverview(), [refreshOverview]);
+
+  useEffect(() => {
+    let alive = true;
+    const sync = () => {
+      refreshPublishedTestBankQuestions().then((changed) => {
+        if (!alive || !changed) return;
+        refreshOverview();
+        setContentVersion((version) => version + 1);
+        if (view.name === 'live' && room?.session) {
+          fetchSessionQuestions(room.session).then((fresh) => {
+            if (!alive) return;
+            const byId = new Map(fresh.map((question) => [question.id, question]));
+            setRoom((current) => current?.session.id === room.session.id
+              ? { ...current, questions: current.questions.map((question) => byId.get(question.id) ?? question) }
+              : current);
+          }).catch(() => {});
+        }
+      }).catch(() => {});
+    };
+    const onStorage = (event) => { if (event.key === 'tapesh:testbank:changed') sync(); };
+    window.addEventListener('focus', sync);
+    window.addEventListener('storage', onStorage);
+    window.addEventListener('tapesh:testbank:changed', sync);
+    const interval = window.setInterval(sync, 30000);
+    return () => {
+      alive = false;
+      window.removeEventListener('focus', sync);
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('tapesh:testbank:changed', sync);
+      window.clearInterval(interval);
+    };
+  }, [refreshOverview, room?.session, view.name]);
 
   const go = useCallback((nextView, payload = null) => {
     setView({ name: nextView, payload });
@@ -459,7 +493,7 @@ export default function TestBankLayer({ userData, onBack }) {
       )}
 
       {!busy && view.name === 'topics' && (
-        <div className="dashboard-layer-reveal">
+        <div key={contentVersion} className="dashboard-layer-reveal">
           <BankTopics
             userId={userId}
             scope={scope}
@@ -470,7 +504,7 @@ export default function TestBankLayer({ userData, onBack }) {
       )}
 
       {!busy && view.name === 'subject' && (
-        <div className="dashboard-layer-reveal">
+        <div key={contentVersion} className="dashboard-layer-reveal">
           <BankSubject
             userId={userId}
             scope={scope}
@@ -487,7 +521,7 @@ export default function TestBankLayer({ userData, onBack }) {
       )}
 
       {!busy && view.name === 'browse' && (
-        <div className="dashboard-layer-reveal">
+        <div key={contentVersion} className="dashboard-layer-reveal">
           <BankExplorer
             userId={userId}
             overview={overview}

@@ -82,16 +82,6 @@ export default function UserProfileCard({ userData }) {
         </div>
       </div>
 
-      <div className="user-profile-card__progress">
-        <div className="user-profile-card__progress-item">
-          <span className="user-profile-card__progress-icon user-profile-card__progress-icon--tests">✓</span>
-          <span> ۱۲۳ تست زده شده</span>
-        </div>
-        <div className="user-profile-card__progress-item">
-          <span className="user-profile-card__progress-icon user-profile-card__progress-icon--courses">−</span>
-          <span> ۱۲۳ دوره تکمیل شده</span>
-        </div>
-      </div>
     </article>
   );
 }

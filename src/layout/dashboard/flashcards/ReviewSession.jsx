@@ -42,14 +42,18 @@ function CardBody({ card, revealed }) {
   return <p className="text-lg leading-9 md:text-2xl md:leading-[2.6rem]">{card.front}</p>;
 }
 
-/* تصویر صورت کارت — آپلودی کاربر یا کارت لوکیشن‌یاب آناتومی با نقطه‌های مشخص */
-function CardFrontImage({ card }) {
+/* تصویر صورت کارت — آپلودی کاربر یا کارت لوکیشن‌یاب آناتومی با نقطه‌های شماره‌دار.
+   برای رندر مستقیم در هارنس headless هم export شده. */
+export function CardFrontImage({ card }) {
   if (card.type === 'image-locate') {
     const image = card.image;
     if (!image?.url) return null;
     return (
       <figure className="relative mx-auto mb-4 w-fit overflow-hidden rounded-2xl border border-white/10 bg-black/30">
-        <img src={image.url} alt={image.alt ?? 'تصویر کارت'} className="h-64 w-64 object-contain" />
+        {/* جعبهٔ تصویر باید دقیقاً اندازهٔ خودِ تصویر بماند: نقطه‌ها با درصد همین جعبه
+            چیده می‌شوند، پس اگر تصویر داخل جعبه letterbox شود (مثلاً `w-64 h-64`
+            با `object-contain` روی تصویر غیرمربعی) نقطه‌ها جابه‌جا می‌افتند. */}
+        <img src={image.url} alt={image.alt ?? 'تصویر کارت'} className="max-h-64 max-w-full w-auto object-contain" />
         {(image.points ?? []).map((point, index) => (
           <span key={index} className="fc-hotspot" style={{ left: `${point.x}%`, top: `${point.y}%` }}>
             <span className="fc-hotspot__num">{toFa(index + 1)}</span>

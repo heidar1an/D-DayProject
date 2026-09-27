@@ -3,9 +3,6 @@ import Brand from './Brand';
 import ThemeToggle from '../ThemeToggle';
 import settingsIcon from '../../../images/icons/icons8-setting-500.png';
 
-const FA_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
-const toFa = (value) => String(value).replace(/\d/g, (digit) => FA_DIGITS[Number(digit)]);
-
 const navigationItems = [
   { id: 'dashboard', label: 'داشبورد' },
   { id: 'courses', label: 'دوره‌ها' },
@@ -14,11 +11,12 @@ const navigationItems = [
   { id: 'league', label: 'لیگ' },
 ];
 
+/* هر سرتیتر وقتی نشانگر پس‌زمینه رویش می‌نشیند، رنگ اختصاصی خودش را از پالت می‌گیرد */
 const indicatorColors = {
   dashboard: 'var(--brown)',
-  courses: 'var(--brown)',
-  tests: 'var(--brown)',
-  other: 'var(--brown)',
+  courses: 'var(--blue)',
+  tests: 'var(--green)',
+  other: 'var(--red)',
   league: 'var(--purple)',
 };
 
@@ -150,7 +148,7 @@ export default function DashboardHeader({
             className={`dashboard-header__icon-btn ${
               areNotificationsOpen ? 'dashboard-header__icon-btn--active' : ''
             }`}
-            aria-label="اعلان‌ها"
+            aria-label={notificationsUnreadCount > 0 ? 'اعلان‌های جدید' : 'اعلان‌ها'}
             aria-pressed={areNotificationsOpen}
             onClick={onNotificationsToggle}
           >
@@ -160,9 +158,7 @@ export default function DashboardHeader({
             </svg>
 
             {notificationsUnreadCount > 0 && (
-              <span className="dashboard-header__icon-badge" aria-hidden="true">
-                {toFa(notificationsUnreadCount)}
-              </span>
+              <span className="dashboard-header__icon-badge" aria-hidden="true" />
             )}
           </button>
 

@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import './comprehensiveCourse.css';
 import { LAYER_IDS, useLayerRoute } from '../dashboardRoute';
+import { ContentService } from '../../../services/learning';
 import AnatomyLearningLayer from './learning/AnatomyLearningLayer';
 
 import anatomyImg from '../../../../images/courses/QqVyc2R_BP6N6Tp05DDFVyP-Yiw-zCJJQASGSV6LQSjrdX1cXw.png';
@@ -21,27 +22,34 @@ const FA_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
 const toFa = (value) => String(value).replace(/\d/g, (digit) => FA_DIGITS[Number(digit)]);
 
 /* نمای آغازین لایهٔ درسنامهٔ جامع: شبکهٔ درس‌ها، بدون فیلتر و بدون لینک عمیق.
-   `anatomy` مسیر داخلی لایهٔ یادگیری آناتومی است و با slot همان‌جا ذخیره می‌شود. */
-const COMPREHENSIVE_VIEW = { filter: 'all', subject: null, deep: null, anatomy: null };
+   `subject` درسِ بازشده است و مسیر داخلی هر درس با slot هم‌نام خودش ذخیره می‌شود. */
+const COMPREHENSIVE_VIEW = { filter: 'all', subject: null, deep: null };
 
 /* SUBJECTS در صفحه «دوره‌ها» هم برای کارت‌های «کار امروز» استفاده می‌شود تا تصویر،
    رنگ و پیشرفت کارت‌ها با خود درسنامه یکی بماند. */
-export const SUBJECTS = [
-  { id: 'anatomy', title: 'آناتومی', image: anatomyImg, accent: '#5b8cc7', progress: 35, chapters: 12, lessons: 24, tests: 940 },
-  { id: 'physiology', title: 'فیزیولوژی', image: physiologyImg, accent: '#ab8e7c', progress: 25, chapters: 10, lessons: 18, tests: 760 },
-  { id: 'biochemistry', title: 'بیوشیمی', image: biochemistryImg, accent: '#77b787', progress: 40, chapters: 8, lessons: 14, tests: 620 },
-  { id: 'immunology', title: 'ایمونولوژی', image: immunologyImg, accent: '#937fcd', progress: 25, chapters: 7, lessons: 11, tests: 450 },
-  { id: 'microbiology', title: 'باکتری‌شناسی', image: bacteriologyImg, accent: '#77b787', progress: 15, chapters: 9, lessons: 13, tests: 540 },
-  { id: 'virology', title: 'ویروس‌شناسی', image: virologyImg, accent: '#ab8e7c', progress: 0, chapters: 6, lessons: 8, tests: 320 },
-  { id: 'mycology', title: 'قارچ‌شناسی', image: mycologyImg, accent: '#5b8cc7', progress: 0, chapters: 4, lessons: 6, tests: 240 },
-  { id: 'parasitology', title: 'انگل‌شناسی', image: parasitologyImg, accent: '#937fcd', progress: 10, chapters: 7, lessons: 10, tests: 410 },
-  { id: 'histology', title: 'بافت‌شناسی', image: histologyImg, accent: '#77b787', progress: 100, chapters: 6, lessons: 8, tests: 350 },
-  { id: 'embryology', title: 'جنین‌شناسی', image: embryologyImg, accent: '#5b8cc7', progress: 0, chapters: 5, lessons: 7, tests: 290 },
-  { id: 'entomology', title: 'حشره‌شناسی', image: entomologyImg, accent: '#77b787', progress: 0, chapters: 3, lessons: 4, tests: 160 },
-  { id: 'hygiene', title: 'بهداشت عمومی', image: hygieneImg, accent: '#5b8cc7', progress: 20, chapters: 5, lessons: 6, tests: 220 },
-  { id: 'epidemiology', title: 'اپیدمیولوژی', glyph: 'epidemiology', accent: '#937fcd', progress: 0, chapters: 5, lessons: 7, tests: 240 },
-  { id: 'english', title: 'زبان انگلیسی', image: englishImg, accent: '#ab8e7c', progress: 60, chapters: 4, lessons: 6, tests: 200 },
+const SUBJECT_LIST = [
+  { id: 'anatomy', title: 'آناتومی', image: anatomyImg, accent: '#5b8cc7', progress: 35, chapters: 12, tests: 940 },
+  { id: 'physiology', title: 'فیزیولوژی', image: physiologyImg, accent: '#ab8e7c', progress: 25, chapters: 10, tests: 760 },
+  { id: 'biochemistry', title: 'بیوشیمی', image: biochemistryImg, accent: '#77b787', progress: 40, chapters: 8, tests: 620 },
+  { id: 'immunology', title: 'ایمونولوژی', image: immunologyImg, accent: '#937fcd', progress: 25, chapters: 7, tests: 450 },
+  { id: 'microbiology', title: 'باکتری‌شناسی', image: bacteriologyImg, accent: '#77b787', progress: 15, chapters: 9, tests: 540 },
+  { id: 'virology', title: 'ویروس‌شناسی', image: virologyImg, accent: '#ab8e7c', progress: 0, chapters: 6, tests: 320 },
+  { id: 'mycology', title: 'قارچ‌شناسی', image: mycologyImg, accent: '#5b8cc7', progress: 0, chapters: 4, tests: 240 },
+  { id: 'parasitology', title: 'انگل‌شناسی', image: parasitologyImg, accent: '#937fcd', progress: 10, chapters: 7, tests: 410 },
+  { id: 'histology', title: 'بافت‌شناسی', image: histologyImg, accent: '#77b787', progress: 100, chapters: 6, tests: 350 },
+  { id: 'embryology', title: 'جنین‌شناسی', image: embryologyImg, accent: '#5b8cc7', progress: 0, chapters: 5, tests: 290 },
+  { id: 'entomology', title: 'حشره‌شناسی', image: entomologyImg, accent: '#77b787', progress: 0, chapters: 3, tests: 160 },
+  { id: 'hygiene', title: 'بهداشت عمومی', image: hygieneImg, accent: '#5b8cc7', progress: 20, chapters: 5, tests: 220 },
+  { id: 'epidemiology', title: 'اپیدمیولوژی', glyph: 'epidemiology', accent: '#937fcd', progress: 0, chapters: 5, tests: 240 },
+  { id: 'english', title: 'زبان انگلیسی', image: englishImg, accent: '#ab8e7c', progress: 60, chapters: 4, tests: 200 },
 ];
+
+/* «تعداد درسنامه» هر درس = تعداد کادرهای سرتیتر (بخش‌های) ستون راست لایهٔ همان درس؛
+   از خودِ محتوای لایه شمرده می‌شود، نه دستی. درسی که لایه‌اش ساخته نشده صفر می‌ماند. */
+export const SUBJECTS = SUBJECT_LIST.map((subject) => ({
+  ...subject,
+  lessons: ContentService.countSections(subject.id),
+}));
 
 const FILTERS = [
   { id: 'all', label: 'همه' },
@@ -91,23 +99,20 @@ function getSubjectStatus(subject) {
   return 'fresh';
 }
 
-/* لینک عمیق آناتومی: {subject, moduleId, unitId?, stepId?} به مسیر لایه یادگیری تبدیل می‌شود */
-function deepLinkToAnatomyRoute(deepLink) {
-  if (deepLink?.subject !== 'anatomy' || !deepLink.moduleId) return null;
-  if (deepLink.unitId) {
-    return { name: 'unit', moduleId: deepLink.moduleId, unitId: deepLink.unitId, stepId: deepLink.stepId };
-  }
+/* لینک عمیق {subject, moduleId?} کارت‌های «کار امروز» و «دوره‌های من» → مسیر داخلی لایهٔ
+   همان درس. بدون moduleId، خودِ نمای کل درسنامه‌ها (overview) باز می‌شود. */
+function deepLinkToRoute(deepLink) {
+  if (!deepLink?.moduleId || !ContentService.hasCourse(deepLink.subject)) return null;
   return { name: 'overview', moduleId: deepLink.moduleId };
 }
 
-function SubjectCard({ subject, index, onOpen, spot = false, registerRef }) {
+function SubjectCard({ subject, index, onOpen }) {
   const status = getSubjectStatus(subject);
 
   return (
     <button
       type="button"
-      ref={(el) => registerRef?.(subject.id, el)}
-      className={`dars-card dars-card--${status}${spot ? ' dars-card--spot' : ''}`}
+      className={`dars-card dars-card--${status}`}
       onClick={() => onOpen?.(subject.id)}
       style={{
         '--accent': subject.accent,
@@ -140,7 +145,11 @@ function SubjectCard({ subject, index, onOpen, spot = false, registerRef }) {
         <p className="dars-card__meta">
           {toFa(subject.lessons)} درسنامه
         </p>
+        {/* عدد پیشرفت پشتِ خودِ نوار می‌نشیند (نه در ردیف جدا) و نوار از رویش رد می‌شود */}
         <div className="dars-card__progress">
+          <span className="dars-card__percent">
+            {status === 'completed' ? '۱۰۰٪' : `${toFa(subject.progress)}٪`}
+          </span>
           <div className="dars-card__bar">
             <span className="dars-card__bar-fill" />
           </div>
@@ -150,38 +159,30 @@ function SubjectCard({ subject, index, onOpen, spot = false, registerRef }) {
             </svg>
           </span>
         </div>
-        <div className="dars-card__foot">
-          <span className="dars-card__percent">
-            {status === 'completed' ? '۱۰۰٪' : `${toFa(subject.progress)}٪`}
-          </span>
-        </div>
       </div>
     </button>
   );
 }
 
 export default function ComprehensiveCourseLayer({ onBack, userId = 'local-user' }) {
-  /* نمای لایه (شبکهٔ درس‌ها ↔ لایهٔ آناتومی) روی مسیر داشبورد می‌نشیند تا Back/Forward و
-     رفرش همان‌جا بمانند؛ `deep` همان لینک عمیق کارت‌های «کار امروز» است. */
+  /* نمای لایه (شبکهٔ درس‌ها ↔ درسنامهٔ یک درس) روی مسیر داشبورد می‌نشیند تا Back/Forward
+     و رفرش همان‌جا بمانند؛ `deep` همان لینک عمیق کارت‌های «کار امروز»/«دوره‌های من» است. */
   const [view, , patchView] = useLayerRoute(LAYER_IDS.comprehensive, COMPREHENSIVE_VIEW, {
     screenOf: (current) => (current?.subject ? `subject:${current.subject}` : 'grid'),
   });
   const filter = view.filter ?? 'all';
   const deepLink = view.deep ?? null;
-  const openSubject = view.subject ?? (deepLink?.subject === 'anatomy' ? 'anatomy' : null);
-  const anatomyRoute = view.anatomy ?? deepLinkToAnatomyRoute(deepLink);
+  const openSubject = view.subject
+    ?? (ContentService.hasCourse(deepLink?.subject) ? deepLink.subject : null);
+  const subjectRoute = deepLinkToRoute(deepLink);
   const setFilter = (next) => patchView({ filter: next });
-  /* ورود/خروج از صفحهٔ یک درس، لینک عمیق و مسیر داخلی آناتومی را هم صفر می‌کند؛
-     وگرنه بازگشت از لایهٔ یادگیری آناتومی دوباره همان‌جا باز می‌شد. */
-  const setOpenSubject = (next) => patchView({ subject: next, deep: null, anatomy: null });
-  const [spotId, setSpotId] = useState(null);
-  const gridRef = useRef(null);
-  const cardRefs = useRef(new Map());
-
-  const registerCard = (id, el) => {
-    if (el) cardRefs.current.set(id, el);
-    else cardRefs.current.delete(id);
-  };
+  /* ورود/خروج از درسنامهٔ یک درس، لینک عمیق و مسیر داخلی همان درس را هم صفر می‌کند؛
+     وگرنه بازگشت از لایهٔ درس دوباره همان‌جا باز می‌شد. */
+  const setOpenSubject = (next) => patchView({
+    subject: next,
+    deep: null,
+    ...(openSubject ? { [openSubject]: null } : {}),
+  });
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -190,22 +191,6 @@ export default function ComprehensiveCourseLayer({ onBack, userId = 'local-user'
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onBack, openSubject]);
-
-  /* ورود از کارت‌های «کار امروز» برای درس‌های غیرآناتومی: کارت همان درس
-     وسط صفحه می‌آید و چند ثانیه با رنگ خودش هایلایت می‌شود */
-  useEffect(() => {
-    if (!deepLink?.subject || deepLink.subject === 'anatomy') return undefined;
-    const raf = requestAnimationFrame(() => {
-      cardRefs.current.get(deepLink.subject)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    });
-    const showTimer = setTimeout(() => setSpotId(deepLink.subject), 400);
-    const hideTimer = setTimeout(() => setSpotId(null), 3400);
-    return () => {
-      cancelAnimationFrame(raf);
-      clearTimeout(showTimer);
-      clearTimeout(hideTimer);
-    };
-  }, [deepLink]);
 
   /* نقطه نور کارت‌ها با حرکت اشاره‌گر جابه‌جا می‌شود تا حس زنده بودن بدهد */
   const handleGridPointerMove = (event) => {
@@ -238,12 +223,18 @@ export default function ComprehensiveCourseLayer({ onBack, userId = 'local-user'
   );
   const startedCount = SUBJECTS.filter((subject) => subject.progress > 0).length;
 
-  if (openSubject === 'anatomy') {
+  /* درسنامهٔ هر درسی که لایه دارد باز می‌شود — آناتومی با مسیر یادگیری کامل، بقیه با
+     ساختار برگرفته از میکرودرسنامهٔ همان درس. تم لایه از رنگ همان کارت می‌آید. */
+  const openSubjectMeta = SUBJECTS.find((subject) => subject.id === openSubject) ?? null;
+  if (openSubject && ContentService.hasCourse(openSubject)) {
     return (
       <AnatomyLearningLayer
+        subjectId={openSubject}
+        subjectTitle={openSubjectMeta?.title}
+        accent={openSubjectMeta?.accent}
         userId={userId}
         onBack={() => setOpenSubject(null)}
-        initialRoute={anatomyRoute ?? undefined}
+        initialRoute={subjectRoute ?? undefined}
       />
     );
   }
@@ -258,7 +249,6 @@ export default function ComprehensiveCourseLayer({ onBack, userId = 'local-user'
             </svg>
             بازگشت به دوره‌ها
           </button>
-          <span className="dars-topbar__crumb">دوره‌ها / درسنامه جامع علوم پایه</span>
         </div>
 
         <header className="dars-hero dash-stagger">
@@ -327,17 +317,15 @@ export default function ComprehensiveCourseLayer({ onBack, userId = 'local-user'
           </div>
         </div>
 
-        <div className="dars-grid dash-stagger" key={filter} ref={gridRef} onPointerMove={handleGridPointerMove}>
+        <div className="dars-grid dash-stagger" key={filter} onPointerMove={handleGridPointerMove}>
           {visibleSubjects.map((subject, index) => (
             <SubjectCard
               key={subject.id}
               subject={subject}
               index={index}
-              spot={spotId === subject.id}
-              registerRef={registerCard}
               onOpen={(subjectId) => {
-                /* فعلاً فقط آناتومی مسیر یادگیری (درس‌ها و مباحث) دارد؛ بقیه در همین شبکه می‌مانند */
-                if (subjectId !== 'anatomy') return;
+                /* درسی که لایهٔ درسنامه ندارد (مثل اپیدمیولوژی) در همین شبکه می‌ماند */
+                if (!ContentService.hasCourse(subjectId)) return;
                 setOpenSubject(subjectId);
               }}
             />

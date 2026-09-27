@@ -32,21 +32,15 @@ import { LAYER_IDS, useLayerRoute } from '../dashboardRoute';
 const DEFAULT_FILTERS = normalizeFilters({});
 const ANALYTICS_VIEW = { name: 'home', payload: null, filters: null };
 
-const VIEW_LABELS = {
-  home: 'تحلیل عملکرد',
-  subject: 'تحلیل درس',
-  topic: 'تحلیل مبحث',
-  questions: 'تحلیل سؤال‌ها',
-  exams: 'تحلیل آزمون‌ها',
-  'exam-detail': 'کارنامهٔ آزمون',
-  errors: 'تحلیل نوع خطا',
-  time: 'تحلیل زمان',
-  confidence: 'اطمینان در برابر دقت',
-  unanswered: 'تحلیل بی‌پاسخ‌ها',
-  difficulty: 'تحلیل دشواری',
-};
-
 const BEHAVIOR_VIEWS = ['errors', 'time', 'confidence', 'unanswered', 'difficulty'];
+
+/* قالب چیپ بازهٔ زمانی — هم‌قالب ردیف گزینه‌های «چطور می‌خواهی تست بزنی؟» بانک تست */
+const RANGE_META = {
+  '7d': { icon: 'clock', accent: '#61D192' },
+  '30d': { icon: 'chart', accent: '#5b8cc7' },
+  '90d': { icon: 'layers', accent: '#937fcd' },
+  all: { icon: 'grid', accent: '#e0b45c' },
+};
 
 export default function AnalyticsLayer({ userData, onBack }) {
   const userId = userData?.id ?? userData?.phone ?? 'guest';
@@ -154,64 +148,57 @@ export default function AnalyticsLayer({ userData, onBack }) {
       aria-label="تحلیل عملکرد تست‌ها"
       className="mx-auto w-[var(--content-width)] py-8 text-white [font-family:'Pinar','Vazir',Tahoma,sans-serif] md:py-10"
     >
-      {/* سربرگ لایه */}
-      <header className="mb-6 flex items-center justify-between gap-3">
-        {showBackHome ? (
-          <button
-            type="button"
-            onClick={handleBack}
-            className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[var(--surface-soft)] px-3.5 py-2.5 text-xs text-[var(--muted)] transition-colors hover:bg-[var(--surface-strong)] hover:text-white"
-          >
-            <Icon name="back" className="h-3.5 w-3.5" />
-            بازگشت
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={onBack}
-            className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-[var(--surface-soft)] px-3.5 py-2.5 text-xs text-[var(--muted)] transition-colors hover:bg-[var(--surface-strong)] hover:text-white"
-          >
-            <Icon name="back" className="h-3.5 w-3.5" />
-            بازگشت به تست
-          </button>
-        )}
-        <span className="flex items-center gap-1.5 text-xs text-[var(--faint)]">
-          <span className="h-1.5 w-1.5 rounded-full bg-[var(--green-vivid)]" aria-hidden="true" />
-          {VIEW_LABELS[view.name] ?? 'تحلیل عملکرد'}
-        </span>
+      {/* سربرگ لایه — هم‌شکل بانک تست علوم پایه: فقط دکمهٔ بازگشت، بدون متن سمت چپ */}
+      <header className="an-topbar">
+        <button
+          type="button"
+          onClick={showBackHome ? handleBack : onBack}
+          aria-label={showBackHome ? 'بازگشت' : 'بازگشت به تست'}
+          className="an-topbar__back"
+        >
+          <Icon name="back" className="h-4 w-4" />
+          {showBackHome ? 'بازگشت' : 'بازگشت به تست'}
+        </button>
       </header>
 
-      {/* سرتیتر صفحه (فقط خانه) — هم‌خانواده با سرتیتر «میکرو درسنامه» */}
+      {/* سرتیتر هیرو لایه — بدون کادر بالا. پیشوند `an-status-hero` عمداً جداست تا با
+          `.an-hero` مرکز تحلیل پنل (که سراسری بارگذاری می‌شود) قاطی نشود. */}
       {view.name === 'home' && (
-        <header className="an-hero dashboard-layer-reveal--down">
-          <div className="an-hero__content">
-            <span className="an-hero__chip">
-              <i aria-hidden="true" />
-              تصویری زنده از مسیر یادگیری‌ات
-            </span>
-            <h1 className="an-hero__title">تحلیل عملکرد</h1>
-            <p className="an-hero__kicker">هر عدد یک سرنخ — از تست‌های تو، برای تصمیم بعدی</p>
-            <p className="an-hero__subtitle">
+        <header className="an-status-hero dashboard-layer-reveal--down">
+          <div className="an-status-hero__content">
+            <h1 className="an-status-hero__title">آنالیز وضعیت</h1>
+            <p className="an-status-hero__kicker">هر عدد یک سرنخ — از تست‌های تو، برای تصمیم بعدی</p>
+            <p className="an-status-hero__subtitle">
               روند، نقاط قوت و نقاط ضعفت از دادهٔ واقعی تست‌هایت ساخته می‌شود؛ هیچ عددی تزئینی نیست.
             </p>
           </div>
         </header>
       )}
 
-      {/* فیلتر بازهٔ زمانی — در تمام نماها پایدار */}
+      {/* فیلتر بازهٔ زمانی — هم‌قالب ردیف گزینه‌های بانک تست؛ وسط‌چین */}
       <div className="mb-4">
-        <div className="an-chiprow" role="group" aria-label="بازهٔ زمانی">
-          {TIME_RANGES.map((range) => (
-            <button
-              key={range.key}
-              type="button"
-              aria-pressed={filters.range === range.key}
-              onClick={() => updateFilter({ range: range.key })}
-              className={`an-chip ${filters.range === range.key ? 'an-chip--on' : ''}`}
-            >
-              {range.label}
-            </button>
-          ))}
+        <div className="an-chiprow flex-wrap justify-center" role="group" aria-label="بازهٔ زمانی">
+          {TIME_RANGES.map((range) => {
+            const active = filters.range === range.key;
+            const meta = RANGE_META[range.key] ?? { icon: 'clock', accent: '#61D192' };
+            return (
+              <button
+                key={range.key}
+                type="button"
+                aria-pressed={active}
+                onClick={() => updateFilter({ range: range.key })}
+                className={`flex shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap rounded-full border px-4 py-2.5 text-[13px] transition-colors ${
+                  active
+                    ? 'text-white'
+                    : 'border-white/8 bg-[var(--surface)] text-[var(--muted)] hover:border-white/20 hover:bg-[var(--surface-soft)] hover:text-white'
+                }`}
+                style={active ? { borderColor: 'rgba(97, 209, 146, 0.5)', background: 'rgba(97, 209, 146, 0.12)' } : undefined}
+              >
+                <Icon name={meta.icon} className="h-4 w-4 shrink-0" style={{ color: meta.accent }} />
+                {range.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 

@@ -4417,3 +4417,18 @@ img {
 .pomodoro__finish-btn:active {
   transform: translateY(0);
 }
+
+/* ── رنگ متن محتوای درسنامه (تُن‌های استاندارد پروژه) ──
+ *
+ * ویرایشگر متن پنل این کلاس‌ها را روی انتخاب کاربر می‌گذارد و خوانندهٔ درسنامه همان HTML را
+ * رندر می‌کند. چون پنل و خواننده هر دو `styles.css` را دارند، تعریف فقط همین‌جا است تا
+ * پیش‌نمایش ادمین مو‌به‌مو همان چیزی باشد که کاربر می‌بیند.
+ *
+ * همه از توکن `-ink` می‌آیند نه `-bright`: نسخهٔ `-bright` روی زمینهٔ روشن زیر آستانهٔ
+ * کنتراست پروژه می‌افتد (همان دلیلی که `-ink` ساخته شد). */
+.micr-tone--gold { color: var(--gold-ink); }
+.micr-tone--green { color: var(--green-ink); }
+.micr-tone--blue { color: var(--blue-soft-ink); }
+.micr-tone--purple { color: var(--purple-soft-ink); }
+.micr-tone--red { color: var(--red-ink); }
+.micr-tone--brown { color: var(--brown-ink); }

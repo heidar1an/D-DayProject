@@ -13,7 +13,22 @@ import {
 } from './adminShared';
 import { IconCheck, IconImage, IconUpload } from './adminIcons';
 
-export default function MediaPicker({ open, onClose, onSelect, accept = 'image/' }) {
+/* تطبیق نوع فایل با `accept` — فقط برای پیام روشن پیش از آپلود؛ سرور مرجع است.
+   نوع خالی را رد نمی‌کنیم (بعضی فایل‌ها MIME ندارند) و تصمیم را به سرور می‌سپاریم. */
+function acceptMatches(accept, mimeType) {
+  if (!mimeType) return true;
+  return String(accept)
+    .split(',')
+    .map((token) => token.trim())
+    .filter(Boolean)
+    .some((token) => (token.endsWith('/*') ? mimeType.startsWith(token.slice(0, -1)) : mimeType === token));
+}
+
+/*
+ * `maxMb` سقف حجم را در همین‌جا هم چک می‌کند (پیش‌فرض ۰ = خاموش) تا فقط مسیری که
+ * سقفش را می‌داند پیش‌بررسی بگیرد؛ سرور همچنان مرجع نهایی است.
+ */
+export default function MediaPicker({ open, onClose, onSelect, accept = 'image/', maxMb = 0 }) {
   const notify = useToast();
   const [state, setState] = useState({ items: [], loading: true, error: null, total: 0, pages: 1, page: 1 });
   const [search, setSearch] = useState('');
@@ -37,6 +52,14 @@ export default function MediaPicker({ open, onClose, onSelect, accept = 'image/'
 
   const handleUpload = async (file) => {
     if (!file) return;
+    if (!acceptMatches(accept, file.type)) {
+      notify('این فرمت پشتیبانی نمی‌شود؛ یک فایل تصویری رایج انتخاب کنید', 'error');
+      return;
+    }
+    if (maxMb > 0 && file.size > maxMb * 1024 * 1024) {
+      notify(`«${file.name}» بزرگ‌تر از ${toFa(maxMb)} مگابایت است`, 'error');
+      return;
+    }
     setUploading(true);
     try {
       const data = await readFileAsBase64(file);
@@ -73,7 +96,13 @@ export default function MediaPicker({ open, onClose, onSelect, accept = 'image/'
             <input
               type="file"
               accept={accept}
-              onChange={(event) => handleUpload(event.target.files?.[0])}
+              /* مقدار فیلد پاک می‌شود تا انتخاب دوبارهٔ همان فایل (مثلاً بعد از رد شدن
+                 به‌خاطر حجم) هم رویداد change بدهد */
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                event.target.value = '';
+                handleUpload(file);
+              }}
               disabled={uploading}
             />
             <span className="ad-btn ad-btn--primary ad-btn--md">

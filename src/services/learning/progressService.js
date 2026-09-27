@@ -30,12 +30,9 @@ function createSeedState(course) {
             exploredStructures: [],
             recallResponses: {},
             practiceResults: {},
-            retrievalResponses: {},
-            acknowledgedSteps: { activate: true },
             progress: firstUnit.progress,
             mastery: firstUnit.mastery,
             status: 'learning',
-            diagnosis: null,
             lastActivity: new Date().toISOString(),
           },
         }
@@ -90,12 +87,9 @@ export const ProgressService = {
       exploredStructures: [],
       recallResponses: {},
       practiceResults: {},
-      retrievalResponses: {},
-      acknowledgedSteps: {},
       progress: unit.progress ?? 0,
       mastery: unit.mastery ?? 0,
       status: unit.status ?? 'fresh',
-      diagnosis: null,
       lastActivity: null,
       ...(state.units?.[unit.id] ?? {}),
     };
@@ -164,10 +158,6 @@ export const ProgressService = {
     const allUnits = Object.values(course.unitsByModule).flat();
     const unitStates = allUnits.map((unit) => this.getUnitState(state, unit));
     const completed = unitStates.filter((unitState) => unitState.status === 'completed').length;
-    const weakConcepts = unitStates.reduce(
-      (sum, unitState) => sum + (unitState.diagnosis?.weakConcepts?.length ?? 0),
-      0,
-    );
     const progress = allUnits.length
       ? Math.round(unitStates.reduce((sum, unitState) => sum + unitState.progress, 0) / allUnits.length)
       : 0;
@@ -175,7 +165,7 @@ export const ProgressService = {
       ? Math.round(unitStates.reduce((sum, unitState) => sum + unitState.mastery, 0) / allUnits.length)
       : 0;
 
-    return { progress, mastery, completed, weakConcepts };
+    return { progress, mastery, completed };
   },
 };
 
