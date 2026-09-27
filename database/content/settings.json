@@ -31,6 +31,13 @@
       "image/webp",
       "image/gif",
       "image/svg+xml",
+      "image/avif",
+      "image/bmp",
+      "image/tiff",
+      "image/heic",
+      "image/heif",
+      "image/x-icon",
+      "image/vnd.microsoft.icon",
       "application/pdf"
     ]
   },

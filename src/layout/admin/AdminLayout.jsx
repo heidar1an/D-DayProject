@@ -16,7 +16,11 @@ import AdminDashboard from './views/AdminDashboard';
 import AdminContentEditor from './views/AdminContentEditor';
 import AdminPages from './views/AdminPages';
 import AdminFlashcards from './views/AdminFlashcards';
+import AdminReferences from './views/AdminReferences';
+import AdminArticleLibrary from './views/AdminArticleLibrary';
 import AdminMicro from './views/AdminMicro';
+import AdminTestBank from './views/AdminTestBank';
+import AdminComprehensive from './views/AdminComprehensive';
 import AdminMedia from './views/AdminMedia';
 import AdminPublishing from './views/AdminPublishing';
 import AdminUsers from './views/AdminUsers';
@@ -52,12 +56,13 @@ const SECTION_IDS = new Set(SECTIONS.map((section) => section.id));
 /*
  * نماهایی که از راه hash باز می‌شوند ولی آیتم سایدبار نیستند.
  *
- * «کتابخانهٔ فلش‌کارت تپش» و «میکرو درسنامه تپش» دو لایهٔ داخل پنل‌اند که از
- * کارت‌های همان لایه‌ها در بخش «صفحات» باز می‌شوند. بدون افزودنشان به این
- * مجموعه، `#admin/flashcard-library` و `#admin/micro-lesson` ناشناخته می‌مانند و
- * مستقیم به داشبورد برمی‌گشتند (رفرش، بخش را از دست می‌داد).
+ * «کتابخانهٔ فلش‌کارت تپش»، «مراجع تپش» و «میکرو درسنامه تپش» سه لایهٔ داخل
+ * پنل‌اند که از کارت‌های همان لایه‌ها در بخش «صفحات» باز می‌شوند. بدون افزودنشان
+ * به این مجموعه، `#admin/flashcard-library` و `#admin/reference-library` و
+ * `#admin/micro-lesson` ناشناخته می‌مانند و مستقیم به داشبورد برمی‌گشتند
+ * (رفرش، بخش را از دست می‌داد).
  */
-const ROUTABLE_VIEWS = new Set([...SECTION_IDS, 'flashcard-library', 'micro-lesson']);
+const ROUTABLE_VIEWS = new Set([...SECTION_IDS, 'flashcard-library', 'reference-library', 'article-library', 'micro-lesson', 'test-bank-library', 'comprehensive-library']);
 
 /*
  * زیرنمایش‌هایی که شناسه‌شان با بخش مادرشان یکی نیست.
@@ -70,7 +75,11 @@ const ROUTABLE_VIEWS = new Set([...SECTION_IDS, 'flashcard-library', 'micro-less
 const SECTION_SUBVIEWS = {
   'page-editor': 'pages',
   'flashcard-library': 'pages',
+  'reference-library': 'pages',
+  'article-library': 'pages',
   'micro-lesson': 'pages',
+  'test-bank-library': 'pages',
+  'comprehensive-library': 'pages',
 };
 
 /* نام هر نمایش → شناسهٔ بخشی که به آن تعلق دارد */
@@ -82,7 +91,11 @@ function sectionOf(viewName) {
 const VIEW_TITLES = {
   'page-editor': 'ویرایش محتوا',
   'flashcard-library': 'کتابخانهٔ فلش‌کارت تپش',
+  'reference-library': 'مراجع تپش',
+  'article-library': 'مقالات تپش',
   'micro-lesson': 'میکرو درسنامه تپش',
+  'test-bank-library': 'بانک تست علوم پایه',
+  'comprehensive-library': 'درسنامه جامع علوم پایه',
 };
 
 /* `#admin` یا `#admin/pages` یا `#admin/analytics/traffic` یا `#admin/pages/page-1234` */
@@ -214,8 +227,16 @@ export function AdminShell({ admin, onExit, onLogout }) {
         return <AdminPages {...editorProps} />;
       case 'flashcard-library':
         return <AdminFlashcards admin={admin} onBack={() => navigate('pages')} />;
+      case 'reference-library':
+        return <AdminReferences admin={admin} onBack={() => navigate('pages')} />;
+      case 'article-library':
+        return <AdminArticleLibrary admin={admin} onBack={() => navigate('pages')} />;
       case 'micro-lesson':
         return <AdminMicro admin={admin} onBack={() => navigate('pages')} />;
+      case 'test-bank-library':
+        return <AdminTestBank admin={admin} onBack={() => navigate('pages')} />;
+      case 'comprehensive-library':
+        return <AdminComprehensive admin={admin} onBack={() => navigate('pages')} />;
       case 'page-editor':
         return <AdminContentEditor {...editorProps} kind="page" id={view.payload?.id ?? null} />;
       case 'media':
@@ -305,6 +326,36 @@ export function AdminShell({ admin, onExit, onLogout }) {
             <span>{sidebarCollapsed ? 'باز کردن منو' : 'جمع کردن منو'}</span>
           </button>
 
+          {/*
+           * حساب کاربری — از هدر به کادر سمت راست («حساب من» در فوتر نوار کناری)
+           * منتقل شد. خودِ بلوک به «حساب من» می‌رود و دکمهٔ خروج کنارش می‌نشیند؛
+           * دو دکمهٔ جدا هستند چون دکمهٔ تودرتو در HTML مجاز نیست.
+           */}
+          <div className="ad-account">
+            <button
+              type="button"
+              className={`ad-account__open ${sectionOf(view.name) === 'profile' ? 'is-active' : ''}`}
+              onClick={() => navigate('profile')}
+              title={sidebarCollapsed ? 'حساب من' : undefined}
+            >
+              <span className="ad-avatar" aria-hidden="true">{(admin.name || admin.username).slice(0, 1)}</span>
+              <span className="ad-account__meta">
+                <strong>{admin.name || admin.username}</strong>
+                <small>{admin.roleLabel}{admin.permissions?.length ? ` · ${toFa(admin.permissions.length)} دسترسی` : ''}</small>
+              </span>
+            </button>
+
+            <button
+              type="button"
+              className="ad-iconbtn"
+              onClick={handleLogout}
+              title="خروج"
+              aria-label="خروج"
+            >
+              <IconLogout width={16} height={16} />
+            </button>
+          </div>
+
           <button
             type="button"
             className="ad-nav__item"
@@ -332,6 +383,9 @@ export function AdminShell({ admin, onExit, onLogout }) {
 
       <div className="ad-main">
         <header className="ad-header">
+          {/* کلید کشوی موبایل — فقط زیر ۸۶۱px دیده می‌شود (`.ad-iconbtn.ad-header__menu`
+              قاعدهٔ `display: none` را می‌برد؛ قبلاً استایل پایهٔ دکمهٔ آیکونی آن را
+              باطل می‌کرد و آیکون در همهٔ عرض‌ها کنار عنوان می‌ایستاد). */}
           <button
             type="button"
             className="ad-iconbtn ad-header__menu"
@@ -341,24 +395,14 @@ export function AdminShell({ admin, onExit, onLogout }) {
             <IconMenu />
           </button>
 
+          {/* عنوان بخش و «آخرین ورود» هم‌ردیف‌اند؛ بلوک حساب کاربری به فوتر نوار
+              کناری (کادر سمت راست) منتقل شده است. */}
           <div className="ad-header__title">
             <h1>{view.name === 'profile' ? 'حساب من' : (VIEW_TITLES[view.name] ?? SECTIONS.find((s) => s.id === view.name)?.label ?? 'ویرایش محتوا')}</h1>
             <p>{meta ? `آخرین ورود: ${faDate(admin.lastLoginAt)}` : 'در حال آماده‌سازی…'}</p>
           </div>
 
-          <div className="ad-header__user">
-            <ThemeToggle className="ad-header__theme" />
-
-            <span className="ad-avatar" aria-hidden="true">{(admin.name || admin.username).slice(0, 1)}</span>
-            <span className="ad-header__userinfo">
-              <strong>{admin.name || admin.username}</strong>
-              <small>{admin.roleLabel}{admin.permissions?.length ? ` · ${toFa(admin.permissions.length)} دسترسی` : ''}</small>
-            </span>
-            <Button variant="ghost" size="sm" onClick={handleLogout}>
-              <IconLogout width={16} height={16} />
-              خروج
-            </Button>
-          </div>
+          <ThemeToggle className="ad-header__theme" />
         </header>
 
         <main className="ad-content">

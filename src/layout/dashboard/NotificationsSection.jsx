@@ -4,17 +4,15 @@
  * دو منبع را در یک فهرست واحد جمع می‌کند (هر دو Mock با قرارداد API واقعی):
  *   همخوان‌ها → GET /api/league/friends/notifications  (اقدام، نتیجه، دستاورد دوستان)
  *   لیگ       → GET /api/league/notifications          (رتبه، رقیب، نبرد، رویداد)
- * بعد از باز شدن لایه، unreadها خوانده می‌شوند (PATCH سمت سرور در نسخهٔ واقعی).
+ * اعلان‌های جدید تا پایان همین بازدید جدید می‌مانند؛ هنگام خروج خوانده می‌شوند.
  *
  * ظاهر: پیام‌رسان — هر اعلان یک ردیف با آواتار و «حباب پیام» است. فقط نمایش است؛
  * ورودی/پاسخ ندارد و متن‌ها عمداً درشت‌اند تا از فاصلهٔ معمول خوانا بمانند.
  */
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useState } from 'react';
 import {
   fetchFriendsLeagueNotifications,
   fetchLeagueNotifications,
-  markFriendsLeagueNotificationsRead,
-  markLeagueNotificationsRead,
 } from '../../services/league/leagueService';
 import {
   EmptyState,
@@ -104,7 +102,7 @@ function NotificationRow({ item, index }) {
     >
       {item.avatar ? (
         <span className="notifications__row-avatar">
-          <UserAvatar avatar={item.avatar} size={56} />
+          <UserAvatar avatar={item.avatar} size={48} />
         </span>
       ) : (
         <span className="notifications__row-icon" style={{ color: item.accent }} aria-hidden="true">
@@ -149,10 +147,9 @@ function NotificationRow({ item, index }) {
   );
 }
 
-export default function NotificationsSection() {
+export default function NotificationsSection({ pendingRead }) {
   const [state, setState] = useState({ items: null, unreadCount: 0, loading: true, error: null });
   const [attempt, setAttempt] = useState(0);
-  const readTimerRef = useRef(null);
 
   /* بارگذاری هر دو منبع با هم؛ Retry دستی همان الگوی بقیهٔ لایه‌ها */
   useEffect(() => {
@@ -160,10 +157,12 @@ export default function NotificationsSection() {
 
     setState((prev) => ({ ...prev, loading: true, error: null }));
 
-    Promise.all([fetchFriendsLeagueNotifications(), fetchLeagueNotifications()])
+    Promise.resolve(pendingRead)
+      .then(() => Promise.all([fetchFriendsLeagueNotifications(), fetchLeagueNotifications()]))
       .then(([friends, league]) => {
         if (!alive) return;
-        const items = [...fromFriends(friends), ...fromLeague(league)];
+        const items = [...fromFriends(friends), ...fromLeague(league)]
+          .sort((a, b) => Number(b.unread) - Number(a.unread));
 
         setState({
           items,
@@ -179,28 +178,7 @@ export default function NotificationsSection() {
     return () => {
       alive = false;
     };
-  }, [attempt]);
-
-  /* بعد از باز شدن لایه، unreadها خوانده شوند — کمی دیرتر تا کاربر رنگ «جدید» را ببیند */
-  useEffect(() => {
-    if (state.loading || state.error || !state.items || state.unreadCount === 0) return undefined;
-
-    readTimerRef.current = window.setTimeout(() => {
-      Promise.all([markFriendsLeagueNotificationsRead(), markLeagueNotificationsRead()]).then(() => {
-        setState((prev) =>
-          prev.items
-            ? {
-                ...prev,
-                unreadCount: 0,
-                items: prev.items.map((item) => ({ ...item, unread: false })),
-              }
-            : prev,
-        );
-      });
-    }, 1400);
-
-    return () => window.clearTimeout(readTimerRef.current);
-  }, [state.loading, state.error, state.items, state.unreadCount]);
+  }, [attempt, pendingRead]);
 
   const retry = useCallback(() => setAttempt((value) => value + 1), []);
 
@@ -252,7 +230,12 @@ export default function NotificationsSection() {
             ) : (
               <ul className="notifications__list">
                 {items.map((item, index) => (
-                  <NotificationRow key={item.id} item={item} index={index} />
+                  <Fragment key={item.id}>
+                    {index > 0 && !item.unread && items[index - 1].unread && (
+                      <li className="notifications__divider">پیام‌های پیشین</li>
+                    )}
+                    <NotificationRow item={item} index={index} />
+                  </Fragment>
                 ))}
               </ul>
             )}

@@ -157,6 +157,11 @@ export default function BankResult({ session, onReview, onBack, onNavigate, onRe
               {result.reason === 'timeout' && <span className="text-[var(--gold-ink)]"> · پایان به‌دلیل اتمام زمان</span>}
               {session.negativeMarking ? ' · با نمرهٔ منفی ۳/۱−' : ''}
             </p>
+            {session.heartAwards > 0 && (
+              <p className="mt-2 text-sm font-bold text-[var(--green-ink)]" role="status">
+                ♥ {faNum(session.heartAwards)} قلب دریافت کردی
+              </p>
+            )}
 
             <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-5">
               <StatCell label="صحیح" value={faNum(result.correct)} accent="#61D192" />

@@ -26,7 +26,8 @@
 import { randomBytes, timingSafeEqual } from 'node:crypto';
 
 import { findUserById, publicUser, saveGoogleUser } from './usersStore.js';
-import { USER_SESSION_COOKIE, createUserSession } from './userSessions.js';
+import { USER_SESSION_COOKIE, createUserSession, getUserSession } from './userSessions.js';
+import { transferGuestTestBankProgress } from './contentStore.js';
 
 const AUTH_ENDPOINT = 'https://accounts.google.com/o/oauth2/v2/auth';
 const TOKEN_ENDPOINT = 'https://oauth2.googleapis.com/token';
@@ -299,6 +300,9 @@ function handleHandoff(request, response) {
    * نمایشی است. SameSite=Strict — fetchهای هم‌مبدأ آن را می‌فرستند.
    */
   if (user) {
+    const previous = readCookie(request, USER_SESSION_COOKIE);
+    const guest = previous ? getUserSession(previous) : null;
+    if (guest?.user.anonymous) transferGuestTestBankProgress(guest.user.id, user.id);
     const session = createUserSession(user, {
       ip: request.socket?.remoteAddress ?? '',
       userAgent: request.headers?.['user-agent'] ?? '',

@@ -1,0 +1,51 @@
+[
+  {
+    "userId": "guest-4ffde9183e8c82fef56d58f56fd442cf",
+    "questionId": "tb-phy-04",
+    "selected": 1,
+    "timeSpent": 3,
+    "answeredAt": 1790254993829
+  },
+  {
+    "userId": "guest-4ffde9183e8c82fef56d58f56fd442cf",
+    "questionId": "tb-phy-c09",
+    "selected": 0,
+    "timeSpent": 2,
+    "answeredAt": 1790254974396
+  },
+  {
+    "userId": "guest-4ffde9183e8c82fef56d58f56fd442cf",
+    "questionId": "tb-phy-c10",
+    "selected": 0,
+    "timeSpent": 2,
+    "answeredAt": 1790254979163
+  },
+  {
+    "userId": "guest-4ffde9183e8c82fef56d58f56fd442cf",
+    "questionId": "tb-phy-c08",
+    "selected": 0,
+    "timeSpent": 3,
+    "answeredAt": 1790254986113
+  },
+  {
+    "userId": "guest-4ffde9183e8c82fef56d58f56fd442cf",
+    "questionId": "tb-phy-c03",
+    "selected": 3,
+    "timeSpent": 5,
+    "answeredAt": 1790255009744
+  },
+  {
+    "userId": "guest-4ffde9183e8c82fef56d58f56fd442cf",
+    "questionId": "tb-phy-c01",
+    "selected": 2,
+    "timeSpent": 2,
+    "answeredAt": 1790255015561
+  },
+  {
+    "userId": "guest-4ffde9183e8c82fef56d58f56fd442cf",
+    "questionId": "tb-phy-c12",
+    "selected": 2,
+    "timeSpent": 2,
+    "answeredAt": 1790255020378
+  }
+]

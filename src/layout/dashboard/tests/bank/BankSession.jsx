@@ -10,13 +10,13 @@ import {
   fetchHistory,
   fetchQuestionAttemptStats,
   reportQuestion,
+  recordBankAnswer,
   saveSessionProgress,
   submitSession,
   toggleBookmark,
   toggleNeedReview,
   DIFFICULTIES,
   QUESTION_TYPES,
-  SOURCES,
   SUBJECTS,
   bankKindOf,
   trackOf,
@@ -29,7 +29,6 @@ import {
   Modal,
   OptionButton,
   QuestionFigure,
-  SourceBadge,
   TrackBadge,
   TypeBadge,
   faNum,
@@ -48,17 +47,21 @@ const OPTION_KEYS = ['A', 'B', 'C', 'D'];
 function ExplanationPanel({ question, userAnswer, myAttempts }) {
   const stats = question.stats ?? {};
   const explanation = question.explanation ?? {};
+  const wrongNotes = (explanation.whyWrong ?? []).filter((item) => item.text?.trim());
+  const hasExplanation = Boolean(explanation.summary?.trim() || explanation.deep?.trim()
+    || explanation.keyPoint?.trim() || explanation.trap?.trim() || wrongNotes.length);
+  if (!hasExplanation && !(stats.solves > 0)) return null;
 
   return (
     <section className="tb-reveal overflow-hidden rounded-[2rem] border border-[#61D192]/20 bg-[var(--green-deep)] p-5 md:p-6" aria-label="پاسخ تشریحی">
-      <header className="flex flex-wrap items-center gap-2 border-b border-white/8 pb-3">
+      {hasExplanation && <header className="flex flex-wrap items-center gap-2 border-b border-white/8 pb-3">
         <span className="grid h-7 w-7 place-items-center rounded-xl bg-[#61D192]/15 text-[var(--green-ink)]">
           <Icon name="book" className="h-4 w-4" />
         </span>
         <h3 className="text-sm font-bold [font-family:'Doran','Vazir',Tahoma,sans-serif]">تحلیل و پاسخ تشریحی</h3>
-      </header>
+      </header>}
 
-      <div className="mt-4 space-y-4 text-[13.5px] leading-7 text-[var(--muted)]">
+      {hasExplanation && <div className="mt-4 space-y-4 text-[13.5px] leading-7 text-[var(--muted)]">
         {explanation.summary && (
           <p>
             <strong className="text-[var(--green-ink)]">چرا؟ </strong>
@@ -87,11 +90,11 @@ function ExplanationPanel({ question, userAnswer, myAttempts }) {
           </div>
         )}
 
-        {explanation.whyWrong?.length > 0 && (
+        {wrongNotes.length > 0 && (
           <div>
             <strong className="text-[13px] text-[var(--muted)]">چرا گزینه‌های دیگر غلط‌اند؟</strong>
             <ul className="mt-2 space-y-2">
-              {explanation.whyWrong.map((item) => (
+              {wrongNotes.map((item) => (
                 <li key={item.index} className="flex gap-2.5 rounded-xl bg-white/[0.04] px-3.5 py-2.5">
                   <span className="grid h-6 w-6 shrink-0 place-items-center rounded-lg bg-[#e26d6d]/15 text-[11px] font-bold text-[var(--red-ink)]">
                     {OPTION_KEYS[item.index] ?? toFa(item.index + 1)}
@@ -102,10 +105,10 @@ function ExplanationPanel({ question, userAnswer, myAttempts }) {
             </ul>
           </div>
         )}
-      </div>
+      </div>}
 
       {/* آمار سؤال — جامعه + خود کاربر */}
-      {stats.solves != null && (
+      {stats.solves > 0 && (
         <footer className="mt-5 border-t border-white/8 pt-4">
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[11.5px] text-[var(--faint)]">
             <span className="flex items-center gap-1.5">
@@ -152,9 +155,6 @@ function ExplanationPanel({ question, userAnswer, myAttempts }) {
             })}
           </div>
 
-          <p className="mt-3.5 text-[11px] text-[var(--faint)]">
-            منبع: {SOURCES[question.source]?.label ?? '—'} · سال {toFa(question.year)}
-          </p>
         </footer>
       )}
     </section>
@@ -423,9 +423,17 @@ export default function BankSession({ userId, session, questions, onFinished, on
   const [submitting, setSubmitting] = useState(false);
   const [questionStats, setQuestionStats] = useState(null); // شکست تلاش‌های کاربر روی سؤال جاری
   const [statsTick, setStatsTick] = useState(0); // با هر ثبت پاسخ زیاد می‌شود تا «آمار این سؤال» تازه شود
+  const [heartAwards, setHeartAwards] = useState({});
+  const [heartToast, setHeartToast] = useState(null);
   const lastStatsQidRef = useRef(null);
   const questionStartRef = useRef(Date.now());
   const autoSubmittedRef = useRef(false);
+
+  useEffect(() => {
+    if (!heartToast) return undefined;
+    const timer = window.setTimeout(() => setHeartToast(null), 3500);
+    return () => window.clearTimeout(timer);
+  }, [heartToast]);
 
   const question = questions[currentIndex];
   const answer = answers[question?.id];
@@ -523,6 +531,13 @@ export default function BankSession({ userId, session, questions, onFinished, on
     const nextAnswers = { ...answers, [question.id]: entry };
     setAnswers(nextAnswers);
     persist({ answers: { [question.id]: entry } });
+    if (!isExam) {
+      const awarded = await recordBankAnswer(question.id, entry);
+      if (awarded) {
+        setHeartAwards((current) => ({ ...current, [question.id]: true }));
+        setHeartToast(question.id);
+      }
+    }
     /* آمار سؤال (کل بار / درست / غلط / آخرین پاسخ) بلافاصله بعد از ثبت، دوباره خوانده می‌شود */
     setStatsTick((tick) => tick + 1);
   };
@@ -598,6 +613,11 @@ export default function BankSession({ userId, session, questions, onFinished, on
 
   return (
     <div dir="rtl" className="mx-auto w-full max-w-[62rem]">
+      {heartToast && (
+        <div className="fixed bottom-6 left-1/2 z-[70] -translate-x-1/2 rounded-full border border-[#61D192]/40 bg-[var(--surface)] px-5 py-3 text-sm font-bold text-[var(--green-ink)] shadow-xl" role="status">
+          ♥ یک قلب دریافت کردی
+        </div>
+      )}
       {/* ── نوار کنترلی — بدون کادر و بدون عنوان سشن؛ شمارش پاسخ‌ها در پنل سمت چپ است ── */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <button
@@ -651,7 +671,7 @@ export default function BankSession({ userId, session, questions, onFinished, on
                   </span>
                 )}
                 <span className="text-[11px] text-[var(--faint)]">{question.topicPath.join(' › ')}</span>
-                <BankKindBadge kind={bankKindOf(question)} />
+                <BankKindBadge kind={bankKindOf(question)} question={question} />
                 <TrackBadge track={trackOf(question)} />
                 <DifficultyBadge difficulty={question.difficulty} />
               </div>
@@ -776,6 +796,9 @@ export default function BankSession({ userId, session, questions, onFinished, on
                   {answer.isCorrect ? 'صحیح' : 'نادرست'}
                 </span>
               </div>
+            )}
+            {revealed && heartAwards[question.id] && (
+              <p className="mt-3 text-sm font-bold text-[var(--green-ink)]" role="status">♥ یک قلب دریافت کردی</p>
             )}
           </div>
 

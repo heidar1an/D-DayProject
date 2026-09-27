@@ -1371,6 +1371,15 @@
   font-style: normal;
 }
 
+/* گویندهٔ نقل‌قول در متنی که از پنل ساخته می‌شود — تگ `cite` در فهرست سفید پاک‌ساز
+   نیست، پس همان ظاهر با کلاس تکرار می‌شود تا خروجی پنل با متن بلوکی یکی بماند */
+.ap-article__blocks blockquote .ap-quote__cite {
+  display: block;
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
 /* هایلایت کاربر */
 .ap-hl {
   background: rgba(119, 183, 135, 0.3);
@@ -1381,8 +1390,9 @@
   cursor: pointer;
 }
 
-/* جداکننده */
-.ap-divider {
+/* جداکننده — پاک‌ساز HTML کلاس را از `hr` برمی‌دارد، پس خودِ تگ هم همان ظاهر را می‌گیرد */
+.ap-divider,
+.ap-article__blocks hr {
   margin: 36px 0;
   border: 0;
   border-top: 1px solid rgb(var(--line-rgb) / 0.08);
@@ -1550,11 +1560,18 @@
   font-size: 0.92rem;
 }
 
-.ap-table-wrap caption {
+.ap-table-wrap caption,
+.ap-table-wrap .ap-table__caption {
   padding: 16px 18px 4px;
   color: var(--muted);
   font-size: 0.84rem;
   text-align: right;
+}
+
+/* عنوان جدولِ ساخته‌شده از پنل — `caption` در فهرست سفید پاک‌ساز نیست، پس با
+   `p` و کلاس ساخته می‌شود و همان فاصلهٔ `caption` را می‌گیرد */
+.ap-table-wrap .ap-table__caption {
+  margin: 0;
 }
 
 .ap-table-wrap th,

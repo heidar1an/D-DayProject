@@ -1,7 +1,7 @@
 /*
  * AnalyticsService — لایهٔ سرویس «تحلیل عملکرد تست‌ها».
  *
- * پیاده‌سازی فعلی Mock است اما قرارداد آن API-ready طراحی شده؛ با اتصال Backend
+ * داده منبع‌محور است اما قرارداد آن API-ready طراحی شده؛ با اتصال Backend
  * فقط بدنهٔ توابع به fetch تبدیل می‌شود و نه امضا عوض می‌شود و نه شکل Entityها:
  *
  *   GET /api/analytics/overview?days=&mode=&subject=    → fetchAnalyticsOverview()
@@ -15,13 +15,14 @@
  *   GET /api/analytics/diagnosis                        → fetchDiagnosis()
  *   GET /api/analytics/summary/week                     → fetchWeeklySummary()
  *
- * منبع داده فعلی: تاریخچهٔ Mock قطعی (per-user) + سشن‌های واقعی بانک تست تپش
- * (testBankService) که در لحظهٔ خواندن به Attempt تبدیل و ادغام می‌شوند؛ یعنی
- * تست‌هایی که کاربر همین الان در بانک می‌زند هم در تحلیل دیده می‌شوند.
+ * منبع داده: فقط دادهٔ واقعی کاربر — سشن‌های ثبت‌شدهٔ بانک تست تپش
+ * (testBankService) که در لحظهٔ خواندن به Attempt استاندارد تبدیل می‌شوند؛
+ * یعنی هر عدد این لایه از تلاش خود کاربر ساخته می‌شود و هیچ داده‌ای نمونه نیست.
  */
 import { QUESTIONS, SUBJECTS, questionById } from '../testBank/mockData';
 import { fetchSubmittedSessions } from '../testBank/testBankService';
-import { generateMockHistory } from './mockData';
+import { MicroProgressService } from '../micro/microProgressService';
+import { courseIdForSubject } from '../micro/microContentService';
 import {
   aggregateExams,
   buildAnalyticsModel,
@@ -31,7 +32,43 @@ import {
   startOfToday,
 } from './analyticsEngine';
 
-const STATE_KEY_PREFIX = 'tapesh:analytics:v1:';
+/*
+ * درس‌هایی که کاربر «شروع» کرده: یا تست زده (تلاش ثبت‌شده دارد) یا خواندن
+ * درسنامهٔ همان درس را آغاز کرده است. کارت «عملکرد بر اساس درس» با همین شرط
+ * پر می‌شود؛ درسی که تازه شروع شده با دقت «—» می‌آید، نه با درصد ساختگی.
+ */
+function subjectsWithStartedLesson(userId, subjectRows) {
+  const startedIds = new Set(
+    SUBJECTS.filter((subject) => {
+      const courseId = courseIdForSubject(subject.id);
+      return courseId ? MicroProgressService.hasStartedReading(courseId, userId) : false;
+    }).map((subject) => subject.id),
+  );
+  if (startedIds.size === 0) return subjectRows;
+
+  const rows = subjectRows.map((row) => ({ ...row, lessonStarted: startedIds.has(row.subjectId) }));
+  const known = new Set(rows.map((row) => row.subjectId));
+  const readingOnly = SUBJECTS.filter((subject) => startedIds.has(subject.id) && !known.has(subject.id)).map((subject) => ({
+    subjectId: subject.id,
+    name: subject.name,
+    accent: subject.accent,
+    attempts: [],
+    questionCount: 0,
+    attemptCount: 0,
+    correctCount: 0,
+    wrongCount: 0,
+    unansweredCount: 0,
+    accuracy: null,
+    averageTime: null,
+    difficulty: null,
+    trend: { direction: null, delta: 0 },
+    mastery: { status: 'NEEDS_DATA', score: null, accuracy: null, volume: 0 },
+    lessonStarted: true,
+  }));
+
+  return [...rows, ...readingOnly];
+}
+
 const LATENCY_MS = 260;
 const HISTORY_DAYS = 84;
 
@@ -74,42 +111,6 @@ export function normalizeFilters(filters = {}) {
 }
 
 export const rangeDays = (rangeKey) => TIME_RANGES.find((range) => range.key === rangeKey)?.days ?? null;
-
-/* ────────────────────────── وضعیت (Mock Backend) ────────────────────────── */
-
-const resolveUserKey = (userRef) => {
-  if (typeof userRef === 'string') return userRef || 'guest';
-  const identity = userRef?.id ?? userRef?.phone;
-  return identity ? String(identity) : 'guest';
-};
-
-const stateKey = (userId) => `${STATE_KEY_PREFIX}${resolveUserKey(userId)}`;
-
-/* تاریخچهٔ Mock — قطعی per-user و کش‌شده؛ رفتار معادل یک Backend */
-function loadMockHistory(userId) {
-  if (typeof window === 'undefined') return generateMockHistory(userId);
-  try {
-    const cached = JSON.parse(window.localStorage.getItem(stateKey(userId)) || 'null');
-    if (cached?.attempts?.length) return cached;
-  } catch {
-    /* کش خراب → تولید دوباره */
-  }
-  const fresh = generateMockHistory(userId);
-  try {
-    window.localStorage.setItem(stateKey(userId), JSON.stringify(fresh));
-  } catch {
-    /* پر بودن localStorage تحلیل را نمی‌شکند */
-  }
-  return fresh;
-}
-
-/* بازتولید تاریخچهٔ نمونه (توسعه/دمو) */
-export function resetMockHistory(userId) {
-  if (typeof window !== 'undefined') {
-    window.localStorage.removeItem(stateKey(userId));
-  }
-  return loadMockHistory(userId);
-}
 
 /* ────────────────────────── تغذیهٔ متادیتای سؤال ────────────────────────── */
 
@@ -178,17 +179,14 @@ function mapLiveSession(session) {
   return { session: mapped, attempts };
 }
 
-/* بارگذاری کل دادهٔ Attempt کاربر: Mock + واقعی، تغذیه‌شده و مرتب */
+/* بارگذاری کل دادهٔ Attempt کاربر — فقط سشن‌های واقعی، تغذیه‌شده و مرتب */
 export function loadAttemptHistory(userId) {
-  const mock = loadMockHistory(userId);
-  let records = [
-    ...mock.sessions.map((session) => ({ session, attempts: mock.attempts.filter((attempt) => attempt.sessionId === session.id) })),
-  ];
+  let records = [];
   try {
     const live = fetchSubmittedSessions ? fetchSubmittedSessions(userId) : [];
-    records = [...records, ...live.map(mapLiveSession)];
+    records = live.map(mapLiveSession);
   } catch {
-    /* اگر بانک واقعی در دسترس نبود، تحلیل روی تاریخچهٔ نمونه ادامه می‌یابد */
+    /* اگر بانک در دسترس نبود، تحلیل خالی می‌ماند — نه اینکه دادهٔ نمونه نشان دهد */
   }
 
   const sessions = records.map((record) => record.session).sort((a, b) => (a.startedAt ?? 0) - (b.startedAt ?? 0));
@@ -455,7 +453,7 @@ export function fetchAnalyticsBundle(userId, filters = {}) {
           .filter((session) => (session.submittedAt ?? 0) >= cutoff)
           .map((session) => ({ id: session.id, title: session.title, submittedAt: session.submittedAt, dayKey: dayKeyOf(session.submittedAt) })),
       },
-      subjects: model.subjects,
+      subjects: subjectsWithStartedLesson(userId, model.subjects),
       topics: model.topics,
       weakness: model.weakness,
       errors: model.errors,

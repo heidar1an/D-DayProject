@@ -196,16 +196,25 @@ export function IconButton({ label, tone = 'neutral', children, ...rest }) {
   );
 }
 
-export function Field({ label, hint, error, required = false, children }) {
+/*
+ * کادر برچسب‌دار یک فیلد فرم.
+ *
+ * `as="div"` را وقتی بدهید که داخل فیلد، محتوای تعاملی است (مثل ویرایشگر متن غنی).
+ * دلیلش یک رفتار مشخص مرورگر است: «کنترلِ» یک `<label>` نخستین عنصر labelable داخلش
+ * است؛ اگر ویرایشگر با نوار ابزارش داخل label باشد، آن کنترل **دکمهٔ «واگرد»** می‌شود و
+ * هر کلیک روی متنِ ویرایشگر یک کلیک مصنوعی روی همان دکمه می‌زند ⇒ `undo` اجرا می‌شود و
+ * آخرین تغییر کاربر بی‌صدا پاک می‌شود. (با پروب واقعی مرورگر تأیید شد.)
+ */
+export function Field({ label, hint, error, required = false, as: Tag = 'label', children }) {
   return (
-    <label className={`ad-field ${error ? 'is-invalid' : ''}`.trim()}>
+    <Tag className={`ad-field ${error ? 'is-invalid' : ''}`.trim()}>
       <span className="ad-field__label">
         {label}
         {required ? <em aria-hidden="true">*</em> : null}
       </span>
       {children}
       {error ? <span className="ad-field__error">{error}</span> : hint ? <span className="ad-field__hint">{hint}</span> : null}
-    </label>
+    </Tag>
   );
 }
 

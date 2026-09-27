@@ -6,6 +6,7 @@
 import { useEffect } from 'react';
 import { toFa, faNum } from '../../league/leagueShared';
 import { BANK_KINDS, DIFFICULTIES, QUESTION_TYPES, SOURCES, TRACKS } from '../../../../services/testBank/testBankService';
+import { examDateLabel } from '../../../../services/testBank/questionMeta';
 
 export { toFa, faNum };
 export { BANK_KINDS, DIFFICULTIES, QUESTION_TYPES, SOURCES, TRACKS };
@@ -256,7 +257,7 @@ export function SourceBadge({ source, className = '' }) {
 
 /* ── نشان «نوع بانک» (کشوری / تألیفی) و «رشته» (پزشکی / دندان‌پزشکی) ──
    هر دو از رکورد سؤال مشتق می‌شوند؛ نشان فقط نمایش می‌دهد، منطق در سرویس است. */
-export function BankKindBadge({ kind, className = '' }) {
+export function BankKindBadge({ kind, question, className = '' }) {
   const meta = BANK_KINDS[kind];
   if (!meta) return null;
   return (
@@ -266,7 +267,7 @@ export function BankKindBadge({ kind, className = '' }) {
       title={meta.description}
     >
       <Icon name={kind === 'authored' ? 'pen' : 'shield'} className="h-3 w-3" />
-      {meta.short}
+      {meta.short}{question ? <> · {toFa(examDateLabel(question))}</> : null}
     </span>
   );
 }
@@ -465,10 +466,10 @@ const FIGURES = {
 
 export function QuestionFigure({ name }) {
   const renderer = FIGURES[name];
-  if (!renderer) return null;
+  if (!renderer && !/^\/uploads\/[\w.-]+$/.test(name ?? '')) return null;
   return (
     <figure className="mt-5 overflow-hidden rounded-2xl border border-white/8 bg-[var(--surface)] p-4">
-      <div className="mx-auto w-full max-w-md">{renderer()}</div>
+      <div className="mx-auto w-full max-w-md">{renderer ? renderer() : <img src={name} alt="شکل سؤال" className="w-full rounded-xl object-contain" />}</div>
       <figcaption className="mt-2 text-center text-[11px] text-[var(--faint)]">شکل سؤال</figcaption>
     </figure>
   );

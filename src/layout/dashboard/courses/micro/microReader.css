@@ -599,6 +599,12 @@
 
 .micr-callout__icon svg { width: 16px; height: 16px; }
 
+/* کادری که آیکون دارد: آیکون و سرتیتر در یک ردیف می‌نشینند، نه آیکون بالای عنوان.
+   با `:has` محدود شده تا کادرهای بدون آیکون (تعریف، مقایسه، هشدار…) دست‌نخورده بمانند. */
+.micr-callout:has(> .micr-callout__icon) { display: flex; align-items: flex-start; gap: 12px; }
+.micr-callout:has(> .micr-callout__icon) > .micr-callout__icon { flex: none; margin-bottom: 0; }
+.micr-callout:has(> .micr-callout__icon) > div { flex: 1; min-width: 0; }
+
 .micr-callout--key { background: rgba(224, 180, 92, 0.07); border-color: rgba(224, 180, 92, 0.28); }
 .micr-callout--key strong { color: var(--gold-ink); }
 .micr-callout--key p { color: rgb(var(--ink-rgb) / 0.94); }

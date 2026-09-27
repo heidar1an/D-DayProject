@@ -187,14 +187,6 @@
   --card-glow: rgba(171, 142, 124, 0.2);
 }
 
-.other-card--gold {
-  --card-accent: var(--gold);
-  --card-soft: rgba(224, 180, 92, 0.13);
-  --card-line: rgba(224, 180, 92, 0.26);
-  --card-line-strong: rgba(224, 180, 92, 0.5);
-  --card-glow: rgba(224, 180, 92, 0.17);
-}
-
 .other-card--red {
   --card-accent: var(--red);
   --card-soft: rgba(226, 109, 109, 0.13);

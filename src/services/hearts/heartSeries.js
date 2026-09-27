@@ -3,20 +3,12 @@
  * این فایل فقط «داده و محاسبه» است؛ ذخیره‌سازی و API در heartStatsService.js انجام می‌شود.
  *
  * دادهٔ پایه: یک دفتر روزانهٔ سادهٔ Map — کلید 'YYYY-MM-DD' (تاریخ محلی) → تعداد قلب همان روز.
- * تولید دادهٔ Mock: با seed ثابت و anchor ثابت، تا برای هر تاریخ همیشه همان مقدار تولید شود
- * (رفرش یا جابه‌جایی بین بازه‌ها عدد عوض نمی‌کند).
  *
  * برچسب‌ها (روز هفته، تاریخ جلالی، ماه، سال) با Intl لوکیل fa-IR ساخته می‌شوند —
  * یعنی تقویم جلالی و اعداد فارسی بدون هیچ کتابخانه‌ای.
  */
 
 export const HEART_RANGES = ['daily', 'weekly', 'monthly', 'yearly'];
-
-const DAY_MS = 86_400_000;
-
-/* anchor = ۱ فروردین ۱۴۰۱ → دفتر روزانه حدود ۵ سال جلالی را پوشش می‌دهد (نمای سالانه ۵ میله) */
-const SEED_ANCHOR = new Date(2022, 2, 21);
-const SEED_SALT = 0x7a25c3;
 
 /* ── ابزارهای تاریخ ── */
 
@@ -53,58 +45,6 @@ const fYear = new Intl.DateTimeFormat('fa-IR', { year: 'numeric' });
 
 /* حرف اول نام روز (ش، ی، د، س، چ، پ، ج) */
 const weekdayLetter = (date) => fWeekday.format(date).charAt(0);
-
-/* ── تولید دفتر روزانهٔ Mock (deterministic) ── */
-
-function mulberry32(seed) {
-  let a = seed;
-  return function next() {
-    a |= 0;
-    a = (a + 0x6d2b79f5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-/*
- * ریتم دانش‌آموزی: فعالیت پایه با روند رشد آرام، پنجشنبهٔ نیمه‌فعال، جمعه تقریباً تعطیل،
- * اسپایک‌های چالش/نبرد، و روزهای غیبت. امروز و دو روز قبل غیرصفر تا با استریک ۳ روزهٔ
- * هدر داشبورد بخواند؛ امروز عمداً مقدار متعادلی دارد و با recordHeartGain رشد می‌کند.
- */
-export function buildSeedDays(today = new Date()) {
-  const today0 = startOfDay(today);
-  const rnd = mulberry32(SEED_SALT);
-  const days = {};
-  const totalDays = Math.max(1, Math.round((today0 - SEED_ANCHOR) / DAY_MS));
-
-  const cursor = new Date(SEED_ANCHOR);
-  for (let i = 0; cursor <= today0; i += 1) {
-    const dow = cursor.getDay();
-    let value = 0;
-
-    if (dow !== 5) {
-      const growth = 0.72 + (i / totalDays) * 0.55;
-      value = (16 + rnd() * 26) * growth * (dow === 4 ? 0.55 : 1);
-      const roll = rnd();
-      if (roll < 0.045) value += 55 + rnd() * 85; /* روز چالش/نبرد */
-      else if (roll < 0.06) value += 170 + rnd() * 130; /* برد بزرگ */
-      if (rnd() < 0.055) value = 0; /* غیبت */
-    } else if (rnd() < 0.18) {
-      value = rnd() * 14; /* جمعهٔ مطالعهٔ سبک */
-    }
-
-    days[toDayKey(cursor)] = Math.round(value);
-    cursor.setDate(cursor.getDate() + 1);
-  }
-
-  /* استریک اخیر: دو روز گذشته غیرصفر + امروز */
-  days[toDayKey(addDays(today0, -2))] = 32 + Math.round(rnd() * 18);
-  days[toDayKey(addDays(today0, -1))] = 41 + Math.round(rnd() * 22);
-  days[toDayKey(today0)] = 18 + Math.round(rnd() * 20);
-
-  return days;
-}
 
 /* ── تجمیع بر اساس بازه ── */
 

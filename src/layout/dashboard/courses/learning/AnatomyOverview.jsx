@@ -77,21 +77,32 @@ export function UnitList({ units, progressState, onOpenUnit }) {
 }
 
 export default function AnatomyOverview({ course, progressState, initialModuleId, onBack, onOpenUnit }) {
-  /* بخش انتخاب‌شده در ستون راست؛ محتوایش در ستون چپ رندر می‌شود */
-  const [selectedId, setSelectedId] = useState(initialModuleId ?? 'upper-limb');
-  const upperSummary = ProgressService.getModuleSummary(course, progressState, 'upper-limb');
+  /* بخش انتخاب‌شده در ستون راست؛ محتوایش در ستون چپ رندر می‌شود. پیش‌فرض، اولین بخشی است
+     که واحد منتشرشده دارد تا ورود به لایه روی محتوای واقعی بنشیند. */
+  const [selectedId, setSelectedId] = useState(() => {
+    if (initialModuleId) return initialModuleId;
+    const withUnits = course.modules.find((module) => ContentService.getUnits(course, module.id).length);
+    return (withUnits ?? course.modules[0])?.id;
+  });
+  /* هر بخشی که واحد منتشرشده دارد، درصد و وضعیتش از وضعیت واقعی همان واحدها خوانده
+     می‌شود؛ بخش بدون واحد روی مقدار خودِ محتوا می‌ماند (هم آناتومی، هم درس‌های دیگر). */
   const modules = useMemo(
-    () => course.modules.map((module) => module.id === 'upper-limb'
-      ? {
-          ...module,
-          progress: Math.max(module.progress, upperSummary.progress),
-          status: upperSummary.completed === upperSummary.total && upperSummary.total ? 'completed' : upperSummary.learning ? 'learning' : module.status,
-        }
-      : module),
-    [course.modules, upperSummary.completed, upperSummary.learning, upperSummary.progress, upperSummary.total],
+    () => course.modules.map((module) => {
+      const units = ContentService.getUnits(course, module.id);
+      if (!units.length) return module;
+      const summary = ProgressService.getModuleSummary(course, progressState, module.id);
+      return {
+        ...module,
+        progress: Math.max(module.progress ?? 0, summary.progress),
+        status: summary.completed === summary.total && summary.total
+          ? 'completed'
+          : summary.learning ? 'learning' : module.status,
+      };
+    }),
+    [course, progressState],
   );
   const selectedModule = modules.find((module) => module.id === selectedId) ?? modules[0];
-  const selectedUnits = ContentService.getUnits(course, selectedModule.id);
+  const selectedUnits = selectedModule ? ContentService.getUnits(course, selectedModule.id) : [];
 
   return (
     <section className="anatomy-overview">
@@ -109,7 +120,7 @@ export default function AnatomyOverview({ course, progressState, initialModuleId
 
       <div className="anatomy-split">
         {/* کادرهای بخش‌ها — ستون راست */}
-        <div className="anatomy-split__cards" aria-label="بخش‌های آناتومی">
+        <div className="anatomy-split__cards" aria-label={`بخش‌های ${course.title}`}>
           {modules.map((module, index) => (
             <AnatomyModuleCard
               key={module.id}
@@ -122,7 +133,7 @@ export default function AnatomyOverview({ course, progressState, initialModuleId
         </div>
 
         {/* محتوای بخش انتخاب‌شده — ستون چپ (key باعث انیمیشن ورود با هر انتخاب است) */}
-        <div className="anatomy-split__content" key={selectedModule.id}>
+        <div className="anatomy-split__content" key={selectedModule?.id}>
           {selectedUnits.length ? (
             <UnitList units={selectedUnits} progressState={progressState} onOpenUnit={onOpenUnit} />
           ) : (

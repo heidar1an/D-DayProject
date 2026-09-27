@@ -51,9 +51,64 @@ import {
 
 const STATE_KEY_PREFIX = 'tapesh:testbank:v1:';
 const LATENCY_MS = 280;
+let bankLoad = null;
+let bankRevision = null;
+let bankCheckedAt = 0;
+let bankSignal = null;
+
+async function loadPublishedQuestions(force = false) {
+  if (typeof window === 'undefined') return false;
+  let signal = null;
+  try { signal = window.localStorage.getItem('tapesh:testbank:changed'); } catch { /* ذخیرهٔ محلی اختیاری است */ }
+  if (signal !== bankSignal) { bankSignal = signal; bankCheckedAt = 0; }
+  if (!force && bankRevision !== null && Date.now() - bankCheckedAt < 3000) return false;
+  if (bankLoad) return bankLoad;
+  bankLoad = (async () => {
+    const revisionResponse = await fetch('/api/public/test-bank/revision', { cache: 'no-store' });
+    if (!revisionResponse.ok) throw new Error('bank-unavailable');
+    const revisionPayload = await revisionResponse.json();
+    const revision = revisionPayload.data?.revision;
+    if (!revisionPayload.success || !revision) throw new Error('bank-unavailable');
+    bankCheckedAt = Date.now();
+    if (revision === bankRevision) return false;
+    const response = await fetch('/api/public/test-bank/questions', { cache: 'no-store' });
+    if (!response.ok) throw new Error('bank-unavailable');
+    const payload = await response.json();
+    if (!payload.success || !Array.isArray(payload.data?.questions)) throw new Error('bank-unavailable');
+    QUESTIONS.splice(0, QUESTIONS.length, ...payload.data.questions);
+    BANK_YEARS.splice(0, BANK_YEARS.length, ...[...new Set(QUESTIONS.filter((question) => question.source === 'official').map((question) => question.year).filter(Boolean))].sort((a, b) => a - b));
+    Object.assign(BANK_STATS, buildStats(QUESTIONS));
+    bankRevision = payload.data.revision ?? revision;
+    return true;
+  })().finally(() => { bankLoad = null; });
+  return bankLoad;
+}
+
+export const refreshPublishedTestBankQuestions = () => loadPublishedQuestions(true);
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+async function reportAnswers(answers) {
+  if (typeof window === 'undefined') return [];
+  const response = await fetch('/api/users/test-bank/answers', {
+    method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ answers: Object.entries(answers).map(([questionId, answer]) => ({ questionId, selected: answer.selected, timeSpent: answer.timeSpent, answeredAt: answer.answeredAt })) }),
+  });
+  if (!response.ok) return [];
+  bankCheckedAt = 0;
+  const { awardedQuestionIds = [] } = await response.json();
+  if (awardedQuestionIds.length) window.dispatchEvent(new Event('tapesh:hearts:changed'));
+  return awardedQuestionIds;
+}
+
+export async function recordBankAnswer(questionId, answer) {
+  try {
+    return (await reportAnswers({ [questionId]: answer })).includes(questionId);
+  } catch {
+    return false;
+  }
+}
 const respond = async (build) => {
+  await loadPublishedQuestions();
   await delay(LATENCY_MS + Math.random() * 160);
   return build();
 };
@@ -296,7 +351,7 @@ export function fetchBankOverview(userId, scope = EMPTY_SCOPE) {
     }));
 
     const yearPool = scoped.filter((question) => question.source === 'official');
-    const yearCounts = BANK_YEARS.map((year) => {
+    const yearCounts = [...new Set(yearPool.map((question) => question.year).filter(Boolean))].sort((a, b) => b - a).map((year) => {
       const items = yearPool.filter((question) => question.year === year);
       const community = items.length
         ? Math.round(items.reduce((sum, question) => sum + question.stats.correctPercent, 0) / items.length)
@@ -701,6 +756,7 @@ export function fetchSessionQuestions(session) {
         type: question.type,
         difficulty: question.difficulty,
         year: question.year,
+        examMonth: question.examMonth,
         source: question.source,
         sourceLabel: SOURCES[question.source]?.label,
         stem: question.stem,
@@ -730,7 +786,7 @@ export function saveSessionProgress(userId, session) {
 
 /* POST /api/sessions/:id/submit — تصحیح و صدور کارنامه (منطق نمره در سرویس) */
 export function submitSession(userId, sessionId, { reason = 'user' } = {}) {
-  return respond(() => {
+  return respond(async () => {
     const state = loadState(userId);
     const index = state.sessions.findIndex((item) => item.id === sessionId);
     if (index === -1) throw new Error('session-not-found');
@@ -846,6 +902,19 @@ export function submitSession(userId, sessionId, { reason = 'user' } = {}) {
       if (storedIndex !== -1) draft.sessions[storedIndex] = submitted;
     });
 
+    let heartAwards = 0;
+    if (answered) {
+      try {
+        heartAwards = (await reportAnswers(session.answers ?? {})).length;
+      } catch {
+        /* کارنامه حتی در صورت قطع ارتباط با سرور قابل نمایش است. */
+      }
+    }
+    if (heartAwards) mutateState(userId, (draft) => {
+      const stored = draft.sessions.find((item) => item.id === sessionId);
+      if (stored) stored.heartAwards = heartAwards;
+    });
+
     trackEvent('bank_session_submitted', {
       sessionId,
       mode: session.mode,
@@ -853,7 +922,7 @@ export function submitSession(userId, sessionId, { reason = 'user' } = {}) {
       answered,
       total,
     });
-    return submitted;
+    return { ...submitted, heartAwards };
   });
 }
 

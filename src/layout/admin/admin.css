@@ -18,6 +18,8 @@
   --ad-muted-2: var(--faint);
   --ad-accent: var(--purple-bright);
   --ad-accent-soft: rgba(147, 127, 205, 0.16);
+  /* متن روی پرکنندهٔ اکسنت (بنفش روشن) — جایش قبلاً هگز خام تکرار شده بود */
+  --ad-accent-ink: #14121c;
   --ad-green: var(--green-vivid);
   --ad-green-soft: rgba(97, 209, 146, 0.14);
   --ad-red: var(--rose);
@@ -206,20 +208,31 @@
   gap: 1rem;
   padding: 1.1rem 1.6rem;
   border-bottom: 1px solid var(--ad-border);
-  background: rgb(var(--scrim-rgb) / 0.86);
-  backdrop-filter: blur(8px);
+  /* هم‌رنگ پس‌زمینهٔ کلی پنل (`--ad-bg`). چون رنگ حالا مات است،
+     `backdrop-filter` بی‌اثر می‌شد و برداشته شد. */
+  background: var(--ad-bg);
   position: sticky;
   top: 0;
   z-index: 5;
 }
 
-.ad-header__menu {
+/*
+ * کلید کشوی موبایل. انتخاب‌گر ترکیبی است چون `.ad-iconbtn` (که پایین‌تر در همین
+ * فایل تعریف شده) با `display: inline-grid` این قاعده را باطل می‌کرد و آیکون
+ * منو در همهٔ عرض‌ها کنار عنوان هر بخش دیده می‌شد.
+ */
+.ad-iconbtn.ad-header__menu {
   display: none;
 }
 
+/* عنوان بخش و «آخرین ورود» در یک ردیف */
 .ad-header__title {
   flex: 1;
   min-width: 0;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.6rem;
 }
 
 .ad-header__title h1 {
@@ -228,15 +241,9 @@
 }
 
 .ad-header__title p {
-  margin: 0.2rem 0 0;
+  margin: 0;
   color: var(--ad-muted);
   font-size: 0.75rem;
-}
-
-.ad-header__user {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
 }
 
 /* دکمهٔ تم پنل — کمی کوچک‌تر از هدر سایت تا با ریتم فشردهٔ پنل بخواند */
@@ -244,9 +251,44 @@
   --theme-toggle-size: 36px;
 }
 
+/*
+ * ── بلوک حساب کاربری در فوتر نوار کناری ──
+ * از هدر به کادر سمت راست («حساب من») منتقل شد: آواتار + نام/نقش در یک دکمه که
+ * صفحهٔ حساب من را باز می‌کند، و دکمهٔ آیکونی خروج کنارش.
+ */
+.ad-account {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.2rem;
+}
+
+.ad-account__open {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.45rem 0.5rem;
+  border: 0;
+  border-radius: var(--ad-radius-sm);
+  background: transparent;
+  color: var(--ad-text);
+  font-family: inherit;
+  text-align: right;
+  cursor: pointer;
+  transition: background 0.18s ease, gap 0.22s ease, padding 0.22s ease;
+}
+
+.ad-account__open:hover,
+.ad-account__open.is-active {
+  background: var(--ad-surface-2);
+}
+
 .ad-avatar {
   width: 38px;
   height: 38px;
+  flex-shrink: 0;
   display: grid;
   place-items: center;
   border-radius: 50%;
@@ -256,17 +298,23 @@
   font-weight: 700;
 }
 
-.ad-header__userinfo {
+/* مثل برچسب‌های نوار کناری با `max-width: 0` محو می‌شود؛ `min-width: 0` اجباری است */
+.ad-account__meta {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  max-width: 12rem;
+  overflow: hidden;
+  white-space: nowrap;
   line-height: 1.35;
+  transition: max-width 0.22s ease, opacity 0.16s ease;
 }
 
-.ad-header__userinfo strong {
-  font-size: 0.85rem;
+.ad-account__meta strong {
+  font-size: 0.84rem;
 }
 
-.ad-header__userinfo small {
+.ad-account__meta small {
   color: var(--ad-muted);
   font-size: 0.7rem;
 }
@@ -468,7 +516,7 @@
 
 .ad-btn--primary {
   background: var(--ad-accent);
-  color: #14121c;
+  color: var(--ad-accent-ink);
   font-weight: 600;
 }
 
@@ -1003,6 +1051,14 @@
 
 .ad-linkcell:hover {
   color: var(--ad-accent);
+}
+
+/* سلول «مجموعه» در جدول فلش‌کارت — عنوان + نشان منبع در یک ردیف */
+.ad-deckcell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .ad-sub {
@@ -1783,6 +1839,66 @@
 
 .ad-rte__area th { background: var(--ad-surface-3); }
 
+/* دکمهٔ رنگ متن: حرف `A` رنگ خودش را از کلاس `.micr-tone--*` (در `styles.css`) می‌گیرد،
+   پس پالت یک‌جا تعریف شده و پیش‌نمایش پنل با خروجی کاربر یکی می‌ماند. */
+.ad-rte__tone--none .ad-rte__letter {
+  color: var(--ad-muted-2);
+  text-decoration: line-through;
+}
+
+/* رنگ جاریِ پالت — دابل‌کلیک روی هر واژه همین رنگ را می‌نشاند */
+.ad-rte__tone.is-active {
+  background: var(--ad-surface-3);
+  box-shadow: inset 0 0 0 1.5px var(--ad-accent);
+}
+
+/* دکمه‌های «کادر آماده» متن دارند نه آیکون، پس عرضشان خودکار است */
+.ad-rte__btn--text {
+  width: auto;
+  padding: 0 0.6rem;
+  font-family: inherit;
+  font-size: 0.74rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* پیش‌نمایش کادرهای «نکتهٔ کلیدی» و «جمع‌بندی صفحه» که دکمه‌های نوار ابزار درج می‌کنند.
+   قرینهٔ `microReader.css` است تا ادمین همان چیزی را ببیند که کاربر می‌بیند. */
+.ad-rte__area .micr-callout {
+  margin: 0 0 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.9rem;
+  border: 1px solid var(--ad-border);
+  background: var(--ad-surface-3);
+}
+
+.ad-rte__area .micr-callout--key {
+  background: rgba(224, 180, 92, 0.07);
+  border-color: rgba(224, 180, 92, 0.28);
+}
+
+.ad-rte__area .micr-callout strong { display: block; margin-bottom: 0.35rem; color: var(--gold-ink); }
+.ad-rte__area .micr-callout__icon { display: inline-flex; margin-bottom: 0.4rem; color: var(--gold-ink); }
+
+/* قرینهٔ `microReader.css`: آیکون و سرتیتر در یک ردیف (فقط کادرهایی که آیکون دارند) */
+.ad-rte__area .micr-callout:has(> .micr-callout__icon) { display: flex; align-items: flex-start; gap: 0.75rem; }
+.ad-rte__area .micr-callout:has(> .micr-callout__icon) > .micr-callout__icon { flex: none; margin-bottom: 0; }
+.ad-rte__area .micr-callout:has(> .micr-callout__icon) > div { flex: 1; min-width: 0; }
+.ad-rte__area .micr-callout p { margin: 0; color: var(--muted); }
+
+.ad-rte__area .micr-summary {
+  margin: 0 0 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.9rem;
+  background: rgba(119, 183, 135, 0.06);
+  border: 1px solid rgba(119, 183, 135, 0.26);
+}
+
+.ad-rte__area .micr-summary strong { display: block; margin-bottom: 0.4rem; color: var(--green-ink); }
+.ad-rte__area .micr-summary ul { margin: 0; padding: 0; list-style: none; }
+.ad-rte__area .micr-summary li { display: flex; gap: 0.5rem; color: var(--muted); }
+.ad-rte__area .micr-summary li span:first-child { color: var(--green-bright); }
+
 .ad-rte__foot {
   display: flex;
   align-items: center;
@@ -1881,7 +1997,7 @@
   place-items: center;
   border-radius: 50%;
   background: var(--ad-accent);
-  color: #14121c;
+  color: var(--ad-accent-ink);
   opacity: 0;
   transition: opacity 0.16s ease;
 }
@@ -2275,7 +2391,8 @@
    * پدینگ افقی لوگو برداشته می‌شود تا لوگوی ۴۲px در ریل ۷۹px جا شود.
    */
   .ad-sidebar.is-collapsed .ad-nav__item > span,
-  .ad-sidebar.is-collapsed .ad-sidebar__brand > div {
+  .ad-sidebar.is-collapsed .ad-sidebar__brand > div,
+  .ad-sidebar.is-collapsed .ad-account__meta {
     max-width: 0;
     opacity: 0;
   }
@@ -2288,15 +2405,33 @@
   .ad-sidebar.is-collapsed .ad-sidebar__brand {
     padding-inline: 0;
   }
+
+  /* بلوک حساب در ریل: آواتار بالا و دکمهٔ خروج زیرش، هر دو وسط‌چین */
+  .ad-sidebar.is-collapsed .ad-account {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    padding-inline: 0;
+  }
+
+  .ad-sidebar.is-collapsed .ad-account__open {
+    flex: 0 0 auto;
+    gap: 0;
+    padding-inline: 0;
+    justify-content: center;
+  }
 }
 
 @media (max-width: 860px) {
   .ad-sidebar {
     position: fixed;
     inset-block: 0;
+    /* در RTL، `inset-inline-start` یعنی لبهٔ راست — همان‌جایی که نوار در دسکتاپ
+       هم نشسته است. پس کشو باید با `translateX(100%)` به بیرونِ راست برود؛
+       `-100%` آن را ۲۵۸px به چپ می‌کشید و در حالت بسته وسط صفحه رها می‌کرد. */
     inset-inline-start: 0;
     z-index: 40;
-    transform: translateX(-100%);
+    transform: translateX(100%);
     transition: transform 0.22s ease;
     box-shadow: 0 0 60px rgb(var(--shadow-rgb) / calc(0.5 * var(--shadow-scale)));
   }
@@ -2319,7 +2454,8 @@
     background: rgb(var(--scrim-rgb) / 0.6);
   }
 
-  .ad-header__menu {
+  /* همان انتخاب‌گر ترکیبی، این‌بار برای روشن‌کردن کلید در عرض موبایل */
+  .ad-iconbtn.ad-header__menu {
     display: inline-grid;
   }
 
@@ -2335,9 +2471,8 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .ad-header__userinfo {
-    display: none;
-  }
+  /* نام و نقش مدیر حالا در کشوی نوار کناری است (عرض ۲۵۸px) و جا می‌شود،
+     پس دیگر لازم نیست در موبایل پنهان شود. */
 }
 
 @media (max-width: 560px) {
@@ -3185,17 +3320,46 @@
   background: var(--ad-surface-2);
 }
 
-.ad-fccard__head {
+/*
+ * فهرست کارت‌های مجموعه — ردیف کوتاه، ویرایش در پنجرهٔ مستقل.
+ * متن کارت فضای میانی را می‌گیرد و با «…» بریده می‌شود تا ردیف بلند نشود.
+ */
+.ad-fccard__rows {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ad-fccard__row {
   display: flex;
   align-items: center;
   gap: 0.6rem;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--ad-border);
+  border-radius: var(--ad-radius-sm);
+  background: var(--ad-surface);
 }
 
-/* عنوان کارت فضای میانی را می‌گیرد تا Select و دکمهٔ حذف به انتهای ردیف بروند */
-.ad-fccard__head strong {
-  margin-inline-end: auto;
-  font-size: 0.85rem;
-  color: var(--ad-text);
+.ad-fccard__rowtype {
+  flex: 0 0 auto;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--ad-border);
+  background: var(--ad-surface-3);
+  font-size: 0.68rem;
+  color: var(--ad-muted);
+}
+
+.ad-fccard__rowtext {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 0.78rem;
+  font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ردیف «ورودی + دکمه» — انتخاب تصویر، گزینهٔ چهارگزینه‌ای، … */
@@ -3347,6 +3511,10 @@
 .ad-fccard__canvas-wrap {
   position: relative;
   display: inline-block;
+  /* جعبهٔ والد در فلکس‌ستون کشیده می‌شود ولی تصویر عرض طبیعی خودش را دارد؛ اگر این
+     جعبه پهن‌تر از تصویر بماند، درصدهای نقطه (که نسبت به همین جعبه چیده می‌شوند)
+     به تصویر نمی‌خورند و نقطه جای دیگری می‌افتد. */
+  align-self: flex-start;
   max-width: 100%;
   border: 1px solid var(--ad-border);
   border-radius: var(--ad-radius-sm);
@@ -3363,18 +3531,524 @@
 
 .ad-fccard__point {
   position: absolute;
-  width: 18px;
-  height: 18px;
+  /* شمارهٔ نقطه روی خودِ دایره می‌نشیند تا کاربر بتواند نقاط را از هم تشخیص بدهد */
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
   /* نیمِ منفی عرض/ارتفاع = نقطه دقیقاً روی مختصات کلیک‌شده وسط‌چین می‌شود */
-  margin: -9px 0 0 -9px;
+  margin: -11px 0 0 -11px;
   padding: 0;
   border: 2px solid var(--pure);
   border-radius: 50%;
   background: var(--ad-accent);
   box-shadow: 0 0 0 2px rgb(var(--scrim-rgb) / 0.35);
+  color: var(--ad-accent-ink);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
   cursor: pointer;
 }
 
 .ad-fccard__point:hover {
   background: var(--ad-red);
+}
+
+/* ── مراجع تپش (لایهٔ داخل پنل) ──
+ *
+ * آینهٔ لایهٔ میکرو درسنامه: نوار بالا (عنوان + شمارنده‌ها + ذخیره/انتشار/حذف)،
+ * دو ستونِ «درخت بخش‌ها | ویرایشگر گره» و گروه‌های موضوعی داخل ویرایشگر.
+ * کلاس‌ها هم‌نامِ `ad-mic__*` نیستند چون دو لایهٔ جدا با نیازهای متفاوت‌اند،
+ * ولی توکن‌ها و فاصله‌ها یکی است تا رفتارشان در پنل یکسان باشد.
+ */
+
+.ad-ref__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid var(--ad-border);
+  border-radius: var(--ad-radius);
+  background: var(--ad-surface);
+}
+
+.ad-ref__bartitle,
+.ad-ref__barmeta,
+.ad-ref__baractions {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.ad-ref__bartitle strong {
+  font-size: 0.95rem;
+}
+
+.ad-ref__bartitle svg {
+  color: var(--ad-accent);
+}
+
+.ad-ref__hint {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.9;
+  color: var(--ad-muted);
+}
+
+/* چیدمان دو ستونی: درخت بخش‌ها | ویرایشگر */
+.ad-ref__layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 330px) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.ad-ref__tree {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.7rem;
+  border: 1px solid var(--ad-border);
+  border-radius: var(--ad-radius);
+  background: var(--ad-surface);
+  max-height: 78vh;
+  overflow-y: auto;
+}
+
+.ad-ref__treebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.15rem 0.3rem 0.45rem;
+  border-bottom: 1px solid var(--ad-border);
+  margin-bottom: 0.25rem;
+}
+
+.ad-ref__node {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: var(--ad-radius-sm);
+  padding-inline-end: 0.3rem;
+}
+
+.ad-ref__node:hover {
+  background: var(--ad-surface-2);
+}
+
+.ad-ref__node.is-active {
+  background: var(--ad-accent-soft);
+  box-shadow: inset 0 0 0 1px var(--ad-accent);
+}
+
+.ad-ref__node--leaf {
+  margin-inline-start: 0.55rem;
+}
+
+/* تورفتگی مبحث‌ها زیر بخش — یک پله عمیق‌تر از برگ‌های سطح بخش */
+.ad-ref__branch {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.ad-ref__branch .ad-ref__node--leaf {
+  margin-inline-start: 1.15rem;
+  padding-inline-start: 0.35rem;
+  border-inline-start: 1px dashed var(--ad-border);
+}
+
+.ad-ref__nodetoggle {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.42rem 0.5rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.8rem;
+  text-align: start;
+  cursor: pointer;
+}
+
+.ad-ref__nodelabel {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ad-ref__nodedot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--ad-border);
+  flex: none;
+}
+
+/* فهرست مبحث‌های یک بخش داخل ویرایشگرِ همان بخش */
+.ad-ref__topiclist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.ad-ref__topiclist li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.4rem 0.65rem;
+  border: 1px solid var(--ad-border);
+  border-radius: var(--ad-radius-sm);
+  font-size: 0.8rem;
+}
+
+.ad-ref__node.is-active .ad-ref__nodedot {
+  background: var(--ad-accent);
+}
+
+.ad-ref__nodeactions {
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+  flex: none;
+}
+
+/* فلش باز/بستهٔ شاخهٔ بخش — چرخش روی شورون، همان قرارداد میکرو */
+.ad-ref__caret {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.3rem;
+  height: 1.3rem;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ad-muted);
+  cursor: pointer;
+}
+
+.ad-ref__caret svg {
+  transition: transform 0.16s ease;
+}
+
+.ad-ref__caret.is-open svg {
+  transform: rotate(-90deg);
+}
+
+.ad-ref__caret:hover {
+  background: var(--ad-surface-2);
+  color: var(--ad-text);
+}
+
+.ad-ref__addrow {
+  display: flex;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+  padding: 0.2rem 0.3rem;
+}
+
+/* ویرایشگر */
+.ad-ref__editor {
+  padding: 1.1rem 1.2rem;
+  border: 1px solid var(--ad-border);
+  border-radius: var(--ad-radius);
+  background: var(--ad-surface);
+  min-width: 0;
+}
+
+/* گروه‌بندی موضوعی داخل ویرایشگر (شناسه، مشخصات کتاب، ظاهر و انتشار) */
+.ad-ref__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--ad-border);
+  border-radius: var(--ad-radius-sm);
+  background: var(--ad-surface-2);
+}
+
+.ad-ref__grouphead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+
+.ad-ref__grouphead h4 {
+  margin: 0;
+  font-size: 0.86rem;
+}
+
+/* رنگ جلد: نقطهٔ رنگ از داده می‌آید (فیلد accent مرجع)، نه از CSS */
+.ad-ref__accent {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.ad-ref__accent .ad-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.ad-ref__swatch {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  border-radius: 999px;
+  border: 1px solid var(--ad-border);
+}
+
+/* زیر ۱۰۸۰px درخت بالای ویرایشگر می‌نشیند (همان نقطهٔ شکستِ میکرو) */
+@media (max-width: 1080px) {
+  .ad-ref__layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ad-ref__tree {
+    max-height: 46vh;
+  }
+}
+
+/* مدیریت بانک تست */
+.ad-bank__head, .ad-bank__listhead, .ad-bank__editorhead, .ad-bank__pager, .ad-bank__option, .ad-bank__save {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.ad-bank__head h2 { margin: 10px 0 4px; }
+.ad-bank__layout { display: grid; grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1.7fr); gap: 18px; align-items: start; }
+.ad-bank__list { overflow: hidden; }
+.ad-bank__listhead, .ad-bank__pager { padding: 14px; }
+.ad-bank__item { display: grid; width: 100%; gap: 8px; border: 0; border-top: 1px solid var(--ad-border, #e4e6eb); background: transparent; color: inherit; text-align: right; padding: 14px; cursor: pointer; }
+.ad-bank__item:hover, .ad-bank__item.is-active { background: var(--ad-surface-2, #f5f5fa); }
+.ad-bank__subject { grid-template-columns: 1fr auto; align-items: center; }
+.ad-bank__item strong { line-height: 1.8; font-weight: 600; }
+.ad-bank__item small, .ad-bank__item code, .ad-bank__editorhead code { color: var(--ad-muted, #777); }
+.ad-bank__itemtop { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.ad-bank__editor { min-width: 0; }
+.ad-bank__editorhead { border-bottom: 1px solid var(--ad-border, #e4e6eb); padding-bottom: 14px; margin-bottom: 18px; }
+.ad-bank__editorhead h3 { margin: 0 0 6px; }
+.ad-bank__actions, .ad-bank__fields { display: flex; gap: 10px; }
+.ad-bank__fields { flex-direction: column; border: 0; padding: 0; margin: 0; min-width: 0; }
+.ad-bank__fields h4 { margin: 16px 0 0; }
+.ad-bank__option { justify-content: flex-start; margin-top: 9px; }
+.ad-bank__option label { white-space: nowrap; display: flex; gap: 4px; align-items: center; }
+.ad-bank__option .ad-input { flex: 1; min-width: 0; }
+.ad-bank__save { justify-content: flex-end; margin-top: 20px; }
+.ad-bank__preview { display: block; max-width: 320px; max-height: 240px; object-fit: contain; margin-top: 12px; border-radius: 12px; }
+@media (max-width: 900px) { .ad-bank__layout { grid-template-columns: 1fr; } }
+
+/*
+ * لایهٔ «مقالات تپش» — هم‌خانوادهٔ `ad-ref__*` و `ad-mic__*`.
+ * توکن‌ها و فاصله‌ها یکی است تا رفتار سه لایه در پنل یکسان بماند؛ فقط نام‌ها جداست
+ * تا دو لایه به هم گره نخورند.
+ */
+
+.ad-art__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid var(--ad-border);
+  border-radius: var(--ad-radius);
+  background: var(--ad-surface);
+}
+
+.ad-art__bartitle,
+.ad-art__barmeta,
+.ad-art__baractions {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.ad-art__bartitle strong {
+  font-size: 0.95rem;
+}
+
+.ad-art__bartitle svg {
+  color: var(--ad-accent);
+}
+
+.ad-art__hint {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.9;
+  color: var(--ad-muted);
+}
+
+/* چیدمان دو ستونی: فهرست مقالات | ویرایشگر */
+.ad-art__layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 330px) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.ad-art__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.7rem;
+  border: 1px solid var(--ad-border);
+  border-radius: var(--ad-radius);
+  background: var(--ad-surface);
+  max-height: 78vh;
+  overflow-y: auto;
+}
+
+.ad-art__listbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.15rem 0.3rem 0.45rem;
+  border-bottom: 1px solid var(--ad-border);
+  margin-bottom: 0.25rem;
+}
+
+.ad-art__item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  border-radius: var(--ad-radius-sm);
+  padding-inline-end: 0.3rem;
+}
+
+.ad-art__item:hover {
+  background: var(--ad-surface-2);
+}
+
+.ad-art__item.is-active {
+  background: var(--ad-accent-soft);
+  box-shadow: inset 0 0 0 1px var(--ad-accent);
+}
+
+.ad-art__itemtoggle {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.42rem 0.5rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.8rem;
+  text-align: start;
+  cursor: pointer;
+}
+
+.ad-art__itemlabel {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ردیف دوم هر ردیف فهرست: دسته + وضعیت + نشان «تپش» */
+.ad-art__itemmeta {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  padding: 0 0.5rem 0.45rem;
+}
+
+/* ویرایشگر */
+.ad-art__editor {
+  padding: 1.1rem 1.2rem;
+  border: 1px solid var(--ad-border);
+  border-radius: var(--ad-radius);
+  background: var(--ad-surface);
+  min-width: 0;
+}
+
+.ad-art__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--ad-border);
+  border-radius: var(--ad-radius-sm);
+  background: var(--ad-surface-2);
+}
+
+.ad-art__grouphead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+
+.ad-art__grouphead h4 {
+  margin: 0;
+  font-size: 0.86rem;
+}
+
+/* تصویر شاخص: پیش‌نمایش + دکمه‌های انتخاب/حذف */
+.ad-art__cover {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.ad-art__coverbox {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 190px;
+  height: 110px;
+  overflow: hidden;
+  border: 1px solid var(--ad-border);
+  border-radius: var(--ad-radius-sm);
+  background: var(--ad-surface);
+}
+
+.ad-art__coverbox img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ad-art__coverempty {
+  padding: 0 0.6rem;
+  color: var(--ad-muted);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+.ad-art__coveractions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+/* زیر ۱۰۸۰px فهرست بالای ویرایشگر می‌نشیند (همان نقطهٔ شکستِ میکرو و مراجع) */
+@media (max-width: 1080px) {
+  .ad-art__layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

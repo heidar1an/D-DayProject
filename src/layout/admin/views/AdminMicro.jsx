@@ -96,6 +96,54 @@ const DIAGRAM_OPTIONS = [
 const INTERACTIVE_BLOCK_OPTIONS = BLOCK_OPTIONS
   .filter((option) => INTERACTIVE_BLOCK_TYPES.includes(option.value));
 
+/* ── رنگ متن و کادرهای آمادهٔ ویرایشگر صفحه ──
+ *
+ * رنگ‌ها کلاس `.micr-tone--*` می‌گیرند (تعریفش در `src/styles.css`) نه `style`؛ چون
+ * پاک‌ساز HTML هر `style` را دور می‌ریزد و فقط `class` را عبور می‌دهد. `value` خالی
+ * یعنی «رنگ را بردار».
+ *
+ * کادرها همان کلاس‌های خواننده‌اند (`microReader.css`) تا ظاهر یکی بماند. `aside` و `svg`
+ * در فهرست سفید پاک‌ساز نیستند، پس کادر با `div` و نشانهٔ متنی ساخته می‌شود. */
+const TEXT_TONES = [
+  { value: 'gold', label: 'طلایی' },
+  { value: 'green', label: 'سبز' },
+  { value: 'blue', label: 'آبی' },
+  { value: 'purple', label: 'بنفش' },
+  { value: 'red', label: 'قرمز' },
+  { value: 'brown', label: 'قهوه‌ای' },
+  { value: '', label: 'حذف رنگ' },
+];
+
+/*
+ * کادرهای آمادهٔ ویرایشگر.
+ *
+ * `select` متنِ راهنمای داخل کادر است؛ بعد از درج، همان متن انتخاب می‌شود تا کاربر
+ * فقط تایپ کند و جایگزین شود (وگرنه متن راهنما ممکن است اشتباهی منتشر شود).
+ *
+ * ساختار HTML عیناً همان ساختار کادرهای خواننده است (`microReader.css`): آیکون
+ * فرزندِ مستقیم `.micr-callout` و بعد یک `div` با سرتیتر و بدنه. قاعدهٔ
+ * `:has(> .micr-callout__icon)` در CSS، آیکون و سرتیتر را در یک ردیف می‌نشاند.
+ */
+const PAGE_INSERTS = [
+  {
+    label: 'نکتهٔ کلیدی',
+    hint: 'کادر «نکتهٔ کلیدی» را در متن درج می‌کند',
+    select: 'متن نکته را اینجا بنویسید…',
+    html: '<div class="micr-callout micr-callout--key">'
+      + '<span class="micr-callout__icon">✦</span>'
+      + '<div><strong>نکتهٔ کلیدی</strong><p>متن نکته را اینجا بنویسید…</p></div>'
+      + '</div><p><br></p>',
+  },
+  {
+    label: 'جمع‌بندی صفحه',
+    hint: 'کادر «جمع‌بندی صفحه» را در متن درج می‌کند',
+    select: 'نخستین بند جمع‌بندی…',
+    html: '<div class="micr-summary"><strong>جمع‌بندی صفحه</strong>'
+      + '<ul><li><span>•</span>نخستین بند جمع‌بندی…</li></ul>'
+      + '</div><p><br></p>',
+  },
+];
+
 /* ────────────────────────── ابزارهای ساخت بلوک ────────────────────────── */
 
 function emptyBlock(type) {
@@ -547,7 +595,7 @@ function UnitEditor({ unit, onChange }) {
   );
 }
 
-export function PageEditor({ page, unit, onChange }) {
+export function PageEditor({ page, onChange }) {
   const set = (changes) => onChange({ ...page, ...changes });
   const blocks = page.blocks ?? [];
   /* فقط بلوک‌های تعاملی در پنل می‌مانند؛ متن به ویرایشگر متنی منتقل شده است */
@@ -559,11 +607,6 @@ export function PageEditor({ page, unit, onChange }) {
     blocks: [...blocks.filter((block) => !INTERACTIVE_BLOCK_TYPES.includes(block.type)), ...list],
   });
   const setBlock = (index, block) => setInteractive(interactiveBlocks.map((item, i) => (i === index ? block : item)));
-  const toggleConcept = (conceptId) => set({
-    concepts: (page.concepts ?? []).includes(conceptId)
-      ? page.concepts.filter((id) => id !== conceptId)
-      : [...(page.concepts ?? []), conceptId],
-  });
 
   return (
     <div className="ad-stack">
@@ -574,50 +617,21 @@ export function PageEditor({ page, unit, onChange }) {
 
       <Field label="هدف یادگیری صفحه"><Textarea rows={2} value={page.learningObjective ?? ''} onChange={(event) => set({ learningObjective: event.target.value })} /></Field>
 
-      <div className="ad-grid3">
-        <Field label="ترتیب"><Input dir="ltr" value={page.order ?? ''} onChange={(event) => set({ order: event.target.value })} /></Field>
-        <Field label="زمان (دقیقه)"><Input dir="ltr" value={page.estimatedTime ?? ''} onChange={(event) => set({ estimatedTime: event.target.value })} /></Field>
-        <Field label="اهمیت (۱ تا ۵)"><Input dir="ltr" value={page.importance ?? ''} onChange={(event) => set({ importance: event.target.value })} /></Field>
-      </div>
-
       <div className="ad-grid2">
-        <Field label="سطح دشواری">
-          <Select className="ad-input--select" options={DIFFICULTY_OPTIONS} value={page.difficulty ?? 'medium'} onChange={(event) => set({ difficulty: event.target.value })} />
-        </Field>
-        <Field label="تکرار در آزمون‌ها">
-          <Select className="ad-input--select" options={FREQUENCY_OPTIONS} value={page.examFrequency ?? 'medium'} onChange={(event) => set({ examFrequency: event.target.value })} />
-        </Field>
+        <Field label="زمان (دقیقه)"><Input dir="ltr" value={page.estimatedTime ?? ''} onChange={(event) => set({ estimatedTime: event.target.value })} /></Field>
       </div>
-
-      <LinesField label="کلیدواژه‌ها" hint="هر خط یک کلیدواژه" value={page.keywords} onChange={(keywords) => set({ keywords })} rows={2} />
-
-      <Field label="مفاهیم این صفحه" hint="مفهوم‌ها از واحد می‌آیند؛ انتخاب‌شان تعیین می‌کند تست ایستگاه بعدی از کدام مفهوم بیاید.">
-        {unit.concepts.length === 0 ? (
-          <p className="ad-mic__hint">این واحد هنوز مفهومی ندارد. اول در گرهٔ «واحد یادگیری» مفهوم اضافه کنید.</p>
-        ) : (
-          <div className="ad-chiprow">
-            {unit.concepts.map((concept) => (
-              <button
-                type="button"
-                key={concept.id}
-                className={`ad-chip ${(page.concepts ?? []).includes(concept.id) ? 'is-active' : ''}`}
-                onClick={() => toggleConcept(concept.id)}
-              >
-                {concept.title || concept.id}
-              </button>
-            ))}
-          </div>
-        )}
-      </Field>
 
       <Field
+        as="div"
         label="متن صفحه"
-        hint="مثل یک ویرایشگر متن معمولی بنویسید. تیتر، فهرست، جدول، نقل‌قول، لینک و تصویر در نوار ابزار هست."
+        hint="مثل یک ویرایشگر متن معمولی بنویسید. تیتر، فهرست، جدول، نقل‌قول، لینک و تصویر در نوار ابزار هست؛ با دکمه‌های رنگ می‌توانید بخشی از متن را رنگ کنید و با دو دکمهٔ کادر، «نکتهٔ کلیدی» و «جمع‌بندی صفحه» بسازید. رنگِ آخرین دکمهٔ رنگی «رنگ جاری» می‌شود و دابل‌کلیک روی هر واژه همان رنگ را به آن می‌دهد."
       >
         <RichTextEditor
           value={page.content ?? ''}
           onChange={(content) => set({ content })}
           placeholder="متن این صفحه را اینجا بنویسید…"
+          tones={TEXT_TONES}
+          inserts={PAGE_INSERTS}
         />
       </Field>
 
@@ -1189,16 +1203,6 @@ export function Outline({ course, node, onSelect, actions }) {
         </Button>
       </div>
 
-      <button
-        type="button"
-        className={`ad-mic__node ${isNode('course', []) ? 'is-active' : ''}`}
-        onClick={() => onSelect({ kind: 'course' })}
-      >
-        <IconMicroLesson width={15} height={15} />
-        <span className="ad-mic__nodelabel">تنظیمات درسنامه</span>
-        <Badge tone="neutral">{faNumber(course.topics.length)} مبحث</Badge>
-      </button>
-
       {course.topics.map((topic, topicIndex) => {
         const topicKey = `t:${topicIndex}`;
         const topicOpen = !collapsed.has(topicKey);
@@ -1584,7 +1588,7 @@ export default function AdminMicro({ admin, onBack }) {
           : <EmptyState title="این واحد پیدا نشد" description="با تغییر ساختار، انتخاب قبلی معتبر نمانده است." />;
       case 'page':
         return selected.page
-          ? <PageEditor page={selected.page} unit={selected.unit} onChange={(page) => setPageAt(node.topicIndex, node.unitIndex, node.pageIndex, page)} />
+          ? <PageEditor page={selected.page} onChange={(page) => setPageAt(node.topicIndex, node.unitIndex, node.pageIndex, page)} />
           : <EmptyState title="این صفحه پیدا نشد" description="با تغییر ساختار، انتخاب قبلی معتبر نمانده است." />;
       case 'checkpoint':
         return selected.checkpoint

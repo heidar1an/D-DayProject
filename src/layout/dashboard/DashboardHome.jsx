@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import UserProfileCard from './UserProfileCard';
 import DashboardActionCards from './DashboardActionCards';
 import PeersSection from './PeersSection';
@@ -6,17 +6,28 @@ import HeartChart from './heart-chart/HeartChart';
 import RangeDropdown from './heart-chart/RangeDropdown';
 import ChartModeToggle from './heart-chart/ChartModeToggle';
 import { SolidIcon } from './heart-chart/chartIcons';
+import { fetchHeartSummary } from '../../services/hearts/heartStatsService';
 
 const FA_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
 const toFa = (value) => String(value).replace(/\d/g, (digit) => FA_DIGITS[Number(digit)]);
 
-/* آمار هدر نمودار — فعلاً Mock؛ وقتی سرویس قلب خلاصهٔ امروز را داد، از همان خوانده می‌شود. */
-const HEARTS_TODAY = 113;
-const STREAK_DAYS = 3;
-
 export default function DashboardHome({ userData, onOpenFlashcards, onOpenNotes, onOpenReviewNotebook }) {
   const [heartRange, setHeartRange] = useState('daily');
   const [chartMode, setChartMode] = useState('bar');
+  const [heartSummary, setHeartSummary] = useState({ today: 0, total: 0, streak: 0 });
+
+  useEffect(() => {
+    let alive = true;
+    const refresh = () => fetchHeartSummary()
+      .then((summary) => { if (alive) setHeartSummary(summary); })
+      .catch(() => { if (alive) setHeartSummary({ today: 0, total: 0, streak: 0 }); });
+    refresh();
+    window.addEventListener('tapesh:hearts:changed', refresh);
+    return () => {
+      alive = false;
+      window.removeEventListener('tapesh:hearts:changed', refresh);
+    };
+  }, [userData?.id]);
 
   return (
     <main className="dashboard__main dash-stagger">
@@ -32,15 +43,15 @@ export default function DashboardHome({ userData, onOpenFlashcards, onOpenNotes,
               <span className="dashboard__chart-stat dashboard__chart-stat--hearts">
                 <SolidIcon name="heart" size={18} />
                 <span className="dashboard__chart-stat-text">
-                  <b>{toFa(HEARTS_TODAY)}</b>
-                  <i>قلب</i>
+                  <b>{toFa(heartSummary.today)}</b>
+                  <i>قلب امروز</i>
                 </span>
               </span>
 
               <span className="dashboard__chart-stat dashboard__chart-stat--streak">
                 <SolidIcon name="flame" size={18} />
                 <span className="dashboard__chart-stat-text">
-                  <b>{toFa(STREAK_DAYS)}</b>
+                  <b>{toFa(heartSummary.streak)}</b>
                   <i>روز متوالی</i>
                 </span>
               </span>

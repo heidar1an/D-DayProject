@@ -23,7 +23,7 @@
  */
 
 import { randomBytes, randomUUID, scryptSync, timingSafeEqual } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -38,8 +38,18 @@ import { blocksToHtml } from '../src/data/micro/blocksToHtml.js';
 import {
   DIFFICULTIES as TEST_BANK_DIFFICULTIES,
   QUESTIONS as TEST_BANK_QUESTIONS,
+  QUESTION_TYPES as TEST_BANK_TYPES,
   SUBJECTS as TEST_BANK_SUBJECTS,
+  TRACKS as TEST_BANK_TRACKS,
 } from '../src/services/testBank/mockData.js';
+import { CARD_IMAGE_MIME_EXTENSIONS, TAPESH_CARDS, TAPESH_DECKS } from '../src/services/flashcards/mockData.js';
+import { REFERENCE_CATALOG, REFERENCE_CONTENTS, referenceBlocksToHtml } from '../src/services/references/referenceCatalog.js';
+import { difficultyFromPercent } from '../src/services/testBank/questionMeta.js';
+import {
+  ARTICLE_AUTHORS, ARTICLE_CATALOG, articleBlocksToHtml,
+} from '../src/services/articles/articleCatalog.js';
+/* درسنامهٔ جامع دست‌نویس (آناتومی) — دادهٔ خالص بدون React، مثل کاتالوگ مراجع */
+import anatomyCourse from '../src/data/learning/anatomyCourse.js';
 
 const databaseDir = dirname(fileURLToPath(import.meta.url));
 const contentDir = resolve(databaseDir, 'content');
@@ -56,8 +66,13 @@ export const PERMISSIONS = [
   'pages.create', 'pages.read', 'pages.update', 'pages.delete',
   /* کتابخانهٔ فلش‌کارت تپش — ساخت/ویرایش دک و کارت، انتشار در کتابخانهٔ عمومی */
   'flashcards.create', 'flashcards.read', 'flashcards.update', 'flashcards.delete', 'flashcards.publish',
+  'testbank.create', 'testbank.read', 'testbank.update', 'testbank.delete', 'testbank.publish',
   /* میکرو درسنامه — ویرایش ساختار درس، ایستگاه‌های تست و انتشار برای کاربران */
   'micro.create', 'micro.read', 'micro.update', 'micro.delete', 'micro.publish',
+  /* مراجع تپش — افزودن/حذف مرجع و بخش، ویرایش متن و انتشار در لایهٔ رفرنس */
+  'references.create', 'references.read', 'references.update', 'references.delete', 'references.publish',
+  /* درسنامه جامع — کنترل متن‌ها و تست‌های لایهٔ یادگیری جامع، درس به درس و واحد به واحد */
+  'comprehensive.read', 'comprehensive.update', 'comprehensive.publish',
   'media.upload', 'media.read', 'media.delete',
   'banners.create', 'banners.update', 'banners.delete',
   'users.create', 'users.read', 'users.update', 'users.delete',
@@ -119,7 +134,10 @@ export const ROLES = {
       'categories.create', 'categories.read',
       'pages.read', 'pages.update',
       'flashcards.read', 'flashcards.create', 'flashcards.update', 'flashcards.publish',
+      'testbank.read', 'testbank.create', 'testbank.update', 'testbank.publish',
       'micro.read', 'micro.create', 'micro.update', 'micro.publish',
+      'references.read', 'references.create', 'references.update', 'references.publish',
+      'comprehensive.read', 'comprehensive.update', 'comprehensive.publish',
       'media.upload', 'media.read', 'media.delete',
       'notes.create', 'notes.read', 'notes.update', 'notes.delete',
       'publishing.read', 'publishing.send',
@@ -154,10 +172,24 @@ const COLLECTIONS = [
   /* کتابخانهٔ فلش‌کارت تپش — دک‌های رسمی که از پنل ساخته/منتشر می‌شوند؛
      کارت‌ها داخل رکورد دک می‌مانند (دک و کارت یک موجودیت مدیریتی‌اند). */
   'flashcardDecks',
+  'testBankQuestions',
+  'testBankAnswers',
+  'testBankHeartRewards',
   /* میکرو درسنامه — هر رکورد یک درسنامهٔ کامل است: مبحث‌ها، واحدهای یادگیری،
      صفحه‌ها، بلوک‌های محتوا، ایستگاه‌های تست و مفاهیم. مثل فلش‌کارت، کل درسنامه
      یک موجودیت مدیریتی است و در یک رکورد می‌ماند تا انتشار اتمیک باشد. */
   'microCourses',
+  /*
+   * مراجع تپش — هر رکورد یک مرجع کامل است (فراداده + بخش‌های قابل ویرایش).
+   * مثل فلش‌کارت و میکرو، کل مرجع یک موجودیت مدیریتی است تا انتشار اتمیک باشد.
+   */
+  'references',
+  /*
+   * درسنامه جامع — هر رکورد یک درس کامل است: مبحث‌ها، واحدها و متن و تستِ هر
+   * واحد (فعال‌سازی، میکرودرس‌ها، تصویرسازی، تمرین و تست نقشه). کل درس یک
+   * موجودیت مدیریتی است تا ویرایش و انتشار اتمیک بماند — همان قرارداد مراجع.
+   */
+  'comprehensiveCourses',
   /*
    * مرکز رسانه و فضای مجازی — ۱۲ مجموعهٔ مستقل.
    * هر مجموعه یک Entity از مدل داده است؛ افزودن پلتفرم یا نوع محتوای تازه
@@ -282,7 +314,8 @@ export const DEFAULT_SETTINGS = {
   integrations: { googleAnalyticsId: '' },
   media: {
     maxUploadMb: 4,
-    allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/svg+xml', 'application/pdf'],
+    /* تصویرهای کارت تصویری از فهرست مشترک می‌آیند؛ PDF فقط برای پیوست‌های کتابخانهٔ رسانه */
+    allowedMimeTypes: [...Object.keys(CARD_IMAGE_MIME_EXTENSIONS), 'application/pdf'],
   },
   security: { sessionHours: 12, maxLoginAttempts: 8, lockMinutes: 10 },
 };
@@ -400,6 +433,70 @@ function seedArticles() {
   }));
 }
 
+/*
+ * مقالات ثابتِ بخش «مقالات تپش» یک‌بار به رکورد پنل تبدیل می‌شوند.
+ *
+ * چرا: تا پیش از این، فهرست مقالات پنل فقط سه رکورد آزمایشی بود و دوازده مقاله‌ای که
+ * کاربران در `#articles` می‌خوانند اصلاً در پنل دیده نمی‌شدند — یعنی «همهٔ مقالات بخش
+ * مقالات تپش» در دسترس مدیر نبود. این تابع هر مقالهٔ کاتالوگ را که رکوردی با همان
+ * `slug` ندارد یک‌بار می‌سازد و **هیچ رکورد موجودی را بازنویسی نمی‌کند**.
+ *
+ * دو محافظ، دقیقاً مثل `syncFlashcardDecks`/`syncMicroCourses`/`syncReferences`:
+ * گارد یک‌باردرعمر پروسه، و `writeJson` مستقیم به‌جای `writeCollection` تا حلقهٔ
+ * `ensureStore` ساخته نشود.
+ *
+ * دو نکتهٔ عمدی:
+ *   • `contentHtml` خالی می‌ماند. متن بلوکیِ کاتالوگ همان چیزی است که کاربران امروز
+ *     می‌خوانند (با هایلایت و یادداشت‌گذاری روی متن)، پس تا وقتی مدیر متن را در پنل
+ *     ویرایش نکند هیچ چیزی برای کاربر عوض نمی‌شود. به‌محض اولین ویرایش، `contentHtml`
+ *     نوشته می‌شود و خواننده همان را رندر می‌کند.
+ *   • `figure` کلید تصویر ثابت است و فقط از همین‌جا می‌آید. خوانندهٔ سایت اگر `cover`
+ *     خالی باشد از همان کلید استفاده می‌کند، پس تا وقتی مدیر کاور تازه بارگذاری
+ *     نکرده مقاله ظاهر قبلی‌اش را نگه می‌دارد.
+ */
+let articlesSynced = false;
+
+function syncArticles() {
+  if (articlesSynced) return;
+  articlesSynced = true;
+
+  const stored = readJson(files.articles, []);
+  if (!Array.isArray(stored)) return;
+
+  const known = new Set(stored.map((article) => article?.slug).filter(Boolean));
+  const created = nowIso();
+
+  const added = ARTICLE_CATALOG.filter((article) => !known.has(article.slug)).map((article) => ({
+    id: makeId('art'),
+    title: article.title,
+    slug: article.slug,
+    excerpt: article.excerpt ?? '',
+    contentHtml: '',
+    content: article.content ?? [],
+    cover: '',
+    coverAlt: article.coverAlt ?? '',
+    figure: article.figure ?? null,
+    category: article.category,
+    tags: article.tags ?? [],
+    authorName: ARTICLE_AUTHORS[article.author]?.name ?? 'تیم محتوای تپش',
+    status: 'published',
+    featured: Boolean(article.featured),
+    recommended: Boolean(article.recommended),
+    readingTime: Number(article.readingTime) || 1,
+    views: Number(article.views) || 0,
+    likes: Number(article.likes) || 0,
+    seo: { title: '', description: '', canonical: '', ogImage: '', robots: 'index,follow' },
+    origin: 'tapesh',
+    publishedAt: article.publishedAt ?? created,
+    createdAt: article.publishedAt ?? created,
+    updatedAt: article.updatedAt ?? created,
+    createdBy: 'seed',
+    updatedBy: 'seed',
+  }));
+
+  if (added.length) writeJson(files.articles, [...added, ...stored]);
+}
+
 function seedPages() {
   const created = nowIso();
   return SEED_PAGES.map((page, index) => ({
@@ -448,12 +545,28 @@ function ensureStore() {
 
   ensureFile(files.admins, seedAdmins());
   ensureFile(files.articles, seedArticles());
+  /* دوازده مقالهٔ ثابتِ بخش «مقالات تپش» که کاربران می‌خوانند، اینجا رکورد پنل می‌شوند */
+  syncArticles();
   ensureFile(files.categories, SEED_CATEGORIES);
   ensureFile(files.pages, seedPages());
   ensureFile(files.flashcardDecks, seedFlashcardDecks());
+  ensureFile(files.testBankQuestions, TEST_BANK_QUESTIONS.map((question) => ({
+    ...question, status: 'published', difficulty: 'medium',
+    stats: { solves: 0, correctPercent: 0, optionPercents: question.options.map(() => 0), avgTimeSec: 0, difficultyIndex: 0 },
+  })));
+  ensureFile(files.testBankAnswers, []);
+  ensureFile(files.testBankHeartRewards, []);
+  /* مجموعه‌های ثابت تپش که هنوز رکورد پنل ندارند، اینجا به رکورد تبدیل می‌شوند */
+  syncFlashcardDecks();
   ensureFile(files.microCourses, seedMicroCourses());
   /* پروژه‌های موجود فقط فیزیولوژی را داشتند؛ درس‌های غایب رجیستری اینجا اضافه می‌شوند */
   syncMicroCourses();
+  /* مراجع کاتالوگ ثابت تپش یک‌بار به رکورد پنل تبدیل می‌شوند */
+  ensureFile(files.references, seedReferences());
+  /* رکوردهای دور اول بدون مبحث، اینجا به مدل تازه (بخش → مبحث) مهاجرت می‌کنند */
+  syncReferences();
+  /* درسنامهٔ جامع دست‌نویس (آناتومی) یک‌بار به رکورد پنل تبدیل می‌شود */
+  ensureFile(files.comprehensiveCourses, seedComprehensiveCourses());
   ensureFile(files.media, []);
   ensureFile(files.banners, seedBanners());
   ensureFile(files.activity, []);
@@ -759,6 +872,13 @@ function articlePayload(input, existing = null) {
     status,
     featured: Boolean(input.featured),
     recommended: Boolean(input.recommended),
+    /*
+     * منبع و تصویر ثابت فقط از رکورد قبلی ارث می‌رسند و از بدنهٔ درخواست خوانده
+     * نمی‌شوند: `origin` می‌گوید مقاله از کاتالوگ ثابت تپش آمده یا ساختهٔ پنل است،
+     * و `figure` کلید تصویر ثابت است که تا وقتی `cover` خالی باشد به کار می‌آید.
+     */
+    origin: existing?.origin === 'tapesh' ? 'tapesh' : 'panel',
+    figure: existing?.figure ?? null,
     readingTime: Math.max(1, Math.round(String(contentHtml).replace(/<[^>]*>/g, ' ').split(/\s+/).filter(Boolean).length / 200)),
     seo: {
       title: String(input.seo?.title ?? '').slice(0, 70),
@@ -981,6 +1101,481 @@ export function deletePage(id) {
   return target;
 }
 
+/* ─────────────────────────────── مراجع تپش ─────────────────────────────── */
+
+/*
+ * شکل داده:
+ *   مرجع { title, latin, edition, authors, subject, accent, pages, glyph, status, sections[] }
+ *   بخش  { id, title, topics[] }
+ *   مبحث { id, title, content }  — `content` متن غنی است و با `sanitizeHtml` پاک می‌شود
+ *
+ * مثل میکرو درسنامه، هر بخش چند «مبحث» دارد و متنِ واقعی روی مبحث‌هاست. سه مرجعِ
+ * کاتالوگ ثابت (`src/services/references/referenceCatalog.js`) هنگام نخستین اجرا به
+ * رکورد تبدیل می‌شوند و هر فصلِ شناخته‌شدهٔ کتاب یک بخش و هر بخشِ نوشته‌شدهٔ آن فصل یک
+ * مبحث با متن آماده می‌سازد. مثل فلش‌کارت و میکرو، کل مرجع یک رکورد است تا
+ * افزودن/حذف مبحث و انتشار، یک عملیات اتمیک باشد.
+ */
+
+const REFERENCE_GLYPHS = ['bone', 'cell', 'heart'];
+
+function referenceTopicPayload(input, index = 0) {
+  const title = String(input?.title ?? '').trim().slice(0, 160);
+
+  return {
+    id: String(input?.id ?? '').trim().slice(0, 60) || makeId('rtop'),
+    title: title || `مبحث ${index + 1}`,
+    content: sanitizeHtml(String(input?.content ?? '')),
+  };
+}
+
+function referenceSectionPayload(input, index = 0) {
+  const title = String(input?.title ?? '').trim().slice(0, 160);
+
+  return {
+    id: String(input?.id ?? '').trim().slice(0, 60) || makeId('rsec'),
+    title: title || `بخش ${index + 1}`,
+    topics: (Array.isArray(input?.topics) ? input.topics : []).map(referenceTopicPayload),
+  };
+}
+
+function referencePayload(input, existing = null) {
+  const title = String(input?.title ?? '').trim().slice(0, 160);
+  if (!title) throw Object.assign(new Error('عنوان مرجع الزامی است'), { code: 'VALIDATION_ERROR' });
+
+  const status = ARTICLE_STATUSES.includes(input?.status) ? input.status : 'draft';
+
+  return {
+    title,
+    latin: String(input?.latin ?? '').trim().slice(0, 160),
+    edition: String(input?.edition ?? '').trim().slice(0, 80),
+    authors: String(input?.authors ?? '').trim().slice(0, 160),
+    subject: String(input?.subject ?? '').trim().slice(0, 80),
+    accent: /^#[0-9a-fA-F]{3,8}$/.test(String(input?.accent ?? '')) ? String(input.accent) : '#5b8cc7',
+    pages: Math.min(100_000, Math.max(0, Math.round(Number(input?.pages) || 0))),
+    glyph: REFERENCE_GLYPHS.includes(input?.glyph) ? input.glyph : 'bone',
+    sections: (Array.isArray(input?.sections) ? input.sections : []).map(referenceSectionPayload),
+    status,
+    /* منبع مرجع فقط از رکورد قبلی ارث می‌رسد؛ از بدنهٔ درخواست خوانده نمی‌شود */
+    origin: existing?.origin === 'tapesh' ? 'tapesh' : 'panel',
+    publishedAt: status === 'published' ? (existing?.publishedAt || nowIso()) : (existing?.publishedAt ?? null),
+  };
+}
+
+/* سه مرجعِ ثابت کاتالوگ — هر فصل یک بخش و هر بخشِ نوشته‌شدهٔ فصل، یک مبحث با متن آماده */
+function seedReferences() {
+  const created = nowIso();
+
+  return REFERENCE_CATALOG.map((reference) => ({
+    id: reference.id,
+    title: reference.title,
+    latin: reference.latin ?? '',
+    edition: reference.edition ?? '',
+    authors: reference.authors ?? '',
+    subject: reference.subject ?? '',
+    accent: reference.accent ?? '#5b8cc7',
+    pages: Number(reference.pages) || 0,
+    glyph: REFERENCE_GLYPHS.includes(reference.glyph) ? reference.glyph : 'bone',
+    sections: (reference.chapters ?? []).map((chapter) => ({
+      id: chapter.id,
+      title: chapter.title,
+      topics: (REFERENCE_CONTENTS[chapter.id]?.sections ?? []).map((section) => ({
+        id: section.id,
+        title: section.title,
+        content: referenceBlocksToHtml(section.blocks),
+      })),
+    })),
+    status: 'published',
+    origin: 'tapesh',
+    createdAt: created,
+    updatedAt: created,
+    createdBy: 'seed',
+    updatedBy: 'seed',
+    publishedAt: created,
+  }));
+}
+
+/*
+ * مبحث‌ها، لایهٔ تازهٔ مدل مراجع‌اند: رکوردهایی که پیش از این مدل بدون `topics`
+ * ساخته شده‌اند (دور اول لایه) اینجا backfill می‌شوند — برای بخش‌هایی که شناسه‌شان
+ * با فصلِ کاتالوگ یکی است، مبحث‌ها با متنِ همان فصل ساخته می‌شوند و برای بقیه
+ * فقط آرایهٔ خالی می‌گیرند. فیلد کهنهٔ `content` بخش هم حذف می‌شود چون متن حالا
+ * روی مبحث‌هاست. یک‌بار در عمر پروسه و با `writeJson` مستقیم — همان دو محافظ
+ * `syncFlashcardDecks`/`syncMicroCourses`.
+ */
+let referencesSynced = false;
+
+function syncReferences() {
+  if (referencesSynced) return;
+  referencesSynced = true;
+
+  const stored = readJson(files.references, []);
+  if (!Array.isArray(stored)) return;
+
+  let changed = false;
+  const migrated = stored.map((reference) => {
+    if (!reference || !Array.isArray(reference.sections)) return reference;
+
+    let touched = false;
+    const sections = reference.sections.map((section) => {
+      if (!section || Array.isArray(section.topics)) return section;
+      touched = true;
+
+      const catalog = REFERENCE_CONTENTS[section.id]?.sections ?? [];
+      const topics = catalog.length
+        ? catalog.map((item) => ({
+          id: item.id,
+          title: item.title,
+          content: referenceBlocksToHtml(item.blocks),
+        }))
+        : [];
+
+      return { id: section.id, title: section.title, topics };
+    });
+
+    if (!touched) return reference;
+    changed = true;
+    return { ...reference, sections };
+  });
+
+  if (changed) writeJson(files.references, migrated);
+}
+
+export function listReferences({ search = '', status = 'all', page = 1, perPage = 20 } = {}) {
+  const query = normalizeSearch(search);
+  const filtered = readCollection('references').filter((reference) => {
+    if (status !== 'all' && reference.status !== status) return false;
+    if (!query) return true;
+    return [reference.title, reference.latin, reference.subject].some((field) => normalizeSearch(field).includes(query));
+  });
+
+  filtered.sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt)));
+  return paginate(filtered, { page, perPage });
+}
+
+export function getReference(id) {
+  return readCollection('references').find((reference) => reference.id === id) ?? null;
+}
+
+export function createReference(input, admin) {
+  const references = readCollection('references');
+  const created = nowIso();
+
+  const reference = {
+    id: makeId('ref'),
+    ...referencePayload(input),
+    createdAt: created,
+    updatedAt: created,
+    createdBy: admin?.id ?? 'system',
+    updatedBy: admin?.id ?? 'system',
+  };
+
+  references.unshift(reference);
+  writeCollection('references', references);
+  return reference;
+}
+
+export function updateReference(id, input, admin) {
+  const references = readCollection('references');
+  const index = references.findIndex((reference) => reference.id === id);
+  if (index === -1) return null;
+
+  const updated = {
+    ...references[index],
+    ...referencePayload(input, references[index]),
+    updatedAt: nowIso(),
+    updatedBy: admin?.id ?? 'system',
+  };
+
+  references[index] = updated;
+  writeCollection('references', references);
+  return updated;
+}
+
+export function deleteReference(id) {
+  const references = readCollection('references');
+  const target = references.find((reference) => reference.id === id);
+  if (!target) return null;
+
+  writeCollection('references', references.filter((reference) => reference.id !== id));
+  return target;
+}
+
+/*
+ * قرارداد عمومی مراجع — فقط منتشرشده‌ها، با همان کلیدهایی که لایهٔ رفرنس
+ * کاربران می‌خواند (`referencesApi.js` این‌ها را جلوی کاتالوگ ثابت می‌گذارد).
+ */
+export function publishedReferences() {
+  return readCollection('references')
+    .filter((reference) => reference.status === 'published')
+    .map((reference) => ({
+      id: reference.id,
+      title: reference.title,
+      latin: reference.latin,
+      edition: reference.edition,
+      authors: reference.authors,
+      subject: reference.subject,
+      accent: reference.accent,
+      pages: reference.pages,
+      glyph: reference.glyph,
+      sections: reference.sections.map((section) => ({
+        id: section.id,
+        title: section.title,
+        topics: (section.topics ?? []).map((topic) => ({
+          id: topic.id,
+          title: topic.title,
+          content: topic.content,
+        })),
+      })),
+    }));
+}
+
+/* ─────────────────────── درسنامه جامع علوم پایه ───────────────────────
+ *
+ * درسنامهٔ جامعِ دست‌نویس (`src/data/learning/anatomyCourse.js`) هنگام نخستین
+ * اجرا به رکورد پنل تبدیل می‌شود: هر درس یک رکورد کامل — مبحث‌ها (modules)،
+ * واحدهای هر مبحث (unitsByModule) و متن و تستِ هر واحد (learning). مثل مراجع
+ * و میکرو، ویرایش یک PUT کامل می‌فرستد و انتشار اتمیک می‌ماند.
+ */
+
+const COMPREHENSIVE_MODULE_STATUSES = ['fresh', 'learning', 'completed', 'locked'];
+
+const clampCount = (value, max = 100_000) => Math.min(max, Math.max(0, Math.round(Number(value) || 0)));
+
+function comprehensiveOption(option, index) {
+  return {
+    id: String(option?.id ?? '').trim().slice(0, 60) || `opt-${index + 1}`,
+    label: String(option?.label ?? '').slice(0, 400),
+  };
+}
+
+function comprehensiveQuestion(question, index, prefix) {
+  const options = (Array.isArray(question?.options) ? question.options : []).map(comprehensiveOption);
+  const answer = String(question?.answer ?? '').trim();
+
+  return {
+    id: String(question?.id ?? '').trim().slice(0, 80) || makeId(prefix),
+    type: 'mcq',
+    question: String(question?.question ?? '').slice(0, 1200),
+    options,
+    /* گزینهٔ درست باید به یکی از گزینه‌ها بخورد؛ وگرنه نخستین گزینه */
+    answer: options.some((option) => option.id === answer) ? answer : (options[0]?.id ?? ''),
+    explanation: String(question?.explanation ?? '').slice(0, 2000),
+    ...(question?.misconception !== undefined
+      ? { misconception: String(question.misconception ?? '').slice(0, 1200) } : {}),
+    ...(question?.conceptId ? { conceptId: String(question.conceptId).slice(0, 80) } : {}),
+    ...(question?.difficulty ? { difficulty: String(question.difficulty).slice(0, 30) } : {}),
+    ...(Array.isArray(question?.tags)
+      ? { tags: question.tags.slice(0, 10).map((tag) => String(tag).slice(0, 40)) } : {}),
+  };
+}
+
+function comprehensiveMicroLesson(lesson, index, unitId) {
+  const text = (value) => String(value ?? '').slice(0, 4000);
+
+  return {
+    id: String(lesson?.id ?? '').trim().slice(0, 80) || `${unitId}-lesson-${index + 1}`,
+    title: String(lesson?.title ?? '').trim().slice(0, 200) || `میکرودرس ${index + 1}`,
+    objective: text(lesson?.objective),
+    simple: text(lesson?.simple),
+    scientific: text(lesson?.scientific),
+    highlight: text(lesson?.highlight),
+    example: text(lesson?.example),
+    connection: text(lesson?.connection),
+    concepts: (Array.isArray(lesson?.concepts) ? lesson.concepts : [])
+      .slice(0, 10).map((concept) => String(concept).slice(0, 120)),
+    ...(Array.isArray(lesson?.facts)
+      ? { facts: lesson.facts.slice(0, 12).map((row) => row.map((cell) => String(cell ?? '').slice(0, 200))) } : {}),
+  };
+}
+
+function comprehensiveStructure(structure, index, unitId) {
+  return {
+    id: String(structure?.id ?? '').trim().slice(0, 60) || `${unitId}-st-${index + 1}`,
+    label: String(structure?.label ?? '').trim().slice(0, 160) || `ساختار ${index + 1}`,
+    x: Math.min(100, Math.max(0, Math.round(Number(structure?.x) || 0))),
+    y: Math.min(100, Math.max(0, Math.round(Number(structure?.y) || 0))),
+    detail: String(structure?.detail ?? '').slice(0, 600),
+  };
+}
+
+function comprehensiveUnitPayload(unit, index, moduleId) {
+  const id = String(unit?.id ?? '').trim().slice(0, 80) || makeId('cunit');
+  const learning = unit?.learning ?? {};
+  const activate = learning.activate ?? {};
+  const visualize = learning.visualize ?? {};
+
+  return {
+    id,
+    moduleId,
+    order: Number(unit?.order) || index + 1,
+    title: String(unit?.title ?? '').trim().slice(0, 200) || `واحد ${index + 1}`,
+    description: String(unit?.description ?? '').slice(0, 800),
+    estimatedTime: clampCount(unit?.estimatedTime, 600),
+    sectionCount: clampCount(unit?.sectionCount, 200),
+    tests: clampCount(unit?.tests),
+    objectives: (Array.isArray(unit?.objectives) ? unit.objectives : [])
+      .slice(0, 12).map((item) => String(item).slice(0, 400)),
+    prerequisites: (Array.isArray(unit?.prerequisites) ? unit.prerequisites : [])
+      .slice(0, 12).map((item) => String(item).slice(0, 160)),
+    status: COMPREHENSIVE_MODULE_STATUSES.includes(unit?.status) ? unit.status : 'fresh',
+    progress: Math.min(100, Math.max(0, Math.round(Number(unit?.progress) || 0))),
+    mastery: Math.min(100, Math.max(0, Math.round(Number(unit?.mastery) || 0))),
+    lastActivity: String(unit?.lastActivity ?? '').slice(0, 80),
+    steps: Array.isArray(unit?.steps) ? unit.steps.slice(0, 8) : ['activate', 'learn', 'visualize', 'practice', 'test'],
+    learning: {
+      activate: {
+        tests: (Array.isArray(activate.tests) ? activate.tests : [])
+          .map((question, questionIndex) => comprehensiveQuestion(question, questionIndex, `${id}-warmup`)),
+      },
+      microLessons: (Array.isArray(learning.microLessons) ? learning.microLessons : [])
+        .slice(0, 12).map((lesson, lessonIndex) => comprehensiveMicroLesson(lesson, lessonIndex, id)),
+      visualize: {
+        title: String(visualize.title ?? '').slice(0, 200),
+        instruction: String(visualize.instruction ?? '').slice(0, 600),
+        structures: (Array.isArray(visualize.structures) ? visualize.structures : [])
+          .slice(0, 20).map((structure, structureIndex) => comprehensiveStructure(structure, structureIndex, id)),
+        layers: (Array.isArray(visualize.layers) ? visualize.layers : [])
+          .slice(0, 8).map((layer, layerIndex) => ({
+            id: String(layer?.id ?? '').trim().slice(0, 60) || `layer-${layerIndex + 1}`,
+            label: String(layer?.label ?? '').trim().slice(0, 160) || `لایه ${layerIndex + 1}`,
+          })),
+      },
+      practice: (Array.isArray(learning.practice) ? learning.practice : [])
+        .slice(0, 20).map((question, questionIndex) => comprehensiveQuestion(question, questionIndex, `${id}-mcq`)),
+      ...(learning.labelQuiz
+        ? {
+          labelQuiz: {
+            id: String(learning.labelQuiz.id ?? '').trim().slice(0, 80) || makeId('lq'),
+            prompt: String(learning.labelQuiz.prompt ?? '').slice(0, 600),
+            answer: String(learning.labelQuiz.answer ?? '').slice(0, 80),
+            ...(learning.labelQuiz.conceptId
+              ? { conceptId: String(learning.labelQuiz.conceptId).slice(0, 80) } : {}),
+            explanation: String(learning.labelQuiz.explanation ?? '').slice(0, 1200),
+          },
+        } : {}),
+    },
+  };
+}
+
+function comprehensiveModulePayload(module_, index) {
+  return {
+    id: String(module_?.id ?? '').trim().slice(0, 80) || makeId('cmod'),
+    order: Number(module_?.order) || index + 1,
+    title: String(module_?.title ?? '').trim().slice(0, 200) || `مبحث ${index + 1}`,
+    description: String(module_?.description ?? '').slice(0, 800),
+    unitCount: clampCount(module_?.unitCount, 200),
+    tests: clampCount(module_?.tests),
+    progress: Math.min(100, Math.max(0, Math.round(Number(module_?.progress) || 0))),
+    status: COMPREHENSIVE_MODULE_STATUSES.includes(module_?.status) ? module_.status : 'fresh',
+    lastActivity: String(module_?.lastActivity ?? '').slice(0, 80),
+    ...(module_?.available ? { available: true } : {}),
+    ...(module_?.locked ? { locked: true } : {}),
+  };
+}
+
+function comprehensiveCoursePayload(input, existing = null) {
+  const title = String(input?.title ?? '').trim().slice(0, 160);
+  if (!title) throw Object.assign(new Error('عنوان درسنامه الزامی است'), { code: 'VALIDATION_ERROR' });
+
+  const status = ARTICLE_STATUSES.includes(input?.status) ? input.status : 'draft';
+  const modules = (Array.isArray(input?.modules) ? input.modules : []).map(comprehensiveModulePayload);
+  const rawUnits = input?.unitsByModule && typeof input.unitsByModule === 'object' ? input.unitsByModule : {};
+
+  const unitsByModule = {};
+  for (const module_ of modules) {
+    const units = (Array.isArray(rawUnits[module_.id]) ? rawUnits[module_.id] : [])
+      .map((unit, index) => comprehensiveUnitPayload(unit, index, module_.id));
+    unitsByModule[module_.id] = units;
+    /* شمارندهٔ واحدِ مبحث همیشه از دادهٔ واقعی می‌آید، نه از عدد دستی */
+    module_.unitCount = units.length;
+  }
+
+  return {
+    title,
+    subtitle: String(input?.subtitle ?? '').slice(0, 300),
+    description: String(input?.description ?? '').slice(0, 800),
+    modules,
+    unitsByModule,
+    status,
+    origin: existing?.origin === 'tapesh' ? 'tapesh' : 'panel',
+    publishedAt: status === 'published' ? (existing?.publishedAt || nowIso()) : (existing?.publishedAt ?? null),
+  };
+}
+
+function seedComprehensiveCourses() {
+  const created = nowIso();
+
+  return [{
+    id: anatomyCourse.id,
+    title: anatomyCourse.title,
+    subtitle: anatomyCourse.subtitle ?? '',
+    description: anatomyCourse.description ?? '',
+    modules: (anatomyCourse.modules ?? []).map((module_, index) => comprehensiveModulePayload(module_, index)),
+    unitsByModule: Object.fromEntries(Object.entries(anatomyCourse.unitsByModule ?? {}).map(([moduleId, units]) => [
+      moduleId,
+      (units ?? []).map((unit, index) => comprehensiveUnitPayload(unit, index, moduleId)),
+    ])),
+    status: 'published',
+    origin: 'tapesh',
+    createdAt: created,
+    updatedAt: created,
+    createdBy: 'seed',
+    updatedBy: 'seed',
+    publishedAt: created,
+  }];
+}
+
+export function listComprehensiveCourses({ search = '', status = 'all', page = 1, perPage = 20 } = {}) {
+  const query = normalizeSearch(search);
+  const filtered = readCollection('comprehensiveCourses').filter((course) => {
+    if (status !== 'all' && course.status !== status) return false;
+    if (!query) return true;
+    return [course.title, course.subtitle].some((field) => normalizeSearch(field).includes(query));
+  });
+
+  filtered.sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt)));
+  return paginate(filtered, { page, perPage });
+}
+
+export function getComprehensiveCourse(id) {
+  return readCollection('comprehensiveCourses').find((course) => course.id === id) ?? null;
+}
+
+export function updateComprehensiveCourse(id, input, admin) {
+  const courses = readCollection('comprehensiveCourses');
+  const index = courses.findIndex((course) => course.id === id);
+  if (index === -1) return null;
+
+  const updated = {
+    ...courses[index],
+    ...comprehensiveCoursePayload(input, courses[index]),
+    updatedAt: nowIso(),
+    updatedBy: admin?.id ?? 'system',
+  };
+
+  courses[index] = updated;
+  writeCollection('comprehensiveCourses', courses);
+  return updated;
+}
+
+/*
+ * قرارداد عمومی درسنامه جامع — فقط منتشرشده‌ها، با همان کلیدهایی که
+ * `ContentService` لایهٔ یادگیری از آن می‌خواند (id، title، subtitle،
+ * modules، unitsByModule). فرادادهٔ پنل به کاربران درز نمی‌کند.
+ */
+export function publishedComprehensiveCourses() {
+  return readCollection('comprehensiveCourses')
+    .filter((course) => course.status === 'published')
+    .map((course) => ({
+      id: course.id,
+      title: course.title,
+      subtitle: course.subtitle,
+      description: course.description,
+      modules: course.modules,
+      unitsByModule: course.unitsByModule,
+    }));
+}
+
 /* ─────────────────────── کتابخانهٔ فلش‌کارت تپش ─────────────────────── */
 
 /*
@@ -988,9 +1583,38 @@ export function deletePage(id) {
  *   دک   { title, description, subjectId, level, cover, shortTitle, anatomy, previewImage, status, cards[] }
  *   کارت { type: basic|cloze|mcq|image-locate, front, back, hint, tags[], image{url,alt,points[]}, options[], explanation }
  * دک تصویری (`anatomy: true`) کارت‌های image-locate دارد که روی تصویر نقطه مشخص می‌کنند.
+ *
+ * `origin` می‌گوید دک از کجا آمده: `tapesh` = مجموعهٔ ثابتِ داخل کد که با
+ * `syncFlashcardDecks()` به رکورد تبدیل شده، `panel` = ساختهٔ خودِ پنل. این فیلد
+ * فقط برای نمایش/گزارش است و در قرارداد عمومی کاربران نمی‌رود.
  */
 
 const FLASHCARD_CARD_TYPES = ['basic', 'cloze', 'mcq', 'image-locate'];
+
+/*
+ * فیلدهای کارت‌های ثابت که ویرایشگر پنل نمایش نمی‌دهد (منبع کارت و زبان).
+ *
+ * `flashcardCardPayload` فقط فیلدهای فرم را می‌نویسد؛ اگر این‌ها را همراه نبرد،
+ * نخستین ویرایشِ یک کارتِ ثابت در پنل، «منبع» کارت را بی‌صدا پاک می‌کرد و
+ * چیپ منبع در رابط کاربران ناپدید می‌شد.
+ */
+function carriedCardFields(input) {
+  const carried = {};
+  const source = input?.source;
+
+  if (source && typeof source === 'object') {
+    carried.source = {
+      sourceType: String(source.sourceType ?? '').slice(0, 20),
+      sourceId: String(source.sourceId ?? '').slice(0, 60),
+      title: String(source.title ?? '').slice(0, 160),
+      url: source.url ? String(source.url).slice(0, 300) : null,
+    };
+  }
+
+  if (input?.language) carried.language = String(input.language).slice(0, 8);
+
+  return carried;
+}
 
 function sanitizeCardPoints(points) {
   if (!Array.isArray(points)) return [];
@@ -1020,6 +1644,7 @@ function flashcardCardPayload(input) {
     topicId: String(input?.topicId ?? '').slice(0, 60),
     explanation: String(input?.explanation ?? '').slice(0, 2000),
     status: 'active',
+    ...carriedCardFields(input),
   };
 
   if (type === 'image-locate') {
@@ -1058,6 +1683,8 @@ function flashcardDeckPayload(input, existing = null) {
     anatomy: Boolean(input?.anatomy),
     previewImage: String(input?.previewImage ?? '').slice(0, 300),
     status: ARTICLE_STATUSES.includes(input?.status) ? input.status : 'draft',
+    /* منبع دک فقط از رکورد قبلی ارث می‌رسد؛ از بدنهٔ درخواست خوانده نمی‌شود */
+    origin: existing?.origin === 'tapesh' ? 'tapesh' : 'panel',
     cards,
   };
 }
@@ -1153,7 +1780,10 @@ export function publishedFlashcardDecks() {
 
 function seedFlashcardDecks() {
   const created = nowIso();
-  const base = { status: 'published', createdAt: created, updatedAt: created, createdBy: 'seed', updatedBy: 'seed' };
+  const base = {
+    status: 'published', origin: 'panel', createdAt: created, updatedAt: created,
+    createdBy: 'seed', updatedBy: 'seed',
+  };
 
   return [
     {
@@ -1210,6 +1840,80 @@ function seedFlashcardDecks() {
       ],
     },
   ];
+}
+
+/*
+ * ── مجموعه‌های ثابت تپش → رکورد پنل (همگام‌سازی افزایشی) ──
+ *
+ * ده مجموعهٔ رسمی تپش در `src/services/flashcards/mockData.js` داخل کد زندگی
+ * می‌کنند و کتابخانهٔ کاربران از همان‌جا می‌خواند. تا وقتی رکوردی در پنل نداشتند،
+ * در فهرست پنل دیده نمی‌شدند و کارت‌هایشان هم ویرایش‌پذیر نبود — یعنی «همهٔ
+ * مجموعه‌های کتابخانهٔ تپش» در پنل نبود.
+ *
+ * `syncFlashcardDecks()` هر مجموعهٔ ثابتِ بدون رکورد را به‌صورت رکورد کامل و
+ * `status: published` (چون همین حالا در کتابخانهٔ کاربران زنده است) اضافه می‌کند و
+ * **هیچ رکورد موجودی را بازنویسی نمی‌کند** ⇒ ویرایش‌های ادمین و وضعیت انتشارش
+ * محفوظ می‌ماند. تنها استثنا یک backfill تک‌فیلدی است: رکوردهای قدیمی‌ترِ بدون
+ * `origin` فقط همان فیلد را می‌گیرند. دو محافظ، دقیقاً مثل `syncMicroCourses`:
+ *   • `flashcardSynced` — یک‌بار در عمر هر پروسه (`ensureStore` روی هر read/write
+ *     صدا زده می‌شود و این تابع نباید هر بار فایل را باز کند).
+ *   • `writeJson` مستقیم، نه `writeCollection` — وگرنه از داخل `ensureStore` به
+ *     `ensureStore` برمی‌گردیم و حلقهٔ بی‌پایان می‌شود.
+ *
+ * کارت‌ها همان `id` ثابت را نگه می‌دارند تا وضعیت مرور کاربر (که به `cardId`
+ * گره خورده) با ساخته‌شدن رکورد از صفر شروع نشود.
+ *
+ * ⚠️ پیامد شناخته‌شده: حذف یک مجموعهٔ `origin: 'tapesh'` از پنل، در شروع بعدی
+ * سرور دوباره ساخته می‌شود (همان رفتار میکرو درسنامه). برای «برداشتن از کتابخانهٔ
+ * کاربران» وضعیت «بایگانی» را بگذار، نه حذف.
+ */
+let flashcardSynced = false;
+
+function flashcardRecordFromFixed(deck, created) {
+  return {
+    id: deck.id,
+    title: deck.title,
+    description: deck.description ?? '',
+    shortTitle: deck.shortTitle ?? '',
+    subjectId: deck.subjectId ?? 'general',
+    level: deck.level ?? '',
+    cover: /^#[0-9a-fA-F]{3,8}$/.test(String(deck.cover ?? '')) ? deck.cover : '#937fcd',
+    anatomy: Boolean(deck.anatomy),
+    previewImage: deck.previewImage ?? '',
+    status: 'published',
+    origin: 'tapesh',
+    cards: TAPESH_CARDS.filter((card) => card.deckId === deck.id).map(flashcardCardPayload),
+    createdAt: created,
+    updatedAt: deck.updatedAt ?? created,
+    createdBy: 'seed',
+    updatedBy: 'seed',
+  };
+}
+
+function syncFlashcardDecks() {
+  if (flashcardSynced) return;
+  flashcardSynced = true;
+
+  const stored = readJson(files.flashcardDecks, []);
+  if (!Array.isArray(stored)) return;
+
+  const known = new Set(stored.map((deck) => deck.id));
+  const created = nowIso();
+  const missing = TAPESH_DECKS
+    .filter((deck) => deck?.id && !known.has(deck.id))
+    .map((deck) => flashcardRecordFromFixed(deck, created));
+
+  /* رکوردهای قدیمی‌ترِ بدون `origin` (دو نمونهٔ seed) فقط همین یک فیلد را می‌گیرند */
+  let changed = false;
+  const backfilled = stored.map((deck) => {
+    if (deck.origin) return deck;
+    changed = true;
+    return { ...deck, origin: 'panel' };
+  });
+
+  if (!missing.length && !changed) return;
+  /* ته فایل اضافه می‌شوند تا ترتیب کتابخانهٔ کاربران (که همان ترتیب فایل است) عوض نشود */
+  writeJson(files.flashcardDecks, [...backfilled, ...missing]);
 }
 
 /* ──────────────────────────── میکرو درسنامه ──────────────────────────── */
@@ -1691,6 +2395,198 @@ export function publishedMicroCourses() {
  * این تابع تنها نقطهٔ خواندن بانک از سمت سرور است؛ وقتی بانک به Backend منتقل
  * شود، فقط بدنهٔ همین تابع به کوئری تبدیل می‌شود.
  */
+const TEST_BANK_STATUSES = ['draft', 'published', 'archived'];
+const publicTestBankQuestion = ({ examDay, ...question }) => ({
+  ...question,
+  source: question.source === 'comprehensive' ? 'official' : question.source,
+  difficulty: question.stats?.solves > 0 ? difficultyFromPercent(question.stats.correctPercent) : question.difficulty,
+});
+
+export function publishedTestBankQuestions() {
+  return readCollection('testBankQuestions')
+    .filter((question) => question.status === 'published')
+    .map(({ status, createdBy, updatedBy, ...question }) => publicTestBankQuestion(question));
+}
+
+export function testBankRevision() {
+  ensureStore();
+  const file = statSync(files.testBankQuestions);
+  return `${file.mtimeMs}:${file.size}`;
+}
+
+export function listTestBankQuestions({ search = '', subject = 'all', track = 'all', status = 'all', page = 1, perPage = 20 } = {}) {
+  const query = normalizeSearch(search);
+  const scoped = readCollection('testBankQuestions').filter((question) =>
+    (status === 'all' || question.status === status)
+    && (track === 'all' || question.track === track)
+    && (!query || normalizeSearch(`${question.stem} ${question.id} ${question.topicPath.join(' ')}`).includes(query)));
+  return {
+    ...paginate(scoped.filter((question) => subject === 'all' || question.subject === subject).map(publicTestBankQuestion), { page, perPage }),
+    subjects: TEST_BANK_SUBJECTS.map(({ id, name }) => ({ id, name, count: scoped.filter((question) => question.subject === id).length })),
+  };
+}
+
+export function getTestBankQuestion(id) {
+  const question = readCollection('testBankQuestions').find((item) => item.id === id);
+  return question ? publicTestBankQuestion(question) : null;
+}
+
+export function recordTestBankAnswers(userId, answers) {
+  const votes = readCollection('testBankAnswers');
+  const questions = readCollection('testBankQuestions');
+  const rewards = readCollection('testBankHeartRewards');
+  const awardedQuestionIds = [];
+  const changed = new Set();
+  for (const entry of answers.slice(0, 1000)) {
+    const question = questions.find((item) => item.id === entry?.questionId && item.status === 'published');
+    const selected = Number(entry?.selected);
+    if (!question || entry?.selected == null || !Number.isInteger(selected) || selected < 0 || selected >= question.options.length) continue;
+    const index = votes.findIndex((vote) => vote.userId === userId && vote.questionId === question.id);
+    const vote = {
+      userId, questionId: question.id, selected,
+      timeSpent: Math.min(3600, Math.max(0, Number(entry.timeSpent) || 0)),
+      answeredAt: Math.min(Date.now(), Math.max(0, Number(entry.answeredAt) || 0)),
+    };
+    if (index === -1) votes.push(vote);
+    else if ((votes[index].answeredAt ?? 0) <= vote.answeredAt) votes[index] = vote;
+    else continue;
+    changed.add(question.id);
+    if (selected === question.correctAnswer) {
+      const now = Date.now();
+      const attemptKey = `${question.id}:${entry.answeredAt ?? ''}`;
+      const previous = rewards.filter((reward) => reward.userId === userId && reward.questionId === question.id);
+      if (!previous.some((reward) => reward.attemptKey === attemptKey
+        || now - reward.awardedAt < 24 * 60 * 60 * 1000)) {
+        rewards.push({ userId, questionId: question.id, attemptKey, awardedAt: now });
+        awardedQuestionIds.push(question.id);
+      }
+    }
+  }
+  if (!changed.size) return { awardedQuestionIds };
+  for (const question of questions) if (changed.has(question.id)) refreshTestBankStats(question, votes);
+  writeCollection('testBankAnswers', votes);
+  writeCollection('testBankQuestions', questions);
+  if (awardedQuestionIds.length) writeCollection('testBankHeartRewards', rewards);
+  return { awardedQuestionIds };
+}
+
+export function getUserHeartRewards(userId) {
+  return readCollection('testBankHeartRewards')
+    .filter((reward) => reward.userId === userId)
+    .map((reward) => ({ awardedAt: reward.awardedAt }));
+}
+
+export function transferGuestTestBankProgress(guestId, userId) {
+  if (!guestId || guestId === userId) return;
+  const rewards = readCollection('testBankHeartRewards');
+  if (rewards.some((reward) => reward.userId === guestId)) {
+    writeCollection('testBankHeartRewards', rewards.map((reward) =>
+      reward.userId === guestId ? { ...reward, userId } : reward));
+  }
+  const votes = readCollection('testBankAnswers');
+  if (!votes.some((vote) => vote.userId === guestId)) return;
+  const merged = votes.filter((vote) => vote.userId !== guestId);
+  const changed = new Set();
+  for (const vote of votes.filter((item) => item.userId === guestId)) {
+    changed.add(vote.questionId);
+    const index = merged.findIndex((item) => item.userId === userId && item.questionId === vote.questionId);
+    if (index === -1) merged.push({ ...vote, userId });
+    else if ((merged[index].answeredAt ?? 0) < (vote.answeredAt ?? 0)) merged[index] = { ...vote, userId };
+  }
+  writeCollection('testBankAnswers', merged);
+  const questions = readCollection('testBankQuestions');
+  for (const question of questions) if (changed.has(question.id)) refreshTestBankStats(question, merged);
+  writeCollection('testBankQuestions', questions);
+}
+
+function refreshTestBankStats(question, votes) {
+  const responses = votes.filter((vote) => vote.questionId === question.id && vote.selected < question.options.length);
+  if (!responses.length) return;
+  const solves = responses.length;
+  const correctPercent = Math.round(responses.filter((vote) => vote.selected === question.correctAnswer).length / solves * 100);
+  question.stats = {
+    ...question.stats, solves, correctPercent,
+    optionPercents: question.options.map((_, index) => Math.round(responses.filter((vote) => vote.selected === index).length / solves * 100)),
+    avgTimeSec: Math.round(responses.reduce((sum, vote) => sum + vote.timeSpent, 0) / solves),
+    difficultyIndex: correctPercent / 100,
+  };
+  question.difficulty = difficultyFromPercent(correctPercent);
+}
+
+function testBankQuestionPayload(input, existing) {
+  const options = Array.isArray(input?.options) ? input.options.map((value) => String(value ?? '').trim().slice(0, 2000)) : [];
+  const correctAnswer = Number(input?.correctAnswer);
+  if (!TEST_BANK_SUBJECTS.some((item) => item.id === input?.subject)
+    || !TEST_BANK_TRACKS[input?.track] || !['official', 'tapesh'].includes(input?.source)
+    || !String(input?.stem ?? '').trim() || options.length < 2 || options.some((value) => !value)
+    || !Number.isInteger(correctAnswer) || correctAnswer < 0 || correctAnswer >= options.length) {
+    throw Object.assign(new Error('مشخصات سؤال، گزینه‌ها یا پاسخ صحیح معتبر نیست'), { code: 'VALIDATION_ERROR' });
+  }
+  const explanation = input?.explanation ?? {};
+  const figure = String(input.figure ?? '');
+  if (figure && !['cardiac-ap', 'o2-curve', 'enzyme-kinetics'].includes(figure) && !/^\/uploads\/[\w.-]+\.(?:png|jpe?g|webp|gif|avif|svg)$/.test(figure)) {
+    throw Object.assign(new Error('شکل سؤال معتبر نیست'), { code: 'VALIDATION_ERROR' });
+  }
+  return {
+    subject: input.subject, track: input.track, source: input.source,
+    type: existing?.type ?? 'single',
+    difficulty: existing?.stats?.solves > 0 ? difficultyFromPercent(existing.stats.correctPercent) : (existing?.difficulty ?? 'medium'),
+    year: Number.isInteger(Number(input.year)) && Number(input.year) >= 1300 && Number(input.year) <= 1600 ? Number(input.year) : null,
+    examMonth: Number.isInteger(Number(input.examMonth)) && Number(input.examMonth) >= 1 && Number(input.examMonth) <= 12 && Number(input.year) >= 1300 ? Number(input.examMonth) : null,
+    topicPath: (Array.isArray(input.topicPath) ? input.topicPath : []).map((part) => String(part ?? '').trim().slice(0, 120)).filter(Boolean).slice(0, 5),
+    tags: (Array.isArray(input.tags) ? input.tags : []).map((tag) => String(tag ?? '').trim().slice(0, 60)).filter(Boolean).slice(0, 20),
+    conceptIds: (Array.isArray(input.conceptIds) ? input.conceptIds : []).map((id) => String(id ?? '').trim().slice(0, 100)).filter(Boolean).slice(0, 30),
+    stem: String(input.stem).trim().slice(0, 10000),
+    figure: figure || null,
+    options, correctAnswer,
+    explanation: {
+      summary: String(explanation.summary ?? '').trim().slice(0, 10000),
+      deep: String(explanation.deep ?? '').trim().slice(0, 20000),
+      keyPoint: String(explanation.keyPoint ?? '').trim().slice(0, 10000),
+      trap: String(explanation.trap ?? '').trim().slice(0, 10000),
+      whyWrong: options.map((_, index) => index).filter((index) => index !== correctAnswer)
+        .map((index) => ({ index, text: String(explanation.whyWrong?.find((item) => Number(item.index) === index)?.text ?? '').trim().slice(0, 10000) }))
+        .filter((item) => item.text),
+    },
+    stats: existing?.stats ?? { solves: 0, correctPercent: 0, optionPercents: options.map(() => 0), avgTimeSec: 0, difficultyIndex: 0 },
+    status: TEST_BANK_STATUSES.includes(input.status) ? input.status : 'draft',
+  };
+}
+
+export function createTestBankQuestion(input, admin) {
+  const questions = readCollection('testBankQuestions');
+  const now = nowIso();
+  const question = { id: makeId('tbq'), ...testBankQuestionPayload(input), createdAt: now, updatedAt: now, createdBy: admin?.id, updatedBy: admin?.id };
+  questions.unshift(question);
+  writeCollection('testBankQuestions', questions);
+  return question;
+}
+
+export function updateTestBankQuestion(id, input, admin) {
+  const questions = readCollection('testBankQuestions');
+  const index = questions.findIndex((question) => question.id === id);
+  if (index === -1) return null;
+  const { examDay, ...previous } = questions[index];
+  const question = { ...previous, ...testBankQuestionPayload(input, questions[index]), updatedAt: nowIso(), updatedBy: admin?.id };
+  const changedAnswer = question.correctAnswer !== questions[index].correctAnswer
+    || JSON.stringify(question.options) !== JSON.stringify(questions[index].options);
+  if (changedAnswer) {
+    question.stats = { solves: 0, correctPercent: 0, optionPercents: question.options.map(() => 0), avgTimeSec: 0, difficultyIndex: 0 };
+    question.difficulty = 'medium';
+    writeCollection('testBankAnswers', readCollection('testBankAnswers').filter((vote) => vote.questionId !== id));
+  } else refreshTestBankStats(question, readCollection('testBankAnswers'));
+  questions[index] = question;
+  writeCollection('testBankQuestions', questions);
+  return question;
+}
+
+export function deleteTestBankQuestion(id) {
+  const questions = readCollection('testBankQuestions');
+  const question = questions.find((item) => item.id === id);
+  if (question) writeCollection('testBankQuestions', questions.filter((item) => item.id !== id));
+  return question ?? null;
+}
+
 export function searchTestBankQuestions({
   search = '', subjectId = '', topicPath = '', difficulty = 'all', limit = 40,
 } = {}) {
@@ -1698,7 +2594,7 @@ export function searchTestBankQuestions({
   const path = microText(topicPath, 120);
   const size = microInt(limit, 40, 1, 100);
 
-  const matched = TEST_BANK_QUESTIONS.filter((question) => {
+  const matched = publishedTestBankQuestions().filter((question) => {
     if (subjectId && question.subject !== subjectId) return false;
     if (difficulty !== 'all' && question.difficulty !== difficulty) return false;
     if (path && !question.topicPath.join(' › ').includes(path)) return false;
@@ -2034,12 +2930,10 @@ export function toggleNoteItem(id, itemId, admin) {
 
 /* ──────────────────────────────── رسانه ──────────────────────────────── */
 
+/* تصویرها از فهرست مشترک کارت تصویری می‌آیند (`mockData.js`) تا پنل و داشبورد
+   و سرور یک فهرست داشته باشند؛ PDF فقط در کتابخانهٔ رسانه مجاز است، نه کارت. */
 const MIME_EXTENSIONS = {
-  'image/png': 'png',
-  'image/jpeg': 'jpg',
-  'image/webp': 'webp',
-  'image/gif': 'gif',
-  'image/svg+xml': 'svg',
+  ...CARD_IMAGE_MIME_EXTENSIONS,
   'application/pdf': 'pdf',
 };
 

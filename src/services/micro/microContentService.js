@@ -1,8 +1,8 @@
 /*
  * سرویس محتوای میکرودرسنامه — قرارداد دسترسی به درس‌ها و مبحث‌ها.
- * مثل ContentService درسنامهٔ جامع، پیاده‌سازی امروز از دادهٔ محلی می‌خواند و
- * با اتصال Backend فقط بدنهٔ getCourse به fetch تبدیل می‌شود؛ امضا و شکل Entity
- * عوض نمی‌شود (قرارداد آینده: GET /api/micro/courses/:courseId).
+ * خوانندهٔ درس از مسیر عمومی `/api/public/micro/library` می‌آید (نسخه‌ای که ادمین
+ * منتشر کرده) و در نبودِ آن به رجیستری ثابت `src/data/micro/registry.js` برمی‌گردد؛
+ * امضا و شکل Entity در هر دو حالت یکی است.
  *
  * سلسله‌مراتب: درس (subject) → مبحث (topic) → واحد یادگیری → صفحه‌های میکرو.
  * پرچم `published` فقط «آمادگی محتوا» را نشان می‌دهد (مسیر پیش‌فرض ورود به خواننده و
@@ -20,7 +20,71 @@
  */
 import { MICRO_COURSE_REGISTRY as COURSE_REGISTRY } from '../../data/micro/registry.js';
 
-const wait = (duration) => new Promise((resolve) => window.setTimeout(resolve, duration));
+/*
+ * ── کتابخانهٔ منتشرشدهٔ پنل ──
+ *
+ * درسنامه‌ای که مدیر در پنل ویرایش و «انتشار برای کاربران تپش» می‌کند، منبعش سرور
+ * است (`GET /api/public/micro/library`) نه رجیستری ثابت. تا وقتی این مسیر خوانده
+ * نمی‌شد، ویرایش پنل روی همان نسخه‌ای که کاربر می‌بیند اثری نداشت — چون UI فقط
+ * `COURSE_REGISTRY` را می‌خواند. (همان الگوی `/api/public/flashcards/library`.)
+ *
+ * رجیستری سرجایش می‌ماند: ساختار فهرست، نگاشت subject→course و همهٔ درس‌های
+ * منتشرنشده از آن می‌آید. نسخهٔ منتشرشده **جای** نسخهٔ ثابت را می‌گیرد، نه کنارش.
+ *
+ * کش کوتاه‌مدت است چون این تابع پرتکرار است؛ خطا هم بالا نمی‌دهد تا نبودِ سرور
+ * (پیش‌نمایش استاتیک) کل درسنامه را از کار نیندازد.
+ */
+const PUBLISHED_TTL_MS = 15000;
+
+let publishedCourses = [];
+let publishedAt = 0;
+let publishedPending = null;
+
+export async function loadPublishedCourses({ force = false } = {}) {
+  if (!force && publishedAt && Date.now() - publishedAt < PUBLISHED_TTL_MS) return publishedCourses;
+  if (publishedPending) return publishedPending;
+
+  publishedPending = (async () => {
+    try {
+      const response = await fetch('/api/public/micro/library', {
+        headers: { Accept: 'application/json' },
+      });
+      if (!response.ok) throw new Error(`micro-library-http-${response.status}`);
+      const payload = await response.json();
+      const courses = payload?.data?.courses;
+      if (Array.isArray(courses)) publishedCourses = courses.filter((course) => course?.id);
+    } catch {
+      /* سرور در دسترس نیست — رجیستری ثابت پاسخ می‌دهد */
+    } finally {
+      publishedAt = Date.now();
+      publishedPending = null;
+    }
+    return publishedCourses;
+  })();
+
+  return publishedPending;
+}
+
+/*
+ * نسخهٔ منتشرشدهٔ یک درس، اگر پنل آن را منتشر کرده باشد.
+ *
+ * کلیدِ اتصال **`subjectId`** است نه `id`: شناسهٔ رجیستری محلی `physiology` است ولی
+ * رکورد پنل `mcr-physiology`. اگر با `id` تطبیق می‌دادیم هیچ‌وقت جفت نمی‌شد و ویرایش
+ * پنل بی‌اثر می‌ماند — دقیقاً همان چیزی که کاربر گزارش کرد.
+ *
+ * `id` خروجی روی شناسهٔ محلی یکسان می‌شود، چون کلید پیشرفت کاربر
+ * (`tapesh:micro:v1:<user>:<courseId>`) و مسیرهای لایه به آن گره خورده‌اند؛ عوض‌شدنش
+ * یعنی پیشرفت ذخیره‌شدهٔ کاربران گم شود. پس رکورد پنل فقط «محتوا» می‌دهد، نه هویت.
+ */
+function publishedCourse(courseId) {
+  if (!courseId) return null;
+  const match = publishedCourses.find((course) => course.id === courseId)
+    ?? publishedCourses.find((course) => course.subjectId === courseId);
+  if (!match) return null;
+
+  const local = Object.values(COURSE_REGISTRY).find((course) => course.subjectId === match.subjectId);
+  return local ? { ...match, id: local.id } : match;
+}
 
 /* درس‌های میکرودرسنامهٔ ثبت‌شده — منبع نگاشت درسِ فهرست به میکرودرسنامه */
 export const AVAILABLE_MICRO_COURSES = Object.keys(COURSE_REGISTRY);
@@ -62,9 +126,10 @@ export const MicroContentService = {
     return Boolean(COURSE_REGISTRY[courseId]);
   },
 
-  /* دسترسی همگام به رجیستری — برای فهرست مبحث‌ها که بدون تأخیر رندر می‌شود */
+  /* دسترسی همگام به درس — برای فهرست مبحث‌ها که بدون تأخیر رندر می‌شود.
+     اگر کتابخانهٔ منتشرشده پیش‌تر خوانده شده باشد، همان مقدم است. */
   getCourseSync(courseId) {
-    return COURSE_REGISTRY[courseId] ?? null;
+    return publishedCourse(courseId) ?? COURSE_REGISTRY[courseId] ?? null;
   },
 
   courseIdForSubject(subjectId) {
@@ -79,12 +144,16 @@ export const MicroContentService = {
     return firstPublishedCourse();
   },
 
+  /*
+   * خوانندهٔ درسنامه همین‌جا تصمیم می‌گیرد: نسخهٔ منتشرشدهٔ پنل، وگرنه رجیستری ثابت.
+   * `loadPublishedCourses` خطا پرتاب نمی‌کند، پس افت سرور فقط به نسخهٔ ثابت برمی‌گردد.
+   */
   async getCourse(courseId, { signal } = {}) {
-    await wait(220);
+    await loadPublishedCourses();
 
     if (signal?.aborted) throw new DOMException('درخواست لغو شد', 'AbortError');
 
-    const course = COURSE_REGISTRY[courseId];
+    const course = publishedCourse(courseId) ?? COURSE_REGISTRY[courseId];
     if (!course) {
       const error = new Error('میکرودرسنامهٔ این درس هنوز منتشر نشده است.');
       error.code = 'course-not-published';

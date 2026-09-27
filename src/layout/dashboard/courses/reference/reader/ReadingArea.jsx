@@ -7,6 +7,7 @@ import {
   DividerBlock,
   FormulaBlock,
   HeadingBlock,
+  HtmlBlock,
   ImageBlock,
   QuoteBlock,
   TableBlock,
@@ -21,6 +22,7 @@ const WIDTHS = { narrow: 660, normal: 780, wide: 920 };
 
 const BLOCK_RENDERERS = {
   p: TextBlock,
+  html: HtmlBlock,
   h1: HeadingBlock,
   h2: HeadingBlock,
   h3: HeadingBlock,
@@ -35,25 +37,23 @@ const BLOCK_RENDERERS = {
 /* ناحیه مطالعه: اسکرول، اسپای بخش‌ها، ذخیره پیشرفت و بازگشت به آخرین موقعیت */
 export default function ReadingArea({ contentRef, progressRef }) {
   const {
-    reference,
     chapter,
     content,
     chapterLoading,
     chapterError,
     activeSectionId,
-    setActiveSectionId,
     markSectionSeen,
     savePosition,
     scrollRestore,
     settings,
-    progress,
     openChapter,
-    availableChapters,
   } = useReader();
 
   const scrollerRef = useRef(null);
   const lastSavedRef = useRef(0);
-  const seenRef = useRef(new Set());
+  const sectionIndex = content?.sections.findIndex((section) => section.id === activeSectionId) ?? -1;
+  const currentIndex = sectionIndex < 0 ? 0 : sectionIndex;
+  const currentSection = content?.sections[currentIndex];
 
   /* بازگرداندن موقعیت مطالعه بعد از رندر فصل */
   useEffect(() => {
@@ -85,7 +85,7 @@ export default function ReadingArea({ contentRef, progressRef }) {
       scroller.scrollTop = 0;
     });
     scrollRestore.current = null;
-  }, [content, chapterLoading, contentRef, scrollRestore]);
+  }, [content, activeSectionId, chapterLoading, contentRef, scrollRestore]);
 
   const handleScroll = () => {
     const scroller = scrollerRef.current;
@@ -105,38 +105,10 @@ export default function ReadingArea({ contentRef, progressRef }) {
     }
   };
 
-  /* اسپای بخش‌ها + ثبت بخش‌های دیده‌شده برای پیشرفت فصل */
+  /* هر زیرمبحث یک صفحه است؛ ورود به همان صفحه پیشرفت را ثبت می‌کند. */
   useEffect(() => {
-    if (!content || chapterLoading || !scrollerRef.current) return undefined;
-    const sections = contentRef.current?.querySelectorAll('[data-section-id]');
-    if (!sections?.length) return undefined;
-
-    seenRef.current = new Set(progress[chapter.id]?.seen ?? []);
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          const sectionId = entry.target.dataset.sectionId;
-          setActiveSectionId(sectionId);
-          if (!seenRef.current.has(sectionId)) {
-            seenRef.current.add(sectionId);
-            markSectionSeen(sectionId);
-          }
-        });
-      },
-      { root: scrollerRef.current, rootMargin: '-10% 0px -55% 0px', threshold: 0 },
-    );
-    sections.forEach((section) => observer.observe(section));
-    return () => observer.disconnect();
-  }, [content, chapterLoading, chapter, progress, contentRef, setActiveSectionId, markSectionSeen]);
-
-  const chapterIndex = availableChapters.findIndex((ch) => ch.id === chapter?.id);
-  const prevChapter = chapterIndex > 0 ? availableChapters[chapterIndex - 1] : null;
-  const nextChapter =
-    chapterIndex >= 0 && chapterIndex < availableChapters.length - 1
-      ? availableChapters[chapterIndex + 1]
-      : null;
+    if (currentSection && !chapterLoading) markSectionSeen(currentSection.id);
+  }, [currentSection?.id, chapterLoading, markSectionSeen]);
 
   return (
     <main className="rdr-content" ref={scrollerRef} onScroll={handleScroll} tabIndex={-1}>
@@ -149,20 +121,6 @@ export default function ReadingArea({ contentRef, progressRef }) {
           '--rdr-measure': `${WIDTHS[settings.width]}px`,
         }}
       >
-        {chapter && (
-          <header className="rdr-article__head">
-            <span className="rdr-article__kicker">فصل {toFa(chapter.number)}</span>
-            <h1>{chapter.title}</h1>
-            <p className="rdr-article__meta">
-              <Icon name="clock" size={14} />
-              زمان مطالعه حدود {toFa(chapter.minutes)} دقیقه
-              {progress[chapter.id]?.pct > 0 && (
-                <em>پیشرفت شما در این فصل: {toFa(progress[chapter.id].pct)}٪</em>
-              )}
-            </p>
-          </header>
-        )}
-
         {chapterLoading && <BlockSkeleton />}
 
         {!chapterLoading && chapterError && (
@@ -170,12 +128,12 @@ export default function ReadingArea({ contentRef, progressRef }) {
             <Icon name="book" size={34} />
             <h3>
               {chapterError === 'CONTENT_NOT_AVAILABLE'
-                ? 'محتوای این فصل به‌زودی بارگذاری می‌شود'
+                ? 'متن این فصل هنوز آماده نشده'
                 : 'خطا در بارگذاری محتوا'}
             </h3>
             <p>
               {chapterError === 'CONTENT_NOT_AVAILABLE'
-                ? 'این فصل در حال دیجیتال‌سازی است؛ به‌محض انتشار، همین‌جا به‌صورت متنی در دسترس قرار می‌گیرد.'
+                ? 'همهٔ فصل‌ها باز و قابل ورودند؛ فصلی که متنش نوشته نشده، به‌محض آماده شدن همین‌جا نمایش داده می‌شود.'
                 : 'اتصال خود را بررسی کنید و دوباره تلاش کنید.'}
             </p>
           </div>
@@ -183,48 +141,46 @@ export default function ReadingArea({ contentRef, progressRef }) {
 
         {!chapterLoading && !chapterError && content && (
           <>
-            {content.sections.map((section, sectionIndex) => (
+            {currentSection && (
               <section
                 className="rdr-section"
-                key={section.id}
-                data-section-id={section.id}
-                aria-label={section.title}
+                key={currentSection.id}
+                data-section-id={currentSection.id}
+                aria-label={currentSection.title}
               >
                 <h2 className="rdr-section__title" data-section-title>
-                  <span className="rdr-section__num">{toFa(sectionIndex + 1)}</span>
-                  {section.title}
+                  <span className="rdr-section__num">{toFa(currentIndex + 1)}</span>
+                  {currentSection.title}
                 </h2>
-                {section.blocks.map((block) => {
+                {currentSection.blocks.map((block) => {
                   const Renderer = BLOCK_RENDERERS[block.type];
                   if (!Renderer) return null;
                   return <Renderer key={block.id} block={block} />;
                 })}
               </section>
-            ))}
+            )}
 
-            <nav className="rdr-chapter-nav" aria-label="جابه‌جایی بین فصل‌ها">
-              {prevChapter ? (
-                <button type="button" className="rdr-chapter-nav__btn" onClick={() => openChapter(prevChapter.id)}>
-                  <Icon name="arrowPrev" size={17} />
+            <nav className="rdr-chapter-nav" aria-label="جابه‌جایی بین زیرمبحث‌ها">
+              {currentIndex > 0 ? (
+                <button type="button" className="rdr-chapter-nav__btn" onClick={() =>
+                  openChapter(chapter.id, { sectionId: content.sections[currentIndex - 1].id })}>
+                  <Icon name="arrowNext" size={17} />
                   <span>
-                    <small>فصل قبل</small>
-                    <strong>
-                      فصل {toFa(prevChapter.number)} — {prevChapter.title}
-                    </strong>
+                    <small>زیرمبحث قبل</small>
+                    <strong>{content.sections[currentIndex - 1].title}</strong>
                   </span>
                 </button>
               ) : (
                 <span />
               )}
-              {nextChapter ? (
-                <button type="button" className="rdr-chapter-nav__btn" onClick={() => openChapter(nextChapter.id)}>
+              {currentIndex < content.sections.length - 1 ? (
+                <button type="button" className="rdr-chapter-nav__btn" onClick={() =>
+                  openChapter(chapter.id, { sectionId: content.sections[currentIndex + 1].id })}>
                   <span>
-                    <small>فصل بعد</small>
-                    <strong>
-                      فصل {toFa(nextChapter.number)} — {nextChapter.title}
-                    </strong>
+                    <small>زیرمبحث بعد</small>
+                    <strong>{content.sections[currentIndex + 1].title}</strong>
                   </span>
-                  <Icon name="arrowNext" size={17} />
+                  <Icon name="arrowPrev" size={17} />
                 </button>
               ) : (
                 <span />

@@ -32,6 +32,8 @@ import {
   createMicroCourse,
   createNote,
   createPage,
+  createReference,
+  createTestBankQuestion,
   createSession,
   dashboardStats,
   deleteAdmin,
@@ -43,13 +45,18 @@ import {
   deleteMicroCourse,
   deleteNote,
   deletePage,
+  deleteReference,
+  deleteTestBankQuestion,
   destroySession,
   ensureStore,
   getArticle,
+  getComprehensiveCourse,
   getFlashcardDeck,
   getMicroCourse,
   getNote,
   getPage,
+  getReference,
+  getTestBankQuestion,
   getSession,
   hasPermission,
   listActivity,
@@ -57,22 +64,29 @@ import {
   listArticles,
   listBanners,
   listCategories,
+  listComprehensiveCourses,
   listFlashcardDecks,
   listMedia,
   listMicroCourses,
   listNotes,
   listPages,
+  listReferences,
+  listTestBankQuestions,
   logActivity,
   microSubjectCatalog,
   publicAdmin,
   publicSettings,
   publishedArticles,
   publishedBanners,
+  publishedComprehensiveCourses,
   publishedFlashcardDecks,
   publishedMicroCourses,
+  publishedReferences,
+  publishedTestBankQuestions,
   readSettings,
   saveCategory,
   searchTestBankQuestions,
+  testBankRevision,
   setArticleStatus,
   setMicroCourseStatus,
   setNotePinned,
@@ -80,11 +94,14 @@ import {
   updateAdmin,
   updateArticle,
   updateBanner,
+  updateComprehensiveCourse,
   updateFlashcardDeck,
   updateMedia,
   updateMicroCourse,
   updateNote,
   updatePage,
+  updateReference,
+  updateTestBankQuestion,
   writeSettings,
 } from './contentStore.js';
 
@@ -679,6 +696,90 @@ const ROUTES = [
     return { deleted: page.id };
   }],
 
+  /* ── مراجع تپش (لایهٔ داخل پنل) ──
+   *
+   * هر مرجع یک رکورد کامل است: فراداده + بخش‌ها + متن هر بخش. پس ویرایش یک
+   * PUT کامل است و افزودن/حذف بخش هم در همان رکورد انجام می‌شود (اتمیک،
+   * درست مثل فلش‌کارت و میکرو). `references.publish` برای تغییر وضعیت انتشار
+   * لازم نیست چون وضعیت خودِ رکورد با همان PUT می‌آید.
+   */
+
+  ['GET', '/api/admin/references', 'references.read', async (ctx) => listReferences({
+    search: ctx.query.get('search') ?? '',
+    status: ctx.query.get('status') ?? 'all',
+    page: ctx.query.get('page') ?? 1,
+    perPage: ctx.query.get('perPage') ?? 20,
+  })],
+
+  ['GET', '/api/admin/references/:id', 'references.read', async (ctx) => {
+    const reference = getReference(ctx.params.id);
+    if (!reference) fail('NOT_FOUND', 'مرجع پیدا نشد');
+    return { reference };
+  }],
+
+  ['POST', '/api/admin/references', 'references.create', async (ctx) => {
+    const reference = createReference(ctx.body, ctx.admin);
+    logActivity({
+      admin: ctx.admin, action: 'reference.created', entityType: 'reference',
+      entityId: reference.id, entityLabel: reference.title, ip: clientIp(ctx.request),
+    });
+    return { reference };
+  }],
+
+  ['PUT', '/api/admin/references/:id', 'references.update', async (ctx) => {
+    const reference = updateReference(ctx.params.id, ctx.body, ctx.admin);
+    if (!reference) fail('NOT_FOUND', 'مرجع پیدا نشد');
+    logActivity({
+      admin: ctx.admin, action: 'reference.updated', entityType: 'reference',
+      entityId: reference.id, entityLabel: reference.title,
+      metadata: { status: reference.status, sections: reference.sections.length },
+      ip: clientIp(ctx.request),
+    });
+    return { reference };
+  }],
+
+  ['DELETE', '/api/admin/references/:id', 'references.delete', async (ctx) => {
+    const reference = deleteReference(ctx.params.id);
+    if (!reference) fail('NOT_FOUND', 'مرجع پیدا نشد');
+    logActivity({
+      admin: ctx.admin, action: 'reference.deleted', entityType: 'reference',
+      entityId: reference.id, entityLabel: reference.title, ip: clientIp(ctx.request),
+    });
+    return { deleted: reference.id };
+  }],
+
+  /* ── درسنامه جامع (لایهٔ داخل پنل) ──
+   *
+   * هر درس یک رکورد کامل است: مبحث‌ها + واحدها + متن و تست هر واحد. پس ویرایش
+   * یک PUT کامل می‌فرستد (اتمیک، مثل مراجع و میکرو). درس‌ها ثابت‌اند — مسیر
+   * ساخت/حذف ندارد؛ کنترل یعنی ویرایش محتوا و انتشار.
+   */
+
+  ['GET', '/api/admin/comprehensive', 'comprehensive.read', async (ctx) => listComprehensiveCourses({
+    search: ctx.query.get('search') ?? '',
+    status: ctx.query.get('status') ?? 'all',
+    page: ctx.query.get('page') ?? 1,
+    perPage: ctx.query.get('perPage') ?? 20,
+  })],
+
+  ['GET', '/api/admin/comprehensive/:id', 'comprehensive.read', async (ctx) => {
+    const course = getComprehensiveCourse(ctx.params.id);
+    if (!course) fail('NOT_FOUND', 'درسنامه پیدا نشد');
+    return { course };
+  }],
+
+  ['PUT', '/api/admin/comprehensive/:id', 'comprehensive.update', async (ctx) => {
+    const course = updateComprehensiveCourse(ctx.params.id, ctx.body, ctx.admin);
+    if (!course) fail('NOT_FOUND', 'درسنامه پیدا نشد');
+    logActivity({
+      admin: ctx.admin, action: 'comprehensive.updated', entityType: 'comprehensive-course',
+      entityId: course.id, entityLabel: course.title,
+      metadata: { status: course.status, modules: course.modules.length },
+      ip: clientIp(ctx.request),
+    });
+    return { course };
+  }],
+
   /* کتابخانهٔ فلش‌کارت تپش */
   ['GET', '/api/admin/flashcards', 'flashcards.read', async (ctx) => listFlashcardDecks({
     search: ctx.query.get('search') ?? '',
@@ -722,6 +823,38 @@ const ROUTES = [
       entityId: deck.id, entityLabel: deck.title, ip: clientIp(ctx.request),
     });
     return { deleted: deck.id };
+  }],
+
+  /* بانک تست علوم پایه */
+  ['GET', '/api/admin/test-bank', 'testbank.read', async (ctx) => listTestBankQuestions({
+    search: ctx.query.get('search') ?? '', subject: ctx.query.get('subject') ?? 'all',
+    track: ctx.query.get('track') ?? 'all', status: ctx.query.get('status') ?? 'all',
+    page: ctx.query.get('page') ?? 1, perPage: ctx.query.get('perPage') ?? 20,
+  })],
+  ['GET', '/api/admin/test-bank/:id', 'testbank.read', async (ctx) => {
+    const question = getTestBankQuestion(ctx.params.id);
+    if (!question) fail('NOT_FOUND', 'سؤال پیدا نشد');
+    return { question };
+  }],
+  ['POST', '/api/admin/test-bank', 'testbank.create', async (ctx) => {
+    if (ctx.body.status === 'published' && !hasPermission(ctx.admin, 'testbank.publish')) fail('FORBIDDEN', 'مجوز انتشار ندارید');
+    const question = createTestBankQuestion(ctx.body, ctx.admin);
+    logActivity({ admin: ctx.admin, action: 'test-bank.created', entityType: 'test-bank-question', entityId: question.id, entityLabel: question.stem.slice(0, 80) });
+    return { question };
+  }],
+  ['PUT', '/api/admin/test-bank/:id', 'testbank.update', async (ctx) => {
+    const previous = getTestBankQuestion(ctx.params.id);
+    if (!previous) fail('NOT_FOUND', 'سؤال پیدا نشد');
+    if (ctx.body.status === 'published' && previous.status !== 'published' && !hasPermission(ctx.admin, 'testbank.publish')) fail('FORBIDDEN', 'مجوز انتشار ندارید');
+    const question = updateTestBankQuestion(ctx.params.id, ctx.body, ctx.admin);
+    logActivity({ admin: ctx.admin, action: 'test-bank.updated', entityType: 'test-bank-question', entityId: question.id, entityLabel: question.stem.slice(0, 80), metadata: { status: question.status } });
+    return { question };
+  }],
+  ['DELETE', '/api/admin/test-bank/:id', 'testbank.delete', async (ctx) => {
+    const question = deleteTestBankQuestion(ctx.params.id);
+    if (!question) fail('NOT_FOUND', 'سؤال پیدا نشد');
+    logActivity({ admin: ctx.admin, action: 'test-bank.deleted', entityType: 'test-bank-question', entityId: question.id, entityLabel: question.stem.slice(0, 80) });
+    return { deleted: question.id };
   }],
 
   /* ── میکرو درسنامه ──
@@ -2065,6 +2198,15 @@ const PUBLIC_ROUTES = [
    * مصرفش کند. آنچه منتشر نشده اینجا نیست.
    */
   ['/api/public/micro/library', async () => ({ courses: publishedMicroCourses() })],
+  ['/api/public/references/library', async () => ({ references: publishedReferences() })],
+  /*
+   * درسنامه جامع — درس‌های منتشرشده برای لایهٔ یادگیری کاربران تپش.
+   * خروجی با قرارداد دادهٔ `ContentService` یکی است تا موتور یادگیری بدون
+   * تبدیل مصرفش کند. آنچه منتشر نشده اینجا نیست.
+   */
+  ['/api/public/comprehensive/library', async () => ({ courses: publishedComprehensiveCourses() })],
+  ['/api/public/test-bank/revision', async () => ({ revision: testBankRevision() })],
+  ['/api/public/test-bank/questions', async () => ({ revision: testBankRevision(), questions: publishedTestBankQuestions() })],
   ['/api/public/pages/:slug', async (ctx) => {
     const page = getPage(ctx.params.slug);
     if (!page) fail('NOT_FOUND', 'صفحه پیدا نشد');

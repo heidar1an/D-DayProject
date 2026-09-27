@@ -25,8 +25,6 @@ const sessionsFile = join(databaseDir, 'users.sessions.json');
 
 export const USER_SESSION_COOKIE = 'tapesh_user_session';
 export const USER_SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000; /* هفت روز با تمدید لغزنده */
-const RENEW_THRESHOLD_MS = USER_SESSION_TTL_MS / 2;
-
 let cache = null; /* {sessions: {token: record}} — نوشتن همیشه از طریق writeSessions */
 
 function ensureFile() {
@@ -63,17 +61,19 @@ function sweepExpired(data, now = Date.now()) {
   }
 }
 
-export function createUserSession(user, { ip = '', userAgent = '', anonymous = false } = {}) {
+export function createUserSession(user, { ip = '', userAgent = '', anonymous = false, ttlMs = USER_SESSION_TTL_MS } = {}) {
   const data = readSessions();
   sweepExpired(data);
 
   const token = randomBytes(32).toString('hex');
   const now = Date.now();
+  const lifetime = Math.min(365 * 24 * 60 * 60 * 1000, Math.max(60 * 60 * 1000, Number(ttlMs) || USER_SESSION_TTL_MS));
   data.sessions[token] = {
     userId: anonymous ? String(user.id) : user.id,
     anonymous: Boolean(anonymous),
     createdAt: now,
-    expiresAt: now + USER_SESSION_TTL_MS,
+    expiresAt: now + lifetime,
+    ttlMs: lifetime,
     lastSeenAt: now,
     ip: String(ip).slice(0, 64),
     userAgent: String(userAgent).slice(0, 256),
@@ -107,8 +107,9 @@ export function getUserSession(token) {
   }
 
   /* تمدید لغزنده — فقط وقتی بیش از نیمی از عمر گذشته تا نوشتن فایل کم شود */
-  if (record.expiresAt - now < RENEW_THRESHOLD_MS) {
-    record.expiresAt = now + USER_SESSION_TTL_MS;
+  const lifetime = record.ttlMs ?? USER_SESSION_TTL_MS;
+  if (record.expiresAt - now < lifetime / 2) {
+    record.expiresAt = now + lifetime;
     record.lastSeenAt = now;
     writeSessions(data);
   }

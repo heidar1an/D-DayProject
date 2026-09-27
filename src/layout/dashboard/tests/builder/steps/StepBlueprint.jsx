@@ -1,11 +1,10 @@
 /*
  * Step 4 — «انتخاب سؤال‌ها»: موتور انتخاب اینجا واقعاً اجرا می‌شود و Blueprint
- * (تفکیک + هشدارها) نمایش داده می‌شود. دکمهٔ «ترکیب دیگر» با seed تازه دوباره
- * می‌چیند — تولید تکرارپذیر (seed-based) برای آینده از همین مسیر می‌گذرد.
+ * (تفکیک + هشدارها) نمایش داده می‌شود.
  */
 import { Skeleton } from '../../bank/bankShared';
 import BlueprintCard from '../BlueprintCard';
-import { Icon, SectionCard, faNum } from '../builderShared';
+import { Icon } from '../builderShared';
 
 export default function StepBlueprint({ plan, planBusy, planError, onReroll, draft, catalog, subjects }) {
   return (
@@ -34,35 +33,6 @@ export default function StepBlueprint({ plan, planBusy, planError, onReroll, dra
       {!planBusy && !planError && plan && (
         <BlueprintCard plan={plan} subjects={subjects} config={draft} />
       )}
-
-      {!planBusy && plan && (
-        <SectionCard
-          icon="shuffle"
-          accent="#5b8cc7"
-          title="از این ترکیب راضی هستی؟"
-          hint="هر بار «ترکیب دیگر»، انتخاب تازه‌ای بدون تکرار از همان مخزن می‌چیند."
-        >
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={onReroll}
-              className="flex cursor-pointer items-center gap-2 rounded-xl bg-white/6 px-4 py-2.5 text-sm text-[var(--muted)] transition-colors hover:bg-white/12 hover:text-white"
-            >
-              <Icon name="dice" className="h-4 w-4 text-[var(--blue-ink)]" />
-              ترکیب دیگر
-            </button>
-            <p className="text-[11px] leading-5 text-[var(--faint)]">
-              {faQuestionsNote(plan)}
-            </p>
-          </div>
-        </SectionCard>
-      )}
     </div>
   );
-}
-
-function faQuestionsNote(plan) {
-  const count = plan?.questionIds?.length ?? 0;
-  if (!count) return 'هنوز سوئی انتخاب نشده است.';
-  return `${faNum(count)} سؤال واقعی از بانک برایت چیده شد؛ ترتیبشان در اجرا تصادفی می‌شود.`;
 }

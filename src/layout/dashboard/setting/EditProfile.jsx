@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { saveUserRecord } from '../../../services/userStorage';
+import { UNIVERSITIES } from '../../../services/league/mockData';
 import AvatarPicker from './avatar/AvatarPicker';
 import { avatarSrc } from './avatar/avatarOptions';
 
@@ -12,12 +13,41 @@ const selectClass = `${inputClass} cursor-pointer appearance-none pl-10`;
 const labelClass =
   'mb-2 block text-right text-sm text-[var(--copper-ink)] [font-family:\'Doran\',\'Vazir\',Tahoma,sans-serif]';
 
-const universityOptions = [
-  'دانشگاه علوم پزشکی تهران',
-  'دانشگاه علوم پزشکی ایران',
-  'دانشگاه علوم پزشکی شهید بهشتی',
-  'سایر دانشگاه‌ها',
-];
+/* فهرست کامل دانشگاه‌ها و دانشکده‌های علوم پزشکی کشور از منبع واحد (لیگ تپش) */
+const universityOptions = UNIVERSITIES.map(({ name }) => name);
+
+const normalizeSearch = (value) => value.trim().replace(/ي/g, 'ی').replace(/ك/g, 'ک').replace(/\s+/g, ' ');
+const toLatinDigits = (value) => String(value).replace(/[۰-۹]/g, (digit) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(digit));
+const toPersianDigits = (value) => String(value).replace(/\d/g, (digit) => '۰۱۲۳۴۵۶۷۸۹'[Number(digit)]);
+const persianCalendar = new Intl.DateTimeFormat('en-US-u-ca-persian', {
+  year: 'numeric', month: 'numeric', day: 'numeric',
+});
+const persianDateParts = (date) => Object.fromEntries(
+  persianCalendar.formatToParts(date)
+    .filter(({ type }) => ['year', 'month', 'day'].includes(type))
+    .map(({ type, value }) => [type, Number(value)]),
+);
+const currentPersianDate = persianDateParts(new Date());
+const monthNames = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
+
+function daysInPersianMonth(year, month) {
+  if (month <= 6) return 31;
+  if (month <= 11) return 30;
+  // روز پیش از نوروز بعدی، آخرین روز اسفند این سال است.
+  for (let day = 18; day <= 23; day += 1) {
+    const nextYearStart = new Date(year + 622, 2, day);
+    const parts = persianDateParts(nextYearStart);
+    if (parts.year === year + 1 && parts.month === 1 && parts.day === 1) {
+      return persianDateParts(new Date(year + 622, 2, day - 1)).day;
+    }
+  }
+  return 29;
+}
+
+function parseBirthDate(value) {
+  const match = toLatinDigits(value).match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
+  return match ? { year: Number(match[1]), month: Number(match[2]), day: Number(match[3]) } : null;
+}
 
 const termOptions = ['۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹', '۱۰', '۱۱', '۱۲', '۱۳', '۱۴'];
 
@@ -87,6 +117,13 @@ const GenderIcon = ({ className }) => (
   <SvgIcon className={className}>
     <circle cx="10.5" cy="13.5" r="5.5" />
     <path d="M14.5 9.5 20 4M15 4h5v5" />
+  </SvgIcon>
+);
+
+const FemaleGenderIcon = ({ className }) => (
+  <SvgIcon className={className}>
+    <circle cx="12" cy="9" r="5.5" />
+    <path d="M12 14.5V22M8.5 18.5h7" />
   </SvgIcon>
 );
 
@@ -167,13 +204,13 @@ function FieldIcon({ icon: Icon }) {
   );
 }
 
-function FormField({ id, label, icon, children }) {
+function FormField({ id, label, icon, children, onBlur }) {
   return (
     <div>
       <label className={labelClass} htmlFor={id}>
         {label}
       </label>
-      <div className="group relative">
+      <div className="group relative" onBlur={onBlur}>
         <FieldIcon icon={icon} />
         {children}
       </div>
@@ -223,14 +260,20 @@ export default function EditProfile({ userData, onUserDataChange, onLogout }) {
   const [form, setForm] = useState(initialForm);
   const [isSaved, setIsSaved] = useState(false);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const [universityQuery, setUniversityQuery] = useState(initialForm.university);
+  const [isUniversityOpen, setIsUniversityOpen] = useState(false);
+  const [universityError, setUniversityError] = useState(false);
+  const universityInputRef = useRef(null);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [birthParts, setBirthParts] = useState(
+    parseBirthDate(initialForm.birthDate) ?? { year: currentPersianDate.year - 20, month: 1, day: 1 },
+  );
+  const matchingUniversities = universityOptions.filter((name) =>
+    normalizeSearch(name).includes(normalizeSearch(universityQuery)),
+  );
 
   const handleChange = (field) => (event) => {
     setForm((current) => ({ ...current, [field]: event.target.value }));
-    setIsSaved(false);
-  };
-
-  const handleCancel = () => {
-    setForm(initialForm);
     setIsSaved(false);
   };
 
@@ -244,6 +287,12 @@ export default function EditProfile({ userData, onUserDataChange, onLogout }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    if (!universityOptions.includes(form.university) || universityQuery !== form.university) {
+      setUniversityError(true);
+      universityInputRef.current?.focus();
+      return;
+    }
+
     const { phone, ...profileChanges } = form;
     const updatedUser = await saveUserRecord({
       phone: phone.trim() || userData?.phone,
@@ -252,6 +301,30 @@ export default function EditProfile({ userData, onUserDataChange, onLogout }) {
 
     onUserDataChange?.(updatedUser);
     setIsSaved(true);
+  };
+
+  const openCalendar = () => {
+    setBirthParts(parseBirthDate(form.birthDate) ?? {
+      year: currentPersianDate.year - 20, month: 1, day: 1,
+    });
+    setIsCalendarOpen((open) => !open);
+  };
+
+  const updateBirthParts = (key, value) => {
+    setBirthParts((current) => {
+      const next = { ...current, [key]: Number(value) };
+      return { ...next, day: Math.min(next.day, daysInPersianMonth(next.year, next.month)) };
+    });
+  };
+
+  const saveBirthDate = () => {
+    const { year, month, day } = birthParts;
+    setForm((current) => ({
+      ...current,
+      birthDate: toPersianDigits(`${year}/${String(month).padStart(2, '0')}/${String(day).padStart(2, '0')}`),
+    }));
+    setIsSaved(false);
+    setIsCalendarOpen(false);
   };
 
   return (
@@ -389,26 +462,75 @@ export default function EditProfile({ userData, onUserDataChange, onLogout }) {
                   id="edit-profile-university"
                   label="دانشگاه"
                   icon={BuildingIcon}
+                  onBlur={(event) => {
+                    if (!event.currentTarget.contains(event.relatedTarget)) setIsUniversityOpen(false);
+                  }}
                 >
                   <>
-                    <select
+                    <input
+                      ref={universityInputRef}
                       id="edit-profile-university"
-                      className={selectClass}
-                      value={form.university}
-                      onChange={handleChange('university')}
-                    >
-                      <option value="" disabled>
-                        انتخاب دانشگاه
-                      </option>
-                      {universityOptions.map((university) => (
-                        <option key={university} value={university}>
-                          {university}
-                        </option>
-                      ))}
-                    </select>
-                    <SelectChevron />
+                      type="text"
+                      className={inputClass}
+                      value={universityQuery}
+                      placeholder="نام دانشگاه را جست‌وجو کنید"
+                      autoComplete="off"
+                      role="combobox"
+                      aria-autocomplete="list"
+                      aria-expanded={isUniversityOpen}
+                      aria-controls="edit-profile-university-options"
+                      aria-invalid={universityError}
+                      onFocus={() => setIsUniversityOpen(true)}
+                      onChange={(event) => {
+                        setUniversityQuery(event.target.value);
+                        setForm((current) => ({ ...current, university: '' }));
+                        setUniversityError(false);
+                        setIsUniversityOpen(true);
+                        setIsSaved(false);
+                      }}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Escape') setIsUniversityOpen(false);
+                        if (event.key === 'ArrowDown' && isUniversityOpen) {
+                          event.preventDefault();
+                          event.currentTarget.parentElement.querySelector('[role="option"]')?.focus();
+                        }
+                      }}
+                    />
+                    {isUniversityOpen && (
+                      <div
+                        id="edit-profile-university-options"
+                        role="listbox"
+                        className="absolute inset-x-0 top-full z-30 mt-2 max-h-52 overflow-y-auto rounded-2xl border border-white/15 bg-[var(--surface-soft)] p-1 shadow-xl"
+                      >
+                        {matchingUniversities.length ? matchingUniversities.map((university) => (
+                          <button
+                            key={university}
+                            type="button"
+                            role="option"
+                            aria-selected={form.university === university}
+                            className="block w-full cursor-pointer rounded-xl px-3 py-2 text-right text-sm text-white hover:bg-white/10 focus:bg-white/10 focus:outline-none"
+                            onClick={() => {
+                              setUniversityQuery(university);
+                              setForm((current) => ({ ...current, university }));
+                              setUniversityError(false);
+                              setIsUniversityOpen(false);
+                              setIsSaved(false);
+                            }}
+                          >
+                            {university}
+                          </button>
+                        )) : (
+                          <p className="px-3 py-2 text-sm text-[var(--faint)]">دانشگاهی پیدا نشد</p>
+                        )}
+                      </div>
+                    )}
                   </>
                 </FormField>
+                {universityError && (
+                  <p className="text-sm text-[var(--red-ink)] sm:col-span-2" role="alert">
+                    یک دانشگاه را از فهرست انتخاب کنید.
+                  </p>
+                )}
 
                 <FormField id="edit-profile-term" label="ترم" icon={LayersIcon}>
                   <>
@@ -459,7 +581,7 @@ export default function EditProfile({ userData, onUserDataChange, onLogout }) {
               <SectionTitle icon={InfoIcon} title="اطلاعات تکمیلی" />
 
               <div className="mt-6 grid gap-5 sm:grid-cols-2 md:gap-6">
-                <FormField id="edit-profile-gender" label="جنسیت" icon={GenderIcon}>
+                <FormField id="edit-profile-gender" label="جنسیت" icon={form.gender === 'زن' ? FemaleGenderIcon : GenderIcon}>
                   <>
                     <select
                       id="edit-profile-gender"
@@ -480,21 +602,62 @@ export default function EditProfile({ userData, onUserDataChange, onLogout }) {
                   </>
                 </FormField>
 
-                <FormField
-                  id="edit-profile-birth-date"
-                  label="تاریخ تولد"
-                  icon={CalendarIcon}
-                >
-                  <input
-                    id="edit-profile-birth-date"
-                    type="text"
-                    inputMode="numeric"
-                    className={inputClass}
-                    value={form.birthDate}
-                    onChange={handleChange('birthDate')}
-                    placeholder="مثلا: ۱۳۸۲/۰۴/۱۵"
-                  />
-                </FormField>
+                <div>
+                  <label className={labelClass} htmlFor="edit-profile-birth-date">تاریخ تولد</label>
+                  <div
+                    className="relative"
+                    onBlur={(event) => {
+                      if (!event.currentTarget.contains(event.relatedTarget)) setIsCalendarOpen(false);
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Escape') setIsCalendarOpen(false);
+                    }}
+                  >
+                    <input
+                      id="edit-profile-birth-date"
+                      type="text"
+                      className={inputClass}
+                      value={form.birthDate}
+                      placeholder="مثلا: ۱۳۸۲/۰۴/۱۵"
+                      readOnly
+                      onClick={openCalendar}
+                    />
+                    <button
+                      type="button"
+                      aria-label="انتخاب تاریخ تولد"
+                      aria-expanded={isCalendarOpen}
+                      onClick={openCalendar}
+                      className="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-lg text-[var(--gold-ink)] hover:bg-white/10"
+                    >
+                      <CalendarIcon />
+                    </button>
+                    {isCalendarOpen && (
+                      <div className="absolute right-0 top-full z-30 mt-2 w-min min-w-[280px] max-w-[90vw] rounded-2xl border border-white/15 bg-[var(--surface-soft)] p-4 shadow-xl">
+                        <p className="mb-3 text-sm text-[var(--copper-ink)]">تاریخ تولد (شمسی)</p>
+                        <div className="flex gap-2">
+                          <select aria-label="سال تولد" value={birthParts.year} onChange={(event) => updateBirthParts('year', event.target.value)} className="min-w-0 flex-1 rounded-lg bg-[var(--background)] p-2 text-white">
+                            {Array.from({ length: 121 }, (_, index) => currentPersianDate.year - index).map((year) => (
+                              <option key={year} value={year}>{toPersianDigits(year)}</option>
+                            ))}
+                          </select>
+                          <select aria-label="ماه تولد" value={birthParts.month} onChange={(event) => updateBirthParts('month', event.target.value)} className="min-w-0 flex-1 rounded-lg bg-[var(--background)] p-2 text-white">
+                            {monthNames.map((month, index) => (
+                              <option key={month} value={index + 1}>{month}</option>
+                            ))}
+                          </select>
+                          <select aria-label="روز تولد" value={birthParts.day} onChange={(event) => updateBirthParts('day', event.target.value)} className="min-w-0 w-14 rounded-lg bg-[var(--background)] p-2 text-white">
+                            {Array.from({ length: daysInPersianMonth(birthParts.year, birthParts.month) }, (_, index) => index + 1).map((day) => (
+                              <option key={day} value={day}>{toPersianDigits(day)}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <button type="button" onClick={saveBirthDate} className="mt-3 w-full cursor-pointer rounded-xl bg-[var(--copper)] px-3 py-2 text-white">
+                          ثبت تاریخ
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </section>
           </div>
@@ -506,13 +669,6 @@ export default function EditProfile({ userData, onUserDataChange, onLogout }) {
             className="cursor-pointer rounded-full bg-[var(--copper)] px-10 py-3.5 text-white transition-colors duration-200 hover:bg-[var(--copper)] md:text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]"
           >
             ذخیره تغییرات
-          </button>
-          <button
-            type="button"
-            onClick={handleCancel}
-            className="cursor-pointer rounded-full border border-white/15 px-10 py-3.5 text-[var(--muted)] transition-colors duration-200 hover:border-[#b99a86]/60 hover:text-white md:text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]"
-          >
-            انصراف
           </button>
           {isSaved && (
             <span className="flex items-center gap-1.5 text-sm text-[var(--green-ink)]">

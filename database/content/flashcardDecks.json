@@ -1,59 +1,543 @@
 [
   {
+    "id": "fcd-28aa9c96",
+    "title": "اناتومی تصویری - گوش",
+    "description": "",
+    "shortTitle": "بخش گوش",
+    "subjectId": "anatomy",
+    "level": "علوم پایه",
+    "cover": "#e0b45c",
+    "anatomy": true,
+    "previewImage": "",
     "status": "published",
-    "createdAt": "2026-09-23T08:30:33.267Z",
-    "updatedAt": "2026-09-23T19:22:58.256Z",
+    "origin": "panel",
+    "cards": [
+      {
+        "id": "fcc-5737e546",
+        "type": "image-locate",
+        "front": "کدام گوش؟",
+        "back": "گوش",
+        "hint": "",
+        "tags": [],
+        "subjectId": "general",
+        "topicId": "",
+        "explanation": "",
+        "status": "active",
+        "image": {
+          "url": "/uploads/mufb9t4s-e1a8fca2038a.png",
+          "alt": "",
+          "points": [
+            {
+              "x": 95,
+              "y": 50
+            }
+          ]
+        }
+      }
+    ],
+    "createdAt": "2026-09-24T09:10:43.549Z",
+    "updatedAt": "2026-09-24T09:10:43.549Z",
+    "createdBy": "adm-5e246f08",
+    "updatedBy": "adm-5e246f08"
+  },
+  {
+    "id": "deck-physio-heart",
+    "title": "فیزیولوژی قلب و گردش خون",
+    "description": "چرخه قلبی، الکتروفیزیولوژی، تنظیم برون‌ده قلبی و فشار خون — با تمرکز بر High Yield های آزمون.",
+    "shortTitle": "",
+    "subjectId": "physiology",
+    "level": "علوم پایه",
+    "cover": "#e26d6d",
+    "anatomy": false,
+    "previewImage": "",
+    "status": "published",
+    "origin": "tapesh",
+    "cards": [
+      {
+        "id": "c-ph-001",
+        "type": "basic",
+        "front": "مهم‌ترین تنظیم‌کننده ضربان قلب در حالت استراحت چیست؟",
+        "back": "فعالیت پاراسمپاتیک از طریق عصب واگ (Vagus) — با آزادسازی استیل‌کولین روی گره‌های SA و AV.",
+        "hint": "",
+        "tags": [
+          "قلب",
+          "فیزیولوژی",
+          "HighYield"
+        ],
+        "subjectId": "physiology",
+        "topicId": "cardiac-electrophysiology",
+        "explanation": "",
+        "status": "active",
+        "source": {
+          "sourceType": "lesson",
+          "sourceId": "lesson-physio-cardiac-3",
+          "title": "درسنامه فیزیولوژی قلب تپش — بخش ۳",
+          "url": null
+        },
+        "language": "fa"
+      },
+      {
+        "id": "c-ph-002",
+        "type": "cloze",
+        "front": "قلب توسط {{c1::گره سینوسی (SA)}} تحریک می‌شود و_impuls از طریق {{c2::گره دهلیزی-بطنی (AV)}} به بطن‌ها می‌رسد.",
+        "back": "گره سینوسی پیس‌میکر اصلی است (۶۰–۱۰۰ ضربان)؛ تأخیر در گره AV اجازه پر شدن بطن‌ها را می‌دهد.",
+        "hint": "",
+        "tags": [
+          "قلب",
+          "الکتروفیزیولوژی"
+        ],
+        "subjectId": "physiology",
+        "topicId": "cardiac-electrophysiology",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      },
+      {
+        "id": "c-ph-003",
+        "type": "mcq",
+        "front": "در فاز صفر پتانسیل عمل سلول عضلانی قلبی، کدام جریان یونی غالب است؟",
+        "back": "جریان ورودی Ca²⁺ از کانال‌های نوع L — برخلاف نورون که جریان Na⁺ دارد.",
+        "hint": "",
+        "tags": [
+          "قلب",
+          "پتانسیل عمل"
+        ],
+        "subjectId": "physiology",
+        "topicId": "cardiac-electrophysiology",
+        "explanation": "سلول‌های عضلانی قلبی نقطه اوج (نوسازی) با جریان Ca²⁺ نوع L ایجاد می‌کنند؛ Na⁺ فقط در عضلات اسکلتی و نورون نقش فاز صفر دارد.",
+        "status": "active",
+        "language": "fa",
+        "options": [
+          {
+            "text": "ورود Na⁺ سریع",
+            "correct": false
+          },
+          {
+            "text": "ورود Ca²⁺ از کانال نوع L",
+            "correct": true
+          },
+          {
+            "text": "خروج K⁺",
+            "correct": false
+          },
+          {
+            "text": "ورود Cl⁻",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "id": "c-ph-004",
+        "type": "basic",
+        "front": "مکانیسم فرانک-استارلینگ را در یک جمله توضیح بده.",
+        "back": "با افزایش حجم پایان دیاستولی (پیش‌بار)، طول سارکومر به سمت طول بهینه می‌رود و نیروی انقباض و برون‌ده قلبی افزایش می‌یابد.",
+        "hint": "رابطه پیش‌بار و بازده انقباض",
+        "tags": [
+          "قلب",
+          "HighYield"
+        ],
+        "subjectId": "physiology",
+        "topicId": "cardiac-output",
+        "explanation": "",
+        "status": "active",
+        "source": {
+          "sourceType": "book",
+          "sourceId": "guyton-ch9",
+          "title": "کتاب Guyton — فصل ۹",
+          "url": null
+        },
+        "language": "fa"
+      },
+      {
+        "id": "c-ph-005",
+        "type": "cloze",
+        "front": "برون‌ده قلبی حاصل‌ضرب {{c1::حجم ضربه‌ای}} در {{c2::ضربان قلب}} است و به‌طور نرمال حدود {{c3::۵ لیتر در دقیقه}} برآورد می‌شود.",
+        "back": "CO = SV × HR؛ در بزرگسال ۷۰ ضربان × ۷۰ میلی‌لیتر ≈ ۵ L/min.",
+        "hint": "",
+        "tags": [
+          "قلب"
+        ],
+        "subjectId": "physiology",
+        "topicId": "cardiac-output",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      },
+      {
+        "id": "c-ph-006",
+        "type": "basic",
+        "front": "تفاوت صدای قلبی S1 و S2 چیست و از چه رویدادی ناشی می‌شود؟",
+        "back": "S1 (بلندتر، اپکس) از بسته‌شدن دریچه‌های میترال و تریکاسپید در شروع سیستول؛ S2 از بسته‌شدن دریچه‌های آئورت و پولمونر در پایان سیستول.",
+        "hint": "",
+        "tags": [
+          "قلب",
+          "صداها"
+        ],
+        "subjectId": "physiology",
+        "topicId": "cardiac-cycle",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      },
+      {
+        "id": "c-ph-007",
+        "type": "basic",
+        "front": "در موج ECG، معرف هر جزء چیست: P، QRS، T؟",
+        "back": "P: دپلاریزاسیون دهلیز — QRS: دپلاریزاسیون بطن — T: رپلاریزاسیون بطن (رپلاریزاسیون دهلیز در QRS پنهان است).",
+        "hint": "",
+        "tags": [
+          "قلب",
+          "ECG",
+          "HighYield"
+        ],
+        "subjectId": "physiology",
+        "topicId": "cardiac-electrophysiology",
+        "explanation": "",
+        "status": "active",
+        "source": {
+          "sourceType": "lesson",
+          "sourceId": "lesson-physio-ecg-1",
+          "title": "درسنامه ECG تپش — بخش ۱",
+          "url": null
+        },
+        "language": "fa"
+      },
+      {
+        "id": "c-ph-008",
+        "type": "basic",
+        "front": "چگونه فشار خون شریانی میان‌مدت تنظیم می‌شود؟ (سیستم اصلی)",
+        "back": "سیستم رنین-آنژیوتانسین-آلدوسترون (RAAS): آنژیوتانسین II هم وازوکانستریکشن ایجاد می‌کند هم آلدوسترون و احتباس آب و سدیم را افزایش می‌دهد.",
+        "hint": "",
+        "tags": [
+          "قلب",
+          "فشار خون",
+          "HighYield"
+        ],
+        "subjectId": "physiology",
+        "topicId": "blood-pressure",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      },
+      {
+        "id": "c-ph-009",
+        "type": "mcq",
+        "front": "کدام مورد افزایش فشار داخل قفسه سینه را به کاهش برون‌ده قلبی می‌رساند؟",
+        "back": "افزایش پیش‌بار ریوی با کاهش برگشت وریدی (Preload) به قلب راست همراه است؛ در Valsalva برگشت وریدی کاهش می‌یابد و برون‌ده افت می‌کند.",
+        "hint": "",
+        "tags": [
+          "قلب",
+          "کلینیکال"
+        ],
+        "subjectId": "physiology",
+        "topicId": "cardiac-output",
+        "explanation": "در مانور Valsalva فشار داخل قفسه سینه بالا می‌رود، برگشت وریدی کم می‌شود و در نتیجه Preload و برون‌ده قلبی افت می‌کند.",
+        "status": "active",
+        "language": "fa",
+        "options": [
+          {
+            "text": "Valsalva (فاز نگه‌داشتن)",
+            "correct": true
+          },
+          {
+            "text": "بلند شدن از حالت خوابیده",
+            "correct": false
+          },
+          {
+            "text": "انقباض عضلات پا",
+            "correct": false
+          },
+          {
+            "text": "دم عمیق عادی",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "id": "c-ph-010",
+        "type": "basic",
+        "front": "نقش گیرنده‌های کشش (Baroreceptors) در تنظیم فشار لحظه‌ای چیست؟",
+        "back": "در کمان آئورت و سینوس کاروتید قرار دارند؛ افزایش فشار → سیگنال بیشتر از طریق عصب گلاسوفارنژ و واگ → مهار سمپاتیک و فعال‌سازی پاراسمپاتیک → کاهش ضربان و گشاد شدن عروق.",
+        "hint": "",
+        "tags": [
+          "قلب",
+          "فشار خون"
+        ],
+        "subjectId": "physiology",
+        "topicId": "blood-pressure",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      },
+      {
+        "id": "c-ph-011",
+        "type": "cloze",
+        "front": "حجم ضربه‌ای به سه عامل بستگی دارد: {{c1::پیش‌بار}}، {{c2::قراردادپذیری}} و {{c3::پس‌بار}}.",
+        "back": "Preload (حجم پایان دیاستول)، Contractility و Afterload (مقاومت آئورت) — سه ضلع اصلی تعیین SV.",
+        "hint": "",
+        "tags": [
+          "قلب"
+        ],
+        "subjectId": "physiology",
+        "topicId": "cardiac-output",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      },
+      {
+        "id": "c-ph-012",
+        "type": "basic",
+        "front": "بازگشت وریدی (Venous Return) چگونه به برون‌ده قلبی متصل است؟",
+        "back": "در حالت پایدار، بازگشت وریدی = برون‌ده قلبی؛ هر عاملی که برگشت را کم کند (خونریزی، ایستادن طولانی) برون‌ده را کم می‌کند.",
+        "hint": "",
+        "tags": [
+          "قلب"
+        ],
+        "subjectId": "physiology",
+        "topicId": "cardiac-output",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      }
+    ],
+    "createdAt": "2026-09-24T08:45:20.596Z",
+    "updatedAt": "2026-09-05T10:00:00.000Z",
     "createdBy": "seed",
-    "updatedBy": "adm-5e246f08",
-    "id": "fcd-visual-heart",
-    "title": "آناتومی تصویری — قلب (پنل)",
-    "shortTitle": "قلب آزمایشی",
-    "description": "نمونهٔ مجموعهٔ تصویری ساخته‌شده از پنل مدیریت؛ ساختارهای قلب روی تصویر.",
+    "updatedBy": "seed"
+  },
+  {
+    "id": "deck-anatomy-neuro",
+    "title": "آناتومی سیستم عصبی",
+    "description": "ساختار مغز، ساقه مغز، راه‌های طولی و اعصاب مغزی به زبان ساده.",
+    "shortTitle": "",
     "subjectId": "anatomy",
     "level": "علوم پایه",
     "cover": "#937fcd",
-    "anatomy": true,
-    "previewImage": "/anatomy/heart.svg",
+    "anatomy": false,
+    "previewImage": "",
+    "status": "published",
+    "origin": "tapesh",
     "cards": [
       {
-        "id": "fcc-vh-1",
+        "id": "c-an-001",
+        "type": "basic",
+        "front": "اجزای ساقه مغز (Brainstem) از بالا به پایین کدام‌اند؟",
+        "back": "مید‌برین (Midbrain) → پونس (Pons) → مدولا (Medulla Oblongata).",
+        "hint": "",
+        "tags": [
+          "آناتومی",
+          "ساقه مغز",
+          "HighYield"
+        ],
+        "subjectId": "anatomy",
+        "topicId": "brainstem",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      },
+      {
+        "id": "c-an-002",
+        "type": "cloze",
+        "front": "مخچه از طریق سه پدونکول به ساقه مغز وصل می‌شود: پدونکول {{c1::زیرین}} به مدولا، {{c2::میانی}} به پونس و {{c3::زبرین}} به مید‌برین.",
+        "back": "Inferior → Medulla، Middle → Pons، Superior → Midbrain؛ مسیر خروجی مخچه از پدونکول زبرین است.",
+        "hint": "",
+        "tags": [
+          "آناتومی",
+          "مخچه"
+        ],
+        "subjectId": "anatomy",
+        "topicId": "cerebellum",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      },
+      {
+        "id": "c-an-003",
+        "type": "basic",
+        "front": "کدام عصب مغزی از پونس خارج می‌شود و نقش حرکتی چشم دارد؟",
+        "back": "عصب Abducens (CN VI) — مسئول حرکت جانبی چشم با فعال‌سازی عضله راست جانبی (Lateral Rectus).",
+        "hint": "",
+        "tags": [
+          "آناتومی",
+          "اعصاب مغزی"
+        ],
+        "subjectId": "anatomy",
+        "topicId": "cranial-nerves",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      },
+      {
+        "id": "c-an-004",
+        "type": "basic",
+        "front": "نقص در شریان مغزی میانی (MCA) چه علائمی ایجاد می‌کند؟",
+        "back": "فلج بازو و صورت (برخلاف PCA که پا را درگیر می‌کند)، اختلاف تکلم در سمت چپ و نگاه به سمت ضایعه.",
+        "hint": "",
+        "tags": [
+          "آناتومی",
+          "عروق مغز",
+          "HighYield"
+        ],
+        "subjectId": "anatomy",
+        "topicId": "cerebral-vessels",
+        "explanation": "",
+        "status": "active",
+        "source": {
+          "sourceType": "question",
+          "sourceId": "q-bank-1421",
+          "title": "بانک سؤال بین‌الملل — سؤال ۱۴۲۱",
+          "url": null
+        },
+        "language": "fa"
+      },
+      {
+        "id": "c-an-005",
+        "type": "cloze",
+        "front": "بطن‌های مغزی شامل دو بطن {{c1::جانبی}}، بطن {{c2::سوم}} در تالاموس و بطن {{c3::چهارم}} بین پونس و مخچه هستند.",
+        "back": "CSF از شبکه‌های کروئید بطن‌های جانبی تولید و از سوراخ‌های مگندی و لوشکا در بطن چهارم به فضای ساب‌آراکنوئید می‌ریزد.",
+        "hint": "",
+        "tags": [
+          "آناتومی",
+          "CSF"
+        ],
+        "subjectId": "anatomy",
+        "topicId": "ventricles",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      },
+      {
+        "id": "c-an-006",
+        "type": "basic",
+        "front": "آسیب عصب Hypoglossal (CN XII) چه علامتی می‌دهد؟",
+        "back": "انحراف زبان به سمت ضایعه هنگام برون‌روی؛ عضله گنیوگلوسوس سمت سالم زبان را به سمت نیمه فلج می‌راند.",
+        "hint": "",
+        "tags": [
+          "آناتومی",
+          "اعصاب مغزی"
+        ],
+        "subjectId": "anatomy",
+        "topicId": "cranial-nerves",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      }
+    ],
+    "createdAt": "2026-09-24T08:45:20.596Z",
+    "updatedAt": "2026-08-28T10:00:00.000Z",
+    "createdBy": "seed",
+    "updatedBy": "seed"
+  },
+  {
+    "id": "deck-anatomy-images-heart",
+    "title": "آناتومی تصویری — قلب",
+    "description": "روی نقشهٔ قلب، نقطهٔ مشخص‌شده را نام ببر؛ مرور موقعیت ساختارها با تصویر واقعی می‌شود.",
+    "shortTitle": "بخش قلب",
+    "subjectId": "anatomy",
+    "level": "علوم پایه",
+    "cover": "#e26d6d",
+    "anatomy": true,
+    "previewImage": "/anatomy/heart.svg",
+    "status": "published",
+    "origin": "tapesh",
+    "cards": [
+      {
+        "id": "c-ai-001",
+        "type": "image-locate",
+        "front": "ساختار مشخص‌شده با نقطهٔ سرخ روی تصویر قلب کدام است؟",
+        "back": "قوس آئورت — خروجی بطن چپ و آغاز شریان‌های بزرگ سیستمیک.",
+        "hint": "",
+        "tags": [
+          "آناتومی",
+          "تصویری",
+          "قلب"
+        ],
+        "subjectId": "anatomy",
+        "topicId": "heart-gross",
+        "explanation": "",
+        "status": "active",
+        "language": "fa",
+        "image": {
+          "url": "/anatomy/heart.svg",
+          "alt": "نمای قدامی قلب",
+          "points": [
+            {
+              "x": 58,
+              "y": 14
+            }
+          ]
+        }
+      },
+      {
+        "id": "c-ai-002",
+        "type": "image-locate",
+        "front": "ساختار مشخص‌شده با نقطهٔ سرخ روی تصویر قلب کدام است؟",
+        "back": "تنه شریان ریوی — خون ضربه‌ایِ بطن راست را به ریه‌ها می‌برد.",
+        "hint": "",
+        "tags": [
+          "آناتومی",
+          "تصویری",
+          "قلب"
+        ],
+        "subjectId": "anatomy",
+        "topicId": "heart-gross",
+        "explanation": "",
+        "status": "active",
+        "language": "fa",
+        "image": {
+          "url": "/anatomy/heart.svg",
+          "alt": "نمای قدامی قلب",
+          "points": [
+            {
+              "x": 43,
+              "y": 16
+            }
+          ]
+        }
+      },
+      {
+        "id": "c-ai-003",
         "type": "image-locate",
         "front": "ساختار مشخص‌شده با نقطهٔ سرخ روی تصویر قلب کدام است؟",
         "back": "دهلیز راست — گیرندهٔ خون وریدی اجوف فوقانی و تحتانی.",
         "hint": "",
         "tags": [
           "آناتومی",
-          "تصویری"
+          "تصویری",
+          "قلب"
         ],
         "subjectId": "anatomy",
-        "topicId": "",
+        "topicId": "heart-gross",
         "explanation": "",
         "status": "active",
+        "language": "fa",
         "image": {
           "url": "/anatomy/heart.svg",
           "alt": "نمای قدامی قلب",
           "points": [
             {
               "x": 33,
-              "y": 50
+              "y": 39
             }
           ]
         }
       },
       {
-        "id": "fcc-vh-2",
+        "id": "c-ai-004",
         "type": "image-locate",
         "front": "ساختار مشخص‌شده با نقطهٔ سرخ روی تصویر قلب کدام است؟",
         "back": "بطن چپ — پمپ اصلی گردش سیستمیک با جدارهٔ ضخیم‌تر.",
         "hint": "",
         "tags": [
           "آناتومی",
-          "تصویری"
+          "تصویری",
+          "قلب"
         ],
         "subjectId": "anatomy",
-        "topicId": "",
+        "topicId": "heart-gross",
         "explanation": "",
         "status": "active",
+        "language": "fa",
         "image": {
           "url": "/anatomy/heart.svg",
           "alt": "نمای قدامی قلب",
@@ -66,10 +550,10 @@
         }
       },
       {
-        "id": "fcc-a6e7b3c8",
+        "id": "fcc-3cddde7b",
         "type": "image-locate",
-        "front": "سوال یک",
-        "back": "یک",
+        "front": "کارت؟",
+        "back": "۱- یک\n۲-  دو\n۳- سه",
         "hint": "",
         "tags": [],
         "subjectId": "general",
@@ -77,69 +561,943 @@
         "explanation": "",
         "status": "active",
         "image": {
-          "url": "",
+          "url": "/uploads/mufb9t4s-e1a8fca2038a.png",
           "alt": "",
-          "points": []
+          "points": [
+            {
+              "x": 60,
+              "y": 36
+            },
+            {
+              "x": 38,
+              "y": 73
+            },
+            {
+              "x": 74,
+              "y": 80
+            }
+          ]
+        }
+      }
+    ],
+    "createdAt": "2026-09-24T08:45:20.596Z",
+    "updatedAt": "2026-09-24T10:18:53.880Z",
+    "createdBy": "seed",
+    "updatedBy": "adm-5e246f08"
+  },
+  {
+    "id": "deck-anatomy-images-brain",
+    "title": "آناتومی تصویری — مغز",
+    "description": "قشر مخ، مخچه و ساقه مغز را روی تصویر پیدا کن و نام ببر.",
+    "shortTitle": "بخش مغز",
+    "subjectId": "anatomy",
+    "level": "علوم پایه",
+    "cover": "#937fcd",
+    "anatomy": true,
+    "previewImage": "/anatomy/brain.svg",
+    "status": "published",
+    "origin": "tapesh",
+    "cards": [
+      {
+        "id": "c-ni-001",
+        "type": "image-locate",
+        "front": "ساختار مشخص‌شده با نقطهٔ سرخ روی تصویر مغز کدام است؟",
+        "back": "مخ (نیمکرهٔ مغزی) — مرکز پردازش حسی-حرکتی و شناختی.",
+        "hint": "",
+        "tags": [
+          "آناتومی",
+          "تصویری",
+          "مغز"
+        ],
+        "subjectId": "anatomy",
+        "topicId": "brain-gross",
+        "explanation": "",
+        "status": "active",
+        "language": "fa",
+        "image": {
+          "url": "/anatomy/brain.svg",
+          "alt": "نمای جانبی مغز",
+          "points": [
+            {
+              "x": 40,
+              "y": 28
+            }
+          ]
         }
       },
       {
-        "id": "fcc-7910eeb8",
+        "id": "c-ni-002",
         "type": "image-locate",
-        "front": "سوال دو",
-        "back": "دو",
+        "front": "ساختار مشخص‌شده با نقطهٔ سرخ روی تصویر مغز کدام است؟",
+        "back": "مخچه — هماهنگی حرکت، تعادل و تون عضلانی.",
         "hint": "",
-        "tags": [],
-        "subjectId": "general",
-        "topicId": "",
+        "tags": [
+          "آناتومی",
+          "تصویری",
+          "مخچه"
+        ],
+        "subjectId": "anatomy",
+        "topicId": "brain-gross",
         "explanation": "",
         "status": "active",
+        "language": "fa",
         "image": {
-          "url": "",
-          "alt": "",
-          "points": []
+          "url": "/anatomy/brain.svg",
+          "alt": "نمای جانبی مغز",
+          "points": [
+            {
+              "x": 67,
+              "y": 62
+            }
+          ]
+        }
+      },
+      {
+        "id": "c-ni-003",
+        "type": "image-locate",
+        "front": "ساختار مشخص‌شده با نقطهٔ سرخ روی تصویر مغز کدام است؟",
+        "back": "ساقه مغز — مید‌برین، پونس و مدولا؛ راه عبور راه‌های طولی و مرکزهای حیاتی.",
+        "hint": "",
+        "tags": [
+          "آناتومی",
+          "تصویری",
+          "ساقه مغز"
+        ],
+        "subjectId": "anatomy",
+        "topicId": "brain-gross",
+        "explanation": "",
+        "status": "active",
+        "language": "fa",
+        "image": {
+          "url": "/anatomy/brain.svg",
+          "alt": "نمای جانبی مغز",
+          "points": [
+            {
+              "x": 48,
+              "y": 68
+            }
+          ]
         }
       }
-    ]
+    ],
+    "createdAt": "2026-09-24T08:45:20.596Z",
+    "updatedAt": "2026-09-16T10:00:00.000Z",
+    "createdBy": "seed",
+    "updatedBy": "seed"
   },
   {
+    "id": "deck-pharm-basic",
+    "title": "داروشناسی پایه",
+    "description": "فارماکوکینتیک، اتورسپشن و مهم‌ترین داروهای سیستم قلبی-عروقی و عصبی.",
+    "shortTitle": "",
+    "subjectId": "pharmacology",
+    "level": "علوم پایه",
+    "cover": "#77b787",
+    "anatomy": false,
+    "previewImage": "",
     "status": "published",
-    "createdAt": "2026-09-23T08:30:33.267Z",
-    "updatedAt": "2026-09-23T08:30:33.267Z",
+    "origin": "tapesh",
+    "cards": [
+      {
+        "id": "c-fa-001",
+        "type": "basic",
+        "front": "چهار فرایند اصلی فارماکوکینتیک کدام‌اند؟",
+        "back": "Absorption (جذب)، Distribution (توزیع)، Metabolism (متابولیسم) و Excretion (دفع) — ADME.",
+        "hint": "",
+        "tags": [
+          "داروشناسی",
+          "فارماکوکینتیک"
+        ],
+        "subjectId": "pharmacology",
+        "topicId": "pharmacokinetics",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      },
+      {
+        "id": "c-fa-002",
+        "type": "cloze",
+        "front": "داروهای اول عبور از متابولیسم کبدی با اثر کاهش‌یافته، در اصطلاح اثر {{c1::First-pass}} دارند؛ نمونه بارز آن {{c2::نیتروگلیسیرین زیرزبانی}} است.",
+        "back": "فرار First-pass: مصرف زیرزبانی/رکتال یا تزریقی از متابولیسم کبدی عبور می‌کند؛ خوراکی نیتروگلیسیرین تقریباً بی‌اثر است.",
+        "hint": "",
+        "tags": [
+          "داروشناسی",
+          "HighYield"
+        ],
+        "subjectId": "pharmacology",
+        "topicId": "pharmacokinetics",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      },
+      {
+        "id": "c-fa-003",
+        "type": "mcq",
+        "front": "مکانیسم اصلی اثر دیگوکسین چیست؟",
+        "back": "مهار پمپ Na⁺/K⁺-ATPase → افزایش Ca²⁺ داخل سلولی → افزایش انقباض (اینوتروپی مثبت).",
+        "hint": "",
+        "tags": [
+          "داروشناسی",
+          "قلب"
+        ],
+        "subjectId": "pharmacology",
+        "topicId": "cardiovascular-drugs",
+        "explanation": "مهار پمپ سدیم-پتاسیم باعث تجمع سدیم داخل سلولی و کاهش خروج Ca²⁺ از طریق مبادله‌گر Na/Ca می‌شود؛ در نتیجه ذخیره کلسیم و نیروی انقباض بالا می‌رود.",
+        "status": "active",
+        "language": "fa",
+        "options": [
+          {
+            "text": "مهار بتا-۱",
+            "correct": false
+          },
+          {
+            "text": "مهار Na⁺/K⁺-ATPase",
+            "correct": true
+          },
+          {
+            "text": "مهار کانال کلسیم",
+            "correct": false
+          },
+          {
+            "text": "مهار ACE",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "id": "c-fa-004",
+        "type": "basic",
+        "front": "تفاوت داروهای آنتاگونیست و پارت آنتاگونیست چیست؟",
+        "back": "آنتاگونیست کامل در حضور لیگاند اثر بیولوژیک ایجاد نمی‌کند؛ پارت آنتاگونیست اثر ضعیف‌تری از لیگاند کامل دارد و هم‌زمان مانع اثر آن می‌شود.",
+        "hint": "",
+        "tags": [
+          "داروشناسی",
+          "اتورسپشن"
+        ],
+        "subjectId": "pharmacology",
+        "topicId": "pharmacodynamics",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      },
+      {
+        "id": "c-fa-005",
+        "type": "basic",
+        "front": "نیمه‌عمق مفید (Half-life) چگونه به دوز ثابت (Steady state) مرتبط است؟",
+        "back": "حدود ۴–۵ نیمه‌عمق طول می‌کشد تا غلظت به ۹۴–۹۷٪ حالت پایا برسد؛ زمان رسیدن به Steady state مستقل از دوز است.",
+        "hint": "",
+        "tags": [
+          "داروشناسی",
+          "فارماکوکینتیک"
+        ],
+        "subjectId": "pharmacology",
+        "topicId": "pharmacokinetics",
+        "explanation": "",
+        "status": "active",
+        "source": {
+          "sourceType": "book",
+          "sourceId": "katzung-ch3",
+          "title": "کتاب Katzung — فصل ۳",
+          "url": null
+        },
+        "language": "fa"
+      },
+      {
+        "id": "c-fa-006",
+        "type": "cloze",
+        "front": "آسپرین با {{c1::مهار غیرقابل برگشت آنزیم COX-1}} اثر ضدپلاکت خود را نشان می‌دهد و به همین دلیل اثر آن تا {{c2::عمر پلاکت (۷-۱۰ روز)}} باقی می‌ماند.",
+        "back": "پلاکت هسته ندارند و COX جدید نمی‌سازند؛ با هر دوز آسپرین باید تا بازسازی پلاکت‌ها صبر کرد.",
+        "hint": "",
+        "tags": [
+          "داروشناسی",
+          "خون"
+        ],
+        "subjectId": "pharmacology",
+        "topicId": "cardiovascular-drugs",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      },
+      {
+        "id": "c-fa-007",
+        "type": "basic",
+        "front": "عوارض اصلی مهارکننده‌های ACE را نام ببرید.",
+        "back": "سرفه خشک (تجمع برادی‌کینین)، هایپرکالمی، افزایش کراتینین در تنگی دوطرفه شریان رینال، آنژیوادم (نادر).",
+        "hint": "",
+        "tags": [
+          "داروشناسی",
+          "قلب",
+          "HighYield"
+        ],
+        "subjectId": "pharmacology",
+        "topicId": "cardiovascular-drugs",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      },
+      {
+        "id": "c-fa-008",
+        "type": "mcq",
+        "front": "کدام دارو در آسم به‌عنوان داروی کنترل‌کننده بلندمدت نگه‌دارنده است؟",
+        "back": "کورتیکواستروئید استنشاقی (مثل بودسونید) — داروی پایه کنترل آسم؛ بتا-۲ آگونیست بلند اثر (سالمترول) همیشه همراه آن است.",
+        "hint": "",
+        "tags": [
+          "داروشناسی",
+          "تنفس"
+        ],
+        "subjectId": "pharmacology",
+        "topicId": "respiratory-drugs",
+        "explanation": "ICS پایه درمان کنترل آسم است؛ سالبتامول فقط رهایی‌بخش (Rescue) است.",
+        "status": "active",
+        "language": "fa",
+        "options": [
+          {
+            "text": "سالبتامول استنشاقی",
+            "correct": false
+          },
+          {
+            "text": "کورتیکواستروئید استنشاقی",
+            "correct": true
+          },
+          {
+            "text": "ایپراتروپیوم",
+            "correct": false
+          },
+          {
+            "text": "تئوفیلین خوراکی",
+            "correct": false
+          }
+        ]
+      }
+    ],
+    "createdAt": "2026-09-24T08:45:20.596Z",
+    "updatedAt": "2026-09-01T10:00:00.000Z",
     "createdBy": "seed",
-    "updatedBy": "seed",
-    "id": "fcd-normal-physio",
-    "title": "فیزیولوژی تنفس (پنل)",
-    "description": "نمونهٔ مجموعهٔ متنی ساخته‌شده از پنل مدیریت؛ مبانی تنفس و مکانیک آن.",
-    "subjectId": "physiology",
+    "updatedBy": "seed"
+  },
+  {
+    "id": "deck-biochem-metab",
+    "title": "بیوشیمی متابولیسم",
+    "description": "گلیکولیز، چرخه کربس، انتقال الکترون و تنظیم هورمونی متابولیسم.",
+    "shortTitle": "",
+    "subjectId": "biochemistry",
+    "level": "علوم پایه",
+    "cover": "#e0b45c",
+    "anatomy": false,
+    "previewImage": "",
+    "status": "published",
+    "origin": "tapesh",
+    "cards": [
+      {
+        "id": "c-bi-001",
+        "type": "basic",
+        "front": "مرحله نرخ-تعیین‌کننده گلیکولیز کدام است و چه آنزیمی آن را کاتالیز می‌کند؟",
+        "back": "تبدیل فروکتوز-۶-فسفات به فروکتوز-۱،۶-بیس‌فسفات توسط فسفوفروکتوکیناز-۱ (PFK-1) — فعال‌شده با AMP و فروکتوز-۲،۶-بیس‌فسفات، مهارشده با ATP و سیترات.",
+        "hint": "",
+        "tags": [
+          "بیوشیمی",
+          "گلیکولیز",
+          "HighYield"
+        ],
+        "subjectId": "biochemistry",
+        "topicId": "glycolysis",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      },
+      {
+        "id": "c-bi-002",
+        "type": "cloze",
+        "front": "در چرخه کربس، هر استیل-کوآ منجر به تولید {{c1::۳}} NADH، {{c2::۱}} FADH₂ و {{c3::۱}} GTP می‌شود.",
+        "back": "مجموع ATP معادل هر استیل-کوآ ≈ ۱۰ ATP (۳NADH×۲.۵ + ۱FADH₂×۱.۵ + ۱GTP).",
+        "hint": "",
+        "tags": [
+          "بیوشیمی",
+          "چرخه کربس"
+        ],
+        "subjectId": "biochemistry",
+        "topicId": "tca-cycle",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      },
+      {
+        "id": "c-bi-003",
+        "type": "basic",
+        "front": "نقش انسولین و گلوکاگون در نسبت فسفوریلاسیون PFK-2 چیست؟",
+        "back": "انسولین با فعال‌سازی فسفوپروتئین فسفاتاز، PFK-2 را دفسفوریلاسیون می‌کند → فروکتوز-۲،۶-بیس‌فسفات ↑ → گلیکولیز فعال. گلوکاگون برعکس و گلیکولیز را مهار و گلوکونئوژنز را فعال می‌کند.",
+        "hint": "",
+        "tags": [
+          "بیوشیمی",
+          "هورمون"
+        ],
+        "subjectId": "biochemistry",
+        "topicId": "metabolic-regulation",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      },
+      {
+        "id": "c-bi-004",
+        "type": "basic",
+        "front": "کبد از کدام مسیر قادر است گلوکز را از لاکتات و آلانین بسازد؟",
+        "back": "گلوکونئوژنز — عمدتاً در کبد؛ از پیرووات با عبور از میتوکندری (پیرووات کربوکسیلاز) شروع می‌شود.",
+        "hint": "",
+        "tags": [
+          "بیوشیمی"
+        ],
+        "subjectId": "biochemistry",
+        "topicId": "gluconeogenesis",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      },
+      {
+        "id": "c-bi-005",
+        "type": "mcq",
+        "front": "کمپلکس‌های I تا IV زنجیره انتقال الکترون، پروتون را به کدام فضا پمپ می‌کنند؟",
+        "back": "از ماتریکس میتوکندری به فضای بین غشایی — گرادیان پروتونی موتور ATP سنتاز است.",
+        "hint": "",
+        "tags": [
+          "بیوشیمی",
+          "انتقال الکترون"
+        ],
+        "subjectId": "biochemistry",
+        "topicId": "etc",
+        "explanation": "کمپلکس I، III و IV پمپ پروتون انجام می‌دهند؛ جهت همیشه به فضای بین غشایی است (درون-به-بیرون).",
+        "status": "active",
+        "language": "fa",
+        "options": [
+          {
+            "text": "از سیتوزول به ماتریکس",
+            "correct": false
+          },
+          {
+            "text": "از ماتریکس به فضای بین غشایی",
+            "correct": true
+          },
+          {
+            "text": "از فضای بین غشایی به ماتریکس",
+            "correct": false
+          },
+          {
+            "text": "پمپ پروتونی ندارند",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "id": "c-bi-006",
+        "type": "cloze",
+        "front": "آنزیم {{c1::گلیکوژن فسفوریلاز}} گلیکوژن را به {{c2::گلوکز-۱-فسفات}} تجزیه می‌کند و با فعال‌سازی توسط {{c3::PKA}} تحت کنترل گلوکاگون است.",
+        "back": "زنجیره: گلوکاگون → cAMP ↑ → PKA → فسفوریلاز کیناز → فسفوریلاز فعال.",
+        "hint": "",
+        "tags": [
+          "بیوشیمی",
+          "گلیکوژن"
+        ],
+        "subjectId": "biochemistry",
+        "topicId": "glycogen",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      }
+    ],
+    "createdAt": "2026-09-24T08:45:20.596Z",
+    "updatedAt": "2026-08-20T10:00:00.000Z",
+    "createdBy": "seed",
+    "updatedBy": "seed"
+  },
+  {
+    "id": "deck-immuno-basic",
+    "title": "ایمنی‌شناسی پایه",
+    "description": "ایمنی ذاتی و اکتسابی، آنتی‌بادی‌ها، کمپلکان و هایپرسنسیتیویتی.",
+    "shortTitle": "",
+    "subjectId": "immunology",
     "level": "علوم پایه",
     "cover": "#5b8cc7",
     "anatomy": false,
     "previewImage": "",
+    "status": "published",
+    "origin": "tapesh",
     "cards": [
       {
-        "id": "fcc-np-1",
+        "id": "c-im-001",
         "type": "basic",
-        "front": "عضلهٔ اصلی دم آرام چیست و عصب آن کدام است؟",
-        "back": "دیافراگم — عصب فرنیک (C3-C5).",
+        "front": "تفاوت ایمنی ذاتی و اکتسابی در دو محور اصلی چیست؟",
+        "back": "ذاتی: سریع (ساعت‌ها)، غیراختصاصی، حافظه ندارد (نوتروفیل، ماکروفاژ، کمپلکان، باری‌ر). اکتسابی: کند (روزها)، اختصاصی، حافظه قوی دارد (لنفوسیت B و T).",
+        "hint": "",
         "tags": [
-          "فیزیولوژی",
-          "تنفس"
+          "ایمنی‌شناسی",
+          "HighYield"
         ],
-        "subjectId": "physiology",
-        "status": "active"
+        "subjectId": "immunology",
+        "topicId": "innate-vs-adaptive",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
       },
       {
-        "id": "fcc-np-2",
+        "id": "c-im-002",
         "type": "cloze",
-        "front": "سرفیس‌اکتیو توسط سلول‌های {{c1::نوع دوم آلوئولی}} ترشح می‌شود و {{c2::کشش سطحی}} را کاهش می‌دهد.",
-        "back": "کاهش کشش سطحی از اتلاپسی آلوئول‌ها جلوگیری می‌کند (نقش سورفکتانت).",
+        "front": "آنتی‌بادی IgG تنها آنتی‌بادی است که از {{c1::جفت}} عبور می‌کند و IgA عمدتاً در {{c2::ترشحات مخاطی}} یافت می‌شود.",
+        "back": "IgG با گیرنده FcRn از جفت عبور و ایمنی نوزاد را فراهم می‌کند؛ IgA دیمری و در شیر مادر و مخاط‌ها است.",
+        "hint": "",
         "tags": [
-          "تنفس",
-          "سورفکتانت"
+          "ایمنی‌شناسی",
+          "آنتی‌بادی"
+        ],
+        "subjectId": "immunology",
+        "topicId": "antibodies",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      },
+      {
+        "id": "c-im-003",
+        "type": "mcq",
+        "front": "هایپرسنسیتیویتی نوع I توسط کدام مکانیسم ایجاد می‌شود؟",
+        "back": "IgE و دگرانولاسیون ماست‌سل — آنافیلاکسی و آلرژی فوری.",
+        "hint": "",
+        "tags": [
+          "ایمنی‌شناسی",
+          "هایپرسنسیتیویتی"
+        ],
+        "subjectId": "immunology",
+        "topicId": "hypersensitivity",
+        "explanation": "نوع I: IgE/ماست‌سل — نوع II: IgG/IgM علیه سلول — نوع III: کمپلکس ایمن — نوع IV: تأخیری T-cell.",
+        "status": "active",
+        "language": "fa",
+        "options": [
+          {
+            "text": "IgG و کمپلکان",
+            "correct": false
+          },
+          {
+            "text": "IgE و ماست‌سل",
+            "correct": true
+          },
+          {
+            "text": "کمپلکس ایمن",
+            "correct": false
+          },
+          {
+            "text": "لنفوسیت T سیتوتوکسیک",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "id": "c-im-004",
+        "type": "basic",
+        "front": "نقش MHC کلاس I و II در ارائه آنتی‌ژن چه تفاوتی دارد؟",
+        "back": "MHC I: آنتی‌ژن درون‌زا به CD8+ (همه سلول‌های نوکلئاته). MHC II: آنتی‌ژن برون‌زا به CD4+ (فقط APC مثل ماکروفاژ، دندریتیک، B).",
+        "hint": "",
+        "tags": [
+          "ایمنی‌شناسی",
+          "MHC",
+          "HighYield"
+        ],
+        "subjectId": "immunology",
+        "topicId": "antigen-presentation",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      },
+      {
+        "id": "c-im-005",
+        "type": "cloze",
+        "front": "در مسیر کلاسیک کمپلکان، {{c1::IgM یا IgG}} متصل‌شده به آنتی‌ژن فعال‌سازی را آغاز می‌کند و C3 convertase آن ترکیب {{c2::C4b2a}} است.",
+        "back": "مسیر لکتینی و آلترنیت مستقل از آنتی‌بادی فعال می‌شوند؛ خروجی مشترک هر سه مسیر C3b و MAC است.",
+        "hint": "",
+        "tags": [
+          "ایمنی‌شناسی",
+          "کمپلکان"
+        ],
+        "subjectId": "immunology",
+        "topicId": "complement",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      }
+    ],
+    "createdAt": "2026-09-24T08:45:20.596Z",
+    "updatedAt": "2026-08-15T10:00:00.000Z",
+    "createdBy": "seed",
+    "updatedBy": "seed"
+  },
+  {
+    "id": "deck-highyield-basic",
+    "title": "High Yield علوم پایه",
+    "description": "نکات طلایی و پرتکرار همه درس‌های علوم پایه — گلچین‌شده توسط تیم آموزشی تپش.",
+    "shortTitle": "",
+    "subjectId": "general",
+    "level": "ویژه",
+    "cover": "#ab8e7c",
+    "anatomy": false,
+    "previewImage": "",
+    "status": "published",
+    "origin": "tapesh",
+    "cards": [
+      {
+        "id": "c-hy-001",
+        "type": "basic",
+        "front": "اولین اقدام در احیای بیمار با افت فشار شدید و نبض تپنده چیست؟ (اصل عمومی)",
+        "back": "ABC — Airway, Breathing, Circulation؛ در فشار پایین، دسترسی وریدی و تزریق سریع مایع (Fluid resuscitation) قبل از هر دارو.",
+        "hint": "",
+        "tags": [
+          "HighYield",
+          "کلینیکال"
+        ],
+        "subjectId": "general",
+        "topicId": "clinical-principles",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      },
+      {
+        "id": "c-hy-002",
+        "type": "basic",
+        "front": "شایع‌ترین علت نارسایی حاد کلیوی در بیمارستان چیست؟",
+        "back": "نکروز توبولی حاد (ATN) — عمدتاً ایسکمی ناشی از افت فشار طولانی و یا نفروتوکسین‌ها.",
+        "hint": "",
+        "tags": [
+          "HighYield",
+          "کلیه"
+        ],
+        "subjectId": "general",
+        "topicId": "renal",
+        "explanation": "",
+        "status": "active",
+        "source": {
+          "sourceType": "article",
+          "sourceId": "art-akm-22",
+          "title": "مقاله تپش — نارسایی کلیوی",
+          "url": null
+        },
+        "language": "fa"
+      },
+      {
+        "id": "c-hy-003",
+        "type": "cloze",
+        "front": "در اسیدوز متابولیک، جبران تنفسی باعث {{c1::کاهش}} PCO₂ می‌شود؛ فرمول وینتر: {{c2::PCO₂ = 1.5 × HCO₃⁻ + 8 (±2)}}.",
+        "back": "اگر PCO₂ اندازه‌گیری‌شده از مقدار محاسباتی دور باشد، اختلال تنفسی ترکیبی وجود دارد.",
+        "hint": "",
+        "tags": [
+          "HighYield",
+          "ABG"
+        ],
+        "subjectId": "general",
+        "topicId": "acid-base",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      },
+      {
+        "id": "c-hy-004",
+        "type": "mcq",
+        "front": "بیمار با اسهال آبکی شدید؛ انتظار داریم اسید-پایه چه باشد؟",
+        "back": "اسیدوز متابولیک با آنیون‌گپ نرمال (هایپرکلورمیک) — از دست رفتن بیکربنات با اسهال.",
+        "hint": "",
+        "tags": [
+          "HighYield",
+          "ABG"
+        ],
+        "subjectId": "general",
+        "topicId": "acid-base",
+        "explanation": "اسهال = از دست رفتن HCO₃⁻؛ کلر جبران می‌شود و آنیون‌گپ نرمال می‌ماند.",
+        "status": "active",
+        "language": "fa",
+        "options": [
+          {
+            "text": "آلکالوز متابولیک",
+            "correct": false
+          },
+          {
+            "text": "اسیدوز متابولیک با آنیون‌گپ بالا",
+            "correct": false
+          },
+          {
+            "text": "اسیدوز متابولیک با آنیون‌گپ نرمال",
+            "correct": true
+          },
+          {
+            "text": "اسیدوز تنفسی",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "id": "c-hy-005",
+        "type": "basic",
+        "front": "چهار نکته کلیدی در شناسایی سندرم‌های High Yield قلبی-عروقی؟",
+        "back": "MI (درد >۲۰ دقیقه + CK-MB/Troponin)، آنژین ناپایدار (درد بدون آنزیم)، پریکاردیت (درد با تغییر وضعیت + فریکشن راب)، آئورت دیسکشن (درد تیز کشیده‌شونده به پشت).",
+        "hint": "",
+        "tags": [
+          "HighYield",
+          "قلب"
+        ],
+        "subjectId": "general",
+        "topicId": "cardiovascular",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      },
+      {
+        "id": "c-hy-006",
+        "type": "basic",
+        "front": "مکانیسم مقاومت به انسولین در دیابت نوع ۲ در سطح گیرنده چیست؟",
+        "back": "کاهش فسفوریلاسیون گیرنده انسولین و مسیر PI3K/AKT — نه کاهش تعداد گیرنده؛ به همین دلیل IRS-1 و انتقال GLUT4 مختل می‌شود.",
+        "hint": "",
+        "tags": [
+          "HighYield",
+          "اندوکرین"
+        ],
+        "subjectId": "general",
+        "topicId": "endocrine",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      }
+    ],
+    "createdAt": "2026-09-24T08:45:20.596Z",
+    "updatedAt": "2026-09-10T10:00:00.000Z",
+    "createdBy": "seed",
+    "updatedBy": "seed"
+  },
+  {
+    "id": "deck-cram-physio",
+    "title": "مرور شب امتحان فیزیولوژی",
+    "description": "فشرده‌ترین نکات فیزیولوژی برای مرور سریع شبانه؛ مناسب تکرار چندباره.",
+    "shortTitle": "",
+    "subjectId": "physiology",
+    "level": "ویژه",
+    "cover": "#ef9196",
+    "anatomy": false,
+    "previewImage": "",
+    "status": "published",
+    "origin": "tapesh",
+    "cards": [
+      {
+        "id": "c-cr-001",
+        "type": "basic",
+        "front": "۵ نکته یک‌خطی درباره گره SA؟",
+        "back": "پیس‌میکر اصلی — پتانسیل آهسته (I_f funny channel) — نرخ ۶۰-۱۰۰ — آپ‌استروک Ca²⁺ (T-type) — تحت تأثیر واگ/سمپاتیک.",
+        "hint": "",
+        "tags": [
+          "مرور سریع",
+          "قلب"
         ],
         "subjectId": "physiology",
-        "status": "active"
+        "topicId": "cardiac-electrophysiology",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      },
+      {
+        "id": "c-cr-002",
+        "type": "cloze",
+        "front": "فازهای پتانسیل عمل بطنی: صفر = {{c1::Na⁺}}، یک = {{c2::K⁺ گذرا}}، دو = {{c3::Ca²⁺}}، سه = {{c4::K⁺}}، چهار = {{c5::Na/K ATPase}}.",
+        "back": "پلاتو (فاز ۲) ویژگی اختصاصی قلب است و فرصت ریفرکتوری مطلق را می‌دهد (جلوگیری از تیتانی).",
+        "hint": "",
+        "tags": [
+          "مرور سریع",
+          "ECG"
+        ],
+        "subjectId": "physiology",
+        "topicId": "cardiac-electrophysiology",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      },
+      {
+        "id": "c-cr-003",
+        "type": "basic",
+        "front": "تفاوت پیش‌بار و پس‌بار در یک جمله + نمونه بالینی؟",
+        "back": "پیش‌بار = کشش اولیه قبل از انقباض (حجم پایان دیاستول)؛ پس‌بار = مقاومت مقابل تخلیه (فشار آئورت). نمونه: انفوزیون مایع پیش‌بار را بالا می‌برد؛ تنگی آئورت پس‌بار را.",
+        "hint": "",
+        "tags": [
+          "مرور سریع",
+          "قلب"
+        ],
+        "subjectId": "physiology",
+        "topicId": "cardiac-output",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      },
+      {
+        "id": "c-cr-004",
+        "type": "basic",
+        "front": "در ECG، کدام فاصله نشان‌دهنده هدایت AV است؟ نرمالش چند است؟",
+        "back": "فاصله PR — نرمال ۰.۱۲ تا ۰.۲۰ ثانیه؛ بیشتر = بلوک درجه ۱، کمتر = مسیر جانبی (مثل WPW).",
+        "hint": "",
+        "tags": [
+          "مرور سریع",
+          "ECG"
+        ],
+        "subjectId": "physiology",
+        "topicId": "cardiac-electrophysiology",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      },
+      {
+        "id": "c-cr-005",
+        "type": "mcq",
+        "front": "ورزش باعث چه تغییری در برون‌ده قلبی می‌شود؟",
+        "back": "برون‌ده ۴-۵ برابر می‌شود — هم HR هم SV افزایش می‌یابند (کشش سمپاتیک + پمپ عضلانی + تنفس).",
+        "hint": "",
+        "tags": [
+          "مرور سریع",
+          "قلب"
+        ],
+        "subjectId": "physiology",
+        "topicId": "cardiac-output",
+        "explanation": "در ورزش دینامیک: تزریق سمپاتیک + بازگشت وریدی (پمپ عضلانی) = HR↑ و SV↑؛ CO تا ~۲۰ L/min.",
+        "status": "active",
+        "language": "fa",
+        "options": [
+          {
+            "text": "فقط HR زیاد می‌شود",
+            "correct": false
+          },
+          {
+            "text": "SV کم می‌شود",
+            "correct": false
+          },
+          {
+            "text": "HR و SV هر دو زیاد می‌شوند",
+            "correct": true
+          },
+          {
+            "text": "برون‌ده ثابت می‌ماند",
+            "correct": false
+          }
+        ]
       }
-    ]
+    ],
+    "createdAt": "2026-09-24T08:45:20.596Z",
+    "updatedAt": "2026-09-11T10:00:00.000Z",
+    "createdBy": "seed",
+    "updatedBy": "seed"
+  },
+  {
+    "id": "deck-micro-basic",
+    "title": "میکروب‌شناسی باکتری‌ها",
+    "description": "باکتری‌های مهم گرم مثبت و منفی، توکسین‌ها و درمان‌های کلیدی.",
+    "shortTitle": "",
+    "subjectId": "microbiology",
+    "level": "علوم پایه",
+    "cover": "#9ed3ab",
+    "anatomy": false,
+    "previewImage": "",
+    "status": "published",
+    "origin": "tapesh",
+    "cards": [
+      {
+        "id": "c-mi-001",
+        "type": "basic",
+        "front": "باکتری گرم-مثبت خوشه‌ای کاتالاز-مثبت و کوالاز-منفی شایع روی پوست؟",
+        "back": "استافیلوکوکوس اپیدرمیدیس — پاتوژن فرصت‌طلب در پروتزها و کاتترها (چسبندگی به صفحات پلی‌استیرون).",
+        "hint": "",
+        "tags": [
+          "میکروب",
+          "گرم مثبت"
+        ],
+        "subjectId": "microbiology",
+        "topicId": "gram-positive",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      },
+      {
+        "id": "c-mi-002",
+        "type": "cloze",
+        "front": "استرپتوکوکوس پنومونیه گرم-{{c1::مثبت}} دیپلوکوکوس {{c2::لنست-شکل}} است و با {{c3::کپسول پلی‌ساکاریدی}} ویرولانس دارد.",
+        "back": "کوئلینگ مثبت (تورم کپسولی) و تراست آگلوتیناسیون ابزارهای شناسایی آن‌اند؛ واکسین بر علیه کپسول است.",
+        "hint": "",
+        "tags": [
+          "میکروب",
+          "گرم مثبت"
+        ],
+        "subjectId": "microbiology",
+        "topicId": "gram-positive",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      },
+      {
+        "id": "c-mi-003",
+        "type": "basic",
+        "front": "توکسین کدام باکتری با مهار releasing factor عامل اسهال آبکی (مثل ریس) است؟",
+        "back": "Vibrio cholerae — توکسین کولرا ADP-ریبوزیله Gsα → cAMP ↑ → فعالیت CFTR → دفع کلر و اسهال آبکی (آب-برنجی).",
+        "hint": "",
+        "tags": [
+          "میکروب",
+          "توکسین",
+          "HighYield"
+        ],
+        "subjectId": "microbiology",
+        "topicId": "toxins",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      },
+      {
+        "id": "c-mi-004",
+        "type": "mcq",
+        "front": "بیمار با فلج پیش‌رونده بعد از زخم آلوده خاکی؛ تشخیص مظنون؟",
+        "back": "تتانوس (Clostridium tetani) — توکسین تانوسپاسمین با جلوگیری از آزادسازی گلیسین و GABA در نخاع اسپاسم ایجاد می‌کند.",
+        "hint": "",
+        "tags": [
+          "میکروب",
+          "کلستریدیا"
+        ],
+        "subjectId": "microbiology",
+        "topicId": "toxins",
+        "explanation": "بوتولیسم فلج شل (مهار استیل‌کولین)، تیتانوس اسپاسم (مهار مهارکننده‌ها) — دو قطب مخالف فلج.",
+        "status": "active",
+        "language": "fa",
+        "options": [
+          {
+            "text": "بوتولیسم",
+            "correct": false
+          },
+          {
+            "text": "تتانوس",
+            "correct": true
+          },
+          {
+            "text": "دیفتری",
+            "correct": false
+          },
+          {
+            "text": "گنگرن گازی",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "id": "c-mi-005",
+        "type": "basic",
+        "front": "تفاوت اندوتوکسین و اگزوتوکسین در سه محور؟",
+        "back": "اندوتوکسین (LPS دیوار گرمنفی): بخشی از ساختار، پایدار حرارتی، اثر سیستمیک TNF/IL-1. اگزوتوکسین: پروتئین ترشح‌شده، ناپایدار حرارتی، اثر اختصاصی و قوی (معمولاً آنتی‌ژنیک).",
+        "hint": "",
+        "tags": [
+          "میکروب",
+          "HighYield"
+        ],
+        "subjectId": "microbiology",
+        "topicId": "toxins",
+        "explanation": "",
+        "status": "active",
+        "language": "fa"
+      }
+    ],
+    "createdAt": "2026-09-24T08:45:20.596Z",
+    "updatedAt": "2026-07-30T10:00:00.000Z",
+    "createdBy": "seed",
+    "updatedBy": "seed"
   }
 ]

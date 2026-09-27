@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import './reference.css';
 import './referenceHome.css';
 import ReferenceReader from './reference/reader/ReferenceReader';
@@ -11,7 +11,6 @@ const REFERENCE_VIEW = { mode: 'shelf' };
 
 const FA_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
 const toFa = (value) => String(value).replace(/\d/g, (digit) => FA_DIGITS[Number(digit)]);
-const toFaNumber = (value) => toFa(new Intl.NumberFormat('en-US').format(value)).replace(/,/g, '٬');
 
 const relativeTime = (timestamp) => {
   const minutes = Math.round((Date.now() - timestamp) / 60000);
@@ -79,7 +78,7 @@ function BookFigure({ book }) {
 }
 
 /* ── نمای قفسه: سه مرجع قابل انتخاب ── */
-function ShelfView({ books, onOpen, totals }) {
+function ShelfView({ books, onOpen, loading }) {
   return (
     <div className="ref-view dash-stagger">
       <div className="ref-topbar">
@@ -89,7 +88,6 @@ function ShelfView({ books, onOpen, totals }) {
           </svg>
           بازگشت به دوره‌ها
         </button>
-        <span className="ref-topbar__crumb">دوره‌ها / رفرنس</span>
       </div>
 
       <header className="ref-hero">
@@ -105,60 +103,8 @@ function ShelfView({ books, onOpen, totals }) {
         </div>
       </header>
 
-      <div className="ref-overview">
-        <div className="ref-overview__copy">
-          <span className="ref-overview__badge">
-            <i aria-hidden="true" />
-            در حال تکمیل
-          </span>
-          <h2>متن مرجع‌ها فصل‌به‌فصل دیجیتال می‌شود</h2>
-          <p>
-            فصل‌های منتشرشده را همین حالا بخوانید؛ روی متن هایلایت بزنید، یادداشت بگذارید و
-            نشان‌گذاری کنید. بقیه فصل‌ها به‌مرور اضافه می‌شوند.
-          </p>
-        </div>
-        <div className="ref-overview__stats">
-          <span className="ref-stat">
-            <span className="ref-stat__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4H6.5A2.5 2.5 0 0 0 4 6.5v13z" />
-                <path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-2.5" />
-              </svg>
-            </span>
-            <span className="ref-stat__copy">
-              <strong>{toFa(totals.books)}</strong>
-              <small>مرجع بین‌المللی</small>
-            </span>
-          </span>
-          <span className="ref-stat">
-            <span className="ref-stat__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M12 3l9 5-9 5-9-5 9-5z" />
-                <path d="M3 13l9 5 9-5" opacity="0.55" />
-              </svg>
-            </span>
-            <span className="ref-stat__copy">
-              <strong>{toFa(totals.chapters)}</strong>
-              <small>فصل</small>
-            </span>
-          </span>
-          <span className="ref-stat">
-            <span className="ref-stat__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
-                <path d="M14 3v5h5" />
-                <path d="M9 13h6M9 17h6" opacity="0.55" />
-              </svg>
-            </span>
-            <span className="ref-stat__copy">
-              <strong>{toFaNumber(totals.pages)}</strong>
-              <small>صفحه</small>
-            </span>
-          </span>
-        </div>
-      </div>
-
       <div className="ref-shelf">
+        {!books.length && <p>{loading ? 'در حال بارگذاری رفرنس‌ها…' : 'هنوز رفرنسی منتشر نشده است.'}</p>}
         {books.map((book, index) => (
           <button
             key={book.id}
@@ -171,8 +117,6 @@ function ShelfView({ books, onOpen, totals }) {
             onClick={() => onOpen.book(book.id)}
             aria-label={`${book.title} — مشاهده فصل‌ها`}
           >
-            <span className="ref-card__soon">{toFa(book.availableCount)} فصل فعال</span>
-
             <span className="ref-card__scene">
               <span className="ref-card__halo" aria-hidden="true" />
               <span className="ref-float">
@@ -188,8 +132,6 @@ function ShelfView({ books, onOpen, totals }) {
               <span className="ref-chip ref-chip--plain">{toFa(book.chapters.length)} فصل</span>
               <span className="ref-chip ref-chip--plain">{toFa(book.pages)} صفحه</span>
             </span>
-
-            <span className="ref-card__board" aria-hidden="true" />
 
             <span className="ref-card__go" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -239,7 +181,6 @@ function BookHomeView({ book, onBack, onOpenChapter, onContinue, refreshKey }) {
           </svg>
           بازگشت به قفسه
         </button>
-        <span className="ref-topbar__crumb">رفرنس / {book.title}</span>
       </div>
 
       <header className="ref-home__head" style={{ '--accent': book.accent }}>
@@ -288,9 +229,7 @@ function BookHomeView({ book, onBack, onOpenChapter, onContinue, refreshKey }) {
 
           <div className="ref-home__chapters-head">
             <h3>فصل‌های مرجع</h3>
-            <span className="ref-sections__count">
-              {toFa(book.chapters.filter((chapter) => chapter.available).length)} فصل فعال
-            </span>
+            <span className="ref-sections__count">{toFa(book.chapters.length)} فصل</span>
           </div>
 
           <div className="ref-chapters">
@@ -300,32 +239,25 @@ function BookHomeView({ book, onBack, onOpenChapter, onContinue, refreshKey }) {
                 <button
                   key={chapter.id}
                   type="button"
-                  className={`ref-chapter ${chapter.available ? '' : 'is-locked'}`}
+                  className="ref-chapter"
                   style={{ '--accent': book.accent }}
-                  disabled={!chapter.available}
-                  title={chapter.available ? 'شروع مطالعه فصل' : 'به‌زودی'}
-                  onClick={() => chapter.available && onOpenChapter(chapter.id)}
-                  aria-label={`فصل ${toFa(chapter.number)} — ${chapter.title}${chapter.available ? '' : ' — به‌زودی'}`}
+                  title="شروع مطالعه فصل"
+                  onClick={() => onOpenChapter(chapter.id)}
+                  aria-label={`فصل ${toFa(chapter.number)} — ${chapter.title}`}
                 >
                   <span className="ref-chapter__num">{toFa(chapter.number)}</span>
                   <span className="ref-chapter__body">
                     <strong>{chapter.title}</strong>
                     <small>
-                      {toFa(chapter.sections)} بخش · حدود {toFa(chapter.minutes)} دقیقه
+                      {toFa(chapter.sections)} زیرمبحث
                     </small>
                     <span className="ref-chapter__bar" aria-hidden="true">
                       <span style={{ width: `${pct}%` }} />
                     </span>
                   </span>
                   <span className="ref-chapter__side">
-                    {chapter.available ? (
-                      <>
-                        <em className="ref-chapter__pct">{pct > 0 ? `${toFa(pct)}٪` : 'شروع کن'}</em>
-                        <Icon name="arrowPrev" size={16} className="ref-chapter__go" />
-                      </>
-                    ) : (
-                      <em className="ref-chapter__soon">به‌زودی</em>
-                    )}
+                    <em className="ref-chapter__pct">{pct > 0 ? `${toFa(pct)}٪` : 'شروع کن'}</em>
+                    <Icon name="arrowPrev" size={16} className="ref-chapter__go" />
                   </span>
                 </button>
               );
@@ -347,6 +279,18 @@ export default function ReferenceLayer({ onBack }) {
      روی مسیر داشبورد می‌نشیند تا Back/Forward و رفرش همان صفحهٔ کتاب را نگه دارند. */
   const [view, setView] = useLayerRoute(LAYER_IDS.reference, REFERENCE_VIEW);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [books, setBooks] = useState([]);
+  const [libraryLoading, setLibraryLoading] = useState(true);
+
+  useEffect(() => {
+    let alive = true;
+    api.listReferences().then((references) => {
+      if (alive) setBooks(references);
+    }).finally(() => {
+      if (alive) setLibraryLoading(false);
+    });
+    return () => { alive = false; };
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -355,26 +299,6 @@ export default function ReferenceLayer({ onBack }) {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [view.mode, onBack]);
-
-  const books = useMemo(() => api.REFERENCES, []);
-  const totals = useMemo(
-    () => ({
-      books: books.length,
-      chapters: books.reduce((sum, book) => sum + book.chapters.length, 0),
-      pages: books.reduce((sum, book) => sum + book.pages, 0),
-    }),
-    [books],
-  );
-
-  /* تعداد فصل فعال هر کتاب — یک بار محاسبه و به کارت‌ها وصل می‌شود */
-  const booksWithCounts = useMemo(
-    () =>
-      books.map((book) => ({
-        ...book,
-        availableCount: book.chapters.filter((chapter) => chapter.available).length,
-      })),
-    [books],
-  );
 
   const activeBook = view.bookId ? books.find((book) => book.id === view.bookId) : null;
 
@@ -403,8 +327,8 @@ export default function ReferenceLayer({ onBack }) {
       <div className="ref-layer__inner">
         {view.mode === 'shelf' && (
           <ShelfView
-            books={booksWithCounts}
-            totals={totals}
+            books={books}
+            loading={libraryLoading}
             onOpen={{
               back: onBack,
               book: (bookId) => setView({ mode: 'home', bookId }),

@@ -1,81 +1,36 @@
-import { useMemo, useRef, useState } from 'react';
-import { CONCEPT_STATUSES } from '../../../../data/learning/anatomyCourse';
-import { RecommendationCard } from './LearningPrimitives';
-import { clamp, getConceptStatus, toFa } from './learningUtils';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { clamp, toFa } from './learningUtils';
+import { createCard, createDeck } from '../../../../services/flashcards/flashcardService';
 
 export function PriorKnowledgeActivation({ data, activityState, onChange }) {
-  const [visibleHint, setVisibleHint] = useState(null);
   const responses = activityState.recallResponses ?? {};
-  const acknowledged = Boolean(activityState.acknowledgedSteps?.activate);
 
-  const updateResponse = (promptId, value) => {
-    onChange({ recallResponses: { ...responses, [promptId]: value } });
+  const selectOption = (test, optionId) => {
+    if (responses[test.id]?.correct) return;
+    onChange({
+      recallResponses: {
+        ...responses,
+        [test.id]: {
+          selectedAnswer: optionId,
+          correct: optionId === test.answer,
+          correctLabel: test.options.find((option) => option.id === test.answer)?.label,
+          explanation: test.explanation,
+        },
+      },
+    });
   };
 
   return (
     <div className="activate-panel">
-      <div className="activate-panel__intro">
-        <span aria-hidden="true">؟</span>
-        <p>{data.intro}</p>
-      </div>
-      <div className="activate-panel__prompts">
-        {data.prompts.map((item, index) => (
-          <article className="recall-card" key={item.id}>
-            <header>
-              <span>{toFa(index + 1)}</span>
-              <h3>{item.prompt}</h3>
-            </header>
-            <label htmlFor={item.id}>آنچه الان به یاد می‌آوری</label>
-            <textarea
-              id={item.id}
-              value={responses[item.id] ?? ''}
-              onChange={(event) => updateResponse(item.id, event.target.value)}
-              placeholder="پاسخت را کوتاه و بدون جست‌وجو بنویس…"
-              rows="3"
-            />
-            <button
-              type="button"
-              className="learn-text-button"
-              aria-expanded={visibleHint === item.id}
-              onClick={() => setVisibleHint(visibleHint === item.id ? null : item.id)}
-            >
-              {visibleHint === item.id ? 'بستن راهنما' : 'یک سرنخ کوچک'}
-            </button>
-            {visibleHint === item.id && <p className="recall-card__hint">{item.hint}</p>}
-          </article>
-        ))}
-      </div>
-      <button
-        type="button"
-        className={`learning-check ${acknowledged ? 'is-checked' : ''}`}
-        onClick={() => onChange({
-          acknowledgedSteps: { ...activityState.acknowledgedSteps, activate: !acknowledged },
-        })}
-      >
-        <span aria-hidden="true">{acknowledged ? '✓' : ''}</span>
-        برای مقایسه دانسته قبلی با آموزش آماده‌ام
-      </button>
+      {data.tests.map((test) => (
+        <PracticeQuestion
+          key={test.id}
+          question={test}
+          result={responses[test.id]}
+          onAnswer={(answer) => selectOption(test, answer)}
+        />
+      ))}
     </div>
-  );
-}
-
-export function ConceptCard({ title, description, meta, status, mastery }) {
-  const statusMeta = getConceptStatus(status);
-  return (
-    <article className="concept-card">
-      <header>
-        <h4>{title}</h4>
-        {status && <span className={`status-pill status-pill--${statusMeta.tone}`}>{statusMeta.label}</span>}
-      </header>
-      {description && <p>{description}</p>}
-      {typeof mastery === 'number' && (
-        <div className="concept-card__mastery">
-          <span><i style={{ width: `${mastery}%` }} /></span>
-          <b>{toFa(mastery)}٪</b>
-        </div>
-      )}
-      {meta && <small>{meta}</small>}
-    </article>
   );
 }
 
@@ -83,7 +38,6 @@ export function MicroLesson({ lessons, activityState, onChange }) {
   const activeIndex = clamp(activityState.currentLesson ?? 0, 0, lessons.length - 1);
   const lesson = lessons[activeIndex];
   const completedLessons = activityState.completedLessons ?? [];
-  const isCompleted = completedLessons.includes(lesson.id);
 
   const selectLesson = (index) => {
     onChange(
@@ -92,20 +46,9 @@ export function MicroLesson({ lessons, activityState, onChange }) {
     );
   };
 
-  const toggleComplete = () => {
-    const nextCompleted = isCompleted
-      ? completedLessons.filter((lessonId) => lessonId !== lesson.id)
-      : [...new Set([...completedLessons, lesson.id])];
-    onChange({ completedLessons: nextCompleted });
-    if (!isCompleted && activeIndex < lessons.length - 1) selectLesson(activeIndex + 1);
-  };
-
   return (
     <div className="micro-lesson-layout">
       <aside className="micro-lesson-nav" aria-label="فهرست میکرودرس‌ها">
-        <header>
-          <strong>{toFa(completedLessons.length)} از {toFa(lessons.length)} کامل</strong>
-        </header>
         {lessons.map((item, index) => (
           <button
             key={item.id}
@@ -121,11 +64,7 @@ export function MicroLesson({ lessons, activityState, onChange }) {
 
       <article className="micro-lesson" key={lesson.id}>
         <header className="micro-lesson__header">
-          <div>
-            <small>میکرودرس {toFa(activeIndex + 1)}</small>
-            <h3>{lesson.title}</h3>
-          </div>
-          <span>{toFa(activeIndex + 1)} / {toFa(lessons.length)}</span>
+          <h3>{lesson.title}</h3>
         </header>
 
         <section className="micro-lesson__objective">
@@ -177,15 +116,6 @@ export function MicroLesson({ lessons, activityState, onChange }) {
             {lesson.concepts.map((concept) => <span key={concept}>{concept}</span>)}
           </div>
         </div>
-
-        <button
-          type="button"
-          className={`learning-check ${isCompleted ? 'is-checked' : ''}`}
-          onClick={toggleComplete}
-        >
-          <span aria-hidden="true">{isCompleted ? '✓' : ''}</span>
-          {isCompleted ? 'این میکرودرس تکمیل شده' : 'مفهوم را فهمیدم؛ ثبت شود'}
-        </button>
       </article>
     </div>
   );
@@ -320,56 +250,6 @@ export function AnatomyImageViewer({ data, exploredStructures = [], onExplore })
   );
 }
 
-export function ConceptMap({ relations, activityState, onChange }) {
-  const [activeMap, setActiveMap] = useState(relations[0]?.id);
-  const acknowledged = Boolean(activityState.acknowledgedSteps?.connect);
-  return (
-    <div className="concept-map-panel">
-      <div className="concept-map-panel__tabs" role="tablist" aria-label="نقشه‌های ارتباط مفاهیم">
-        {relations.map((relation) => (
-          <button
-            key={relation.id}
-            type="button"
-            role="tab"
-            aria-selected={activeMap === relation.id}
-            className={activeMap === relation.id ? 'is-active' : ''}
-            onClick={() => setActiveMap(relation.id)}
-          >
-            {relation.title}
-          </button>
-        ))}
-      </div>
-      {relations.filter((relation) => relation.id === activeMap).map((relation) => (
-        <section className="concept-map" key={relation.id} aria-label={relation.title}>
-          <header>
-            <h3>{relation.title}</h3>
-          </header>
-          <div className="concept-map__flow">
-            {relation.nodes.map((node, index) => (
-              <div key={`${node}-${index}`}>
-                <span>{toFa(index + 1)}</span>
-                <b>{node}</b>
-                {index < relation.nodes.length - 1 && <i aria-hidden="true">←</i>}
-              </div>
-            ))}
-          </div>
-          <p>هر فلش را با جمله «باعث می‌شود / مرتبط است با» برای خودت توضیح بده.</p>
-        </section>
-      ))}
-      <button
-        type="button"
-        className={`learning-check ${acknowledged ? 'is-checked' : ''}`}
-        onClick={() => onChange({
-          acknowledgedSteps: { ...activityState.acknowledgedSteps, connect: !acknowledged },
-        })}
-      >
-        <span aria-hidden="true">{acknowledged ? '✓' : ''}</span>
-        حداقل یک زنجیره را با صدای بلند توضیح دادم
-      </button>
-    </div>
-  );
-}
-
 export function QuestionFeedback({ result }) {
   if (!result) return null;
   return (
@@ -385,15 +265,11 @@ export function QuestionFeedback({ result }) {
   );
 }
 
-export function PracticeQuestion({ question, index, result, onAnswer }) {
+export function PracticeQuestion({ question, result, onAnswer }) {
   return (
     <article className="practice-question">
       <header>
-        <div>
-          <small>سؤال {toFa(index + 1)}</small>
-          <h3>{question.question}</h3>
-        </div>
-        <span>{question.difficulty === 'clinical' ? 'بالینی' : 'مفهومی'}</span>
+        <h3>{question.question}</h3>
       </header>
       <div className="practice-question__options">
         {question.options.map((option, optionIndex) => {
@@ -428,10 +304,7 @@ export function AnatomyLabelQuiz({ question, structures, result, onAnswer }) {
   return (
     <article className="label-quiz">
       <header>
-        <div>
-          <h3>{question.prompt}</h3>
-        </div>
-        <span>یک نقطه را انتخاب کن</span>
+        <h3>{question.prompt}</h3>
       </header>
       <div className="label-quiz__stage">
         <ArmSkeleton />
@@ -454,208 +327,365 @@ export function AnatomyLabelQuiz({ question, structures, result, onAnswer }) {
   );
 }
 
-export function RetrievalPrompt({ prompts, activityState, onChange }) {
-  const [revealed, setRevealed] = useState({});
-  const responses = activityState.retrievalResponses ?? {};
+const FLASHCARD_TYPES = [
+  { id: 'basic', label: 'ساده' },
+  { id: 'basic-hint', label: 'با راهنما' },
+  { id: 'cloze', label: 'کلوز (جای خالی)' },
+  { id: 'mcq', label: 'چهارگزینه‌ای' },
+];
 
-  const updateResponse = (promptId, patch) => {
-    onChange({
-      retrievalResponses: {
-        ...responses,
-        [promptId]: {
-          text: '',
-          confidence: 50,
-          ...(responses[promptId] ?? {}),
-          ...patch,
-          updatedAt: new Date().toISOString(),
-        },
-      },
-    });
+/* ساخت فلش‌کارت از همین واحد — با همان استانداردهای بخش فلش‌کارت: نوع کارت، صورت/پاسخ،
+   راهنما، تگ، گزینه‌های کارت چهارگزینه‌ای و source از نوع lesson برای برگشت به همین واحد. */
+function UnitFlashcards({ course, unit, userId, deckId, onDeckCreated }) {
+  const [type, setType] = useState('basic');
+  const [front, setFront] = useState('');
+  const [back, setBack] = useState('');
+  const [hint, setHint] = useState('');
+  const [tags, setTags] = useState('');
+  const [optionLines, setOptionLines] = useState('');
+  const [correctIndex, setCorrectIndex] = useState(0);
+  const [state, setState] = useState('idle'); /* idle | saving | saved | error */
+
+  const options = optionLines.split('\n').map((line) => line.trim()).filter(Boolean);
+  const needsBack = type !== 'cloze' && type !== 'mcq';
+  const ready = front.trim() && (!needsBack || back.trim()) && (type !== 'mcq' || options.length >= 2);
+
+  const save = async () => {
+    if (!ready || state === 'saving') return;
+    setState('saving');
+    try {
+      let targetDeck = deckId;
+      if (!targetDeck) {
+        const deck = await createDeck({ id: userId }, {
+          title: `فلش‌کارت‌های ${unit.title}`,
+          description: `ساخته‌شده از واحد «${unit.title}» در درسنامهٔ ${course.title}`,
+          subjectId: course.id,
+        });
+        targetDeck = deck.id;
+        onDeckCreated?.(deck.id);
+      }
+
+      await createCard({ id: userId }, targetDeck, {
+        type,
+        front,
+        back,
+        hint: type === 'basic-hint' ? hint : null,
+        tags: tags.split(',').map((tag) => tag.trim()).filter(Boolean),
+        subjectId: course.id,
+        topicId: unit.moduleId,
+        source: { sourceType: 'lesson', sourceId: `${course.id}:${unit.id}`, title: unit.title, url: null },
+        ...(type === 'mcq'
+          ? { options: options.map((text, index) => ({ text, correct: index === correctIndex })) }
+          : {}),
+      });
+
+      setFront('');
+      setBack('');
+      setHint('');
+      setTags('');
+      setOptionLines('');
+      setState('saved');
+    } catch {
+      setState('error');
+    }
   };
 
   return (
-    <div className="retrieval-panel">
-      <div className="retrieval-panel__notice">
-        <span aria-hidden="true">↺</span>
-        <p><b>کتاب را ببند.</b> هدف این مرحله تولید پاسخ کامل نیست؛ تلاش برای بازیابی، خودش حافظه را قوی می‌کند.</p>
+    <section className="unit-flashcards">
+      <header>
+        <h3>فلش‌کارت این واحد</h3>
+        <p>کارت‌ها در مجموعهٔ «فلش‌کارت‌های {unit.title}» ذخیره می‌شوند و به همین واحد وصل می‌مانند.</p>
+      </header>
+
+      <div className="unit-flashcards__types">
+        {FLASHCARD_TYPES.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            className={item.id === type ? 'is-active' : ''}
+            aria-pressed={item.id === type}
+            onClick={() => setType(item.id)}
+          >
+            {item.label}
+          </button>
+        ))}
       </div>
-      {prompts.map((prompt, index) => {
-        const response = responses[prompt.id] ?? { text: '', confidence: 50 };
-        return (
-          <article className="retrieval-card" key={prompt.id}>
-            <header>
-              <span>{toFa(index + 1)}</span>
-              <h3>{prompt.prompt}</h3>
-            </header>
-            <textarea
-              value={response.text}
-              onChange={(event) => updateResponse(prompt.id, { text: event.target.value })}
-              placeholder="پاسخ را از حافظه بازسازی کن…"
-              rows="4"
-            />
-            <div className="retrieval-card__confidence">
-              <label htmlFor={`${prompt.id}-confidence`}>اعتماد به پاسخ: <b>{toFa(response.confidence)}٪</b></label>
-              <input
-                id={`${prompt.id}-confidence`}
-                type="range"
-                min="0"
-                max="100"
-                step="10"
-                value={response.confidence}
-                onChange={(event) => updateResponse(prompt.id, { confidence: Number(event.target.value) })}
-              />
-            </div>
-            <button
-              type="button"
-              className="learn-text-button"
-              disabled={!response.text.trim()}
-              onClick={() => setRevealed((current) => ({ ...current, [prompt.id]: !current[prompt.id] }))}
-            >
-              {revealed[prompt.id] ? 'پنهان‌کردن مدل پاسخ' : 'مقایسه با مدل پاسخ'}
-            </button>
-            {revealed[prompt.id] && (
-              <aside className="retrieval-card__answer">
-                <small>مدل پاسخ</small>
-                <p>{prompt.modelAnswer}</p>
-                <span>کلماتت لازم نیست عین همین باشد؛ رابطه‌های درست مهم‌اند.</span>
-              </aside>
-            )}
-          </article>
-        );
-      })}
-    </div>
+
+      <label className="unit-field">
+        <span>{type === 'cloze' ? 'صورت کارت (جای خالی را با {{c1::…}} بنویس)' : 'صورت کارت'}</span>
+        <textarea rows={2} value={front} onChange={(event) => setFront(event.target.value)} />
+      </label>
+
+      {type === 'basic-hint' && (
+        <label className="unit-field">
+          <span>راهنما</span>
+          <input type="text" value={hint} onChange={(event) => setHint(event.target.value)} />
+        </label>
+      )}
+
+      {type === 'mcq' ? (
+        <>
+          <label className="unit-field">
+            <span>گزینه‌ها (هر خط یک گزینه)</span>
+            <textarea rows={4} value={optionLines} onChange={(event) => setOptionLines(event.target.value)} />
+          </label>
+          <label className="unit-field">
+            <span>شمارهٔ گزینهٔ درست</span>
+            <select value={correctIndex} onChange={(event) => setCorrectIndex(Number(event.target.value))}>
+              {options.map((option, index) => (
+                <option key={`${option}-${index}`} value={index}>{toFa(index + 1)} — {option}</option>
+              ))}
+            </select>
+          </label>
+        </>
+      ) : (
+        <label className="unit-field">
+          <span>{type === 'cloze' ? 'توضیح پاسخ (اختیاری)' : 'پاسخ کارت'}</span>
+          <textarea rows={2} value={back} onChange={(event) => setBack(event.target.value)} />
+        </label>
+      )}
+
+      <label className="unit-field">
+        <span>تگ‌ها (با کاما جدا کن)</span>
+        <input type="text" value={tags} onChange={(event) => setTags(event.target.value)} />
+      </label>
+
+      <div className="unit-flashcards__actions">
+        <button type="button" className="learn-button learn-button--primary" onClick={save} disabled={!ready || state === 'saving'}>
+          {state === 'saving' ? 'در حال ذخیره…' : 'افزودن کارت'}
+        </button>
+        {state === 'saved' && <small className="is-ok">کارت در مجموعهٔ این واحد ذخیره شد.</small>}
+        {state === 'error' && <small className="is-error">ذخیره نشد؛ دوباره تلاش کن.</small>}
+      </div>
+    </section>
   );
 }
 
-export function LearningDiagnosis({ diagnosis, activityState, onChange }) {
-  const acknowledged = Boolean(activityState.acknowledgedSteps?.diagnose);
-  if (!diagnosis) return null;
-  return (
-    <div className="diagnosis-panel">
-      <section className="diagnosis-panel__summary">
-        <div className="diagnosis-panel__score" style={{ '--score': `${diagnosis.mastery * 3.6}deg` }}>
-          <strong>{toFa(diagnosis.mastery)}٪</strong>
-          <span>تسلط فعلی</span>
-        </div>
-        <div>
-          <h3>{diagnosis.message}</h3>
-          <p>این نتیجه از پاسخ‌ها، تعداد تلاش، زمان پاسخ و اعتماد اعلام‌شده ساخته شده است.</p>
-        </div>
-      </section>
+/* آزمون از این واحد — حالت آزمون: بدون بازخورد لحظه‌ای، با تایمر و کارنامهٔ کوتاه. */
+function UnitExam({ questions }) {
+  const [index, setIndex] = useState(0);
+  const [answers, setAnswers] = useState({});
+  const [elapsed, setElapsed] = useState(0);
+  const [finished, setFinished] = useState(false);
 
-      <div className="diagnosis-panel__metrics">
-        <article><span>دقت</span><strong>{toFa(diagnosis.accuracy)}٪</strong></article>
-        <article><span>تعداد تلاش</span><strong>{toFa(diagnosis.attempts)}</strong></article>
-        <article><span>میانگین پاسخ</span><strong>{toFa(diagnosis.averageResponseTime)} ثانیه</strong></article>
-        <article><span>اعتماد</span><strong>{toFa(diagnosis.confidence)}٪</strong></article>
-        <article><span>خطا</span><strong>{toFa(diagnosis.mistakeCount)}</strong></article>
-      </div>
+  useEffect(() => {
+    if (finished) return undefined;
+    const timer = setInterval(() => setElapsed((seconds) => seconds + 1), 1000);
+    return () => clearInterval(timer);
+  }, [finished]);
 
-      <section className="diagnosis-panel__concepts">
-        <header>
-          <div>
-            <small>وضعیت مفهوم‌ها</small>
-            <h3>نقشه تسلط</h3>
+  const question = questions[index];
+  const correctCount = questions.filter((item) => answers[item.id] === item.answer).length;
+  const percent = questions.length ? Math.round((correctCount / questions.length) * 100) : 0;
+  const answeredCount = Object.keys(answers).length;
+
+  const restart = () => {
+    setAnswers({});
+    setIndex(0);
+    setElapsed(0);
+    setFinished(false);
+  };
+
+  if (!questions.length) {
+    return <p className="unit-exam__empty">برای این واحد سؤالی ثبت نشده است.</p>;
+  }
+
+  if (finished) {
+    return (
+      <section className="unit-exam">
+        <header className="unit-exam__result">
+          <div className="unit-test__score" style={{ '--score': `${percent * 3.6}deg` }}>
+            <strong>{toFa(percent)}٪</strong>
+            <span>نتیجه آزمون</span>
           </div>
-          <span>از {CONCEPT_STATUSES.WEAK} تا {CONCEPT_STATUSES.MASTERED}</span>
+          <div>
+            <h3>به {toFa(correctCount)} سؤال از {toFa(questions.length)} سؤال درست پاسخ دادی.</h3>
+            <p>زمان آزمون: {toFa(Math.floor(elapsed / 60))}:{toFa(String(elapsed % 60).padStart(2, '0'))}</p>
+          </div>
         </header>
-        <div>
-          {(diagnosis.concepts.length ? diagnosis.concepts : diagnosis.weakConcepts).map((concept) => (
-            <ConceptCard
-              key={concept.conceptId}
-              title={concept.title}
-              description={`${CONCEPT_STATUSES[concept.status]} · ${toFa(concept.mistakeCount)} خطا`}
-              status={concept.status}
-              mastery={concept.mastery}
-              meta={`مرور بعدی بر اساس فاصله‌گذاری تنظیم می‌شود`}
-            />
-          ))}
-        </div>
-      </section>
 
-      <button
-        type="button"
-        className={`learning-check ${acknowledged ? 'is-checked' : ''}`}
-        onClick={() => onChange({
-          acknowledgedSteps: { ...activityState.acknowledgedSteps, diagnose: !acknowledged },
-        })}
-      >
-        <span aria-hidden="true">{acknowledged ? '✓' : ''}</span>
-        تشخیص را دیدم و می‌دانم چه چیزی نیاز به مرور دارد
-      </button>
-    </div>
-  );
-}
-
-export function ReviewPanel({ unit, unitState, recommendation, onReview, onExam }) {
-  const [flippedCards, setFlippedCards] = useState([]);
-  const diagnosis = unitState.diagnosis;
-  const mistakes = Object.values(unitState.practiceResults ?? {}).filter((result) => !result.correct);
-  const weakConcepts = diagnosis?.weakConcepts ?? [];
-
-  const toggleCard = (cardId) => {
-    setFlippedCards((cards) => cards.includes(cardId) ? cards.filter((id) => id !== cardId) : [...cards, cardId]);
-  };
-
-  return (
-    <div className="review-panel">
-      <section className="review-panel__summary">
-        <small>خلاصه واحد</small>
-        <h3>تصویر بزرگ را یک بار دیگر ببین</h3>
-        <p>{unit.learning.review.summary}</p>
-        <div className="learning-tags">
-          {unit.learning.review.keyConcepts.map((concept) => <span key={concept}>{concept}</span>)}
-        </div>
-      </section>
-
-      <div className="review-panel__grid">
-        <section>
-          <header><span aria-hidden="true">!</span><h3>خطاها و نقاط مرور</h3></header>
-          {mistakes.length || weakConcepts.length ? (
-            <ul>
-              {mistakes.map((mistake) => <li key={mistake.questionId}>{mistake.explanation}</li>)}
-              {weakConcepts.map((concept) => <li key={concept.conceptId}>مرور دوباره «{concept.title}»</li>)}
-            </ul>
-          ) : <p>خطای ثبت‌شده‌ای باقی نمانده؛ برای تثبیت، یک بازیابی کوتاه انجام بده.</p>}
-        </section>
-        <section>
-          <header><span aria-hidden="true">↺</span><h3>سؤال‌های بازیابی منتخب</h3></header>
-          <ol>
-            {unit.learning.review.selectedQuestions.map((question) => <li key={question}>{question}</li>)}
-          </ol>
-        </section>
-      </div>
-
-      <section className="review-panel__flashcards">
-        <header>
-          <div><h3>سه کارت برای تثبیت</h3></div>
-          <span>برای دیدن پاسخ روی کارت بزن</span>
-        </header>
-        <div>
-          {unit.learning.review.flashcards.map((card) => {
-            const flipped = flippedCards.includes(card.id);
+        <ul className="unit-exam__review">
+          {questions.map((item) => {
+            const correctOption = item.options.find((option) => option.id === item.answer);
+            const givenOption = item.options.find((option) => option.id === answers[item.id]);
+            const isRight = answers[item.id] === item.answer;
             return (
-              <button
-                type="button"
-                key={card.id}
-                className={flipped ? 'is-flipped' : ''}
-                onClick={() => toggleCard(card.id)}
-                aria-pressed={flipped}
-              >
-                <small>{flipped ? 'پاسخ' : 'پرسش'}</small>
-                <strong>{flipped ? card.back : card.front}</strong>
-              </button>
+              <li key={item.id} className={isRight ? 'is-correct' : 'is-wrong'}>
+                <b>{item.question || item.prompt}</b>
+                <p>پاسخ تو: {givenOption?.label ?? 'بی‌پاسخ'}</p>
+                {!isRight && <p>پاسخ درست: {correctOption?.label}</p>}
+              </li>
             );
           })}
+        </ul>
+
+        <div className="unit-exam__actions">
+          <button type="button" className="learn-button learn-button--primary" onClick={restart}>آزمون دوباره</button>
         </div>
       </section>
+    );
+  }
 
-      <RecommendationCard recommendation={recommendation} compact />
+  return (
+    <section className="unit-exam">
+      <header className="unit-exam__bar">
+        <span>سؤال {toFa(index + 1)} از {toFa(questions.length)}</span>
+        <span className="unit-exam__timer">
+          {toFa(Math.floor(elapsed / 60))}:{toFa(String(elapsed % 60).padStart(2, '0'))}
+        </span>
+      </header>
 
-      <div className="review-panel__actions">
-        <button type="button" className="learn-button learn-button--soft" onClick={onReview}>مرور این واحد</button>
-        <button type="button" className="learn-button learn-button--primary" onClick={onExam}>آزمون واحد</button>
+      <h3 className="unit-exam__prompt">{question.question || question.prompt}</h3>
+
+      <div className="unit-exam__options">
+        {question.options.map((option, optionIndex) => (
+          <button
+            key={option.id}
+            type="button"
+            className={answers[question.id] === option.id ? 'is-selected' : ''}
+            aria-pressed={answers[question.id] === option.id}
+            onClick={() => setAnswers((current) => ({ ...current, [question.id]: option.id }))}
+          >
+            <span>{toFa(optionIndex + 1)}</span>
+            {option.label}
+          </button>
+        ))}
       </div>
+
+      <div className="unit-exam__actions">
+        <button
+          type="button"
+          className="learn-button learn-button--quiet"
+          onClick={() => setIndex((current) => Math.max(0, current - 1))}
+          disabled={index === 0}
+        >
+          سؤال قبلی
+        </button>
+        <small>{toFa(answeredCount)} پاسخ ثبت شده</small>
+        {index < questions.length - 1 ? (
+          <button
+            type="button"
+            className="learn-button learn-button--primary"
+            onClick={() => setIndex((current) => Math.min(questions.length - 1, current + 1))}
+          >
+            سؤال بعدی
+          </button>
+        ) : (
+          <button type="button" className="learn-button learn-button--primary" onClick={() => setFinished(true)}>
+            پایان آزمون
+          </button>
+        )}
+      </div>
+    </section>
+  );
+}
+
+/* مرحلهٔ «تست» = میز کنش‌ها: تست‌های بخش، دفترچهٔ مرور، آزمون واحد، فلش‌کارت، تپش هوشمند. */
+export function UnitTest({
+  course,
+  unit,
+  unitState,
+  userId,
+  onOpenTests,
+  onOpenNotes,
+  onAskAI,
+  onToggleReview,
+  onDeckCreated,
+  inReview,
+}) {
+  const [panel, setPanel] = useState(null); /* null | exam | flashcards */
+
+  const questions = [
+    ...(unit.learning.practice ?? []),
+    ...(unit.learning.labelQuiz
+      ? [{
+          ...unit.learning.labelQuiz,
+          question: unit.learning.labelQuiz.prompt,
+          options: (unit.learning.visualize?.structures ?? []).map((structure) => ({ id: structure.id, label: structure.label })),
+        }]
+      : []),
+  ];
+
+  /* هر کنش رنگِ بخش مقصدش را می‌گیرد: تست‌ها سبز، مرور آبی، آزمون طلایی، فلش‌کارت بنفش، تپش هوشمند مسی. */
+  const actions = [
+    {
+      id: 'tests',
+      accent: 'green',
+      icon: '✓',
+      title: 'تست‌های این بخش',
+      hint: `${toFa(questions.length)} سؤال چهارگزینه‌ای و برچسب‌گذاری همین واحد؛ پاسخ‌ها با توضیح بلافاصله باز می‌شوند.`,
+      label: 'زدن تست‌ها',
+      onClick: onOpenTests,
+    },
+    {
+      id: 'review',
+      accent: 'blue',
+      icon: '↻',
+      title: 'دفترچهٔ مرور',
+      hint: inReview
+        ? 'این واحد در دفترچهٔ مرور ثبت شده و طبق برنامهٔ G5 به تو یادآوری می‌شود.'
+        : 'این واحد را به مرورهای فاصله‌دار G5 اضافه کن تا فراموشش نکنی.',
+      label: inReview ? 'حذف از دفترچهٔ مرور' : 'افزودن به دفترچهٔ مرور',
+      onClick: onToggleReview,
+    },
+    {
+      id: 'exam',
+      accent: 'gold',
+      icon: '◷',
+      title: 'آزمون از این واحد',
+      hint: 'حالت آزمون: بدون بازخورد لحظه‌ای، با تایمر و کارنامهٔ کوتاه در پایان.',
+      label: panel === 'exam' ? 'بستن آزمون' : 'شروع آزمون',
+      onClick: () => setPanel((current) => (current === 'exam' ? null : 'exam')),
+    },
+    {
+      id: 'flashcards',
+      accent: 'purple',
+      icon: '▤',
+      title: 'ساخت فلش‌کارت',
+      hint: 'کارت استاندارد تپش (ساده، با راهنما، کلوز یا چهارگزینه‌ای) با اتصال به همین واحد.',
+      label: panel === 'flashcards' ? 'بستن' : 'ساخت فلش‌کارت',
+      onClick: () => setPanel((current) => (current === 'flashcards' ? null : 'flashcards')),
+    },
+    {
+      id: 'ai',
+      accent: 'copper',
+      icon: '✦',
+      title: 'پرس‌وجو با تپش هوشمند',
+      hint: 'ابهام همین واحد را با پرامپت آماده از هوش مصنوعی بپرس و جواب بگیر.',
+      label: 'پرسیدن از تپش',
+      onClick: onAskAI,
+    },
+  ];
+
+  return (
+    <div className="unit-test">
+      <div className="unit-actions">
+        {actions.map((action) => (
+          <article key={action.id} className={`unit-action unit-action--${action.accent}`}>
+            <span className="unit-action__icon" aria-hidden="true">{action.icon}</span>
+            <div className="unit-action__copy">
+              <h3>{action.title}</h3>
+              <p>{action.hint}</p>
+            </div>
+            <button type="button" className="learn-button learn-button--soft" onClick={action.onClick}>
+              {action.label}
+            </button>
+          </article>
+        ))}
+      </div>
+
+      {panel === 'exam' && <UnitExam questions={questions} />}
+
+      {panel === 'flashcards' && (
+        <UnitFlashcards
+          course={course}
+          unit={unit}
+          userId={userId}
+          deckId={unitState.flashcardDeckId}
+          onDeckCreated={onDeckCreated}
+        />
+      )}
     </div>
   );
 }
+

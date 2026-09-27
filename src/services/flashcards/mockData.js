@@ -30,6 +30,35 @@ export const SUBJECTS = [
   { id: 'general', title: 'عمومی' },
 ];
 
+/* ── تصویر کارت ──
+ * فهرست مشترک ویرایشگر کارت پنل و داشبورد (و سرور، برای کتابخانهٔ رسانه):
+ * فرمت‌های تصویری رایج — عکس آیفون (HEIC/HEIF)، تصویربرداری پزشکی (TIFF) و وب (AVIF/BMP).
+ * مرورگرها همهٔ این‌ها را نمایش نمی‌دهند (HEIC و TIFF عملاً فقط سافاری)؛ چون سرور فایل
+ * را همان‌طور ذخیره می‌کند، محدودیت نمایش در راهنمای همان فیلد به کاربر گفته می‌شود. */
+export const CARD_IMAGE_MIME_EXTENSIONS = {
+  'image/png': 'png',
+  'image/jpeg': 'jpg',
+  'image/webp': 'webp',
+  'image/gif': 'gif',
+  'image/svg+xml': 'svg',
+  'image/avif': 'avif',
+  'image/bmp': 'bmp',
+  'image/tiff': 'tiff',
+  'image/heic': 'heic',
+  'image/heif': 'heif',
+  'image/x-icon': 'ico',
+  'image/vnd.microsoft.icon': 'ico',
+};
+
+/* مقدار `accept` فیلد فایل — همان فهرست بالا */
+export const CARD_IMAGE_ACCEPT = Object.keys(CARD_IMAGE_MIME_EXTENSIONS).join(',');
+
+/* سقف حجم تصویر کارت (مگابایت) — سرور مرجع است، اینجا برای پیش‌بررسی UX */
+export const CARD_IMAGE_MAX_MB = 4;
+
+/* پسوندهای جایگزین — وقتی مرورگر نوع فایل را خالی برمی‌گرداند */
+export const CARD_IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg', 'avif', 'bmp', 'heic', 'heif', 'tif', 'tiff', 'ico'];
+
 /* ── دک‌های رسمی تپش ── */
 
 export const TAPESH_DECKS = [

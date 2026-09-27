@@ -134,7 +134,7 @@ export function buildMyCourses() {
     key: `international:${course.id}`,
     kind: 'international',
     courseId: 'international',
-    target: { courseId: course.id },
+    target: null,
     title: course.title,
     accent: course.accent,
     accentSoft: course.accentSoft ?? null,

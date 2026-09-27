@@ -10,7 +10,6 @@ import {
   Card,
   EmptyState,
   Icon,
-  RingScore,
   TrendChart,
   DonutChart,
   BarRow,
@@ -20,6 +19,7 @@ import {
   faNum,
   toFa,
 } from './analyticsShared';
+import { MASTERY_STATUSES } from '../../../services/analytics/analyticsEngine';
 
 /*
  * سنجه‌های نمودار روند — همه از دادهٔ همین لایه ساخته می‌شوند (سری روزانهٔ سرویس).
@@ -50,12 +50,54 @@ const WEAKNESS_BUCKETS = [
   { key: 'ok', title: 'وضعیت مناسب', accent: '#61D192', icon: 'check' },
 ];
 
+/* فقط مؤلفه‌های نمایش‌داده‌شده در کارت امتیاز — ثبات، دشواری و روند از کارت حذف شده‌اند */
+const SCORE_PART_KEYS = ['accuracy', 'speed'];
+const SCORE_PART_LABELS = { accuracy: 'دقت', speed: 'سرعت' };
+
+/*
+ * راهنمای فاصلهٔ دقت «تمرین ↔ آزمون».
+ * اختلاف = دقت تمرین − دقت آزمون (واحد درصد)؛ برای هر باند، یک توصیهٔ مشخص.
+ * فهرست نزولی است و اولین باندی که اختلاف به آن رسیده انتخاب می‌شود؛ پس هر
+ * اختلافی از ۰ تا ۱۰۰ واحد، توصیهٔ خودش را دارد و هیچ باندی بی‌پاسخ نمی‌ماند.
+ */
+const PRACTICE_EXAM_GAP_TIPS = [
+  { min: 80, tip: 'اختلاف تقریباً کامل است؛ تمرین آزاد را متوقف کن و فقط آزمون کامل زمان‌دار با بازبینی خطا بزن.' },
+  { min: 70, tip: 'عملکرد آزمونی‌ات کمتر از یک‌سوم تمرینی است؛ تمرین‌ها را در شرایط سالن آزمون (بی‌صدا، بدون وقفه) اجرا کن.' },
+  { min: 65, tip: 'افت شدید در آزمون؛ یک آزمون تشخیصی بده و نتیجه را با تحلیل همین کارت مقایسه کن.' },
+  { min: 60, tip: 'فاصلهٔ ۶۰ واحدی نشان می‌دهد تمرین‌هایت اندازه‌گیری واقعی نیستند؛ فقط آزمون زمان‌دار را معیار بگیر.' },
+  { min: 56, tip: 'در آزمون، صورت سؤال را دو بار بخوان و پاسخ مطمئن را علامت بزن؛ بی‌پاسخ ماندن هم دقت را پایین می‌آورد.' },
+  { min: 52, tip: 'اختلاف بسیار بالاست؛ ریشه را در سرعت خواندن و درک صورت سؤال جست‌وجو کن، نه در دانش.' },
+  { min: 48, tip: 'احتمالاً استرس آزمون دقتت را می‌خورد؛ پیش از آزمون دو دقیقه تنفس و مرور چک‌لیست را امتحان کن.' },
+  { min: 44, tip: 'دقت آزمونی‌ات کمتر از نصف تمرینی‌ات است؛ تا سه هفته تمرین آزاد را کنار بگذار و فقط آزمون شبیه‌سازی‌شده بزن.' },
+  { min: 40, tip: 'بیش از ۴۰ واحد فاصله یعنی تمرین و آزمون دو مهارت جدا شده‌اند؛ هر تمرین را دقیقاً در قالب آزمون اجرا کن.' },
+  { min: 36, tip: 'در آزمون تصمیم‌گیری‌ات کند است؛ تمرین «۲۰ سؤال در ۲۰ دقیقه» را روزانه اجرا کن.' },
+  { min: 33, tip: 'اختلاف بالاست؛ برنامهٔ تمرینی‌ات را به سشن‌های کوتاه با تایمر و بدون وقفه تغییر بده.' },
+  { min: 30, tip: 'یک‌سوم دقتت در آزمون از دست می‌رود؛ تا جبران نشده، آزمون بدون تایمر نزن.' },
+  { min: 26, tip: 'فاصله بزرگ است؛ هر آزمون را با بازبینی خطاها تمام کن و همان مبحث را فردا زمان‌دار تکرار کن.' },
+  { min: 23, tip: 'احتمالاً در آزمون وقت کم می‌آوری؛ اول سؤال‌های مطمئن را بزن و سؤال‌های سنگین را به دور دوم بسپار.' },
+  { min: 20, tip: 'اختلاف ۲۰ واحدی زیاد است؛ ترتیب سؤال‌ها را در آزمون عوض کن و از سؤال‌های سخت بگذر.' },
+  { min: 18, tip: 'پیش از هر تمرین تایمر همان درس را روشن کن و میانگین زمان هر سؤال را زیر ۶۰ ثانیه نگه دار.' },
+  { min: 15, tip: 'فاصلهٔ ۱۵ واحدی نشانهٔ افت عملکرد در آزمون است؛ آزمون شبیه‌سازی‌شدهٔ کامل را هفته‌ای یک‌بار بگنجان.' },
+  { min: 12, tip: 'دقتت در شرایط بدون فشار بالاست؛ ضعف در مدیریت زمان است نه دانش — تمرین زمان‌بندی‌شده را جدی بگیر.' },
+  { min: 10, tip: 'اختلاف دو رقمی یعنی عادت تمرینی‌ات بدون فشار است؛ از این پس هر تمرین را زمان‌دار بزن.' },
+  { min: 8, tip: 'اختلاف محسوس است؛ تمرین‌هایت را با تعداد سؤال ثابت و زمان محدود اجرا کن.' },
+  { min: 6, tip: 'پیش از آزمون بعدی، همان مبحث را بدون وقفه و با تایمر تمرین کن.' },
+  { min: 4, tip: 'با یک آزمون ۲۰ سؤالی زمان‌دار در هفته، این فاصله به‌سرعت بسته می‌شود.' },
+  { min: 2, tip: 'این اختلاف در محدودهٔ نوسان طبیعی است؛ هر دو هفته یک آزمون زمان‌دار بزن تا همین سطح تثبیت شود.' },
+  { min: 0, tip: 'فاصلهٔ دقت تمرین و آزمونت زیر ۲ واحد است؛ عملکردت زیر فشار آزمون حفظ می‌شود.' },
+];
+const pickGapTip = (gap) => (PRACTICE_EXAM_GAP_TIPS.find((rule) => gap >= rule.min) ?? PRACTICE_EXAM_GAP_TIPS[PRACTICE_EXAM_GAP_TIPS.length - 1]).tip;
+
 export default function AnalyticsHome({ data, onNavigate, onOpenExam }) {
   const [trendMetric, setTrendMetric] = useState('accuracy');
   if (!data) return null;
 
-  const { kpis, performance, consistency, practiceVsExam, trend, subjects, weakness, dataStatus, exams } = data;
+  const { kpis, performance, practiceVsExam, trend, subjects, weakness, dataStatus, exams } = data;
   const metricMeta = TREND_METRICS.find((metric) => metric.key === trendMetric) ?? TREND_METRICS[0];
+
+  /* اختلاف دقت تمرین و آزمون → توصیهٔ متناظر از جدول باندها */
+  const accuracyGap = practiceVsExam.accuracyDrop === null ? null : Math.abs(practiceVsExam.accuracyDrop);
+  const gapTip = accuracyGap === null ? null : pickGapTip(accuracyGap);
 
   /* نقاط نمودار = کل سری روزانهٔ سرویس؛ همهٔ فیلدهای روز حفظ می‌شوند تا تولتیپ کامل باشد */
   const labeledPoints = trend.series.map((point, index) => ({ ...point, value: point[trendMetric], index }));
@@ -99,18 +141,11 @@ export default function AnalyticsHome({ data, onNavigate, onOpenExam }) {
         </div>
       )}
 
-      {/* امتیاز عملکرد + تمرین در برابر آزمون — یک ردیف */}
-      <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
+      {/* امتیاز عملکرد + تمرین در برابر آزمون — یک ردیف با ارتفاع برابر */}
+      <div className="grid gap-4 lg:grid-cols-2">
         <Card title="امتیاز عملکرد" icon="target" hint={performance.note} className="dashboard-layer-reveal">
           <div className="grid gap-4 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center">
             <div className="flex items-center justify-center gap-4">
-              <RingScore
-                score={performance.score}
-                label="از ۱۰۰"
-                size={104}
-                stroke={9}
-                accent={performance.score >= 70 ? '#61D192' : performance.score >= 55 ? '#e0b45c' : '#e26d6d'}
-              />
               <DonutChart
                 segments={answerSegments}
                 centerLabel={formatPercent(kpis.accuracy)}
@@ -122,13 +157,11 @@ export default function AnalyticsHome({ data, onNavigate, onOpenExam }) {
               />
             </div>
             <div className="space-y-1.5">
-              {Object.entries(performance.parts)
-                .filter(([, part]) => part.weight > 0)
-                .map(([key, part]) => (
+              {SCORE_PART_KEYS.filter((key) => (performance.parts[key]?.weight ?? 0) > 0).map((key) => {
+                const part = performance.parts[key];
+                return (
                   <div key={key} className="flex items-center gap-2.5">
-                    <span className="w-16 shrink-0 text-[11px] text-[var(--faint)]">
-                      {{ accuracy: 'دقت', consistency: 'ثبات', speed: 'سرعت', difficulty: 'دشواری', recency: 'روند' }[key] ?? key}
-                    </span>
+                    <span className="w-16 shrink-0 text-[11px] text-[var(--faint)]">{SCORE_PART_LABELS[key] ?? key}</span>
                     <div className="an-bar flex-1">
                       <span className="an-bar__fill" style={{ width: `${Math.min(100, part.score)}%`, background: 'var(--purple-bright)' }} />
                     </div>
@@ -136,7 +169,8 @@ export default function AnalyticsHome({ data, onNavigate, onOpenExam }) {
                       {faNum(Math.round(part.score))} <span className="text-[10px]">· وزن {toFa(Math.round(part.weight * 100))}٪</span>
                     </span>
                   </div>
-                ))}
+                );
+              })}
             </div>
           </div>
 
@@ -144,12 +178,6 @@ export default function AnalyticsHome({ data, onNavigate, onOpenExam }) {
             <span className="flex items-center gap-1 text-[var(--green-ink)]"><span className="h-2 w-2 rounded-full bg-[var(--green-vivid)]" />درست {faNum(kpis.correct)}</span>
             <span className="flex items-center gap-1 text-[var(--red-ink)]"><span className="h-2 w-2 rounded-full bg-[var(--red)]" />غلط {faNum(kpis.wrong)}</span>
             <span className="flex items-center gap-1 text-[var(--faint)]"><span className="h-2 w-2 rounded-full bg-[var(--light-fill)]" />نزده {faNum(kpis.unanswered)}</span>
-            {consistency.score !== null && (
-              <span className="mr-auto text-[var(--faint)]">
-                ثبات بین {faNum(consistency.sessions)} سشن:{' '}
-                <strong style={{ color: consistency.cv < 0.22 ? '#61D192' : '#e0b45c' }}>{consistency.label}</strong>
-              </span>
-            )}
           </div>
         </Card>
 
@@ -180,34 +208,21 @@ export default function AnalyticsHome({ data, onNavigate, onOpenExam }) {
                         <span className="text-[var(--faint)]">دقت</span><strong>{formatPercent(stats.accuracy)}</strong>
                         <span className="text-[var(--faint)]">میانگین زمان</span><strong>{formatSeconds(stats.averageTime)}</strong>
                         <span className="text-[var(--faint)]">تعداد تست</span><strong>{faNum(stats.answered)}</strong>
-                        <span className="text-[var(--faint)]">سطح دشواری</span><strong>{stats.difficulty ? toFa(stats.difficulty.toFixed(2)) : '—'}</strong>
-                        {side.key === 'exam' ? (
-                          <>
-                            <span className="text-[var(--faint)]">بی‌پاسخ</span><strong>{faNum(stats.unanswered)} سؤال</strong>
-                          </>
-                        ) : (
-                          <>
-                            <span className="text-[var(--faint)]">پاسخ مطمئن</span><strong>{stats.confidence === null ? '—' : `${faNum(stats.confidence)}٪`}</strong>
-                          </>
-                        )}
                       </div>
                     </div>
                   );
                 })}
               </div>
               <div>
-                {practiceVsExam.accuracyDrop !== null && Math.abs(practiceVsExam.accuracyDrop) >= 5 ? (
+                {accuracyGap !== null && practiceVsExam.accuracyDrop > 0 && accuracyGap >= 2 ? (
                   <p className="text-[12px] leading-6 text-[var(--muted)]">
-                    {practiceVsExam.accuracyDrop > 0 ? (
-                      <>
-                        دقت تو در تمرین‌ها <strong className="text-[var(--green-ink)]">{faNum(Math.round(practiceVsExam.practice.accuracy))}٪</strong> است اما در آزمون‌ها به{' '}
-                        <strong className="text-[var(--red-ink)]">{faNum(Math.round(practiceVsExam.exam.accuracy))}٪</strong> کاهش پیدا می‌کند؛ تمرین در شرایط شبیه‌سازی‌شدهٔ آزمون (تایمر و بدون وقفه) این فاصله را می‌بندد.
-                      </>
-                    ) : (
-                      <>
-                        دقت آزمونی تو ({faNum(Math.round(practiceVsExam.exam.accuracy))}٪) حتی از تمرینی‌ات ({faNum(Math.round(practiceVsExam.practice.accuracy))}٪) بالاتر است؛ نشانهٔ آمادگی آزمونی خوب.
-                      </>
-                    )}
+                    دقت تو در تمرین‌ها <strong className="text-[var(--green-ink)]">{faNum(Math.round(practiceVsExam.practice.accuracy))}٪</strong> است اما در آزمون‌ها به{' '}
+                    <strong className="text-[var(--red-ink)]">{faNum(Math.round(practiceVsExam.exam.accuracy))}٪</strong> کاهش پیدا می‌کند؛ {gapTip}
+                  </p>
+                ) : accuracyGap !== null && practiceVsExam.accuracyDrop < 0 ? (
+                  <p className="text-[12px] leading-6 text-[var(--muted)]">
+                    دقت آزمونی تو (<strong className="text-[var(--green-ink)]">{faNum(Math.round(practiceVsExam.exam.accuracy))}٪</strong>) حتی از تمرینی‌ات (
+                    {faNum(Math.round(practiceVsExam.practice.accuracy))}٪) بالاتر است؛ نشانهٔ آمادگی آزمونی خوب.
                   </p>
                 ) : (
                   <p className="text-[12px] leading-6 text-[var(--faint)]">دقت تو در تمرین و آزمون تقریباً یکسان است — عملکردت در شرایط فشار حفظ می‌شود.</p>
@@ -246,38 +261,37 @@ export default function AnalyticsHome({ data, onNavigate, onOpenExam }) {
         }
         className="dashboard-layer-reveal"
       >
-        <TrendChart
-          points={labeledPoints}
-          accent={metricMeta.accent}
-          ariaLabel={`نمودار ${metricMeta.label} در ${toFa(trendStats.days)} روز؛ ${toFa(trendStats.activeDays)} روز دارای داده`}
-          yMax={trendStats.yMax}
-          valueFormat={(value) => `${faNum(Math.round(value))}${metricMeta.suffix}`}
-          markerEvents={examMarkers}
-          emptyNote={emptyTrendNote}
-        />
-
-        {/* خلاصهٔ آماری همین سنجه روی کل دادهٔ بازه */}
-        <div className="mt-3 grid grid-cols-2 gap-2.5 border-t border-white/6 pt-3 sm:grid-cols-4">
-          <TrendStat label={metricMeta.avgLabel} value={trendStats.average} suffix={metricMeta.suffix} />
-          <TrendStat label={metricMeta.bestLabel} value={trendStats.best} suffix={metricMeta.suffix} accent={metricMeta.accent} />
-          <TrendStat label={metricMeta.worstLabel} value={trendStats.worst} suffix={metricMeta.suffix} accent="#9a9a9a" />
-          <TrendStat
-            label="آخرین مقدار"
-            value={trendStats.last}
-            suffix={metricMeta.suffix}
-            note={
-              trendStats.delta === null || trendStats.delta === 0
-                ? 'بدون تغییر نسبت به ابتدای بازه'
-                : `${trendStats.delta > 0 ? '+' : '−'}${faNum(Math.abs(Math.round(trendStats.delta * 10) / 10))}${metricMeta.suffix} نسبت به ابتدای بازه`
-            }
-            noteTone={trendStats.deltaGood === null ? '#8a8a8a' : trendStats.deltaGood ? '#61D192' : '#e26d6d'}
+        {/* نمودار در ستون راست، چهار کادر خلاصه در ستون چپ؛ ارتفاع نمودار از همان ستون می‌آید */}
+        <div className="grid gap-3 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+          <TrendChart
+            points={labeledPoints}
+            accent={metricMeta.accent}
+            height="auto"
+            ariaLabel={`نمودار ${metricMeta.label} در ${toFa(trendStats.days)} روز؛ ${toFa(trendStats.activeDays)} روز دارای داده`}
+            yMax={trendStats.yMax}
+            valueFormat={(value) => `${faNum(Math.round(value))}${metricMeta.suffix}`}
+            markerEvents={examMarkers}
+            emptyNote={emptyTrendNote}
           />
-        </div>
 
-        <p className="mt-3 text-[11px] leading-5 text-[var(--faint)]">
-          {faNum(trendStats.activeDays)} روز دارای فعالیت از {toFa(trendStats.days)} روز این بازه
-          {examMarkers.length > 0 ? ` · آزمون‌های این بازه: ${trend.examEvents.map((event) => event.title).join(' · ')}` : ''}
-        </p>
+          {/* خلاصهٔ آماری همین سنجه روی کل دادهٔ بازه */}
+          <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-1">
+            <TrendStat label={metricMeta.avgLabel} value={trendStats.average} suffix={metricMeta.suffix} />
+            <TrendStat label={metricMeta.bestLabel} value={trendStats.best} suffix={metricMeta.suffix} accent={metricMeta.accent} />
+            <TrendStat label={metricMeta.worstLabel} value={trendStats.worst} suffix={metricMeta.suffix} accent="#9a9a9a" />
+            <TrendStat
+              label="آخرین مقدار"
+              value={trendStats.last}
+              suffix={metricMeta.suffix}
+              note={
+                trendStats.delta === null || trendStats.delta === 0
+                  ? 'بدون تغییر نسبت به ابتدای بازه'
+                  : `${trendStats.delta > 0 ? '+' : '−'}${faNum(Math.abs(Math.round(trendStats.delta * 10) / 10))}${metricMeta.suffix} نسبت به ابتدای بازه`
+              }
+              noteTone={trendStats.deltaGood === null ? '#8a8a8a' : trendStats.deltaGood ? '#61D192' : '#e26d6d'}
+            />
+          </div>
+        </div>
       </Card>
 
       {/* نقشهٔ نقاط ضعف */}
@@ -339,27 +353,33 @@ export default function AnalyticsHome({ data, onNavigate, onOpenExam }) {
         )}
       </Card>
 
-      {/* عملکرد درس‌ها + آزمون‌های اخیر — در یک ردیف */}
-      <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
+      {/* عملکرد درس‌ها + آزمون‌های اخیر — در یک ردیف با ارتفاع برابر */}
+      <div className="grid gap-4 lg:grid-cols-2">
         <Card
           title="عملکرد بر اساس درس"
           icon="grid"
-          hint="روی هر درس بزن تا تحلیل مبحث‌به‌مبحثش را ببینی"
+          hint="هر درسی که تست‌زدن یا خواندن درسنامه‌اش را شروع کرده باشی اینجا می‌آید — روی هر درس بزن تا تحلیل مبحث‌به‌مبحثش را ببینی"
           className={`dashboard-layer-reveal ${exams.length > 0 ? '' : 'lg:col-span-2'}`}
         >
-          <div className="space-y-3">
-            {subjects.map((subject) => (
-              <BarRow
-                key={subject.subjectId}
-                label={subject.name}
-                value={subject.accuracy}
-                accent={subject.accent}
-                right={formatPercent(subject.accuracy)}
-                onClick={() => onNavigate?.('subject', { subjectId: subject.subjectId })}
-                subLabel={`${faNum(subject.attemptCount)} تست · میانگین زمان ${formatSeconds(subject.averageTime)} · تسلط: ${{ MASTERED: 'تسلط یافته', STRONG: 'قوی', LEARNING: 'در حال یادگیری', WEAK: 'نیازمند تقویت', NEEDS_DATA: 'دادهٔ کافی نیست' }[subject.mastery.status]}`}
-              />
-            ))}
-          </div>
+          {subjects.length === 0 ? (
+            <EmptyState icon="grid" title="درسی برای تحلیل نیست" note="با ثبت اولین تست‌ها، کارنامهٔ درس‌ها همین‌جا ساخته می‌شود." />
+          ) : (
+            <div className="space-y-3">
+              {subjects.map((subject) => (
+                <BarRow
+                  key={subject.subjectId}
+                  label={subject.name}
+                  value={subject.accuracy}
+                  accent={subject.accent}
+                  right={formatPercent(subject.accuracy)}
+                  onClick={() => onNavigate?.('subject', { subjectId: subject.subjectId })}
+                  subLabel={`${faNum(subject.attemptCount)} تست · میانگین زمان ${formatSeconds(subject.averageTime)} · تسلط: ${MASTERY_STATUSES[subject.mastery.status]?.label ?? '—'}${
+                    subject.lessonStarted ? ' · درسنامه شروع شده' : ''
+                  }`}
+                />
+              ))}
+            </div>
+          )}
         </Card>
 
         {exams.length > 0 && (

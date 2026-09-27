@@ -2,11 +2,11 @@
  * CardEditor — ساخت و ویرایش سریع کارت.
  * اصل: کاربر برای کارت ساده نباید فرم طولانی ببیند؛ Advanced Options جمع‌شده است.
  * انواع کارت: basic | basic-hint | cloze | mcq | image (معماری برای انواع بعدی باز است).
- * صدا و تصویر: فایل کاربر (تا ۲ مگابایت) به‌صورت Data-URL روی کارت ذخیره می‌شود؛
+ * صدا و تصویر: فایل کاربر (تصویر تا ۴ مگابایت، صدا تا ۲ مگابایت) به‌صورت Data-URL روی کارت ذخیره می‌شود؛
  * تصویر هم برای صورت کارت و هم برای پاسخ جداگانه بارگذاری می‌شود.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { SUBJECTS } from '../../../services/flashcards/mockData';
+import { CARD_IMAGE_EXTENSIONS, CARD_IMAGE_MAX_MB, CARD_IMAGE_MIME_EXTENSIONS, SUBJECTS } from '../../../services/flashcards/mockData';
 import { Icon, Modal, parseClozeBlanks, textFieldError, toFa } from './flashcardShared';
 
 const CARD_TYPES = [
@@ -20,7 +20,7 @@ const CARD_TYPES = [
 /* اگر فیلد درس قبلاً به‌شکل شناسهٔ ذخیره شده باشد، برای نمایش به عنوانش تبدیل می‌شود */
 const subjectLabelOf = (value) => SUBJECTS.find((subject) => subject.id === value)?.title ?? value;
 
-/* یک جای خالی بارگذاری تصویر — پیش‌نمایش + حذف؛ فایل ≤ ۲ مگابایت به Data-URL */
+/* یک جای خالی بارگذاری تصویر — پیش‌نمایش + حذف؛ فایل ≤ ۴ مگابایت تصویر و ≤ ۲ مگابایت صدا به Data-URL */
 function ImageSlot({ label, required = false, value, onPick, onClear }) {
   return (
     <div>
@@ -85,6 +85,34 @@ function QualityHints({ front, back, type, options }) {
       ))}
     </ul>
   );
+}
+
+/* تصویر کارت سقف جداگانه دارد — عکس پزشکی معمولاً از صدای کوتاه بزرگ‌تر است و
+   همان سقفِ کتابخانهٔ رسانهٔ پنل (CARD_IMAGE_MAX_MB) اینجا هم اعمال می‌شود. */
+const MAX_IMAGE_BYTES = CARD_IMAGE_MAX_MB * 1024 * 1024;
+
+/* اعتبارسنجی فایل تصویری کارت: فرمت‌های رایج + سقف حجم.
+   اگر مرورگر نوع فایل را خالی بدهد (بعضی HEIC/AVIFها) با پسوند قضاوت می‌کنیم. */
+function imageFileError(file) {
+  const extension = String(file.name).split('.').pop()?.toLowerCase() ?? '';
+  const looksLikeImage = file.type.startsWith('image/') || (!file.type && CARD_IMAGE_EXTENSIONS.includes(extension));
+  if (!looksLikeImage) return 'فایل تصویری انتخاب کن — PNG، JPG، WEBP، GIF، SVG، AVIF، HEIC و…';
+  if (file.size > MAX_IMAGE_BYTES) return `حجم تصویر باید کمتر از ${toFa(CARD_IMAGE_MAX_MB)} مگابایت باشد.`;
+  return '';
+}
+
+/* پسوند → MIME، از همان فهرست مشترک (برعکسِ نگاشت) */
+const MIME_BY_EXTENSION = Object.fromEntries(
+  Object.entries(CARD_IMAGE_MIME_EXTENSIONS).map(([mime, extension]) => [extension, mime]),
+);
+
+/* اگر مرورگر نوع فایل را خالی داده باشد، فایل با MIME درست دوباره ساخته می‌شود؛
+   وگرنه Data-URL بدون نوع تصویری ذخیره می‌شد و در <img> نمایش داده نمی‌شد. */
+function typedImageFile(file) {
+  if (file.type) return file;
+  const extension = String(file.name).split('.').pop()?.toLowerCase() ?? '';
+  const mime = MIME_BY_EXTENSION[extension];
+  return mime ? new File([file], file.name, { type: mime }) : file;
 }
 
 const MAX_AUDIO_BYTES = 2 * 1024 * 1024; /* سقف ذخیره‌سازی محلی — localStorage محدود است */
@@ -214,17 +242,16 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
     reader.readAsDataURL(file);
   };
 
-  /* فایل تصویری کاربر (صورت یا پاسخ کارت) → Data-URL با همان سقف ۲ مگابایت */
+  /* فایل تصویری کاربر (صورت یا پاسخ کارت) → Data-URL با سقف تصویر ۴ مگابایت */
   const handleImageFile = (kind) => (event) => {
-    const file = event.target.files?.[0];
+    const picked = event.target.files?.[0];
     event.target.value = '';
-    if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      setError('یک فایل تصویری انتخاب کن (jpg، png، webp و…).');
-      return;
-    }
-    if (file.size > MAX_AUDIO_BYTES) {
-      setError('حجم تصویر باید کمتر از ۲ مگابایت باشد.');
+    if (!picked) return;
+    /* نوع خالی (بعضی HEIC/AVIFها) از پسوند ساخته می‌شود تا Data-URL نوع تصویری داشته باشد */
+    const file = typedImageFile(picked);
+    const fileError = imageFileError(file);
+    if (fileError) {
+      setError(fileError);
       return;
     }
     const reader = new FileReader();
@@ -296,7 +323,12 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
     try {
       await onSave(card?.id ?? null, draft);
       onClose();
-    } catch {
+    } catch (error) {
+      /* حافظهٔ مرورگر پر شده: تصویر بزرگ در localStorage جا نشده و کارت ذخیره نشده */
+      if (error?.message === 'storage-full') {
+        setError(`تصویر در حافظهٔ مرورگر جا نشد و کارت ذخیره نشد — تصویری کوچک‌تر از ${toFa(CARD_IMAGE_MAX_MB)} مگابایت انتخاب کن.`);
+        return;
+      }
       setError('ذخیره نشد؛ دوباره تلاش کن.');
     }
   };
@@ -515,7 +547,7 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
           </div>
         )}
 
-        {/* تصاویر کارت — هم صورت و هم پاسخ؛ فایل تا ۲ مگابایت */}
+        {/* تصاویر کارت — هم صورت و هم پاسخ؛ تصویر تا ۴ مگابایت */}
         <div>
           <p className="mb-2 text-xs text-[var(--muted)]">
             تصاویر کارت {type === 'image' && <span className="text-[var(--ghost)]">— برای نوع تصویری، عکس صورت لازم است</span>}
@@ -535,7 +567,7 @@ export default function CardEditor({ open, onClose, onSave, card = null, default
               onClear={() => setBackImageUrl('')}
             />
           </div>
-          <p className="mt-1.5 text-[10px] text-[var(--ghost)]">حداکثر ۲ مگابایت برای هر تصویر — در مرور بالای صورت کارت و داخل پاسخ نمایش داده می‌شود.</p>
+          <p className="mt-1.5 text-[10px] text-[var(--ghost)]">حداکثر ۴ مگابایت برای هر تصویر — فرمت‌های رایج (PNG، JPG، WEBP، GIF، SVG، AVIF، HEIC و…). HEIC و TIFF فقط در بعضی مرورگرها باز می‌شوند.</p>
         </div>
 
         {/* صدا — بارگذاری فایل صوتی توسط کاربر */}

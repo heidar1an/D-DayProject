@@ -9,20 +9,9 @@ export const LEARNING_STEPS = [
   { id: 'activate', label: 'فعال‌سازی', action: 'دانسته‌های قبلی را بیدار کن' },
   { id: 'learn', label: 'یادگیری', action: 'مفهوم را در واحدهای کوچک یاد بگیر' },
   { id: 'visualize', label: 'تصویرسازی', action: 'ساختار را فضایی ببین' },
-  { id: 'connect', label: 'ارتباط', action: 'رابطه مفاهیم را بساز' },
   { id: 'practice', label: 'تمرین', action: 'دانسته‌ها را به کار ببر' },
-  { id: 'retrieve', label: 'بازیابی', action: 'بدون کمک پاسخ را به یاد بیاور' },
-  { id: 'diagnose', label: 'تشخیص', action: 'نقطه قوت و ضعف را پیدا کن' },
-  { id: 'review', label: 'مرور', action: 'حافظه را تثبیت کن' },
+  { id: 'test', label: 'تست', action: 'دانسته‌ها را بسنج' },
 ];
-
-export const CONCEPT_STATUSES = {
-  NOT_STARTED: 'شروع‌نشده',
-  LEARNING: 'در حال یادگیری',
-  WEAK: 'نیازمند مرور',
-  FAMILIAR: 'آشنا',
-  MASTERED: 'مسلط',
-};
 
 const anatomyModules = [
   {
@@ -407,20 +396,45 @@ const upperLimbUnitSeeds = [
 
 function createPrototypeLearning(seed, unitId) {
   const [primary, secondary, tertiary, quaternary] = seed.keyConcepts;
+  /* گرم‌کردن فعال‌سازی: سه تست چهارگزینه‌ای که از دادهٔ واقعی واحد (نقشه و مفاهیم) ساخته می‌شوند؛
+     جای گزینهٔ درست با شمارهٔ واحد می‌چرخد تا همیشه «الف» درست نباشد. */
+  const spin = Number(unitId.slice(-2)) % 4;
+  const spinOptions = (correct, distractors) => {
+    const options = [
+      { id: 'opt-0', label: correct },
+      ...distractors.map((label, index) => ({ id: `opt-${index + 1}`, label })),
+    ];
+    return {
+      options: [...options.slice(spin), ...options.slice(0, spin)],
+      answer: `opt-${spin}`,
+    };
+  };
 
   return {
     activate: {
-      intro: `قبل از شروع «${seed.title}»، دانسته‌های قبلی‌ات را فعال کن. این بخش نمره ندارد.`,
-      prompts: [
-        { id: `${unitId}-recall-1`, prompt: seed.prompt, hint: `از نقشه مسیر و واژه «${primary}» شروع کن.` },
-        { id: `${unitId}-recall-2`, prompt: `بین «${primary}» و «${secondary}» چه رابطه‌ای انتظار داری؟`, hint: 'رابطه ساختار، عملکرد و پیامد بالینی را در نظر بگیر.' },
+      tests: [
+        {
+          id: `${unitId}-warmup-1`,
+          difficulty: 'warm-up',
+          question: `در نقشه مسیر این واحد، گامِ بعد از «${seed.map[1]}» کدام است؟`,
+          ...spinOptions(seed.map[2], [seed.map[3], seed.map[4], seed.map[5]]),
+          explanation: `ترتیب نقشه این واحد: ${seed.map.join(' ← ')}.`,
+        },
+        {
+          id: `${unitId}-warmup-2`,
+          difficulty: 'warm-up',
+          question: `در زنجیرهٔ ساختاری این واحد، پس از «${primary}» کدام مفهوم می‌آید؟`,
+          ...spinOptions(secondary, [tertiary, quaternary, 'هیچ‌کدام']),
+          explanation: `زنجیرهٔ این واحد از «${primary}» به «${secondary}» و سپس «${tertiary}» می‌رسد.`,
+        },
+        {
+          id: `${unitId}-warmup-3`,
+          difficulty: 'warm-up',
+          question: 'کدام مورد از مفاهیم کلیدی این واحد است؟',
+          ...spinOptions(quaternary, [seed.map[2], seed.map[3], seed.map[4]]),
+          explanation: `مفاهیم کلیدی این واحد: ${seed.keyConcepts.join('، ')}.`,
+        },
       ],
-    },
-    orient: {
-      why: seed.clinical,
-      position: `این واحد پس از «${seed.prerequisites.at(-1)}» قرار می‌گیرد و پایه ورود به واحد بعدی اندام فوقانی است.`,
-      clinical: seed.clinical,
-      map: seed.map,
     },
     microLessons: seed.keyConcepts.map((concept, index) => ({
       id: `${unitId}-lesson-${index + 1}`,
@@ -448,10 +462,6 @@ function createPrototypeLearning(seed, unitId) {
         { id: 'relations', label: 'روابط' },
       ],
     },
-    relations: [
-      { id: `${unitId}-relation-1`, title: 'زنجیره ساختاری', nodes: [primary, secondary, tertiary, quaternary] },
-      { id: `${unitId}-relation-2`, title: 'زنجیره بالینی', nodes: [primary, 'عملکرد', 'اختلال', 'یافته معاینه'] },
-    ],
     practice: [
       {
         id: `${unitId}-mcq-1`,
@@ -478,41 +488,50 @@ function createPrototypeLearning(seed, unitId) {
       conceptId: secondary,
       explanation: `${secondary} در این نمای آموزشی پس از ${primary} قرار گرفته و به ${tertiary} متصل می‌شود.`,
     },
-    retrieval: [
-      { id: `${unitId}-retrieve-1`, prompt: `بدون نگاه‌کردن، مسیر ${seed.map.slice(0, 5).join(' ← ')} را توضیح بده.`, modelAnswer: `پاسخ خوب باید ترتیب مفاهیم و حداقل دو رابطه علت‌ومعلولی را پوشش دهد.`, conceptId: primary },
-      { id: `${unitId}-retrieve-2`, prompt: `یک کاربرد بالینی برای «${tertiary}» بنویس.`, modelAnswer: seed.clinical, conceptId: tertiary },
-    ],
-    review: {
-      summary: `در این واحد، ${seed.keyConcepts.join('، ')} را در یک مسیر ساختار تا کاربرد به هم متصل کردی.`,
-      keyConcepts: seed.keyConcepts,
-      flashcards: seed.keyConcepts.slice(0, 3).map((concept, index) => ({
-        id: `${unitId}-card-${index + 1}`,
-        front: `برای توضیح «${concept}» چه چهار سؤال اصلی می‌پرسی؟`,
-        back: 'کجاست؟ با چه چیزی مرتبط است؟ چه کاری انجام می‌دهد؟ آسیب آن چه پیامدی دارد؟',
-      })),
-      selectedQuestions: [`رابطه ${primary} و ${secondary} را توضیح بده.`, `یک سناریوی کوتاه درباره ${tertiary} بساز.`],
-    },
   };
 }
 
 const boneLearning = {
   activate: {
-    intro: 'قبل از شروع، ببین چقدر از استخوان‌های اندام فوقانی را می‌شناسی. این یک آزمون نیست؛ فقط حافظه را روشن می‌کند.',
-    prompts: [
+    tests: [
       {
-        id: 'bone-recall-girdle',
-        prompt: 'استخوان‌های تشکیل‌دهنده کمربند شانه‌ای را نام ببر.',
-        hint: 'یکی در جلوی قفسه سینه و دیگری روی سطح خلفی آن قرار می‌گیرد.',
+        id: 'bone-warmup-girdle',
+        difficulty: 'warm-up',
+        question: 'کمربند شانه‌ای از کدام استخوان‌ها ساخته می‌شود؟',
+        options: [
+          { id: 'girdle-a', label: 'جناغ و دنده‌ها' },
+          { id: 'girdle-b', label: 'هومروس و رادیوس' },
+          { id: 'girdle-c', label: 'ترقوه و کتف' },
+          { id: 'girdle-d', label: 'کارپ و متاکارپ' },
+        ],
+        answer: 'girdle-c',
+        explanation: 'کمربند شانه‌ای فقط Clavicle و Scapula است؛ جناغ بخشی از اسکلت محوری و بقیه جزو بخش آزادند.',
       },
       {
-        id: 'bone-recall-free-limb',
-        prompt: 'اگر بخش آزاد اندام فوقانی را جدا کنیم، چه گروه‌هایی از استخوان‌ها را انتظار داری ببینی؟',
-        hint: 'از بازو به ساعد، مچ، کف دست و انگشتان حرکت کن.',
+        id: 'bone-warmup-free-limb',
+        difficulty: 'warm-up',
+        question: 'بخش آزاد اندام فوقانی شامل کدام گروه استخوانی است؟',
+        options: [
+          { id: 'free-a', label: 'هومروس، رادیوس، اولنا و استخوان‌های دست' },
+          { id: 'free-b', label: 'ترقوه، کتف و هومروس' },
+          { id: 'free-c', label: 'فقط هومروس، رادیوس و اولنا' },
+          { id: 'free-d', label: 'فقط استخوان‌های مچ و دست' },
+        ],
+        answer: 'free-a',
+        explanation: 'بخش آزاد = هومروس + رادیوس + اولنا + ۸ کارپ + ۵ متاکارپ + ۱۴ فالانکس؛ کمربند جدا است.',
       },
       {
-        id: 'bone-recall-landmark',
-        prompt: 'یک برجستگی استخوانی قابل لمس در شانه، آرنج و مچ نام ببر.',
-        hint: 'آکرومیون، اولکرانون و زائده استیلوئید نمونه‌های خوبی هستند.',
+        id: 'bone-warmup-landmark',
+        difficulty: 'warm-up',
+        question: 'کدام گروه، Landmarkهای قابل لمس اندام فوقانی‌اند؟',
+        options: [
+          { id: 'mark-a', label: 'حفره گلنوئید و شیار رادیال' },
+          { id: 'mark-b', label: 'آکرومیون، اولکرانون و زائده استیلوئید' },
+          { id: 'mark-c', label: 'Spine کتف و Trochlear notch' },
+          { id: 'mark-d', label: 'گردن جراحی و Head رادیوس' },
+        ],
+        answer: 'mark-b',
+        explanation: 'این سه در شانه، آرنج و مچ لمس می‌شوند؛ حفره گلنوئید و شیار رادیال عمق‌اند و لمس‌پذیر نیستند.',
       },
     ],
   },
@@ -593,11 +612,6 @@ const boneLearning = {
       { id: 'scaphoid', label: 'اسکافوئید', x: 39, y: 88, detail: 'استخوان کارپ مستعد شکستگی و نکروز آواسکولار' },
     ],
   },
-  relations: [
-    { id: 'bone-joint-movement', title: 'ساختار تا حرکت', nodes: ['استخوان', 'سطح مفصلی', 'مفصل', 'محور حرکت', 'دامنه حرکت'] },
-    { id: 'bone-nerve-clinical', title: 'Landmark تا بالین', nodes: ['گردن جراحی', 'عصب آگزیلاری', 'عضله دلتوئید', 'ابداکشن', 'ضعف حرکت'] },
-    { id: 'scaphoid-flow', title: 'شکستگی اسکافوئید', nodes: ['افتادن روی دست', 'شکستگی اسکافوئید', 'اختلال خون‌رسانی رتروگراد', 'نکروز آواسکولار'] },
-  ],
   practice: [
     {
       id: 'bone-mcq-glenoid',
@@ -641,30 +655,6 @@ const boneLearning = {
     conceptId: 'acromion',
     explanation: 'آکرومیون ادامه لترال خار کتف است و سقف استخوانی شانه را می‌سازد.',
   },
-  retrieval: [
-    {
-      id: 'bone-retrieve-1',
-      prompt: 'بدون نگاه‌کردن، استخوان‌های اندام فوقانی را از پروگزیمال به دیستال مرتب کن.',
-      modelAnswer: 'ترقوه و کتف ← هومروس ← رادیوس و اولنا ← کارپ‌ها ← متاکارپ‌ها ← فالانکس‌ها',
-      conceptId: 'bone-map',
-    },
-    {
-      id: 'bone-retrieve-2',
-      prompt: 'سه جفت Landmark هومروس و عصب در معرض آسیب را بنویس.',
-      modelAnswer: 'گردن جراحی ـ آگزیلاری؛ شیار رادیال ـ رادیال؛ اپی‌کندیل داخلی ـ اولنار',
-      conceptId: 'humerus-relations',
-    },
-  ],
-  review: {
-    summary: 'اندام فوقانی از کمربند شانه‌ای و بخش آزاد ساخته می‌شود. Landmarkهای استخوانی فقط نام نیستند؛ هرکدام یک رابطه مفصلی، عضلانی، عصبی یا بالینی را رمزگذاری می‌کنند.',
-    keyConcepts: ['تقسیم‌بندی ۲ + ۳۰ استخوان', 'Landmarkهای کتف', 'نقاط خطر هومروس', 'سمت رادیوس و اولنا', 'گروه‌های استخوانی دست'],
-    flashcards: [
-      { id: 'bone-card-1', front: 'اجزای کمربند شانه‌ای؟', back: 'Clavicle و Scapula' },
-      { id: 'bone-card-2', front: 'سه رابطه عصبی مهم هومروس؟', back: 'Surgical neck–Axillary؛ Radial groove–Radial؛ Medial epicondyle–Ulnar' },
-      { id: 'bone-card-3', front: 'تعداد استخوان‌های کارپ، متاکارپ و فالانکس؟', back: '۸، ۵ و ۱۴' },
-    ],
-    selectedQuestions: ['چرا حفره گلنوئید هم حرکت را زیاد و هم پایداری را کم می‌کند؟', 'اهمیت بالینی خون‌رسانی اسکافوئید چیست؟'],
-  },
 };
 
 export const upperLimbUnits = upperLimbUnitSeeds.map((seed, index) => {
@@ -688,16 +678,6 @@ export const upperLimbUnits = upperLimbUnitSeeds.map((seed, index) => {
     mastery: isDetailedPrototype ? 31 : 0,
     lastActivity: isDetailedPrototype ? 'امروز · میکرودرس ۲' : 'هنوز شروع نشده',
     steps: LEARNING_STEPS.map((step) => step.id),
-    concepts: seed.keyConcepts.map((concept, conceptIndex) => ({
-      id: `${id}-concept-${conceptIndex + 1}`,
-      title: concept,
-      description: `مفهوم کلیدی ${concept} در واحد ${seed.title}`,
-      relatedConcepts: seed.keyConcepts.filter((item) => item !== concept),
-      difficulty: conceptIndex < 2 ? 'core' : 'advanced',
-      mastery: isDetailedPrototype ? Math.max(18, 42 - conceptIndex * 7) : 0,
-      lastReviewed: isDetailedPrototype ? 'امروز' : null,
-      nextReview: isDetailedPrototype ? 'فردا' : null,
-    })),
     learning: isDetailedPrototype ? boneLearning : createPrototypeLearning(seed, id),
   };
 });

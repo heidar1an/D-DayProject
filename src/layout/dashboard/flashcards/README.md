@@ -15,7 +15,7 @@ src/layout/dashboard/flashcards/
 ├── FlashcardSection.jsx   ← پوستهٔ لایه: هیرو، برنامهٔ امروز، دک‌ها، ضعیف‌ها، پیشنهادها، توست
 ├── ReviewSession.jsx      ← فضای مرور متمرکز + میانبرهای کیبورد + ارزیابی خوش‌بینانه
 ├── DeckView.jsx           ← جزئیات دِک: جستجو، فیلتر حالت/تگ، مدیریت کارت‌ها
-├── CardEditor.jsx         ← ساخت/ویرایش کارت (basic | basic-hint | cloze | mcq) + هشدار کیفیت
+├── CardEditor.jsx         ← ساخت/ویرایش کارت (basic | basic-hint | cloze | mcq | image) + هشدار کیفیت
 ├── DeckModal.jsx          ← ساخت/ویرایش دِک (نام، توضیح، موضوع، رنگ، دسترسی)
 ├── StatsView.jsx          ← آمار مینیمال: نمودار روزانه، هیت‌مپ تپشی، مباحث ضعیف، ترکیب کارت‌ها
 ├── SettingsView.jsx       ← محدودیت روزانه، پیکربندی الگوریتم، تجربهٔ مرور، خروجی JSON
@@ -90,6 +90,14 @@ src/layout/dashboard/flashcards/
 - `POST /api/flashcards/cards/:id/suspend|unsuspend|bury|bookmark`
 - `GET /api/flashcards/stats` · `GET/PATCH /api/flashcards/settings` · `POST /api/flashcards/events`
 
+**کتابخانهٔ واقعی امروز دو منبع دارد:** دک‌های ثابتِ داخل کد (`mockData.js`) و دک‌هایی که
+مدیر در پنل ساخته و منتشر کرده است. مسیر دومی `GET /api/public/flashcards/library` است و
+`loadPublishedDecks()` آن را با کش ۱۵ ثانیه‌ای می‌خواند؛ `fetchLibrary`/`fetchDeck`/
+`fetchMyDecks`/`fetchOverview` همیشه تازه می‌خوانند (`forceLibrary`). سرور هر مجموعهٔ ثابت را
+هم به رکورد پنل تبدیل می‌کند، پس **هم‌شناسه‌ها با `publishedDeckIds()` از فهرست ثابت حذف
+می‌شوند** تا یک مجموعه دو بار نیاید و ویرایش پنل زیر نسخهٔ کد گم نشود. با قطع سرور خطا پرت
+نمی‌شود و همان دک‌های ثابت سر جایشان می‌مانند.
+
 اتصال واقعی فقط بدنهٔ توابع `flashcardService.js` را تغییر می‌دهد؛ UI دست نمی‌خورد.
 
 ## ۷. اتصال به اکوسیستم تپش
@@ -107,6 +115,27 @@ src/layout/dashboard/flashcards/
 - داده‌ها در `localStorage` با کلید `tapesh:flashcards:v1` به تفکیک `userId` — مرورها بین رفرش می‌مانند.
   برای ریست کامل: `localStorage.removeItem('tapesh:flashcards:v1')`.
 - `useAsyncData` (مشترک با لیگ) لودینگ/خطا/Retry را می‌دهد؛ اسکلت‌ها هم‌اندازه‌اند و Layout Shift ندارند.
+- **تصویر کارت تصویری: فرمت‌های رایج و سقف ۴ مگابایت (دور ششم).** سقف تصویر از صدای کارت
+  جدا شد (`MAX_IMAGE_BYTES` از `CARD_IMAGE_MAX_MB` مشترک در `mockData.js`؛ صدا همان ۲ مگابایت)
+  و فهرست فرمت‌ها هم از همان‌جا می‌آید: png، jpg، webp، gif، svg، avif، bmp، tiff، heic، heif
+  و ico — همان فهرستی که ویرایشگر پنل و سرور هم می‌خوانند. اگر مرورگر `file.type` را خالی
+  بدهد (بعضی HEIC/AVIFها) با پسوند قضاوت می‌شود و فایل با MIME درست **بازسازی** می‌شود؛ وگرنه
+  Data-URL بدون نوع تصویری ذخیره می‌شد و در `<img>` نمایش داده نمی‌شد. HEIC و TIFF فقط در بعضی
+  مرورگرها باز می‌شوند و همین در راهنمای فیلد نوشته شده.
+- **قرارداد «حافظهٔ مرورگر پر است».** تصویر به‌صورت Data-URL داخل همان کلید `localStorage`
+  می‌نشیند، پس تصویر بزرگ می‌تواند سقف ~۵ مگابایتی مرورگر را پر کند. `writeStore` حالا نتیجهٔ
+  نوشتن را در `lastWriteOk` نگه می‌دارد و `createCard`/`updateCard` در صورت شکست
+  `Error('storage-full')` می‌دهند **و تغییر را برمی‌گردانند** تا کش با دیسک یکی بماند؛
+  `CardEditor` همین را به پیام «تصویر در حافظهٔ مرورگر جا نشد…» تبدیل می‌کند. بقیهٔ مسیرها
+  رفتار قبلی را دارند (نشست در حافظه ادامه می‌یابد و فقط ماندگاری بین رفرش‌ها کم می‌شود).
+- **جای نقطه‌ها روی تصویر (دور هفتم).** نقطه‌ها درصدی‌اند (۰ تا ۱۰۰) و مرجعشان **جعبهٔ خودِ
+  تصویر** است، پس آن جعبه باید مو‌به‌مو اندازهٔ تصویر بماند. تا پیش از این تصویر داخل یک جعبهٔ
+  مربعی `h-64 w-64` با `object-contain` می‌نشست؛ روی تصویر غیرمربعی (مثل `/anatomy/heart.svg`
+  و `brain.svg` که ۴۰۰×۴۰۰ اعلام شده‌اند ولی `viewBox` دیگری دارند) این جعبه **letterbox**
+  می‌شد و نقطه‌ها جابه‌جا می‌افتادند. حالا `<img>` خودش `max-h-64 max-w-full w-auto
+  object-contain` است و داخل `figure.relative.w-fit` می‌نشیند تا جعبه دقیقاً به اندازهٔ تصویر
+  بچسبد. شمارهٔ هر نقطه هم با `toFa(index + 1)` روی خود دایره (`.fc-hotspot__num`) نشان داده
+  می‌شود تا کاربر نقاط را از هم تشخیص بدهد.
 - همهٔ اعداد فارسی (`toFa/faNum`)، `dir=rtl`، فوکوس‌پذیری، `aria-pressed/expanded/current`،
   `role=switch/progressbar/progressbar`، دکمه‌های لمسی بزرگ در موبایل و گارد `prefers-reduced-motion`.
 - تست حالت خطا از کنسول: `__flashcardService.__setFailure(true)` و سپس تعویض تب.
