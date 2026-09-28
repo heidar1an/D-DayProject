@@ -144,15 +144,27 @@ export function ReaderProvider({ reference, initialPosition, onExit, children })
     [],
   );
 
-  /* ── هایلایت ── */
+  /* ── هایلایت — با منطق روشن/خاموش:
+       انتخابِ دقیقاً همان بازه با همان رنگ ⇒ هایلایت برداشته می‌شود؛
+       هم‌پوشانی با هایلایت(های) قبلی ⇒ آن‌ها حذف و هایلایت تازه جای‌شان می‌نشیند. ── */
   const addHighlight = useCallback(
     async (blockIdValue, start, end, color) => {
-      const overlaps = highlights.some(
+      const overlapping = highlights.filter(
         (h) => h.blockId === blockIdValue && start < h.end && end > h.start,
       );
-      if (overlaps) {
-        showToast('این بخش با هایلایت فعلی هم‌پوشانی دارد', 'warning');
-        return false;
+      const exact = overlapping.find((h) => h.start === start && h.end === end && h.color === color);
+      if (exact) {
+        await api.deleteHighlight(reference.id, exact.id);
+        setHighlights((current) => current.filter((h) => h.id !== exact.id));
+        showToast('هایلایت برداشته شد', 'info');
+        return true;
+      }
+      for (const item of overlapping) {
+        await api.deleteHighlight(reference.id, item.id);
+      }
+      if (overlapping.length) {
+        const ids = new Set(overlapping.map((item) => item.id));
+        setHighlights((current) => current.filter((h) => !ids.has(h.id)));
       }
       const quote =
         content
@@ -160,7 +172,7 @@ export function ReaderProvider({ reference, initialPosition, onExit, children })
           .find((b) => b.id === blockIdValue)?.text?.slice(start, end) ?? '';
       const created = await api.saveHighlight(reference.id, { blockId: blockIdValue, start, end, color, quote });
       setHighlights((current) => [...current, created]);
-      showToast('هایلایت ذخیره شد', 'success');
+      showToast(overlapping.length ? 'هایلایت به‌روزرسانی شد' : 'هایلایت ذخیره شد', 'success');
       return true;
     },
     [highlights, content, reference.id, showToast],

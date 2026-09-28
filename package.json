@@ -12,7 +12,8 @@
     "theme:verify": "node scripts/theme-verify.mjs",
     "theme:contrast": "node scripts/theme-contrast.mjs",
     "theme:tailwind": "node scripts/tailwind-probe.mjs",
-    "theme:render": "node scripts/verify-render.mjs"
+    "theme:render": "node scripts/verify-render.mjs",
+    "planning:test": "node scripts/planning-service-test.mjs"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",

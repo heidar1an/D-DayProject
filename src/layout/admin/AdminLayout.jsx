@@ -21,6 +21,7 @@ import AdminArticleLibrary from './views/AdminArticleLibrary';
 import AdminMicro from './views/AdminMicro';
 import AdminTestBank from './views/AdminTestBank';
 import AdminComprehensive from './views/AdminComprehensive';
+import AdminIntlCourses from './views/AdminIntlCourses';
 import AdminMedia from './views/AdminMedia';
 import AdminPublishing from './views/AdminPublishing';
 import AdminUsers from './views/AdminUsers';
@@ -30,18 +31,21 @@ import AdminNotes from './views/AdminNotes';
 import AdminProfile from './views/AdminProfile';
 import AnalyticsCenter from './analytics/AnalyticsCenter';
 import MediaCenter, { MEDIA_TAB_IDS } from './media/MediaCenter';
+import PlanningCenter, { PLANNING_TAB_IDS } from './planning/PlanningCenter';
 import {
   Button, Spinner, ToastProvider, faDate, toFa, useToast,
 } from './adminShared';
 import {
   IconAnalytics, IconBroadcast, IconChevron, IconDashboard, IconLog,
-  IconLogout, IconMedia, IconMenu, IconNote, IconPage, IconSend, IconSettings, IconUser,
+  IconLogout, IconMedia, IconMenu, IconNote, IconPage, IconPlanning, IconSend,
+  IconSettings, IconUser,
 } from './adminIcons';
 
 const SECTIONS = [
   { id: 'dashboard', label: 'داشبورد', icon: IconDashboard, permission: null },
   { id: 'analytics', label: 'مرکز تحلیل', icon: IconAnalytics, permission: 'analytics.read' },
   { id: 'media-center', label: 'مدیریت رسانه و فضای مجازی', icon: IconBroadcast, permission: 'media.read' },
+  { id: 'planning', label: 'برنامه‌ریزی و مدیریت', icon: IconPlanning, permission: null },
   { id: 'pages', label: 'صفحات', icon: IconPage, permission: 'pages.read' },
   { id: 'media', label: 'کتابخانهٔ رسانه', icon: IconMedia, permission: 'media.read' },
   { id: 'publishing', label: 'انتشار در کانال‌ها', icon: IconSend, permission: 'publishing.read' },
@@ -62,7 +66,13 @@ const SECTION_IDS = new Set(SECTIONS.map((section) => section.id));
  * `#admin/micro-lesson` ناشناخته می‌مانند و مستقیم به داشبورد برمی‌گشتند
  * (رفرش، بخش را از دست می‌داد).
  */
-const ROUTABLE_VIEWS = new Set([...SECTION_IDS, 'flashcard-library', 'reference-library', 'article-library', 'micro-lesson', 'test-bank-library', 'comprehensive-library']);
+const ROUTABLE_VIEWS = new Set([...SECTION_IDS, 'flashcard-library', 'reference-library', 'article-library', 'micro-lesson', 'test-bank-library', 'comprehensive-library', 'intl-courses']);
+
+/*
+ * زیرصفحه‌های «برنامه‌ریزی و مدیریت» — پاراگراف دوم آدرس نام تب است
+ * (`#admin/planning/tasks`). اگر تب ناشناخته باشد، خودِ ماژول آن را به تب مجاز
+ * برمی‌گرداند و آدرس را اصلاح می‌کند.
+ */
 
 /*
  * زیرنمایش‌هایی که شناسه‌شان با بخش مادرشان یکی نیست.
@@ -80,6 +90,7 @@ const SECTION_SUBVIEWS = {
   'micro-lesson': 'pages',
   'test-bank-library': 'pages',
   'comprehensive-library': 'pages',
+  'intl-courses': 'pages',
 };
 
 /* نام هر نمایش → شناسهٔ بخشی که به آن تعلق دارد */
@@ -96,6 +107,7 @@ const VIEW_TITLES = {
   'micro-lesson': 'میکرو درسنامه تپش',
   'test-bank-library': 'بانک تست علوم پایه',
   'comprehensive-library': 'درسنامه جامع علوم پایه',
+  'intl-courses': 'دوره‌های بین‌الملل',
 };
 
 /* `#admin` یا `#admin/pages` یا `#admin/analytics/traffic` یا `#admin/pages/page-1234` */
@@ -115,6 +127,11 @@ function parseHashView() {
   /* مرکز رسانه: پاراگراف دوم نام تب است (`#admin/media-center/overview`) */
   if (section === 'media-center') {
     return { name: 'media-center', payload: match[2] ? { tab: MEDIA_TAB_IDS.has(match[2]) ? match[2] : 'overview' } : null };
+  }
+
+  /* برنامه‌ریزی و مدیریت: پاراگراف دوم نام زیرصفحه است (`#admin/planning/tasks`) */
+  if (section === 'planning') {
+    return { name: 'planning', payload: match[2] && PLANNING_TAB_IDS.has(match[2]) ? { tab: match[2] } : null };
   }
 
   return { name: section, payload: null };
@@ -152,7 +169,9 @@ export function AdminShell({ admin, onExit, onLogout }) {
         ? `#admin/analytics/${payload.tab}`
         : name === 'media-center' && payload?.tab
           ? `#admin/media-center/${payload.tab}`
-          : `#admin/${name}`;
+          : name === 'planning' && payload?.tab
+            ? `#admin/planning/${payload.tab}`
+            : `#admin/${name}`;
 
     if (window.location.hash !== hash) {
       window.history.replaceState(window.history.state, '', hash);
@@ -223,6 +242,14 @@ export function AdminShell({ admin, onExit, onLogout }) {
             onTabChange={(tab) => navigate('media-center', { tab })}
           />
         );
+      case 'planning':
+        return (
+          <PlanningCenter
+            admin={admin}
+            tab={view.payload?.tab ?? null}
+            onTabChange={(tab) => navigate('planning', { tab })}
+          />
+        );
       case 'pages':
         return <AdminPages {...editorProps} />;
       case 'flashcard-library':
@@ -237,6 +264,8 @@ export function AdminShell({ admin, onExit, onLogout }) {
         return <AdminTestBank admin={admin} onBack={() => navigate('pages')} />;
       case 'comprehensive-library':
         return <AdminComprehensive admin={admin} onBack={() => navigate('pages')} />;
+      case 'intl-courses':
+        return <AdminIntlCourses admin={admin} onBack={() => navigate('pages')} />;
       case 'page-editor':
         return <AdminContentEditor {...editorProps} kind="page" id={view.payload?.id ?? null} />;
       case 'media':

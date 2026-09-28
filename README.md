@@ -154,6 +154,7 @@ D-DayProject/
 │   ├── contentStore.js     دادهٔ CMS + RBAC + نشست + audit
 │   ├── adminApi.js         هندلر API پنل (مستقل از فریم‌ورک)
 │   ├── adminApiPlugin.js   میزبان توسعه (middleware ویت)
+│   ├── uploadsFile.js      سرو `public/uploads/` + Range (مشترک توسعه و پروداکشن)
 │   ├── analyticsStore.js / analyticsEngine.js / analyticsInsights.js
 │   ├── sanitizeHtml.js     پاک‌ساز HTML (تک‌نسخه، سرور و کلاینت)
 │   ├── usersStore.js / apiPlugin.js   حساب‌های کاربری سایت
@@ -370,7 +371,7 @@ const [view, setView, patchView] = useLayerRoute(LAYER_IDS.wiki, WIKI_HOME_VIEW,
 - **`myCoursesCatalog.js`** منبع واحد «دوره‌های من» است و از سه خانوادهٔ واقعی دوره‌ها
   (`SUBJECTS` درسنامه جامع، `SUBJECTS` میکرو، `COURSES` بین‌الملل) تغذیه می‌شود؛ `COURSE_KINDS`
   هویت بصری هر خانواده (رنگ، آیکون، مدل نوار پیشرفت) را نگه می‌دارد.
-- **نمای داخل دوره‌های بین‌الملل** در `courses/InternationalCoursesLayer.jsx` با همان مسیر داخلی لایه ساخته شده است: کارت دوره → کادر اطلاعات (هشتک‌ها/عنوان/ناشر/پسندیدن/گزارش) در **بالای** پخش‌کننده، بعد در ستون اصلی پخش‌کننده و **زیر ویدیو کادر `LessonInfo`** (عنوان و توضیح همان ویدیو + دکمهٔ یادداشت‌برداری که با `createNote` در بخش «یادداشت‌ها» ذخیره می‌شود) و در ستون کنار فهرست ویدیوها و دورهٔ پیشنهادی؛ `view.name = 'detail'` و `view.courseId` در hash می‌نشینند و بازگشت به کاتالوگ با `view.name = 'catalog'` انجام می‌شود. عرض این نما هم `var(--content-width)` است (هم‌اندازهٔ هدر داشبورد). پخش‌کننده: پخش/توقف، تنظیم صدا و نور (`PlayerStepper`)، خط زمانی **چپ‌به‌راست** با زمان در سمت چپ نوار، زیرنویس (`SUBTITLE_LANGS` در همین فایل) و تمام‌صفحه. استایل‌ها با پیشوند `intl-course-*` در `internationalCourses.css` هستند. لایه `userId` می‌گیرد (از `DashboardLayout`).
+- **نمای داخل دوره‌های بین‌الملل** در `courses/InternationalCoursesLayer.jsx` با همان مسیر داخلی لایه ساخته شده است: کارت دوره → کادر اطلاعات (هشتک‌ها/عنوان/ناشر/پسندیدن/گزارش) در **بالای** پخش‌کننده، بعد در ستون اصلی پخش‌کننده و **زیر ویدیو کادر `LessonInfo`** (عنوان و توضیح همان ویدیو + دکمهٔ یادداشت‌برداری که با `createNote` در بخش «یادداشت‌ها» ذخیره می‌شود) و در ستون کنار فهرست ویدیوها و دورهٔ پیشنهادی؛ `view.name = 'detail'` و `view.courseId` در hash می‌نشینند و بازگشت به کاتالوگ با `view.name = 'catalog'` انجام می‌شود. عرض این نما هم `var(--content-width)` است (هم‌اندازهٔ هدر داشبورد). پخش‌کننده دو حالت دارد. اگر برای آن بخش ویدیویی در پنل بارگذاری شده باشد، **پخش‌کنندهٔ داخلی خود سایت** می‌آید: همان دیزاین قبلی، ولی روی عنصر `<video>` واقعی — دکمهٔ بزرگ پخش، خط زمانی تعاملی (کلیک + کلیدهای ←/→/Home/End) با نمایش بخش بافرشده، زمان سپری‌شده/کل، چیدمان نوار کنترل (راست‌به‌چپ: **تنظیم‌های پخش سمت راست، پخش/زمان سمت چپ**): صدا و نور با **نوار عمودی شناور** (`PlayerSlider` — با کلیک روی آیکون بالای همان آیکون باز می‌شود و درصد **بالای** نوار است؛ نه `+ / −` و نه خوانش عددی)، سرعت پخش (`PLAYBACK_RATES`)، خط زمان در میانه، و سپس پخش/توقف **کنار زمان ویدیو**، زیرنویس و تمام‌صفحه. **فقط یک کادر شناور هم‌زمان باز است** (`panel` واحد ⇒ باز کردن هر کدام قبلی را می‌بندد) و کلیک **بیرون** روی `document` هم می‌بندد؛ کلیک روی سطح ویدیو اگر کادری باز باشد فقط آن را می‌بندد و ویدیو را پخش/توقف نمی‌کند. آیکون پخش/توقف با **Web Animations API** انیمیشن تعویض می‌گیرد (`pulseIcon`) — نه با `animation` در CSS، چون گارد `prefers-reduced-motion` این لایه `animation-duration`/`transition-duration` را `0.01ms !important` می‌کند و روی مکِ کاربر انیمیشن CSS دیده نمی‌شود. زیرنویس واقعی از `<track>` و `textTracks[].mode` روی **زیرنویس‌های بارگذاری‌شدهٔ همان بخش** می‌آید (آیکون زیرنویس همیشه در نوار هست، هر زبانی که فایل نداشته باشد در منو نیست)؛ ظاهرش با `::cue` تعیین می‌شود (فونت **Pinar**، اندازهٔ واکنش‌گرا) و **جایش با `VTTCue`** — `snapToLines = false` و `line = 74٪` از بالای قاب، چون مکان را CSS نمی‌تواند عوض کند و پیش‌فرض مرورگر متن را می‌چسباند به نوار کنترل. فایل `.srt` هنگام بارگذاری در پنل به WebVTT تبدیل می‌شود، چون عنصر `<track>` مرورگر فقط WebVTT را می‌خواند و برای `.srt` بی‌صدا هیچ زیرنویسی نشان نمی‌دهد. ویدیو `controls` بومی ندارد و در تمام‌صفحه کل قاب را می‌گیرد (`object-fit: contain`). اگر ویدیویی بارگذاری نشده باشد، همان قاب تصویری با کنترل‌های نمایشی می‌ماند. خط زمانی **چپ‌به‌راست** است. استایل‌ها با پیشوند `intl-course-*` در `internationalCourses.css` هستند. لایه `userId` می‌گیرد (از `DashboardLayout`).
 - **لایهٔ منبع** (`view.name = 'provider'` + `view.providerId` + `view.fromCourseId`): کلیک روی نام دانشگاه/نهاد در کادر اطلاعات دوره، این نما را باز می‌کند — معرفی منبع از `PROVIDER_DATA` (کشور، سال بنیان، تمرکزها) + دوره‌های همان منبع در تپش (`COURSES[].providerId`) + «دوره‌های مرتبط در همین حوزه». بازگشت به همان دورهٔ قبلی می‌رود. استایل‌ها با پیشوند `intl-provider-*`.
 - **لایهٔ یادگیری یک درس** (`courses/learning/`، کامپوننت `AnatomyLearningLayer`): دو سطح
   `overview → unit` — نمای «کل درسنامه‌ها» (ستون راست: کادرهای سرتیتر، ستون چپ: کارت‌های واحد)
@@ -528,6 +529,8 @@ POST   /api/admin/auth/login | logout | password
 GET    /api/admin/auth/me                     نشست جاری + توکن CSRF
 GET    /api/admin/stats | meta
 CRUD   /api/admin/{articles,categories,pages,media,banners,users,notes,flashcards,micro}
+CRUD   /api/admin/{intl-courses,intl-providers}  دوره‌ها و منابع لایهٔ بین‌الملل (پنل)
+POST   /api/admin/intl-courses/upload          بارگذاری دودویی ویدیو/زیرنویس (استریم، نه JSON)
 GET    /api/admin/micro/subjects               فهرست درس‌های رجیستری (فرم «درسنامهٔ تازه»)
 GET    /api/admin/micro/test-bank              انتخاب سؤال از بانک تست
 POST   /api/admin/micro/:id/status             انتشار/لغو انتشار میکرو درسنامه
@@ -536,7 +539,7 @@ GET    /api/admin/logs
 GET    /api/admin/analytics/{sources,ping,export,alerts} + ۱۶ بخش تحلیل
 POST   /api/public/analytics/collect           تلمتری مرورگر (تنها مسیر عمومی غیر-GET)
 GET    /api/public/{articles,banners,settings,pages/:slug}
-GET    /api/public/{flashcards,micro}/library   کتابخانهٔ منتشرشدهٔ فلش‌کارت / میکرو درسنامه
+GET    /api/public/{flashcards,micro,intl-courses}/library   کتابخانهٔ منتشرشدهٔ فلش‌کارت / میکرو / بین‌الملل
 GET    /api/auth/google/{status,start,callback,handoff}   ورود/ثبت‌نام با گوگل
 ```
 
@@ -592,7 +595,8 @@ Google Cloud Console. خودِ جریان کد کامل است، ولی `client_
 ### مجموعه‌های دادهٔ CMS (`database/content/*.json`)
 
 `admins` · `articles` · `categories` · `pages` · `media` · `banners` · `activity` · `notes` ·
-`settings` · `alerts` · `events` · `flashcardDecks` · `references` · `microCourses`
+`settings` · `alerts` · `events` · `flashcardDecks` · `references` · `microCourses` ·
+`intlProviders` · `intlCourses`
 
 در اولین درخواست خودکار ساخته و seed می‌شوند (`ensureStore`).
 **بازنشانی کامل:** `rm -rf database/content` (توجه: رویدادهای واقعی تحلیل هم پاک می‌شوند).
@@ -1186,6 +1190,32 @@ specificity داشتند ⇒ **قاعدهٔ دیرتر برد** و آیکون د
   (مثل `['قلب و عروق','چرخهٔ قلبی']`)؛ یک کاراکتر اختلاف = صفر سؤال. مسیر درست را از خود
   بانک بردار، حدس نزن.
 
+### ۱۹) کپی مسیر import دارایی از یک لایه به یک سرویس = یک `../` اضافه
+
+وقتی کاتالوگ خالص را از داخل لایه (`src/layout/dashboard/<x>/`) به `src/services/<x>/`
+منتقل می‌کنی، مسیرهای `import ... from '../../../../images/…'` یک پله عمیق‌تر از لازم
+می‌مانند و **بی‌صدا در باندل نمی‌نشینند**: در توسعه Vite خطای «Failed to resolve import»
+می‌دهد و در بررسی هارنس فقط «Could not resolve» می‌بینی.
+
+**قاعده:** عمق را از محل فایل بشمار، نه از روی فایل مبدأ. `src/services/<x>/file.js`
+سه پله (`../../../images/…`) و `src/services/file.js` دو پله (`../../images/…`) و
+`src/layout/dashboard/<x>/file.jsx` چهار پله. سریع‌ترین راه تأیید: باندل با esbuild و
+لودر دارایی‌ها (`{'.png':'dataurl'}` و `{'.css':'text'}`) — هر مسیر غلط همان‌جا لو می‌رود.
+
+### ۲۰) ویت ۷ فایل‌های تازهٔ `public/` را سرو نمی‌کند (ویدیوی آپلودی سیاه می‌ماند)
+
+`servePublicMiddleware` ویت فهرست فایل‌های `public/` را **یک‌بار در زمان راه‌اندازی**
+کش می‌کند (`publicFilesMap`). پس هر فایلی که بعد از بالا آمدن سرور توسعه در `public/`
+ساخته شود سرو نمی‌شود و درخواستش به **HTML اسپا با کد ۲۰۰** می‌افتد. برای `<video>`
+این یعنی هیچ خطایی در کنسول نیست و پخش‌کننده فقط سیاه می‌ماند — شبیه باگ داده، ولی باگ
+سرو است.
+
+**قاعده:** فایل‌های آپلودی پنل از `database/uploadsFile.js` سرو می‌شوند (هم در
+`adminApiPlugin.js` برای توسعه و هم در `server.js` برای پروداکشن). این ماژول در هر
+درخواست از دیسک می‌خواند، `Range` می‌دهد و برای فایل غایب **۴۰۴ صریح** برمی‌گرداند نه
+HTML. اگر جایی فایل تازه‌ای زیر `public/` گذاشتی، انتظار نداشته باش ویت در همان اجرا
+سروش کند. تشخیص سریع: `curl -sI <url>` — اگر `content-type` برابر `text/html` بود،
+فایل سرو نشده و به اسپا افتاده است.
 
 ---
 

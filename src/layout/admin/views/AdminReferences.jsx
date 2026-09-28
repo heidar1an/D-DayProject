@@ -63,9 +63,9 @@ const STATUS_LABEL = { draft: 'پیش‌نویس', published: 'منتشرشده'
  * رنگ‌ها و کادرهای آمادهٔ ویرایشگر مبحث — همان پیکربندی میکرو درسنامه (`AdminMicro`).
  * متن مبحث همان کلاس‌های محتوا را می‌گیرد (`micr-tone--*` و `micr-callout--*`) تا
  * پیش‌نمایش ویرایشگر و متن منتشرشده یکی بماند؛ پاک‌ساز HTML فقط `class` را عبور
- * می‌دهد، پس رنگ با کلاس است نه `style`. ساختار کادرهای درج عیناً همان خروجیِ
- * seed است (`referenceBlockToHtml` در `referenceCatalog.js`): سرتیتر با
- * `micr-callout__tag` و متن در `p` بعدی.
+ * می‌دهد، پس رنگ با کلاس است نه `style`. ساختار کادرهای درج از seed ساده‌تر است:
+ * سرتیتر با `strong` (بدون برچسبِ گردِ `micr-callout__tag` که در ویرایشگر به‌صورت
+ * عنوان آبی دیده می‌شد و کاربر حذفش را خواست) و متن در `p` بعدی.
  */
 const TOPIC_TONES = [
   { value: 'gold', label: 'طلایی' },
@@ -84,7 +84,7 @@ const TOPIC_INSERTS = [
     hint: 'کادر «تعریف» را در متن درج می‌کند',
     select: 'متن تعریف را اینجا بنویسید…',
     html: '<div class="micr-callout micr-callout--def">'
-      + '<p><span class="micr-callout__tag">تعریف</span> <strong>تعریف</strong></p>'
+      + '<p><strong>تعریف</strong></p>'
       + '<p>متن تعریف را اینجا بنویسید…</p>'
       + '</div><p><br></p>',
   },
@@ -93,7 +93,7 @@ const TOPIC_INSERTS = [
     hint: 'کادر «نکتهٔ کلیدی» را در متن درج می‌کند',
     select: 'متن نکته را اینجا بنویسید…',
     html: '<div class="micr-callout micr-callout--key">'
-      + '<p><span class="micr-callout__tag">نکتهٔ کلیدی</span> <strong>نکتهٔ کلیدی</strong></p>'
+      + '<p><strong>نکتهٔ کلیدی</strong></p>'
       + '<p>متن نکته را اینجا بنویسید…</p>'
       + '</div><p><br></p>',
   },
@@ -102,7 +102,7 @@ const TOPIC_INSERTS = [
     hint: 'کادر «هشدار / اشتباه رایج» را در متن درج می‌کند',
     select: 'هشدار یا اشتباه رایج را اینجا بنویسید…',
     html: '<div class="micr-callout micr-callout--warn">'
-      + '<p><span class="micr-callout__tag">هشدار / اشتباه رایج</span> <strong>هشدار / اشتباه رایج</strong></p>'
+      + '<p><strong>هشدار / اشتباه رایج</strong></p>'
       + '<p>هشدار یا اشتباه رایج را اینجا بنویسید…</p>'
       + '</div><p><br></p>',
   },
@@ -111,7 +111,7 @@ const TOPIC_INSERTS = [
     hint: 'کادر «ارتباط بالینی» را در متن درج می‌کند',
     select: 'پیوند بالینی این موضوع را اینجا بنویسید…',
     html: '<div class="micr-callout micr-callout--clinical">'
-      + '<p><span class="micr-callout__tag">ارتباط بالینی</span> <strong>ارتباط بالینی</strong></p>'
+      + '<p><strong>ارتباط بالینی</strong></p>'
       + '<p>پیوند بالینی این موضوع را اینجا بنویسید…</p>'
       + '</div><p><br></p>',
   },

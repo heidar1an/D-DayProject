@@ -11,6 +11,24 @@ const LATIN_RUN = /([A-Za-z][A-Za-z0-9'’\-().]*(?:\s+[A-Za-z][A-Za-z0-9'’\-(
 
 const clamp = (value, length) => Math.max(0, Math.min(value ?? 0, length));
 
+/* ── مرزهای واژه ──
+   شکستن متن در وسط واژه، اتصال حروف فارسی را می‌شکند: هر `span` یک قطعهٔ شکل‌گیری
+   جداست و «سلام»ِ بریده‌شده دو تکهٔ جدا دیده می‌شود. پس هر بازهٔ هایلایت/نوت — چه
+   تازه و چه ذخیره‌شدهٔ قدیمی — تا مرز واژه بیرون کشیده می‌شود. نیم‌فاصله (`\u200c`)
+   بخشی از واژه است و مرز واژه نیست. همین منطق در ویرایشگر پنل هم هست. */
+const WORD_SEPARATORS = new Set(Array.from(' \t\n.,;:!?؟،؛«»"\'`()[]{}<>/\\|…—–-ـ*_+=#@&^%~$'));
+const isWordChar = (char) => Boolean(char) && !WORD_SEPARATORS.has(char) && !/\s/.test(char);
+
+/* بازه را تا مرزهای واژه بیرون می‌کشد و بازهٔ تازه را برمی‌گرداند */
+export function snapToWordEdges(text, start, end) {
+  const length = text.length;
+  let from = clamp(start, length);
+  let to = clamp(end, length);
+  while (from > 0 && isWordChar(text[from - 1]) && isWordChar(text[from])) from -= 1;
+  while (to < length && isWordChar(text[to - 1]) && isWordChar(text[to])) to += 1;
+  return [from, to];
+}
+
 /* بازه‌های روی هم افتاده را به intervalهای غیر هم‌پوشان با رنگ/نوت/نتیجه جست‌وجو تبدیل می‌کند */
 export function buildSegments(text, highlights = [], notes = [], flashTerm = null) {
   const length = text.length;
@@ -24,8 +42,18 @@ export function buildSegments(text, highlights = [], notes = [], flashTerm = nul
     }
   };
 
-  highlights.forEach((h) => push(h.start, h.end));
-  notes.forEach((n) => push(n.start, n.end));
+  /* بازه‌ها پیش از هر چیز تا مرز واژه بیرون کشیده می‌شوند تا هیچ واژه‌ای از وسط نشکند */
+  const marks = highlights.map((h) => {
+    const [start, end] = snapToWordEdges(text, h.start, h.end);
+    return { start, end, color: h.color };
+  });
+  const noteMarks = notes.map((n) => {
+    const [start, end] = snapToWordEdges(text, n.start, n.end);
+    return { start, end, id: n.id };
+  });
+
+  marks.forEach((mark) => push(mark.start, mark.end));
+  noteMarks.forEach((mark) => push(mark.start, mark.end));
 
   const hits = [];
   if (flashTerm) {
@@ -45,8 +73,8 @@ export function buildSegments(text, highlights = [], notes = [], flashTerm = nul
     const start = sorted[i];
     const end = sorted[i + 1];
     if (end <= start) continue;
-    const highlight = highlights.find((h) => h.start <= start && end <= h.end);
-    const note = notes.find((n) => n.start <= start && end <= n.end);
+    const highlight = marks.find((m) => m.start <= start && end <= m.end);
+    const note = noteMarks.find((n) => n.start <= start && end <= n.end);
     const hit = hits.some(([s, e]) => s <= start && end <= e);
     segments.push({
       key: `${start}-${end}`,
@@ -97,7 +125,9 @@ export function RichText({ text, highlights, notes, flashTerm }) {
   });
 }
 
-/* تبدیل انتخاب متن کاربر به بازه روی متن بلوک — هسته هایلایت/نوت */
+/* تبدیل انتخاب متن کاربر به بازه روی متن بلوک — هسته هایلایت/نوت.
+   بازه پیش از برگشت تا مرزهای واژه بیرون کشیده می‌شود؛ پس گزینشِ نیمه‌واژه هم کل واژه
+   را هایلایت می‌کند و هیچ‌وقت هایلایتی وسط واژه نمی‌شکند. */
 export function selectionToBlockRange(contentEl) {
   const selection = window.getSelection();
   if (!selection || selection.isCollapsed || selection.rangeCount === 0) return null;
@@ -123,8 +153,11 @@ export function selectionToBlockRange(contentEl) {
     return null;
   };
 
-  const start = offsetIn(range.startContainer, range.startOffset);
-  const end = offsetIn(range.endContainer, range.endOffset);
-  if (start == null || end == null || end <= start) return null;
+  const rawStart = offsetIn(range.startContainer, range.startOffset);
+  const rawEnd = offsetIn(range.endContainer, range.endOffset);
+  if (rawStart == null || rawEnd == null || rawEnd <= rawStart) return null;
+
+  const [start, end] = snapToWordEdges(startBlock.textContent, rawStart, rawEnd);
+  if (end <= start) return null;
   return { crossBlock: false, block: startBlock, blockId: startBlock.dataset.blockId, start, end };
 }

@@ -91,6 +91,58 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* ── هیروی وسط‌چین لایه — همان ساختار سربرگ فلش‌کارت ── */
+.lg-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: clamp(30px, 5.5vh, 60px) 0 10px;
+  text-align: center;
+}
+
+.lg-hero__title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  color: var(--white);
+}
+
+.lg-hero__title-top {
+  font-weight: 500;
+  font-size: clamp(1.4rem, 2.8vw, 2.1rem);
+  color: var(--muted);
+}
+
+.lg-hero__title-accent {
+  font-weight: 800;
+  font-size: clamp(3rem, 6.8vw, 5.1rem);
+  line-height: 1.3;
+  background: linear-gradient(120deg, var(--purple-bright) 15%, var(--purple-bright) 85%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.lg-hero__subtitle {
+  max-width: 620px;
+  margin: 14px auto 0;
+  color: var(--muted);
+  font-size: clamp(0.95rem, 1.4vw, 1.1rem);
+  line-height: 2;
+}
+
+/* ── اسکرول افقی چیپ‌های زیربخش، بدون نوار ── */
+.lg-scroll-x {
+  scrollbar-width: none;
+}
+
+.lg-scroll-x::-webkit-scrollbar {
+  display: none;
+}
+
 /* احترام به تنظیم کاهش حرکت — هم‌حس با بقیهٔ داشبورد */
 @media (prefers-reduced-motion: reduce) {
   .lg-sk,

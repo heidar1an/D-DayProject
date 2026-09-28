@@ -28,6 +28,8 @@ import {
   createArticle,
   createBanner,
   createFlashcardDeck,
+  createIntlCourse,
+  createIntlProvider,
   createMedia,
   createMicroCourse,
   createNote,
@@ -41,6 +43,8 @@ import {
   deleteBanner,
   deleteCategory,
   deleteFlashcardDeck,
+  deleteIntlCourse,
+  deleteIntlProvider,
   deleteMedia,
   deleteMicroCourse,
   deleteNote,
@@ -52,6 +56,8 @@ import {
   getArticle,
   getComprehensiveCourse,
   getFlashcardDeck,
+  getIntlCourse,
+  getIntlProvider,
   getMicroCourse,
   getNote,
   getPage,
@@ -66,6 +72,8 @@ import {
   listCategories,
   listComprehensiveCourses,
   listFlashcardDecks,
+  listIntlCourses,
+  listIntlProviders,
   listMedia,
   listMicroCourses,
   listNotes,
@@ -80,11 +88,13 @@ import {
   publishedBanners,
   publishedComprehensiveCourses,
   publishedFlashcardDecks,
+  publishedIntlCatalog,
   publishedMicroCourses,
   publishedReferences,
   publishedTestBankQuestions,
   readSettings,
   saveCategory,
+  saveIntlUpload,
   searchTestBankQuestions,
   testBankRevision,
   setArticleStatus,
@@ -96,6 +106,8 @@ import {
   updateBanner,
   updateComprehensiveCourse,
   updateFlashcardDeck,
+  updateIntlCourse,
+  updateIntlProvider,
   updateMedia,
   updateMicroCourse,
   updateNote,
@@ -104,6 +116,13 @@ import {
   updateTestBankQuestion,
   writeSettings,
 } from './contentStore.js';
+
+/* فهرست مجاز و سقف بارگذاری ویدیو/زیرنویس — از همان کاتالوگی که پنل می‌خواند */
+import {
+  INTL_DEFAULT_MAX_VIDEO_MB,
+  INTL_UPLOAD_EXTENSION_MIME,
+  uploadExtensionFor,
+} from '../src/services/international/intlCatalog.js';
 
 import {
   allowCollect,
@@ -778,6 +797,103 @@ const ROUTES = [
       ip: clientIp(ctx.request),
     });
     return { course };
+  }],
+
+  /* ── دوره‌های بین‌الملل (لایهٔ داخل پنل) ──
+   *
+   * دو مجموعه: دوره‌ها و منابع (دانشگاه/رسانه/نشریه).
+   *   دوره = فراداده + تصویر + بخش‌ها؛ هر بخش یک ویدیو و چند زیرنویس دارد.
+   *   منبع = معرفی + لوگو + ترتیب فهرست و ترتیب نوار متحرک.
+   * ویرایش یک PUT کامل می‌فرستد (اتمیک، مثل مراجع و میکرو) و انتشار با فیلد
+   * `status` انجام می‌شود؛ از آن لحظه لایه از `/api/public/intl-courses/library`
+   * می‌خواند. بارگذاری ویدیو/زیرنویس مسیر جداگانه‌ای دارد (پایین‌تر، بدنهٔ دودویی).
+   */
+
+  ['GET', '/api/admin/intl-courses', 'intl.read', async (ctx) => listIntlCourses({
+    search: ctx.query.get('search') ?? '',
+    status: ctx.query.get('status') ?? 'all',
+    providerId: ctx.query.get('providerId') ?? 'all',
+    page: ctx.query.get('page') ?? 1,
+    perPage: ctx.query.get('perPage') ?? 50,
+  })],
+
+  ['GET', '/api/admin/intl-courses/:id', 'intl.read', async (ctx) => {
+    const course = getIntlCourse(ctx.params.id);
+    if (!course) fail('NOT_FOUND', 'دوره پیدا نشد');
+    return { course };
+  }],
+
+  ['POST', '/api/admin/intl-courses', 'intl.create', async (ctx) => {
+    const course = createIntlCourse(ctx.body, ctx.admin);
+    logActivity({
+      admin: ctx.admin, action: 'intl-course.created', entityType: 'intl-course',
+      entityId: course.id, entityLabel: course.title, ip: clientIp(ctx.request),
+    });
+    return { course };
+  }],
+
+  ['PUT', '/api/admin/intl-courses/:id', 'intl.update', async (ctx) => {
+    const course = updateIntlCourse(ctx.params.id, ctx.body, ctx.admin);
+    if (!course) fail('NOT_FOUND', 'دوره پیدا نشد');
+    logActivity({
+      admin: ctx.admin, action: 'intl-course.updated', entityType: 'intl-course',
+      entityId: course.id, entityLabel: course.title,
+      metadata: { status: course.status, sections: course.sections.length },
+      ip: clientIp(ctx.request),
+    });
+    return { course };
+  }],
+
+  ['DELETE', '/api/admin/intl-courses/:id', 'intl.delete', async (ctx) => {
+    const course = deleteIntlCourse(ctx.params.id);
+    if (!course) fail('NOT_FOUND', 'دوره پیدا نشد');
+    logActivity({
+      admin: ctx.admin, action: 'intl-course.deleted', entityType: 'intl-course',
+      entityId: course.id, entityLabel: course.title, ip: clientIp(ctx.request),
+    });
+    return { deleted: course.id };
+  }],
+
+  ['GET', '/api/admin/intl-providers', 'intl.read', async (ctx) => listIntlProviders({
+    search: ctx.query.get('search') ?? '',
+    status: ctx.query.get('status') ?? 'all',
+  })],
+
+  ['GET', '/api/admin/intl-providers/:id', 'intl.read', async (ctx) => {
+    const provider = getIntlProvider(ctx.params.id);
+    if (!provider) fail('NOT_FOUND', 'منبع پیدا نشد');
+    return { provider };
+  }],
+
+  ['POST', '/api/admin/intl-providers', 'intl.create', async (ctx) => {
+    const provider = createIntlProvider(ctx.body, ctx.admin);
+    logActivity({
+      admin: ctx.admin, action: 'intl-provider.created', entityType: 'intl-provider',
+      entityId: provider.id, entityLabel: provider.name, ip: clientIp(ctx.request),
+    });
+    return { provider };
+  }],
+
+  ['PUT', '/api/admin/intl-providers/:id', 'intl.update', async (ctx) => {
+    const provider = updateIntlProvider(ctx.params.id, ctx.body, ctx.admin);
+    if (!provider) fail('NOT_FOUND', 'منبع پیدا نشد');
+    logActivity({
+      admin: ctx.admin, action: 'intl-provider.updated', entityType: 'intl-provider',
+      entityId: provider.id, entityLabel: provider.name,
+      metadata: { status: provider.status },
+      ip: clientIp(ctx.request),
+    });
+    return { provider };
+  }],
+
+  ['DELETE', '/api/admin/intl-providers/:id', 'intl.delete', async (ctx) => {
+    const provider = deleteIntlProvider(ctx.params.id);
+    if (!provider) fail('NOT_FOUND', 'منبع پیدا نشد');
+    logActivity({
+      admin: ctx.admin, action: 'intl-provider.deleted', entityType: 'intl-provider',
+      entityId: provider.id, entityLabel: provider.name, ip: clientIp(ctx.request),
+    });
+    return { deleted: provider.id };
   }],
 
   /* کتابخانهٔ فلش‌کارت تپش */
@@ -2207,6 +2323,8 @@ const PUBLIC_ROUTES = [
   ['/api/public/comprehensive/library', async () => ({ courses: publishedComprehensiveCourses() })],
   ['/api/public/test-bank/revision', async () => ({ revision: testBankRevision() })],
   ['/api/public/test-bank/questions', async () => ({ revision: testBankRevision(), questions: publishedTestBankQuestions() })],
+  /* دوره‌های بین‌الملل — دوره‌ها و منابعِ منتشرشده، در یک پاسخ */
+  ['/api/public/intl-courses/library', async () => publishedIntlCatalog()],
   ['/api/public/pages/:slug', async (ctx) => {
     const page = getPage(ctx.params.slug);
     if (!page) fail('NOT_FOUND', 'صفحه پیدا نشد');
@@ -2218,6 +2336,21 @@ const MUTATING = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
 /* مسیرهایی که پیش از احراز هویت لازم است باز باشند (فقط ورود) */
 const PUBLIC_ADMIN_PATHS = new Set(['/api/admin/auth/login']);
+
+/* بارگذاری دودویی ویدیو و زیرنویس دوره‌های بین‌الملل — بدنه‌اش JSON نیست */
+const INTL_UPLOAD_PATH = '/api/admin/intl-courses/upload';
+
+/* نام فایل در هدر می‌آید و ممکن است نویسه‌های غیر-ASCII داشته باشد؛
+   `decodeURIComponent` روی ورودی خراب خطا می‌دهد، پس محافظت‌شده است. */
+function headerFileName(request) {
+  const raw = String(request.headers?.['x-tapesh-filename'] ?? '');
+  if (!raw) return '';
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return raw;
+  }
+}
 
 /*
  * مسیرهایی که درخواست‌هایشان شمرده نمی‌شود: پنل هر ۱۰ ثانیه «لحظه‌ای» را
@@ -2284,6 +2417,65 @@ export async function handleApi(request, response) {
         return true;
       }
       fail('NOT_FOUND', 'مسیر پیدا نشد');
+    }
+
+    /*
+     * ── بارگذاری دودویی ویدیو/زیرنویس دوره‌های بین‌الملل ──
+     *
+     * عمداً بیرون از گردش عادی ROUTES است: بدنه‌اش JSON نیست، فایل خام است و
+     * باید همان‌طور که می‌رسد روی دیسک بنشیند. اگر مثل آپلود تصویر base64
+     * می‌کردیم، یک ویدیوی ۲۰۰ مگابایتی هم حافظهٔ مرورگر و هم حافظهٔ سرور را
+     * چند برابر می‌کرد و از سقف `MAX_BODY_BYTES` می‌گذشت. با این حال همان سه
+     * لایهٔ امنیتی مسیرهای پنل را دارد: نشست، توکن CSRF و مجوز `intl.upload`.
+     */
+    if (pathname === INTL_UPLOAD_PATH) {
+      if (request.method !== 'POST') fail('VALIDATION_ERROR', 'این مسیر فقط POST می‌پذیرد');
+
+      const token = parseCookies(request)[SESSION_COOKIE];
+      const active = getSession(token);
+      if (!active) fail('UNAUTHENTICATED', 'برای دسترسی به پنل باید وارد شوید');
+      if (!safeEqual(request.headers?.[CSRF_HEADER], active.session.csrfToken)) {
+        fail('FORBIDDEN', 'درخواست از منبع نامعتبر رد شد');
+      }
+      if (!hasPermission(active.admin, 'intl.upload')) {
+        fail('FORBIDDEN', 'برای این عملیات دسترسی ندارید');
+      }
+
+      const headerType = String(request.headers?.['content-type'] ?? '').split(';')[0].trim().toLowerCase();
+      const originalName = headerFileName(request);
+
+      /*
+       * پسوند نام فایل مقدم است، نه نوع اعلامی مرورگر: کروم روی مک `.vtt` را
+       * گاهی `text/plain` و `.srt` را خالی اعلام می‌کند، پس تکیه بر هدر باعث
+       * می‌شد زیرنویس یا رد شود یا با پسوند گروه دیگر (ویدیو) ذخیره شود.
+       */
+      const extension = uploadExtensionFor(originalName, headerType);
+      if (!extension) {
+        /* بدنه خوانده نشده؛ تخلیه‌اش می‌کنیم تا پاسخ برسد و سوکت خراب نشود */
+        request.resume?.();
+        fail('UNSUPPORTED_MEDIA_TYPE', 'نوع فایل مجاز نیست؛ ویدیو (mp4/webm/mov) یا زیرنویس (vtt/srt) بفرستید');
+      }
+
+      const settings = readSettings();
+      const maxBytes = (Number(settings.media?.maxVideoUploadMb) || INTL_DEFAULT_MAX_VIDEO_MB) * 1024 * 1024;
+
+      const media = await saveIntlUpload({
+        originalName,
+        extension,
+        mimeType: INTL_UPLOAD_EXTENSION_MIME[extension],
+        stream: request,
+        maxBytes,
+      });
+
+      logActivity({
+        admin: active.admin, action: 'intl-media.uploaded', entityType: 'intl-media',
+        entityId: media.filename, entityLabel: media.originalName,
+        metadata: { size: media.size, mimeType: media.mimeType },
+        ip: clientIp(request),
+      });
+
+      ok(response, { media });
+      return true;
     }
 
     /* ── مسیرهای پنل ── */

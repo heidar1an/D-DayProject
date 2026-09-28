@@ -7,6 +7,7 @@
  */
 
 import { handleApi } from './adminApi.js';
+import { serveUploadRequest } from './uploadsFile.js';
 
 export default function contentApiPlugin() {
   const middleware = async (request, response, next) => {
@@ -24,12 +25,36 @@ export default function contentApiPlugin() {
     }
   };
 
+  /*
+   * فایل‌های آپلودی پنل (`/uploads/…`).
+   *
+   * ویت فهرست فایل‌های `public/` را در زمان راه‌اندازی کش می‌کند، پس فایلی که
+   * بعد از بالا آمدن سرور توسعه بارگذاری شود سرو نمی‌شود و درخواستش به HTML
+   * اسپا می‌افتد؛ ویدیو در پخش‌کننده سیاه می‌ماند. این middleware در هر درخواست
+   * از دیسک می‌خواند (همان ماژولی که `server.js` استفاده می‌کند).
+   */
+  const uploadsMiddleware = (request, response, next) => {
+    const raw = String(request.url ?? '');
+    const query = raw.indexOf('?');
+    let pathname = query === -1 ? raw : raw.slice(0, query);
+    try {
+      pathname = decodeURIComponent(pathname);
+    } catch {
+      /* آدرس بدشکل — همان خام را نگه می‌داریم */
+    }
+
+    if (serveUploadRequest(request, response, pathname)) return;
+    next();
+  };
+
   return {
     name: 'tapesh-content-api',
     configureServer(server) {
+      server.middlewares.use(uploadsMiddleware);
       server.middlewares.use(middleware);
     },
     configurePreviewServer(server) {
+      server.middlewares.use(uploadsMiddleware);
       server.middlewares.use(middleware);
     },
   };

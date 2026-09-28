@@ -1746,6 +1746,16 @@
   color: var(--ad-accent);
 }
 
+.ad-rte__btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.ad-rte__btn:disabled:hover {
+  background: transparent;
+  color: var(--ad-muted);
+}
+
 .ad-rte__letter {
   font-weight: 700;
   font-size: 0.82rem;
@@ -1782,7 +1792,9 @@
 .ad-rte__area p { margin: 0 0 0.9rem; }
 .ad-rte__area ul,
 .ad-rte__area ol { padding-inline-start: 1.4rem; margin: 0 0 0.9rem; }
-.ad-rte__area li { margin-bottom: 0.35rem; }
+.ad-rte__area ul { list-style: disc outside; }
+.ad-rte__area ol { list-style: decimal outside; }
+.ad-rte__area li { margin-bottom: 0.35rem; display: list-item; }
 
 .ad-rte__area blockquote {
   margin: 0 0 1rem;
@@ -1862,6 +1874,27 @@
   white-space: nowrap;
 }
 
+/* نوار ابزار جدول — وقتی نشانگر داخل یک جدول است زیر نوار اصلی می‌نشیند */
+.ad-rte__tablebar {
+  border-bottom: 1px solid var(--ad-border);
+  background: rgb(var(--shadow-rgb) / 0.08);
+}
+
+.ad-rte__tablebar__title {
+  padding-inline-start: 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--ad-muted-2);
+}
+
+.ad-rte__tablebar .ad-rte__btn {
+  width: auto;
+  height: 26px;
+  padding: 0 0.5rem;
+  font-size: 0.7rem;
+  white-space: nowrap;
+}
+
 /* پیش‌نمایش کادرهای «نکتهٔ کلیدی» و «جمع‌بندی صفحه» که دکمه‌های نوار ابزار درج می‌کنند.
    قرینهٔ `microReader.css` است تا ادمین همان چیزی را ببیند که کاربر می‌بیند. */
 .ad-rte__area .micr-callout {
@@ -1879,6 +1912,30 @@
 
 .ad-rte__area .micr-callout strong { display: block; margin-bottom: 0.35rem; color: var(--gold-ink); }
 .ad-rte__area .micr-callout__icon { display: inline-flex; margin-bottom: 0.4rem; color: var(--gold-ink); }
+
+/* هر نوع کادر رنگ خودش را دارد — قرینهٔ variantهای `microReader.css` */
+.ad-rte__area .micr-callout--def {
+  background: rgba(91, 140, 199, 0.07);
+  border-color: rgba(91, 140, 199, 0.3);
+}
+.ad-rte__area .micr-callout--def strong { color: var(--blue-soft-ink); }
+
+.ad-rte__area .micr-callout--warn {
+  background: rgba(226, 109, 109, 0.06);
+  border-color: rgba(226, 109, 109, 0.3);
+}
+.ad-rte__area .micr-callout--warn strong { color: var(--red-ink); }
+
+.ad-rte__area .micr-callout--clinical {
+  background: rgba(147, 127, 205, 0.08);
+  border-color: rgba(147, 127, 205, 0.3);
+}
+.ad-rte__area .micr-callout--clinical strong { color: var(--purple-soft-ink); }
+
+/* برچسبِ گردِ آبی (`micr-callout__tag`) در ویرایشگر نمایش داده نمی‌شود؛ سرتیترِ
+   `strong` همان کادر کافی است. (استایل آبی از باندل سراسری `microReader.css`
+   به اینجا نشت می‌کند.) */
+.ad-rte__area .micr-callout__tag { display: none; }
 
 /* قرینهٔ `microReader.css`: آیکون و سرتیتر در یک ردیف (فقط کادرهایی که آیکون دارند) */
 .ad-rte__area .micr-callout:has(> .micr-callout__icon) { display: flex; align-items: flex-start; gap: 0.75rem; }
@@ -4049,6 +4106,161 @@
 /* زیر ۱۰۸۰px فهرست بالای ویرایشگر می‌نشیند (همان نقطهٔ شکستِ میکرو و مراجع) */
 @media (max-width: 1080px) {
   .ad-art__layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ═══════════════ دوره‌های بین‌الملل (لایهٔ داخل پنل) ═══════════════
+ *
+ * تب‌های «دوره‌ها» و «دانشگاه‌ها و مراجع»، به‌علاوهٔ کادرهای تصویر، بارگذاری
+ * ویدیو/زیرنویس و ردیف‌های زیرنویس. چیدمان درخت/ویرایشگر همان `ad-ref__*`
+ * است تا این لایه از بقیهٔ لایه‌های «صفحات» جدا به نظر نرسد.
+ */
+
+.ad-intl__tabs {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.2rem;
+  border: 1px solid var(--ad-border);
+  border-radius: 999px;
+  background: var(--ad-surface-2);
+}
+
+.ad-intl__tabs button {
+  padding: 0.35rem 0.9rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ad-muted);
+  font-family: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ad-intl__tabs button:hover {
+  color: var(--ad-text);
+}
+
+.ad-intl__tabs button.is-active {
+  background: var(--ad-accent);
+  color: var(--ad-accent-ink);
+  font-weight: 600;
+}
+
+/* ── کادر تصویر: پیش‌نمایش + آدرس + انتخاب از کتابخانه + دارایی‌های آماده ── */
+
+.ad-intl__media {
+  display: grid;
+  grid-template-columns: 4.6rem minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.ad-intl__preview {
+  display: grid;
+  place-items: center;
+  width: 4.6rem;
+  height: 4.6rem;
+  overflow: hidden;
+  border: 1px solid var(--ad-border);
+  border-radius: var(--ad-radius-sm);
+  background: var(--ad-surface-2);
+  color: var(--ad-muted);
+}
+
+.ad-intl__preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.ad-intl__mediabody {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.ad-intl__mediarow,
+.ad-intl__uploadrow {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.ad-intl__assets {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.ad-intl__asset {
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  padding: 0.15rem;
+  overflow: hidden;
+  border: 1px solid var(--ad-border);
+  border-radius: 0.6rem;
+  background: var(--ad-surface-2);
+  cursor: pointer;
+}
+
+.ad-intl__asset img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.ad-intl__asset:hover {
+  border-color: var(--ad-accent);
+}
+
+.ad-intl__asset.is-active {
+  border-color: var(--ad-green);
+  box-shadow: 0 0 0 2px var(--ad-green-soft);
+}
+
+/* ── بارگذاری فایل ── */
+
+.ad-intl__upload {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.ad-upload.is-disabled {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+/* ── ردیف زیرنویس ── */
+
+.ad-intl__subtitle {
+  display: grid;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid var(--ad-border);
+  border-radius: var(--ad-radius-sm);
+  background: var(--ad-surface-2);
+}
+
+.ad-intl__subtitlehead {
+  display: grid;
+  grid-template-columns: 8.5rem minmax(0, 1fr) auto;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+/* زیر ۱۰۸۰px فهرست بالای ویرایشگر می‌نشیند (همان نقطهٔ شکستِ میکرو و مراجع) */
+@media (max-width: 1080px) {
+  .ad-intl__media {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ad-intl__subtitlehead {
     grid-template-columns: minmax(0, 1fr);
   }
 }

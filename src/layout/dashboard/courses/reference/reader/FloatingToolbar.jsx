@@ -52,10 +52,14 @@ export default function FloatingToolbar({ contentRef }) {
       showToast(result?.crossBlock ? 'فعلاً هایلایت در محدوده یک بلوک ممکن است' : 'ابتدا متنی را انتخاب کنید', 'warning');
       return;
     }
-    const ok = await addHighlight(result.blockId, result.start, result.end, color);
-    if (ok) {
-      clearSelection();
-      setState(null);
+    try {
+      const ok = await addHighlight(result.blockId, result.start, result.end, color);
+      if (ok) {
+        clearSelection();
+        setState(null);
+      }
+    } catch {
+      showToast('هایلایت ذخیره نشد', 'warning');
     }
   };
 

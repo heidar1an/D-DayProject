@@ -489,7 +489,9 @@
 .micr-rich h4 { font-size: 1.04rem; }
 
 .micr-rich ul,
-.micr-rich ol { padding-inline-start: 1.4rem; display: flex; flex-direction: column; gap: 8px; }
+.micr-rich ol { padding-inline-start: 1.4rem; }
+/* flex روی ul نشانهٔ فهرست (نقطه/عدد) را حذف می‌کند؛ فاصلهٔ آیتم‌ها با margin */
+.micr-rich li + li { margin-top: 8px; }
 .micr-rich li { line-height: 1.85; }
 
 .micr-rich blockquote {

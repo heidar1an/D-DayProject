@@ -472,7 +472,9 @@
 .rdr-html p { margin: 0 0 1.15em; text-align: justify; }
 .rdr-html h1, .rdr-html h2, .rdr-html h3 { margin: 1.4em 0 0.6em; font-family: 'Doran', 'Vazir', Tahoma, sans-serif; }
 .rdr-html ul, .rdr-html ol { margin: 0 0 1.15em; padding-inline-start: 1.5em; }
-.rdr-html li { margin-bottom: 0.4em; }
+.rdr-html ul { list-style: disc outside; }
+.rdr-html ol { list-style: decimal outside; }
+.rdr-html li { margin-bottom: 0.4em; display: list-item; }
 .rdr-html blockquote, .rdr-html .micr-callout {
   margin: 1.2em 0;
   padding: 1em 1.2em;

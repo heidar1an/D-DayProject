@@ -718,34 +718,103 @@
   background: var(--course-accent);
 }
 
-/* ── تنظیم عددی صدا و نور ── */
-.intl-course-player__stepper {
-  display: inline-flex;
-  flex: 0 0 auto;
-  align-items: center;
-  gap: 0.1rem;
-  padding: 0.12rem 0.2rem;
-  border: 1px solid rgb(var(--line-rgb) / 0.14);
-  border-radius: 999px;
-  background: rgb(var(--shadow-rgb) / 0.22);
+/*
+ * ── تنظیم صدا و نور: آیکون در نوار، نوار عمودی شناور بالای آن ──
+ *
+ * عدد فقط **بالای** همان نوار دیده می‌شود؛ در نوار کنترل هیچ «+ / −» و هیچ
+ * خوانش عددی برای این دو نیست. نوار با `writing-mode: vertical-lr` +
+ * `direction: rtl` عمودی می‌شود و از پایین به بالا پر می‌شود.
+ */
+.intl-course-player__glyph {
+  display: inline-grid;
+  place-items: center;
 }
 
-.intl-course-player__stepper-value {
-  display: inline-flex;
-  min-width: 3.5rem;
-  align-items: center;
-  justify-content: center;
-  gap: 0.25rem;
-  direction: rtl;
+.intl-course-player__slider {
+  position: absolute;
+  inset: auto auto calc(100% + 0.5rem) 50%;
+  z-index: 4;
+  display: grid;
+  justify-items: center;
+  gap: 0.3rem;
+  padding: 0.5rem 0.45rem 0.55rem;
+  border: 1px solid rgb(var(--line-rgb) / 0.16);
+  border-radius: 0.85rem;
+  background: var(--surface-soft);
+  box-shadow: 0 18px 40px -16px rgb(var(--shadow-rgb) / 0.9);
+  /*
+   * `left: 50%` گوشهٔ **چپ** کادر را روی وسط آیکون می‌گذارد؛ پس باید نصف عرض
+   * خودش به چپ برگردد تا وسطش روی آیکون بنشیند. با `translateX(50%)` کادر یک
+   * عرض کامل به راست می‌افتاد — همان «سر جایش نیست»ی که دیده می‌شد.
+   */
+  transform: translateX(-50%);
+}
+
+.intl-course-player__slider-value {
+  color: var(--course-accent);
   font-size: 0.62rem;
+  line-height: 1;
+  white-space: nowrap;
 }
 
-.intl-course-player__stepper button {
-  width: 1.35rem;
-  height: 1.35rem;
+.intl-course-player__range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 1.15rem;
+  height: 6.2rem;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  writing-mode: vertical-lr;
+  direction: rtl;
+  -moz-orient: vertical;
+}
+
+.intl-course-player__range::-webkit-slider-runnable-track {
+  width: 0.28rem;
+  height: 100%;
+  border-radius: 999px;
+  background: rgb(var(--line-rgb) / 0.34);
+}
+
+.intl-course-player__range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 0.82rem;
+  height: 0.82rem;
+  /* در نوشتار عمودی، جابه‌جایی عرضی با margin چپ انجام می‌شود */
+  margin-left: -0.27rem;
+  border: 0;
   border-radius: 50%;
-  font-size: 0.8rem;
-  line-height: 1;
+  background: var(--course-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--course-accent) 20%, transparent);
+}
+
+.intl-course-player__range::-moz-range-track {
+  width: 0.28rem;
+  height: 100%;
+  border-radius: 999px;
+  background: rgb(var(--line-rgb) / 0.34);
+}
+
+.intl-course-player__range::-moz-range-thumb {
+  width: 0.82rem;
+  height: 0.82rem;
+  border: 0;
+  border-radius: 50%;
+  background: var(--course-accent);
+}
+
+.intl-course-player__range:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--course-accent) 70%, transparent);
+  outline-offset: 3px;
+}
+
+/* متن جایگزین وقتی هیچ زیرنویسی بارگذاری نشده است */
+.intl-course-player__menu-empty {
+  padding: 0.45rem 0.6rem;
+  color: var(--muted);
+  font-size: 0.66rem;
+  white-space: nowrap;
 }
 
 /* ── زیرنویس: دکمه + فهرست زبان‌ها ── */
@@ -1066,6 +1135,153 @@
   color: var(--white);
 }
 
+/*
+ * نشان «ویدیو آماده» روی بخش‌هایی که مدیر در پنل برایشان ویدیو بارگذاری
+ * کرده است — هم برای کاربر روشن می‌کند کدام بخش قابل پخش است.
+ * عمداً **داخل قاب** و مطلق موقعیت می‌گیرد: دکمهٔ فهرست یک گرید دوستونه است و
+ * افزودن فرزند سوم، چیدمان هر ردیف را می‌شکست.
+ */
+.intl-course-playlist__ready {
+  position: absolute;
+  inset-block-start: 0.25rem;
+  inset-inline-end: 0.25rem;
+  padding: 0.05rem 0.3rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  background: rgb(var(--shadow-rgb) / 0.75);
+  color: var(--green);
+  font-size: 0.55rem;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+
+.intl-course-playlist__empty {
+  padding: 0.75rem 1rem;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+/* زیرنویس‌های موجود زیر ویدیو */
+.intl-course-lesson__subtitles {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+/*
+ * پخش‌کنندهٔ واقعی — وقتی مدیر برای بخش ویدیو بارگذاری کرده باشد.
+ * `aspect-ratio` تا قاب در همهٔ عرض‌ها ۱۶:۹ بماند و چیدمان نپرد.
+ */
+.intl-course-player.intl-course-player--video {
+  display: block;
+  /* قاب ۱۶:۹ خودش ارتفاع می‌سازد؛ `min-height` پایه (و نسخهٔ ریسپانسیوش)
+     فقط فضای خالی زیر ویدیو می‌گذاشت. انتخاب‌گر دوتایی تا از مدیا‌کوئری
+     پایین‌تر فایل هم رد شود. */
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  background: var(--pure);
+}
+
+.intl-course-player__video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  /* ویدیوی غیر ۱۶:۹ کشیده نشود */
+  object-fit: contain;
+  background: var(--pure);
+  cursor: pointer;
+}
+
+/*
+ * متن زیرنویس بارگذاری‌شده (کانال `<track>`) روی خود ویدیو.
+ *
+ * فونت `Pinar` است (وزن متغیر، در `styles.css` تعریف شده). **جای** متن را
+ * نمی‌شود از CSS عوض کرد؛ آن کار با ویژگی‌های `VTTCue` در
+ * `InternationalCoursesLayer.jsx` (`styleCues`) انجام می‌شود و اینجا فقط
+ * ظاهرش تعیین می‌شود.
+ */
+.intl-course-player__video::cue {
+  background: rgb(var(--shadow-rgb) / 0.62);
+  color: var(--pure);
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
+  font-weight: 500;
+  font-size: clamp(0.95rem, 2.1vw, 1.4rem);
+  line-height: 1.6;
+  text-shadow: 0 1px 4px rgb(var(--shadow-rgb) / 0.95);
+}
+
+/* در تمام‌صفحه، ویدیو کل قاب را می‌گیرد و نوار کنترل سر جایش می‌ماند */
+.intl-course-player--video:fullscreen .intl-course-player__video {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+}
+
+/*
+ * نوار پیشرفت تعاملی (پخش‌کنندهٔ داخلی سایت).
+ *
+ * خودِ نوار ۳ پیکسل است و کلیک‌کردن روی آن تقریباً ناممکن؛ پس ناحیهٔ کلیک
+ * بلندتر می‌شود و خط زمان به‌صورت لایهٔ میانی روی آن کشیده می‌شود.
+ */
+.intl-course-player__progress.is-live {
+  height: 0.85rem;
+  align-items: center;
+  background: transparent;
+  cursor: pointer;
+}
+
+.intl-course-player__progress.is-live::before {
+  content: '';
+  position: absolute;
+  inset: 50% 0 auto 0;
+  height: 0.22rem;
+  border-radius: 999px;
+  background: rgb(var(--line-rgb) / 0.42);
+  transform: translateY(-50%);
+}
+
+.intl-course-player__progress.is-live > span,
+.intl-course-player__progress.is-live > .intl-course-player__buffered {
+  position: absolute;
+  inset: 50% auto auto 0;
+  height: 0.22rem;
+  border-radius: 999px;
+  transform: translateY(-50%);
+}
+
+/* بخش بافرشده پشت زمان سپری‌شده می‌ماند */
+.intl-course-player__progress.is-live > .intl-course-player__buffered {
+  background: rgb(var(--line-rgb) / 0.26);
+}
+
+.intl-course-player__progress.is-live > span {
+  z-index: 1;
+}
+
+.intl-course-player__progress.is-live:hover::before {
+  height: 0.32rem;
+}
+
+.intl-course-player__progress.is-live:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--course-accent) 70%, transparent);
+  outline-offset: 3px;
+}
+
+/* دکمه‌های منوی شناور (زیرنویس/سرعت) هم‌شکل دکمهٔ زیرنویس */
+.intl-course-player__popover {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.intl-course-player__popover > button.is-active {
+  background: rgb(var(--line-rgb) / 0.16);
+  color: var(--course-accent);
+}
+
 .intl-course-suggestions {
   padding: 1rem;
 }
@@ -1275,15 +1491,9 @@
     font-size: 0.58rem;
   }
 
-  /* در عرض کم، فقط آیکون صدا/نور می‌ماند تا نوار یک‌خطی بماند */
-  .intl-course-player__stepper-value {
-    min-width: 0;
-    font-size: 0;
-  }
-
-  .intl-course-player__stepper-value svg {
-    width: 1rem;
-    height: 1rem;
+  /* در عرض کم، نوار عمودی کوتاه‌تر می‌شود تا از قاب پخش‌کننده بیرون نزند */
+  .intl-course-player__range {
+    height: 4.6rem;
   }
 
   .intl-course-lesson__head h2 {

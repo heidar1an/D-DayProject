@@ -1,6 +1,73 @@
+import { useMemo } from 'react';
+
 import Icon from './icons';
-import { RichText } from './richText';
+import { RichText, snapToWordEdges } from './richText';
 import { useReader } from './readerContext';
+
+/*
+ * هایلایت/نوت را داخل HTML غنی (بلوک‌های متنِ ویرایشگر پنل) نشان می‌دهد.
+ * offsetهای ذخیره‌شده روی الحاقِ متن‌گره‌ها حساب شده‌اند؛ اینجا همان شمارش روی
+ * DOM موقت انجام و بازه‌ها با span دور متن پیچیده می‌شود — از آخر به اول، تا
+ * splitهای گرهِ متن offsetهای بازه‌های بعدی را به‌هم نریزد. خودِ متن هیچ
+ * نویسه‌ای اضافه/کم نمی‌شود، پس انتخابِ بعدیِ کاربر همان offsetها را می‌دهد.
+ * بازه‌ها هم مثل رندر متن ساده تا مرز واژه بیرون کشیده می‌شوند (`snapToWordEdges`)،
+ * وگرنه برشِ وسط واژه اتصال حروف فارسی را می‌شکند.
+ */
+function markHtml(html, highlights = [], notes = []) {
+  if (!html || (!highlights.length && !notes.length)) return html;
+  const holder = document.createElement('div');
+  holder.innerHTML = html;
+  const walker = document.createTreeWalker(holder, NodeFilter.SHOW_TEXT);
+  let text = '';
+  let node;
+  while ((node = walker.nextNode())) text += node.textContent;
+  if (!text.length) return html;
+
+  /* بازه‌ها مثل رندر متن ساده تا مرز واژه بیرون کشیده می‌شوند؛ هایلایت‌های ذخیره‌شدهٔ
+     قدیمی هم ممکن است وسط واژه باشند و برشِ وسط واژه، اتصال حروف فارسی را می‌شکند. */
+  const ranges = [
+    ...highlights.map((h) => {
+      const [start, end] = snapToWordEdges(text, h.start, h.end);
+      return { start, end, cls: `rdr__hl rdr__hl--${h.color}` };
+    }),
+    ...notes.map((n) => {
+      const [start, end] = snapToWordEdges(text, n.start, n.end);
+      return { start, end, cls: 'rdr__note-anchor', noteId: n.id };
+    }),
+  ]
+    .filter((range) => range.end > range.start)
+    .sort((a, b) => b.start - a.start || b.end - a.end);
+
+  for (const range of ranges) {
+    /* نقشهٔ گره‌ها بعد از هر برش از نو ساخته می‌شود: `splitText` گره‌ها را عوض می‌کند و
+       نقشهٔ کهنه بازه‌های هم‌پوشان (هایلایت + یادداشت روی یک متن) را ناقص می‌پیچید.
+       طول کل متن با نشانه‌گذاری عوض نمی‌شود، پس offsetهای کانونی معتبر می‌مانند. */
+    const fresh = [];
+    const scan = document.createTreeWalker(holder, NodeFilter.SHOW_TEXT);
+    let cursor = 0;
+    let current = scan.nextNode();
+    while (current) {
+      fresh.push({ node: current, start: cursor });
+      cursor += current.textContent.length;
+      current = scan.nextNode();
+    }
+    for (const { node: textNode, start } of fresh) {
+      const end = start + textNode.textContent.length;
+      if (end <= range.start || start >= range.end) continue;
+      let target = textNode;
+      const to = range.end - start;
+      if (to < target.textContent.length) target.splitText(to);
+      const from = range.start - start;
+      if (from > 0) target = target.splitText(from);
+      const mark = document.createElement('span');
+      mark.className = range.cls;
+      if (range.noteId) mark.dataset.noteId = range.noteId;
+      target.replaceWith(mark);
+      mark.appendChild(target);
+    }
+  }
+  return holder.innerHTML;
+}
 
 const FA_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
 const toFa = (value) => String(value).replace(/\d/g, (digit) => FA_DIGITS[Number(digit)]);
@@ -33,9 +100,15 @@ export function TextBlock({ block }) {
   );
 }
 
-/* HTML متن مبحث در سرور هنگام ذخیره پاک‌سازی شده است. */
+/* HTML متن مبحث در سرور هنگام ذخیره پاک‌سازی شده است. هایلایت/نوت داخل همین
+   HTML با markHtml نشان داده می‌شود — روی متنِ ساده هم همان `RichText` است. */
 export function HtmlBlock({ block }) {
-  return <div className="rdr-html" data-block-id={block.id} dangerouslySetInnerHTML={{ __html: block.html }} />;
+  const [blockHighlights, blockNotes] = useBlockMarks(block.id);
+  const html = useMemo(
+    () => markHtml(block.html, blockHighlights, blockNotes),
+    [block.html, blockHighlights, blockNotes],
+  );
+  return <div className="rdr-html" data-block-id={block.id} dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
 export function HeadingBlock({ block }) {

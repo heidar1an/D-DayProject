@@ -1,60 +1,49 @@
 # تپش وب — یادداشت بلندمدت
 
-## قواعد کار
-- ساختار مینیمال موجود را حفظ کن؛ فایل/لایهٔ تازه فقط با درخواست صریح. **قبل از حذف، فهرست بده و تأیید بگیر.** پاسخ کوتاه و مستقیم.
-- `npm install` و `npm run build` ممنوع (بیلد `dist/` را پاک می‌کند). تست UI/مرورگر فقط با درخواست کاربر. README ریشه و همان لایه در همان نوبت به‌روز شود.
-- طراحی در `src/styles.css` با پالت موجود (`--brown/--blue/--green/--red/--purple/--gold` و bright/تم روشن). ابهام دوخوانشی ⇒ یک سؤال دوگزینه‌ای.
-- تأیید مجاز: esbuild transform/bundle، SSR با `renderToStaticMarkup`، `theme:verify|contrast|tailwind`؛ لایهٔ React با اسکیل `react-layer-headless-verify`.
-- دیزاین سیستم یک **کپی** است (اسکیل `tapesh-design-system`)؛ هر تغییر توکن باید در `references/tokens.css` آن هم بیاید.
+## قواعد
+- مینیمال؛ فایل تازه فقط با درخواست صریح؛ **قبل از حذف، فهرست + تأیید**. پاسخ کوتاه، فارسی.
+- `npm install`/`build` ممنوع. تست UI فقط با درخواست کاربر. README لایه در همان نوبت.
+- تأیید مجاز: esbuild، SSR، `theme:verify`، اسکیل `react-layer-headless-verify`. دیزاین‌سیستم **کپی** است (اسکیل `tapesh-design-system`)؛ تغییر توکن ⇒ `references/tokens.css` هم.
 
 ## معماری
-- داده از UI جدا: `src/services/<domain>/` و `src/layout/dashboard/<domain>/`.
-- داشبورد hash-driven در `dashboardRoute.jsx`؛ `initialView` ثابت و بیرون کامپوننت، صفحه push و زیرصفحه replace. هدر `DashboardHeader.jsx`، رنگ نشانگر `indicatorColors`.
-- مقصد دوره‌ها فقط `COURSE_LAYERS` در `DashboardLayout.jsx`. پنل: سایدبار فقط `SECTIONS` (۱۰ آیتم)؛ زیرنماها با نگاشت صریح `SECTION_SUBVIEWS`+`sectionOf()`؛ مسیر `#admin/<view>`. **هرگز تشخیص پیشوندی** (تلهٔ `media-center`).
-- مهاجرت کاتالوگ: `syncX()` در `ensureStore()` با گارد یک‌بار و `writeJson` مستقیم نه `writeCollection`؛ رکوردها `origin:'tapesh'`. کش سرویس عمومی ۱۵ ثانیه.
-- OAuth گوگل فقط سروری. اعداد تعرفه فقط در `services/pricing/pricingService.js`. کارت کاتالوگ یک تعریف مشترک در `CoursesSection.jsx`.
-- «صفحات» = رجیستری ۱۵ لایهٔ محصول؛ کارت لایه `h3.ad-layercard__name` غیرکلیک‌پذیر + آیکون چشم + «ورود به لایه»؛ `page-editor` از UI در دسترس نیست.
-- لایهٔ داخل پنل (سایدبار ثابت): `ROUTABLE_VIEWS` + `SECTION_SUBVIEWS`→`pages` + `VIEW_TITLES` + case در `renderView`. مقصد «ورود به لایه» فقط از `LAYER_VIEWS` در `AdminPages.jsx` (`layerEntryTarget` ⇒ `{view,title}`): `flashcards`→`flashcard-library` (گارد `canSendDeck`؛ ارسال `PUT` با `status:'published'` → `/api/public/flashcards/library`) و `micro-lesson`→`micro-lesson` (→ `/api/public/micro/library`).
+- داده از UI جدا: `services/<domain>/` + `layout/dashboard/<domain>/`؛ کش عمومی ۱۵s. داشبورد hash-driven؛ مقصد دوره‌ها فقط `COURSE_LAYERS`.
+- پنل: زیرنما با `SECTION_SUBVIEWS`+`sectionOf()`؛ **هرگز تشخیص پیشوندی** (تلهٔ `media-center`). لایهٔ داخل پنل = `ROUTABLE_VIEWS`+`VIEW_TITLES`+case در `renderView`؛ «ورود به لایه» فقط از `LAYER_VIEWS` در `AdminPages.jsx`.
+- `IconX` importنشده در `AdminLayout.jsx` = سفیدی پنل. مهاجرت کاتالوگ: `syncX()` در `ensureStore()` گارد یک‌بار + `writeJson` مستقیم (نه `writeCollection` = حلقهٔ بی‌پایان)؛ `origin` را از body نخوان.
 
 ## میکرودرسنامه
-- کل ساختار در **یک رکورد** `microCourses` ⇒ ذخیره یک `PUT` کامل، انتشار اتمیک با `POST /api/admin/micro/:id/status`. اتصال با `subjectId`.
-- **`src/data/micro/registry.js` تک منبع حقیقت است**؛ `contentStore.js` و `microContentService.js` از آن می‌خوانند. **پسوند `.js` در importهایش عمدی است** (در Node هم خوانده می‌شود).
-- **داده‌محور — برای درس تازه کد UI ننویس:** فقط `src/data/micro/<subjectId>Course.js` بساز و در `COURSE_REGISTRY` (`microContentService.js`) ثبت کن. **۱۶ درس**؛ `id` درس = `subjectId` = کلید رجیستری. **فیزیولوژی عمداً اولین کلید است** (`firstPublishedCourse()`). قرارداد در `src/data/micro/README.md`.
-- **seed = هر ۱۶ درس + همگام‌سازی افزایشی:** `syncMicroCourses()` در `ensureStore()` فقط درس‌های بدون رکورد را `draft` اضافه و `content` صفحه‌های قدیمی را پر می‌کند؛ رکورد موجود را بازنویسی نمی‌کند. یک‌بار در عمر پروسه (`microSynced`) با `writeJson` مستقیم — **`writeCollection` داخل `ensureStore` حلقهٔ بی‌پایان می‌سازد.**
-- ایستگاه تست دو منبع: `pinnedQuestionIds` (بانک) + `questions[]` (دستی، اولویت بر بانک). **`test-bank` و `subjects` باید پیش از `/:id` در ROUTES بیایند.**
-- **متن صفحه = `page.content`، نه بلوک.** `blocksToHtml.js` بلوک‌های قدیمی را یک‌بار به HTML می‌برد؛ سرور فقط وقتی `content` خالی است مشتق می‌گیرد (ویرایش ادمین بازنویسی نمی‌شود). `blocks[]` آرشیو است، حذف نشد. `INTERACTIVE_BLOCK_TYPES` (`figure`/`flashcards`/`quickQuestion`) به HTML نمی‌روند و زیر `micr-rich` رندر می‌شوند ⇒ بعد از مهاجرت به پایان صفحه می‌روند.
-- سه دیاگرام **عمومی داده‌محور** در `microDiagrams.jsx`: `flow`(`data.steps`)/`bars`(`data.items`)/`cycle`(`data.stages`)؛ کلید ناشناخته ⇒ `null`. `pressure-timeline`/`wiggers`/`pv-loop` ثابت و مخصوص قلب.
-- **`unit.testBank.subjectId` را با `unit.subjectId` قاطی نکن** (موتور اولی را ترجیح می‌دهد). دو override عمدی: `genetics`→`biochemistry`، `english`→`esl`. `topicPath` باید مو‌به‌مو با بانک یکی باشد وگرنه استخر بی‌صدا صفر می‌شود.
-- **پوشش بانک (اندازه‌گیری‌شده):** ۵۹ سؤال، فقط ۷ درس از ۱۶؛ **۹ واحد استخر صفر دارند** ⇒ حالت خالی عمدی است نه باگ UI؛ اول `questionPoolOf` و مسیرهای `testBank` را چک کن.
+- ساختار در **یک رکورد** `microCourses` ⇒ `PUT` کامل، انتشار `POST /api/admin/micro/:id/status`.
+- **`src/data/micro/registry.js` تک منبع حقیقت** (پسوند `.js` عمدی — Node هم می‌خواند). درس تازه = فقط `<subjectId>Course.js` + ثبت در `COURSE_REGISTRY`. ۱۶ درس؛ فیزیولوژی اولین کلید.
+- متن صفحه = `page.content` نه بلوک. تست: **`test-bank` و `subjects` پیش از `/:id`**؛ `unit.testBank.subjectId` ≠ `unit.subjectId` (override: `genetics`→`biochemistry`)؛ `topicPath` مو‌به‌مو؛ ۹ واحد استخر صفر — عمدی.
 
-## درسنامهٔ جامع
-- `ContentService.countSections(subjectId)` کادرهای سرتیتر ستون راست را می‌شمارد. تم درس با `--learn-accent`/`--learn-accent-rgb` از `AnatomyLearningLayer`؛ `--blue*` را برای اکسنت بازتعریف نکن.
-- مراحل فقط `activate → learn → visualize → practice → test` از `LEARNING_STEPS`؛ حرکت آزاد و بدون تیک/تأیید. `test` از `practice` و `labelQuiz`.
-- `AnatomyLearningLayer` عمومی است (`subjectId`, `subjectTitle`, routeهای `overview/unit/reader`). واحد `micro` در سطح خود لایه رندر شود نه داخل wrapper باریک.
+## سایر لایه‌ها
+- جامع: `--learn-accent*` (نه `--blue*`). بین‌الملل: `intlCatalog.js`+`intlAssets.js`؛ فایل آپلودی از `uploadsFile.js` سرو می‌شود (ویت ۷ فهرست `public/` را کش می‌کند ⇒ ۲۰۰+HTML، ویدیو بی‌خطا سیاه). فلش‌کارت: کتابخانه = ثابت + منتشرشدهٔ پنل؛ «تغییر پنل به کاربر نمی‌رسد» = اول مسیر عمومی *مصرف* را ببین.
+- **پخش‌کنندهٔ بین‌الملل:** در RTL اولین عنصر DOM راست‌ترین است ⇒ چیدمان دیده‌شده = ترتیب کد. نوار: صدا، نور، سرعت (راست) → خط زمان → پخش، زمان، زیرنویس، تمام‌صفحه (چپ). **یک `panel` واحد** برای کادرهای شناور ⇒ باز کردن هر کدام قبلی را می‌بندد؛ بستن با کلیک بیرون = `pointerdown` روی `document` با چشم‌پوشی از داخل `.intl-course-player__popover`/`__subtitle` (وگرنه کشیدن نوار، کادر را می‌بندد یا کلیک دوباره عمل می‌کند). کلیک روی ویدیو = `onSurfaceClick` (اول کادر را می‌بندد، بعد پخش/توقف). صدا/نور = `PlayerSlider` عمودی (`writing-mode: vertical-lr`، درصد بالای نوار، بدون `+ / −`)؛ وسط‌چینی کادر با `left:50%` + **`translateX(-50%)`**. انیمیشن آیکون با **WAAPI** نه CSS (گارد `prefers-reduced-motion` هر `animation`/`transition` را `0.01ms !important` می‌کند). **آیکون زیرنویس همیشه هست** — فقط فهرست منو از `lesson.subtitles` می‌آید. بنر روی ویدیو نکِش (محل رندر زیرنویس بومی را می‌پوشاند). **جای زیرنویس را CSS نمی‌تواند عوض کند** ⇒ `VTTCue`: `snapToLines=false` + `line=74` (درصد از بالای قاب) + `position=50`/`size=88`/`align=center`؛ ظاهر با `::cue` (فونت **Pinar** از `styles.css` سراسری). **دو شاخهٔ پخش‌کننده (ویدیو / قاب تصویری) باید هم‌زمان به‌روز شوند.**
 
-## بین‌الملل (`courses/InternationalCoursesLayer`)
-- نوار بی‌پایان: فهرست ۴ بار، حرکت یک نسخه/۲۵٪ ترک؛ RTL به راست چسبیده و با `translateX` مثبت حرکت می‌کند. لوگوها واقعی و خالص، بدون پلاک/هاله/drop-shadow. `logo.clearbit.com` قابل اتکا نیست؛ SVG/PNG سفید را کورکلید نکن.
-- کارت‌ها ستونی و دو نیمهٔ مساوی با flex؛ تم روشن باید روشن باشد و رنگ توپُر ثابت نداشته باشد (`var(--white)`, `rgb(var(--shadow-rgb) / …)`, `var(--pure)`).
+## ویرایشگر متن (RichTextEditor.jsx)
+- رنگ با `span.micr-tone--*` (کلاس نه style)؛ کادر با div. `label` کلیک را می‌دزدد ⇒ field با div + stopPropagation.
+- **حالت ماژیک رنگ:** کلیک روی رنگ = «رنگ جاری»؛ هر گزینش تازه (`onMouseUp`/`onKeyUp`) همان رنگ را می‌گیرد یا با «حذف رنگ» هایلایت را برمی‌دارد. کلیک دوباره روی همان رنگ = خاموش (`tone===null` پیش‌فرض). **هرگز به گزینشِ کهنه برنگرد** (`savedRangeRef` حذف شد) — وگرنه «حذف رنگ» رنگِ بخشِ قدیمی را برمی‌داشت. گزینش چندسلولی جدول کنار گذاشته می‌شود.
+- **رنگ هرگز وسط واژه نمی‌شکند:** هر `span` یک قطعهٔ شکل‌گیری جداست ⇒ بریدن وسط واژه اتصال حروف فارسی را می‌شکند. `expandToWordEdges` پیش از `extractContents` بازه را تا مرز واژه بیرون می‌کشد (نیم‌فاصله = واژه، نه مرز)؛ دامنه = درونی‌ترین بلوکِ مشترک (گزینش چندبلوکی دست‌نخورده). همین منطق در خواننده: `snapToWordEdges` در `selectionToBlockRange`+`buildSegments`+`markHtml`.
+- **واگرد = پشتهٔ خودش** (`historyRef`: snapshot از innerHTML، ادغام تایپ ۸۰۰ms، Ctrl/Cmd+Z/Y، sync بیرونی ⇒ reset) — پشتهٔ بومی با بازنویسی DOM ری‌اکت ناسازگار بود.
+- **فهرست DOMی** (`toggleList`) — execCommand بی‌صدا شکست می‌خورد. **جدول** = گرید ۲بعدی (`tableGrid`/`applyTableOp`/`writeGrid`)؛ span از هندسه و **سلول‌های یتی باید از DOM حذف شوند** (وگرنه حذف ستون محتوا را جابه‌جا می‌کند).
+- **حذف رنگ** ⇒ بعد از extract باید از پوسته‌های `micr-tone--*` پیرامون نقطهٔ درج بیرون کشید (split سر/دم).
+- `micr-callout__tag` در ویرایشگر `display:none` (نشت باندل سراسری microReader.css)؛ هر variant رنگ خودش را در admin.css دارد.
 
-## فلش‌کارت
-- **کتابخانهٔ کاربران = ثابت + منتشرشدهٔ پنل.** `flashcardService.js` حالا `/api/public/flashcards/library` را `fetch` می‌کند و دک‌های منتشرشده را **جلوی** دک‌های ثابت `mockData.js` ادغام می‌کند (TTL ۱۵s + `forceLibrary: true`؛ سرور قطع ⇒ سقوط به ثابت‌ها). **تلهٔ کلاسیک: زنجیرهٔ سرور کامل ولی هیچ کد سمت کاربری مصرفش نمی‌کرد** ⇒ «تغییر پنل به کاربر نمی‌رسد» = اول ببین مسیر عمومی *مصرف* می‌شود.
-- ویرایشگر: `CARD_TYPES` پنج‌گانه ولی سرور ۴ نوع ⇒ `basic-hint` فقط نمایشی (`cardTypeOf`/`toStoredType`). `validateDeck` سخت‌گیر (جلوی ذخیره) در مقابل `cardQualityHints` هشدار. `PUBLISH_OPTIONS` سه‌گانه + تنها دکمهٔ **«تأیید تغییرات»** در همان فرم.
+## خوانندهٔ مراجع (reader/)
+- هایلایت/نوت روی بلوک HTML غنی با `markHtml` در `ContentBlocks.jsx` (از آخر به اول، بدون تغییر متن ⇒ offsetها معتبر). `addHighlight` روشن/خاموش است (همان بازه+رنگ = حذف، هم‌پوشانی = جایگزینی). بازه‌ها **کانونی‌اند** (`snapToWordEdges`) ⇒ هایلایت‌های کهنهٔ وسط‌واژه هم درست رندر می‌شوند و «انتخاب دوباره = حذف» دقیق می‌ماند.
+- نشانهٔ فهرست صریح: `list-style` در `.rdr-html` و `.ad-rte__area`؛ `display:flex` روی ul در `.micr-rich` قاتل نشانه است.
 
-## ویرایشگر و CSS
-- `RichTextEditor.jsx`: پاک‌ساز style و aside/svg/caption را حذف می‌کند؛ فقط class/dir از `*`؛ رنگ با `span.micr-tone--*`، کادر با div. `label` کلیک را می‌دزدد؛ برای field از div و stopPropagation.
-- CSS پایین‌تر برنده است؛ انتخاب‌گر ترکیبی بنویس. RTL: `inset-inline-start:0` لبهٔ راست و `translateX(-100%)` حرکت به چپ.
-- روی تصویر با `left/top` فیزیکی موقعیت بده نه `inset-inline-start` (تصویر با RTL آینه نمی‌شود). متن Pinar، تیتر Doran، اعداد `toFa`. دکمهٔ تم فقط در `App.jsx`/`DashboardHeader.jsx`/`AdminLayout.jsx`. تپش هوشمند یک نقطهٔ ورود؛ گارد `prefers-reduced-motion` نباید `.nt-card` را `animation:none` کند.
+## ماژول برنامه‌ریزی و مدیریت (پنل، `pl-`)
+- **صفر دادهٔ ساختگی.** `services/planning/mockData.js` حذف شد. واحدها و پروژه‌ها **از `productsService.getProducts()`** ساخته می‌شوند (ردهٔ محصول `eyebrow` = واحد، خود محصول = پروژه؛ ۸ واحد، ۹ پروژه) و کاربران از `GET /api/admin/users`. تسک/رویداد/تراکنش/SOP/آمار پیش‌فرض ساخته نمی‌شود. تنها دادهٔ ثابت = تعطیلات رسمی تقویم کشور.
+- ذخیره‌سازی پیشوند `tapesh.planning.v3.` — **بالا بردن نسخه = دور ریختن دادهٔ کهنهٔ نشسته در مرورگر** (بدون مهاجرت). هر بار منبع ساختار عوض شد، نسخه را بالا ببر.
+- `setViewer` از `adminToUser(admin)` — **همگام**، از نقش+مجوزهای واقعی؛ `unitId` کاربر از فضای‌نام مجوزهایش با `NAMESPACE_PRODUCT` استنتاج می‌شود (نگاشت چسب، نه داده). مدیر کل `unitId: ''` می‌گیرد.
+- **شمارندهٔ اعلان:** اعلان «عقب‌افتاده» **خودکار** ساخته می‌شود و ذخیره نمی‌شود ⇒ `markRead`/`markAllRead` باید شناسه را در `PLANNING_KEYS.dismissed` ثبت کنند، وگرنه نشان قرمز تا ابد می‌ماند. هر «اعلان خودکار» = پیشوند `auto-`.
+- **مالی:** حالت پرداخت **فقط** `bank`/`direct` (`PAYMENT_MODES`؛ درگاه آنلاین وصل نیست — `PAYMENT_STATUS` در `services/pricing`). `finance.create/update/remove` + `validateTransaction` (عنوان/مبلغ>۰/نوع/پرداخت/تاریخ). `summary` یک `payments` هم می‌دهد.
+- `settings.clear()` = پاک‌کردن **محتوا** (ساختار و تنظیمات می‌ماند)؛ `settings.reset()` = بازگشت کامل.
+- سنجهٔ رگرسیون: `npm run planning:test` → `scripts/planning-service-test.mjs` (۳۴ سنجه، فقط سرویس، بدون React). انتظارها را از خودِ منبع بساز، نه عدد ثابت.
 
 ## بررسی و تله
-- `npm run theme:check` گام آخر (`verify-render.mjs`) به‌خاطر `node_modules/three` می‌افتد (خطای پیش‌موجود) ⇒ معیار نگذار، exit code مهم است. `node database/adminApi.test.mjs` = ۹۲ سنجه.
-- **`adminApi.test.mjs` فایل‌های واقعی `content/*.json` را بازنویسی می‌کند** (`events.json`→`[]`، `activity.json`، مهر زمانی `admins.json`) ⇒ **قبل از اجرا بکاپ بگیر.** `git checkout` کورکورانه نزن: `flashcardDecks.json` ویرایش محتوایی واقعی هم دارد؛ تفاوت را معنایی بسنج.
-- `useAsync` وابستگی پایدار و StrictMode guard لازم دارد وگرنه حلقهٔ fetch. کد HTTP به‌تنهایی حقیقت نیست؛ `null` و «—» نشان بده.
-- **سنجش لایهٔ داده = هارنس قرارداد، نه رندر.** جزئیات باندل/لودرها در بخش «۶» اسکیل `react-layer-headless-verify`؛ **React باید `external` باشد** وگرنه پروسه با `SIGTERM`/۱۳۹ بی‌خروجی می‌میرد.
-- **هارنس دو نیمه:** نیمهٔ سرور (`contentStore`) را **بدون باندل** با نود خالی اجرا کن (`import.meta.url` مسیر `content/` را می‌سازد و باندل می‌شکندش)؛ فقط نیمهٔ React باندل می‌شود. `MicroCompletion.jsx` **default export ندارد**. jsdom روی `import.meta.glob` می‌میرد.
-- رندر سرور: `AdminShell` تا `meta` نیاید `renderView()` را صدا نمی‌زند ⇒ نما را مستقیم رندر کن. `IconX` استفاده‌شده و importنشده در `AdminLayout.jsx` = سفیدی کل پنل.
-- **`grep` سندباکس `\|` را نمی‌فهمد** ⇒ منفی کاذب؛ از ابزار Grep استفاده کن.
-- **دو `Edit` موازی روی یک فایل همدیگر را پاک می‌کنند.** Editها را پشت‌سرهم بزن. علامت: `ReferenceError: X is not defined` برای چیزی که import کرده‌ای.
-- **نویسندهٔ هم‌زمان:** قبل از کار روی مخزن `git status` + mtime؛ قبل از `git checkout` روی فایل سروری هش/زمان را چک کن. **رخ داد (۲۳ سپتامبر ۲۰۲۶):** یک session موازی ۱۵ فایل درس میکرو ساخت و `microContentService.js` را عوض کرده بود.
-- **هر `readCollection` ~۱۵۰ms است — از حجم داده نیست.** علت: `ensureStore()` آرگومان‌های `ensureFile` را از پیش می‌سازد و `seedAdmins()` داخلش `scryptSync` صدا می‌زند. رفع = تنبل‌کردن seedها؛ فقط با اجازهٔ کاربر.
-- **توقعِ کهنه را باگ نپندار.** اول *قرارداد فعلی* را بخوان: `layerEntryTarget` شیء `{view,title}` می‌دهد نه رشته؛ `grep -c "id: 'deck-"` روی `mockData.js` `id` کارت‌ها را هم می‌شمارد (تعداد واقعی: `TAPESH_DECKS.length` = ۱۰).
-- کاهش حرکت macOS روشن است ⇒ «محتوا هست، انیمیشن نیست» تنظیم سیستم است. بازیابی فایل پاک‌شدهٔ بدون commit: کش کروم (`sourcesContent`).
+- `theme:check` به‌خاطر `node_modules/three` می‌افتد ⇒ exit code مهم است. `adminApi.test.mjs` = ۹۲ سنجه ولی **`content/*.json` را بازنویسی می‌کند ⇒ اول بکاپ.**
+- هارنس: نیمهٔ سرور **بدون باندل**؛ React باید `external` (وگرنه SIGTERM/۱۳۹). `grep` سندباکس `\|` نمی‌فهمد ⇒ ابزار Grep. **دو Edit موازی روی یک فایل = پاک‌شدن**.
+- هارنس رندر React: esbuild با `--jsx=automatic` (وگرنه `React is not defined`) و **باندل داخل پروژه** (ESM در `/tmp` ماژول‌های پروژه را پیدا نمی‌کند)؛ برای رسیدن به نماهای داخلی، پلاگین esbuild ماژول‌های `intlCoursesService`/`dashboardRoute` را با نسخهٔ آزمون عوض می‌کند، بعد `renderToStaticMarkup` با DOM حداقلی.
+- **هارنس فقط‌سرویس:** `import` ایستا hoist می‌شود ⇒ شیم `window.localStorage` را اول بگذار و باندل سرویس را با **`await import()`** بردار، وگرنه `bootstrapOnce()` حافظهٔ خالی می‌بیند. دارایی‌ها با لودر `empty` (نه `external` — در Node می‌شکند). `String.raw` + `${` = `Bad substitution`؛ فایل هارنس را با Write بنویس نه heredoc.
+- `useAsync` وابستگی پایدار + StrictMode guard. `events.json`/`activity.json` زمان‌اجرایند — دست نزن. توقع کهنه ≠ باگ: `layerEntryTarget` شیء `{view,title}` می‌دهد؛ عمق import دارایی از محل فایل.

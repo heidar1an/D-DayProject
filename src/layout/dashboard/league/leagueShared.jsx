@@ -3,7 +3,7 @@
  * همهٔ بخش‌های لیگ (پروفایل، جدول، چالش، دستاورد، نوتیفیکیشن) از همین قطعات استفاده می‌کنند
  * تا قلب و آواتار در کل محصول یک شکل و یک رنگ بمانند.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { avatarSrc, fallbackAvatarSrc } from '../setting/avatar/avatarOptions';
 
 const FA_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
@@ -66,10 +66,13 @@ const iconPaths = {
       <path d="M12 13.5V17M9 20.5h6M10 17h4l.5 3.5h-5z" />
     </>
   ),
+  /* دو شمشیر متقاطع — آیکن چالش‌ها/نبرد (نسخهٔ پیشین مسیر ناقص و شکسته داشت) */
   swords: (
     <>
-      <path d="m3.5 5.5 3-2 9 9-2.5 2.5-9.5-9.5zM5.5 15.5l3 3M3 18l3 3M14.5 4.5l3-2 3 3-2 3" />
-      <path d="m13.5 11.5 7 7M17.5 15.5l3-3" />
+      <path d="M14.5 17.5 3 6V3h3l11.5 11.5" />
+      <path d="M14.5 6.5 18 3h3v3l-3.5 3.5" />
+      <path d="m13 19 6-6M16 16l4 4M19 21l2-2" />
+      <path d="M5 14 9 18M7 17l-3 3M3 19l2 2" />
     </>
   ),
   bell: (
@@ -122,6 +125,14 @@ const iconPaths = {
     </>
   ),
   up: <path d="M12 19V5m-6 6 6-6 6 6" />,
+  /* آیکن «؟» — توضیح سطح‌بندی */
+  help: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M9.4 9.4A2.7 2.7 0 0 1 12 7.4c1.5 0 2.7 1.1 2.7 2.5 0 1.7-1.6 2.2-2.7 3.1v1" />
+      <path d="M12 17.2h.01" />
+    </>
+  ),
   calendar: (
     <>
       <rect x="3.5" y="5" width="17" height="16" rx="2.5" />
@@ -244,6 +255,58 @@ export function EmptyState({ icon = 'spark', title, note, action }) {
       {note && <p className="max-w-sm text-sm leading-6 text-[var(--faint)]">{note}</p>}
       {action}
     </div>
+  );
+}
+
+/* ── راهنمای سطح: اطلاعات سطح‌بندی داخل آیکن «؟» کنار نشان لیگ (تب پروفایل) ── */
+export function LevelHint({ levelProgress }) {
+  const [open, setOpen] = useState(false);
+  const boxRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const onPointerDown = (event) => {
+      if (boxRef.current && !boxRef.current.contains(event.target)) setOpen(false);
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    return () => document.removeEventListener('pointerdown', onPointerDown);
+  }, [open]);
+
+  if (!levelProgress) return null;
+
+  return (
+    <span ref={boxRef} className="relative inline-flex">
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-label="سطح‌بندی چطور کار می‌کند؟"
+        onClick={() => setOpen((prev) => !prev)}
+        className={`grid h-7 w-7 cursor-pointer place-items-center rounded-full border transition-colors ${
+          open
+            ? 'border-[#937fcd]/60 bg-[#937fcd]/20 text-[var(--purple-soft-ink)]'
+            : 'border-white/12 bg-white/5 text-[var(--muted)] hover:border-white/25 hover:text-white'
+        }`}
+      >
+        <Icon name="help" className="h-4 w-4" />
+      </button>
+
+      {open && (
+        <span
+          role="tooltip"
+          className="absolute bottom-full left-1/2 z-30 mb-3 block w-60 -translate-x-1/2 rounded-2xl border border-[#937fcd]/30 bg-[#191424]/95 p-4 text-right shadow-[0_18px_40px_-16px_rgb(var(--shadow-rgb)/0.95)] backdrop-blur"
+        >
+          <strong className="block text-xs [font-family:'Doran','Vazir',Tahoma,sans-serif]">سطح‌بندی چطور کار می‌کند؟</strong>
+          <span className="mt-2.5 flex items-center justify-between text-[11px] text-[var(--faint)]">
+            <span>سطح فعلی</span>
+            <span className="text-sm text-white [font-family:'Doran','Vazir',Tahoma,sans-serif]">{toFa(levelProgress.level)}</span>
+          </span>
+          <ProgressBar value={levelProgress.step} max={levelProgress.stepMax} height={5} className="mt-2" />
+          <span className="mt-2 block text-[11px] leading-5 text-[var(--faint)]">
+            {toFa(levelProgress.step)} از {toFa(levelProgress.stepMax)} قدم این سطح رفته؛ با هر قلب تازه یک قدم جلو می‌افتی و سطحت بالا می‌رود.
+          </span>
+        </span>
+      )}
+    </span>
   );
 }
 

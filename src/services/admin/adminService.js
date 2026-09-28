@@ -11,6 +11,8 @@
  *     هر درخواست تغییردهنده در هدر می‌رود.
  */
 
+import { uploadMimeOf } from '../international/intlCatalog';
+
 const API_BASE = '/api/admin';
 
 export class AdminApiError extends Error {
@@ -233,6 +235,96 @@ export const micro = {
      مجبور نباشد ۱۶ فایل درس را با خودش حمل کند */
   subjects: () => get('/micro/subjects'),
 };
+
+/* ──────────────── دوره‌های بین‌الملل (لایهٔ داخل پنل) ────────────────
+ *
+ * دو مجموعه: دوره‌ها و منابع (دانشگاه/رسانه/نشریه). هر دوره یک رکورد کامل
+ * است (فراداده + تصویر + بخش‌ها و ویدیو و زیرنویس هر بخش)، پس ویرایش یک PUT
+ * کامل می‌فرستد و انتشار اتمیک می‌ماند — همان قرارداد مراجع و میکرو.
+ * انتشار با فیلد `status` انجام می‌شود و لایه را روی
+ * `/api/public/intl-courses/library` می‌گذارد.
+ */
+
+export const intlCourses = {
+  list: (params) => get(`/intl-courses${toQuery(params)}`),
+  get: (id) => get(`/intl-courses/${encodeURIComponent(id)}`),
+  create: (payload) => post('/intl-courses', payload),
+  update: (id, payload) => put(`/intl-courses/${encodeURIComponent(id)}`, payload),
+  remove: (id) => del(`/intl-courses/${encodeURIComponent(id)}`),
+
+  /* منابع (دانشگاه‌ها و مراجع) */
+  providers: {
+    list: (params) => get(`/intl-providers${toQuery(params)}`),
+    get: (id) => get(`/intl-providers/${encodeURIComponent(id)}`),
+    create: (payload) => post('/intl-providers', payload),
+    update: (id, payload) => put(`/intl-providers/${encodeURIComponent(id)}`, payload),
+    remove: (id) => del(`/intl-providers/${encodeURIComponent(id)}`),
+  },
+};
+
+/*
+ * بارگذاری ویدیو و زیرنویس دوره‌های بین‌الملل.
+ *
+ * چرا از `request()` عبور نمی‌کند: آن تابع بدنه را JSON می‌فرستد و فایل را
+ * base64 می‌کند؛ برای ویدیو یعنی چند برابر شدن حجم در حافظه. اینجا خودِ فایل
+ * بدنهٔ درخواست است و مستقیم روی دیسک سرور می‌نشیند. سه چیز دستی ضمیمه
+ * می‌شود: کوکی نشست (`credentials`)، توکن CSRF و نام فایل در هدر.
+ */
+export async function uploadIntlMedia(file, kind = '') {
+  /*
+   * نوع را از پسوند فایل می‌سازیم، نه از `file.type`.
+   *
+   * مرورگرها برای زیرنویس قابل اتکا نیستند: `.vtt` را گاهی `text/plain`
+   * (که سرور آن را `.srt` ذخیره می‌کرد) و `.srt` را گاهی خالی
+   * (`application/octet-stream` ⇒ رد) اعلام می‌کنند. `kind` هم نمی‌گذارد فایل
+   * ویدیو از فیلد زیرنویس رد شود و برعکس.
+   */
+  const mime = uploadMimeOf(file, kind);
+  if (!mime) {
+    throw new AdminApiError({
+      code: 'UNSUPPORTED_MEDIA_TYPE',
+      message: kind === 'subtitle'
+        ? 'فقط فایل زیرنویس (vtt یا srt) پذیرفته می‌شود'
+        : 'فقط فایل ویدیو (mp4/webm/mov) پذیرفته می‌شود',
+    });
+  }
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': mime,
+    'x-tapesh-filename': encodeURIComponent(file.name || 'upload'),
+  };
+  if (csrfToken) headers['x-tapesh-csrf'] = csrfToken;
+
+  let response;
+  try {
+    response = await fetch(`${API_BASE}/intl-courses/upload`, {
+      method: 'POST',
+      headers,
+      credentials: 'same-origin',
+      body: file,
+    });
+  } catch {
+    throw new AdminApiError({ code: 'NETWORK_ERROR', message: 'ارتباط با سرور برقرار نشد.' });
+  }
+
+  let payload = null;
+  try {
+    payload = await response.json();
+  } catch {
+    payload = null;
+  }
+
+  if (!response.ok || !payload?.success) {
+    throw new AdminApiError({
+      status: response.status,
+      code: payload?.error?.code,
+      message: payload?.error?.message,
+    });
+  }
+
+  return payload.data.media;
+}
 
 /* ──────────────────────────────── رسانه ──────────────────────────────── */
 
@@ -565,6 +657,6 @@ export function readFileAsBase64(file) {
 }
 
 export default {
-  auth, articles, categories, pages, flashcards, references, comprehensive, micro, media, banners, users, settings, logs, notes,
-  publishing, analytics, mediaCenter, getStats, getMeta, toQuery, readFileAsBase64, AdminApiError,
+  auth, articles, categories, pages, flashcards, references, comprehensive, micro, intlCourses, media, banners, users, settings, logs, notes,
+  publishing, analytics, mediaCenter, getStats, getMeta, toQuery, readFileAsBase64, uploadIntlMedia, AdminApiError,
 };

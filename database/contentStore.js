@@ -23,7 +23,7 @@
  */
 
 import { randomBytes, randomUUID, scryptSync, timingSafeEqual } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from 'node:fs';
+import { createWriteStream, existsSync, mkdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -44,6 +44,15 @@ import {
 } from '../src/services/testBank/mockData.js';
 import { CARD_IMAGE_MIME_EXTENSIONS, TAPESH_CARDS, TAPESH_DECKS } from '../src/services/flashcards/mockData.js';
 import { REFERENCE_CATALOG, REFERENCE_CONTENTS, referenceBlocksToHtml } from '../src/services/references/referenceCatalog.js';
+/* کاتالوگ خالص دوره‌های بین‌الملل — دادهٔ ثابت بدون تصویر (نود نمی‌تواند تصویر import کند) */
+import {
+  INTL_COURSE_CATALOG,
+  INTL_DEFAULT_MAX_VIDEO_MB,
+  INTL_PROVIDER_CATALOG,
+  INTL_SUBTITLE_LANGS,
+  INTL_UPLOAD_EXTENSION_MIME,
+  INTL_UPLOAD_MIME_EXTENSIONS,
+} from '../src/services/international/intlCatalog.js';
 import { difficultyFromPercent } from '../src/services/testBank/questionMeta.js';
 import {
   ARTICLE_AUTHORS, ARTICLE_CATALOG, articleBlocksToHtml,
@@ -54,8 +63,12 @@ import anatomyCourse from '../src/data/learning/anatomyCourse.js';
 const databaseDir = dirname(fileURLToPath(import.meta.url));
 const contentDir = resolve(databaseDir, 'content');
 const uploadsDir = resolve(databaseDir, '..', 'public', 'uploads');
+/* ویدیو و زیرنویس دوره‌های بین‌الملل زیرپوشهٔ جدا می‌گیرند تا کتابخانهٔ تصویر
+   (که فقط تصویر و PDF می‌پذیرد) با فایل‌های سنگین شلوغ نشود. */
+const intlUploadsDir = resolve(uploadsDir, 'intl');
 
 export const UPLOADS_URL_PREFIX = '/uploads';
+export const INTL_UPLOADS_URL_PREFIX = '/uploads/intl';
 export { sanitizeHtml };
 
 /* ─────────────────────────── نقش‌ها و دسترسی‌ها ─────────────────────────── */
@@ -73,6 +86,12 @@ export const PERMISSIONS = [
   'references.create', 'references.read', 'references.update', 'references.delete', 'references.publish',
   /* درسنامه جامع — کنترل متن‌ها و تست‌های لایهٔ یادگیری جامع، درس به درس و واحد به واحد */
   'comprehensive.read', 'comprehensive.update', 'comprehensive.publish',
+  /*
+   * دوره‌های بین‌الملل — دوره‌ها و منابع (دانشگاه‌ها/نهادها) در لایهٔ
+   * `intl-courses`. `intl.upload` جداست چون بارگذاری ویدیو و زیرنویس حجم و
+   * فضای دیسک می‌خورد و نباید لازمهٔ ویرایش متن باشد.
+   */
+  'intl.read', 'intl.create', 'intl.update', 'intl.delete', 'intl.publish', 'intl.upload',
   'media.upload', 'media.read', 'media.delete',
   'banners.create', 'banners.update', 'banners.delete',
   'users.create', 'users.read', 'users.update', 'users.delete',
@@ -138,6 +157,7 @@ export const ROLES = {
       'micro.read', 'micro.create', 'micro.update', 'micro.publish',
       'references.read', 'references.create', 'references.update', 'references.publish',
       'comprehensive.read', 'comprehensive.update', 'comprehensive.publish',
+      'intl.read', 'intl.create', 'intl.update', 'intl.publish', 'intl.upload',
       'media.upload', 'media.read', 'media.delete',
       'notes.create', 'notes.read', 'notes.update', 'notes.delete',
       'publishing.read', 'publishing.send',
@@ -190,6 +210,16 @@ const COLLECTIONS = [
    * موجودیت مدیریتی است تا ویرایش و انتشار اتمیک بماند — همان قرارداد مراجع.
    */
   'comprehensiveCourses',
+  /*
+   * دوره‌های بین‌الملل — دو مجموعهٔ مستقل:
+   *   intlProviders = منابع (دانشگاه/رسانه/نشریه) با معرفی، لوگو و ترتیب نوار
+   *   intlCourses   = دوره‌ها با فراداده + بخش‌ها و ویدیو و زیرنویس هر بخش
+   * جدا نگه داشته شده‌اند چون یک منبع چند دوره دارد و ویرایش نام دانشگاه باید
+   * همهٔ کارت‌هایش را هم عوض کند. مثل بقیه، هر دوره یک موجودیت کامل است تا
+   * افزودن/حذف بخش و انتشار، یک عملیات اتمیک بماند.
+   */
+  'intlProviders',
+  'intlCourses',
   /*
    * مرکز رسانه و فضای مجازی — ۱۲ مجموعهٔ مستقل.
    * هر مجموعه یک Entity از مدل داده است؛ افزودن پلتفرم یا نوع محتوای تازه
@@ -316,6 +346,9 @@ export const DEFAULT_SETTINGS = {
     maxUploadMb: 4,
     /* تصویرهای کارت تصویری از فهرست مشترک می‌آیند؛ PDF فقط برای پیوست‌های کتابخانهٔ رسانه */
     allowedMimeTypes: [...Object.keys(CARD_IMAGE_MIME_EXTENSIONS), 'application/pdf'],
+    /* سقف جدا برای ویدیو و زیرنویس دوره‌های بین‌الملل — مسیر بارگذاری‌شان جداست
+       (`/api/admin/intl-courses/upload`) چون بدنه‌شان JSON/base64 نیست. */
+    maxVideoUploadMb: INTL_DEFAULT_MAX_VIDEO_MB,
   },
   security: { sessionHours: 12, maxLoginAttempts: 8, lockMinutes: 10 },
 };
@@ -567,6 +600,10 @@ function ensureStore() {
   syncReferences();
   /* درسنامهٔ جامع دست‌نویس (آناتومی) یک‌بار به رکورد پنل تبدیل می‌شود */
   ensureFile(files.comprehensiveCourses, seedComprehensiveCourses());
+  /* منابع و دوره‌های بین‌الملل — دورهٔ ثابتِ غایب اینجا رکورد می‌گیرد */
+  ensureFile(files.intlProviders, seedIntlProviders());
+  ensureFile(files.intlCourses, seedIntlCourses());
+  syncIntlCatalog();
   ensureFile(files.media, []);
   ensureFile(files.banners, seedBanners());
   ensureFile(files.activity, []);
@@ -1327,6 +1364,495 @@ export function publishedReferences() {
         })),
       })),
     }));
+}
+
+/* ─────────────────────── دوره‌های بین‌الملل (لایهٔ داخل پنل) ───────────────────────
+ *
+ * دو مجموعهٔ جدا:
+ *   intlProviders — منابع: نام فارسی/لاتین، کشور، سال بنیان، معرفی، حوزه‌ها، لوگو،
+ *                   ترتیب فهرست (`sortOrder`) و ترتیب نوار متحرک (`marqueeOrder`؛
+ *                   صفر = در نوار نیاید). منابعی که دوره‌ای در تپش ندارند هم رکورد
+ *                   دارند تا فقط در نوار دیده شوند.
+ *   intlCourses   — دوره‌ها: فراداده + بخش‌ها؛ هر بخش یک ویدیو و چند زیرنویس دارد.
+ *
+ * ناشر فقط با `providerId` به منبع وصل می‌شود، پس نام و لوگوی دانشگاه یک منبع
+ * حقیقت دارد و ویرایشش همهٔ کارت‌های آن دانشگاه را هم عوض می‌کند.
+ *
+ * تصویر و لوگو دو جا می‌توانند بیایند: `image`/`logo` (فایل آپلودی پنل) یا
+ * `imageKey`/`logoKey` (دارایی باندل‌شدهٔ خود پروژه). سرور نمی‌تواند تصویر
+ * باندل کند، پس seed فقط کلید می‌گذارد و حل آدرس سمت مرورگر است (`intlAssets.js`).
+ *
+ * مثل مراجع و میکرو، کل دوره یک موجودیت کامل است: ویرایش یک PUT کامل می‌فرستد
+ * و افزودن/حذف بخش و انتشار، اتمیک می‌ماند.
+ */
+
+const INTL_STATUSES = ['draft', 'published', 'archived'];
+
+const intlText = (value, max) => String(value ?? '').trim().slice(0, max);
+const intlHex = (value, fallback) => (/^#[0-9a-fA-F]{3,8}$/.test(String(value ?? '')) ? String(value) : fallback);
+const intlCount = (value, max = 100_000) => Math.min(max, Math.max(0, Math.round(Number(value) || 0)));
+/* اعداد عنوان‌های پیش‌فرض فارسی می‌مانند (قرارداد UI تپش) */
+const intlFaNumber = (value) => String(value).replace(/\d/g, (digit) => '۰۱۲۳۴۵۶۷۸۹'[Number(digit)]);
+
+function intlSubtitlePayload(input) {
+  const url = intlText(input?.url, 400);
+  if (!url) return null;
+
+  const lang = intlText(input?.lang, 12) || 'fa';
+  const known = INTL_SUBTITLE_LANGS.find((item) => item.id === lang);
+
+  return {
+    lang,
+    label: intlText(input?.label, 40) || known?.label || lang,
+    url,
+  };
+}
+
+function intlSectionPayload(input, index = 0) {
+  const subtitles = (Array.isArray(input?.subtitles) ? input.subtitles : [])
+    .map(intlSubtitlePayload)
+    .filter(Boolean)
+    /* هر زبان یک‌بار — زیرنویس تکراری همان زبان بی‌معناست */
+    .filter((item, position, list) => list.findIndex((other) => other.lang === item.lang) === position);
+
+  return {
+    id: intlText(input?.id, 60) || makeId('isec'),
+    title: intlText(input?.title, 200) || `ویدیو ${intlFaNumber(index + 1)}`,
+    time: intlText(input?.time, 20),
+    desc: intlText(input?.desc, 1200),
+    videoUrl: intlText(input?.videoUrl, 400),
+    videoMime: intlText(input?.videoMime, 80),
+    subtitles,
+  };
+}
+
+function intlCoursePayload(input, existing = null) {
+  const title = intlText(input?.title, 160);
+  if (!title) throw Object.assign(new Error('عنوان دوره الزامی است'), { code: 'VALIDATION_ERROR' });
+
+  const status = INTL_STATUSES.includes(input?.status) ? input.status : 'draft';
+  const category = intlText(input?.category, 40) || 'medicine';
+
+  return {
+    title,
+    providerId: intlText(input?.providerId, 60),
+    category,
+    categoryLabel: intlText(input?.categoryLabel, 80),
+    level: intlText(input?.level, 40) || 'مقدماتی',
+    duration: intlCount(input?.duration, 1000),
+    totalDuration: intlText(input?.totalDuration, 20),
+    progress: intlCount(input?.progress, 100),
+    accent: intlHex(input?.accent, '#5b8cc7'),
+    accentSoft: intlHex(input?.accentSoft, '#1d314a'),
+    badge: intlText(input?.badge, 40),
+    description: intlText(input?.description, 600),
+    tags: (Array.isArray(input?.tags) ? input.tags : [])
+      .map((tag) => intlText(tag, 40))
+      .filter(Boolean)
+      .slice(0, 8),
+    image: intlText(input?.image, 400),
+    imageKey: intlText(input?.imageKey, 60),
+    sortOrder: intlCount(input?.sortOrder, 10_000),
+    sections: (Array.isArray(input?.sections) ? input.sections : []).map(intlSectionPayload),
+    status,
+    /* منبع رکورد فقط از رکورد قبلی ارث می‌رسد؛ از بدنهٔ درخواست خوانده نمی‌شود */
+    origin: existing?.origin === 'tapesh' ? 'tapesh' : 'panel',
+    publishedAt: status === 'published' ? (existing?.publishedAt || nowIso()) : (existing?.publishedAt ?? null),
+  };
+}
+
+function intlProviderPayload(input, existing = null) {
+  const name = intlText(input?.name, 160);
+  if (!name) throw Object.assign(new Error('نام منبع الزامی است'), { code: 'VALIDATION_ERROR' });
+
+  const status = INTL_STATUSES.includes(input?.status) ? input.status : 'draft';
+
+  return {
+    name,
+    nameEn: intlText(input?.nameEn, 160),
+    kind: intlText(input?.kind, 40) || 'university',
+    country: intlText(input?.country, 80),
+    founded: intlText(input?.founded, 20),
+    description: intlText(input?.description, 800),
+    focus: (Array.isArray(input?.focus) ? input.focus : [])
+      .map((item) => intlText(item, 60))
+      .filter(Boolean)
+      .slice(0, 6),
+    logo: intlText(input?.logo, 400),
+    logoKey: intlText(input?.logoKey, 60),
+    sortOrder: intlCount(input?.sortOrder, 10_000),
+    marqueeOrder: intlCount(input?.marqueeOrder, 10_000),
+    status,
+    origin: existing?.origin === 'tapesh' ? 'tapesh' : 'panel',
+    publishedAt: status === 'published' ? (existing?.publishedAt || nowIso()) : (existing?.publishedAt ?? null),
+  };
+}
+
+/* منابع ثابت کاتالوگ — یک‌بار به رکورد پنل تبدیل می‌شوند (منتشرشده) */
+function seedIntlProviders() {
+  const created = nowIso();
+
+  return INTL_PROVIDER_CATALOG.map((provider) => ({
+    id: provider.id,
+    ...intlProviderPayload({ ...provider, status: 'published' }),
+    origin: 'tapesh',
+    createdAt: created,
+    updatedAt: created,
+    createdBy: 'seed',
+    updatedBy: 'seed',
+    publishedAt: created,
+  }));
+}
+
+/* دوره‌های ثابت کاتالوگ — با بخش‌هایشان؛ ویدیو و زیرنویس خالی می‌ماند */
+function seedIntlCourses() {
+  const created = nowIso();
+
+  return INTL_COURSE_CATALOG.map((course) => ({
+    id: course.id,
+    ...intlCoursePayload({ ...course, status: 'published' }),
+    origin: 'tapesh',
+    createdAt: created,
+    updatedAt: created,
+    createdBy: 'seed',
+    updatedBy: 'seed',
+    publishedAt: created,
+  }));
+}
+
+/*
+ * همگام‌سازی افزایشی — همان دو محافظ `syncFlashcardDecks`/`syncMicroCourses`:
+ * یک‌بار در عمر پروسه و با `writeJson` مستقیم (نه `writeCollection`، که داخل
+ * `ensureStore` حلقهٔ بی‌پایان می‌سازد). فقط رکوردهای **غایب** را اضافه می‌کند؛
+ * رکورد موجود — حتی اگر ادمین پاکش کرده باشد — بازنویسی نمی‌شود.
+ */
+let intlSynced = false;
+
+function syncIntlCatalog() {
+  if (intlSynced) return;
+  intlSynced = true;
+
+  const providers = readJson(files.intlProviders, []);
+  if (Array.isArray(providers)) {
+    const known = new Set(providers.map((provider) => provider?.id));
+    const missing = seedIntlProviders().filter((provider) => !known.has(provider.id));
+    if (missing.length) writeJson(files.intlProviders, [...providers, ...missing]);
+  }
+
+  const courses = readJson(files.intlCourses, []);
+  if (Array.isArray(courses)) {
+    const known = new Set(courses.map((course) => course?.id));
+    const missing = seedIntlCourses().filter((course) => !known.has(course.id));
+    if (missing.length) writeJson(files.intlCourses, [...courses, ...missing]);
+  }
+}
+
+const intlBySort = (a, b) => (Number(a.sortOrder) || 0) - (Number(b.sortOrder) || 0);
+
+export function listIntlCourses({ search = '', status = 'all', providerId = 'all', page = 1, perPage = 50 } = {}) {
+  const query = normalizeSearch(search);
+  const filtered = readCollection('intlCourses').filter((course) => {
+    if (status !== 'all' && course.status !== status) return false;
+    if (providerId !== 'all' && course.providerId !== providerId) return false;
+    if (!query) return true;
+    return [course.title, course.categoryLabel, course.description, ...(course.tags ?? [])]
+      .some((field) => normalizeSearch(field).includes(query));
+  });
+
+  filtered.sort(intlBySort);
+  return paginate(filtered, { page, perPage });
+}
+
+export function getIntlCourse(id) {
+  return readCollection('intlCourses').find((course) => course.id === id) ?? null;
+}
+
+export function createIntlCourse(input, admin) {
+  const courses = readCollection('intlCourses');
+  const created = nowIso();
+
+  const course = {
+    id: makeId('intl'),
+    ...intlCoursePayload(input),
+    createdAt: created,
+    updatedAt: created,
+    createdBy: admin?.id ?? 'system',
+    updatedBy: admin?.id ?? 'system',
+  };
+
+  courses.push(course);
+  writeCollection('intlCourses', courses);
+  return course;
+}
+
+export function updateIntlCourse(id, input, admin) {
+  const courses = readCollection('intlCourses');
+  const index = courses.findIndex((course) => course.id === id);
+  if (index === -1) return null;
+
+  const updated = {
+    ...courses[index],
+    ...intlCoursePayload(input, courses[index]),
+    updatedAt: nowIso(),
+    updatedBy: admin?.id ?? 'system',
+  };
+
+  courses[index] = updated;
+  writeCollection('intlCourses', courses);
+  return updated;
+}
+
+export function deleteIntlCourse(id) {
+  const courses = readCollection('intlCourses');
+  const target = courses.find((course) => course.id === id);
+  if (!target) return null;
+
+  writeCollection('intlCourses', courses.filter((course) => course.id !== id));
+  return target;
+}
+
+export function listIntlProviders({ search = '', status = 'all' } = {}) {
+  const query = normalizeSearch(search);
+  const filtered = readCollection('intlProviders').filter((provider) => {
+    if (status !== 'all' && provider.status !== status) return false;
+    if (!query) return true;
+    return [provider.name, provider.nameEn, provider.country].some((field) => normalizeSearch(field).includes(query));
+  });
+
+  filtered.sort(intlBySort);
+  return { items: filtered, total: filtered.length };
+}
+
+export function getIntlProvider(id) {
+  return readCollection('intlProviders').find((provider) => provider.id === id) ?? null;
+}
+
+export function createIntlProvider(input, admin) {
+  const providers = readCollection('intlProviders');
+  const created = nowIso();
+
+  const provider = {
+    id: makeId('intlp'),
+    ...intlProviderPayload(input),
+    createdAt: created,
+    updatedAt: created,
+    createdBy: admin?.id ?? 'system',
+    updatedBy: admin?.id ?? 'system',
+  };
+
+  providers.push(provider);
+  writeCollection('intlProviders', providers);
+  return provider;
+}
+
+export function updateIntlProvider(id, input, admin) {
+  const providers = readCollection('intlProviders');
+  const index = providers.findIndex((provider) => provider.id === id);
+  if (index === -1) return null;
+
+  const updated = {
+    ...providers[index],
+    ...intlProviderPayload(input, providers[index]),
+    updatedAt: nowIso(),
+    updatedBy: admin?.id ?? 'system',
+  };
+
+  providers[index] = updated;
+  writeCollection('intlProviders', providers);
+  return updated;
+}
+
+/*
+ * حذف منبع — اگر دوره‌ای به آن وصل باشد رد می‌شود.
+ * حذف خاموش منبع، کارت‌های آن دوره‌ها را بی‌ناشر می‌کرد و کاربر فقط یک کارت
+ * بی‌نام می‌دید؛ پس اجازه نمی‌دهیم و شمارش دوره‌ها را در خطا برمی‌گردانیم.
+ */
+export function deleteIntlProvider(id) {
+  const providers = readCollection('intlProviders');
+  const target = providers.find((provider) => provider.id === id);
+  if (!target) return null;
+
+  const used = readCollection('intlCourses').filter((course) => course.providerId === id).length;
+  if (used > 0) {
+    throw Object.assign(new Error(`این منبع ${used} دوره دارد؛ اول دوره‌ها را به منبع دیگری وصل کنید`), {
+      code: 'VALIDATION_ERROR',
+    });
+  }
+
+  writeCollection('intlProviders', providers.filter((provider) => provider.id !== id));
+  return target;
+}
+
+/*
+ * قرارداد عمومی — فقط منتشرشده‌ها، با همان کلیدهایی که `intlCoursesService`
+ * سمت مرورگر می‌خواند. اتصال ناشر به دوره سمت کلاینت انجام می‌شود تا
+ * کاتالوگ ثابت و نسخهٔ پنل از یک مسیر رد شوند.
+ */
+export function publishedIntlCatalog() {
+  const providers = readCollection('intlProviders')
+    .filter((provider) => provider.status === 'published')
+    .sort(intlBySort)
+    .map((provider) => ({
+      id: provider.id,
+      name: provider.name,
+      nameEn: provider.nameEn,
+      kind: provider.kind,
+      country: provider.country,
+      founded: provider.founded,
+      description: provider.description,
+      focus: provider.focus ?? [],
+      logo: provider.logo,
+      logoKey: provider.logoKey,
+      sortOrder: provider.sortOrder,
+      marqueeOrder: provider.marqueeOrder,
+    }));
+
+  const courses = readCollection('intlCourses')
+    .filter((course) => course.status === 'published')
+    .sort(intlBySort)
+    .map((course) => ({
+      id: course.id,
+      title: course.title,
+      providerId: course.providerId,
+      category: course.category,
+      categoryLabel: course.categoryLabel,
+      level: course.level,
+      duration: course.duration,
+      totalDuration: course.totalDuration,
+      progress: course.progress,
+      accent: course.accent,
+      accentSoft: course.accentSoft,
+      badge: course.badge,
+      description: course.description,
+      tags: course.tags ?? [],
+      image: course.image,
+      imageKey: course.imageKey,
+      sortOrder: course.sortOrder,
+      sections: (course.sections ?? []).map((section) => ({
+        id: section.id,
+        title: section.title,
+        time: section.time,
+        desc: section.desc,
+        videoUrl: section.videoUrl,
+        videoMime: section.videoMime,
+        subtitles: section.subtitles ?? [],
+      })),
+    }));
+
+  return { courses, providers };
+}
+
+/*
+ * بارگذاری دودویی ویدیو/زیرنویس.
+ *
+ * چرا مسیر جدا و چرا جریانی: بدنهٔ این درخواست JSON نیست، فایل خام است.
+ * اگر مثل آپلود تصویر base64 می‌کردیم، یک ویدیوی ۲۰۰ مگابایتی هم در حافظهٔ
+ * مرورگر و هم در حافظهٔ سرور چند برابر می‌شد و از سقف `MAX_BODY_BYTES`
+ * می‌گذشت. اینجا بایت‌ها همان‌طور که می‌رسند روی دیسک نوشته می‌شوند و اگر از
+ * سقف بگذرند، فایل نیمه‌کاره پاک می‌شود.
+ */
+/*
+ * SRT → WebVTT.
+ *
+ * چرا لازم است: عنصر `<track>` مرورگر **فقط WebVTT** را می‌خواند و برای `.srt`
+ * بی‌صدا هیچ زیرنویسی نشان نمی‌دهد — نه خطایی در کنسول، نه چیزی روی ویدیو.
+ * پس همان لحظهٔ بارگذاری تبدیل می‌شود تا مدیر لازم نباشد فایلش را دستی عوض کند.
+ */
+function srtToVtt(text) {
+  const body = String(text)
+    .replace(/^\uFEFF/, '')
+    .replace(/\r\n?/g, '\n')
+    /* اگر فایل از قبل VTT بود، سرصفحهٔ قدیمی برداشته می‌شود تا دوباره بیاید */
+    .replace(/^WEBVTT[^\n]*\n+/, '')
+    /* شمارهٔ ترتیب بلوک‌ها در WebVTT لازم نیست */
+    .replace(/^\d+\n(?=\d{1,2}:\d{2})/gm, '')
+    /* `,` به `.` و میلی‌ثانیه به سه رقم (قرارداد WebVTT) */
+    .replace(/(\d{1,2}:\d{2}(?::\d{2})?),(\d{1,3})/g, (_, stamp, ms) => `${stamp}.${ms.padEnd(3, '0')}`);
+
+  return `WEBVTT\n\n${body.trim()}\n`;
+}
+
+export function saveIntlUpload({ originalName, extension, mimeType, stream, maxBytes }) {
+  /*
+   * پسوند را فراخوان می‌دهد (از نام فایل اصلی) چون نوع اعلامی مرورگر برای
+   * زیرنویس قابل اتکا نیست. اگر نداد، از نوع MIME می‌سازیم.
+   */
+  const resolvedExtension = extension || INTL_UPLOAD_MIME_EXTENSIONS[mimeType];
+  if (!resolvedExtension) {
+    throw Object.assign(new Error('نوع فایل مجاز نیست؛ ویدیو (mp4/webm/mov) یا زیرنویس (vtt/srt) بفرستید'), {
+      code: 'UNSUPPORTED_MEDIA_TYPE',
+    });
+  }
+  const resolvedMime = mimeType || INTL_UPLOAD_EXTENSION_MIME[resolvedExtension] || '';
+
+  /* نام فایل هرگز از ورودی کاربر ساخته نمی‌شود — ضد path traversal */
+  const filename = `${Date.now().toString(36)}-${randomBytes(6).toString('hex')}.${resolvedExtension}`;
+  const target = resolve(intlUploadsDir, filename);
+  ensureDir(intlUploadsDir);
+
+  return new Promise((resolvePromise, rejectPromise) => {
+    const output = createWriteStream(target);
+    let size = 0;
+    let failed = false;
+
+    const abort = (error) => {
+      if (failed) return;
+      failed = true;
+      output.destroy();
+      try { unlinkSync(target); } catch { /* فایل نیمه‌کاره‌ای نبود */ }
+      stream.destroy?.();
+      rejectPromise(error);
+    };
+
+    stream.on('data', (chunk) => {
+      size += chunk.length;
+      if (size > maxBytes) {
+        abort(Object.assign(new Error(`حجم فایل بیش از ${Math.round(maxBytes / (1024 * 1024))} مگابایت است`), {
+          code: 'PAYLOAD_TOO_LARGE',
+        }));
+      }
+    });
+
+    stream.on('error', () => abort(Object.assign(new Error('دریافت فایل ناتمام ماند'), { code: 'VALIDATION_ERROR' })));
+    output.on('error', () => abort(Object.assign(new Error('نوشتن فایل ناموفق بود'), { code: 'INTERNAL_ERROR' })));
+
+    output.on('finish', () => {
+      if (failed) return;
+      if (!size) {
+        try { unlinkSync(target); } catch { /* چیزی نوشته نشده بود */ }
+        rejectPromise(Object.assign(new Error('فایل خالی است'), { code: 'VALIDATION_ERROR' }));
+        return;
+      }
+
+      /* زیرنویس srt همان‌جا به vtt تبدیل می‌شود (پخش‌کننده فقط WebVTT می‌فهمد) */
+      let storedName = filename;
+      let storedMime = resolvedMime;
+      if (resolvedExtension === 'srt') {
+        try {
+          const vtt = srtToVtt(readFileSync(target, 'utf8'));
+          storedName = `${filename.slice(0, -'.srt'.length)}.vtt`;
+          writeFileSync(resolve(intlUploadsDir, storedName), vtt, 'utf8');
+          unlinkSync(target);
+          storedMime = 'text/vtt';
+        } catch {
+          /* تبدیل نشد — همان srt می‌ماند */
+          storedName = filename;
+          storedMime = resolvedMime;
+        }
+      }
+
+      resolvePromise({
+        filename: storedName,
+        originalName: String(originalName ?? filename).replace(/[\\/]/g, '').slice(0, 160),
+        mimeType: storedMime,
+        size,
+        url: `${INTL_UPLOADS_URL_PREFIX}/${storedName}`,
+        createdAt: nowIso(),
+      });
+    });
+
+    stream.pipe(output);
+  });
 }
 
 /* ─────────────────────── درسنامه جامع علوم پایه ───────────────────────

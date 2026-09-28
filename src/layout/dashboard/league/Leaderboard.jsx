@@ -29,7 +29,6 @@ const SCOPES = [
 
 const METRICS = [
   { id: 'total', label: 'مجموع قلب‌ها', icon: 'heart' },
-  { id: 'avg', label: 'میانگین قلب', icon: 'heart' },
   { id: 'active', label: 'دانشجویان فعال', icon: 'users' },
 ];
 

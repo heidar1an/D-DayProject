@@ -75,6 +75,7 @@ const LAYER_VIEWS = {
   'micro-lesson': { view: 'micro-lesson', title: 'مدیریت میکرو درسنامه و انتشارش برای کاربران تپش' },
   'test-bank': { view: 'test-bank-library', title: 'مدیریت سؤالات بانک تست علوم پایه' },
   'comprehensive-lesson': { view: 'comprehensive-library', title: 'مدیریت درسنامه جامع: متن‌ها و تست‌های هر درس، مبحث و واحد' },
+  'international-courses': { view: 'intl-courses', title: 'مدیریت دوره‌های بین‌الملل: دوره‌ها، بخش‌ها، ویدیو، زیرنویس و منابع' },
 };
 
 export function layerEntryTarget(page) {

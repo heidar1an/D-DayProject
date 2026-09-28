@@ -1,0 +1,507 @@
+[
+  {
+    "id": "global-health",
+    "title": "نگاهی جهانی به سلامت",
+    "providerId": "harvard",
+    "category": "medicine",
+    "categoryLabel": "پزشکی و سلامت",
+    "level": "مقدماتی",
+    "duration": 8,
+    "totalDuration": "۰۸:۴۲:۰۰",
+    "progress": 64,
+    "accent": "#5b8cc7",
+    "accentSoft": "#1d314a",
+    "badge": "پربازدید",
+    "description": "در این مسیر با چالش‌های سلامت عمومی، نابرابری‌های درمانی و راهکارهای اثرگذار در جوامع مختلف آشنا می‌شوی.",
+    "tags": [
+      "سلامت عمومی",
+      "اپیدمیولوژی",
+      "جامعه"
+    ],
+    "image": "",
+    "imageKey": "global-health",
+    "sortOrder": 10,
+    "sections": [
+      {
+        "id": "gh-01",
+        "title": "چرا سلامت عمومی به مرزها محدود نیست؟",
+        "time": "۰۰:۰۰",
+        "desc": "تفاوت نگاه فردمحور و جامعه‌محور به سلامت و این‌که چرا یک بیماری محلی می‌تواند مسئله‌ای جهانی شود.",
+        "videoUrl": "",
+        "videoMime": "",
+        "subtitles": []
+      },
+      {
+        "id": "gh-02",
+        "title": "نابرابری درمانی و نقش جامعه",
+        "time": "۰۵:۱۵",
+        "desc": "چگونه درآمد، محل زندگی و دسترسی به خدمات، نتیجهٔ درمان را تغییر می‌دهد.",
+        "videoUrl": "",
+        "videoMime": "",
+        "subtitles": []
+      },
+      {
+        "id": "gh-03",
+        "title": "خواندن داده‌های سلامت در جهان",
+        "time": "۲۲:۲۵",
+        "desc": "با شاخص‌های پایه مثل امید به زندگی و مرگ‌ومیر کودکان، وضعیت یک جامعه را بخوان.",
+        "videoUrl": "",
+        "videoMime": "",
+        "subtitles": []
+      },
+      {
+        "id": "gh-04",
+        "title": "طراحی مداخله‌های اثرگذار",
+        "time": "۳۴:۵۰",
+        "desc": "از تشخیص مسئله تا انتخاب مداخله‌ای که واقعاً قابل اجرا و سنجش باشد.",
+        "videoUrl": "",
+        "videoMime": "",
+        "subtitles": []
+      },
+      {
+        "id": "gh-05",
+        "title": "جمع‌بندی: از مسئله تا اثر",
+        "time": "۵۰:۳۰",
+        "desc": "مرور مسیر کامل یک پروژهٔ سلامت عمومی و معیارهای سنجش اثر آن.",
+        "videoUrl": "",
+        "videoMime": "",
+        "subtitles": []
+      }
+    ],
+    "status": "published",
+    "origin": "tapesh",
+    "publishedAt": "2026-09-27T11:02:54.237Z",
+    "createdAt": "2026-09-27T11:02:54.237Z",
+    "updatedAt": "2026-09-27T11:02:54.237Z",
+    "createdBy": "seed",
+    "updatedBy": "seed"
+  },
+  {
+    "id": "visual-science",
+    "title": "علم را چطور ببینیم؟",
+    "providerId": "mit",
+    "category": "science",
+    "categoryLabel": "علوم پایه",
+    "level": "متوسط",
+    "duration": 6,
+    "totalDuration": "۰۶:۱۸:۰۰",
+    "progress": 18,
+    "accent": "#937fcd",
+    "accentSoft": "#2d2744",
+    "badge": "جدید",
+    "description": "یک دوره تصویری برای فهم بهتر مدل‌ها، آزمایش‌ها و ایده‌های علمی؛ از مشاهده دقیق تا ساختن یک توضیح قابل اعتماد.",
+    "tags": [
+      "تفکر علمی",
+      "مدل‌سازی",
+      "آزمایش"
+    ],
+    "image": "",
+    "imageKey": "visual-science",
+    "sortOrder": 20,
+    "sections": [
+      {
+        "id": "vs-01",
+        "title": "دیدن پیش از توضیح دادن",
+        "time": "۰۰:۰۰",
+        "desc": "تفاوت مشاهدهٔ دقیق با تفسیر شتاب‌زده و تمرین ثبت آنچه واقعاً دیده می‌شود.",
+        "videoUrl": "",
+        "videoMime": "",
+        "subtitles": []
+      },
+      {
+        "id": "vs-02",
+        "title": "مدل‌ها چگونه فکر ما را شکل می‌دهند؟",
+        "time": "۰۷:۴۰",
+        "desc": "مدل‌های علمی ابزار ساده‌سازی‌اند؛ با مثال می‌بینی کجا کمک می‌کنند و کجا گمراه.",
+        "videoUrl": "",
+        "videoMime": "",
+        "subtitles": []
+      },
+      {
+        "id": "vs-03",
+        "title": "آزمایش خوب چه چیزی را جدا می‌کند؟",
+        "time": "۲۱:۱۰",
+        "desc": "نقش گروه شاهد، متغیر و تکرار در این‌که نتیجه به یک علت نسبت داده شود.",
+        "videoUrl": "",
+        "videoMime": "",
+        "subtitles": []
+      },
+      {
+        "id": "vs-04",
+        "title": "تصویرسازی برای فهم داده",
+        "time": "۳۹:۲۵",
+        "desc": "انتخاب شکل درست نمودار و پرهیز از تصویرهایی که داده را بزرگ‌تر از واقع نشان می‌دهند.",
+        "videoUrl": "",
+        "videoMime": "",
+        "subtitles": []
+      },
+      {
+        "id": "vs-05",
+        "title": "ساختن یک توضیح قابل اعتماد",
+        "time": "۵۲:۴۰",
+        "desc": "از مشاهده تا فرضیه و از فرضیه تا توضیحی که دیگران بتوانند بیازمایند.",
+        "videoUrl": "",
+        "videoMime": "",
+        "subtitles": []
+      }
+    ],
+    "status": "published",
+    "origin": "tapesh",
+    "publishedAt": "2026-09-27T11:02:54.237Z",
+    "createdAt": "2026-09-27T11:02:54.237Z",
+    "updatedAt": "2026-09-27T11:02:54.237Z",
+    "createdBy": "seed",
+    "updatedBy": "seed"
+  },
+  {
+    "id": "scientific-english",
+    "title": "انگلیسی برای مطالعه علمی",
+    "providerId": "cambridge",
+    "category": "skills",
+    "categoryLabel": "مهارت‌های دانشگاهی",
+    "level": "متوسط",
+    "duration": 5,
+    "totalDuration": "۰۵:۰۵:۰۰",
+    "progress": 0,
+    "accent": "#77b787",
+    "accentSoft": "#20392a",
+    "badge": "پیشنهاد تپش",
+    "description": "واژگان و الگوهای ضروری برای خواندن مقاله، دنبال کردن ویدیوهای دانشگاهی و نوشتن خلاصه‌های دقیق.",
+    "tags": [
+      "Academic English",
+      "مقاله‌خوانی",
+      "واژگان"
+    ],
+    "image": "",
+    "imageKey": "scientific-english",
+    "sortOrder": 30,
+    "sections": [
+      {
+        "id": "se-01",
+        "title": "نقشهٔ یک مقالهٔ علمی",
+        "time": "۰۰:۰۰",
+        "desc": "ساختار استاندارد چکیده، روش، نتیجه و بحث و این‌که هر بخش را با چه سرعتی بخوانی.",
+        "videoUrl": "",
+        "videoMime": "",
+        "subtitles": []
+      },
+      {
+        "id": "se-02",
+        "title": "واژگان پرتکرار در چکیده‌ها",
+        "time": "۰۶:۲۵",
+        "desc": "فهرست کوتاهی از فعل‌ها و عبارت‌هایی که در بیشتر چکیده‌ها تکرار می‌شوند.",
+        "videoUrl": "",
+        "videoMime": "",
+        "subtitles": []
+      },
+      {
+        "id": "se-03",
+        "title": "دنبال کردن یک سخنرانی دانشگاهی",
+        "time": "۱۹:۴۰",
+        "desc": "نشانه‌های گفتاری که ساختار سخنرانی را لو می‌دهند و کمکت می‌کنند جا نمانی.",
+        "videoUrl": "",
+        "videoMime": "",
+        "subtitles": []
+      },
+      {
+        "id": "se-04",
+        "title": "خلاصه‌نویسی بدون از دست دادن معنا",
+        "time": "۳۳:۱۵",
+        "desc": "الگوهای جمله‌سازی برای خلاصه‌ای دقیق و بی‌طرف از یک متن علمی.",
+        "videoUrl": "",
+        "videoMime": "",
+        "subtitles": []
+      },
+      {
+        "id": "se-05",
+        "title": "تمرین خواندن سریع و دقیق",
+        "time": "۴۴:۵۰",
+        "desc": "تمرین عملی اسکن متن برای یافتن عدد، نتیجه و محدودیت‌های مطالعه.",
+        "videoUrl": "",
+        "videoMime": "",
+        "subtitles": []
+      }
+    ],
+    "status": "published",
+    "origin": "tapesh",
+    "publishedAt": "2026-09-27T11:02:54.237Z",
+    "createdAt": "2026-09-27T11:02:54.237Z",
+    "updatedAt": "2026-09-27T11:02:54.237Z",
+    "createdBy": "seed",
+    "updatedBy": "seed"
+  },
+  {
+    "id": "media-literacy",
+    "title": "سواد رسانه‌ای در عصر داده",
+    "providerId": "bbc",
+    "category": "media",
+    "categoryLabel": "رسانه و تفکر",
+    "level": "مقدماتی",
+    "duration": 4,
+    "totalDuration": "۰۴:۱۲:۰۰",
+    "progress": 0,
+    "accent": "#ab8e7c",
+    "accentSoft": "#3b2e28",
+    "badge": "کوتاه و کاربردی",
+    "description": "با چند ابزار ساده، خبرها و محتوای آنلاین را دقیق‌تر بخوان، منبع را ارزیابی کن و گرفتار شایعه نشو.",
+    "tags": [
+      "خبرخوانی",
+      "منبع‌شناسی",
+      "داده"
+    ],
+    "image": "",
+    "imageKey": "media-literacy",
+    "sortOrder": 40,
+    "sections": [
+      {
+        "id": "ml-01",
+        "title": "چرا هر چیزی که می‌بینیم خبر نیست؟",
+        "time": "۰۰:۰۰",
+        "desc": "تفاوت خبر، گزارش، تبلیغ و نظر شخصی و این‌که چرا مرزشان در شبکه‌ها محو می‌شود.",
+        "videoUrl": "",
+        "videoMime": "",
+        "subtitles": []
+      },
+      {
+        "id": "ml-02",
+        "title": "ردیابی منبع و تاریخ انتشار",
+        "time": "۰۴:۵۰",
+        "desc": "چند پرسش ساده برای فهمیدن این‌که خبر از کجا آمده و چه‌قدر تازه است.",
+        "videoUrl": "",
+        "videoMime": "",
+        "subtitles": []
+      },
+      {
+        "id": "ml-03",
+        "title": "تصویر، تیتر و خطای ذهن",
+        "time": "۱۷:۲۰",
+        "desc": "چگونه تیتر و تصویر بیرون از متن، برداشت ما را جهت می‌دهند.",
+        "videoUrl": "",
+        "videoMime": "",
+        "subtitles": []
+      },
+      {
+        "id": "ml-04",
+        "title": "خواندن داده در شبکه‌های اجتماعی",
+        "time": "۲۸:۴۰",
+        "desc": "تشخیص نمودارهای بریده و آمارهای بی‌منبع در محتوای پرطرفدار.",
+        "videoUrl": "",
+        "videoMime": "",
+        "subtitles": []
+      },
+      {
+        "id": "ml-05",
+        "title": "چک‌لیست یک خوانندهٔ دقیق",
+        "time": "۳۸:۰۰",
+        "desc": "چک‌لیست کوتاه و قابل استفادهٔ روزمره پیش از بازنشر هر محتوا.",
+        "videoUrl": "",
+        "videoMime": "",
+        "subtitles": []
+      }
+    ],
+    "status": "published",
+    "origin": "tapesh",
+    "publishedAt": "2026-09-27T11:02:54.237Z",
+    "createdAt": "2026-09-27T11:02:54.237Z",
+    "updatedAt": "2026-09-27T11:02:54.237Z",
+    "createdBy": "seed",
+    "updatedBy": "seed"
+  },
+  {
+    "id": "neuroscience",
+    "title": "مغز، یادگیری و حافظه",
+    "providerId": "toronto",
+    "category": "medicine",
+    "categoryLabel": "پزشکی و سلامت",
+    "level": "متوسط",
+    "duration": 7,
+    "totalDuration": "۰۷:۲۶:۰۰",
+    "progress": 0,
+    "accent": "#5b8cc7",
+    "accentSoft": "#1d314a",
+    "badge": "منتخب سردبیر",
+    "description": "سفر تصویری از نورون تا رفتار؛ سازوکارهای یادگیری، حافظه و شکل‌گیری عادت‌ها را با مثال‌های روزمره دنبال کن.",
+    "tags": [
+      "علوم اعصاب",
+      "یادگیری",
+      "حافظه"
+    ],
+    "image": "",
+    "imageKey": "neuroscience",
+    "sortOrder": 50,
+    "sections": [
+      {
+        "id": "ns-01",
+        "title": "مغز چگونه یادگیری را ثبت می‌کند؟",
+        "time": "۰۰:۰۰",
+        "desc": "از نورون تا رفتار؛ مرور سادهٔ سازوکاری که تجربه را به حافظه تبدیل می‌کند.",
+        "videoUrl": "",
+        "videoMime": "",
+        "subtitles": []
+      },
+      {
+        "id": "ns-02",
+        "title": "توجه، حافظهٔ کاری و حواس‌پرتی",
+        "time": "۰۸:۱۰",
+        "desc": "چرا ظرفیت توجه محدود است و چه‌طور محیط مطالعه آن را می‌بلعد.",
+        "videoUrl": "",
+        "videoMime": "",
+        "subtitles": []
+      },
+      {
+        "id": "ns-03",
+        "title": "نقش خواب در تثبیت خاطره",
+        "time": "۲۴:۳۵",
+        "desc": "آنچه در خواب با آموخته‌های روز اتفاق می‌افتد و اثر کم‌خوابی بر یادگیری.",
+        "videoUrl": "",
+        "videoMime": "",
+        "subtitles": []
+      },
+      {
+        "id": "ns-04",
+        "title": "ساختن عادت‌های پایدار",
+        "time": "۴۲:۲۰",
+        "desc": "حلقهٔ نشانه، رفتار و پاداش و راه ساختن عادت مطالعهٔ روزانه.",
+        "videoUrl": "",
+        "videoMime": "",
+        "subtitles": []
+      },
+      {
+        "id": "ns-05",
+        "title": "تمرین: طراحی برنامهٔ یادگیری",
+        "time": "۵۹:۱۰",
+        "desc": "تمرین گام‌به‌گام برای چیدن یک برنامهٔ هفتگی بر پایهٔ یافته‌های این دوره.",
+        "videoUrl": "",
+        "videoMime": "",
+        "subtitles": []
+      }
+    ],
+    "status": "published",
+    "origin": "tapesh",
+    "publishedAt": "2026-09-27T11:02:54.237Z",
+    "createdAt": "2026-09-27T11:02:54.237Z",
+    "updatedAt": "2026-09-27T11:02:54.237Z",
+    "createdBy": "seed",
+    "updatedBy": "seed"
+  },
+  {
+    "id": "research-methods",
+    "title": "از سؤال تا پژوهش معتبر",
+    "providerId": "oxford",
+    "category": "skills",
+    "categoryLabel": "مهارت‌های دانشگاهی",
+    "level": "پیشرفته",
+    "duration": 9,
+    "totalDuration": "۰۹:۱۰:۰۰",
+    "progress": 0,
+    "accent": "#77b787",
+    "accentSoft": "#20392a",
+    "badge": "پیشرفته",
+    "description": "از تبدیل یک ایده به سؤال پژوهشی تا طراحی مطالعه، خواندن نتایج و ارائه یک نتیجه‌گیری مسئولانه.",
+    "tags": [
+      "روش تحقیق",
+      "نقد مقاله",
+      "داده‌خوانی"
+    ],
+    "image": "",
+    "imageKey": "research-methods",
+    "sortOrder": 60,
+    "sections": [
+      {
+        "id": "rm-01",
+        "title": "از کنجکاوی تا سؤال پژوهشی",
+        "time": "۰۰:۰۰",
+        "desc": "تبدیل یک ایدهٔ کلی به سؤالی دقیق، قابل سنجش و قابل پاسخ.",
+        "videoUrl": "",
+        "videoMime": "",
+        "subtitles": []
+      },
+      {
+        "id": "rm-02",
+        "title": "انتخاب طراحی مطالعه",
+        "time": "۰۹:۳۰",
+        "desc": "مقایسهٔ طراحی‌های مقطعی، کوهورت و کارآزمایی و تناسب هرکدام با سؤال.",
+        "videoUrl": "",
+        "videoMime": "",
+        "subtitles": []
+      },
+      {
+        "id": "rm-03",
+        "title": "خواندن نتایج بدون فریب آماری",
+        "time": "۲۶:۴۵",
+        "desc": "فاصلهٔ اطمینان، اندازهٔ اثر و معناداری؛ چه چیزی واقعاً مهم است.",
+        "videoUrl": "",
+        "videoMime": "",
+        "subtitles": []
+      },
+      {
+        "id": "rm-04",
+        "title": "نقد مقاله با یک چارچوب ثابت",
+        "time": "۴۶:۱۰",
+        "desc": "چهار پرسش ثابت که با آن‌ها هر مقاله را در چند دقیقه ارزیابی می‌کنی.",
+        "videoUrl": "",
+        "videoMime": "",
+        "subtitles": []
+      },
+      {
+        "id": "rm-05",
+        "title": "نوشتن نتیجه‌گیری مسئولانه",
+        "time": "۶۷:۲۰",
+        "desc": "مرز میان یافته‌های مطالعه و ادعاهایی که داده پشتیبانشان نیست.",
+        "videoUrl": "",
+        "videoMime": "",
+        "subtitles": []
+      }
+    ],
+    "status": "published",
+    "origin": "tapesh",
+    "publishedAt": "2026-09-27T11:02:54.237Z",
+    "createdAt": "2026-09-27T11:02:54.237Z",
+    "updatedAt": "2026-09-27T11:02:54.237Z",
+    "createdBy": "seed",
+    "updatedBy": "seed"
+  },
+  {
+    "id": "intl-a69d2593",
+    "title": "سلام",
+    "providerId": "harvard",
+    "category": "medicine",
+    "categoryLabel": "",
+    "level": "مقدماتی",
+    "duration": 11,
+    "totalDuration": "",
+    "progress": 0,
+    "accent": "#5b8cc7",
+    "accentSoft": "#1d314a",
+    "badge": "",
+    "description": "سلام بر همگی",
+    "tags": [],
+    "image": "/uploads/mufb9t4s-e1a8fca2038a.png",
+    "imageKey": "",
+    "sortOrder": 70,
+    "sections": [
+      {
+        "id": "isec-52da2a55",
+        "title": "ویدیو ۱",
+        "time": "",
+        "desc": "سلام .و درود ۲ چارا توضیحات نیست؟",
+        "videoUrl": "/uploads/intl/mujqoxfn-5655345c4baa.mp4",
+        "videoMime": "video/mp4",
+        "subtitles": [
+          {
+            "lang": "fa",
+            "label": "فارسی",
+            "url": "/uploads/intl/mujrp9cn-5b1e5333f125.vtt"
+          }
+        ]
+      }
+    ],
+    "status": "published",
+    "origin": "panel",
+    "publishedAt": "2026-09-27T11:31:24.769Z",
+    "createdAt": "2026-09-27T11:31:24.769Z",
+    "updatedAt": "2026-09-27T12:01:06.261Z",
+    "createdBy": "adm-5e246f08",
+    "updatedBy": "system"
+  }
+]

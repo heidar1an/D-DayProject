@@ -627,3 +627,197 @@ export function IconFlyer(props) {
     </svg>
   );
 }
+
+/* ─────────────── ماژول برنامه‌ریزی و مدیریت ─────────────── */
+
+/* برنامه‌ریزی — مسیر با نقطه‌های ایستگاه */
+export function IconPlanning(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M4.5 19.5V6.5" />
+      <path d="M4.5 7h9.5l-1.4 3 1.4 3H4.5" />
+      <circle cx="18.5" cy="17.5" r="2.4" />
+      <path d="M18.5 9.5v5.6" />
+      <circle cx="18.5" cy="6.6" r="1.8" />
+    </svg>
+  );
+}
+
+/* برد کانبان — ستون‌های کنار هم */
+export function IconKanban(props) {
+  return (
+    <svg {...base} {...props}>
+      <rect x="3.5" y="4.5" width="5" height="15" rx="1.6" />
+      <rect x="9.5" y="4.5" width="5" height="10.5" rx="1.6" />
+      <rect x="15.5" y="4.5" width="5" height="13" rx="1.6" />
+    </svg>
+  );
+}
+
+/* یادآوری — زنگ */
+export function IconBell(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M6.5 10.5a5.5 5.5 0 0 1 11 0c0 3.2.8 4.7 1.6 5.6.4.4.1 1.1-.5 1.1H5.4c-.6 0-.9-.7-.5-1.1.8-.9 1.6-2.4 1.6-5.6z" />
+      <path d="M10 20a2.2 2.2 0 0 0 4 0" />
+    </svg>
+  );
+}
+
+/* مالی — سکه‌های روی هم */
+export function IconCoins(props) {
+  return (
+    <svg {...base} {...props}>
+      <ellipse cx="12" cy="6.6" rx="6.6" ry="2.6" />
+      <path d="M5.4 6.6v4.2c0 1.4 3 2.6 6.6 2.6s6.6-1.2 6.6-2.6V6.6" />
+      <path d="M5.4 10.8v4.2c0 1.4 3 2.6 6.6 2.6s6.6-1.2 6.6-2.6v-4.2" />
+    </svg>
+  );
+}
+
+/* فیلتر — قیف */
+export function IconFilter(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M4 5.5h16l-6.2 7v5.6l-3.6 2V12.5z" />
+    </svg>
+  );
+}
+
+/* دانلود / خروجی */
+export function IconDownload(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M12 4.5v11m0 0-4-4m4 4 4-4" />
+      <path d="M5 17.5v1.5a1.5 1.5 0 0 0 1.5 1.5h11a1.5 1.5 0 0 0 1.5-1.5v-1.5" />
+    </svg>
+  );
+}
+
+/* پرچم — اولویت */
+export function IconFlag(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M6 20.5V4.2" />
+      <path d="M6 4.8h11l-1.7 3.6L17 12H6" />
+    </svg>
+  );
+}
+
+/* پیوست — گیرهٔ کاغذ */
+export function IconPaperclip(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M17.5 10.5 11 17a3.5 3.5 0 0 1-5-5l6.8-6.8a2.4 2.4 0 0 1 3.4 3.4l-6.8 6.8a1.2 1.2 0 0 1-1.7-1.7l6-6" />
+    </svg>
+  );
+}
+
+/* تاریخچه — ساعت با فلش بازگشت */
+export function IconHistory(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M4 12a8 8 0 1 0 2.4-5.7" />
+      <path d="M4 4.5V10h5.5" />
+      <path d="M12 8v4.3l3 1.8" />
+    </svg>
+  );
+}
+
+/* جدول — شبکهٔ خانه‌ها */
+export function IconTable(props) {
+  return (
+    <svg {...base} {...props}>
+      <rect x="3.5" y="5" width="17" height="14" rx="1.8" />
+      <path d="M3.5 9.6h17M3.5 14.2h17M9.5 5v14M15 5v14" />
+    </svg>
+  );
+}
+
+/* تأیید کاربر — پرونده با تیک */
+export function IconUserCheck(props) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="9.6" cy="8.4" r="3.2" />
+      <path d="M3.6 19.4a6 6 0 0 1 9.3-5.1" />
+      <path d="m14.6 17.4 1.8 1.8 3.4-3.6" />
+    </svg>
+  );
+}
+
+/* سند استاندارد — برگه با خط‌های بند */
+export function IconStandard(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M6.4 3.5h7.8l4.2 4.2v12.8H6.4z" />
+      <path d="M14 3.5v4.4h4.4" />
+      <path d="M9.2 12h5.6M9.2 15h5.6M9.2 18h3.4" />
+    </svg>
+  );
+}
+
+/* نمودار مقایسه‌ای — میله‌های کنار هم */
+export function IconCompare(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M4 19.5h16" />
+      <path d="M6.5 19.5v-7M11 19.5V8M15.5 19.5v-4.5M20 19.5V4.5" />
+    </svg>
+  );
+}
+
+/* تنظیمات برنامه‌ریزی — لغزنده‌های کنترل */
+export function IconSliders(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M4.5 8h10M18.5 8h1M4.5 16h3M11.5 16h8" />
+      <circle cx="16.4" cy="8" r="2.1" />
+      <circle cx="9.5" cy="16" r="2.1" />
+    </svg>
+  );
+}
+
+/* کیف پول — ثبت هزینه و پرداخت */
+export function IconWallet(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M3.6 8.2c0-1.2 1-2.2 2.2-2.2h11.2c1.2 0 2.2 1 2.2 2.2v8.4c0 1.2-1 2.2-2.2 2.2H5.8a2.2 2.2 0 0 1-2.2-2.2z" />
+      <path d="M3.6 9.6h13.4a2 2 0 0 1 2 2v1.6a2 2 0 0 1-2 2H3.6" />
+      <circle cx="16.4" cy="12.4" r="1.05" />
+    </svg>
+  );
+}
+
+/* سند مالی — ریز تراکنش */
+export function IconReceipt(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M6.2 3.6h11.6v16.8l-2.4-1.5-2.3 1.5-2.3-1.5-2.3 1.5-2.3-1.5z" />
+      <path d="M9 8.4h6M9 11.8h6M9 15.2h3.4" />
+    </svg>
+  );
+}
+
+/* بانک — حالت پرداخت بانکی */
+export function IconBank(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M3.6 9.4 12 4.4l8.4 5" />
+      <path d="M5.6 10.4v7.2M9.6 10.4v7.2M14.4 10.4v7.2M18.4 10.4v7.2" />
+      <path d="M4.2 19.6h15.6" />
+    </svg>
+  );
+}
+
+/* تسویهٔ مستقیم — دست و سکه */
+export function IconHandCoins(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M4 13.6h3.4l4.2 3.1h4.1a1.6 1.6 0 0 0 0-3.2h-3.2" />
+      <path d="M11.6 13.6 8.9 11.7a1.7 1.7 0 0 0-2.2.3" />
+      <circle cx="16.6" cy="6.6" r="2.8" />
+      <path d="M16.6 5.2v2.8M15.6 6.6h2" />
+    </svg>
+  );
+}
+

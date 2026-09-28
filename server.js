@@ -18,10 +18,10 @@ import { handleApi } from './database/adminApi.js';
 import { handleExamApi } from './database/examApi.js';
 import { handleGoogleAuthApi } from './database/googleAuth.js';
 import { handleUsersApi } from './database/usersApi.js';
+import { serveUploadRequest } from './database/uploadsFile.js';
 
 const rootDir = dirname(fileURLToPath(import.meta.url));
 const distDir = resolve(rootDir, 'dist');
-const uploadsDir = resolve(rootDir, 'public', 'uploads');
 
 /*
  * همان دلیل `vite.config.js`: نود خودش `.env` را نمی‌خواند، پس متغیرهای
@@ -56,6 +56,14 @@ const MIME_TYPES = {
   '.pdf': 'application/pdf',
   '.txt': 'text/plain; charset=utf-8',
   '.map': 'application/json; charset=utf-8',
+  /* ویدیو و زیرنویس دوره‌های بین‌الملل (آپلود پنل در `public/uploads/intl/`) */
+  '.mp4': 'video/mp4',
+  '.webm': 'video/webm',
+  '.ogv': 'video/ogg',
+  '.mov': 'video/quicktime',
+  '.mkv': 'video/x-matroska',
+  '.vtt': 'text/vtt; charset=utf-8',
+  '.srt': 'application/x-subrip; charset=utf-8',
 };
 
 function isInside(parent, child) {
@@ -63,8 +71,9 @@ function isInside(parent, child) {
   return child === parent || child.startsWith(base);
 }
 
-function sendFile(response, filePath, status = 200) {
+function sendFile(response, filePath, status = 200, request = null) {
   const type = MIME_TYPES[extname(filePath).toLowerCase()] ?? 'application/octet-stream';
+  const size = statSync(filePath).size;
 
   response.statusCode = status;
   response.setHeader('Content-Type', type);
@@ -76,13 +85,44 @@ function sendFile(response, filePath, status = 200) {
     response.setHeader('Cache-Control', 'no-cache');
   }
 
+  /*
+   * پشتیبانی Range برای ویدیو.
+   *
+   * بدون این، مرورگر کل فایل را از ابتدا می‌گیرد و «جابه‌جایی در تایم‌لاین»
+   * کار نمی‌کند (سافاری حتی پخش را شروع نمی‌کند). فقط یک بازه را می‌پذیریم؛
+   * چندبازه‌ای (`multipart/byteranges`) لازم نیست.
+   */
+  const range = type.startsWith('video/') ? request?.headers?.range : null;
+  const match = range ? /^bytes=(\d*)-(\d*)$/.exec(range) : null;
+
+  if (match) {
+    const start = match[1] ? Number(match[1]) : 0;
+    const end = match[2] ? Math.min(Number(match[2]), size - 1) : size - 1;
+
+    if (Number.isNaN(start) || start >= size || end < start) {
+      response.statusCode = 416;
+      response.setHeader('Content-Range', `bytes */${size}`);
+      response.end();
+      return;
+    }
+
+    response.statusCode = 206;
+    response.setHeader('Content-Range', `bytes ${start}-${end}/${size}`);
+    response.setHeader('Content-Length', String(end - start + 1));
+    response.setHeader('Accept-Ranges', 'bytes');
+    createReadStream(filePath, { start, end }).pipe(response);
+    return;
+  }
+
+  if (type.startsWith('video/')) response.setHeader('Accept-Ranges', 'bytes');
+  response.setHeader('Content-Length', String(size));
   createReadStream(filePath).pipe(response);
 }
 
-function tryServe(response, filePath) {
+function tryServe(response, filePath, request = null) {
   if (!existsSync(filePath)) return false;
   if (!statSync(filePath).isFile()) return false;
-  sendFile(response, filePath);
+  sendFile(response, filePath, 200, request);
   return true;
 }
 
@@ -113,20 +153,17 @@ const server = createServer(async (request, response) => {
       return;
     }
 
-    /* فایل‌های آپلودی پنل */
-    if (pathname.startsWith('/uploads/')) {
-      const target = resolve(uploadsDir, `.${pathname.slice('/uploads'.length)}`);
-      if (isInside(uploadsDir, target) && tryServe(response, target)) return;
-    }
+    /* فایل‌های آپلودی پنل — همان ماژولی که سرور توسعه استفاده می‌کند */
+    if (serveUploadRequest(request, response, pathname)) return;
 
     /* دارایی‌های Build — مسیر حل‌شده باید داخل dist بماند (ضد path traversal) */
     const assetPath = resolve(distDir, `.${pathname}`);
-    if (isInside(distDir, assetPath) && tryServe(response, assetPath)) return;
+    if (isInside(distDir, assetPath) && tryServe(response, assetPath, request)) return;
 
     /* SPA fallback: مسیرهای بدون پسوند به index.html */
     if (!extname(pathname)) {
       const indexPath = join(distDir, 'index.html');
-      if (tryServe(response, indexPath)) return;
+      if (tryServe(response, indexPath, request)) return;
     }
 
     response.statusCode = 404;

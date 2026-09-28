@@ -143,7 +143,7 @@
   },
   {
     "id": "art-a7b6b90d",
-    "title": "مقاومت آنتی‌بیوتیکی؛ وقتی سلاح قرن کارساز نیست",
+    "title": "مقاومت آنتی‌بیوتیکی؛ وقتی سلاح قرن کارساز",
     "slug": "antibiotic-resistance",
     "excerpt": "باکتری‌ها یاد گرفته‌اند از داروهای ما جان سالم به در ببرند. داستان مقاومت آنتی‌بیوتیکی از یک جهش تصادفی شروع می‌شود و می‌تواند به بستری طولانی در بیمارستان ختم شود.",
     "contentHtml": "",
@@ -218,7 +218,7 @@
     "status": "published",
     "featured": false,
     "recommended": true,
-    "readingTime": 8,
+    "readingTime": 1,
     "views": 6210,
     "likes": 398,
     "seo": {
@@ -231,9 +231,9 @@
     "origin": "tapesh",
     "publishedAt": "2026-09-01",
     "createdAt": "2026-09-01",
-    "updatedAt": "2026-09-24T11:26:39.089Z",
+    "updatedAt": "2026-09-27T10:40:56.096Z",
     "createdBy": "seed",
-    "updatedBy": "seed"
+    "updatedBy": "adm-5e246f08"
   },
   {
     "id": "art-54c9194e",

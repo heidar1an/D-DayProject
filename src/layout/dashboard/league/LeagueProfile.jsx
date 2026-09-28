@@ -8,6 +8,7 @@ import { fetchProfileDetails } from '../../../services/league/leagueService';
 import {
   Icon,
   IconHeart,
+  LevelHint,
   ProgressBar,
   Skeleton,
   TierBadge,
@@ -107,7 +108,7 @@ function StreakCalendar({ history }) {
   );
 }
 
-export default function LeagueProfile({ userData, me }) {
+export default function LeagueProfile({ userData, me, levelProgress }) {
   const { data, loading } = useAsyncData(() => fetchProfileDetails(userData), [userData]);
   const [equippedTitle, setEquippedTitle] = useState(me?.title ?? '');
 
@@ -142,6 +143,7 @@ export default function LeagueProfile({ userData, me }) {
             <p className="mt-1 text-sm text-[var(--muted)]">{profile.university}</p>
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <TierBadge tier={me?.tier} />
+              <LevelHint levelProgress={levelProgress} />
               <span className="inline-flex items-center gap-1.5 rounded-full bg-[#e26d6d]/12 px-3 py-1.5 text-sm text-[var(--red-ink)]">
                 <IconHeart className="h-4 w-4" />
                 {faNum(profile.hearts)}

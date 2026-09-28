@@ -65,6 +65,7 @@ import { GROUP_PAGE_HASH } from './services/group/groupService';
 import './layout/dashboard/dashboard.css';
 import './layout/admin/analytics/analytics.css';
 import './layout/admin/media/media.css';
+import './layout/admin/planning/planning.css';
 
 const authHighlights = [
   {

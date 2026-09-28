@@ -309,19 +309,22 @@ export default function Challenges({ me, onEarnHearts }) {
       </section>
       )}
 
-      <section aria-label="نبردهای رقابتی" className="rounded-[2.5rem] bg-[var(--surface-soft)] p-5 md:p-8">
-        <header className="mb-5 flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-lg text-white md:text-xl [font-family:'Doran','Vazir',Tahoma,sans-serif]">نبردهای فعال</h2>
-          <span className="text-xs text-[var(--faint)]">تکی، دانشگاهی یا با دوستانت</span>
-        </header>
-        <div className="space-y-4">
-          {battles.map((battle) => (
-            <BattleCard key={battle.id} battle={battle} onJoin={handleJoin} />
-          ))}
-        </div>
-      </section>
+      {/* نبردهای فعال و دوئل دوستانه در یک ردیف */}
+      <div className="grid gap-6 xl:grid-cols-2">
+        <section aria-label="نبردهای رقابتی" className="rounded-[2.5rem] bg-[var(--surface-soft)] p-5 md:p-8">
+          <header className="mb-5 flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-lg text-white md:text-xl [font-family:'Doran','Vazir',Tahoma,sans-serif]">نبردهای فعال</h2>
+            <span className="text-xs text-[var(--faint)]">تکی، دانشگاهی یا با دوستانت</span>
+          </header>
+          <div className="space-y-4">
+            {battles.map((battle) => (
+              <BattleCard key={battle.id} battle={battle} onJoin={handleJoin} />
+            ))}
+          </div>
+        </section>
 
-      <DuelCard duel={data.duel} me={me} />
+        <DuelCard duel={data.duel} me={me} />
+      </div>
     </div>
   );
 }
