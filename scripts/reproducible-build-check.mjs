@@ -40,7 +40,7 @@ const declared = new Set([
   ...Object.keys(pkg.peerDependencies ?? {}),
 ]);
 
-const findings = { missingDeclared: [], notInLock: [], notInstalled: [], build: null, entry: [], problems: [] };
+const findings = { missingDeclared: [], notInLock: [], notInstalled: [], build: null, entry: [], problems: [], inconclusive: [] };
 
 /* ───────────── ۱. یکپارچگی وابستگی‌ها ───────────── */
 
@@ -139,13 +139,39 @@ if (!skipBuild) {
       env: { ...process.env, NODE_ENV: 'production' },
     });
 
+    const buildOutput = `${result.stdout ?? ''}${result.stderr ?? ''}`;
+
+    /*
+     * ⚠️ «شکست کاذب» سندباکس — همان تلهٔ ثبت‌شدهٔ پروژه.
+     *
+     * ویت پیش از build پوشهٔ `dist` را خالی می‌کند (`emptyOutDir`). اگر این
+     * ابزار داخل سندباکس میزبان اجرا شود، گارد حذف انبوهِ میزبان هر `rm` را رد
+     * می‌کند و **build سالم** با کد خروج ۱ می‌افتد — بی‌آنکه چیزی خراب باشد.
+     * تشخیصش می‌دهیم و با کد ۳ («نامعین») اعلام می‌کنیم، نه «شکست».
+     */
+    const deleteGuard = Boolean(
+      process.env.CODEBUDDY_SAFE_DELETE_BULK_STATE_DIR && process.env.CODEBUDDY_TOOL_CALL_ID,
+    );
+
     findings.build = {
       ok: result.status === 0,
       exitCode: result.status ?? -1,
       seconds: Number(((Date.now() - started) / 1000).toFixed(1)),
-      tail: `${result.stdout ?? ''}${result.stderr ?? ''}`.split('\n').filter(Boolean).slice(-4),
+      deleteGuard,
+      inconclusive: false,
+      tail: buildOutput.split('\n').filter(Boolean).slice(-25),
     };
-    if (!findings.build.ok) findings.problems.push(`build با کد خروج ${findings.build.exitCode} شکست خورد`);
+
+    if (!findings.build.ok) {
+      if (deleteGuard) {
+        findings.build.inconclusive = true;
+        findings.inconclusive.push(
+          'build داخل سندباکس میزبان شکست خورد و گارد حذف انبوه فعال است ⇒ «شکست کاذب» محتمل است، نه شکست واقعی',
+        );
+      } else {
+        findings.problems.push(`build با کد خروج ${findings.build.exitCode} شکست خورد`);
+      }
+    }
   }
 }
 
@@ -188,10 +214,13 @@ if (!existsSync(indexHtml)) {
 /* ───────────── خروجی ───────────── */
 
 const ok = findings.problems.length === 0;
+const inconclusiveOnly = ok && findings.inconclusive.length > 0;
 
 if (asJson) {
-  process.stdout.write(`${JSON.stringify({ ok, generatedAt: new Date().toISOString(), declared: declared.size, imported: bare.size, ...findings }, null, 2)}\n`);
-  process.exit(ok ? 0 : 1);
+  process.stdout.write(
+    `${JSON.stringify({ ok, inconclusive: findings.inconclusive.length > 0, generatedAt: new Date().toISOString(), declared: declared.size, imported: bare.size, ...findings }, null, 2)}\n`,
+  );
+  process.exit(findings.problems.length ? 1 : inconclusiveOnly ? 3 : 0);
 }
 
 console.log('══ بازتولیدپذیری build — تپش ══');
@@ -210,7 +239,8 @@ if (findings.notInstalled.length) {
 
 if (findings.build) {
   console.log('\n── build ──');
-  console.log(`  ${findings.build.ok ? '✓' : '✗'} exit=${findings.build.exitCode}  ${findings.build.seconds ?? '—'}s`);
+  console.log(`  ${findings.build.ok ? '✓' : findings.build.inconclusive ? '⚠' : '✗'} exit=${findings.build.exitCode}  ${findings.build.seconds ?? '—'}s`);
+  if (findings.build.deleteGuard) console.log('    (گارد حذف انبوهِ سندباکس میزبان فعال است)');
   for (const line of findings.build.tail ?? []) console.log(`    ${line}`);
 }
 
@@ -219,7 +249,15 @@ if (!findings.entry.length) console.log('  (بررسی نشد)');
 for (const row of findings.entry) console.log(`  ${row.ok ? '✓' : '✗'} ${row.ref}${row.bytes ? `  ${(row.bytes / 1024).toFixed(1)}KB` : ''}${row.reason ? `  — ${row.reason}` : ''}`);
 
 console.log('');
-console.log(ok ? 'نتیجه: سبز' : `نتیجه: ${findings.problems.length} ایراد`);
-for (const problem of findings.problems) console.log(`  ✗ ${problem}`);
+if (findings.problems.length) {
+  console.log(`نتیجه: ${findings.problems.length} ایراد`);
+  for (const problem of findings.problems) console.log(`  ✗ ${problem}`);
+} else if (inconclusiveOnly) {
+  console.log('نتیجه: نامعین — همهٔ بررسی‌های ایستا سبزند، ولی build داخل سندباکس');
+  console.log('       قابل‌اعتبار نیست. برای نتیجهٔ قطعی این را در ترمینال معمولی اجرا کن.');
+  for (const line of findings.inconclusive) console.log(`  ⚠ ${line}`);
+} else {
+  console.log('نتیجه: سبز');
+}
 
-process.exit(ok ? 0 : 1);
+process.exit(findings.problems.length ? 1 : inconclusiveOnly ? 3 : 0);

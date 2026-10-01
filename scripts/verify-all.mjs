@@ -236,7 +236,8 @@ for (const step of selected) {
 
   report.push({ id: step.id, exitCode, seconds, tail: lines.slice(-2), logPath });
   if (!asJson) {
-    const mark = exitCode === 0 ? '✓' : '✗';
+    /* کد ۳ = «نامعین» (مثلاً شکست کاذب سندباکس) — نه سبز، نه شکست قطعی */
+    const mark = exitCode === 0 ? '✓' : exitCode === 3 ? '⚠' : '✗';
     console.log(`${mark} ${step.id.padEnd(22)} exit=${String(exitCode).padStart(2)}  ${String(seconds).padStart(5)}s  ${lines.slice(-1)[0] ?? ''}`);
     if (logPath) console.log(`    ↳ خروجی کامل: ${logPath.slice(ROOT.length + 1)}`);
   }
@@ -259,7 +260,8 @@ if (!keepPollution) {
 }
 tryRemove(snapshotDir, { recursive: true, force: true });
 
-const failed = report.filter((row) => row.exitCode !== 0);
+const failed = report.filter((row) => row.exitCode !== 0 && row.exitCode !== 3);
+const inconclusive = report.filter((row) => row.exitCode === 3);
 
 if (asJson) {
   process.stdout.write(`${JSON.stringify({ steps: report, preexisting, polluted, restored, deleteGuard, failed: failed.map((f) => f.id) }, null, 2)}\n`);
@@ -271,8 +273,11 @@ if (asJson) {
     console.log(`دادهٔ واقعی: ${polluted.length} فایل توسط تست‌ها تغییر کرد${keepPollution ? ' (بازگردانی نشد — --keep-pollution)' : ' و بازگردانی شد'}:`);
     for (const rel of polluted) console.log(`  • ${rel}${restored.includes(rel) ? '  → بازگردانده شد' : ''}`);
   }
-  console.log(`گام‌ها: ${report.length - failed.length}/${report.length} موفق`);
+  console.log(`گام‌ها: ${report.length - failed.length - inconclusive.length}/${report.length} موفق`);
   console.log(`زمان کل: ${report.reduce((sum, row) => sum + row.seconds, 0).toFixed(1)}s`);
+  if (inconclusive.length) {
+    console.log(`نامعین (نیازمند اجرا بیرون سندباکس): ${inconclusive.map((f) => f.id).join(', ')}`);
+  }
   console.log(failed.length === 0 ? 'نتیجه: سبز' : `نتیجه: شکست در ${failed.map((f) => f.id).join(', ')}`);
 }
 

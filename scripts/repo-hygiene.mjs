@@ -69,6 +69,20 @@ const SECRET_SCAN_SKIP = [
   /^scripts\/repo-hygiene\.mjs$/,
   /^database\/content\/publishLog\.json$/,
   /\.test\.mjs$/,
+  /*
+   * استثناهای **بازبینی‌شده** برای الگوی `literal-secret-assignment`.
+   *
+   * این الگو عمداً پهن است (هر `password: '<۱۶+ کاراکتر>'`)، پس دو مورد بی‌خطر
+   * را هم می‌گیرد. هر دو دستی بررسی شدند و هیچ‌کدام سرّ واقعی نیستند:
+   *   • `scripts/e2e-api-flows.mjs` — رمز ثابتِ fixture تست
+   *     (`WrongPassword123`) که در سورس عمومی است و به هیچ سرویسی وصل نیست.
+   *   • `src/layout/auth/AuthPage.jsx` — متن خطای فارسی فرم
+   *     («شماره تلفن یا رمز عبور نادرست است.») که فقط تصادفاً شکل تخصیص رمز
+   *     دارد.
+   * استثنا با مسیر **دقیق** است، نه الگوی باز — تا فایل‌های تازه بی‌سنجش نمانند.
+   */
+  /^scripts\/e2e-api-flows\.mjs$/,
+  /^src\/layout\/auth\/AuthPage\.jsx$/,
 ];
 
 const findings = { secrets: [], largeFiles: [], largeAssets: [], runtimeData: [] };
@@ -120,12 +134,27 @@ for (const rel of tracked) {
   }
 }
 
-const violations =
-  findings.secrets.length + findings.largeFiles.length + findings.runtimeData.length;
+/*
+ * تفکیک «نقض» از «هشدار».
+ *
+ * نقض (کد خروج ۱): سرّ در فایل tracked · دادهٔ زمان‌اجرا tracked.
+ *   این دو **دستهٔ ناخواسته**اند: هیچ‌کدام نباید در مخزن باشد.
+ *
+ * هشدار (کد خروج ۰): فایل حجیم — چه دارایی دودویی، چه سورس.
+ *   «حجم» به‌تنهایی یک فایل را ناخواسته نمی‌کند. مدل‌های GLB آناتومی و
+ *   `mockData.js` ویکی هر دو **عمدی**‌اند؛ تصمیم درباره‌شان (Git LFS، انتقال
+ *   به بک‌اند) یک تصمیم محصولی است، نه چیزی که یک دروازه خودکار تحمیل کند.
+ *   پس گزارش می‌شوند، ولی دروازه را قرمز نمی‌کنند.
+ *
+ * مصنوعات تولیدشده (dist، *.out.mjs، .probe*) جداگانه پوشش دارند: در
+ * `.gitignore` هستند، پس اصلاً نمی‌توانند tracked شوند.
+ */
+const violations = findings.secrets.length + findings.runtimeData.length;
+const warnings = findings.largeFiles.length + findings.largeAssets.length;
 
 if (asJson) {
   process.stdout.write(
-    JSON.stringify({ generatedAt: new Date().toISOString(), maxBytes: MAX_BYTES, findings, violations, warnings: findings.largeAssets.length }, null, 2),
+    JSON.stringify({ generatedAt: new Date().toISOString(), maxBytes: MAX_BYTES, findings, violations, warnings }, null, 2),
   );
   process.exit(violations ? 1 : 0);
 }
@@ -137,10 +166,13 @@ console.log(`\n── سرّ در فایل‌های tracked (${findings.secrets.
 if (!findings.secrets.length) console.log('  ✓ یافته‌ای نبود');
 for (const s of findings.secrets) console.log(`  ✗ ${s.file}  [${s.pattern}]  ${s.sample}`);
 
-console.log(`\n── فایل متنی/سورس حجیم tracked (${findings.largeFiles.length}) ──`);
+console.log(`\n── فایل متنی/سورس حجیم tracked (${findings.largeFiles.length}) — هشدار ──`);
 if (!findings.largeFiles.length) console.log('  ✓ یافته‌ای نبود');
 for (const f of findings.largeFiles.sort((a, b) => b.bytes - a.bytes)) {
-  console.log(`  ✗ ${f.file}  ${(f.bytes / 1048576).toFixed(2)}MB`);
+  console.log(`  ⚠ ${f.file}  ${(f.bytes / 1048576).toFixed(2)}MB`);
+}
+if (findings.largeFiles.length) {
+  console.log('  فایل سورس ۲+ مگابایتی معمولاً یعنی دادهٔ حجیم جای سورس نشسته است.');
 }
 
 console.log(`\n── دارایی دودویی حجیم tracked (${findings.largeAssets.length}) — هشدار، نه نقض ──`);
