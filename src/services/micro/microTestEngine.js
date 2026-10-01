@@ -14,7 +14,7 @@
  * با اتصال Backend همین امضاها سمت سرور اجرا می‌شوند؛ UI فقط از این API مصرف می‌کند.
  */
 
-import { QUESTIONS } from '../testBank/testBankService';
+import { QUESTIONS, checkBankAnswer } from '../testBank/testBankService';
 
 const DIFFICULTY_RANK = { easy: 0, medium: 1, hard: 2, very_hard: 3 };
 const RANK_TO_DIFFICULTY = ['easy', 'medium', 'hard', 'very_hard'];
@@ -261,17 +261,20 @@ export function nextDifficulty(previous, results) {
  * تصحیح یک پاسخ و ساخت ساختار کامل بازخورد.
  * خروجی، همهٔ اجزای درخواستی نمایش جواب است: پاسخ کاربر، پاسخ درست، توضیح،
  * «چرا بقیه غلط‌اند»، مفهوم مرتبط و صفحهٔ مرتبط برای مرور.
+ *
+ * PHASE 2 — کلید پاسخ دیگر در کلاینت نیست؛ درستی از سرور می‌آید و بازگشایی
+ * همان سؤال روی شیء سؤال می‌نشیند. پس این تابع async شد.
  */
-export function evaluateAnswer(question, selectedAnswer, { responseTime = 0 } = {}) {
-  const correct = selectedAnswer === question.correctAnswer;
+export async function evaluateAnswer(question, selectedAnswer, { responseTime = 0 } = {}) {
+  const reveal = await checkBankAnswer(question.id, selectedAnswer);
   return {
     questionId: question.id,
     selectedAnswer,
-    correctAnswer: question.correctAnswer,
-    correct,
+    correctAnswer: reveal?.correctAnswer ?? null,
+    correct: reveal?.correct ?? false,
     responseTime,
     answeredAt: Date.now(),
-    explanation: question.explanation ?? null,
+    explanation: reveal?.explanation ?? null,
     figure: question.figure ?? null,
     conceptIds: question.conceptIds ?? [],
   };

@@ -50,6 +50,8 @@ function buildAttrs(tag, rawAttrs) {
   const allowed = ALLOWED_ATTRS[tag] ?? [];
   const common = ALLOWED_ATTRS['*'];
   const out = [];
+  /* `rel` نوشتهٔ نویسنده جدا نگه داشته می‌شود تا با `rel` امنِ افزوده‌شده قاطی نشود */
+  let authorRel = '';
 
   ATTR_RE.lastIndex = 0;
   let match;
@@ -59,6 +61,17 @@ function buildAttrs(tag, rawAttrs) {
 
     if (name.startsWith('on') || name === 'style' || name === 'srcdoc') continue;
     if (!allowed.includes(name) && !common.includes(name)) continue;
+
+    /*
+     * `rel` هرگز در همین حلقه بیرون داده نمی‌شود. دلیل: اگر نوشتهٔ نویسنده `rel`
+     * داشته باشد و بعد `rel` امنِ ما هم اضافه شود، HTML **دو** `rel` می‌گیرد و
+     * مرورگر اولی را می‌خواند ⇒ `rel` امن بی‌اثر می‌شد. ضمناً پاک‌سازی
+     * idempotent نمی‌ماند (هر بار یک `rel` تازه).
+     */
+    if (name === 'rel') {
+      if (!authorRel) authorRel = String(value).replace(/"/g, '&quot;');
+      continue;
+    }
 
     if (name === 'href' || name === 'src') {
       const safe = cleanUrl(value);
@@ -81,9 +94,13 @@ function buildAttrs(tag, rawAttrs) {
     out.push(`${name}="${String(value).replace(/"/g, '&quot;')}"`);
   }
 
-  /* لینک‌های خارجی همیشه با rel امن بسته شوند */
-  if (tag === 'a' && out.some((attr) => attr.startsWith('target='))) {
-    out.push('rel="noopener noreferrer nofollow"');
+  /*
+   * لینک با `target` همیشه `rel` امن می‌گیرد (و `rel` نویسنده دور ریخته می‌شود).
+   * بدون `target`، `rel` نویسنده دست‌نخورده می‌ماند ⇒ رفتار پیشین حفظ می‌شود.
+   */
+  if (tag === 'a') {
+    if (out.some((attr) => attr.startsWith('target='))) out.push('rel="noopener noreferrer nofollow"');
+    else if (authorRel) out.push(`rel="${authorRel}"`);
   }
 
   return out.length ? ` ${out.join(' ')}` : '';
@@ -104,7 +121,7 @@ export function sanitizeHtml(input) {
   TAG_RE.lastIndex = 0;
   while ((match = TAG_RE.exec(html)) !== null) {
     /* متن بین دو تگ: فقط `<` سرگردان خنثی می‌شود (entities دست‌نخورده می‌مانند) */
-    output += html.slice(lastIndex, match.index).replace(/<(?![a-zA-Z/])/g, '&lt;');
+    output += html.slice(lastIndex, match.index).replace(/</g, '&lt;');
     lastIndex = match.index + match[0].length;
 
     const [, closing, rawTag, rawAttrs, selfClosing] = match;
@@ -125,7 +142,7 @@ export function sanitizeHtml(input) {
     output += `<${tag}${buildAttrs(tag, rawAttrs)}${selfClosing ? ' /' : ''}>`;
   }
 
-  output += html.slice(lastIndex).replace(/<(?![a-zA-Z/])/g, '&lt;');
+  output += html.slice(lastIndex).replace(/</g, '&lt;');
 
   return output.trim();
 }

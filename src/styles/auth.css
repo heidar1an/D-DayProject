@@ -1,0 +1,718 @@
+.auth-page {
+  position: relative;
+  display: grid;
+  min-height: 100vh;
+  min-height: 100svh;
+  align-content: safe center;
+  justify-items: center;
+  padding: clamp(12px, 2vh, 30px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  background: var(--background);
+  color: var(--white);
+}
+
+/* هاله‌های رنگیِ پشت کارت — گرادیانِ شعاعیِ نرم، بدون بلورِ گران */
+.auth-page__aura {
+  position: absolute;
+  inset: -12%;
+  pointer-events: none;
+  background:
+    radial-gradient(40% 44% at 10% 6%, color-mix(in srgb, var(--green-bright) 24%, transparent), transparent 72%),
+    radial-gradient(36% 40% at 90% 94%, color-mix(in srgb, var(--blue-bright) 22%, transparent), transparent 74%),
+    radial-gradient(32% 34% at 94% 8%, color-mix(in srgb, var(--purple-bright) 18%, transparent), transparent 76%);
+}
+
+/* منحنی‌های نازکِ تزئینی — امضای گرافیکیِ چهارچوب مرجع */
+.auth-page__curves {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.45;
+}
+
+.auth-page__curves path {
+  fill: none;
+  stroke: color-mix(in srgb, var(--green-bright) 60%, transparent);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+.auth-page__shell {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: min(100%, 1320px);
+  min-height: min(88vh, 880px);
+  margin: 0 auto;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.94fr);
+  gap: clamp(16px, 1.6vw, 32px);
+  padding: clamp(14px, 1.3vw, 24px);
+  border: 1px solid rgb(var(--line-rgb) / 0.08);
+  border-radius: 46px;
+  background: var(--surface);
+  box-shadow: 0 30px 80px rgb(var(--shadow-rgb) / calc(0.34 * var(--shadow-scale)));
+  direction: rtl;
+  opacity: 0;
+  transform: translate3d(0, 22px, 0) scale(0.985);
+  transition:
+    opacity 520ms ease,
+    transform 680ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.auth-page__shell.is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+.auth-panel,
+.auth-visual {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+  transition:
+    opacity 520ms ease,
+    transform 620ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.auth-page__shell.is-visible .auth-panel,
+.auth-page__shell.is-visible .auth-visual {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.auth-page__shell.is-visible .auth-visual {
+  transition-delay: 90ms;
+}
+
+.auth-page__shell.is-visible .auth-panel {
+  transition-delay: 180ms;
+}
+
+.auth-panel {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(20px, 2.2vw, 38px) clamp(20px, 2.6vw, 44px);
+  border-radius: 34px;
+  direction: rtl;
+}
+
+.auth-panel__head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/*
+ * نشان تپش نسبتِ ~۱٫۶۷:۱ دارد (۲۰۹۴×۱۲۵۴)، نه مربع. جعبهٔ مربعِ قبلی با
+ * `object-fit: contain` آن را در ارتفاع لِترباکس می‌کرد و ریز نشان می‌داد؛
+ * این‌جا عرض می‌دهیم و ارتفاع خودش می‌آید.
+ */
+.auth-panel__logo-button {
+  display: block;
+  width: clamp(92px, 7.6vw, 124px);
+  flex: 0 0 auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  transition: transform 200ms ease, opacity 200ms ease;
+}
+
+.auth-panel__logo-button:hover {
+  transform: translateY(-2px);
+  opacity: 0.82;
+}
+
+.auth-panel__logo-button img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  filter: var(--icon-filter);
+}
+
+.auth-panel h1 {
+  width: 100%;
+  max-width: 24ch;
+  margin: clamp(10px, 1.4vh, 18px) 0 0;
+  color: var(--white);
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: clamp(1.5rem, 2.3vw, 2.4rem);
+  font-weight: 500;
+  letter-spacing: -0.045em;
+  line-height: 1.3;
+  text-align: center;
+}
+
+.auth-panel__title--login {
+  min-height: 2.6em;
+}
+
+.auth-panel h1 > span:not(.auth-animated-phrase) {
+  color: var(--blue-bright);
+}
+
+.auth-panel__subtitle {
+  max-width: 42ch;
+  margin: 10px 0 0;
+  color: var(--faint);
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
+  font-size: clamp(0.78rem, 0.9vw, 0.94rem);
+  font-weight: 400;
+  line-height: 1.85;
+}
+
+.auth-animated-phrase {
+  display: inline-block;
+  min-width: 13ch;
+  min-height: 1.35em;
+  white-space: nowrap;
+}
+
+.auth-panel h1 .auth-animated-phrase--blue {
+  color: var(--blue-ink);
+}
+
+.auth-panel h1 .auth-animated-phrase--green {
+  color: var(--green-ink);
+}
+
+.auth-panel h1 .auth-animated-phrase--brown {
+  color: var(--copper-ink);
+}
+
+.auth-panel h1 .auth-animated-phrase--purple {
+  color: var(--purple-ink);
+}
+
+.auth-typewriter__cursor {
+  display: inline-block;
+  width: 0.07em;
+  height: 1em;
+  margin-inline-start: 0.12em;
+  background: currentColor;
+  vertical-align: -0.12em;
+  animation: auth-cursor-blink 900ms steps(1, end) infinite;
+}
+
+@keyframes auth-cursor-blink {
+  0%,
+  45% {
+    opacity: 1;
+  }
+
+  46%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.auth-form {
+  display: flex;
+  width: 100%;
+  max-width: 430px;
+  margin: clamp(16px, 2vh, 26px) auto 0;
+  flex-direction: column;
+  align-items: stretch;
+  direction: rtl;
+}
+
+.auth-form__fields {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  margin-top: clamp(14px, 1.8vh, 20px);
+}
+
+.auth-form__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  margin-top: clamp(16px, 2vh, 22px);
+}
+
+.auth-form.is-switching,
+.auth-panel__title.is-switching {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.auth-form,
+.auth-panel__title {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 240ms ease,
+    transform 280ms ease;
+}
+
+.auth-form__fields > label {
+  margin: 0 0 9px;
+  color: var(--white);
+  font-size: clamp(0.84rem, 0.95vw, 1rem);
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+/* ── فیلدِ ورودی + نشانِ تیکِ اعتبار ── */
+.auth-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.auth-field input {
+  width: 100%;
+  height: 56px;
+  padding-block: 0;
+  padding-inline: 18px 56px;
+  border: 1px solid var(--border-solid);
+  border-radius: 16px;
+  outline: none;
+  background: rgb(var(--wash-rgb) / 0.04);
+  color: var(--white);
+  direction: rtl;
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
+  font-size: clamp(0.88rem, 0.98vw, 1.02rem);
+  font-weight: 400;
+  text-align: right;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.auth-field input::placeholder {
+  color: var(--ghost);
+  opacity: 1;
+}
+
+.auth-field input:focus {
+  border-color: var(--blue-bright);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue-bright) 22%, transparent);
+}
+
+.auth-field input.is-error {
+  border-color: var(--form-error);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--form-error) 20%, transparent);
+}
+
+.auth-field input.is-error:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--form-error) 26%, transparent);
+}
+
+.auth-field__check {
+  position: absolute;
+  inset-inline-end: 9px;
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--green-bright);
+  color: var(--ink-deep);
+  opacity: 0;
+  transform: scale(0.55);
+  pointer-events: none;
+  transition:
+    opacity 180ms ease,
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.auth-field__check svg {
+  width: 16px;
+  height: 16px;
+}
+
+.auth-field.is-valid input {
+  border-color: color-mix(in srgb, var(--green-bright) 62%, transparent);
+  background: color-mix(in srgb, var(--green-bright) 14%, transparent);
+}
+
+.auth-field.is-valid .auth-field__check {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.auth-form__error {
+  display: block;
+  margin: 6px 0 12px;
+  color: var(--form-error);
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
+  font-size: clamp(0.74rem, 0.8vw, 0.86rem);
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: right;
+}
+
+.auth-field + label {
+  margin-top: 16px;
+}
+
+.auth-form__error + label {
+  margin-top: 0;
+}
+
+.auth-form__forgot {
+  align-self: flex-start;
+  margin: 12px 0 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--faint);
+  cursor: pointer;
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
+  font-size: clamp(0.76rem, 0.86vw, 0.9rem);
+  font-weight: 400;
+  transition: color 180ms ease;
+}
+
+.auth-form__forgot:hover {
+  color: var(--white);
+}
+
+/* ── چک‌باکسِ پذیرش قوانین ── */
+.auth-form__consent {
+  display: flex;
+  flex-direction: column;
+  margin-top: 16px;
+}
+
+.auth-consent {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.auth-consent input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.auth-consent__box {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  margin-top: 1px;
+  place-items: center;
+  border: 1.5px solid var(--border-solid);
+  border-radius: 7px;
+  color: transparent;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+
+.auth-consent__box svg {
+  width: 14px;
+  height: 14px;
+}
+
+.auth-consent input:checked + .auth-consent__box {
+  border-color: transparent;
+  background: var(--green-bright);
+  color: var(--ink-deep);
+}
+
+.auth-consent input:focus-visible + .auth-consent__box {
+  outline: 2px solid var(--blue-bright);
+  outline-offset: 2px;
+}
+
+.auth-consent__text {
+  color: var(--muted);
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
+  font-size: clamp(0.76rem, 0.86vw, 0.9rem);
+  line-height: 1.75;
+}
+
+.auth-form__submit,
+.auth-form__switch {
+  width: 100%;
+  min-height: 54px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: clamp(1rem, 1.15vw, 1.15rem);
+  font-weight: 500;
+  transition:
+    transform 180ms ease,
+    background 180ms ease,
+    color 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease;
+}
+
+.auth-form__submit {
+  border: 1px solid transparent;
+  background: var(--blue);
+  color: var(--white);
+  box-shadow: 0 14px 30px color-mix(in srgb, var(--blue) 34%, transparent);
+}
+
+.auth-form__submit:hover {
+  background: var(--blue-bright);
+  color: var(--ink-deep);
+  transform: translateY(-2px);
+  box-shadow: 0 18px 36px color-mix(in srgb, var(--blue-bright) 36%, transparent);
+}
+
+.auth-form__switch {
+  border: 1px solid var(--border-solid);
+  background: transparent;
+  color: var(--muted);
+  font-size: clamp(0.84rem, 0.95vw, 0.98rem);
+}
+
+.auth-form__switch:hover {
+  border-color: color-mix(in srgb, var(--white) 28%, transparent);
+  background: rgb(var(--wash-rgb) / 0.06);
+  color: var(--white);
+  transform: translateY(-2px);
+}
+
+.auth-form__google {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 52px;
+  padding: 0 20px;
+  border: 1px solid var(--border-solid);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--white);
+  cursor: pointer;
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
+  font-size: clamp(0.88rem, 1vw, 1rem);
+  font-weight: 500;
+  transition:
+    transform 180ms ease,
+    background 180ms ease,
+    border-color 180ms ease;
+}
+
+.google-icon {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+}
+
+.auth-form__google:hover {
+  border-color: color-mix(in srgb, var(--white) 28%, transparent);
+  background: rgb(var(--wash-rgb) / 0.06);
+  transform: translateY(-2px);
+}
+
+/*
+ * گوگلِ پیکربندی‌نشده: مرز خط‌چین + متن راهنما زیر دکمه، بدون دست‌زدن به کنتراست.
+ * دکمه عمداً `disabled` نمی‌شود تا کلیکش همان دلیل را بگوید، نه اینکه مرده باشد.
+ */
+.auth-form__google.is-unavailable {
+  border-style: dashed;
+}
+
+.auth-form__google.is-unavailable:hover {
+  transform: none;
+}
+
+.auth-form__google:disabled {
+  cursor: progress;
+  opacity: 0.75;
+}
+
+.auth-form__google-note {
+  margin: 8px 0 0;
+  color: var(--faint);
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
+  font-size: clamp(0.74rem, 0.84vw, 0.88rem);
+  line-height: 1.8;
+  text-align: right;
+}
+
+/* ── ستونِ تصویرگرافیک و کارتِ شناور ── */
+.auth-visual {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  grid-template-rows: minmax(0, 1fr) auto;
+  overflow: hidden;
+  border-radius: 34px;
+  background: color-mix(in srgb, var(--green-bright) 9%, var(--light-fill-soft));
+  direction: rtl;
+}
+
+.auth-visual__stage {
+  display: grid;
+  min-height: 0;
+  padding: clamp(18px, 2vw, 34px) clamp(16px, 2vw, 30px) 0;
+}
+
+.auth-visual__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  object-fit: contain;
+  object-position: center;
+}
+
+.auth-visual__card {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  margin: -26px clamp(12px, 1.2vw, 18px) clamp(12px, 1.2vw, 18px);
+  flex-direction: column;
+  padding: clamp(16px, 1.6vw, 22px);
+  border: 1px solid rgb(var(--line-rgb) / 0.1);
+  border-radius: 24px;
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  box-shadow: 0 22px 48px rgb(var(--shadow-rgb) / calc(0.3 * var(--shadow-scale)));
+  backdrop-filter: blur(14px);
+}
+
+.auth-visual__spark {
+  position: absolute;
+  top: -13px;
+  inset-inline-start: -12px;
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--gold-ink);
+  box-shadow: 0 10px 24px rgb(var(--shadow-rgb) / calc(0.3 * var(--shadow-scale)));
+}
+
+.auth-visual__spark svg {
+  width: 18px;
+  height: 18px;
+}
+
+.auth-visual__title {
+  margin: 0;
+  color: var(--white);
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: clamp(1.02rem, 1.3vw, 1.45rem);
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  line-height: 1.35;
+}
+
+.auth-visual__title em {
+  padding: 0 4px;
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--green-bright) 26%, transparent);
+  color: var(--green-ink);
+  font-style: normal;
+}
+
+.auth-visual__text {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
+  font-size: clamp(0.74rem, 0.84vw, 0.88rem);
+  line-height: 1.8;
+}
+
+.auth-visual__features {
+  display: grid;
+  margin: clamp(12px, 1.4vh, 18px) 0 0;
+  padding: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 12px;
+  list-style: none;
+}
+
+.auth-visual__feature {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 9px;
+}
+
+.auth-visual__feature-art {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border-radius: 11px;
+  object-fit: cover;
+  background: rgb(var(--wash-rgb) / 0.06);
+}
+
+.auth-visual__feature h3 {
+  margin: 0;
+  color: var(--white);
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
+  font-size: clamp(0.7rem, 0.78vw, 0.82rem);
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.auth-visual__feature--copper .auth-visual__feature-art {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--brown-bright) 48%, transparent);
+}
+
+.auth-visual__feature--lavender .auth-visual__feature-art {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--purple-bright) 48%, transparent);
+}
+
+.auth-visual__feature--sky .auth-visual__feature-art {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--blue-bright) 48%, transparent);
+}
+
+.auth-visual__feature--mint .auth-visual__feature-art {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--green-bright) 48%, transparent);
+}
+
+.auth-visual__people {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: clamp(12px, 1.4vh, 16px);
+  padding-top: clamp(10px, 1.2vh, 14px);
+  border-top: 1px solid rgb(var(--line-rgb) / 0.1);
+}
+
+.auth-visual__avatars {
+  display: flex;
+  flex: 0 0 auto;
+}
+
+.auth-visual__avatars img {
+  width: 30px;
+  height: 30px;
+  border: 2px solid var(--surface);
+  border-radius: 50%;
+  background: var(--surface-strong);
+  object-fit: cover;
+}
+
+.auth-visual__avatars img + img {
+  margin-inline-start: -10px;
+}
+
+.auth-visual__people-label {
+  color: var(--faint);
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
+  font-size: clamp(0.68rem, 0.76vw, 0.8rem);
+  line-height: 1.6;
+}
+

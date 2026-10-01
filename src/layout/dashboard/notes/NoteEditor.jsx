@@ -2,20 +2,19 @@
  * مودال ساخت/ویرایش یادداشت.
  * چهار حالت: «متنی» (چندخطی)، «چک‌لیست» (آیتم‌های تیک‌خور)، «پرسش و پاسخ»
  * (بازیابی فعال) و «جدول مقایسه» (چند مورد روی چند معیار).
- * هر یادداشت می‌تواند موضوع (از لیست ویکی)، تگ دسته‌بندی‌شده، رنگ کارت و یک منبع داشته باشد.
+ * هر یادداشت می‌تواند موضوع (از لیست ویکی)، تگ آزاد، رنگ کارت و یک منبع داشته باشد.
+ * تگ‌ها دسته‌بندی ندارند؛ رنگ هر تگ از خود متن تگ می‌آید (`tagAccent`).
  * تپش هوشمند یک نقطهٔ ورود دارد: کادر خلاصهٔ بالای فرم، که همهٔ متن‌های این یادداشت
  * (بدنه، آیتم‌ها، پرسش/پاسخ‌ها و سلول‌های جدول) را یک‌جا بازنویسی می‌کند.
  * ذخیره async است و والد با onSave نتیجه را می‌گیرد؛ این کامپوننت خودش سرویس CRUD صدا نمی‌زند.
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
-  CUSTOM_TAG_GROUP,
   NOTE_AI_ACTIONS,
   NOTE_COLORS,
   NOTE_KINDS,
   SOURCE_TYPES,
   SUBJECTS,
-  TAG_GROUPS,
   rewriteDraft,
   tagAccent,
 } from '../../../services/notes/notesService';
@@ -43,7 +42,7 @@ const makeTable = () => ({
 
 const makePair = () => ({ id: uid('qa'), question: '', answer: '' });
 
-export default function NoteEditor({ open, note, tagGroups = [], saving = false, onSave, onClose }) {
+export default function NoteEditor({ open, note, saving = false, onSave, onClose }) {
   const isEdit = Boolean(note);
 
   const [title, setTitle] = useState('');
@@ -100,16 +99,6 @@ export default function NoteEditor({ open, note, tagGroups = [], saving = false,
       setSourceTitle('');
     }
   }, [open, note]);
-
-  /* پیشنهاد تگ‌ها به تفکیک دسته: واژه‌نامهٔ هر درس + تگ‌های خودِ کاربر.
-     تگ‌های انتخاب‌شده از پیشنهاد حذف می‌شوند تا فهرست شلوغ نشود. */
-  const suggestions = useMemo(() => {
-    const custom = tagGroups.find((group) => group.id === CUSTOM_TAG_GROUP.id)?.tags.map(({ tag }) => tag) ?? [];
-    const groups = [...TAG_GROUPS, ...(custom.length ? [{ ...CUSTOM_TAG_GROUP, tags: custom }] : [])];
-    return groups
-      .map((group) => ({ ...group, tags: group.tags.filter((tag) => !tags.includes(tag)).slice(0, 8) }))
-      .filter((group) => group.tags.length > 0);
-  }, [tagGroups, tags]);
 
   const addTag = (raw) => {
     const tag = String(raw ?? tagDraft).trim().replace(/^#/, '');
@@ -548,27 +537,6 @@ export default function NoteEditor({ open, note, tagGroups = [], saving = false,
               افزودن
             </button>
           </div>
-
-          {suggestions.length > 0 && (
-            <div className="mt-3">
-              <span className="mb-2 block text-[10px] text-[var(--ghost)]">تگ‌ها به تفکیک دسته:</span>
-              <div className="max-h-44 space-y-2.5 overflow-y-auto rounded-2xl border border-white/8 bg-white/[0.02] p-3">
-                {suggestions.map((group) => (
-                  <div key={group.id} className="nt-taggroup" style={{ '--accent': group.accent }}>
-                    <span className="nt-taggroup__label">
-                      <Icon name="folder" size={12} />
-                      {group.label}
-                    </span>
-                    <div className="nt-taggroup__tags">
-                      {group.tags.map((tag) => (
-                        <TagPill key={tag} tag={tag} accent={group.accent} onClick={() => addTag(tag)} />
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* رنگ کارت */}

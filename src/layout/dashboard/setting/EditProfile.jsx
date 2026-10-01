@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 
-import { saveUserRecord } from '../../../services/userStorage';
+import { saveProfile } from '../../../services/userStorage';
 import { UNIVERSITIES } from '../../../services/league/mockData';
 import AvatarPicker from './avatar/AvatarPicker';
 import { avatarSrc } from './avatar/avatarOptions';
@@ -293,11 +293,15 @@ export default function EditProfile({ userData, onUserDataChange, onLogout }) {
       return;
     }
 
-    const { phone, ...profileChanges } = form;
-    const updatedUser = await saveUserRecord({
-      phone: phone.trim() || userData?.phone,
-      profile: profileChanges,
-    });
+    /*
+     * پروفایل سشن‌محور ذخیره می‌شود؛ شمارهٔ تلفن به سرور نمی‌رود چون کلید هویت
+     * نیست (سرور خودش کاربر را از کوکی سشن می‌شناسد).
+     */
+    const { phone: _phone, ...profileChanges } = form;
+    const updatedUser = await saveProfile({ profile: profileChanges });
+
+    /* ذخیره نشد ⇒ تیک «ذخیره شد» نشان داده نمی‌شود (کاربر واردنشده نمی‌ماند) */
+    if (!updatedUser) return;
 
     onUserDataChange?.(updatedUser);
     setIsSaved(true);

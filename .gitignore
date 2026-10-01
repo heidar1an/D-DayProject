@@ -29,6 +29,8 @@ database/content/admins.json
 database/content/events.json
 database/content/publishLog.json
 database/content/mediaMetrics.json
+# بازخورد کاربران — نوشتنی، شامل متن و شناسهٔ کاربر
+database/content/feedback.json
 
 # ── لاگ اجرای دروازهٔ کیفیت (خروجی کامل گام‌های ناموفق) ──
 .workbuddy-ai/verify-logs/

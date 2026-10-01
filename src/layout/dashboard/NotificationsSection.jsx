@@ -15,6 +15,12 @@ import {
   fetchLeagueNotifications,
 } from '../../services/league/leagueService';
 import {
+  fetchFeedbackReplies,
+  markFeedbackRepliesRead,
+  relativeFa,
+  sourceLabel,
+} from '../../services/feedback/userFeedback';
+import {
   EmptyState,
   Icon,
   IconHeart,
@@ -91,6 +97,25 @@ function fromLeague(data) {
   }));
 }
 
+/* منبع «پشتیبانی تپش» → پاسخ‌های مدیر به گزارش‌های همین کاربر */
+function fromSupport(data) {
+  return (data?.items ?? []).map((item) => ({
+    id: `support-${item.id}`,
+    avatar: null,
+    icon: 'bell',
+    accent: '#e0b45c',
+    name: 'پشتیبانی تپش',
+    tag: sourceLabel(item.source),
+    tagIcon: 'bell',
+    text: item.text,
+    note: item.subject ? `پاسخ به: ${item.subject}` : null,
+    rarity: null,
+    hearts: null,
+    time: relativeFa(item.createdAt),
+    unread: !item.readAt,
+  }));
+}
+
 /* ── ردیف اعلان — ظاهر پیام‌رسان: آواتار + حباب پیام ── */
 function NotificationRow({ item, index }) {
   const rarity = item.rarity ? RARITY_COLOR[item.rarity] : null;
@@ -158,11 +183,18 @@ export default function NotificationsSection({ pendingRead }) {
     setState((prev) => ({ ...prev, loading: true, error: null }));
 
     Promise.resolve(pendingRead)
-      .then(() => Promise.all([fetchFriendsLeagueNotifications(), fetchLeagueNotifications()]))
-      .then(([friends, league]) => {
+      .then(() => Promise.all([
+        fetchFriendsLeagueNotifications(),
+        fetchLeagueNotifications(),
+        fetchFeedbackReplies(),
+      ]))
+      .then(([friends, league, support]) => {
         if (!alive) return;
-        const items = [...fromFriends(friends), ...fromLeague(league)]
+        const items = [...fromFriends(friends), ...fromLeague(league), ...fromSupport(support)]
           .sort((a, b) => Number(b.unread) - Number(a.unread));
+
+        /* پاسخ‌های پشتیبانی همین‌جا خوانده‌شده می‌شوند؛ نشان «جدید» تا بازدید بعدی نمی‌ماند */
+        if (support.items.length) markFeedbackRepliesRead();
 
         setState({
           items,

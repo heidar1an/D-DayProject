@@ -1,0 +1,126 @@
+/*
+ * نشان باز نقل‌قول با `top` نسبت به لبهٔ **بالای همین بخش** اندازه می‌گیرد، نه
+ * نسبت به متنِ نقل‌قول؛ پس فاصله‌اش از کارتِ بالایی مستقیماً همین عدد است.
+ * عدد قبلی (۲۶px) نشان را چسبیده به کارت بالا می‌نشاند، در حالی که فاصله‌اش
+ * از متنِ زیرش نزدیک ۸۰px بود. با ۶۱px، جوهرِ نشان از بالا و پایین تقریباً
+ * یک‌اندازه فاصله می‌گیرد (اندازه‌گیری واقعی در ۱۹۲۰px: ۵۸px بالا، ۵۸px پایین).
+ * ⚠️ این عدد و `padding-top` بخش به هم گره خورده‌اند: بزرگ‌کردن پدینگ بدون
+ * این عدد، دوباره نشان را به کارت بالا می‌چسباند.
+ */
+.quote__mark--open {
+  top: 61px;
+  right: 18px;
+}
+
+.quote__mark--close {
+  bottom: 72px;
+  left: 18px;
+}
+
+.quote__author {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 34px;
+  text-align: right;
+}
+
+.quote__author img {
+  width: 68px;
+  height: 68px;
+  border: 3px solid var(--white);
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.quote__author div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.quote__author strong {
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.quote__author span {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.continuation {
+  display: flex;
+  flex-direction: column;
+  gap: 70px;
+  padding-bottom: 54px;
+}
+
+.friends-banner {
+  display: grid;
+  min-height: 410px;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
+  align-items: center;
+  overflow: hidden;
+  border-radius: 38px;
+  direction: ltr;
+  background:
+    radial-gradient(circle at 30% 44%, rgba(96, 78, 66, 0.25), transparent 30%),
+    var(--card-warm);
+}
+
+.friends-banner__visual {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: 18px 8px 12px 18px;
+}
+
+.friends-banner__visual img {
+  width: 100%;
+  height: 100%;
+  max-height: 380px;
+  object-fit: contain;
+  object-position: center;
+}
+
+.friends-banner__content {
+  padding: 40px clamp(28px, 5vw, 68px) 40px 32px;
+  direction: rtl;
+  text-align: right;
+}
+
+.friends-banner h2 {
+  margin: 0;
+  color: var(--orange-ink);
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: clamp(2rem, 3.5vw, 3.35rem);
+  font-weight: 700;
+  letter-spacing: -0.07em;
+  line-height: 1.2;
+}
+
+.friends-banner p {
+  max-width: 420px;
+  margin: 18px 0 0;
+  color: var(--white);
+  font-size: clamp(0.98rem, 1.5vw, 1.3rem);
+  font-weight: 500;
+  line-height: 1.9;
+}
+
+.button--orange {
+  background: var(--orange);
+  box-shadow: 0 12px 28px rgba(255, 151, 23, 0.2);
+}
+
+.button--orange:hover {
+  background: var(--orange);
+  box-shadow: 0 16px 34px rgba(255, 151, 23, 0.32);
+}
+

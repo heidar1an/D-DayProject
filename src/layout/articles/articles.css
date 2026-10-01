@@ -1275,17 +1275,39 @@
   padding: 4%;
 }
 
-/* ── چیدمان محتوا + ستون کنار ── */
+/* ── چیدمان محتوا + ستون کنار ──
+ *
+ * متن باید **وسطِ صفحه** بنشیند — همان محورِ سرتیترِ وسط‌چینِ مقاله. با شبکهٔ
+ * دوستونیِ قبلی (متن + ستونِ کنار) ستونِ کنار متن را ۱۶۰px به راست می‌راند و
+ * متن ناهم‌محور دیده می‌شد. حالا سه ستونِ **متقارن** است: ریلِ خالیِ یک‌طرف
+ * برابرِ ریلِ ستونِ کنارِ طرفِ دیگر ⇒ متن دقیقاً وسط می‌ماند.
+ *
+ * پهنای این لایه هم از `--content-width` (۸۰٪) جدا شد: با ۸۰٪ نه می‌شد متن را
+ * وسط نشاند و نه پهن‌ترش کرد. حالا متن هم‌عرضِ سرتیترِ مقاله (۸۶۰px) است و
+ * لبه‌هایش با آن یکی می‌افتد.
+ */
 .ap-article__layout {
+  --ap-read: 860px; /* هم‌عرض و هم‌محورِ سرتیترِ مقاله */
+  --ap-rail: 220px; /* ریلِ ستونِ کنار (فهرست مطالب) */
+  --ap-gap: 28px;
+
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 264px;
-  gap: 56px;
+  grid-template-columns: var(--ap-rail) minmax(0, 1fr) var(--ap-rail);
+  gap: var(--ap-gap);
   align-items: start;
+  width: min(100% - 48px, calc(var(--ap-read) + 2 * (var(--ap-rail) + var(--ap-gap))));
   margin-top: 48px;
 }
 
 .ap-article__content {
-  max-width: 720px;
+  grid-column: 2;
+  max-width: var(--ap-read);
+  margin-inline: auto;
+}
+
+/* ستونِ کنار در ریلِ چپ می‌نشیند و محورِ متن را جابه‌جا نمی‌کند */
+.ap-article__aside {
+  grid-column: 3;
 }
 
 .ap-article__aside-sticky {
@@ -1857,7 +1879,6 @@
 }
 
 .ap-share-inline {
-  display: none;
   margin-top: 30px;
 }
 
@@ -2040,6 +2061,7 @@ body.ap-reading-mode .ap-back {
 }
 
 .ap-article--focus .ap-article__content {
+  grid-column: 1;
   margin-inline: auto;
 }
 
@@ -2381,7 +2403,13 @@ body.ap-reading-mode .ap-back {
   .ap-article__layout {
     grid-template-columns: minmax(0, 1fr);
     gap: 0;
+    width: var(--content-width);
     margin-top: 42px;
+  }
+
+  /* تک‌ستونی: متن به ستونِ اول برمی‌گردد (وگرنه ستونِ ضمنیِ دوم می‌سازد) */
+  .ap-article__content {
+    grid-column: 1;
   }
 
   .ap-article__aside {

@@ -1,0 +1,28 @@
+/*
+ * تنظیمات زبان برای ویرایشگر — بدون نصب تایپ‌اسکریپت.
+ *
+ * چرا وجود دارد: پروژه هیچ ابزار بررسی نوع ندارد. این فایل با `allowJs` به ویرایشگر
+ * می‌گوید این‌ها ماژول ESM با JSX هستند، تا IntelliSense، پرش به تعریف، و بازآرایی
+ * نام درست کار کند — همان چیزی که در ۳۰۰ فایل JSX بدون آن کور است.
+ *
+ * `checkJs: false` عمدی است: تایپ‌اسکریپت اجرا نمی‌شود و هیچ خطایی گزارش نمی‌کند.
+ * برای مهاجرت تدریجی، همین را روی `true` بگذارید و فایل‌به‌فایل پیش بروید؛ لازم
+ * نیست کد را به `.ts` تغییر نام دهید.
+ */
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "checkJs": false,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["src", "database", "scripts", "vite.config.js", "server.js"],
+  "exclude": ["node_modules", "dist", "public"]
+}

@@ -210,6 +210,9 @@ export const comprehensive = {
   list: (params) => get(`/comprehensive${toQuery(params)}`),
   get: (id) => get(`/comprehensive/${encodeURIComponent(id)}`),
   update: (id, payload) => put(`/comprehensive/${encodeURIComponent(id)}`, payload),
+
+  /* انتخاب از بانک تست — برای «تست‌های این بخش» هر واحد */
+  testBank: (params) => get(`/comprehensive/test-bank${toQuery(params)}`),
 };
 
 /* ──────────────── میکرو درسنامه (لایهٔ داخل پنل) ────────────────
@@ -364,6 +367,15 @@ export const settings = {
 
 export const logs = {
   list: (params) => get(`/logs${toQuery(params)}`),
+};
+
+/* ──────────────── بازخورد و گزارش‌های کاربران (هر منبع جدا) ──────────────── */
+
+export const feedback = {
+  list: () => get('/feedback'),
+  reply: (id, text) => post(`/feedback/${encodeURIComponent(id)}/reply`, { text }),
+  setStatus: (id, status) => post(`/feedback/${encodeURIComponent(id)}/status`, { status }),
+  remove: (id) => del(`/feedback/${encodeURIComponent(id)}`),
 };
 
 /* ──────────────────────────── یادداشت‌های پنل ──────────────────────────── */
@@ -657,6 +669,6 @@ export function readFileAsBase64(file) {
 }
 
 export default {
-  auth, articles, categories, pages, flashcards, references, comprehensive, micro, intlCourses, media, banners, users, settings, logs, notes,
+  auth, articles, categories, pages, flashcards, references, comprehensive, micro, intlCourses, media, banners, users, settings, logs, feedback, notes,
   publishing, analytics, mediaCenter, getStats, getMeta, toQuery, readFileAsBase64, uploadIntlMedia, AdminApiError,
 };

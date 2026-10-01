@@ -418,15 +418,6 @@
 .anatomy-module-card > header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .anatomy-catalog__empty { margin-top: 24px; padding: 40px; border: 1px dashed var(--learn-border); border-radius: 25px; color: var(--faint); text-align: center; }
 
-.learning-tags > span {
-  padding: 6px 10px;
-  border: 1px solid rgb(var(--line-rgb) / .075);
-  border-radius: 999px;
-  background: rgb(var(--wash-rgb) / .035);
-  color: var(--faint);
-  font-size: .68rem;
-}
-
 /* Unit cards */
 /* واحدها به‌صورت کادرهای مربعی */
 .unit-list {
@@ -776,6 +767,67 @@
 .unit-test__score { display: flex; width: 112px; height: 112px; flex: 0 0 auto; flex-direction: column; align-items: center; justify-content: center; border-radius: 50%; background: radial-gradient(circle, var(--surface-strong) 58%, transparent 60%), conic-gradient(var(--learn-blue) var(--score), rgb(var(--wash-rgb) / .07) 0); }
 .unit-test__score strong { color: var(--blue-soft-ink); font-family: 'Doran', 'Vazir', Tahoma, sans-serif; font-size: 1.3rem; }
 .unit-test__score span { color: var(--blue-ink); font-size: .6rem; }
+
+/* تست‌های این بخش — سؤال‌های انتخاب‌شده از بانک تست برای همین واحد */
+/* «تست‌های این بخش» — اتاق مستقل حل سؤال، هم‌خانوادهٔ اتاق تمرین بانک تست:
+   یک سؤال در قاب، نقشهٔ سؤال‌ها و ثبت پاسخ با تحلیل بلافاصله — با سرتیتر خودِ بخش. */
+.unit-bank-session { display: flex; flex-direction: column; gap: 14px; padding: 20px; border: 1px solid rgba(119, 183, 135, .2); border-radius: 23px; background: rgba(119, 183, 135, .05); }
+.unit-bank-session__top { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px 14px; }
+.unit-bank-session__headline small { color: var(--green-ink); font-size: .62rem; }
+.unit-bank-session__headline h3 { margin: 5px 0 0; font-family: 'Doran', 'Vazir', Tahoma, sans-serif; font-size: 1.08rem; color: var(--white); }
+.unit-bank-session__meta { display: flex; align-items: center; gap: 10px; }
+.unit-bank-session__source { padding: 4px 10px; border: 1px solid rgb(119 183 135 / .3); border-radius: 999px; background: rgb(119 183 135 / .1); color: var(--green-ink); font-size: .6rem; white-space: nowrap; }
+.unit-bank-session__position { color: var(--ghost); font-size: .68rem; }
+.unit-bank-session__progress { grid-column: 1 / -1; height: 6px; overflow: hidden; border-radius: 999px; background: rgb(var(--wash-rgb) / .08); }
+.unit-bank-session__progress > span { display: block; height: 100%; border-radius: 999px; background: linear-gradient(to left, var(--green-vivid), rgba(119, 183, 135, .5)); transition: width .4s ease; }
+.unit-bank-session__body { display: grid; gap: 16px; }
+.unit-bank-session__main { display: flex; min-width: 0; flex-direction: column; gap: 12px; }
+.unit-bank-card { padding: 18px; border: 1px solid rgb(var(--line-rgb) / .07); border-radius: 20px; background: var(--surface); }
+.unit-bank-card__head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.unit-bank-card__no { padding: 4px 11px; border-radius: 999px; background: rgba(119, 183, 135, .13); color: var(--green-ink); font-family: 'Doran', 'Vazir', Tahoma, sans-serif; font-size: .64rem; }
+.unit-bank-card__path { color: var(--ghost); font-size: .64rem; }
+.unit-bank-card__level { padding: 3px 9px; border-radius: 999px; background: rgb(var(--wash-rgb) / .06); color: var(--faint); font-size: .6rem; }
+.unit-bank-card__stem { margin: 14px 0 0; font-family: 'Doran', 'Vazir', Tahoma, sans-serif; font-size: 1.02rem; line-height: 1.95; color: var(--white); }
+.unit-bank-card__options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; }
+.unit-bank-card__options button { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 11px 13px; border: 1px solid rgb(var(--line-rgb) / .07); border-radius: 15px; background: var(--background); color: var(--faint); cursor: pointer; text-align: right; font-size: .72rem; }
+.unit-bank-card__options button > span { display: grid; width: 25px; height: 25px; flex: 0 0 auto; place-items: center; border-radius: 8px; background: rgb(var(--wash-rgb) / .05); color: var(--ghost); font-size: .59rem; }
+.unit-bank-card__options button:hover:not(:disabled),
+.unit-bank-card__options button.is-selected { border-color: rgb(var(--learn-accent-rgb) / .4); background: rgb(var(--learn-accent-rgb) / .09); color: color-mix(in srgb, var(--learn-accent) 72%, var(--white)); }
+.unit-bank-card__options button.is-correct { border-color: rgba(119, 183, 135, .42); background: rgba(119, 183, 135, .1); color: var(--green-ink); }
+.unit-bank-card__options button.is-wrong { border-color: rgba(226, 109, 109, .4); background: rgba(226, 109, 109, .09); color: var(--red-ink); }
+.unit-bank-card__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 16px; }
+.unit-bank-session__nav { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.unit-bank-session__side { display: flex; flex-direction: column; gap: 12px; }
+.unit-bank-session__score { display: flex; flex-direction: column; gap: 5px; padding: 13px; border-radius: 16px; background: rgb(var(--wash-rgb) / .045); }
+.unit-bank-session__score > span { color: var(--ghost); font-size: .64rem; }
+.unit-bank-session__score strong { font-family: 'Doran', 'Vazir', Tahoma, sans-serif; font-size: .74rem; }
+.unit-bank-session__maptitle { margin: 0; font-family: 'Doran', 'Vazir', Tahoma, sans-serif; font-size: .78rem; }
+.unit-bank-session__map { display: grid; grid-template-columns: repeat(auto-fill, minmax(38px, 1fr)); gap: 6px; }
+.unit-bank-chip { display: grid; height: 38px; place-items: center; border: 1px solid rgb(var(--line-rgb) / .08); border-radius: 12px; background: transparent; color: var(--faint); cursor: pointer; font-family: 'Doran', 'Vazir', Tahoma, sans-serif; font-size: .68rem; }
+.unit-bank-chip:hover { border-color: rgb(var(--learn-accent-rgb) / .35); }
+.unit-bank-chip.is-current { border-color: rgb(var(--learn-accent-rgb) / .5); background: rgb(var(--learn-accent-rgb) / .12); color: var(--white); }
+.unit-bank-chip.is-correct { border-color: rgba(119, 183, 135, .45); background: rgba(119, 183, 135, .12); color: var(--green-ink); }
+.unit-bank-chip.is-wrong { border-color: rgba(226, 109, 109, .42); background: rgba(226, 109, 109, .1); color: var(--red-ink); }
+.unit-bank-session__legend { display: flex; flex-wrap: wrap; gap: 8px 14px; margin: 0; padding: 12px 0 0; border-top: 1px solid rgb(var(--line-rgb) / .06); list-style: none; color: var(--faint); font-size: .62rem; }
+.unit-bank-session__legend li { display: flex; align-items: center; gap: 6px; }
+.unit-bank-session__legend i { width: 9px; height: 9px; border-radius: 4px; }
+.unit-bank-session__legend i.is-correct { background: rgba(119, 183, 135, .6); }
+.unit-bank-session__legend i.is-wrong { background: rgba(226, 109, 109, .6); }
+.unit-bank-session__legend i.is-idle { background: rgb(var(--wash-rgb) / .2); }
+@media (min-width: 1024px) { .unit-bank-session__body { grid-template-columns: minmax(0, 1fr) 236px; } }
+@media (max-width: 640px) { .unit-bank-card__options { grid-template-columns: 1fr; } }
+
+/* پاپ‌آپ تبریک تکمیل واحد — تصویرش از کتابخانهٔ رسانه و مخصوص همین واحد */
+.unit-celebration { position: fixed; z-index: 70; inset: 0; display: grid; place-items: center; padding: 20px; background: rgb(6 10 16 / .62); }
+.unit-celebration__card { position: relative; display: flex; width: min(100%, 430px); flex-direction: column; align-items: center; gap: 14px; padding: 30px 24px 24px; border: 1px solid rgb(var(--learn-accent-rgb) / .28); border-radius: 28px; background: radial-gradient(120% 90% at 50% 0%, rgb(var(--learn-accent-rgb) / .16), transparent 62%), var(--surface); box-shadow: 0 30px 70px rgb(var(--shadow-rgb) / .55); text-align: center; }
+.unit-celebration__close { position: absolute; top: 12px; inset-inline-end: 12px; width: 30px; height: 30px; border: 1px solid rgb(var(--line-rgb) / .09); border-radius: 10px; background: rgb(var(--wash-rgb) / .05); color: var(--faint); cursor: pointer; font-size: .95rem; line-height: 1; }
+.unit-celebration__art { width: min(100%, 250px); overflow: hidden; border-radius: 22px; }
+.unit-celebration__art img { display: block; width: 100%; height: auto; }
+.unit-celebration__badge { display: grid; width: 92px; height: 92px; place-items: center; border-radius: 50%; background: rgba(119, 183, 135, .14); color: var(--green-ink); }
+.unit-celebration__badge svg { width: 46px; height: 46px; }
+.unit-celebration__card h3 { margin: 0; font-family: 'Doran', 'Vazir', Tahoma, sans-serif; font-size: 1.12rem; line-height: 1.75; }
+.unit-celebration__card p { margin: 0; color: var(--faint); font-size: .74rem; line-height: 1.9; }
+.unit-celebration__card .learn-button { margin-top: 4px; }
 
 /* فلش‌کارت این واحد — فیلدهای استاندارد کارت تپش */
 .unit-flashcards { display: flex; flex-direction: column; gap: 12px; padding: 20px; border: 1px solid rgb(var(--line-rgb) / .06); border-radius: 23px; background: var(--surface); }

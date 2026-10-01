@@ -22,6 +22,12 @@ export default function AdminSettings({ admin, meta }) {
 
   const { data, loading, error, reload } = useAsync(() => settingsApi.get(), []);
   const canUpdate = admin.permissions?.includes('settings.update');
+  /*
+   * سقف حجم بارگذاری، پنجرهٔ نشست و سقف تلاش ورود، خودِ مکانیزم‌های حفاظتی‌اند.
+   * سرور تغییرشان را با مجوز جدا می‌سنجد؛ اینجا فقط نمایش‌شان قفل می‌شود تا
+   * کاربر بیهوده فرم را پر نکند و ۴۰۳ نگیرد.
+   */
+  const canManageSecurity = admin.permissions?.includes('settings.security.manage');
 
   useEffect(() => {
     if (data?.settings) setForm(data.settings);
@@ -156,13 +162,19 @@ export default function AdminSettings({ admin, meta }) {
         </div>
       </Card>
 
-      <Card title="رسانه و امنیت" description="محدودیت‌هایی که در سرور اعمال می‌شوند">
+      <Card
+        title="رسانه و امنیت"
+        description={canManageSecurity
+          ? 'محدودیت‌هایی که در سرور اعمال می‌شوند'
+          : 'این بخش مجوز جداگانه لازم دارد (settings.security.manage) و فقط‌خواندنی است'}
+      >
         <div className="ad-grid2">
           <Field label="حداکثر حجم فایل" hint="مگابایت">
             <Input
               type="number"
               min="1"
               max="50"
+              disabled={!canManageSecurity}
               value={form.media.maxUploadMb}
               onChange={(event) => setNested('media', 'maxUploadMb', Number(event.target.value))}
             />
@@ -173,6 +185,7 @@ export default function AdminSettings({ admin, meta }) {
               type="number"
               min="1"
               max="72"
+              disabled={!canManageSecurity}
               value={form.security.sessionHours}
               onChange={(event) => setNested('security', 'sessionHours', Number(event.target.value))}
             />
@@ -183,6 +196,7 @@ export default function AdminSettings({ admin, meta }) {
               type="number"
               min="3"
               max="20"
+              disabled={!canManageSecurity}
               value={form.security.maxLoginAttempts}
               onChange={(event) => setNested('security', 'maxLoginAttempts', Number(event.target.value))}
             />
@@ -193,6 +207,7 @@ export default function AdminSettings({ admin, meta }) {
               type="number"
               min="1"
               max="120"
+              disabled={!canManageSecurity}
               value={form.security.lockMinutes}
               onChange={(event) => setNested('security', 'lockMinutes', Number(event.target.value))}
             />
@@ -204,6 +219,7 @@ export default function AdminSettings({ admin, meta }) {
             <Input
               value={(form.media.allowedMimeTypes ?? []).join(', ')}
               dir="ltr"
+              disabled={!canManageSecurity}
               onChange={(event) => setNested('media', 'allowedMimeTypes', event.target.value.split(',').map((item) => item.trim()).filter(Boolean))}
             />
           </Field>

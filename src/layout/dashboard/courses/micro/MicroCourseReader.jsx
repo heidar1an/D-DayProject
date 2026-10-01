@@ -26,6 +26,7 @@ import {
   difficultyLabel,
 } from '../../../../services/micro/microTestEngine';
 import { toFa } from '../learning/learningUtils';
+import { FEEDBACK_SOURCES, sendFeedback } from '../../../../services/feedback/userFeedback';
 import MicroBlocks from './MicroBlocks';
 import MicroCheckpoint from './MicroCheckpoint';
 import MicroOutline from './MicroOutline';
@@ -33,8 +34,11 @@ import { MicroCompletion, FinalAssessment, AssessmentResult } from './MicroCompl
 
 const CONFIDENCE_LABELS = ['اصلاً', 'ضعیف', 'متوسط', 'خوب', 'کاملاً'];
 
-/* کشوی ابزارهای نوار بالا: یادداشت + هایلایت‌ها، فلش‌کارت‌های من */
-const TOOL_DRAWERS = { note: 'note', flashcards: 'flashcards' };
+/* کشوی ابزارهای نوار بالا: یادداشت + هایلایت‌ها، فلش‌کارت‌های من، گزارش ایراد */
+const TOOL_DRAWERS = { note: 'note', flashcards: 'flashcards', report: 'report' };
+
+/* نوع گزارش ایراد این صفحه — همان واژگان گزارش درسنامهٔ جامع */
+const REPORT_KINDS = ['گزارش اشکال محتوایی', 'خطای فنی', 'پیشنهاد بهبود'];
 
 export default function MicroCourseReader({ courseId, userId = 'local-user', view = {}, patchView, onExit }) {
   const dashboardRoute = useDashboardRoute();
@@ -46,7 +50,8 @@ export default function MicroCourseReader({ courseId, userId = 'local-user', vie
   const [flowIndex, setFlowIndex] = useState(0);
   const [screen, setScreen] = useState('flow'); // flow | assessment | assess-result
   const [outlineOpen, setOutlineOpen] = useState(false);
-  const [toolDrawer, setToolDrawer] = useState(null); // null | note | flashcards
+  const [toolDrawer, setToolDrawer] = useState(null); // null | note | flashcards | report
+  const [report, setReport] = useState({ kind: REPORT_KINDS[0], text: '', state: 'idle' });
   const [toast, setToast] = useState(null);
   const [cpQuestions, setCpQuestions] = useState(null); // سؤال‌های checkpoint جاری (هر ورود تازه)
   const [activeRetest, setActiveRetest] = useState(null); // { checkpointId, questions }
@@ -269,6 +274,22 @@ export default function MicroCourseReader({ courseId, userId = 'local-user', vie
     saveProgress((previous) => MicroProgressService.removeFlashcard(previous, unit, currentPage.id, cardId));
   };
 
+  /* گزارش ایراد همین صفحه — به سرور می‌رود تا در پنل با منبع «میکرو درسنامه» بنشیند */
+  const submitReport = async () => {
+    if (!report.text.trim() || report.state === 'sending') return;
+    setReport((previous) => ({ ...previous, state: 'sending' }));
+
+    const sent = await sendFeedback({
+      source: FEEDBACK_SOURCES.micro,
+      subject: `گزارش ایراد — ${currentPage?.title ?? course?.title ?? 'میکرو درسنامه'}`,
+      category: report.kind,
+      message: report.text.trim(),
+      meta: { courseId, unitId: unit?.id ?? null, pageId: currentPage?.id ?? null },
+    });
+
+    setReport((previous) => ({ ...previous, text: sent ? '' : previous.text, state: sent ? 'sent' : 'error' }));
+  };
+
   /* ── کنش‌های checkpoint ── */
   const checkpointQuestions = currentCheckpoint
     ? (activeRetest?.checkpointId === currentCheckpoint.id
@@ -342,8 +363,9 @@ export default function MicroCourseReader({ courseId, userId = 'local-user', vie
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleAssessmentAnswer = (question, selected) => {
-    const attempt = evaluateAnswer(question, selected);
+  const handleAssessmentAnswer = async (question, selected) => {
+    /* PHASE 2 — درستی از سرور می‌آید؛ کلید پاسخ در کلاینت نیست. */
+    const attempt = await evaluateAnswer(question, selected);
     setAssessmentAttempts((previous) => [...previous, attempt]);
   };
 
@@ -511,6 +533,17 @@ export default function MicroCourseReader({ courseId, userId = 'local-user', vie
             {userFlashcards.length > 0 && <i>{toFa(userFlashcards.length)}</i>}
           </button>
 
+          <button
+            type="button"
+            className={`micr-rhead__tool micr-rhead__tool--report${toolDrawer === TOOL_DRAWERS.report ? ' is-active' : ''}`}
+            onClick={() => setToolDrawer(toolDrawer === TOOL_DRAWERS.report ? null : TOOL_DRAWERS.report)}
+            aria-expanded={toolDrawer === TOOL_DRAWERS.report}
+            title="گزارش ایراد یا خطای این صفحه"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" /><path d="M12 9v4" /><path d="M12 17h.01" /></svg>
+            گزارش ایراد
+          </button>
+
           <button type="button" className="micr-rhead__toggle" onClick={() => setOutlineOpen(!outlineOpen)} aria-expanded={outlineOpen}>
             فهرست
           </button>
@@ -520,9 +553,9 @@ export default function MicroCourseReader({ courseId, userId = 'local-user', vie
       {/* کشوی یادداشت و فلش‌کارت — زیر نوار ابزار */}
       {toolDrawer && currentPage && (
         <div
-          className={`micr-toolbox${toolDrawer === TOOL_DRAWERS.note ? ' micr-toolbox--note' : ''}${toolDrawer === TOOL_DRAWERS.flashcards ? ' micr-toolbox--flash' : ''}`}
+          className={`micr-toolbox${toolDrawer === TOOL_DRAWERS.note ? ' micr-toolbox--note' : ''}${toolDrawer === TOOL_DRAWERS.flashcards ? ' micr-toolbox--flash' : ''}${toolDrawer === TOOL_DRAWERS.report ? ' micr-toolbox--report' : ''}`}
           role="dialog"
-          aria-label={toolDrawer === TOOL_DRAWERS.note ? 'یادداشت' : 'فلش‌کارت‌ها'}
+          aria-label={toolDrawer === TOOL_DRAWERS.note ? 'یادداشت' : (toolDrawer === TOOL_DRAWERS.report ? 'گزارش ایراد' : 'فلش‌کارت‌ها')}
         >
           {toolDrawer === TOOL_DRAWERS.note && (
             <>
@@ -593,6 +626,47 @@ export default function MicroCourseReader({ courseId, userId = 'local-user', vie
                   افزودن فلش‌کارت
                 </button>
               </div>
+            </>
+          )}
+
+          {toolDrawer === TOOL_DRAWERS.report && (
+            <>
+              <h4>گزارش ایراد — «{currentPage.title}»</h4>
+              {report.state === 'sent' ? (
+                <p className="micr-toolbox__empty">
+                  ثبت شد؛ تیم تپش بررسی می‌کند و پاسخ را در بخش «اعلان‌ها» می‌بینی.
+                </p>
+              ) : (
+                <>
+                  <label className="micr-toolbox__field">
+                    <span>نوع گزارش</span>
+                    <select
+                      value={report.kind}
+                      onChange={(event) => setReport((previous) => ({ ...previous, kind: event.target.value }))}
+                    >
+                      {REPORT_KINDS.map((item) => <option key={item} value={item}>{item}</option>)}
+                    </select>
+                  </label>
+                  <textarea
+                    value={report.text}
+                    onChange={(event) => setReport((previous) => ({ ...previous, text: event.target.value, state: 'idle' }))}
+                    rows={4}
+                    placeholder={`چه ایرادی در «${currentPage.title}» دیدی؟`}
+                    aria-label="متن گزارش"
+                  />
+                  {report.state === 'error' && <small className="micr-toolbox__error">ثبت نشد؛ دوباره تلاش کن.</small>}
+                  <div className="micr-toolbox__form">
+                    <button
+                      type="button"
+                      className="micr-button micr-button--primary"
+                      onClick={submitReport}
+                      disabled={!report.text.trim()}
+                    >
+                      ارسال گزارش
+                    </button>
+                  </div>
+                </>
+              )}
             </>
           )}
         </div>

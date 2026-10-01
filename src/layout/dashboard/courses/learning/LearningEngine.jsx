@@ -11,6 +11,7 @@ import {
   MicroLesson,
   PracticeQuestion,
   PriorKnowledgeActivation,
+  UnitCelebration,
   UnitTest,
 } from './LearningActivities';
 import {
@@ -21,6 +22,7 @@ import {
   UnitReport,
 } from './LearningPrimitives';
 import { toFa } from './learningUtils';
+import { FEEDBACK_SOURCES } from '../../../../services/feedback/userFeedback';
 import { LAYER_IDS, useDashboardRoute } from '../../dashboardRoute';
 import { ReviewNotebookService } from '../../../../services/reviewNotebook/reviewNotebookService';
 
@@ -54,6 +56,8 @@ export default function LearningEngine({
   });
   const [notesOpen, setNotesOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
+  /* پاپ‌آپ تبریک — فقط لحظهٔ تکمیل واحد باز می‌شود، نه در ورودهای بعدی */
+  const [celebrate, setCelebrate] = useState(false);
 
   const saveState = (updater) => {
     setCourseState((previousCourseState) => {
@@ -80,13 +84,22 @@ export default function LearningEngine({
     ));
   };
 
-  /* ورود دوباره به واحد: بخش فعال‌سازی به حالت تازه برمی‌گردد (پاسخ‌های قبلی پاک می‌شوند)،
-     ولی اگر یک بار به این بخش جواب داده شده باشد، تیکش در نوار مراحل می‌ماند. */
+  /* ورود دوباره به واحد: بخش فعال‌سازی و بخش تمرین به حالت تازه برمی‌گردند
+     (پاسخ‌های قبلی پاک می‌شوند) تا کاربر بتواند دوباره تمرین کند؛ ولی اگر یک بار
+     به این بخش‌ها جواب داده شده باشد، تیکشان در نوار مراحل می‌ماند. */
   useEffect(() => {
-    if (!Object.keys(initialUnitState.recallResponses ?? {}).length) return;
+    const answeredRecall = Object.keys(initialUnitState.recallResponses ?? {}).length > 0;
+    const answeredPractice = Object.keys(initialUnitState.practiceResults ?? {}).length > 0;
+    if (!answeredRecall && !answeredPractice) return;
+
     patchUnit({
-      recallResponses: {},
-      completedSteps: [...new Set([...(initialUnitState.completedSteps ?? []), 'activate'])],
+      ...(answeredRecall ? { recallResponses: {} } : {}),
+      ...(answeredPractice ? { practiceResults: {} } : {}),
+      completedSteps: [...new Set([
+        ...(initialUnitState.completedSteps ?? []),
+        ...(answeredRecall ? ['activate'] : []),
+        ...(answeredPractice ? ['practice'] : []),
+      ])],
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -202,6 +215,7 @@ export default function LearningEngine({
         },
       });
       setReviewItemId(ReviewNotebookService.getAll(userId).find((entry) => entry.sourceId === reviewSourceId)?.id ?? null);
+      setCelebrate(true);
       onCompleted?.(unit.id);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
@@ -270,9 +284,9 @@ export default function LearningEngine({
             unit={unit}
             unitState={unitState}
             userId={userId}
+            moduleTitle={course.modules?.find((module) => module.id === unit.moduleId)?.title}
             inReview={Boolean(reviewItemId)}
             onToggleReview={toggleReview}
-            onOpenTests={() => selectStep('practice')}
             onOpenNotes={openNotes}
             onAskAI={askTapeshAI}
             onDeckCreated={(deckId) => patchUnit({ flashcardDeckId: deckId })}
@@ -352,6 +366,8 @@ export default function LearningEngine({
             onClose={() => setReportOpen(false)}
             courseTitle={course.title}
             unitTitle={unit.title}
+            source={FEEDBACK_SOURCES.comprehensive}
+            meta={{ courseId: course.id, unitId: unit.id }}
           />
         </div>
       </div>
@@ -363,6 +379,8 @@ export default function LearningEngine({
         onNext={goNext}
         isLast={currentStepIndex === LEARNING_STEPS.length - 1}
       />
+
+      <UnitCelebration open={celebrate} unit={unit} onClose={() => setCelebrate(false)} />
     </div>
   );
 }

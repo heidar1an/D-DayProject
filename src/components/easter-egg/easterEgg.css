@@ -1,0 +1,509 @@
+/*
+ * استایل ایستر اگ — کاملاً namespace‌شده زیر `.eg-*` و `.brand.is-egg-*`.
+ * هیچ انتخاب‌گرِ عمومی و هیچ بازنویسیِ توکنِ پروژه اینجا نیست؛ پس این فایل
+ * نه CSS سراسری را خراب می‌کند و نه به تمِ سایت وابسته است.
+ *
+ * پالت بازی عمداً «آرکیدِ تیره» است: روی تمِ روشن هم کنتراستِ بالا دارد و
+ * همان حسِ صفحهٔ دستگاه قدیمی را می‌دهد.
+ */
+
+.eg-root {
+  --eg-bg: #0a0a10;
+  --eg-panel: #16161f;
+  --eg-panel-2: #1e1e2a;
+  --eg-gold: #e0b45c;
+  --eg-red: #e26d6d;
+  --eg-green: #61d192;
+  --eg-blue: #5b8cc7;
+  --eg-purple: #937fcd;
+  --eg-orange: #ff9717;
+  --eg-ink: #f4f4f7;
+  --eg-dim: #9a9aa8;
+  --eg-line: #33334a;
+
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  direction: rtl;
+  font-family: 'Doran', Tahoma, sans-serif;
+  color: var(--eg-ink);
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  animation: eg-fade 240ms ease-out both;
+}
+
+.eg-root__backdrop {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 30%, rgba(224, 180, 92, 0.09), transparent 62%),
+    rgba(4, 4, 8, 0.86);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+}
+
+.eg-root__panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: min(440px, 100%);
+  max-height: 100%;
+  overflow: hidden;
+  padding: 12px;
+  border: 2px solid var(--eg-line);
+  border-radius: 6px;
+  background: linear-gradient(180deg, var(--eg-panel-2), var(--eg-panel));
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.6),
+    0 24px 60px rgba(0, 0, 0, 0.6),
+    0 0 34px rgba(224, 180, 92, 0.12);
+  outline: none;
+  animation: eg-pop 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ---------- نوار بالا ---------- */
+
+.eg-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.eg-topbar__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--eg-gold);
+}
+
+/* نشانِ پیکسلیِ تپش: نبضِ طلایی روی زمینهٔ تیره */
+.eg-topbar__mark {
+  width: 18px;
+  height: 18px;
+  background:
+    linear-gradient(var(--eg-gold), var(--eg-gold)) 0 100% / 4px 4px no-repeat,
+    linear-gradient(var(--eg-gold), var(--eg-gold)) 4px 12px / 4px 4px no-repeat,
+    linear-gradient(var(--eg-gold), var(--eg-gold)) 8px 0 / 4px 12px no-repeat,
+    linear-gradient(var(--eg-gold), var(--eg-gold)) 12px 12px / 4px 4px no-repeat,
+    linear-gradient(var(--eg-gold), var(--eg-gold)) 16px 100% / 4px 4px no-repeat;
+}
+
+.eg-topbar__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.eg-icon-btn {
+  min-width: 34px;
+  height: 30px;
+  padding: 0 10px;
+  border: 2px solid var(--eg-line);
+  border-radius: 3px;
+  background: var(--eg-panel);
+  color: var(--eg-ink);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 140ms ease, color 140ms ease, transform 90ms ease;
+}
+
+.eg-icon-btn:hover {
+  border-color: var(--eg-gold);
+  color: var(--eg-gold);
+}
+
+.eg-icon-btn:active {
+  transform: translateY(1px);
+}
+
+.eg-icon-btn.is-muted {
+  color: var(--eg-dim);
+  text-decoration: line-through;
+}
+
+.eg-icon-btn--exit {
+  border-color: #4a2a2f;
+  color: var(--eg-red);
+}
+
+.eg-icon-btn--exit:hover {
+  border-color: var(--eg-red);
+  color: #fff;
+  background: #3a1a1e;
+}
+
+.eg-icon-btn:focus-visible,
+.eg-pad:focus-visible,
+.eg-btn:focus-visible {
+  outline: 2px solid var(--eg-gold);
+  outline-offset: 2px;
+}
+
+/* ---------- HUD ---------- */
+
+.eg-game {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-height: 0;
+}
+
+.eg-hud {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.eg-hud__row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.eg-hud__row--sub {
+  justify-content: space-between;
+  min-height: 20px;
+}
+
+.eg-hud__chip {
+  padding: 3px 8px;
+  border: 2px solid var(--eg-line);
+  border-radius: 3px;
+  background: #101018;
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
+.eg-hud__chip--score {
+  color: var(--eg-gold);
+  border-color: #4a3c1e;
+}
+
+.eg-hud__chip--wave {
+  color: var(--eg-purple);
+  border-color: #33294f;
+}
+
+.eg-hud__chip--best {
+  color: var(--eg-dim);
+  margin-inline-start: auto;
+}
+
+.eg-hearts {
+  display: inline-flex;
+  gap: 3px;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.eg-heart {
+  color: #3a3a48;
+  transition: color 160ms ease, transform 160ms ease;
+}
+
+.eg-heart.is-on {
+  color: var(--eg-red);
+  text-shadow: 0 0 8px rgba(226, 109, 109, 0.5);
+}
+
+.eg-buffs {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.eg-buff {
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  border: 1px solid currentColor;
+}
+
+.eg-buff--rapid { color: var(--eg-orange); }
+.eg-buff--double { color: var(--eg-green); }
+.eg-buff--shield { color: var(--eg-blue); }
+
+.eg-bossbar {
+  height: 8px;
+  border: 2px solid #4a2a2f;
+  border-radius: 3px;
+  background: #1a0f12;
+  overflow: hidden;
+}
+
+.eg-bossbar__fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--eg-red), var(--eg-orange));
+  transition: width 120ms linear;
+}
+
+/* ---------- صفحهٔ بازی ---------- */
+
+.eg-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.eg-screen {
+  position: relative;
+  background: var(--eg-bg);
+  border: 2px solid var(--eg-gold);
+  border-radius: 3px;
+  box-shadow: 0 0 26px rgba(224, 180, 92, 0.16), inset 0 0 40px rgba(0, 0, 0, 0.8);
+  overflow: hidden;
+}
+
+.eg-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  outline: none;
+}
+
+/* خطوطِ اسکن: بافتِ صفحهٔ CRT، بدون هزینهٔ رندر */
+.eg-scanlines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.045) 0 1px,
+    transparent 1px 3px
+  );
+}
+
+/* ---------- پایان بازی ---------- */
+
+.eg-over {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px;
+  background: rgba(6, 6, 10, 0.9);
+  text-align: center;
+  animation: eg-fade 260ms ease-out both;
+}
+
+.eg-over__title {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--eg-red);
+  text-shadow: 0 0 18px rgba(226, 109, 109, 0.45);
+}
+
+.eg-over__badge {
+  margin: 0;
+  padding: 3px 10px;
+  border: 2px solid var(--eg-gold);
+  border-radius: 3px;
+  color: var(--eg-gold);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  animation: eg-blink 900ms steps(2, end) infinite;
+}
+
+.eg-over__stats {
+  display: flex;
+  gap: 14px;
+  margin: 4px 0;
+}
+
+.eg-over__stats div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.eg-over__stats dt {
+  font-size: 11px;
+  color: var(--eg-dim);
+}
+
+.eg-over__stats dd {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--eg-ink);
+}
+
+.eg-over__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.eg-btn {
+  padding: 9px 16px;
+  border: 2px solid var(--eg-line);
+  border-radius: 3px;
+  background: #101018;
+  color: var(--eg-ink);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: border-color 140ms ease, color 140ms ease, transform 90ms ease;
+}
+
+.eg-btn:hover {
+  border-color: var(--eg-gold);
+  color: var(--eg-gold);
+}
+
+.eg-btn:active {
+  transform: translateY(1px);
+}
+
+.eg-btn--primary {
+  border-color: var(--eg-gold);
+  color: var(--eg-bg);
+  background: var(--eg-gold);
+}
+
+.eg-btn--primary:hover {
+  color: var(--eg-bg);
+  background: #f0c878;
+  border-color: #f0c878;
+}
+
+/* ---------- کنترل لمسی ---------- */
+
+.eg-controls {
+  direction: ltr;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-shrink: 0;
+  touch-action: none;
+}
+
+.eg-pad {
+  flex: 1;
+  height: 54px;
+  border: 2px solid var(--eg-line);
+  border-radius: 4px;
+  background: #14141e;
+  color: var(--eg-ink);
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 700;
+  touch-action: none;
+  cursor: pointer;
+  transition: background 100ms ease, border-color 100ms ease, transform 80ms ease;
+}
+
+.eg-pad--fire {
+  flex: 1.4;
+  color: var(--eg-gold);
+  border-color: #4a3c1e;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+}
+
+.eg-pad:active,
+.eg-pad.is-active {
+  background: #26263a;
+  border-color: var(--eg-gold);
+  transform: translateY(1px);
+}
+
+/* روی دستگاهِ اشاره‌گرِ دقیق (ماوس) دکمه‌های لمسی لازم نیستند */
+@media (hover: hover) and (pointer: fine) {
+  .eg-controls {
+    display: none;
+  }
+}
+
+/* ---------- واکنش نشانِ لوگو ---------- */
+
+.brand.is-egg-burst .brand__mark {
+  animation: eg-brand-burst 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.brand.is-egg-charging .brand__mark {
+  box-shadow: 0 0 12px rgba(224, 180, 92, 0.45);
+}
+
+@keyframes eg-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes eg-pop {
+  from { opacity: 0; transform: translateY(16px) scale(0.94); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes eg-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+@keyframes eg-brand-burst {
+  0% { transform: scale(1); filter: none; }
+  35% { transform: scale(1.22) rotate(-6deg); filter: drop-shadow(0 0 10px rgba(224, 180, 92, 0.85)); }
+  70% { transform: scale(0.94) rotate(3deg); }
+  100% { transform: scale(1) rotate(0); filter: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eg-root,
+  .eg-root__panel,
+  .eg-over,
+  .brand.is-egg-burst .brand__mark,
+  .eg-over__badge {
+    animation-duration: 1ms;
+    animation-iteration-count: 1;
+  }
+}
+
+@media (max-width: 420px) {
+  .eg-root {
+    padding: 6px;
+  }
+
+  .eg-root__panel {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .eg-pad {
+    height: 48px;
+  }
+}

@@ -1,4 +1,4 @@
-export { ContentService } from './contentService';
+export { ContentService, refreshLibrary } from './contentService';
 export { ProgressService } from './progressService';
 export { MyCoursesService } from './myCoursesService';
 export { AssessmentService } from './assessmentService';

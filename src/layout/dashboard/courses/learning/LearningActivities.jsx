@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { clamp, toFa } from './learningUtils';
 import { createCard, createDeck } from '../../../../services/flashcards/flashcardService';
+import { checkBankAnswer } from '../../../../services/testBank/testBankService';
 
 export function PriorKnowledgeActivation({ data, activityState, onChange }) {
   const responses = activityState.recallResponses ?? {};
@@ -111,9 +112,6 @@ export function MicroLesson({ lessons, activityState, onChange }) {
               <small>اتصال به قبل</small>
               <p>{lesson.connection}</p>
             </section>
-          </div>
-          <div className="learning-tags">
-            {lesson.concepts.map((concept) => <span key={concept}>{concept}</span>)}
           </div>
         </div>
       </article>
@@ -580,22 +578,322 @@ function UnitExam({ questions }) {
   );
 }
 
+/*
+ * «تست‌های این بخش» — همان سؤال‌هایی که مدیر در پنل برای این واحد از بانک تست
+ * انتخاب کرده است. سؤال‌های بی‌شناسه از جایگاهشان شناسه می‌گیرند (سمت سرور).
+ */
+const optionLetter = (index) => String.fromCharCode(65 + index);
+
+/* سرصفحهٔ مشترک «اتاق بخش» — سرتیتر خودِ بخش + شمارش و نوار پیشرفت */
+function BankSectionHeader({ sectionTitle, eyebrow, source, position, total, progress, onExit }) {
+  return (
+    <header className="unit-bank-session__top">
+      <div className="unit-bank-session__headline">
+        <small>{eyebrow}</small>
+        <h3>{sectionTitle}</h3>
+      </div>
+      <div className="unit-bank-session__meta">
+        {source && <span className="unit-bank-session__source">{source}</span>}
+        <span className="unit-bank-session__position">
+          سؤال {toFa(position)} از {toFa(total)}
+        </span>
+        <button type="button" className="learn-button learn-button--quiet" onClick={onExit}>
+          خروج
+        </button>
+      </div>
+      <span className="unit-bank-session__progress" aria-hidden="true">
+        <span style={{ width: `${progress}%` }} />
+      </span>
+    </header>
+  );
+}
+
+/* نقشهٔ سؤال‌های بخش — وضعیت هر سؤال با رنگ، مثل نقشهٔ تمرین بانک تست */
+function BankSectionMap({ questions, results, currentIndex, onJump }) {
+  const stateOf = (question, index) => {
+    if (index === currentIndex) return 'current';
+    const result = results[question.id];
+    if (!result) return 'idle';
+    return result.correct ? 'correct' : 'wrong';
+  };
+
+  return (
+    <>
+      <div className="unit-bank-session__map" role="list" aria-label="نقشهٔ سؤال‌های این بخش">
+        {questions.map((question, index) => {
+          const state = stateOf(question, index);
+          return (
+            <button
+              key={question.id}
+              type="button"
+              role="listitem"
+              className={`unit-bank-chip is-${state}`}
+              aria-current={index === currentIndex ? 'step' : undefined}
+              aria-label={`سؤال ${toFa(index + 1)}`}
+              onClick={() => onJump(index)}
+            >
+              {toFa(index + 1)}
+            </button>
+          );
+        })}
+      </div>
+      <ul className="unit-bank-session__legend">
+        <li><i className="is-correct" aria-hidden="true" /> درست</li>
+        <li><i className="is-wrong" aria-hidden="true" /> غلط</li>
+        <li><i className="is-idle" aria-hidden="true" /> حل‌نشده</li>
+      </ul>
+    </>
+  );
+}
+
+/*
+ * اتاق «تست‌های این بخش» — همان تجربهٔ حل سؤال در بانک تست (یک سؤال در قاب،
+ * نقشهٔ سؤال‌ها، ثبت پاسخ و باز شدن تحلیل) ولی با سرتیتر خودِ بخش.
+ * سؤال‌ها از پنل می‌آیند (`unit.testBank.questions`) و پاسخ‌ها نشست نمی‌کنند:
+ * هر بار که واحد باز شود، بخش از نو شروع می‌شود.
+ */
+export function UnitBankSession({ questions, sectionTitle, moduleTitle, source, onExit }) {
+  const [index, setIndex] = useState(0);
+  const [results, setResults] = useState({});
+  const [selected, setSelected] = useState(null);
+  /* ضد دوبار کلیک در فاصلهٔ رفت‌وبرگشت تصحیح سروری */
+  const gradingRef = useRef(false);
+
+  const total = questions.length;
+  const safeIndex = Math.min(index, Math.max(0, total - 1));
+  const question = questions[safeIndex];
+  const result = question ? results[question.id] : undefined;
+  const answered = Object.keys(results).length;
+  const correctCount = questions.filter((item) => results[item.id]?.correct).length;
+  const progress = total ? Math.round((answered / total) * 100) : 0;
+  const isLast = safeIndex === total - 1;
+
+  const goTo = (nextIndex) => {
+    setIndex(Math.max(0, Math.min(total - 1, nextIndex)));
+    setSelected(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  /*
+   * PHASE 2 — سؤال‌های این اتاق از بانک تست می‌آیند و کلید پاسخ دیگر در payload
+   * عمومی نیست. درستی را سرور تعیین می‌کند و کلید/تحلیل همان سؤال برمی‌گردد؛
+   * همان‌جا روی شیء سؤال می‌نشیند تا کد نمایشی موجود (`question.answer`) کار کند.
+   */
+  const submit = async () => {
+    if (selected == null || !question || result || gradingRef.current) return;
+    gradingRef.current = true;
+    const selectedIndex = Number(String(selected).replace('opt-', '')) - 1;
+    const reveal = await checkBankAnswer(question.id, selectedIndex);
+    gradingRef.current = false;
+    if (!reveal) return;
+    question.answer = `opt-${Number(reveal.correctAnswer) + 1}`;
+    setResults((current) => ({
+      ...current,
+      [question.id]: {
+        selectedAnswer: selected,
+        correct: reveal.correct,
+        correctLabel: question.options.find((option) => option.id === question.answer)?.label,
+        explanation: reveal.explanation,
+        misconception: question.misconception,
+      },
+    }));
+  };
+
+  const restart = () => {
+    setResults({});
+    setSelected(null);
+    setIndex(0);
+  };
+
+  if (!question) {
+    return (
+      <section className="unit-bank-session" dir="rtl">
+        <BankSectionHeader
+          eyebrow="تست‌های این بخش"
+          sectionTitle={sectionTitle}
+          source={source}
+          position={0}
+          total={0}
+          progress={0}
+          onExit={onExit}
+        />
+        <p className="unit-exam__empty">برای این بخش سؤالی از بانک تست انتخاب نشده است.</p>
+      </section>
+    );
+  }
+
+  const finished = answered === total;
+
+  return (
+    <section className="unit-bank-session" dir="rtl" aria-label={`تست‌های بخش ${sectionTitle}`}>
+      <BankSectionHeader
+        eyebrow={moduleTitle ? `تست‌های این بخش · ${moduleTitle}` : 'تست‌های این بخش'}
+        sectionTitle={sectionTitle}
+        source={source}
+        position={safeIndex + 1}
+        total={total}
+        progress={progress}
+        onExit={onExit}
+      />
+
+      <div className="unit-bank-session__body">
+        <div className="unit-bank-session__main">
+          <article className="unit-bank-card" key={question.id}>
+            <header className="unit-bank-card__head">
+              <span className="unit-bank-card__no">سؤال {toFa(safeIndex + 1)}</span>
+              {question.topicPath?.length ? (
+                <span className="unit-bank-card__path">{question.topicPath.join(' › ')}</span>
+              ) : null}
+              {question.difficulty ? (
+                <span className="unit-bank-card__level">{question.difficulty}</span>
+              ) : null}
+            </header>
+
+            <h3 className="unit-bank-card__stem">{question.question}</h3>
+
+            <div className="unit-bank-card__options" role="group" aria-label="گزینه‌های سؤال">
+              {question.options.map((option, optionIndex) => {
+                const isSelected = result ? result.selectedAnswer === option.id : selected === option.id;
+                const isAnswer = option.id === question.answer;
+                const classes = [
+                  isSelected ? 'is-selected' : '',
+                  result && isAnswer ? 'is-correct' : '',
+                  result && isSelected && !isAnswer ? 'is-wrong' : '',
+                ].filter(Boolean).join(' ');
+
+                return (
+                  <button
+                    key={option.id}
+                    type="button"
+                    className={classes}
+                    aria-pressed={isSelected}
+                    disabled={Boolean(result)}
+                    onClick={() => setSelected(option.id)}
+                  >
+                    <span>{optionLetter(optionIndex)}</span>
+                    {option.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {!result ? (
+              <div className="unit-bank-card__actions">
+                <button
+                  type="button"
+                  className="learn-button learn-button--primary"
+                  onClick={submit}
+                  disabled={selected == null}
+                >
+                  {selected == null ? 'یک گزینه را انتخاب کن' : 'ثبت پاسخ و دیدن تحلیل'}
+                </button>
+                {selected != null && (
+                  <button type="button" className="learn-button learn-button--quiet" onClick={() => setSelected(null)}>
+                    پاک کردن
+                  </button>
+                )}
+              </div>
+            ) : (
+              <QuestionFeedback result={result} />
+            )}
+          </article>
+
+          <div className="unit-bank-session__nav">
+            <button
+              type="button"
+              className="learn-button learn-button--quiet"
+              onClick={() => goTo(safeIndex - 1)}
+              disabled={safeIndex === 0}
+            >
+              سؤال قبلی
+            </button>
+            {finished && (
+              <button type="button" className="learn-button learn-button--soft" onClick={restart}>
+                تمرین دوباره
+              </button>
+            )}
+            {isLast ? (
+              <button type="button" className="learn-button learn-button--primary" onClick={onExit}>
+                پایان بخش
+              </button>
+            ) : (
+              <button type="button" className="learn-button learn-button--primary" onClick={() => goTo(safeIndex + 1)}>
+                سؤال بعدی
+              </button>
+            )}
+          </div>
+        </div>
+
+        <aside className="unit-bank-session__side">
+          <div className="unit-bank-session__score">
+            <span>پیشرفت این تمرین</span>
+            <strong>
+              {toFa(answered)} از {toFa(total)} پاسخ داده شده · {toFa(correctCount)} درست
+            </strong>
+          </div>
+          <h4 className="unit-bank-session__maptitle">نقشهٔ سؤال‌ها</h4>
+          <BankSectionMap questions={questions} results={results} currentIndex={safeIndex} onJump={goTo} />
+        </aside>
+      </div>
+    </section>
+  );
+}
+
+/*
+ * پاپ‌آپ تبریک تکمیل واحد — تصویرش را مدیر برای همین واحد از کتابخانهٔ رسانه
+ * انتخاب می‌کند (`unit.celebration`). بدون تصویر هم پاپ‌آپ با نشان تیک می‌آید.
+ */
+export function UnitCelebration({ open, unit, onClose }) {
+  if (!open) return null;
+
+  const celebration = unit?.celebration ?? {};
+  const title = celebration.title || 'آفرین! واحد را کامل کردی';
+  const message = celebration.message || `واحد «${unit?.title ?? ''}» تمام شد؛ تسلطت روی این بخش ثبت شد.`;
+
+  return (
+    <div className="unit-celebration" role="dialog" aria-modal="true" aria-label="تبریک تکمیل واحد">
+      <div className="unit-celebration__card">
+        <button type="button" className="unit-celebration__close" onClick={onClose} aria-label="بستن">×</button>
+
+        {celebration.image ? (
+          <div className="unit-celebration__art">
+            <img src={celebration.image} alt="" />
+          </div>
+        ) : (
+          <span className="unit-celebration__badge" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m5 12.5 4.5 4.5L19 7.5" />
+            </svg>
+          </span>
+        )}
+
+        <h3>{title}</h3>
+        <p>{message}</p>
+
+        <button type="button" className="learn-button learn-button--primary" onClick={onClose}>
+          ادامه می‌دهم
+        </button>
+      </div>
+    </div>
+  );
+}
+
 /* مرحلهٔ «تست» = میز کنش‌ها: تست‌های بخش، دفترچهٔ مرور، آزمون واحد، فلش‌کارت، تپش هوشمند. */
 export function UnitTest({
   course,
   unit,
   unitState,
   userId,
-  onOpenTests,
+  moduleTitle,
   onOpenNotes,
   onAskAI,
   onToggleReview,
   onDeckCreated,
   inReview,
 }) {
-  const [panel, setPanel] = useState(null); /* null | exam | flashcards */
+  const [panel, setPanel] = useState(null); /* null | bank | exam | flashcards */
 
-  const questions = [
+  const authoredQuestions = [
     ...(unit.learning.practice ?? []),
     ...(unit.learning.labelQuiz
       ? [{
@@ -606,6 +904,28 @@ export function UnitTest({
       : []),
   ];
 
+  /* سؤال‌های «این بخش»: اول انتخاب‌شده‌های مدیر از بانک تست، و اگر برای این واحد
+     چیزی انتخاب نشده باشد، سؤال‌های دست‌نویس خودِ واحد. در هر دو حالت، اتاق یکی است. */
+  const bankQuestions = unit.testBank?.questions ?? [];
+  const hasBank = bankQuestions.length > 0;
+  const roomQuestions = hasBank ? bankQuestions : authoredQuestions;
+  const examQuestions = roomQuestions;
+
+  /* «تست‌های این بخش» یک لایهٔ مستقل است (مثل حل سؤال در بانک تست)، نه پنل تاشو
+     و نه پرش به مرحلهٔ تمرین: با کلیک، میز کنش‌ها جایش را کامل به همین اتاق می‌دهد
+     و «خروج» برمی‌گرداند. */
+  if (panel === 'bank') {
+    return (
+      <UnitBankSession
+        questions={roomQuestions}
+        sectionTitle={unit.title}
+        moduleTitle={moduleTitle}
+        source={hasBank ? 'بانک تست تپش · فقط سؤال‌های همین بخش' : 'سؤال‌های همین واحد · فقط همین بخش'}
+        onExit={() => setPanel(null)}
+      />
+    );
+  }
+
   /* هر کنش رنگِ بخش مقصدش را می‌گیرد: تست‌ها سبز، مرور آبی، آزمون طلایی، فلش‌کارت بنفش، تپش هوشمند مسی. */
   const actions = [
     {
@@ -613,9 +933,11 @@ export function UnitTest({
       accent: 'green',
       icon: '✓',
       title: 'تست‌های این بخش',
-      hint: `${toFa(questions.length)} سؤال چهارگزینه‌ای و برچسب‌گذاری همین واحد؛ پاسخ‌ها با توضیح بلافاصله باز می‌شوند.`,
-      label: 'زدن تست‌ها',
-      onClick: onOpenTests,
+      hint: hasBank
+        ? `${toFa(bankQuestions.length)} سؤال انتخاب‌شده از بانک تست برای همین بخش؛ پاسخ‌ها با توضیح بلافاصله باز می‌شوند.`
+        : `${toFa(authoredQuestions.length)} سؤال چهارگزینه‌ای و برچسب‌گذاری همین واحد؛ پاسخ‌ها با توضیح بلافاصله باز می‌شوند.`,
+      label: 'زدن تست‌های بخش',
+      onClick: () => setPanel('bank'),
     },
     {
       id: 'review',
@@ -674,7 +996,7 @@ export function UnitTest({
         ))}
       </div>
 
-      {panel === 'exam' && <UnitExam questions={questions} />}
+      {panel === 'exam' && <UnitExam questions={examQuestions} />}
 
       {panel === 'flashcards' && (
         <UnitFlashcards

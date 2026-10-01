@@ -49,6 +49,8 @@ import {
   trackOf,
 } from './mockData';
 
+import { FEEDBACK_SOURCES, sendFeedback } from '../feedback/userFeedback';
+
 const STATE_KEY_PREFIX = 'tapesh:testbank:v1:';
 const LATENCY_MS = 280;
 let bankLoad = null;
@@ -87,25 +89,94 @@ async function loadPublishedQuestions(force = false) {
 export const refreshPublishedTestBankQuestions = () => loadPublishedQuestions(true);
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/*
+ * ── بازگشایی کنترل‌شده (PHASE 2) ──
+ *
+ * کلید پاسخ دیگر در Bundle و در payload عمومی نیست. تنها راه رسیدن به آن، ثبت
+ * پاسخ است؛ سرور درستی را تعیین می‌کند و `correctAnswer`/`explanation`/توزیع
+ * گزینه‌ها را **برای همان سؤال** برمی‌گرداند. این تابع نتیجه را روی همان شیء
+ * سؤال می‌نشاند تا کد نمایشی موجود (`question.correctAnswer`،
+ * `question.explanation`) بدون تغییر کار کند.
+ *
+ * نکته: `correctAnswer === undefined` یعنی «هنوز پاسخ داده نشده»، نه «نادرست».
+ * هیچ تصمیم‌گیری‌ای نباید از نبودنش نتیجهٔ غلط بگیرد.
+ */
+function applyReveal(questionId, reveal) {
+  const question = questionById(questionId);
+  if (!question || !reveal) return;
+  if (reveal.correctAnswer !== undefined && reveal.correctAnswer !== null) question.correctAnswer = reveal.correctAnswer;
+  if (reveal.explanation) question.explanation = reveal.explanation;
+  if (Array.isArray(reveal.optionPercents)) {
+    question.stats = { ...(question.stats ?? {}), optionPercents: reveal.optionPercents };
+  }
+}
+
+/*
+ * POST /api/users/test-bank/answers
+ *
+ * فقط «واقعیت» می‌فرستد: کدام گزینه انتخاب شد. `isCorrect` را کلاینت تعیین
+ * نمی‌کند و اگر بفرستد سرور نادیده می‌گیرد. پاسخ سرور شامل پاداش‌های گرفته‌شده
+ * و بازگشایی هر سؤال است.
+ */
 async function reportAnswers(answers) {
-  if (typeof window === 'undefined') return [];
+  if (typeof window === 'undefined') return { awardedQuestionIds: [], results: [] };
   const response = await fetch('/api/users/test-bank/answers', {
     method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ answers: Object.entries(answers).map(([questionId, answer]) => ({ questionId, selected: answer.selected, timeSpent: answer.timeSpent, answeredAt: answer.answeredAt })) }),
   });
-  if (!response.ok) return [];
+  if (!response.ok) return { awardedQuestionIds: [], results: [] };
   bankCheckedAt = 0;
-  const { awardedQuestionIds = [] } = await response.json();
+  const payload = await response.json();
+  const awardedQuestionIds = Array.isArray(payload.awardedQuestionIds) ? payload.awardedQuestionIds : [];
+  const results = Array.isArray(payload.results) ? payload.results : [];
+  for (const reveal of results) applyReveal(reveal.questionId, reveal);
   if (awardedQuestionIds.length) window.dispatchEvent(new Event('tapesh:hearts:changed'));
-  return awardedQuestionIds;
+  return { awardedQuestionIds, results };
 }
 
+/* ثبت یک پاسخ — خروجی: پاداش گرفته‌شده + بازگشایی همان سؤال (یا null) */
 export async function recordBankAnswer(questionId, answer) {
   try {
-    return (await reportAnswers({ [questionId]: answer })).includes(questionId);
+    const { awardedQuestionIds, results } = await reportAnswers({ [questionId]: answer });
+    return {
+      awarded: awardedQuestionIds.includes(questionId),
+      reveal: results.find((entry) => entry.questionId === questionId) ?? null,
+    };
   } catch {
-    return false;
+    return { awarded: false, reveal: null };
   }
+}
+
+/*
+ * بررسی یک پاسخ برای مصرف‌کننده‌های دیگر (میکرو درسنامه، تست‌های بخشِ درسنامهٔ
+ * جامع). همان قرارداد واحد: درستی از سرور، کلید فقط برای همین سؤال.
+ * `selected` شمارهٔ گزینه (۰-پایه) است.
+ */
+export async function checkBankAnswer(questionId, selected) {
+  const { reveal } = await recordBankAnswer(questionId, { selected, timeSpent: 0, answeredAt: Date.now() });
+  return reveal;
+}
+
+/*
+ * POST /api/users/test-bank/grade — تصحیح authoritative تلاش.
+ * نمره در کلاینت ساخته نمی‌شود؛ سرور با کلید خودش تصحیح می‌کند و اعداد را
+ * برمی‌گرداند. اگر سرور در دسترس نباشد، **نمرهٔ ساختگی ساخته نمی‌شود** — خطا
+ * بالا می‌رود تا UI پیام بدهد (اصل «Client نباید حقیقت نتیجه را تعیین کند»).
+ */
+async function gradeBankAttempt(session) {
+  const response = await fetch('/api/users/test-bank/grade', {
+    method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      questionIds: session.questionIds,
+      answers: session.answers ?? {},
+      negativeMarking: session.negativeMarking ?? 0,
+    }),
+  });
+  if (!response.ok) throw new Error('grade-unavailable');
+  const payload = await response.json();
+  if (!payload?.result) throw new Error('grade-unavailable');
+  return payload.result;
 }
 const respond = async (build) => {
   await loadPublishedQuestions();
@@ -512,7 +583,11 @@ export function fetchQuestionAttemptStats(userId, questionId) {
 
       const answer = session.answers?.[questionId];
       if (answer) {
-        const isCorrect = question ? answer.selected === question.correctAnswer : Boolean(answer.isCorrect);
+        /* درستی از حکم سرور می‌آید (`answer.isCorrect` هنگام ثبت پاسخ نوشته می‌شود).
+           `question.correctAnswer` فقط پس از بازگشایی وجود دارد و معیار نیست. */
+        const isCorrect = typeof answer.isCorrect === 'boolean'
+          ? answer.isCorrect
+          : answer.selected === question?.correctAnswer;
         attempts += 1;
         if (isCorrect) correct += 1;
         else wrong += 1;
@@ -745,7 +820,7 @@ export function fetchSession(userId, sessionId) {
  * در practice/review کامل تا بازخورد فوری و تحلیل ممکن باشد.
  */
 export function fetchSessionQuestions(session) {
-  return respond(() => {
+  return respond(async () => {
     const items = session.questionIds.map((id) => questionById(id)).filter(Boolean);
     if (session.mode === 'exam') {
       return items.map((question) => ({
@@ -763,6 +838,17 @@ export function fetchSessionQuestions(session) {
         figure: question.figure,
         options: question.options,
       }));
+    }
+    /*
+     * تمرین/مرور: پاسخ‌های ثبت‌شده از سرور بازگشایی می‌شوند تا پس از Refresh هم
+     * کلید و تحلیل همان سؤال‌های پاسخ‌داده‌شده برگردد (نه کل بانک).
+     */
+    if (Object.keys(session.answers ?? {}).length) {
+      try {
+        await reportAnswers(session.answers);
+      } catch {
+        /* بی‌کلید هم تمرین ادامه‌پذیر است؛ فقط تحلیل باز نمی‌شود. */
+      }
     }
     return items;
   });
@@ -784,7 +870,20 @@ export function saveSessionProgress(userId, session) {
   return state.sessions.find((item) => item.id === session.id) ?? session;
 }
 
-/* POST /api/sessions/:id/submit — تصحیح و صدور کارنامه (منطق نمره در سرویس) */
+/*
+ * POST /api/sessions/:id/submit — کارنامه.
+ *
+ * PHASE 2 — اعداد کارنامه **سرورساز** هستند:
+ *   ۱. `POST /api/users/test-bank/grade` با کلید سرور تصحیح می‌کند (correct/wrong/
+ *      unanswered/score/percentage/wrongIds) — کلاینت هیچ‌کدام را تعیین نمی‌کند.
+ *   ۲. `POST /api/users/test-bank/answers` پاسخ‌ها را ثبت می‌کند، پاداش قلب را
+ *      می‌دهد و کلید هر سؤال را برمی‌گرداند (بازگشایی کنترل‌شده).
+ *   ۳. تفکیک درس/مبحث فقط **ارائه** است و از درستیِ همان پاسخ سرور ساخته می‌شود.
+ *
+ * اگر سرور در دسترس نباشد نمرهٔ ساختگی ساخته نمی‌شود؛ خطا بالا می‌رود و UI
+ * پیام می‌دهد. Idempotent: submit دوباره روی سشن بسته، همان کارنامهٔ اول را
+ * برمی‌گرداند و هیچ پاداش/نمرهٔ دومی تولید نمی‌کند.
+ */
 export function submitSession(userId, sessionId, { reason = 'user' } = {}) {
   return respond(async () => {
     const state = loadState(userId);
@@ -794,23 +893,34 @@ export function submitSession(userId, sessionId, { reason = 'user' } = {}) {
     if (session.status !== 'in_progress') return session;
 
     const now = Date.now();
-    const timedOut = reason === 'timeout' || (session.endsAt && now > session.endsAt);
+    const graded = await gradeBankAttempt(session);
 
-    let correct = 0;
-    let wrong = 0;
+    let reveals = [];
+    let heartAwards = 0;
+    if (graded.answered) {
+      try {
+        const reported = await reportAnswers(session.answers ?? {});
+        reveals = reported.results;
+        heartAwards = reported.awardedQuestionIds.length;
+      } catch {
+        /* کارنامه حتی در صورت قطع ارتباط با سرور قابل نمایش است؛ اعداد همان‌هایی
+           است که سرور در مرحلهٔ تصحیح برگردانده — نه محاسبهٔ محلی. */
+      }
+    }
+    const correctById = new Map(reveals.map((entry) => [entry.questionId, entry.correct]));
+
     let timeSum = 0;
     const subjectMap = new Map();
     const topicMap = new Map();
-    const wrongIds = [];
-    const unansweredIds = [];
 
     for (const questionId of session.questionIds) {
       const question = questionById(questionId);
       const answer = session.answers?.[questionId];
       if (!question) continue;
 
-      const isCorrect = answer ? answer.selected === question.correctAnswer : null;
-      if (!answer) unansweredIds.push(questionId);
+      const isCorrect = correctById.has(questionId)
+        ? correctById.get(questionId)
+        : (typeof answer?.isCorrect === 'boolean' ? answer.isCorrect : null);
 
       const subjectEntry = subjectMap.get(question.subject) ?? {
         subjectId: question.subject,
@@ -842,19 +952,12 @@ export function submitSession(userId, sessionId, { reason = 'user' } = {}) {
       else topicEntry.unanswered += 1;
       topicMap.set(topicKey, topicEntry);
 
-      if (isCorrect === true) correct += 1;
-      else if (isCorrect === false) {
-        wrong += 1;
-        wrongIds.push(questionId);
-      }
       timeSum += answer?.timeSpent ?? 0;
     }
 
-    const total = session.questionIds.length;
-    const answered = correct + wrong;
-    const negative = session.negativeMarking ?? 0;
-    const score = Math.max(0, correct + wrong * negative);
-    const percentage = Math.max(0, Math.min(100, Math.round((score / Math.max(total, 1)) * 1000) / 10));
+    const total = graded.total;
+    const answered = graded.answered;
+    const timedOut = reason === 'timeout' || Boolean(session.endsAt && now > session.endsAt);
     const totalSeconds = Math.round((now - session.startedAt) / 1000);
     const timeSpent = session.endsAt
       ? Math.min(totalSeconds, Math.round((session.endsAt - session.startedAt) / 1000))
@@ -872,21 +975,23 @@ export function submitSession(userId, sessionId, { reason = 'user' } = {}) {
       submittedAt: now,
       total,
       answered,
-      correct,
-      wrong,
-      unanswered: total - answered,
-      score: Math.round(score * 100) / 100,
-      maxScore: total,
-      negativeMarking: negative,
-      percentage,
+      correct: graded.correct,
+      wrong: graded.wrong,
+      unanswered: graded.unanswered,
+      score: graded.score,
+      maxScore: graded.maxScore,
+      negativeMarking: graded.negativeMarking,
+      percentage: graded.percentage,
       timeSpent,
-      avgTimeSec: answered ? Math.round(timeSum / answered) : 0,
+      avgTimeSec: graded.avgTimeSec,
       subjects,
       topics,
-      wrongIds,
-      unansweredIds,
+      wrongIds: graded.wrongIds,
+      unansweredIds: graded.unansweredIds,
       strongest: subjects[0] ?? null,
       weakest: subjects.length > 1 ? subjects[subjects.length - 1] : null,
+      /* ادغام میانگین زمانِ محاسبه‌شدهٔ محلی (ارائه) با اعداد سرور */
+      localAvgTimeSec: answered ? Math.round(timeSum / answered) : 0,
     };
 
     const submitted = {
@@ -895,6 +1000,7 @@ export function submitSession(userId, sessionId, { reason = 'user' } = {}) {
       submittedAt: now,
       reason: result.reason,
       result,
+      heartAwards,
     };
 
     mutateState(userId, (draft) => {
@@ -902,37 +1008,33 @@ export function submitSession(userId, sessionId, { reason = 'user' } = {}) {
       if (storedIndex !== -1) draft.sessions[storedIndex] = submitted;
     });
 
-    let heartAwards = 0;
-    if (answered) {
-      try {
-        heartAwards = (await reportAnswers(session.answers ?? {})).length;
-      } catch {
-        /* کارنامه حتی در صورت قطع ارتباط با سرور قابل نمایش است. */
-      }
-    }
-    if (heartAwards) mutateState(userId, (draft) => {
-      const stored = draft.sessions.find((item) => item.id === sessionId);
-      if (stored) stored.heartAwards = heartAwards;
-    });
-
     trackEvent('bank_session_submitted', {
       sessionId,
       mode: session.mode,
-      percentage,
+      percentage: result.percentage,
       answered,
       total,
     });
-    return { ...submitted, heartAwards };
+    return submitted;
   });
 }
 
-/* سؤال‌های سشن همراه کلید پاسخ — فقط بعد از submit (مرور کارنامه) */
+/*
+ * سؤال‌های سشن همراه کلید پاسخ — فقط بعد از submit (مرور کارنامه).
+ * کلید از سرور می‌آید (بازگشایی کنترل‌شده)؛ سشنِ در جریان هرگز کلید نمی‌گیرد.
+ */
 export function fetchReviewSession(userId, sessionId) {
-  return respond(() => {
+  return respond(async () => {
     const state = loadState(userId);
     const session = state.sessions.find((item) => item.id === sessionId);
     if (!session) throw new Error('session-not-found');
     if (session.status === 'in_progress') throw new Error('review-not-allowed');
+
+    try {
+      await reportAnswers(session.answers ?? {});
+    } catch {
+      /* بی‌کلید هم کارنامه نمایش‌دادنی است؛ فقط تحلیل باز نمی‌شود. */
+    }
 
     const questions = session.questionIds.map((id) => {
       const question = questionById(id);
@@ -989,6 +1091,15 @@ export function reportQuestion(userId, questionId, { reason, note = '' }) {
       state.reports.push({ questionId, reason, note, at: Date.now() });
     });
     trackEvent('bank_question_reported', { questionId, reason });
+    /* نسخهٔ سروری هم می‌رود تا بخش بازخورد پنل، منبع «بانک تست» را ببیند؛
+       شکست شبکه ثبت محلی بالا را خراب نمی‌کند */
+    sendFeedback({
+      source: FEEDBACK_SOURCES.testBank,
+      subject: reason,
+      category: 'گزارش ایراد سؤال',
+      message: note,
+      meta: { questionId },
+    });
     return { ok: true };
   });
 }

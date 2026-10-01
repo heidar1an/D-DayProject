@@ -7,24 +7,34 @@ import Security from './setting/Security';
 import Soppurt from './setting/Soppurt';
 import DashboardHome from './DashboardHome';
 import CoursesSection from './CoursesSection';
-import MyCoursesLayer from './MyCoursesLayer';
-import ComprehensiveCourseLayer from './courses/ComprehensiveCourseLayer';
-import MicroCourseLayer from './courses/MicroCourseLayer';
-import ReferenceLayer from './courses/ReferenceLayer';
-import InternationalCoursesLayer from './courses/InternationalCoursesLayer';
-import GreenPathLayer from './greenPath/GreenPathLayer';
 import TestsSection from './TestsSection';
-import InternationalExamsLayer from './tests/InternationalExamsLayer';
-import CoordinatedExamsLayer from './tests/coordinated/CoordinatedExamsLayer';
-import TestBankLayer, { testBankEntryView } from './tests/bank/TestBankLayer';
-import AnalyticsLayer from './analytics/AnalyticsLayer';
+import { testBankEntryView } from './tests/bank/TestBankLayer';
 import OtherSections from './OtherSections';
-import WikiLayer from './wiki/WikiLayer';
-import KnowledgeLayer from './knowledge/KnowledgeLayer';
-import AILayer from './ai/AILayer';
 
-/* لایهٔ آناتومی سه‌بعدی — موتور three.js و مدل‌های GLB فقط با ورود کاربر به این بخش
-   بارگذاری می‌شوند تا به بقیهٔ داشبورد گرَه نزنند. */
+/*
+ * لایه‌ها با `lazy` بارگذاری می‌شوند، نه با import ایستا.
+ *
+ * چرا: پیش از این فقط لایهٔ آناتومی جدا بود و ورود به داشبورد کل گراف سنگین را
+ * یک‌جا می‌گرفت (three.js، موتورهای آزمون، گراف دانش، ویکی، تحلیل). حالا هر لایه
+ * فقط وقتی کاربر واقعاً واردش می‌شود دانلود می‌شود و باندل اولیه سبک می‌ماند.
+ *
+ * `testBankEntryView` تنها استثناست: یک تابع خالص است که همان‌جا (در لحظهٔ کلیک)
+ * صدا زده می‌شود، پس نمی‌تواند پشت `lazy` برود.
+ */
+const AILayer = lazy(() => import('./ai/AILayer'));
+const GreenPathLayer = lazy(() => import('./greenPath/GreenPathLayer'));
+const ComprehensiveCourseLayer = lazy(() => import('./courses/ComprehensiveCourseLayer'));
+const MicroCourseLayer = lazy(() => import('./courses/MicroCourseLayer'));
+const ReferenceLayer = lazy(() => import('./courses/ReferenceLayer'));
+const InternationalCoursesLayer = lazy(() => import('./courses/InternationalCoursesLayer'));
+const MyCoursesLayer = lazy(() => import('./MyCoursesLayer'));
+const InternationalExamsLayer = lazy(() => import('./tests/InternationalExamsLayer'));
+const CoordinatedExamsLayer = lazy(() => import('./tests/coordinated/CoordinatedExamsLayer'));
+const TestBankLayer = lazy(() => import('./tests/bank/TestBankLayer'));
+const AnalyticsLayer = lazy(() => import('./analytics/AnalyticsLayer'));
+const WikiLayer = lazy(() => import('./wiki/WikiLayer'));
+const KnowledgeLayer = lazy(() => import('./knowledge/KnowledgeLayer'));
+/* موتور three.js و مدل‌های GLB فقط با ورود کاربر به این بخش دانلود می‌شوند. */
 const AnatomyLayer = lazy(() => import('./anatomy3d/AnatomyLayer'));
 import NotificationsSection from './NotificationsSection';
 import LeagueSection from './league/LeagueSection';
@@ -335,11 +345,7 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
         return <KnowledgeLayer userData={userData} onBack={closeLayer} />;
 
       case LAYER_IDS.anatomy3d:
-        return (
-          <Suspense fallback={null}>
-            <AnatomyLayer onBack={closeLayer} />
-          </Suspense>
-        );
+        return <AnatomyLayer onBack={closeLayer} />;
 
       default:
         return null;
@@ -404,7 +410,9 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
           <NotificationsSection pendingRead={pendingNotificationsRead.current} />
         ) : activeLayer ? (
           <div className="dashboard__section dashboard-layer-reveal" key={activeLayer}>
-            {layerContent}
+            <Suspense fallback={<div className="dashboard-layer-skeleton" aria-busy="true" />}>
+              {layerContent}
+            </Suspense>
           </div>
         ) : (
           <div className="dashboard__section dashboard-layer-reveal" key={activeSection}>

@@ -18,6 +18,8 @@
  *   - هیچ وابستگی بیرونی ندارد؛ از `fetch`/`FormData`/`Blob` خودِ Node استفاده می‌کند.
  */
 
+import { assertSafeApiBase } from './urlGuard.js';
+
 const DEFAULT_API_BASE = 'https://tapi.bale.ai/bot';
 const DEFAULT_TIMEOUT_MS = 15_000;
 
@@ -46,7 +48,10 @@ export const BALE_PLATFORM = {
 };
 
 export function baleApiBase() {
-  return String(process.env.BALE_API_BASE || DEFAULT_API_BASE).replace(/\/+$/, '');
+  return assertSafeApiBase(String(process.env.BALE_API_BASE || DEFAULT_API_BASE), {
+    envName: 'BALE_API_BASE',
+    platform: 'بله',
+  });
 }
 
 export function baleTimeoutMs() {

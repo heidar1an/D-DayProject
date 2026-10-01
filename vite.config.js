@@ -39,6 +39,22 @@ console.log(
 export default defineConfig({
   plugins: [react(), usersApiPlugin(), contentApiPlugin(), examApiPlugin(), tailwindcss()],
   base: './',
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ['react', 'react-dom'],
+          three: ['three'],
+          admin: [
+            './src/layout/admin/AdminLayout.jsx',
+            './src/layout/admin/analytics/AnalyticsCenter.jsx',
+            './src/layout/admin/media/MediaCenter.jsx',
+          ],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 600,
+  },
 
   /*
    * دادهٔ زمان‌اجرا از ناظر ویت کنار گذاشته می‌شود.

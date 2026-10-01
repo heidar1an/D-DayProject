@@ -18,7 +18,7 @@ import {
   deleteNote,
   fetchNotes,
   filterNotes,
-  groupTags,
+  collectTags,
   noteColor,
   noteMetrics,
   relativeEditedAt,
@@ -191,12 +191,11 @@ function NoteCard({ note, onOpen, onTogglePin, onEdit, onDelete }) {
 
 /* ── نوار چیپ موضوع و تگ ──
    هم‌شکل ردیف مسیرهای «بانک تست علوم پایه» (`PathChip`): همهٔ چیپ‌ها در یک ردیف
-   افقی، هر چیپ فقط آیکون + عنوان، بدون کادر و بدون گروه. گروه‌بندی تگ‌ها با رنگ
-   آیکون باقی می‌ماند. کلیک روی چیپ درس، موضوع را فیلتر می‌کند، کلیک روی چیپ تگ
-   فهرست را به همان تگ می‌برد و کلیک دوباره فیلتر را برمی‌دارد. */
-function TopicChips({ rows, activeSubject, activeTag, onSelectSubject, onSelectTag, onClear, subjectCount }) {
+   افقی، هر چیپ فقط آیکون + عنوان، بدون کادر. تگ‌ها **بدون دسته‌بندی** و تخت می‌آیند؛
+   رنگ هر چیپ تگ از خودِ تگ می‌آید (`tagAccent`). کلیک روی چیپ درس، موضوع را فیلتر
+   می‌کند، کلیک روی چیپ تگ فهرست را به همان تگ می‌برد و کلیک دوباره فیلتر را برمی‌دارد. */
+function TopicChips({ rows, tags, activeSubject, activeTag, onSelectSubject, onSelectTag, onClear, subjectCount }) {
   const subjects = rows.filter((row) => row.count > 0);
-  const tags = rows.flatMap((row) => row.tags.map(({ tag }) => ({ tag, accent: row.accent })));
 
   if (subjects.length === 0 && tags.length === 0) return null;
 
@@ -416,34 +415,24 @@ export default function NotesSection({ userData, onBack }) {
   const pinnedNotes = filtered.filter((note) => note.pinned);
   const restNotes = filtered.filter((note) => !note.pinned);
 
-  /* تگ‌ها به تفکیک دسته (فیزیولوژی، آناتومی، …، عمومی) — ویرایشگر هم از همین می‌خواند */
-  const tagGroups = useMemo(() => groupTags(notes), [notes]);
+  /* تگ‌های کاربر — فهرست تخت، بدون دسته‌بندی */
+  const allTags = useMemo(() => collectTags(notes), [notes]);
 
-  /* ── ردیف‌های «موضوع + تگ» ──
-     هر موضوع یک ردیف است: سرتیتر همان درس و تگ‌های همان درس هم‌ردیفش. موضوعی که
-     تگ دارد ولی یادداشت ندارد هم می‌آید تا تگش بی‌صاحب نماند. */
+  /* ── ردیف چیپ موضوع‌ها ──
+     هر موضوع یک چیپ است با شمارندهٔ یادداشت‌هایش؛ موضوعی که یادداشت ندارد نمی‌آید. */
   const topicRows = useMemo(() => {
     const noteCounts = new Map();
     (notes ?? []).forEach((note) => noteCounts.set(note.subjectId, (noteCounts.get(note.subjectId) ?? 0) + 1));
 
-    const tagsByGroup = new Map(tagGroups.map((group) => [group.id, group.tags]));
-    const rows = SUBJECTS.filter(
-      (subject) => noteCounts.has(subject.id) || tagsByGroup.has(subject.id),
-    ).map((subject) => ({
-      id: subject.id,
-      label: subject.label,
-      accent: subject.accent,
-      count: noteCounts.get(subject.id) ?? 0,
-      tags: tagsByGroup.get(subject.id) ?? [],
-    }));
-
-    /* دستهٔ تگ‌های آزاد (خارج از فهرست پیش‌فرض) موضوع ندارد — ته فهرست می‌آید */
-    tagGroups
-      .filter((group) => !SUBJECTS.some((subject) => subject.id === group.id))
-      .forEach((group) => rows.push({ id: group.id, label: group.label, accent: group.accent, count: 0, tags: group.tags }));
-
-    return rows;
-  }, [notes, tagGroups]);
+    return SUBJECTS
+      .filter((subject) => noteCounts.has(subject.id))
+      .map((subject) => ({
+        id: subject.id,
+        label: subject.label,
+        accent: subject.accent,
+        count: noteCounts.get(subject.id) ?? 0,
+      }));
+  }, [notes]);
 
   const isFiltering = query.trim() || subjectFilter !== 'all' || Boolean(tagFilter);
 
@@ -590,6 +579,7 @@ export default function NotesSection({ userData, onBack }) {
               {/* ── موضوع و تگ در یک ردیف چیپ — هم‌شکل بانک تست ── */}
               <TopicChips
                 rows={topicRows}
+                tags={allTags}
                 activeSubject={subjectFilter}
                 activeTag={tagFilter}
                 onSelectSubject={setSubjectFilter}
@@ -646,7 +636,6 @@ export default function NotesSection({ userData, onBack }) {
       <NoteEditor
         open={Boolean(editor)}
         note={editor?.note ?? null}
-        tagGroups={tagGroups}
         saving={Boolean(editor?.saving)}
         onSave={handleSave}
         onClose={() => {

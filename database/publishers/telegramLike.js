@@ -17,6 +17,8 @@
  *   - هیچ وابستگی بیرونی ندارد؛ فقط `fetch`/`FormData`/`Blob` خودِ Node.
  */
 
+import { assertSafeApiBase } from './urlGuard.js';
+
 const DEFAULT_TIMEOUT_MS = 15_000;
 
 /* سقف متن همراه مدیا (قرارداد تلگرام/بله/ایتا) */
@@ -134,7 +136,10 @@ export function createTelegramLikeAdapter(config) {
   };
 
   function apiBase() {
-    return String(process.env[apiBaseEnv] || defaultApiBase).replace(/\/+$/, '');
+    return assertSafeApiBase(String(process.env[apiBaseEnv] || defaultApiBase), {
+      envName: apiBaseEnv,
+      platform: label,
+    });
   }
 
   function envToken() {

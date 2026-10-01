@@ -1,0 +1,1 @@
+// fcc-claude --model "anthropic/open_router/openrouter/free"

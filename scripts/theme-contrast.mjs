@@ -4,13 +4,39 @@
  * توکن‌ها را از styles.css می‌خواند و نسبت کنتراست WCAG جفت‌های
  * «متن روی سطح» را حساب می‌کند. هدف: در تم روشن هیچ متنی ناخوانا نماند.
  *
- * اجرا: node scripts/theme-contrast.mjs
+ * اجرا: node scripts/theme-contrast.mjs [--root=DIR]
  */
 import fs from 'node:fs';
 import path from 'node:path';
 
-const ROOT = path.resolve(import.meta.dirname, '..');
-const styles = fs.readFileSync(path.join(ROOT, 'src/styles.css'), 'utf8');
+/*
+ * `--root=DIR` برای تست خودکار: اجازه می‌دهد اسکریپت روی یک درخت موقت اجرا شود
+ * تا گاردِ «سبزِ کاذب» با CSS بدون توکن اثبات شود. الگو از `data-restore.mjs`.
+ */
+const rootArg = process.argv.slice(2).find((a) => a.startsWith('--root='));
+const ROOT = rootArg
+  ? path.resolve(rootArg.slice('--root='.length))
+  : path.resolve(import.meta.dirname, '..');
+
+/*
+ * `src/styles.css` پس از بازآرایی به زنجیرهٔ `@import` تبدیل شد و خودش هیچ
+ * توکنی ندارد. اگر فقط همان فایل خوانده شود، هیچ توکنی پیدا نمی‌شود و اسکریپت
+ * بی‌صدا «۰ ایراد» برمی‌گرداند (سبزِ کاذب). پس زنجیرهٔ import را تا عمق
+ * محدود باز می‌کنیم تا توکن‌های واقعی از `src/styles/tokens.css` خوانده شوند.
+ */
+function readCssWithImports(file, depth = 0, seen = new Set()) {
+  const abs = path.resolve(file);
+  if (depth > 4 || seen.has(abs)) return '';
+  seen.add(abs);
+  const raw = fs.readFileSync(abs, 'utf8');
+  return raw.replace(/@import\s+['"]([^'"]+)['"]\s*;/g, (whole, spec) => {
+    if (/^https?:/.test(spec)) return whole;
+    const target = path.resolve(path.dirname(abs), spec);
+    return fs.existsSync(target) ? readCssWithImports(target, depth + 1, seen) : whole;
+  });
+}
+
+const styles = readCssWithImports(path.join(ROOT, 'src/styles.css'));
 
 function readTokens(block) {
   const tokens = {};
@@ -110,6 +136,19 @@ function audit(themeName, tokens) {
 }
 
 console.log('کنتراست WCAG — ✓ AA (≥۴٫۵)   ~ AA-large (≥۳)   ✗ کم');
+
+/*
+ * گارد سبزِ کاذب: اگر هیچ توکن هگزی خوانده نشود (تغییر ساختار CSS، حذف
+ * توکن‌ها، شکست import)، «۰ ایراد» معنا ندارد و نباید موفق گزارش شود.
+ */
+const checkedTokens = [...Object.values(dark), ...Object.values(light)].filter((v) =>
+  typeof v === 'string' && v.trim().startsWith('#'),
+).length;
+if (checkedTokens === 0) {
+  console.error('\n✗ هیچ توکن هگزی از زنجیرهٔ CSS خوانده نشد — بررسی انجام نشد (نه «۰ ایراد»).');
+  process.exit(2);
+}
+
 const darkFails = audit('حالت تیره', dark);
 const lightFails = audit('حالت روشن', light);
 

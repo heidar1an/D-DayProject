@@ -16,12 +16,16 @@
  *   - toggleChecklistItem برای روان‌بودن UI آفلاین-فرست است (UI ابتدا local را عوض می‌کند).
  */
 
-import { CUSTOM_TAG_GROUP, NOTE_COLORS, SEED_NOTES, SUBJECTS, TAG_GROUPS } from './mockData';
+import { NOTE_COLORS, SUBJECTS, TAG_COLORS } from './mockData';
 
 /* برای مصرف‌کننده‌ها: متادیتای دامنه از یک منبع (سرویس) خوانده شود */
-export { CUSTOM_TAG_GROUP, NOTE_COLORS, NOTE_KINDS, SOURCE_TYPES, SUBJECTS, TAG_GROUPS } from './mockData';
+export { NOTE_COLORS, NOTE_KINDS, SOURCE_TYPES, SUBJECTS, TAG_COLORS } from './mockData';
 
-const STORAGE_KEY = 'tapesh:notes:v1';
+const STORAGE_KEY = 'tapesh:notes:v2';
+/* کلیدهای نسخهٔ قبل: یادداشت‌های نمونهٔ پیش‌فرض در آن‌ها نشسته بود.
+   یک‌بار پاک می‌شوند تا کاربر (تازه یا قدیمی) هیچ یادداشت ازپیش‌موجودی نبیند. */
+const LEGACY_KEYS = ['tapesh:notes:v1'];
+let legacyPurged = false;
 const LATENCY_MS = 300;
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -39,8 +43,21 @@ export function __setFailure(next) {
   simulateFailure = next;
 }
 
+function purgeLegacyKeys() {
+  if (legacyPurged || typeof window === 'undefined') return;
+  legacyPurged = true;
+  LEGACY_KEYS.forEach((key) => {
+    try {
+      window.localStorage.removeItem(key);
+    } catch {
+      /* حافظه غیرفعال — چیزی برای پاک‌کردن نیست */
+    }
+  });
+}
+
 function readStore() {
   if (typeof window === 'undefined') return {};
+  purgeLegacyKeys();
   try {
     return JSON.parse(window.localStorage.getItem(STORAGE_KEY) || '{}');
   } catch {
@@ -63,32 +80,9 @@ function makeId(prefix) {
   return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
 }
 
-const daysAgo = (days) => new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
-
-/* Seed اولیه: یادداشت‌های نمونهٔ تپش با تاریخ‌های نسبی واقعی */
-function seedUserSpace(userData) {
-  const userId = userData?.id ?? 'guest';
-  return {
-    notes: SEED_NOTES.map((note) => ({
-      id: makeId('note'),
-      userId,
-      title: note.title,
-      kind: note.kind,
-      body: note.body ?? '',
-      items: (note.items ?? []).map((item) => ({ ...item })),
-      pairs: (note.pairs ?? []).map((pair) => ({ ...pair })),
-      table: note.table
-        ? { columns: note.table.columns.map((column) => ({ ...column })), rows: note.table.rows.map((row) => ({ id: row.id, cells: { ...row.cells } })) }
-        : { columns: [], rows: [] },
-      subjectId: note.subjectId,
-      tags: [...note.tags],
-      color: note.color,
-      pinned: note.pinned,
-      source: note.source ? { ...note.source } : null,
-      createdAt: daysAgo(note.dayOffsets.created),
-      updatedAt: daysAgo(note.dayOffsets.updated),
-    })),
-  };
+/* فضای هر کاربر از خالی شروع می‌شود — هیچ یادداشت پیش‌فرضی ساخته نمی‌شود */
+function seedUserSpace() {
+  return { notes: [] };
 }
 
 function getUserSpace(userData) {
@@ -208,31 +202,30 @@ export function filterNotes(notes, { query = '', subjectId = 'all', tag = null, 
   });
 }
 
-/* تگ‌های کاربر زیر عنوان دسته‌شان — فقط دسته‌هایی که واقعاً تگ دارند برمی‌گردند.
-   تگ‌های آزاد (خارج از فهرست پیش‌فرض) در دستهٔ «تگ‌های خودت» جمع می‌شوند. */
-export function groupTags(notes) {
+/* تگ‌های کاربر — **بدون دسته‌بندی**؛ یک فهرست تخت، پرکاربردترین اول.
+   منطق شمارش و ترتیب در سرویس می‌ماند تا UI فقط رندر کند. */
+export function collectTags(notes) {
   const counts = new Map();
   (notes ?? []).forEach((note) => (note.tags ?? []).forEach((tag) => counts.set(tag, (counts.get(tag) ?? 0) + 1)));
 
-  const groups = TAG_GROUPS.map((group) => ({
-    ...group,
-    tags: group.tags.filter((tag) => counts.has(tag)).map((tag) => ({ tag, count: counts.get(tag) })),
-  })).filter((group) => group.tags.length > 0);
-
-  const known = new Set(TAG_GROUPS.flatMap((group) => group.tags));
-  const custom = [...counts.keys()]
-    .filter((tag) => !known.has(tag))
-    .sort((a, b) => new Intl.Collator('fa').compare(a, b))
-    .map((tag) => ({ tag, count: counts.get(tag) }));
-  if (custom.length) groups.push({ ...CUSTOM_TAG_GROUP, tags: custom });
-
-  return groups;
+  return [...counts.entries()]
+    .map(([tag, count]) => ({ tag, count, accent: tagAccent(tag) }))
+    .sort((a, b) => (b.count - a.count) || new Intl.Collator('fa').compare(a.tag, b.tag));
 }
 
-/* دستهٔ یک تگ — رنگ و عنوان گروه در UI از همین دو تابع می‌آید */
-const tagGroup = (tag) => TAG_GROUPS.find((group) => group.tags.includes(tag)) ?? null;
-export const tagAccent = (tag) => tagGroup(tag)?.accent ?? CUSTOM_TAG_GROUP.accent;
-export const tagGroupLabel = (tag) => tagGroup(tag)?.label ?? CUSTOM_TAG_GROUP.label;
+/* رنگ تگ — از خودِ متن تگ هش می‌شود: هر تگ رنگ تصادفیِ خودش را می‌گیرد و همان تگ
+   همیشه همان رنگ را دارد (پایدار بین کارت فهرست، نمای کامل و ویرایشگر). */
+export function tagAccent(tag) {
+  const text = String(tag ?? '').trim();
+  if (!text) return TAG_COLORS[0];
+  /* FNV-1a ۳۲بیتی — پخش یکنواخت رنگ‌ها روی پالت (هش سادهٔ ضربی سوگیری داشت) */
+  let hash = 0x811c9dc5;
+  for (let index = 0; index < text.length; index += 1) {
+    hash ^= text.charCodeAt(index);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return TAG_COLORS[(hash >>> 0) % TAG_COLORS.length];
+}
 
 /* ─────────────────────────── عملیات CRUD ─────────────────────────── */
 

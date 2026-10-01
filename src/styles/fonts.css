@@ -1,0 +1,105 @@
+
+@font-face {
+  font-family: 'Doran';
+  src: url('../../fonts/doran/Doran-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Doran';
+  src: url('../../fonts/doran/Doran-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Doran';
+  src: url('../../fonts/doran/Doran-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Doran';
+  src: url('../../fonts/doran/Doran-ExtraBold.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Doran';
+  src: url('../../fonts/doran/Doran-Black.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/*
+ * Doran پروندهٔ ۶۰۰ ندارد؛ همین پروندهٔ Bold به‌عنوان ۶۰۰ هم ثبت می‌شود تا
+ * درخواستِ وزن ۶۰۰ تطبیق دقیق در خودِ این خانواده پیدا کند. بدون آن، رویهٔ
+ * ارقامِ Pinar بالا (بازهٔ ۱۰۰–۹۰۰ با unicode-range فقط ارقام) تنها تطبیقِ
+ * دقیقِ ۶۰۰ است و مرورگر چون حروف را در آن نمی‌پوشاند، کلاً از Doran عبور
+ * می‌کند و متنِ ۶۰۰ با Vazir یا Pinar رندر می‌شود.
+ */
+@font-face {
+  font-family: 'Doran';
+  src: url('../../fonts/doran/Doran-Bold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Pinar';
+  src: url('../../fonts/pinar/Pinar-VF[DSTY,KSHD,wght].woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/*
+ * وزیر — فونت پشتیبان پروژه.
+ *
+ * اگر یکی از دو فونت اصلی (Pinar / Doran) به هر دلیلی بارگذاری نشود، مرورگر
+ * از این فونت استفاده می‌کند نه از Tahoma. به همین دلیل در انتهای همهٔ
+ * زنجیره‌های font-family پروژه، بعد از فونت اصلی و قبل از Tahoma نشسته است.
+ */
+@font-face {
+  font-family: 'Vazir';
+  src: url('../../fonts/vazir/Vazirmatn-VF[wght].woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/*
+ * ═══ ارقام فارسی همیشه با Pinar ═══
+ *
+ * دو رویهٔ هم‌نام Doran/Vazir که فقط محدودهٔ کد ارقام فارسی/عربی را پوشش می‌دهند
+ * و به پروندهٔ Pinar اشاره می‌کنند؛ چون بعد از رویه‌های اصلی تعریف شده‌اند، برای
+ * ارقام برنده‌اند و حروف از فونت اصلی خود عنصر می‌آیند. نتیجه: هر عددی حتی داخل
+ * تیترهای Doran یا متن‌های Vazir هم با همان اعداد Pinar رندر می‌شود.
+ */
+@font-face {
+  font-family: 'Doran';
+  src: url('../../fonts/pinar/Pinar-VF[DSTY,KSHD,wght].woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+06F0-06F9, U+0660-0669;
+}
+
+@font-face {
+  font-family: 'Vazir';
+  src: url('../../fonts/pinar/Pinar-VF[DSTY,KSHD,wght].woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+06F0-06F9, U+0660-0669;
+}
+

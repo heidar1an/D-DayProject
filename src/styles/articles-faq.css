@@ -1,0 +1,315 @@
+.articles,
+.faq {
+  padding-top: 78px;
+}
+
+.lower-section-title {
+  margin: 0 0 40px;
+  text-align: center;
+  font-size: clamp(2rem, 3.5vw, 3.25rem);
+  letter-spacing: -0.06em;
+  line-height: 1.3;
+}
+
+.article-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  direction: rtl;
+}
+
+.article-card {
+  position: relative;
+  display: flex;
+  min-height: 490px;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 34px;
+  background: var(--surface);
+  transition: transform 220ms ease, box-shadow 220ms ease;
+}
+
+.article-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 36px rgb(var(--shadow-rgb) / calc(0.2 * var(--shadow-scale)));
+}
+
+/*
+ * ارتفاع تصویر ثابت است، نه `flex: 1`. قبلاً تصویر فضای باقی‌ماندهٔ کارت را
+ * می‌گرفت و چون طول عنوان/خلاصهٔ سه مقاله یکی نیست، هر کارت ارتفاع دیگری
+ * می‌گرفت و سه تصویر هم‌تراز نبودند. حالا هر سه دقیقاً یک ارتفاع دارند و
+ * تفاوت طول متن فقط در بخش محتوا (پایین کارت) دیده می‌شود.
+ */
+.article-card__image {
+  height: 300px;
+  flex: 0 0 auto;
+  overflow: hidden;
+  background: var(--light-fill-soft);
+}
+
+.article-card__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.article-card__image .ap-cover-art__mark {
+  width: 42%;
+  height: auto;
+  margin: auto;
+  opacity: 0.12;
+}
+
+/* لینک عنوان، کل کارت را کلیک‌پذیر می‌کند */
+.article-card__title-link {
+  color: inherit;
+  transition: color 180ms ease;
+}
+
+.article-card:hover .article-card__title-link {
+  color: var(--white);
+}
+
+.article-card__title-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+}
+
+/*
+ * `flex: 1` عمدی است، نه تزئینی. فلشِ کارت (`.article-card__go`) مطلق است و به
+ * همین بلوک قید می‌شود؛ اگر بلوک فقط به اندازهٔ متنِ خودش ارتفاع بگیرد، کارتی که
+ * عنوان/خلاصهٔ کوتاه‌تری دارد بلوکِ کوتاه‌تری می‌گیرد و فلشش بالاتر از بقیه
+ * می‌افتد. با پر کردن فضای باقی‌مانده، پایینِ هر سه بلوک روی پایینِ کارت می‌نشیند
+ * و فلش‌ها در یک خط هم‌تراز می‌شوند.
+ *
+ * در حالت چندستونی (≥۶۴۱px) این بلوک از حالت فلکس بیرون می‌رود و ردیف‌هایش را
+ * از شبکهٔ والد قرض می‌گیرد — پایین‌تر، در بلوک `subgrid`، توضیح داده شده.
+ */
+.article-card__content {
+  position: relative;
+  flex: 1;
+  min-height: 190px;
+  padding: 26px 28px 42px;
+  direction: rtl;
+  text-align: right;
+}
+
+.article-card h3 {
+  margin: 0;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: clamp(1.35rem, 2vw, 1.7rem);
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.article-card p {
+  max-width: 240px;
+  margin: 15px 0 0;
+  color: var(--white);
+  font-size: 0.91rem;
+  font-weight: 400;
+  line-height: 1.8;
+}
+
+.article-card__go {
+  position: absolute;
+  bottom: 18px;
+  left: 24px;
+  z-index: 2;
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  color: var(--white);
+  font-family: Arial, sans-serif;
+  font-size: 2.25rem;
+  line-height: 0.6;
+  pointer-events: none;
+  transition: transform 180ms ease, color 180ms ease;
+}
+
+.article-card:hover .article-card__go {
+  color: var(--blue-bright);
+  transform: translateX(-4px);
+}
+
+/*
+ * هم‌ترازی کارت‌های مقاله — «توضیحات هر سه کارت از یک خط شروع شود».
+ *
+ * چرا لازم بود: ارتفاع تیتر بسته به عرض صفحه ۲ تا ۶ خط می‌شود (در ۱۲۸۰px یکی
+ * ۲ خط و دوتای دیگر ۳ خط). چون توضیحات در جریانِ بعد از تیتر می‌آمد، شروعش به
+ * ارتفاع تیترِ همان کارت گره خورده بود و تا ~۳۵px ناتراز می‌شد.
+ *
+ * چرا `subgrid`: هر سه کارت **ردیف‌های مشترکِ شبکهٔ والد** را قرض می‌گیرند
+ * (تصویر / تیتر / توضیحات). پس ارتفاع ردیفِ تیتر = بلندترین تیترِ همان عرض، و
+ * توضیحاتِ هر سه از یک خط شروع می‌شود — **بدون کوتاه‌کردن هیچ متنی** (اگر با
+ * `line-clamp` تیتر را ۲ خط می‌کردیم، تیترهای بلند «…» می‌خوردند).
+ *
+ * فقط ≥۶۴۱px: زیر آن شبکه تک‌ستونی است و کارت‌ها روی هم می‌نشینند، پس
+ * هم‌ترازی افقی معنا ندارد و چیدمان فلکسِ پایه دست‌نخورده می‌ماند.
+ * `row-gap: 0` حیاتی است — ردیف‌ها داخلِ هر کارت‌اند، نه بین کارت‌ها؛ فاصلهٔ
+ * ستون‌ها همان ۱۸px می‌ماند.
+ */
+@media (min-width: 641px) {
+  .article-grid {
+    grid-template-rows: auto auto auto;
+    column-gap: 18px;
+    row-gap: 0;
+  }
+
+  .article-card {
+    display: grid;
+    grid-row: 1 / -1;
+    grid-template-rows: subgrid;
+  }
+
+  .article-card__image {
+    grid-row: 1;
+  }
+
+  .article-card__content {
+    display: grid;
+    grid-row: 2 / -1;
+    grid-template-rows: subgrid;
+  }
+}
+
+.articles__all {
+  display: flex;
+  justify-content: center;
+  margin-top: 36px;
+}
+
+.articles-all-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 28px;
+  border: 1px solid rgb(var(--line-rgb) / 0.14);
+  border-radius: 999px;
+  color: var(--white);
+  font-size: 0.98rem;
+  font-weight: 500;
+  transition: background 180ms ease, transform 180ms ease, border-color 180ms ease;
+}
+
+.articles-all-link span {
+  color: var(--blue-bright);
+  font-family: Arial, sans-serif;
+  font-size: 1.2em;
+  line-height: 0;
+  transition: transform 180ms ease;
+}
+
+.articles-all-link:hover {
+  background: rgb(var(--wash-rgb) / 0.06);
+  border-color: rgb(var(--line-rgb) / 0.22);
+  transform: translateY(-2px);
+}
+
+.articles-all-link:hover span {
+  transform: translateX(-4px);
+}
+
+.faq {
+  padding-bottom: 92px;
+}
+
+/* هر ۶ کادر زیر هم — یک ستون، بدون شبکهٔ دوستونیِ قبلی */
+.faq-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+  direction: rtl;
+}
+
+.faq-item {
+  overflow: hidden;
+  border-radius: 15px;
+  background: var(--surface);
+  direction: rtl;
+  transition: background 180ms ease, transform 180ms ease;
+}
+
+.faq-item:hover,
+.faq-item.is-open {
+  background: var(--surface-soft);
+}
+
+.faq-item.is-open {
+  transform: translateY(-2px);
+}
+
+.faq-item button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 78px;
+  gap: 16px;
+  padding: 16px 22px;
+  border: 0;
+  background: transparent;
+  color: var(--white);
+  cursor: pointer;
+  direction: rtl;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.55;
+  text-align: right;
+}
+
+.faq-item button span:first-child {
+  flex: 1;
+}
+
+.faq-item__plus {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  place-items: center;
+  border: 1px solid rgb(var(--line-rgb) / 0.2);
+  border-radius: 50%;
+  color: var(--white);
+  font-family: Arial, sans-serif;
+  font-size: 1.25rem;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.faq-item__answer {
+  display: grid;
+  grid-template-rows: 0fr;
+  overflow: hidden;
+  opacity: 0;
+  transition:
+    grid-template-rows 320ms ease,
+    opacity 220ms ease;
+}
+
+.faq-item.is-open .faq-item__answer {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.faq-item__answer > p {
+  min-height: 0;
+  margin: 0;
+  padding: 0 22px;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 400;
+  line-height: 1.85;
+  text-align: right;
+  transition: padding-bottom 320ms ease;
+}
+
+.faq-item.is-open .faq-item__answer > p {
+  padding-bottom: 20px;
+}
+

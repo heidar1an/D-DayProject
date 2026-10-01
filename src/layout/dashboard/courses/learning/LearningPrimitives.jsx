@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { toFa } from './learningUtils';
 import { createNote } from '../../../../services/notes/notesService';
+import { FEEDBACK_SOURCES, sendFeedback } from '../../../../services/feedback/userFeedback';
 
 export function LearningProgress({ value = 0, label = 'پیشرفت', detail, compact = false }) {
   const safeValue = Math.max(0, Math.min(100, Math.round(value)));
@@ -260,18 +261,20 @@ export function UnitNotes({ open, onClose, userId, courseId, unitTitle, onOpenNo
 
 const REPORT_KINDS = ['گزارش اشکال محتوایی', 'خطای فنی', 'پیشنهاد بهبود'];
 
-/* گزارش ایراد/خطای همین واحد — با همان قرارداد درخواست‌های پشتیبانی (tapesh:support-requests)
-   و دستهٔ «گزارش اشکال» ثبت می‌شود تا همهٔ گزارش‌ها یک‌جا بمانند. */
-export function UnitReport({ open, onClose, courseTitle, unitTitle }) {
+/* گزارش ایراد/خطای همین واحد — هم رکورد محلی (tapesh:support-requests) می‌ماند و
+   هم نسخهٔ سروری با منبع دقیق (درسنامه جامع / میکرو درسنامه) می‌رود تا پنل ببیندش. */
+export function UnitReport({ open, onClose, courseTitle, unitTitle, source, meta }) {
   const [kind, setKind] = useState(REPORT_KINDS[0]);
   const [note, setNote] = useState('');
   const [state, setState] = useState('idle'); /* idle | sent | error */
 
   if (!open) return null;
 
-  const submit = (event) => {
+  const submit = async (event) => {
     event.preventDefault();
     if (!note.trim() || state === 'sending') return;
+    setState('sending');
+
     try {
       const stored = JSON.parse(window.localStorage.getItem('tapesh:support-requests') || '[]');
       stored.push({
@@ -281,11 +284,25 @@ export function UnitReport({ open, onClose, courseTitle, unitTitle }) {
         createdAt: new Date().toISOString(),
       });
       window.localStorage.setItem('tapesh:support-requests', JSON.stringify(stored));
-      setNote('');
-      setState('sent');
     } catch {
-      setState('error');
+      /* حافظهٔ محلی در دسترس نبود؛ ارسال سروری ادامه دارد */
     }
+
+    const sent = await sendFeedback({
+      source,
+      subject: `گزارش ایراد — ${unitTitle}`,
+      category: kind,
+      message: `${note.trim()}\n\n— از واحد «${unitTitle}» در درسنامهٔ ${courseTitle}`,
+      meta,
+    });
+
+    if (!sent) {
+      setState('error');
+      return;
+    }
+
+    setNote('');
+    setState('sent');
   };
 
   return (

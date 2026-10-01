@@ -6,12 +6,16 @@
  *   ۲. شمارش اعلان‌های رنگ قبل/بعد، تا مطمئن شویم چیزی گم نشده.
  *   ۳. هر `var(--x)` که در پروژه مصرف می‌شود باید در styles.css تعریف شده باشد.
  *
- * اجرا: node scripts/theme-verify.mjs
+ * اجرا: node scripts/theme-verify.mjs [--root=DIR]
  */
 import fs from 'node:fs';
 import path from 'node:path';
 
-const ROOT = path.resolve(import.meta.dirname, '..');
+/* `--root=DIR` برای تست خودکار روی درخت موقت (الگو از `data-restore.mjs`) */
+const rootArg = process.argv.slice(2).find((a) => a.startsWith('--root='));
+const ROOT = rootArg
+  ? path.resolve(rootArg.slice('--root='.length))
+  : path.resolve(import.meta.dirname, '..');
 const SRC = path.join(ROOT, 'src');
 
 function walk(dir, list = []) {
@@ -61,7 +65,25 @@ const GLOBAL_TOKENS = [
   'card-lavender', 'card-copper', 'card-sage', 'card-sky', 'card-warm',
 ];
 
-const styles = fs.readFileSync(path.join(SRC, 'styles.css'), 'utf8');
+/*
+ * `src/styles.css` پس از بازآرایی فقط زنجیرهٔ `@import` است و توکن‌ها در
+ * `src/styles/tokens.css` زندگی می‌کنند. اگر فقط فایل ورودی خوانده شود،
+ * هیچ توکنی پیدا نمی‌شود و همهٔ توکن‌های جهانی «گم‌شده» گزارش می‌شوند
+ * (شکستِ کاذب). پس زنجیرهٔ import را تا عمق محدود باز می‌کنیم.
+ */
+function readCssWithImports(file, depth = 0, seen = new Set()) {
+  const abs = path.resolve(file);
+  if (depth > 4 || seen.has(abs)) return '';
+  seen.add(abs);
+  const raw = fs.readFileSync(abs, 'utf8');
+  return raw.replace(/@import\s+['"]([^'"]+)['"]\s*;/g, (whole, spec) => {
+    if (/^https?:/.test(spec)) return whole;
+    const target = path.resolve(path.dirname(abs), spec);
+    return fs.existsSync(target) ? readCssWithImports(target, depth + 1, seen) : whole;
+  });
+}
+
+const styles = readCssWithImports(path.join(SRC, 'styles.css'));
 const inRoot = new Set();
 for (const m of styles.matchAll(/^\s*(--[a-z0-9-]+)\s*:/gim)) inRoot.add(m[1].slice(2));
 const inLight = new Set();

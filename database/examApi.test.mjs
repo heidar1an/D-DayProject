@@ -14,7 +14,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { handleExamApi } from './examApi.js';
 import { __examTestHooks, __resetExamStore, verifyAuditChain } from './examStore.js';
 import { USER_SESSION_COOKIE, createUserSession, destroyUserSession } from './userSessions.js';
-import { findUserByPhone, publicUser, saveUser } from './usersStore.js';
+import { createUser, findUserByPhone, publicUser } from './usersStore.js';
 
 const hooks = __examTestHooks();
 
@@ -74,11 +74,17 @@ async function call(method, path, { body, cookies = {}, headers = {} } = {}) {
 function createTestUser(phone) {
   const existing = findUserByPhone(phone);
   if (existing) return existing;
-  return saveUser({ phone, password: 'exam-test-pass-1', profile: { username: `t-${phone.slice(-4)}` } });
+  /* `createUser` فقط می‌سازد؛ اگر شماره موجود باشد خطا می‌دهد — گارد بالا لازم است */
+  return createUser({ phone, password: 'exam-test-pass-1', profile: { username: `t-${phone.slice(-4)}` } });
 }
 
 function deleteTestUser(phone) {
-  const usersFile = new URL('./users.json', import.meta.url).pathname;
+  /*
+   * شیء URL مستقیم پاس داده می‌شود، نه `.pathname`؛ مسیر پروژه فاصله دارد و
+   * `pathname` آن را `%20` می‌کند ⇒ `readFileSync` شکست می‌خورد و کاربران
+   * آزمایشی در `users.json` باقی می‌ماندند (خطای بی‌صدا در catch).
+   */
+  const usersFile = new URL('./users.json', import.meta.url);
   try {
     const parsed = JSON.parse(readFileSync(usersFile, 'utf8'));
     parsed.users = (parsed.users ?? []).filter((user) => user.phone !== phone);

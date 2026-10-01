@@ -209,6 +209,41 @@
 .micr-toolbox small { display: block; margin-top: 10px; color: var(--ghost); font-size: 0.74rem; }
 .micr-toolbox__empty { margin: 0; color: var(--faint); font-size: 0.85rem; }
 
+/* گزارش ایراد صفحه — همان قالب کشو، رنگ هشدار پروژه */
+.micr-toolbox--report {
+  border-color: rgba(224, 180, 92, 0.38);
+  background: rgba(224, 180, 92, 0.05);
+}
+
+.micr-toolbox--report h4 { color: var(--gold-ink); }
+
+.micr-toolbox--report textarea:focus,
+.micr-toolbox--report select:focus { border-color: rgba(224, 180, 92, 0.6); }
+
+.micr-toolbox__field { display: block; margin-bottom: 10px; }
+.micr-toolbox__field > span { display: block; margin-bottom: 6px; color: var(--faint); font-size: 0.78rem; }
+
+.micr-toolbox__field select,
+.micr-toolbox--report textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid rgb(var(--line-rgb) / 0.16);
+  border-radius: 12px;
+  background: rgb(var(--wash-rgb) / 0.04);
+  color: var(--white);
+  font: inherit;
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.micr-toolbox__error { color: var(--red-ink) !important; }
+
+.micr-reader .micr-rhead__tool--report.is-active {
+  color: var(--gold-ink) !important;
+  border-color: rgba(224, 180, 92, 0.5) !important;
+  background: rgba(224, 180, 92, 0.1) !important;
+}
+
 .micr-toolbox__highlights { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; }
 .micr-toolbox__highlights li { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 10px; background: rgb(var(--wash-rgb) / 0.04); }
 .micr-toolbox__hldot { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; }

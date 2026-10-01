@@ -113,7 +113,8 @@ const { default: SecondaryRegistrationLayout } = await import('__ROOT__/src/layo
 const { default: OfflinePage } = await import('__ROOT__/src/layout/OfflinePage.jsx');
 const { LAYER_IDS, readDashboardRoute } = await import('__ROOT__/src/layout/dashboard/dashboardRoute.jsx');
 const { COURSE_LAYERS } = await import('__ROOT__/src/layout/dashboard/DashboardLayout.jsx');
-const { CATALOG_COURSES } = await import('__ROOT__/src/layout/dashboard/CoursesSection.jsx');
+const { CATALOG_COURSES, CatalogIcon } = await import('__ROOT__/src/layout/dashboard/CoursesSection.jsx');
+const { IconMicroLesson } = await import('__ROOT__/src/layout/admin/adminIcons.jsx');
 const theme = await import('__ROOT__/src/services/theme/themeService.js');
 const pricing = await import('__ROOT__/src/services/pricing/pricingService.js');
 const group = await import('__ROOT__/src/services/group/groupService.js');
@@ -272,7 +273,18 @@ check('فوتر رندر می‌شود', /class="site-footer"/.test(home));
  * وجود دارد. پس قاعدهٔ «ناوبری وسطِ کل صفحه، نه وسطِ ردیف هدر» را از خودِ
  * منبع می‌سنجیم — همان کاری که برای نشانگر ناوبری داشبورد کردیم.
  */
-const siteCss = readFileSync('__ROOT__/src/styles.css', 'utf8');
+/*
+ * CSS ریشه به پوشهٔ src/styles/ شکسته شده و src/styles.css فقط @import دارد. این
+ * کمکی همان ترتیبِ import را بازمی‌گرداند تا سنجه‌های منبع‌محور دست‌نخورده بمانند.
+ */
+const readStyles = () => {
+  const entry = readFileSync('__ROOT__/src/styles.css', 'utf8');
+  const parts = [...entry.matchAll(/@import '\.\/styles\/([^']+)';/g)].map((m) => m[1]);
+  if (!parts.length) return entry;
+  return parts.map((name) => readFileSync('__ROOT__/src/styles/' + name, 'utf8')).join('\n');
+};
+
+const siteCss = readStyles();
 const desktopHeader = siteCss.split('@media (min-width: 641px)')[1] || '';
 check('دو ستون کناری هدر هم‌عرض شده‌اند (ناوبری وسط کل صفحه)',
   /\.site-header > \.brand,\s*\.site-header__actions\s*\{\s*flex: 1 1 0;/.test(desktopHeader));
@@ -326,6 +338,45 @@ check('هر پنج کارتِ کاتالوگ مقصدِ واقعیِ داشبو�
   unmappedCourses.length ? unmappedCourses.map((course) => course.id).join('، ') : String(CATALOG_COURSES.length));
 check('عنوان و توضیح هر پنج کارت از خودِ داده می‌آید',
   CATALOG_COURSES.every((course) => home.includes(course.title) && home.includes(course.tagline)));
+
+/*
+ * ── سه چیزِ هیرو که هیچ سنجهٔ دیگری نمی‌گیرد ──
+ *   ۱. CTA هیرو باید به فرمِ **ثبت‌نام** برود. قبلاً «#products» بود و روی صفحهٔ
+ *      اصلی هیچ عنصری با آن شناسه وجود ندارد؛ یعنی دکمه به لنگرِ بی‌مقصد می‌رفت
+ *      (تلهٔ ۱۰) و از نظر مرورگر هم هیچ‌چیز «خراب» نبود.
+ *   ۲. توضیحِ کارتِ درسنامه جامع جملهٔ خواسته‌شده است (قبلاً «... و تست» داشت).
+ *   ۳. آذرخشِ آیکونِ میکرو درسنامه یک چندضلعیِ **بسته** است، نه خطِ شکستهٔ باز؛
+ *      نسخهٔ قبلی سه پارهٔ نامتقارن بود و کج دیده می‌شد. کارتِ کاتالوگ و پنل هر
+ *      دو از یک رشتهٔ مسیر می‌آیند، پس هر دو جدا سنجیده می‌شوند.
+ */
+const heroMarkup = (home.match(/<section class="hero"[\s\S]*?<\/section>/) || [''])[0];
+const MICRO_BOLT = 'M13.4 6.2 10.6 12.4h2.5l-.3 4.2 2.8-6.2h-2.5z';
+check('CTA هیرو به فرم ثبت‌نام می‌رود', heroMarkup.includes('href="#auth/register"'));
+check('CTA هیرو به لنگرِ بی‌مقصد #products نمی‌رود', !heroMarkup.includes('href="#products"'));
+check('توضیح کارتِ درسنامه جامع همان جملهٔ خواسته‌شده است',
+  CATALOG_COURSES.some(
+    (course) => course.id === 'comprehensive' && course.tagline === 'پوشش کامل دروس پایه با درسنامه'));
+check('آذرخشِ آیکونِ میکرو در کارتِ کاتالوگ چندضلعیِ بسته است',
+  home.includes(MICRO_BOLT) && render(CatalogIcon, { name: 'micro' }, 'آیکون میکرو').includes(MICRO_BOLT));
+check('آذرخشِ آیکونِ میکرو در پنل هم همان چندضلعیِ بسته است',
+  render(IconMicroLesson, {}, 'آیکون میکرو پنل').includes(MICRO_BOLT));
+
+/*
+ * ── متنِ مقاله: هم **وسطِ صفحه** و هم پهن‌تر ──
+ * چیدمان قبلی دوستونی بود و ستونِ کنار، متن را به راست می‌راند (ناهم‌محور با
+ * سرتیترِ وسط‌چین). حالا شبکه سه ستونِ متقارن است و متن در ستونِ وسط می‌نشیند،
+ * با پهنای ۸۶۰px — همان عرضِ سرتیترِ مقاله. سنجه روی خودِ CSS است، چون چیدمان
+ * در رندر سرور دیده نمی‌شود (همان محدودیتِ اعلام‌شدهٔ بالای همین فایل).
+ */
+const articleCss = readFileSync('__ROOT__/src/layout/articles/articles.css', 'utf8');
+const articleLayoutRule = (articleCss.match(/\.ap-article__layout \{[\s\S]*?\}/) || [''])[0];
+const articleContentRule = (articleCss.match(/\.ap-article__content \{[\s\S]*?\}/) || [''])[0];
+check('چیدمان مقاله سه ستونِ متقارن دارد (متن وسط می‌ماند)',
+  /grid-template-columns: var\(--ap-rail\) minmax\(0, 1fr\) var\(--ap-rail\);/.test(articleLayoutRule));
+check('متنِ مقاله در ستونِ وسط و هم‌عرضِ سرتیتر (۸۶۰px) است',
+  /grid-column: 2;/.test(articleContentRule) &&
+    /max-width: var\(--ap-read\);/.test(articleContentRule) &&
+    /--ap-read: 860px;/.test(articleLayoutRule));
 
 /*
  * کادرهای تبلیغی محصولات سرصفحه (بانک تست، تپش هوشمند، ویکی تپش، شبکهٔ دانش) —
@@ -808,13 +859,24 @@ check('آیکون گوگل کنار دکمه هست', /class="google-icon"/.test
  * می‌شود — همان تلهٔ تأییدشدهٔ «دکمه هیچ کاری نمی‌کند». و چون گوگل خودش حساب را
  * تشخیص می‌دهد، دکمه باید در هر دو حالت باشد، نه فقط ثبت‌نام.
  */
-const appSource = readFileSync('__ROOT__/src/App.jsx', 'utf8');
-const authActions = appSource.split('auth-form__actions')[1]?.split('auth-form__switch')[0] || '';
+/*
+ * پوستهٔ سایت و صفحهٔ ورود از src/App.jsx جدا شده‌اند؛ سنجه‌های منبع‌محورِ گوگل
+ * دنبال همان کد می‌گردند، پس هر دو فایل یک‌جا خوانده می‌شوند.
+ */
+const appSource = readFileSync('__ROOT__/src/App.jsx', 'utf8')
+  + '\n' + readFileSync('__ROOT__/src/layout/auth/AuthPage.jsx', 'utf8');
+/*
+ * بازهٔ سنجش: ردیفِ ورودهای اجتماعی بالای فرم تا شروع فیلدها. دکمهٔ گوگل در
+ * بازطراحی از نوار دکمه‌های پایین به همین ردیف منتقل شد (قرارداد چهارچوب مرجع:
+ * ورودهای اجتماعی بالا، فرم پایین)، پس تکیه بر «auth-form__actions» دیگر
+ * جواب نمی‌دهد. قصد سنجه عوض نشده است.
+ */
+const authSocialRow = appSource.split('auth-form__social')[1]?.split('auth-form__fields')[0] || '';
 
 check('دکمهٔ گوگل هندلر دارد (دکمهٔ مرده نیست)', /onClick=\{handleGoogleAuth\}/.test(appSource));
 check('هندلر به سرویس وصل است، نه یک تابع تعریف‌نشده', /startGoogleAuth\(\)/.test(appSource));
 check('دکمهٔ گوگل در هر دو حالت ورود و ثبت‌نام می‌آید',
-  /auth-form__google/.test(authActions) && !/isRegistering &&/.test(authActions));
+  /auth-form__google/.test(authSocialRow) && !/isRegistering &&/.test(authSocialRow));
 check('بازگشت از گوگل نشانهٔ آدرس را پاک می‌کند تا رفرش جریان را تکرار نکند',
   /clearGoogleReturn\(\)/.test(appSource));
 
@@ -823,7 +885,7 @@ check('بازگشت از گوگل نشانهٔ آدرس را پاک می‌کن�
  * «active» نوشته شود، اجرای دوم چون پارامتر آدرس را اجرای اول پاک کرده،
  * «دست‌دادن» را از دست می‌دهد و کاربر بی‌خطا روی #auth می‌ماند.
  */
-const authSource = appSource.split('export function AuthPage')[1]?.split('PRICING_HASHES')[0] || '';
+const authSource = readFileSync('__ROOT__/src/layout/auth/AuthPage.jsx', 'utf8');
 check('افکت گوگل یک‌بارمصرف است، نه فلگ active (تلهٔ StrictMode)',
   /googleBootRef\.current/.test(authSource) && !/let active = true;/.test(authSource));
 check('حساب گوگلیِ ناقص به آنبوردینگ می‌رود و حساب کامل مستقیم وارد می‌شود',
@@ -831,7 +893,7 @@ check('حساب گوگلیِ ناقص به آنبوردینگ می‌رود و �
 check('برای حالت «پیکربندی نشده» پیام صریح هست، نه سکوت',
   /GOOGLE_RETURN_MESSAGES/.test(appSource) && /GOOGLE_CLIENT_ID/.test(appSource));
 
-const authCss = readFileSync('__ROOT__/src/styles.css', 'utf8');
+const authCss = readStyles();
 check('حالت «گوگل پیکربندی نشده» استایل دارد', /\.auth-form__google\.is-unavailable \{/.test(authCss));
 check('متن راهنمای گوگل استایل دارد', /\.auth-form__google-note \{/.test(authCss));
 
@@ -851,7 +913,7 @@ log('\n── ۱۰. پس‌زمینهٔ صفحهٔ داشبورد ──');
  */
 const dashCss = readFileSync('__ROOT__/src/layout/dashboard/dashboard.css', 'utf8');
 const gpCss = readFileSync('__ROOT__/src/layout/dashboard/greenPath/greenPath.css', 'utf8');
-const baseCss = readFileSync('__ROOT__/src/styles.css', 'utf8');
+const baseCss = readStyles();
 
 check('پوستهٔ داشبورد پس‌زمینه را از --background می‌گیرد، نه --deep',
   /\.dashboard \{\s*min-height: 100vh;\s*background: var\(--background\);/.test(dashCss));
@@ -903,8 +965,8 @@ check('هر مسیر پیش‌بارگذاری روی دیسک هست (preload �
 
 /* هر مسیر preload باید دقیقاً یکی از srcهای @font-face باشد، وگرنه فایل اشتباه
    یا مرده‌ای دانلود می‌شود. */
-const faceUrls = [...readFileSync('__ROOT__/src/styles.css', 'utf8')
-  .matchAll(/url\('\.\.\/fonts\/([^']+)'\)/g)].map((m) => m[1]);
+const faceUrls = [...readStyles()
+  .matchAll(/url\('\.\.\/\.\.\/fonts\/([^']+)'\)/g)].map((m) => m[1]);
 const undeclared = preloadHrefs
   .map((href) => href.replace('./fonts/', ''))
   .filter((file) => !faceUrls.includes(file));
@@ -1143,8 +1205,8 @@ await build({
   plugins: [
     {
       /*
-       * تنها استاب: ماژول آواتار در سطح خودش `import.meta.glob` (ویژهٔ Vite)
-       * را صدا می‌زند که esbuild نمی‌شناسدش. بقیهٔ سرویس‌ها دست‌نخورده‌اند.
+       * ماژول آواتار در سطح خودش `import.meta.glob` (ویژهٔ Vite) را صدا می‌زند
+       * که esbuild نمی‌شناسدش. بقیهٔ سرویس‌ها دست‌نخورده‌اند.
        */
       name: 'stub-vite-glob',
       setup(api) {
@@ -1159,6 +1221,40 @@ await build({
           `,
           loader: 'js',
         }));
+      },
+    },
+    {
+      /*
+       * موتور سه‌بعدی آناتومی — تنها دو ماژولی که `three` را import می‌کنند.
+       *
+       * چرا استاب: بستهٔ نصب‌شدهٔ `node_modules/three` در این محیط package.json
+       * ندارد، پس esbuild اصلاً نمی‌تواند حلش کند و کل هارنس با
+       * «Could not resolve three» می‌افتد (خروجی هیچ سنجه‌ای نمی‌دهد). این هارنس
+       * هیچ‌وقت صحنهٔ سه‌بعدی را رندر نمی‌کند (لایه‌اش `lazy` است و در
+       * `renderToStaticMarkup` اصلاً بالا نمی‌آید)، پس استاب بی‌اثر است.
+       *
+       * ⚠️ هزینه‌اش: تا وقتی این استاب هست، خطای import داخل خودِ این دو فایل
+       * سنجیده نمی‌شود. اگر روزی `three` درست نصب شد، این بلوک را بردار.
+       */
+      name: 'stub-three-engine',
+      setup(api) {
+        api.onLoad(
+          { filter: /anatomy3d[\\/]engine[\\/](AnatomyEngine|anatomyMaterials)\.js$/ },
+          () => ({
+            contents: `
+              export class AnatomyEngine {
+                constructor() {}
+                mount() {}
+                dispose() {}
+                reset() {}
+              }
+              export function buildCategoryMaterials() {
+                return { default: {}, hover: {}, selected: {} };
+              }
+            `,
+            loader: 'js',
+          }),
+        );
       },
     },
   ],

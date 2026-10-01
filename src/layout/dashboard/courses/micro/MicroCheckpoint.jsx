@@ -14,8 +14,9 @@
  * پیام روشن + گذر آزاد به ادامهٔ مطالعه.
  */
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { toFa } from '../learning/learningUtils';
+import { checkBankAnswer } from '../../../../services/testBank/testBankService';
 
 const REQUIRED_THRESHOLD = 50; // حداقل دقت برای عبور آزاد از checkpoint اجباری
 
@@ -183,6 +184,8 @@ export default function MicroCheckpoint({
   const [attempts, setAttempts] = useState([]);
   const [retestMode, setRetestMode] = useState(false);
   const [closeRegistered, setCloseRegistered] = useState(false);
+  /* ضد دوبار کلیک در فاصلهٔ رفت‌وبرگشت تصحیح سروری */
+  const gradingRef = useRef(false);
 
   /* دقت این دور از حل — تلاش‌های قبلی در rollup پیشرفت جدا جمع می‌شوند */
   const accuracy = attempts.length
@@ -198,15 +201,24 @@ export default function MicroCheckpoint({
   const currentQuestion = questions[qIndex];
   const currentAttempt = attempts.find((attempt) => attempt.questionId === currentQuestion?.id);
 
-  const handleAnswer = (selectedAnswer) => {
-    if (!currentQuestion || currentAttempt) return;
+  const handleAnswer = async (selectedAnswer) => {
+    if (!currentQuestion || currentAttempt || gradingRef.current) return;
+    /*
+     * PHASE 2 — کلید پاسخ در کلاینت نیست. درستی را سرور تعیین می‌کند و کلید و
+     * تحلیل همان سؤال را برمی‌گرداند (بازگشایی کنترل‌شده)؛ همان‌جا روی شیء سؤال
+     * می‌نشیند تا نمایش موجود کار کند.
+     */
+    gradingRef.current = true;
+    const reveal = await checkBankAnswer(currentQuestion.id, selectedAnswer);
+    gradingRef.current = false;
+    if (!reveal) return;
     const attempt = {
       questionId: currentQuestion.id,
       selectedAnswer,
-      correctAnswer: currentQuestion.correctAnswer,
-      correct: selectedAnswer === currentQuestion.correctAnswer,
+      correctAnswer: reveal.correctAnswer,
+      correct: reveal.correct,
       conceptIds: currentQuestion.conceptIds ?? [],
-      explanation: currentQuestion.explanation,
+      explanation: reveal.explanation,
       answeredAt: Date.now(),
       retest: retestMode,
     };

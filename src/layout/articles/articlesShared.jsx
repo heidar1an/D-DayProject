@@ -291,10 +291,6 @@ export function ArticleCard({ article, showAuthor = true }) {
               ·
             </span>
             <span>{toFa(article.readingTime)} دقیقه</span>
-            <span className="ap-card__views" title="بازدید">
-              <EyeIcon />
-              {faCompact(article.views)}
-            </span>
           </div>
         </div>
       </a>

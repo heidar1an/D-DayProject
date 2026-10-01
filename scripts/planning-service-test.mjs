@@ -169,5 +169,21 @@ process.exit(fail ? 1 : 0);
 writeFileSync(RUNNER, HARNESS.replace('BUNDLE_URL', pathToFileURL(BUNDLE).href));
 
 const result = spawnSync(process.execPath, [RUNNER], { stdio: 'inherit' });
-rmSync(ENTRY, { force: true });
+
+/*
+ * پاک‌سازی نباید سرنوشت تست را تعیین کند.
+ *
+ * در سندباکسِ میزبان، هر حذف از یک گارد بیرونی می‌پرسد و اگر سهمیهٔ نوبت پر
+ * باشد رد می‌شود؛ آن خطا پرتاب می‌شود و پروسه را می‌کشد ⇒ تستی که همهٔ
+ * assertهایش سبز است با exit 1 تمام می‌شود. این دقیقاً همان چیزی است که در
+ * اجرای پیاپیِ `verify:all` دیده شد. پس شکستِ پاک‌سازی را **هشدار** می‌کنیم،
+ * نه شکستِ تست. فایل‌های موقت زیر `node_modules/.cache/` می‌مانند و ردیابی
+ * نمی‌شوند.
+ */
+try {
+  rmSync(ENTRY, { force: true });
+} catch (error) {
+  console.warn('⚠️ پاک‌سازی ' + path.relative(ROOT, ENTRY) + ' انجام نشد: ' + (error && error.message ? error.message : error));
+}
+
 process.exit(result.status ?? 1);

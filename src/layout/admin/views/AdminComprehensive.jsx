@@ -25,12 +25,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { comprehensive as comprehensiveApi } from '../../../services/admin/adminService';
+import MediaPicker from '../MediaPicker';
 import {
-  Badge, Button, EmptyState, ErrorState, Field, IconButton, Input, LoadingBlock,
+  Badge, Button, EmptyState, ErrorState, Field, IconButton, Input, LoadingBlock, Modal,
   SearchInput, Select, StatusBadge, Textarea, faDateTime, faNumber, useAsync, useToast,
 } from '../adminShared';
 import {
-  IconBookOpen, IconChevron, IconEdit, IconPlus, IconRefresh, IconSend, IconTrash,
+  IconBookOpen, IconChevron, IconEdit, IconImage, IconPlus, IconRefresh, IconSend, IconTestBank,
+  IconTrash,
 } from '../adminIcons';
 
 const STATUS_OPTIONS = [
@@ -94,6 +96,10 @@ export function newComprehensiveUnit(moduleId, index) {
     mastery: 0,
     lastActivity: 'هنوز شروع نشده',
     steps: ['activate', 'learn', 'visualize', 'practice', 'test'],
+    /* تست‌های این بخش: انتخاب از بانک تست تپش (سنجاق‌شده و/یا فیلتر درس و مسیر مبحث) */
+    testBank: { subjectId: '', topicPaths: [], pinnedQuestionIds: [] },
+    /* پاپ‌آپ تبریک تکمیل واحد — تصویر از کتابخانهٔ رسانه */
+    celebration: { title: '', message: '', image: '' },
     learning: {
       activate: { tests: [] },
       microLessons: [],
@@ -104,12 +110,13 @@ export function newComprehensiveUnit(moduleId, index) {
   };
 }
 
-/* تعداد تست‌های یک واحد — فعال‌سازی + تمرین + تست نقشه */
+/* تعداد تست‌های یک واحد — فعال‌سازی + تمرین + تست نقشه + سؤال‌های سنجاق‌شدهٔ بخش */
 export function unitTestCount(unit) {
   const learning = unit?.learning ?? {};
   return (learning.activate?.tests?.length ?? 0)
     + (learning.practice?.length ?? 0)
-    + (learning.labelQuiz ? 1 : 0);
+    + (learning.labelQuiz ? 1 : 0)
+    + (unit?.testBank?.pinnedQuestionIds?.length ?? 0);
 }
 
 /* خطوط یک textarea چندخطی → آرایهٔ تمیز */
@@ -299,11 +306,111 @@ function MicroLessonEditor({ lesson, index, onChange, onRemove }) {
   );
 }
 
+/* ── انتخاب از بانک تست برای «تست‌های این بخش» یک واحد ── */
+
+function BankPicker({ onClose, onAdd, subjectId, topicPaths }) {
+  const [filters, setFilters] = useState({
+    search: '',
+    subjectId: subjectId ?? '',
+    topicPath: topicPaths?.[0]?.join(' › ') ?? '',
+    difficulty: 'all',
+  });
+  const [picked, setPicked] = useState([]);
+
+  const load = useCallback(
+    () => comprehensiveApi.testBank({ ...filters, limit: 60 }),
+    [filters.search, filters.subjectId, filters.topicPath, filters.difficulty],
+  );
+  const { data, loading, error, reload } = useAsync(load, [filters.search, filters.subjectId, filters.topicPath, filters.difficulty]);
+
+  const patch = (changes) => setFilters((current) => ({ ...current, ...changes }));
+  const toggle = (id) => setPicked((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]));
+
+  const subjectOptions = [
+    { value: '', label: 'همهٔ درس‌های بانک' },
+    ...(data?.subjects ?? []).map((subject) => ({ value: subject.id, label: subject.name })),
+  ];
+  const difficultyOptions = [
+    { value: 'all', label: 'همهٔ سطوح' },
+    ...(data?.difficulties ?? []).map((item) => ({ value: item.id, label: item.label })),
+  ];
+
+  return (
+    <Modal
+      open
+      title="انتخاب از بانک تست تپش"
+      subtitle="سؤال‌های انتخاب‌شده فقط در «تست‌های این بخش» همین واحد به کاربر نشان داده می‌شوند."
+      onClose={onClose}
+      size="lg"
+      footer={(
+        <div className="ad-editor__actions">
+          <Button disabled={picked.length === 0} onClick={() => onAdd(picked)}>
+            افزودن {faNumber(picked.length)} سؤال
+          </Button>
+          <Button variant="ghost" onClick={onClose}>بستن</Button>
+        </div>
+      )}
+    >
+      <div className="ad-stack">
+        <div className="ad-toolbar">
+          <SearchInput value={filters.search} onChange={(search) => patch({ search })} placeholder="جست‌وجو در متن سؤال یا مسیر مبحث…" />
+          <Select options={subjectOptions} value={filters.subjectId} onChange={(event) => patch({ subjectId: event.target.value })} aria-label="درس" />
+          <Select options={difficultyOptions} value={filters.difficulty} onChange={(event) => patch({ difficulty: event.target.value })} aria-label="سطح" />
+          <div className="ad-toolbar__end">
+            <Button variant="ghost" size="sm" onClick={reload}><IconRefresh width={15} height={15} />تازه‌سازی</Button>
+          </div>
+        </div>
+
+        <Field label="مسیر مبحث" hint="بخشی از مسیر را بنویسید؛ مثل «چرخهٔ قلبی»">
+          <Input value={filters.topicPath} onChange={(event) => patch({ topicPath: event.target.value })} />
+        </Field>
+
+        {error ? <ErrorState error={error} onRetry={reload} /> : null}
+        {loading && !data ? <LoadingBlock label="در حال خواندن بانک تست…" rows={5} /> : null}
+
+        {data ? (
+          <>
+            <p className="ad-mic__hint">{faNumber(data.total)} سؤال با این فیلتر پیدا شد؛ {faNumber(Math.min(60, data.total))} سؤال اول نمایش داده می‌شود.</p>
+
+            {data.items.length === 0 ? <EmptyState title="سؤالی پیدا نشد" description="فیلترها را ساده‌تر کنید." /> : null}
+
+            <div className="ad-mic__qlist">
+              {data.items.map((question) => (
+                <label key={question.id} className={`ad-mic__pick ${picked.includes(question.id) ? 'is-picked' : ''}`}>
+                  <input type="checkbox" checked={picked.includes(question.id)} onChange={() => toggle(question.id)} />
+                  <span className="ad-mic__pickbody">
+                    <span className="ad-mic__pickstem">{question.stem}</span>
+                    <span className="ad-mic__pickmeta">
+                      <code className="ad-code" dir="ltr">{question.id}</code>
+                      <span>{question.subjectTitle}</span>
+                      <span>{question.topicPath.join(' › ')}</span>
+                      <Badge tone="neutral">{question.difficultyLabel}</Badge>
+                      {question.tags.map((tag) => <Badge key={tag} tone="neutral">{tag}</Badge>)}
+                    </span>
+                  </span>
+                </label>
+              ))}
+            </div>
+          </>
+        ) : null}
+      </div>
+    </Modal>
+  );
+}
+
 /* ویرایشگر واحد — همهٔ متن‌ها و تست‌های یک واحد، گروه‌بندی‌شده بر اساس مرحله */
 export function UnitEditor({ unit, onChange }) {
   const learning = unit.learning ?? {};
   const set = (changes) => onChange({ ...unit, ...changes });
   const setLearning = (changes) => onChange({ ...unit, learning: { ...learning, ...changes } });
+  /* تست‌های این بخش و پاپ‌آپ تبریک — دو گرهٔ مستقل از learning واحد */
+  const [bankOpen, setBankOpen] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const testBank = unit.testBank ?? { subjectId: '', topicPaths: [], pinnedQuestionIds: [] };
+  const celebration = unit.celebration ?? { title: '', message: '', image: '' };
+  const setTestBank = (changes) => set({ testBank: { ...testBank, ...changes } });
+  const setCelebration = (changes) => set({ celebration: { ...celebration, ...changes } });
+  const topicPathText = (testBank.topicPaths ?? []).map((path) => path.join(' › ')).join(' › ');
 
   const activateTests = learning.activate?.tests ?? [];
   const microLessons = learning.microLessons ?? [];
@@ -557,6 +664,106 @@ export function UnitEditor({ unit, onChange }) {
           </>
         ) : null}
       </div>
+
+      <div className="ad-ref__group">
+        <div className="ad-ref__grouphead">
+          <h4>تست‌های این بخش — از بانک تست تپش</h4>
+          <Button variant="ghost" size="sm" onClick={() => setBankOpen(true)}>
+            <IconTestBank width={15} height={15} /> انتخاب از بانک تست
+          </Button>
+        </div>
+        <p className="ad-ref__hint">
+          سؤال‌های انتخاب‌شده همان‌هایی هستند که کاربر در مرحلهٔ «تست» زیر «تست‌های این بخش» می‌زند
+          و فقط همین‌ها را می‌بیند. اگر دستی چیزی انتخاب نکنید، فیلتر زیر مبنای انتخاب خودکار از بانک است.
+        </p>
+
+        <div className="ad-grid2">
+          <Field label="درس در بانک" hint="شناسهٔ درس، مثل anatomy — خالی یعنی محدودیتی نیست.">
+            <Input dir="ltr" value={testBank.subjectId ?? ''} onChange={(event) => setTestBank({ subjectId: event.target.value })} />
+          </Field>
+          <Field label="مسیر مبحث" hint="بخشی از مسیر، مثل «اندام فوقانی › استخوان‌ها»">
+            <Input
+              value={topicPathText}
+              onChange={(event) => {
+                const parts = event.target.value.split('›').map((part) => part.trim()).filter(Boolean);
+                setTestBank({ topicPaths: parts.length ? [parts] : [] });
+              }}
+            />
+          </Field>
+        </div>
+
+        {(testBank.pinnedQuestionIds ?? []).length === 0 ? (
+          <p className="ad-ref__hint">هنوز سؤالی برای این بخش انتخاب نشده است.</p>
+        ) : (
+          <div className="ad-mic__qlist">
+            {testBank.pinnedQuestionIds.map((questionId) => (
+              <div key={questionId} className="ad-mic__qrow">
+                <code className="ad-code" dir="ltr">{questionId}</code>
+                <span className="ad-sub">از بانک تست تپش</span>
+                <IconButton
+                  label="حذف از انتخاب‌شده‌ها"
+                  tone="danger"
+                  onClick={() => setTestBank({ pinnedQuestionIds: testBank.pinnedQuestionIds.filter((id) => id !== questionId) })}
+                >
+                  <IconTrash width={14} height={14} />
+                </IconButton>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="ad-ref__group">
+        <div className="ad-ref__grouphead">
+          <h4>پاپ‌آپ تبریک تکمیل واحد</h4>
+          {celebration.image ? (
+            <IconButton label="حذف تصویر پاپ‌آپ" tone="danger" onClick={() => setCelebration({ image: '' })}>
+              <IconTrash width={14} height={14} />
+            </IconButton>
+          ) : null}
+        </div>
+        <p className="ad-ref__hint">
+          وقتی کاربر این واحد را کامل کند، همین پاپ‌آپ به او نشان داده می‌شود. تصویر از کتابخانهٔ رسانه انتخاب می‌شود.
+        </p>
+
+        <div className="ad-grid2">
+          <Field label="عنوان پاپ‌آپ" hint="خالی بماند، عنوان پیش‌فرض می‌آید.">
+            <Input value={celebration.title ?? ''} onChange={(event) => setCelebration({ title: event.target.value })} placeholder="آفرین! واحد را کامل کردی" />
+          </Field>
+          <Field label="پیام پاپ‌آپ">
+            <Input value={celebration.message ?? ''} onChange={(event) => setCelebration({ message: event.target.value })} placeholder="تسلطت روی این بخش ثبت شد." />
+          </Field>
+        </div>
+
+        {celebration.image ? (
+          <img className="ad-ref__imgpreview" src={celebration.image} alt="" />
+        ) : (
+          <span className="ad-ref__imgempty"><IconImage width={16} height={16} /> تصویری برای این واحد انتخاب نشده</span>
+        )}
+
+        <div className="ad-fccard__option">
+          <Input dir="ltr" value={celebration.image ?? ''} onChange={(event) => setCelebration({ image: event.target.value })} placeholder="/uploads/…" />
+          <Button variant="ghost" size="sm" onClick={() => setPickerOpen(true)}>انتخاب از رسانه</Button>
+        </div>
+      </div>
+
+      {bankOpen ? (
+        <BankPicker
+          onClose={() => setBankOpen(false)}
+          subjectId={testBank.subjectId}
+          topicPaths={testBank.topicPaths}
+          onAdd={(ids) => {
+            setTestBank({ pinnedQuestionIds: [...new Set([...(testBank.pinnedQuestionIds ?? []), ...ids])] });
+            setBankOpen(false);
+          }}
+        />
+      ) : null}
+
+      <MediaPicker
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        onSelect={(item) => { setCelebration({ image: item.url }); setPickerOpen(false); }}
+      />
     </div>
   );
 }

@@ -18,6 +18,8 @@
  * مجوزهای جدا و بازبینی اپ توسط متا) — پس `capabilities.comments = false`.
  */
 
+import { assertSafeApiBase } from './urlGuard.js';
+
 const DEFAULT_GRAPH_BASE = 'https://graph.facebook.com/v21.0';
 const DEFAULT_TIMEOUT_MS = 20_000;
 
@@ -62,7 +64,10 @@ export const INSTAGRAM_PLATFORM = {
 };
 
 function graphBase() {
-  return String(process.env.INSTAGRAM_GRAPH_BASE || DEFAULT_GRAPH_BASE).replace(/\/+$/, '');
+  return assertSafeApiBase(String(process.env.INSTAGRAM_GRAPH_BASE || DEFAULT_GRAPH_BASE), {
+    envName: 'INSTAGRAM_GRAPH_BASE',
+    platform: 'اینستاگرام',
+  });
 }
 
 function timeoutMs() {

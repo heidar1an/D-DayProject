@@ -16,6 +16,7 @@ import {
   toggleBookmark,
   trackEvent,
 } from '../../../services/international/internationalService';
+import { FEEDBACK_SOURCES, sendFeedback } from '../../../services/feedback/userFeedback';
 import {
   BilingualText,
   DIFFICULTY_ORDER,
@@ -367,8 +368,16 @@ function ReportDialog({ questionId, onClose }) {
             <div className="mt-5 flex gap-2">
               <button
                 type="button"
-                onClick={() => {
+                onClick={async () => {
                   trackEvent('question_reported', { questionId, reason });
+                  /* گزارش به سرور می‌رود تا در پنل با منبع «آزمون‌های بین‌الملل» دیده شود */
+                  await sendFeedback({
+                    source: FEEDBACK_SOURCES.questionLab,
+                    subject: reason,
+                    category: 'گزارش ایراد سؤال',
+                    message: '',
+                    meta: { questionId },
+                  });
                   setSent(true);
                 }}
                 className="flex-1 cursor-pointer rounded-xl bg-[var(--purple-bright)] px-4 py-2.5 text-sm font-bold transition-transform hover:-translate-y-0.5"

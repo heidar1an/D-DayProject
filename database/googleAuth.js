@@ -100,18 +100,70 @@ export function googleAuthConfig() {
 
 /*
  * مبدأ (origin) سایت از خود درخواست درمی‌آید تا همان دامنه‌ای که کاربر روی آن
- * است برگردد. `PUBLIC_SITE_URL` مقدم است چون پشت پروکسی، هدر Host دامنهٔ داخلی
- * را می‌دهد و آدرس بازگشت باید دقیقاً همان چیزی باشد که در گوگل ثبت شده.
+ * است برگردد. ترتیب اولویت، از مطمئن به نامطمئن:
+ *
+ *   ۱) `PUBLIC_SITE_URL` — قطعی‌ترین راه؛ در پروداکشن این را ست کنید.
+ *   ۲) هدر `Host` — مرورگر خودش آن را می‌سازد و مهاجم نمی‌تواند جعلش کند.
+ *      اگر مقدارش عمومی باشد (نه localhost/IP داخلی/نام بی‌نقطه)، برنده است.
+ *   ۳) `X-Forwarded-Host` — فقط وقتی `Host` داخلی یا غایب باشد (حالت پروکسی
+ *      که Host را به نام داخلی بازنویسی می‌کند).
+ *   ۴) `TAPESH_ALLOWED_HOSTS` — اگر ست باشد، فهرست بسته است و هر میزبانی بیرون
+ *      آن به اولین عضو فهرست برمی‌گردد.
+ *
+ * چرا ترتیب مهم است: پیش از این `X-Forwarded-Host` بر `Host` مقدم بود، پس هر
+ * درخواستی با هدر جعلی می‌توانست کاربر را پس از ورود با گوگل به دامنهٔ مهاجم
+ * برگرداند (open redirect).
+ *
+ * اعتبارسنجی مقدار:
+ *   - `x-forwarded-proto` فقط `http` یا `https` پذیرفته می‌شود؛ هر چیز دیگر
+ *     (مثل `javascript` یا `data`) دور ریخته می‌شود. وگرنه origin می‌توانست
+ *     `javascript://evil` شود.
+ *   - میزبان باید شکل معتبر «host[:port]» داشته باشد؛ مقدارهای نامعتبر (شامل
+ *     `@`، `/`، فاصله، یا فهرست چندمیزبانی) دور ریخته می‌شوند.
  */
+const HOST_PATTERN = /^(\[[0-9a-fA-F:.]+\]|[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)*)(:\d{1,5})?$/;
+
+/* میزبان‌هایی که «عمومی» نیستند و نباید مبنای آدرس بازگشت شوند */
+const INTERNAL_HOST_PATTERN = /^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|169\.254\.|0\.|\[::1\]|\[f[cd]|\[fe80)/i;
+
+function safeHost(value) {
+  const candidate = String(value ?? '').split(',')[0].trim();
+  if (!candidate || candidate.length > 253) return '';
+  return HOST_PATTERN.test(candidate) ? candidate : '';
+}
+
+function isInternalHost(host) {
+  if (!host) return true;
+  if (INTERNAL_HOST_PATTERN.test(host)) return true;
+
+  const name = host.replace(/:\d+$/, '').toLowerCase();
+  if (name.endsWith('.local') || name.endsWith('.internal')) return true;
+  /* نام بدون نقطه = میزبان شبکهٔ داخلی، نه دامنهٔ عمومی */
+  return !name.includes('.') && !name.startsWith('[');
+}
+
+function allowedHosts() {
+  return String(process.env.TAPESH_ALLOWED_HOSTS ?? '')
+    .split(',')
+    .map((item) => safeHost(item))
+    .filter(Boolean);
+}
+
 function requestOrigin(request) {
   const base = String(process.env.PUBLIC_SITE_URL ?? '').trim().replace(/\/+$/, '');
   if (base) return base;
 
   const headers = request.headers ?? {};
-  const host = String(headers['x-forwarded-host'] ?? headers.host ?? 'localhost:5173')
-    .split(',')[0]
-    .trim();
-  const forwarded = String(headers['x-forwarded-proto'] ?? '').split(',')[0].trim();
+  const directHost = safeHost(headers.host);
+  const forwardedHost = safeHost(headers['x-forwarded-host']);
+
+  let host = (!isInternalHost(directHost) ? directHost : '') || forwardedHost || directHost || 'localhost:5173';
+
+  const allow = allowedHosts();
+  if (allow.length) host = allow.includes(host) ? host : allow[0];
+
+  const rawProto = String(headers['x-forwarded-proto'] ?? '').split(',')[0].trim().toLowerCase();
+  const forwarded = rawProto === 'https' || rawProto === 'http' ? rawProto : '';
   const isLocal = /^(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/i.test(host);
 
   return `${forwarded || (isLocal ? 'http' : 'https')}://${host}`;

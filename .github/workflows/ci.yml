@@ -1,0 +1,124 @@
+# CI — دروازهٔ کیفیت تپش
+#
+# چرا وجود دارد: ممیزی فاز ۲۱ (۲۱.۲) نشان داد هیچ CI/CD و staging وجود ندارد و
+# کل مسیر production دستی است. این workflow حداقلِ لازم را خودکار می‌کند:
+# نصب با lockfile → دروازهٔ کامل ۲۴ گامه → build → بازرسی امنیت وابستگی‌ها.
+#
+# آنچه این فایل **انجام نمی‌دهد** (و در READINESS-MATRIX ثبت شده):
+#   • استقرار روی staging یا production — نیازمند میزبان، secret و تأیید مالک پروژه است.
+#   • هیچ secretی در این فایل نیست؛ همهٔ مقادیر از `env` یا پیش‌فرض‌های خود کد می‌آیند.
+#
+# نکتهٔ اجرایی: `scripts/verify-all.mjs` خودش `data:check` را به‌عنوان گام اول
+# اجرا می‌کند، پس اجرای دوبارهٔ آن اینجا لازم نیست.
+
+name: CI
+
+on:
+  push:
+    branches: ['main']
+  pull_request:
+    branches: ['main']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: دروازهٔ کیفیت (۲۴ گام)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: نصب با lockfile
+        run: npm ci
+
+      - name: دروازهٔ کامل
+        run: node scripts/verify-all.mjs
+        env:
+          # توکن متریک فقط برای تست محلی smoke/e2e؛ مقدار واقعی در production
+          # از secret مدیریت می‌شود و اینجا حساس نیست.
+          TAPESH_METRICS_TOKEN: ci-local-token
+          TAPESH_ACCESS_LOG: '1'
+
+      - name: بارگذاری لاگ دروازه در صورت شکست
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verify-logs
+          path: .workbuddy-ai/verify-logs/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: verify
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: نصب با lockfile
+        run: npm ci
+
+      - name: build
+        run: npm run build
+
+      - name: تأیید وجود artifact
+        run: test -s dist/index.html
+
+      - name: بودجهٔ باندل و دارایی‌ها (نقض ⇒ شکست)
+        run: node scripts/bundle-budget.mjs --check
+
+      - name: بارگذاری artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+
+  audit:
+    name: بازرسی امنیت وابستگی‌ها
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: نصب با lockfile
+        run: npm ci
+
+      - name: npm audit (سطح high)
+        run: npm audit --audit-level=high
+
+      - name: بهداشت مخزن (سرّ و فایل حجیم)
+        run: node scripts/repo-hygiene.mjs
+        continue-on-error: true

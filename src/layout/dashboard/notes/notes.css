@@ -298,30 +298,6 @@
   font-size: 11px;
 }
 
-/* گروه تگ — در ویرایشگر یادداشت استفاده می‌شود */
-.nt-taggroup {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.nt-taggroup__label {
-  display: inline-flex;
-  min-width: 6.5rem;
-  align-items: center;
-  gap: 0.35rem;
-  color: var(--accent);
-  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
-  font-size: 11px;
-}
-
-.nt-taggroup__tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-}
-
 /* ── پرسش و پاسخ (بازیابی فعال) ── */
 .nt-qa {
   display: flex;

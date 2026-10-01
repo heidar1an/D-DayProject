@@ -1,0 +1,273 @@
+/*
+ * ══════════════════════════════════════════════════════════════════════════
+ * توکن‌های تم — تنها منبع رنگ در پروژه
+ * ══════════════════════════════════════════════════════════════════════════
+ *
+ * قرارداد نام‌گذاری:
+ *   سطوح  : --deep (فرورفته‌ترین) → --background → --surface → --surface-soft → --surface-strong
+ *           `--deep` هم مثل `--background` یک خاکستریِ نزدیک به هم است، نه سیاهِ
+ *           خالص (#121212 مقابل #181818) — همان فاصلهٔ ۶ واحدیِ تم روشن.
+ *   متن   : --white (اصلی) → --muted → --faint → --ghost (کم‌رنگ‌ترین)
+ *   اکسنت : --blue / --purple / --green / --gold / --copper / --red / --orange
+ *            پرکننده‌اند و در هر دو تم یکسان می‌مانند.
+ *           --*-ink  همان رنگ برای متن است؛ در تم روشن تیره می‌شود تا روی زمینهٔ
+ *                    روشن خوانا بماند.
+ *           --*-deep همان رنگ برای پنل‌های تیره است؛ در تم روشن روشن می‌شود تا
+ *                    متن تیرهٔ تم روشن رویش خوانا باشد.
+ *   شفاف  : --wash-rgb / --line-rgb / --ink-rgb / --shadow-rgb پایهٔ رنگ
+ *            لایه‌های نیمه‌شفاف‌اند، پس `rgb(var(--wash-rgb) / 0.05)` در تم تیره
+ *            روشن‌کننده و در تم روشن تیره‌کننده است.
+ *
+ * هیچ لایه‌ای رنگ ثابت تعریف نمی‌کند؛ فقط این نام‌ها را مصرف می‌کند.
+ */
+
+:root {
+  color-scheme: dark;
+
+  /* ── سطوح ── */
+  /* `--deep` عمداً «سیاهِ خالص» نیست: یک پله زیرِ `--background` می‌نشیند تا
+     پنل‌های فرورفته با زمینهٔ صفحه هم‌خانواده باشند و کنتراستِ تند نسازند.
+     همان فاصله‌ای که تم روشن از قبل دارد (۶ واحد). */
+  --deep: #121212;
+  --background: #181818;
+  --surface: #242426;
+  --surface-soft: #282828;
+  --surface-strong: #333333;
+
+  /* ── متن ── */
+  --white: #ffffff;
+  --muted: #d0d0d0;
+  --faint: #8a8a8a;
+  --ghost: #707070;
+  /* مرکب تیرهٔ عمدی (متن روی دکمهٔ روشن، برچسب روی تصویر) — در هر دو تم تیره */
+  --ink-deep: #111114;
+
+  /* ── پرکننده‌های روشن و ثابت ── */
+  --pure: #ffffff;
+  --light-fill: #d4d4d4;
+  --light-fill-soft: #efefef;
+
+  /* ── خط ── */
+  --border-solid: #3f3f47;
+
+  /* ── پایهٔ رنگ لایه‌های نیمه‌شفاف ──
+     wash  = تینت کم‌آلفا (۰ تا ~۰٫۲): در تم تیره روشن‌کننده، در تم روشن تیره‌کننده.
+     scrim = پردهٔ توپُر از جنس «سطح»: در تم تیره هم‌خانوادهٔ `--deep` (نه سیاهِ
+             خالص)، در تم روشن سفید. برای پنل‌های شیشه‌ای و پس‌زمینهٔ کارت‌هایی
+             که باید با تم برگردند.
+     shadow = هر چیزی که باید همیشه تیره بماند: سایه، drop-shadow، پردهٔ پشت
+              مودال و روکش تیره‌کنندهٔ روی تصویر. سایهٔ سفید معنا ندارد. */
+  --wash-rgb: 255 255 255;
+  --scrim-rgb: 18 18 18;
+  --line-rgb: 255 255 255;
+  --ink-rgb: 255 255 255;
+  --shadow-rgb: 0 0 0;
+  --shadow-scale: 1;
+
+  /* ── آیکون‌های تک‌فام (PNG سیاه که با فیلتر سفید می‌شدند) ── */
+  --icon-filter: brightness(0) invert(1);
+
+  /* ── اکسنت‌ها: پرکننده ── */
+  --blue: #2e4b75;
+  --blue-bright: #5b8cc7;
+  --green: #465c4d;
+  --green-bright: #77b787;
+  --green-vivid: #61d192;
+  --brown: #604e42;
+  --brown-bright: #ab8e7c;
+  --brown-ink: #ab8e7c;
+  --copper: #b99a86;
+  --purple: #574c80;
+  --purple-bright: #937fcd;
+  --gold: #e0b45c;
+  --orange: #ff9717;
+  --red: #e26d6d;
+  --rose: #ef9196;
+  --form-error: #ff6969;
+
+  /* ── اکسنت‌ها: متن ── */
+  --blue-ink: #5b8cc7;
+  --blue-soft-ink: #9cc0e8;
+  --green-ink: #61d192;
+  --green-soft-ink: #9ed3ab;
+  --purple-ink: #937fcd;
+  --purple-soft-ink: #c9bdf0;
+  --gold-ink: #e0b45c;
+  --gold-soft-ink: #e6c98a;
+  --copper-ink: #b99a86;
+  --copper-soft-ink: #d4b8a4;
+  --red-ink: #ef9196;
+  --red-soft-ink: #f3b8b8;
+  --orange-ink: #ff9717;
+
+  /* ── اکسنت‌ها: پنل‌های عمیق ── */
+  --blue-deep: #0d1b2c;
+  --green-deep: #0f2018;
+  --purple-deep: #191430;
+  --gold-deep: #221a0b;
+  --copper-deep: #241a15;
+  --red-deep: #241012;
+
+  /* ── کارت‌های رنگی صفحهٔ اصلی ── */
+  --card-lavender: #302942;
+  --card-copper: #342b27;
+  --card-sage: #25312b;
+  --card-sky: #1f2c3d;
+  --card-warm: #302925;
+
+  /*
+   * ── نگاشت کلاس‌های Tailwind در تم تیره ──
+   * Tailwind v4 رنگ `black` را از `--color-black` می‌سازد. اگر تعریف نشود،
+   * مقدار پیش‌فرضِ خودش (#000) می‌آید و هر `bg-black/N` سیاهِ خالص می‌شود —
+   * ناهم‌خانواده با بقیهٔ سطح‌ها. پس اینجا به `--deep` گره می‌خورد تا هر دو تم
+   * از یک منبع رنگ بخوانند.
+   */
+  --color-white: var(--white);
+  --color-black: var(--deep);
+
+  --content-width: 80%;
+}
+
+/* پایهٔ صفحه — از توکن‌ها می‌خواند تا با تعویض تم هم‌زمان عوض شود */
+:root {
+  color: var(--white);
+  background: var(--background);
+  font-family: 'Pinar', 'Vazir', Tahoma, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+/*
+ * ── حالت روشن ──
+ * فقط مقدار توکن‌ها عوض می‌شود؛ هیچ لایه‌ای لازم نیست تغییر کند.
+ * `--color-white` و `--color-black` هم بازنویسی می‌شوند چون Tailwind v4
+ * کلاس‌های `text-white`، `bg-white/5`، `border-white/8` و `bg-black/30` را
+ * از همین دو متغیر می‌سازد.
+ */
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --deep: #eef1f5;
+  --background: #f4f5f7;
+  --surface: #ffffff;
+  --surface-soft: #ffffff;
+  --surface-strong: #e8eaef;
+
+  --white: #16161b;
+  --muted: #3d3d46;
+  --faint: #6b6b76;
+  --ghost: #8a8a94;
+  --ink-deep: #111114;
+
+  --pure: #ffffff;
+  --light-fill: #dfe2e8;
+  --light-fill-soft: #eceef2;
+
+  --border-solid: #d3d7df;
+
+  --wash-rgb: 16 20 28;
+  --scrim-rgb: 255 255 255;
+  --line-rgb: 16 20 28;
+  --ink-rgb: 22 22 27;
+  --shadow-rgb: 16 20 28;
+  --shadow-scale: 0.45;
+
+  --icon-filter: brightness(0);
+
+  --blue: #d7e4f4;
+  --green: #d9e9de;
+  --brown: #eaddd2;
+  --purple: #e0d9f2;
+
+  --blue-ink: #2f6bb0;
+  --blue-soft-ink: #3f7cbd;
+  --green-ink: #14784a;
+  --green-soft-ink: #1e8a53;
+  --purple-ink: #6d55b5;
+  --purple-soft-ink: #7f68c4;
+  --gold-ink: #8a5f0c;
+  --gold-soft-ink: #96690d;
+  --brown-ink: #75573f;
+  --copper-ink: #75573f;
+  --copper-soft-ink: #7f6047;
+  --red-ink: #ab353c;
+  --red-soft-ink: #b53d44;
+  --orange-ink: #a35407;
+
+  --blue-deep: #dce9f8;
+  --green-deep: #dcece1;
+  --purple-deep: #e5e0f6;
+  --gold-deep: #f7ecd7;
+  --copper-deep: #efe3da;
+  --red-deep: #f8e3e4;
+
+  --card-lavender: #ece7f9;
+  --card-copper: #f3ebe6;
+  --card-sage: #e6f1ea;
+  --card-sky: #e4eef9;
+  --card-warm: #f3ebe7;
+
+  /*
+   * ── نگاشت کلاس‌های Tailwind ──
+   * Tailwind v4 رنگ `white`/`black` را از همین دو متغیر می‌سازد:
+   *   text-white      → color: var(--color-white)
+   *   bg-white/6      → background: color-mix(in oklab, var(--color-white) 6%, transparent)
+   *   border-white/8  → border-color: color-mix(...)
+   * پس با برگرداندن `--color-white` به مرکبِ تم روشن، حدود ۸۰۰ کلاس
+   * (text-white، bg-white/N، border-white/N) خودکار درست می‌شوند.
+   *
+   * فقط دو حالت «توپُر» از این قاعده جا می‌مانند و پایین‌تر صریح بازنویسی شده‌اند:
+   * bg-white و border-white، که در تم تیره رنگ ثابت سفید می‌خواهند نه مرکب.
+   */
+  --color-white: var(--white);
+  --color-black: var(--deep);
+}
+
+/*
+ * استثناهای تم روشن برای کلاس‌های توپُر Tailwind.
+ * این قواعد بیرون از `@layer` نوشته شده‌اند، پس در آبشار بر utilities تو‌در‌تو
+ * اولویت دارند — بدون `!important`.
+ */
+:root[data-theme='light'] .bg-white {
+  background-color: var(--surface);
+}
+
+:root[data-theme='light'] .border-white {
+  border-color: var(--border-solid);
+}
+
+/* پنل‌های فرورفته و ریل کنترل‌های سگمنتی: در تم تیره مشکی کم‌آلفا بودند،
+   در تم روشن باید یک تینت خاکستری ملایم باشند نه ۳۰٪ سیاه. */
+:root[data-theme='light'] .bg-black\/25 {
+  background-color: rgb(16 20 28 / 0.035);
+}
+
+:root[data-theme='light'] .bg-black\/30 {
+  background-color: rgb(16 20 28 / 0.04);
+}
+
+:root[data-theme='light'] .bg-black\/40 {
+  background-color: rgb(16 20 28 / 0.05);
+}
+
+:root[data-theme='light'] .bg-black\/45 {
+  background-color: rgb(16 20 28 / 0.055);
+}
+
+:root[data-theme='light'] .bg-black\/50 {
+  background-color: rgb(16 20 28 / 0.06);
+}
+
+/* پردهٔ پشت مودال — در تم روشن هم باید صفحه را تاریک کند */
+:root[data-theme='light'] .bg-black\/70 {
+  background-color: rgb(16 20 28 / 0.45);
+}
+
+:root[data-theme='light'] .bg-black\/75 {
+  background-color: rgb(16 20 28 / 0.5);
+}
+
+* {
+  box-sizing: border-box;
+}
+

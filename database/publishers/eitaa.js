@@ -54,6 +54,8 @@ const CAPTION_LIMIT = 1000;
 /* این پلتفرم ۲ پیام در ثانیه به هر گفتگو اجازه می‌دهد */
 const PAUSE_BETWEEN_MESSAGES_MS = 600;
 
+import { assertSafeApiBase } from './urlGuard.js';
+
 const DEFAULT_API_BASE = 'https://eitaayar.ir/api';
 
 const TOKEN_LABEL = 'توکن ایتایار';
@@ -65,7 +67,10 @@ function timeoutMs() {
 }
 
 function apiBase() {
-  return String(process.env.EITAA_API_BASE || DEFAULT_API_BASE).replace(/\/+$/, '');
+  return assertSafeApiBase(String(process.env.EITAA_API_BASE || DEFAULT_API_BASE), {
+    envName: 'EITAA_API_BASE',
+    platform: 'ایتا',
+  });
 }
 
 function platformError(message, code, extra = {}) {

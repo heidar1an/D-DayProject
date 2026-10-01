@@ -201,7 +201,7 @@ export const UTM_MEDIUMS = [
   { id: 'qr', label: 'کیوآر' },
 ];
 
-const MEDIA_ENTITY_TYPES = [
+export const MEDIA_ENTITY_TYPES = [
   'media-platform', 'media-account', 'media-content', 'media-campaign',
   'media-team', 'media-asset', 'media-tag', 'media-utm', 'media-inbox',
   'media-mention', 'media-notification',

@@ -1,5 +1,7 @@
 import { useState } from 'react';
 
+import { FEEDBACK_SOURCES, sendFeedback } from '../../../services/feedback/userFeedback';
+
 const STORAGE_KEY = 'tapesh:support-requests';
 
 const categoryOptions = [
@@ -98,13 +100,21 @@ export default function Soppurt() {
     setStatus(null);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (!subject.trim() || !message.trim()) {
       setStatus({ type: 'error', text: 'لطفاً موضوع پیام و متن درخواست را کامل کنید.' });
       return;
     }
+
+    /* نسخهٔ سروری — پنل مدیریت این درخواست را با منبع «فرم پشتیبانی» می‌بیند */
+    await sendFeedback({
+      source: FEEDBACK_SOURCES.support,
+      subject: subject.trim(),
+      category,
+      message: message.trim(),
+    });
 
     try {
       const stored = JSON.parse(window.localStorage.getItem(STORAGE_KEY) || '[]');

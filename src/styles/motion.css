@@ -1,0 +1,806 @@
+.motion-strip {
+  width: 100%;
+  overflow: hidden;
+  padding: 13px 0;
+  background: var(--background);
+  direction: ltr;
+}
+
+.motion-track {
+  --motion-gap: 30px;
+  display: flex;
+  flex-direction: row;
+  width: max-content;
+  align-items: center;
+  gap: var(--motion-gap);
+  direction: ltr;
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+}
+
+.motion-sequence {
+  display: flex;
+  flex-direction: row;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--motion-gap);
+  direction: ltr;
+}
+
+.motion-pill {
+  display: grid;
+  width: clamp(220px, 26vw, 330px);
+  height: 64px;
+  flex: 0 0 clamp(220px, 26vw, 330px);
+  place-items: center;
+  border-radius: 999px;
+  color: var(--white);
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: clamp(1.4rem, 2.5vw, 2.2rem);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  direction: rtl;
+  white-space: nowrap;
+  /* کادرها حالا لینک‌اند؛ بدون این، مرورگر زیرشان خط می‌کشد */
+  text-decoration: none;
+}
+
+.motion-pill--purple {
+  background: var(--purple);
+}
+
+.motion-pill--green {
+  background: var(--green);
+}
+
+.motion-pill--brown {
+  background: var(--brown);
+}
+
+.motion-pill--blue {
+  background: var(--blue);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 900px) {
+  .site-header {
+    width: var(--content-width);
+  }
+
+  .auth-page__shell {
+    width: min(100%, 780px);
+    min-height: 0;
+    padding: 14px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    border-radius: 36px;
+  }
+
+  .auth-panel {
+    padding: 24px 18px 28px;
+    border-radius: 26px;
+  }
+
+  .auth-visual {
+    min-height: 0;
+    border-radius: 26px;
+  }
+
+  .auth-visual__stage {
+    min-height: 240px;
+  }
+
+  .site-nav {
+    gap: 24px;
+    font-size: 1.05rem;
+  }
+
+  .auth-link {
+    font-size: 1rem;
+  }
+
+  .benefits {
+    padding-top: 100px;
+  }
+
+  .continuation {
+    gap: 42px;
+  }
+
+  .friends-banner {
+    min-height: 340px;
+  }
+
+  .tapesh-intro {
+    min-height: 360px;
+  }
+
+  /* دو ستون می‌ماند، ولی کارت کوتاه‌تر و لوگو کوچک‌تر می‌شود */
+  .promo-grid {
+    gap: 16px;
+  }
+
+  .promo-card {
+    min-height: 248px;
+    border-radius: 26px;
+    padding: 24px 22px 26px;
+  }
+
+  .promo-card__art {
+    top: -18px;
+    left: -14px;
+    width: 156px;
+    height: 156px;
+  }
+
+  .promo-card__glyph {
+    width: 94px;
+    height: 94px;
+  }
+
+  .promo-card__body {
+    max-width: 66%;
+  }
+
+  .promo-card__text {
+    font-size: 0.8rem;
+    line-height: 1.8;
+  }
+
+  .promo-card__go {
+    bottom: 26px;
+    left: 22px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .article-card {
+    min-height: 430px;
+  }
+
+  .article-card__image {
+    height: 255px;
+  }
+
+  .faq-grid {
+    gap: 16px;
+  }
+
+  .site-footer__inner {
+    gap: 28px;
+  }
+}
+
+@media (max-width: 640px) {
+  body {
+    background:
+      radial-gradient(circle at 50% 9%, rgba(46, 75, 117, 0.15), transparent 18rem),
+      var(--background);
+  }
+
+  .site-header {
+    width: min(100% - 32px, 460px);
+    min-height: 78px;
+    gap: 12px;
+  }
+
+  .auth-page {
+    align-content: start;
+    padding: 12px;
+  }
+
+  .auth-page__shell {
+    width: 100%;
+    min-height: 0;
+    padding: 12px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    border-radius: 30px;
+  }
+
+  .auth-panel {
+    order: 1;
+    padding: 22px 14px 24px;
+    border-radius: 24px;
+  }
+
+  .auth-panel h1 {
+    font-size: 1.5rem;
+  }
+
+  .auth-panel__title--login {
+    min-height: 3.9em;
+  }
+
+  .auth-animated-phrase {
+    min-width: 0;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .auth-field input {
+    height: 58px;
+    border-radius: 17px;
+  }
+
+  .auth-form__submit,
+  .auth-form__switch {
+    font-size: 1.05rem;
+  }
+
+  .auth-visual {
+    order: 2;
+    border-radius: 24px;
+  }
+
+  .auth-visual__stage {
+    min-height: 200px;
+    padding: 16px 16px 0;
+  }
+
+  .auth-visual__card {
+    margin-top: -20px;
+  }
+
+  .auth-visual__spark {
+    top: -13px;
+    inset-inline-start: -10px;
+    width: 34px;
+    height: 34px;
+  }
+
+  .onboarding-page {
+    display: block;
+    min-height: 100vh;
+    padding: 18px 12px 28px;
+  }
+
+  .offline-page {
+    min-height: 100svh;
+    padding: 20px 16px 32px;
+  }
+
+  .offline-page__illustration {
+    width: min(100%, 460px, 48vh);
+    margin-bottom: 22px;
+  }
+
+  .offline-page__title {
+    font-size: clamp(2.35rem, 10.5vw, 3.5rem);
+    letter-spacing: -0.08em;
+  }
+
+  .offline-page__description {
+    gap: 0;
+    margin-top: 20px;
+    font-size: clamp(0.9rem, 4.1vw, 1.15rem);
+    line-height: 1.8;
+  }
+
+  .offline-page__retry {
+    margin-top: 28px;
+    font-size: 1.35rem;
+  }
+
+  .onboarding-card {
+    width: calc(100% - 12px);
+    height: 75svh;
+    min-height: 0;
+    padding: 28px 18px 34px;
+    border-radius: 30px;
+  }
+
+  .onboarding-card__mascot {
+    width: 140px;
+    margin-bottom: 24px;
+  }
+
+  .onboarding-title {
+    margin: 0 0 22px;
+    font-size: 2rem;
+  }
+
+  .onboarding-progress {
+    margin-bottom: 24px;
+  }
+
+  .onboarding-progress__step {
+    width: 46px;
+    height: 46px;
+    font-size: 1.05rem;
+  }
+
+  .onboarding-form h2 {
+    margin-bottom: 18px;
+    font-size: 1.45rem;
+  }
+
+  .onboarding-field input {
+    height: 56px;
+    padding-inline: 17px;
+    border-radius: 14px;
+    font-size: 0.9rem;
+  }
+
+  .onboarding-field__prefix {
+    width: 44px;
+    height: 56px;
+  }
+
+  .onboarding-field:has(.onboarding-field__prefix) input {
+    padding-left: 54px;
+  }
+
+  .onboarding-note {
+    font-size: 0.74rem;
+  }
+
+  .onboarding-actions {
+    gap: 12px;
+    margin-top: 38px;
+  }
+
+  .onboarding-button {
+    min-width: 0;
+    min-height: 52px;
+    flex: 1;
+    padding-inline: 12px;
+    border-radius: 13px;
+    font-size: 1rem;
+  }
+
+  .brand__word {
+    font-size: 2.2rem;
+  }
+
+  .brand__mark {
+    width: 38px;
+    height: 38px;
+  }
+
+  .menu-toggle {
+    display: block;
+    margin-inline-start: auto;
+    order: 2;
+  }
+
+  .site-nav {
+    position: absolute;
+    top: 70px;
+    right: 0;
+    left: 0;
+    display: none;
+    flex-direction: column;
+    gap: 18px;
+    padding: 22px;
+    border: 1px solid rgb(var(--line-rgb) / 0.08);
+    border-radius: 20px;
+    background: rgb(var(--scrim-rgb) / 0.98);
+    box-shadow: 0 18px 34px rgb(var(--shadow-rgb) / calc(0.28 * var(--shadow-scale)));
+  }
+
+  .site-nav.is-open {
+    display: flex;
+  }
+
+  .auth-link {
+    order: 3;
+    font-size: 0.86rem;
+  }
+
+  .brand {
+    order: 1;
+  }
+
+  .hero {
+    /* همان حاشیهٔ ۱۶pxی `.section-shell` در موبایل، تا نوار کارت‌ها دقیقاً
+       هم‌عرض بخش‌های دیگر بماند (اندازه‌گیری‌شده: ۳۵۸px در ویوپورت ۳۹۰px) */
+    --hero-gutter: 16px;
+    min-height: 400px;
+    padding: 54px 0 24px;
+  }
+
+  .hero h1 {
+    gap: 4px;
+    font-size: clamp(2.35rem, 10vw, 3.5rem);
+  }
+
+  .hero p {
+    margin-top: 18px;
+    font-size: 0.95rem;
+    line-height: 1.9;
+    white-space: normal;
+  }
+
+  .button {
+    min-height: 46px;
+    padding-inline: 26px;
+    font-size: 0.96rem;
+  }
+
+  .section-shell {
+    width: min(100% - 32px, 460px);
+  }
+
+  .benefits {
+    padding-top: 88px;
+  }
+
+  .section-title {
+    margin-bottom: 30px;
+    font-size: 2rem;
+    line-height: 1.35;
+  }
+
+  .benefits__rows,
+  .benefits__row {
+    gap: 14px;
+  }
+
+  .benefits__row {
+    flex-direction: column;
+  }
+
+  .benefit-card,
+  .benefit-card--wide {
+    min-height: 210px;
+    flex: auto;
+    padding: 24px 22px;
+    border-radius: 28px;
+  }
+
+  .benefit-card h3 {
+    font-size: 1.35rem;
+  }
+
+  .benefit-card p {
+    margin-top: 8px;
+    font-size: 0.93rem;
+    line-height: 1.8;
+  }
+
+  .quote {
+    padding: 62px 52px 92px;
+  }
+
+  .quote blockquote {
+    max-width: 100%;
+    font-size: 1.28rem;
+    line-height: 1.85;
+  }
+
+  .quote__mark {
+    font-size: 4.5rem;
+    line-height: 0.75;
+  }
+
+  .quote__mark--open {
+    top: 22px;
+    right: 8px;
+  }
+
+  .quote__mark--close {
+    bottom: 78px;
+    left: 8px;
+  }
+
+  .quote__author {
+    gap: 10px;
+    margin-top: 24px;
+  }
+
+  .quote__author img {
+    width: 56px;
+    height: 56px;
+  }
+
+  .quote__author strong {
+    font-size: 1rem;
+  }
+
+  .quote__author span {
+    font-size: 0.76rem;
+  }
+
+  .continuation {
+    gap: 28px;
+    padding-bottom: 24px;
+  }
+
+  .friends-banner {
+    min-height: 560px;
+    grid-template-columns: 1fr;
+    border-radius: 28px;
+  }
+
+  .friends-banner__visual {
+    order: 2;
+    min-height: 280px;
+    padding: 4px 14px 16px;
+  }
+
+  .friends-banner__visual img {
+    max-height: 300px;
+  }
+
+  .friends-banner__content {
+    order: 1;
+    padding: 35px 24px 4px;
+    text-align: center;
+  }
+
+  .friends-banner h2 {
+    font-size: 2.15rem;
+  }
+
+  .friends-banner p {
+    margin-inline: auto;
+    font-size: 0.94rem;
+  }
+
+  .friends-banner .button {
+    margin-top: 18px;
+  }
+
+  .tapesh-intro {
+    min-height: 650px;
+    grid-template-columns: 1fr;
+    border-radius: 30px;
+  }
+
+  .tapesh-intro__visual {
+    order: 2;
+    min-height: 260px;
+    padding: 12px 24px 18px;
+  }
+
+  .tapesh-intro__content {
+    order: 1;
+    padding: 32px 24px 0;
+    text-align: center;
+  }
+
+  .tapesh-intro h2 {
+    font-size: 1.85rem;
+  }
+
+  .tapesh-intro p {
+    font-size: 0.84rem;
+  }
+
+  .tapesh-features {
+    gap: 10px 12px;
+    text-align: right;
+  }
+
+  .tapesh-feature {
+    font-size: 0.72rem;
+  }
+
+  .tapesh-intro .button {
+    width: min(100%, 260px);
+    margin-top: 20px;
+  }
+
+  /* یک ستون؛ لوگو کوچک می‌شود ولی ترکیبِ مورّبِ متن/گرافیک حفظ می‌ماند */
+  .promo-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .promo-card {
+    min-height: 224px;
+    border-radius: 24px;
+    padding: 20px 20px 22px;
+  }
+
+  .promo-card__art {
+    top: -10px;
+    left: -10px;
+    width: 118px;
+    height: 118px;
+  }
+
+  .promo-card__glyph {
+    width: 74px;
+    height: 74px;
+  }
+
+  .promo-card__body {
+    max-width: 62%;
+  }
+
+  .promo-card__title {
+    font-size: 1.16rem;
+  }
+
+  .promo-card__text {
+    margin-top: 8px;
+    font-size: 0.78rem;
+    line-height: 1.8;
+  }
+
+  .promo-card__go {
+    bottom: 22px;
+    left: 20px;
+    width: 34px;
+    height: 34px;
+  }
+
+  .articles,
+  .faq {
+    padding-top: 56px;
+  }
+
+  .lower-section-title {
+    margin-bottom: 26px;
+    font-size: 1.95rem;
+  }
+
+  .article-grid,
+  .faq-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .article-card {
+    min-height: 380px;
+    border-radius: 26px;
+  }
+
+  .article-card__image {
+    height: 220px;
+  }
+
+  .article-card__content {
+    min-height: 160px;
+    padding: 22px 22px 38px;
+  }
+
+  .article-card h3 {
+    font-size: 1.25rem;
+  }
+
+  .article-card p {
+    margin-top: 10px;
+    font-size: 0.84rem;
+  }
+
+  .article-card__go {
+    bottom: 14px;
+    left: 18px;
+  }
+
+  .faq {
+    padding-bottom: 58px;
+  }
+
+  .faq-item button {
+    min-height: 70px;
+    padding: 14px 17px;
+    font-size: 0.9rem;
+  }
+
+  .faq-item__answer > p {
+    padding: 0 17px 16px;
+    font-size: 0.82rem;
+  }
+
+  .site-footer__inner {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 36px 24px;
+    padding-top: 30px;
+    padding-bottom: 42px;
+  }
+
+  .site-footer__brand {
+    grid-column: 1 / -1;
+  }
+
+  .site-footer__brand .brand__mark {
+    width: 46px;
+    height: 46px;
+  }
+
+  .site-footer__brand .brand__word {
+    font-size: 2.25rem;
+  }
+
+  .site-footer__column h2 {
+    font-size: 1.25rem;
+  }
+
+  .site-footer__column a {
+    font-size: 0.98rem;
+  }
+
+  .site-footer__about {
+    grid-column: 1 / -1;
+    max-width: none;
+    font-size: 0.84rem;
+    line-height: 1.9;
+  }
+
+  .motion-strip {
+    padding: 10px 0;
+  }
+
+  .motion-track {
+    --motion-gap: 14px;
+  }
+
+  .motion-pill {
+    width: 190px;
+    height: 54px;
+    flex-basis: 190px;
+    font-size: 1.35rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .offline-page__retry.is-checking {
+    animation: none;
+  }
+}
+
+/* ── تم رنگی دکمه «پایان پومودو» ── */
+:root {
+  --pomodoro-end: var(--green);
+  --pomodoro-end-bright: var(--green-bright);
+  --pomodoro-end-deep: var(--green-deep);
+}
+
+.pomodoro__finish-btn {
+  padding: 15px 46px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--pomodoro-end-bright), var(--pomodoro-end));
+  box-shadow: 0 14px 34px rgba(95, 174, 124, 0.38);
+  color: var(--white);
+  cursor: pointer;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: clamp(1.05rem, 1.2vw + 0.5vh, 1.3rem);
+  font-weight: 600;
+  min-height: 58px;
+  transition: transform 180ms ease, box-shadow 260ms ease, filter 180ms ease;
+}
+
+.pomodoro__finish-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.07);
+}
+
+.pomodoro__finish-btn:active {
+  transform: translateY(0);
+}
+
+/* ── رنگ متن محتوای درسنامه (تُن‌های استاندارد پروژه) ──
+ *
+ * ویرایشگر متن پنل این کلاس‌ها را روی انتخاب کاربر می‌گذارد و خوانندهٔ درسنامه همان HTML را
+ * رندر می‌کند. چون پنل و خواننده هر دو `styles.css` را دارند، تعریف فقط همین‌جا است تا
+ * پیش‌نمایش ادمین مو‌به‌مو همان چیزی باشد که کاربر می‌بیند.
+ *
+ * همه از توکن `-ink` می‌آیند نه `-bright`: نسخهٔ `-bright` روی زمینهٔ روشن زیر آستانهٔ
+ * کنتراست پروژه می‌افتد (همان دلیلی که `-ink` ساخته شد). */
+.micr-tone--gold { color: var(--gold-ink); }
+.micr-tone--green { color: var(--green-ink); }
+.micr-tone--blue { color: var(--blue-soft-ink); }
+.micr-tone--purple { color: var(--purple-soft-ink); }
+.micr-tone--red { color: var(--red-ink); }
+.micr-tone--brown { color: var(--brown-ink); }

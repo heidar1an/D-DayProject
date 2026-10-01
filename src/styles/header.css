@@ -1,0 +1,346 @@
+.site-header {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: var(--content-width);
+  min-height: 98px;
+  margin: 0 auto;
+  gap: 24px;
+}
+
+/* سمت چپ هدر: دکمهٔ تم + ورود/پروفایل. یک ردیف می‌مانند تا nav وسط بماند. */
+.site-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-shrink: 0;
+}
+
+/* ── دکمهٔ تعویض تم — در همهٔ سرصفحه‌ها مشترک ──
+   اندازه با `--theme-toggle-size` تنظیم می‌شود تا هر سرصفحه بتواند دکمه را
+   با ریتم خودش هم‌آهنگ کند، بدون بازتعریف ظاهر. */
+.theme-toggle {
+  --theme-toggle-size: 42px;
+
+  display: grid;
+  flex-shrink: 0;
+  width: var(--theme-toggle-size);
+  height: var(--theme-toggle-size);
+  padding: 0;
+  border: 1px solid rgb(var(--line-rgb) / 0.16);
+  border-radius: 50%;
+  background: rgb(var(--wash-rgb) / 0.05);
+  color: var(--white);
+  place-items: center;
+  cursor: pointer;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    transform 180ms ease;
+}
+
+.theme-toggle:hover {
+  border-color: rgb(var(--line-rgb) / 0.3);
+  background: rgb(var(--wash-rgb) / 0.1);
+}
+
+.theme-toggle:active {
+  transform: scale(0.93);
+}
+
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--blue-bright);
+  outline-offset: 2px;
+}
+
+.theme-toggle__icon {
+  display: grid;
+  width: 55%;
+  height: 55%;
+  place-items: center;
+}
+
+.theme-toggle__icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle {
+    transition: none;
+  }
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  color: var(--white);
+}
+
+.brand__word {
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: clamp(2rem, 2.8vw, 2.7rem);
+  font-weight: 700;
+  letter-spacing: -0.08em;
+  line-height: 0.8;
+}
+
+/*
+ * ── نشان برند ──
+ * فایلِ لوگو شفاف است و فقط «موج تپش» را دارد؛ کادرِ تیرهٔ گوشه‌گردی که در
+ * فایل قدیمی پخته شده بود حذف شد. پس اینجا هیچ پس‌زمینه‌ای نیست و رنگِ موج از
+ * `--icon-filter` می‌آید: تم تیره ⇒ سفید، تم روشن ⇒ مشکی. همان توکنی که بقیهٔ
+ * آیکون‌های تک‌فام پروژه مصرف می‌کنند.
+ * `object-fit: contain` الزامی است: موج افقی است (نسبت ۱٫۶۷:۱) و با `cover`
+ * نوکِ قله‌ها بریده می‌شد.
+ */
+.brand__mark {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+}
+
+.brand__mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: var(--icon-filter);
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(26px, 4vw, 62px);
+  margin-inline: auto;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: clamp(0.98rem, 1.45vw, 1.2rem);
+  font-weight: 500;
+}
+
+/*
+ * ── وسط‌چینی ناوبری نسبت به «کل صفحه»، نه نسبت به فضای باقی‌مانده ──
+ * قبلاً ناوبری با `margin-inline: auto` وسطِ فاصلهٔ بین لوگو و اکشن‌ها می‌نشست؛
+ * چون لوگو و اکشن‌ها عرض یکسان ندارند، مرکزِ ناوبری از مرکز صفحه می‌لغزید.
+ * این‌جا دو ستون کناری هم‌عرض می‌شوند (`flex-basis: 0` + `flex-grow: 1`) ⇒
+ * ناوبری دقیقاً روی مرکزِ هدر می‌افتد و چون خودِ هدر با `margin: 0 auto` وسطِ
+ * صفحه است، نتیجه مرکزِ کل صفحه می‌شود. اقلام در جریان می‌مانند، پس در عرض‌های
+ * باریک هیچ‌وقت روی هم نمی‌افتند — فقط ستون‌ها به کمینهٔ محتوایشان می‌رسند.
+ * فقط از ۶۴۱px به بالا (جایی که ناوبری افقی است؛ پایین‌تر منوی همبرگری است).
+ *
+ * ⚠️ انتخابگر باید به `.site-header` مقید بماند. `.brand` یک کامپوننت مشترک
+ * است (`src/layout/dashboard/Brand.jsx`) و هدر داشبورد و پنل هم همان را
+ * رندر می‌کنند؛ نسخهٔ مقید‌نشدهٔ این قاعده هدر داشبورد را به‌هم ریخت.
+ */
+@media (min-width: 641px) {
+  .site-header > .brand,
+  .site-header__actions {
+    flex: 1 1 0;
+  }
+
+  /* لوگو به لبهٔ راست و اکشن‌ها به لبهٔ چپ بچسبند، نه به سمت مرکز */
+  .site-header__actions {
+    justify-content: flex-end;
+  }
+
+  .site-nav {
+    margin-inline: 0;
+  }
+}
+
+.site-nav a,
+.auth-link {
+  position: relative;
+  white-space: nowrap;
+  color: var(--white);
+  transition: color 180ms ease;
+}
+
+.site-nav a::after,
+.auth-link::after {
+  position: absolute;
+  right: 0;
+  bottom: -8px;
+  left: 0;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+  content: '';
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 180ms ease;
+}
+
+.site-nav a:hover,
+.auth-link:hover {
+  color: inherit;
+}
+
+.site-nav__link--products::after {
+  background: var(--blue-bright);
+}
+
+.site-nav__link--pricing::after {
+  background: var(--purple-bright);
+}
+
+.site-nav__link--about::after {
+  background: var(--brown-bright);
+}
+
+/* مقالات رنگ خودِ لایهٔ مقالات را می‌گیرد: برچسب «مقاله منتخب» در
+   `articles.css` هم `--green-bright` است. سبز تنها اکسنتِ آزادِ پالت است
+   (آبی=محصولات، بنفش=تعرفه، قهوه‌ای=درباره ما). */
+.site-nav__link--articles::after {
+  background: var(--green-bright);
+}
+
+.auth-link--login::after {
+  background: var(--green-bright);
+}
+
+/*
+ * هاور فقط رنگ و خط زیر را عوض می‌کند، نه وزن فونت را: Doran وزن ۶۰۰ ندارد
+ * (فایل‌های موجود ۴۰۰/۵۰۰/۷۰۰/۸۰۰/۹۰۰اند) و درخواستِ ۶۰۰ مرورگر را به Bold(۷۰۰)
+ * می‌پراند؛ نتیجه این بود که شکل حروف هنگام هاور عوض می‌شد.
+ */
+.site-nav a.site-nav__link--products:hover {
+  color: var(--blue-ink);
+}
+
+.site-nav__link--products:hover::after {
+  background: var(--blue-bright);
+}
+
+.site-nav a.site-nav__link--pricing:hover {
+  color: var(--purple-ink);
+}
+
+.site-nav__link--pricing:hover::after {
+  background: var(--purple-bright);
+}
+
+.site-nav a.site-nav__link--about:hover {
+  color: var(--copper-ink);
+}
+
+.site-nav__link--about:hover::after {
+  background: var(--brown-bright);
+}
+
+.site-nav a.site-nav__link--articles:hover {
+  color: var(--green-ink);
+}
+
+.site-nav__link--articles:hover::after {
+  background: var(--green-bright);
+}
+
+.auth-link--login:hover {
+  color: var(--green-ink);
+}
+
+.auth-link--login:hover::after {
+  background: var(--green-bright);
+}
+
+/* چیپ کاربر لاگین‌شده در هدر صفحه اصلی: آواتار + نام به‌جای «ورود / ثبت نام» */
+.auth-link--user {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 6px 5px 16px;
+  border: 1px solid rgb(var(--line-rgb) / 0.16);
+  border-radius: 999px;
+  background: rgb(var(--wash-rgb) / 0.05);
+  cursor: pointer;
+  transition: color 180ms ease, border-color 180ms ease, background-color 180ms ease;
+}
+
+.auth-link--user::after {
+  display: none;
+}
+
+.auth-link__avatar {
+  display: flex;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid rgba(185, 154, 134, 0.5);
+  border-radius: 50%;
+  background: rgba(185, 154, 134, 0.15);
+  color: var(--copper-ink);
+}
+
+.auth-link__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.auth-link__name {
+  max-width: clamp(90px, 18vw, 180px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.auth-link--user:hover {
+  color: var(--green-ink);
+  border-color: rgba(119, 183, 135, 0.55);
+  background: rgba(119, 183, 135, 0.08);
+}
+
+.site-nav a:hover::after,
+.auth-link:hover::after {
+  transform: scaleX(1);
+}
+
+.auth-link {
+  flex-shrink: 0;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: clamp(0.95rem, 1.4vw, 1.16rem);
+  font-weight: 500;
+}
+
+.menu-toggle {
+  display: none;
+  width: 42px;
+  height: 42px;
+  padding: 10px 8px;
+  border: 1px solid rgb(var(--line-rgb) / 0.18);
+  border-radius: 12px;
+  background: rgb(var(--wash-rgb) / 0.05);
+  cursor: pointer;
+}
+
+.menu-toggle span {
+  display: block;
+  height: 2px;
+  margin: 4px 0;
+  border-radius: 999px;
+  background: var(--white);
+  transition: transform 180ms ease, opacity 180ms ease;
+}
+
+.menu-toggle.is-open span:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.menu-toggle.is-open span:nth-child(2) {
+  opacity: 0;
+}
+
+.menu-toggle.is-open span:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+

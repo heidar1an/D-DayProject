@@ -408,7 +408,14 @@ export default function BankSession({ userId, session, questions, onFinished, on
       ? Object.fromEntries(
           questions
             .filter((question) => question.userAnswer)
-            .map((question) => [question.id, { selected: question.userAnswer.selected, isCorrect: question.userAnswer.isCorrect ?? question.userAnswer.selected === question.correctAnswer }]),
+            .map((question) => [question.id, {
+              selected: question.userAnswer.selected,
+              /* درستی از حکم سرور؛ کلید فقط پس از بازگشایی وجود دارد و fallback است */
+              isCorrect: typeof question.userAnswer.isCorrect === 'boolean'
+                ? question.userAnswer.isCorrect
+                : question.userAnswer.selected === question.correctAnswer,
+              graded: true,
+            }]),
         )
       : session.answers ?? {},
   );
@@ -437,7 +444,12 @@ export default function BankSession({ userId, session, questions, onFinished, on
 
   const question = questions[currentIndex];
   const answer = answers[question?.id];
-  const revealed = isReview || (!isExam && Boolean(answer));
+  /*
+   * PHASE 2 — «بازشده» یعنی سرور حکم داده باشد. پیش‌تر وجودِ پاسخ کافی بود، چون
+   * کلید در کلاینت بود و همان‌جا مقایسه می‌شد. اکنون تا پاسخ سرور نرسد (`graded`)،
+   * هیچ گزینه‌ای سبز/سرخ نمی‌شود و تحلیلی باز نمی‌شود.
+   */
+  const revealed = isReview || (!isExam && answer?.graded === true);
 
   /* گلچین و نیاز به مرور فعلی کاربر — از سرویس، فقط در practice */
   useEffect(() => {
@@ -489,8 +501,16 @@ export default function BankSession({ userId, session, questions, onFinished, on
     async (reason = 'user') => {
       if (submitting) return;
       setSubmitting(true);
-      const submitted = await submitSession(userId, session.id, { reason });
-      onFinished(submitted);
+      setSubmitError(null);
+      try {
+        const submitted = await submitSession(userId, session.id, { reason });
+        onFinished(submitted);
+      } catch {
+        /* تصحیح سرورساز است؛ اگر سرور در دسترس نباشد نمرهٔ ساختگی ساخته نمی‌شود. */
+        setSubmitError('تصحیح کارنامه در سرور انجام نشد؛ اتصال را بررسی کن و دوباره ثبت کن.');
+        setSubmitting(false);
+        autoSubmittedRef.current = false;
+      }
     },
     [onFinished, session.id, submitting, userId],
   );
@@ -518,25 +538,41 @@ export default function BankSession({ userId, session, questions, onFinished, on
     if (!isReview) persist({ currentIndex: next, answers });
   };
 
-  /* ثبت پاسخ — practice: تصحیح فوری | exam: فقط ذخیره انتخاب */
+  /*
+   * ثبت پاسخ.
+   *   practice → انتخاب به سرور می‌رود؛ سرور درستی را تعیین می‌کند و کلید/تحلیل
+   *              همان سؤال را برمی‌گرداند (بازگشایی کنترل‌شده). تا پاسخ سرور نرسد
+   *              چیزی باز نمی‌شود.
+   *   exam     → فقط انتخاب ذخیره می‌شود؛ کلید نه در کلاینت هست و نه می‌آید.
+   */
   const handleSubmitAnswer = async () => {
-    if (selected == null || revealed || submitting) return;
+    if (selected == null || revealed || submitting || grading) return;
     const timeSpent = Math.round((Date.now() - questionStartRef.current) / 1000);
-    const entry = {
-      selected,
-      ...(isExam ? {} : { isCorrect: selected === question.correctAnswer }),
-      timeSpent,
-      answeredAt: Date.now(),
-    };
-    const nextAnswers = { ...answers, [question.id]: entry };
-    setAnswers(nextAnswers);
+
+    if (isExam) {
+      const entry = { selected, timeSpent, answeredAt: Date.now() };
+      setAnswers({ ...answers, [question.id]: entry });
+      persist({ answers: { [question.id]: entry } });
+      setStatsTick((tick) => tick + 1);
+      return;
+    }
+
+    setGrading(true);
+    const { awarded, reveal } = await recordBankAnswer(question.id, { selected, timeSpent, answeredAt: Date.now() });
+    setGrading(false);
+
+    if (!reveal) {
+      setSubmitError('درستی پاسخ از سرور تأیید نشد؛ دوباره تلاش کن.');
+      return;
+    }
+
+    /* درستی از سرور — نه از مقایسهٔ محلی با کلیدی که در کلاینت نیست */
+    const entry = { selected, isCorrect: reveal.correct, timeSpent, answeredAt: Date.now(), graded: true };
+    setAnswers((current) => ({ ...current, [question.id]: entry }));
     persist({ answers: { [question.id]: entry } });
-    if (!isExam) {
-      const awarded = await recordBankAnswer(question.id, entry);
-      if (awarded) {
-        setHeartAwards((current) => ({ ...current, [question.id]: true }));
-        setHeartToast(question.id);
-      }
+    if (awarded) {
+      setHeartAwards((current) => ({ ...current, [question.id]: true }));
+      setHeartToast(question.id);
     }
     /* آمار سؤال (کل بار / درست / غلط / آخرین پاسخ) بلافاصله بعد از ثبت، دوباره خوانده می‌شود */
     setStatsTick((tick) => tick + 1);
@@ -762,21 +798,28 @@ export default function BankSession({ userId, session, questions, onFinished, on
                 <button
                   type="button"
                   onClick={handleSubmitAnswer}
-                  disabled={selected == null || submitting}
+                  disabled={selected == null || submitting || grading}
                   className="flex-1 cursor-pointer rounded-2xl bg-[var(--green-vivid)] py-3 text-sm font-bold text-[#12271a] transition-all hover:-translate-y-0.5 hover:bg-[var(--green-vivid)] disabled:cursor-default disabled:translate-y-0 disabled:bg-white/8 disabled:text-[var(--faint)] disabled:hover:translate-y-0"
                 >
-                  {selected == null ? 'یک گزینه را انتخاب کن' : isExam ? 'ذخیرهٔ پاسخ' : 'ثبت پاسخ و دیدن تحلیل'}
+                  {grading ? 'در حال تصحیح…' : selected == null ? 'یک گزینه را انتخاب کن' : isExam ? 'ذخیرهٔ پاسخ' : 'ثبت پاسخ و دیدن تحلیل'}
                 </button>
                 {selected != null && !isExam && (
                   <button
                     type="button"
                     onClick={() => setSelected(null)}
-                    className="cursor-pointer rounded-2xl bg-white/6 px-4 py-3 text-sm transition-colors hover:bg-white/12"
+                    disabled={grading}
+                    className="cursor-pointer rounded-2xl bg-white/6 px-4 py-3 text-sm transition-colors hover:bg-white/12 disabled:opacity-50"
                   >
                     پاک کردن
                   </button>
                 )}
               </div>
+            )}
+
+            {submitError && (
+              <p className="mt-3 rounded-2xl bg-[#e26d6d]/12 px-4 py-3 text-[12.5px] leading-6 text-[var(--red-ink)]" role="alert">
+                {submitError}
+              </p>
             )}
 
             {/* نتیجهٔ پاسخ پس از reveal */}

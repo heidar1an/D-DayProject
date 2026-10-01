@@ -438,6 +438,16 @@ export function IconMessage(props) {
   );
 }
 
+/* بازخورد و گزارش کاربران — حباب گفت‌وگو با خطوط متن */
+export function IconFeedback(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M20 4.5H4v10h4v4l4.5-4H20z" />
+      <path d="M8 8h8M8 11.5h4.5" />
+    </svg>
+  );
+}
+
 /* صف انتشار — لیست زمان‌بندی‌شده */
 export function IconQueue(props) {
   return (
@@ -492,13 +502,15 @@ export function IconBookOpen(props) {
   );
 }
 
-/* میکرو درسنامه — برگهٔ کوتاه با آذرخش */
+/* میکرو درسنامه — برگهٔ کوتاه با آذرخش.
+   آذرخش عیناً همان چندضلعیِ بستهٔ `CatalogIcon('micro')` است؛ نسخهٔ قبلی یک خطِ
+   شکستهٔ باز و نامتقارن بود و کج دیده می‌شد. */
 export function IconMicroLesson(props) {
   return (
     <svg {...base} {...props}>
       <path d="M7 3.5h7.5l4 4v13H7z" />
       <path d="M14.5 3.5v4h4" />
-      <path d="m13.2 10.2-2.6 3.8h2.6l-2.6 3.8" />
+      <path d="M13.4 6.2 10.6 12.4h2.5l-.3 4.2 2.8-6.2h-2.5z" />
     </svg>
   );
 }

@@ -65,7 +65,9 @@ export default function AnatomyLearningLayer({
     setLoadState('loading');
     setError('');
 
-    ContentService.getCourse(subjectId, { signal: controller.signal })
+    /* `force` ⇒ کتابخانهٔ منتشرشدهٔ پنل هر بار تازه خوانده می‌شود؛ وگرنه کش ۱۵
+       ثانیه‌ای سرویس باعث می‌شد ویرایش تازهٔ مدیر در ورود بعدی دیده نشود. */
+    ContentService.getCourse(subjectId, { signal: controller.signal, force: true })
       .then((loadedCourse) => {
         setCourse(loadedCourse);
         setProgressState(ProgressService.load(loadedCourse, userId));

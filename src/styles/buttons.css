@@ -1,0 +1,70 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  margin-top: 22px;
+  padding: 10px 34px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 1.05rem;
+  font-weight: 500;
+  line-height: 1;
+  transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.button span {
+  font-family: Arial, sans-serif;
+  font-size: 1.2em;
+  line-height: 0;
+}
+
+.button:hover {
+  transform: translateY(-3px);
+}
+
+.button--primary {
+  background: var(--blue);
+  box-shadow: 0 12px 28px rgba(46, 75, 117, 0.25);
+}
+
+.button--primary:hover {
+  background: var(--blue-bright);
+  box-shadow: 0 16px 34px rgba(46, 75, 117, 0.4);
+}
+
+.button--light {
+  margin-top: 0;
+  border-color: rgb(var(--line-rgb) / 0.12);
+  background: var(--white);
+  color: var(--background);
+}
+
+.button--light:hover {
+  background: var(--light-fill-soft);
+  box-shadow: 0 12px 28px rgb(var(--shadow-rgb) / calc(0.12 * var(--shadow-scale)));
+}
+
+.section-shell {
+  width: var(--content-width);
+  margin-inline: auto;
+}
+
+.arrow-icon {
+  display: grid;
+  place-items: center;
+  line-height: 0;
+}
+
+.arrow-icon svg {
+  width: 1em;
+  height: 1em;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3.8;
+}
+

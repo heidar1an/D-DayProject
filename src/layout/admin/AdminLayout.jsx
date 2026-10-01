@@ -25,6 +25,7 @@ import AdminIntlCourses from './views/AdminIntlCourses';
 import AdminMedia from './views/AdminMedia';
 import AdminPublishing from './views/AdminPublishing';
 import AdminUsers from './views/AdminUsers';
+import AdminFeedback from './views/AdminFeedback';
 import AdminSettings from './views/AdminSettings';
 import AdminLogs from './views/AdminLogs';
 import AdminNotes from './views/AdminNotes';
@@ -36,7 +37,7 @@ import {
   Button, Spinner, ToastProvider, faDate, toFa, useToast,
 } from './adminShared';
 import {
-  IconAnalytics, IconBroadcast, IconChevron, IconDashboard, IconLog,
+  IconAnalytics, IconBroadcast, IconChevron, IconDashboard, IconFeedback, IconLog,
   IconLogout, IconMedia, IconMenu, IconNote, IconPage, IconPlanning, IconSend,
   IconSettings, IconUser,
 } from './adminIcons';
@@ -50,6 +51,7 @@ const SECTIONS = [
   { id: 'media', label: 'کتابخانهٔ رسانه', icon: IconMedia, permission: 'media.read' },
   { id: 'publishing', label: 'انتشار در کانال‌ها', icon: IconSend, permission: 'publishing.read' },
   { id: 'users', label: 'کاربران و نقش‌ها', icon: IconUser, permission: 'users.read' },
+  { id: 'feedback', label: 'پیشنهادها و گزارش‌ها', icon: IconFeedback, permission: 'feedback.read' },
   { id: 'settings', label: 'تنظیمات سایت', icon: IconSettings, permission: 'settings.read' },
   { id: 'logs', label: 'گزارش رویدادها', icon: IconLog, permission: 'logs.read' },
   { id: 'notes', label: 'یادداشت‌ها', icon: IconNote, permission: 'notes.read' },
@@ -134,6 +136,11 @@ function parseHashView() {
     return { name: 'planning', payload: match[2] && PLANNING_TAB_IDS.has(match[2]) ? { tab: match[2] } : null };
   }
 
+  /* پیشنهادها و گزارش‌ها: پاراگراف دوم منبعِ انتخاب‌شده است (`#admin/feedback/support`) */
+  if (section === 'feedback') {
+    return { name: 'feedback', payload: match[2] && FEEDBACK_SOURCE_IDS.has(match[2]) ? { tab: match[2] } : null };
+  }
+
   return { name: section, payload: null };
 }
 
@@ -171,7 +178,9 @@ export function AdminShell({ admin, onExit, onLogout }) {
           ? `#admin/media-center/${payload.tab}`
           : name === 'planning' && payload?.tab
             ? `#admin/planning/${payload.tab}`
-            : `#admin/${name}`;
+            : name === 'feedback' && payload?.tab
+              ? `#admin/feedback/${payload.tab}`
+              : `#admin/${name}`;
 
     if (window.location.hash !== hash) {
       window.history.replaceState(window.history.state, '', hash);
@@ -274,6 +283,8 @@ export function AdminShell({ admin, onExit, onLogout }) {
         return <AdminPublishing {...editorProps} />;
       case 'users':
         return <AdminUsers {...editorProps} />;
+      case 'feedback':
+        return <AdminFeedback />;
       case 'settings':
         return <AdminSettings {...editorProps} />;
       case 'logs':

@@ -106,13 +106,26 @@ function publishedCourse(courseId) {
   return publishedCourses.find((course) => course.id === courseId) ?? null;
 }
 
+/*
+ * خواندن دوبارهٔ کتابخانهٔ منتشرشده، بدون توجه به کش.
+ *
+ * چرا لازم است: مدیر در پنل واحدها را ویرایش و «ذخیره/انتشار» می‌کند، ولی کش
+ * ۱۵ ثانیه‌ای اینجا یعنی ورود بعدی کاربر ممکن است همان نسخهٔ کهنه را ببیند —
+ * همان «تغییرات پنل اعمال نمی‌شود». هر بار که لایهٔ یک درس باز می‌شود یک
+ * درخواست تازه می‌فرستیم؛ هزینه‌اش ناچیز است و تضمین می‌کند آنچه مدیر ذخیره
+ * کرده همان لحظه دیده شود.
+ */
+export function refreshLibrary() {
+  return loadPublishedCourses({ force: true });
+}
+
 /**
  * قرارداد دسترسی به محتوا. پیاده‌سازی امروز از داده محلی می‌خواند؛ نسخه API فقط
  * کافی است بدنه این متدها را عوض کند.
  */
 export const ContentService = {
-  async getCourse(courseId, { signal } = {}) {
-    await loadPublishedCourses();
+  async getCourse(courseId, { signal, force = false } = {}) {
+    await loadPublishedCourses({ force });
 
     if (signal?.aborted) {
       throw new DOMException('درخواست لغو شد', 'AbortError');

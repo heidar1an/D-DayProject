@@ -1000,6 +1000,27 @@ export function fileQuestionReport(identity, questionId, payload, now = nowMs())
   return { report };
 }
 
+/* خواندن/مدیریت گزارش‌های ایراد سؤال برای بخش بازخورد پنل مدیریت */
+export function listQuestionReports() {
+  return store.reports.map((report) => ({ ...report }));
+}
+
+export function setQuestionReportStatus(id, status) {
+  const report = store.reports.find((row) => row.id === id);
+  if (!report) return null;
+  report.status = status === 'resolved' ? 'resolved' : 'open';
+  persistReports();
+  return { ...report };
+}
+
+export function removeQuestionReport(id) {
+  const index = store.reports.findIndex((row) => row.id === id);
+  if (index === -1) return false;
+  store.reports.splice(index, 1);
+  persistReports();
+  return true;
+}
+
 /* ────────────────────────── Audit Log (append-only + hash chain) ────────────────────────── */
 
 function appendAudit(action, { actorId = null, examId = null, attemptId = null, detail = null } = {}) {

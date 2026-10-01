@@ -59,9 +59,12 @@ services/testBank/
 1. **جدایی داده از UI** — UI هیچ‌وقت به mockData وارد نمی‌شود؛ همه‌چیز از سرویس.
 2. **حلّهٔ سؤال سمت سرویس** — blueprint فیلتر/تعداد به `createSession` می‌رود و سشن
    با `questionIds` ساخته می‌شود. موتور پیشنهاد آینده فقط همین blueprint را عوض می‌کند.
-3. **امنیت شکل آزمون هماهنگ** — در حالت Exam، `fetchSessionQuestions` فیلد
-   `correctAnswer`/`explanation` را حذف می‌کند (sanitize)؛ کلید پاسخ فقط بعد از
-   submit از `fetchReviewSession` برمی‌گردد.
+3. **کلید پاسخ در کلاینت نیست (PHASE 2)** — بانک عمومی (`/api/public/test-bank/questions`)
+   و Bundle هیچ `correctAnswer`/`explanation`/`optionPercents` ندارند. درستی، نمره و
+   پاداش را سرور تعیین می‌کند (`POST /api/users/test-bank/answers` و
+   `/test-bank/grade`) و کلید **فقط پس از ثبت پاسخ** و فقط برای همان سؤال برمی‌گردد
+   (بازگشایی کنترل‌شده). `fetchReviewSession` هم کلید را از همان مسیر می‌گیرد.
+   تست نگهبان: `npm run bank:test`.
 4. **وضعیت کاربر مشتق است** — «حل‌شده/غلط/دقت پایین» از خود سشن‌ها محاسبه می‌شود،
    نه فیلد دستی؛ نشان‌شده و نیاز به مرور در state کاربر ذخیره می‌شوند.
 5. **زمان سشن از سرویس** — `endsAt` در `createSession` صادر می‌شود؛ Timer فقط نمایش می‌دهد.

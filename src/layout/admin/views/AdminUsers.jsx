@@ -2,9 +2,15 @@
  * مدیریت کاربران پنل و نقش‌ها.
  *
  * قواعدی که در سرور اعمال می‌شود و اینجا فقط نمایش داده می‌شود:
+ *   - «مدیر کل» نقشی است جدا: ساخت/ویرایش/حذفش مجوز `users.superadmin.manage`
+ *     می‌خواهد. `users.create`/`users.update` به‌تنهایی به آن نمی‌رسند.
+ *   - نقش حساب خود آدم از این مسیر عوض نمی‌شود.
  *   - آخرین «مدیر کل» فعال را نمی‌توان حذف، غیرفعال یا تنزل داد.
  *   - کاربر نمی‌تواند حساب خودش را حذف کند.
  *   - رمز عبور فقط با الگوریتم امن ذخیره می‌شود و هرگز به کلاینت برنمی‌گردد.
+ *
+ * این گاردهای UI فقط تجربهٔ کاربری‌اند؛ مرجع قطعی همان سرور است. پنهان‌کردن
+ * دکمه هرگز جای مجوزدهی سرور را نمی‌گیرد.
  */
 
 import { useCallback, useState } from 'react';
@@ -26,6 +32,7 @@ export default function AdminUsers({ admin, roles }) {
   const [busy, setBusy] = useState(false);
 
   const can = (permission) => admin.permissions?.includes(permission);
+  const canManageSuperAdmin = can('users.superadmin.manage');
   const load = useCallback(() => usersApi.list(filters), [filters]);
   const { data, loading, error, reload } = useAsync(load, [filters]);
 
@@ -33,6 +40,11 @@ export default function AdminUsers({ admin, roles }) {
     { value: 'all', label: 'همهٔ نقش‌ها' },
     ...roles.map((role) => ({ value: role.id, label: role.label })),
   ];
+
+  /* نقش‌هایی که این کاربر اجازهٔ تخصیصشان را دارد */
+  const assignableRoles = roles.filter((role) => role.id !== 'super-admin' || canManageSuperAdmin);
+  const canEditRow = (user) => can('users.update') && (user.role !== 'super-admin' || canManageSuperAdmin);
+  const editingSelf = dialog?.mode === 'edit' && dialog?.form?.id === admin.id;
 
   const roleLabel = (id) => roles.find((role) => role.id === id)?.label ?? id;
 
@@ -142,7 +154,7 @@ export default function AdminUsers({ admin, roles }) {
                 <td><span className="ad-sub">{faDateTime(user.createdAt)}</span></td>
                 <td>
                   <div className="ad-rowactions">
-                    {can('users.update') ? (
+                    {canEditRow(user) ? (
                       <IconButton
                         label="ویرایش"
                         onClick={() => setDialog({ mode: 'edit', form: { ...user, password: '' } })}
@@ -204,11 +216,16 @@ export default function AdminUsers({ admin, roles }) {
               <Input type="email" value={dialog.form.email} dir="ltr" onChange={(event) => setField('email', event.target.value)} />
             </Field>
 
-            <Field label="نقش" required>
+            <Field
+              label="نقش"
+              required
+              hint={editingSelf ? 'نقش حساب خودتان را از این مسیر نمی‌توانید عوض کنید.' : undefined}
+            >
               <Select
                 value={dialog.form.role}
-                options={roles.map((role) => ({ value: role.id, label: role.label }))}
+                options={assignableRoles.map((role) => ({ value: role.id, label: role.label }))}
                 onChange={(event) => setField('role', event.target.value)}
+                disabled={editingSelf}
               />
             </Field>
 

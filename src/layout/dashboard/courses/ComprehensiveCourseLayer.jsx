@@ -1,7 +1,7 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import './comprehensiveCourse.css';
 import { LAYER_IDS, useLayerRoute } from '../dashboardRoute';
-import { ContentService } from '../../../services/learning';
+import { ContentService, refreshLibrary } from '../../../services/learning';
 import AnatomyLearningLayer from './learning/AnatomyLearningLayer';
 
 import anatomyImg from '../../../../images/courses/QqVyc2R_BP6N6Tp05DDFVyP-Yiw-zCJJQASGSV6LQSjrdX1cXw.png';
@@ -45,8 +45,14 @@ const SUBJECT_LIST = [
 ];
 
 /* «تعداد درسنامه» هر درس = تعداد کادرهای سرتیتر (بخش‌های) ستون راست لایهٔ همان درس؛
-   از خودِ محتوای لایه شمرده می‌شود، نه دستی. درسی که لایه‌اش ساخته نشده صفر می‌ماند. */
+   از خودِ محتوای لایه شمرده می‌شود، نه دستی. درسی که لایه‌اش ساخته نشده صفر می‌ماند.
+   این نسخه فقط مقدار اولیه است؛ خودِ لایه بعد از خواندن کتابخانهٔ پنل بازشماری می‌کند. */
 export const SUBJECTS = SUBJECT_LIST.map((subject) => ({
+  ...subject,
+  lessons: ContentService.countSections(subject.id),
+}));
+
+const withLessonCounts = () => SUBJECT_LIST.map((subject) => ({
   ...subject,
   lessons: ContentService.countSections(subject.id),
 }));
@@ -170,6 +176,17 @@ export default function ComprehensiveCourseLayer({ onBack, userId = 'local-user'
   const [view, , patchView] = useLayerRoute(LAYER_IDS.comprehensive, COMPREHENSIVE_VIEW, {
     screenOf: (current) => (current?.subject ? `subject:${current.subject}` : 'grid'),
   });
+  /* کتابخانهٔ منتشرشدهٔ پنل منبع شمارش «تعداد درسنامه» و «کارت باز می‌شود یا نه» است.
+     در زمان import هنوز خوانده نشده، پس یک‌بار اینجا تازه‌سازی می‌کنیم تا تغییرات
+     پنل (بخش تازه، انتشار درس تازه) بلافاصله روی همین شبکه دیده شود. */
+  const [subjects, setSubjects] = useState(SUBJECTS);
+  useEffect(() => {
+    let alive = true;
+    refreshLibrary()
+      .then(() => { if (alive) setSubjects(withLessonCounts()); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, []);
   const filter = view.filter ?? 'all';
   const deepLink = view.deep ?? null;
   const openSubject = view.subject
@@ -202,30 +219,30 @@ export default function ComprehensiveCourseLayer({ onBack, userId = 'local-user'
   };
 
   const visibleSubjects = useMemo(() => {
-    if (filter === 'all') return SUBJECTS;
-    return SUBJECTS.filter((subject) => getSubjectStatus(subject) === filter);
-  }, [filter]);
+    if (filter === 'all') return subjects;
+    return subjects.filter((subject) => getSubjectStatus(subject) === filter);
+  }, [filter, subjects]);
 
   const filterCounts = useMemo(
     () =>
       FILTERS.reduce((counts, item) => {
         counts[item.id] =
           item.id === 'all'
-            ? SUBJECTS.length
-            : SUBJECTS.filter((subject) => getSubjectStatus(subject) === item.id).length;
+            ? subjects.length
+            : subjects.filter((subject) => getSubjectStatus(subject) === item.id).length;
         return counts;
       }, {}),
-    [],
+    [subjects],
   );
 
   const overallProgress = Math.round(
-    SUBJECTS.reduce((total, subject) => total + subject.progress, 0) / SUBJECTS.length,
+    subjects.reduce((total, subject) => total + subject.progress, 0) / (subjects.length || 1),
   );
-  const startedCount = SUBJECTS.filter((subject) => subject.progress > 0).length;
+  const startedCount = subjects.filter((subject) => subject.progress > 0).length;
 
   /* درسنامهٔ هر درسی که لایه دارد باز می‌شود — آناتومی با مسیر یادگیری کامل، بقیه با
      ساختار برگرفته از میکرودرسنامهٔ همان درس. تم لایه از رنگ همان کارت می‌آید. */
-  const openSubjectMeta = SUBJECTS.find((subject) => subject.id === openSubject) ?? null;
+  const openSubjectMeta = subjects.find((subject) => subject.id === openSubject) ?? null;
   if (openSubject && ContentService.hasCourse(openSubject)) {
     return (
       <AnatomyLearningLayer
@@ -288,7 +305,7 @@ export default function ComprehensiveCourseLayer({ onBack, userId = 'local-user'
           <div className="dars-overview__copy">
             <h2>پیشرفت کلی شما</h2>
             <p>
-              {toFa(startedCount)} درس از {toFa(SUBJECTS.length)} درس را آغاز کرده‌ای؛ ادامه بده!
+              {toFa(startedCount)} درس از {toFa(subjects.length)} درس را آغاز کرده‌ای؛ ادامه بده!
             </p>
           </div>
           <div className="dars-overview__meter">

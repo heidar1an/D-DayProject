@@ -97,7 +97,12 @@ export function resolveRange({ range = '30d', from = null, to = null } = {}) {
 
 const EVENTS_COLLECTION = 'events';
 const EVENTS_LIMIT = 20_000;
-const EVENT_TYPES = new Set([
+/*
+ * ⚠️ `export` عمدی است: لایهٔ مدل (`database/models/enums.js`) همین فهرست را
+ * آینه می‌کند و یک تست انطباق، برابری را اثبات می‌کند. اگر روزی مقدار تازه‌ای
+ * اینجا اضافه شود و رجیستری به‌روز نشود، تست می‌شکند — نه اینکه بی‌صدا واگرا شود.
+ */
+export const EVENT_TYPES = new Set([
   'page_view', 'session_start', 'signup', 'login', 'logout',
   'article_read', 'lesson_view', 'wiki_view', 'test_start', 'test_submit',
   'flashcard_review', 'feature_use', 'search', 'cwv', 'js_error', 'api_error', 'purchase',

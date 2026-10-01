@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 
+import { sanitizeHtml } from '../../../../../services/admin/sanitizeHtml';
 import Icon from './icons';
 import { RichText, snapToWordEdges } from './richText';
 import { useReader } from './readerContext';
@@ -105,7 +106,7 @@ export function TextBlock({ block }) {
 export function HtmlBlock({ block }) {
   const [blockHighlights, blockNotes] = useBlockMarks(block.id);
   const html = useMemo(
-    () => markHtml(block.html, blockHighlights, blockNotes),
+    () => markHtml(sanitizeHtml(block.html), blockHighlights, blockNotes),
     [block.html, blockHighlights, blockNotes],
   );
   return <div className="rdr-html" data-block-id={block.id} dangerouslySetInnerHTML={{ __html: html }} />;

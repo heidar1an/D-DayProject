@@ -1,0 +1,1748 @@
+{
+  "generatedAt": "2026-10-01T10:29:24.386Z",
+  "scannedFiles": 425,
+  "serverRoutes": 229,
+  "used": [
+    {
+      "path": "/api/public/articles",
+      "files": [
+        "src/services/articles/articlesService.js"
+      ],
+      "implemented": true
+    },
+    {
+      "path": "/api/public/comprehensive/library",
+      "files": [
+        "src/services/learning/contentService.js"
+      ],
+      "implemented": true
+    },
+    {
+      "path": "/api/public/feedback",
+      "files": [
+        "src/services/feedback/userFeedback.js"
+      ],
+      "implemented": true
+    },
+    {
+      "path": "/api/public/feedback/replies",
+      "files": [
+        "src/services/feedback/userFeedback.js"
+      ],
+      "implemented": true
+    },
+    {
+      "path": "/api/public/feedback/replies/read",
+      "files": [
+        "src/services/feedback/userFeedback.js"
+      ],
+      "implemented": true
+    },
+    {
+      "path": "/api/public/flashcards/library",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ],
+      "implemented": true
+    },
+    {
+      "path": "/api/public/intl-courses/library",
+      "files": [
+        "src/services/international/intlCoursesService.js"
+      ],
+      "implemented": true
+    },
+    {
+      "path": "/api/public/micro/library",
+      "files": [
+        "src/services/micro/microContentService.js"
+      ],
+      "implemented": true
+    },
+    {
+      "path": "/api/public/references/library",
+      "files": [
+        "src/services/referencesApi.js"
+      ],
+      "implemented": true
+    },
+    {
+      "path": "/api/public/test-bank/questions",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ],
+      "implemented": true
+    },
+    {
+      "path": "/api/public/test-bank/revision",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ],
+      "implemented": true
+    },
+    {
+      "path": "/api/users/hearts",
+      "files": [
+        "src/services/hearts/heartStatsService.js"
+      ],
+      "implemented": true
+    },
+    {
+      "path": "/api/users/logout",
+      "files": [
+        "src/App.jsx"
+      ],
+      "implemented": true
+    },
+    {
+      "path": "/api/users/test-bank/answers",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ],
+      "implemented": true
+    },
+    {
+      "path": "/api/users/test-bank/grade",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ],
+      "implemented": true
+    }
+  ],
+  "documented": [
+    {
+      "path": "/api/admin",
+      "files": [
+        "src/services/admin/adminService.js"
+      ]
+    },
+    {
+      "path": "/api/admin/stats",
+      "files": [
+        "src/layout/admin/views/AdminDashboard.jsx"
+      ]
+    },
+    {
+      "path": "/api/admin/users",
+      "files": [
+        "src/layout/admin/planning/sections/settings.jsx",
+        "src/services/planning/planningSources.js"
+      ]
+    },
+    {
+      "path": "/api/ai/attachments",
+      "files": [
+        "src/services/ai/aiService.js",
+        "src/services/ai/mockAI.js"
+      ]
+    },
+    {
+      "path": "/api/ai/chat",
+      "files": [
+        "src/services/ai/aiService.js",
+        "src/services/ai/mockAI.js"
+      ]
+    },
+    {
+      "path": "/api/ai/notes/rewrite",
+      "files": [
+        "src/services/notes/notesService.js"
+      ]
+    },
+    {
+      "path": "/api/analytics/behavior",
+      "files": [
+        "src/services/analytics/analyticsService.js"
+      ]
+    },
+    {
+      "path": "/api/analytics/diagnosis",
+      "files": [
+        "src/services/analytics/analyticsService.js"
+      ]
+    },
+    {
+      "path": "/api/analytics/exams",
+      "files": [
+        "src/services/analytics/analyticsService.js"
+      ]
+    },
+    {
+      "path": "/api/analytics/exams/:p",
+      "files": [
+        "src/services/analytics/analyticsService.js"
+      ]
+    },
+    {
+      "path": "/api/analytics/overview",
+      "files": [
+        "src/services/analytics/analyticsService.js"
+      ]
+    },
+    {
+      "path": "/api/analytics/questions",
+      "files": [
+        "src/services/analytics/analyticsService.js"
+      ]
+    },
+    {
+      "path": "/api/analytics/subjects",
+      "files": [
+        "src/services/analytics/analyticsService.js"
+      ]
+    },
+    {
+      "path": "/api/analytics/summary/week",
+      "files": [
+        "src/services/analytics/analyticsService.js"
+      ]
+    },
+    {
+      "path": "/api/analytics/topics",
+      "files": [
+        "src/services/analytics/analyticsService.js"
+      ]
+    },
+    {
+      "path": "/api/analytics/trend",
+      "files": [
+        "src/services/analytics/analyticsService.js"
+      ]
+    },
+    {
+      "path": "/api/articles",
+      "files": [
+        "src/services/articles/articlesService.js"
+      ]
+    },
+    {
+      "path": "/api/articles/:p",
+      "files": [
+        "src/services/articles/articlesService.js"
+      ]
+    },
+    {
+      "path": "/api/articles/:p/highlights",
+      "files": [
+        "src/services/articles/userState.js"
+      ]
+    },
+    {
+      "path": "/api/articles/:p/related",
+      "files": [
+        "src/services/articles/articlesService.js"
+      ]
+    },
+    {
+      "path": "/api/articles/:p/state",
+      "files": [
+        "src/services/articles/userState.js"
+      ]
+    },
+    {
+      "path": "/api/articles/categories",
+      "files": [
+        "src/services/articles/articlesService.js"
+      ]
+    },
+    {
+      "path": "/api/articles/suggest",
+      "files": [
+        "src/services/articles/articlesService.js"
+      ]
+    },
+    {
+      "path": "/api/attempts/:p",
+      "files": [
+        "src/services/coordinatedExams/coordinatedExamService.js"
+      ]
+    },
+    {
+      "path": "/api/attempts/:p/questions",
+      "files": [
+        "src/services/coordinatedExams/coordinatedExamService.js"
+      ]
+    },
+    {
+      "path": "/api/attempts/:p/submit",
+      "files": [
+        "src/services/coordinatedExams/coordinatedExamService.js"
+      ]
+    },
+    {
+      "path": "/api/attempts/active",
+      "files": [
+        "src/services/coordinatedExams/coordinatedExamService.js"
+      ]
+    },
+    {
+      "path": "/api/auth/google",
+      "files": [
+        "src/services/userStorage.js"
+      ]
+    },
+    {
+      "path": "/api/bank/bookmarks/:p/toggle",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ]
+    },
+    {
+      "path": "/api/bank/filters",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ]
+    },
+    {
+      "path": "/api/bank/filters/:p",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ]
+    },
+    {
+      "path": "/api/bank/history",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ]
+    },
+    {
+      "path": "/api/bank/overview",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ]
+    },
+    {
+      "path": "/api/bank/performance",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ]
+    },
+    {
+      "path": "/api/bank/questions/:p",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ]
+    },
+    {
+      "path": "/api/bank/questions/:p/attempts",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ]
+    },
+    {
+      "path": "/api/bank/questions/:p/report",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ]
+    },
+    {
+      "path": "/api/bank/questions/search",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ]
+    },
+    {
+      "path": "/api/bank/questions/stats",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ]
+    },
+    {
+      "path": "/api/bank/review/:p/toggle",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ]
+    },
+    {
+      "path": "/api/bank/sessions",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ]
+    },
+    {
+      "path": "/api/exam-builder/availability",
+      "files": [
+        "src/services/examBuilder/examBuilderService.js"
+      ]
+    },
+    {
+      "path": "/api/exam-builder/catalog",
+      "files": [
+        "src/services/examBuilder/examBuilderService.js"
+      ]
+    },
+    {
+      "path": "/api/exam-builder/next-config",
+      "files": [
+        "src/services/examBuilder/examBuilderService.js"
+      ]
+    },
+    {
+      "path": "/api/exam-builder/plan",
+      "files": [
+        "src/services/examBuilder/examBuilderService.js"
+      ]
+    },
+    {
+      "path": "/api/exam-builder/related-topics",
+      "files": [
+        "src/services/examBuilder/examBuilderService.js"
+      ]
+    },
+    {
+      "path": "/api/exams",
+      "files": [
+        "src/services/coordinatedExams/coordinatedExamService.js",
+        "src/services/examBuilder/examBuilderService.js"
+      ]
+    },
+    {
+      "path": "/api/exams/:p",
+      "files": [
+        "src/services/coordinatedExams/coordinatedExamService.js",
+        "src/services/examBuilder/examBuilderService.js"
+      ]
+    },
+    {
+      "path": "/api/exams/:p/attempts",
+      "files": [
+        "src/services/coordinatedExams/coordinatedExamService.js",
+        "src/services/examBuilder/examBuilderService.js"
+      ]
+    },
+    {
+      "path": "/api/exams/:p/questions/review",
+      "files": [
+        "src/services/coordinatedExams/coordinatedExamService.js"
+      ]
+    },
+    {
+      "path": "/api/exams/:p/ranking",
+      "files": [
+        "src/services/coordinatedExams/coordinatedExamService.js"
+      ]
+    },
+    {
+      "path": "/api/exams/:p/registration",
+      "files": [
+        "src/services/coordinatedExams/coordinatedExamService.js"
+      ]
+    },
+    {
+      "path": "/api/exams/:p/result",
+      "files": [
+        "src/services/coordinatedExams/coordinatedExamService.js"
+      ]
+    },
+    {
+      "path": "/api/exams/server-time",
+      "files": [
+        "src/services/coordinatedExams/coordinatedExamService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/cards",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/cards/:p",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/cards/:p/archive",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/cards/:p/bookmark",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/cards/:p/bury",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/cards/:p/suspend",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/decks",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/decks/:p",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/decks/:p/share",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/events",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/import",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/library",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/library/:p/add",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/library/:p/remove",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/overview",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/review/:p/rate",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/review/queue",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/settings",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/shares/redeem",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/stats",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/green-path",
+      "files": [
+        "src/services/greenPath/greenPathConfig.js"
+      ]
+    },
+    {
+      "path": "/api/green-path/calendar",
+      "files": [
+        "src/services/greenPath/greenPathRepository.js"
+      ]
+    },
+    {
+      "path": "/api/green-path/deadlines",
+      "files": [
+        "src/services/greenPath/greenPathRepository.js"
+      ]
+    },
+    {
+      "path": "/api/green-path/performance",
+      "files": [
+        "src/services/greenPath/greenPathRepository.js"
+      ]
+    },
+    {
+      "path": "/api/green-path/profile",
+      "files": [
+        "src/services/greenPath/greenPathRepository.js"
+      ]
+    },
+    {
+      "path": "/api/green-path/recalculate",
+      "files": [
+        "src/services/greenPath/greenPathRepository.js"
+      ]
+    },
+    {
+      "path": "/api/green-path/recommendations",
+      "files": [
+        "src/services/greenPath/greenPathRepository.js"
+      ]
+    },
+    {
+      "path": "/api/green-path/roadmap",
+      "files": [
+        "src/services/greenPath/greenPathRepository.js"
+      ]
+    },
+    {
+      "path": "/api/green-path/study-sessions",
+      "files": [
+        "src/services/greenPath/greenPathRepository.js"
+      ]
+    },
+    {
+      "path": "/api/green-path/tasks/:p",
+      "files": [
+        "src/services/greenPath/greenPathRepository.js"
+      ]
+    },
+    {
+      "path": "/api/green-path/today",
+      "files": [
+        "src/services/greenPath/greenPathRepository.js"
+      ]
+    },
+    {
+      "path": "/api/group/groups",
+      "files": [
+        "src/services/group/groupService.js"
+      ]
+    },
+    {
+      "path": "/api/group/groups/:p",
+      "files": [
+        "src/services/group/groupService.js"
+      ]
+    },
+    {
+      "path": "/api/group/groups/:p/code",
+      "files": [
+        "src/services/group/groupService.js"
+      ]
+    },
+    {
+      "path": "/api/group/groups/:p/join",
+      "files": [
+        "src/services/group/groupService.js"
+      ]
+    },
+    {
+      "path": "/api/group/groups/:p/members/:p",
+      "files": [
+        "src/services/group/groupService.js"
+      ]
+    },
+    {
+      "path": "/api/group/tiers",
+      "files": [
+        "src/services/group/groupService.js"
+      ]
+    },
+    {
+      "path": "/api/hearts/series",
+      "files": [
+        "src/services/hearts/heartSeries.js"
+      ]
+    },
+    {
+      "path": "/api/intl/attempts",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/intl/attempts/:p",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/intl/attempts/:p/answers",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/intl/attempts/:p/submit",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/intl/bookmarks/:p",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/intl/collections",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/intl/collections/:p",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/intl/collections/:p/questions",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/intl/collections/:p/questions/:p",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/intl/custom-exams/preview",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/intl/events",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/intl/exams",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/intl/exams/:p",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/intl/mistakes",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/intl/overview",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/intl/questions",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/intl/review/due",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/intl/teach-me/:p",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/league/achievements",
+      "files": [
+        "src/services/league/leagueService.js"
+      ]
+    },
+    {
+      "path": "/api/league/battles/:p/join",
+      "files": [
+        "src/services/league/leagueService.js"
+      ]
+    },
+    {
+      "path": "/api/league/challenges",
+      "files": [
+        "src/services/league/leagueService.js"
+      ]
+    },
+    {
+      "path": "/api/league/challenges/:p/claim",
+      "files": [
+        "src/services/league/leagueService.js"
+      ]
+    },
+    {
+      "path": "/api/league/duels",
+      "files": [
+        "src/services/league/leagueService.js"
+      ]
+    },
+    {
+      "path": "/api/league/events",
+      "files": [
+        "src/services/league/leagueService.js"
+      ]
+    },
+    {
+      "path": "/api/league/friends/notifications",
+      "files": [
+        "src/layout/dashboard/NotificationsSection.jsx",
+        "src/services/league/leagueService.js"
+      ]
+    },
+    {
+      "path": "/api/league/leaderboard",
+      "files": [
+        "src/services/league/leagueService.js"
+      ]
+    },
+    {
+      "path": "/api/league/notifications",
+      "files": [
+        "src/layout/dashboard/NotificationsSection.jsx",
+        "src/services/league/leagueService.js"
+      ]
+    },
+    {
+      "path": "/api/league/overview",
+      "files": [
+        "src/services/league/leagueService.js"
+      ]
+    },
+    {
+      "path": "/api/league/profile-details",
+      "files": [
+        "src/services/league/leagueService.js"
+      ]
+    },
+    {
+      "path": "/api/me/collections",
+      "files": [
+        "src/services/articles/userState.js"
+      ]
+    },
+    {
+      "path": "/api/me/recommendations",
+      "files": [
+        "src/services/articles/articlesService.js"
+      ]
+    },
+    {
+      "path": "/api/notes",
+      "files": [
+        "src/services/notes/notesService.js"
+      ]
+    },
+    {
+      "path": "/api/notes/:p",
+      "files": [
+        "src/services/notes/notesService.js"
+      ]
+    },
+    {
+      "path": "/api/notes/:p/checklist/:p/toggle",
+      "files": [
+        "src/services/notes/notesService.js"
+      ]
+    },
+    {
+      "path": "/api/notes/:p/pin",
+      "files": [
+        "src/services/notes/notesService.js"
+      ]
+    },
+    {
+      "path": "/api/pricing/capabilities",
+      "files": [
+        "src/services/pricing/pricingService.js"
+      ]
+    },
+    {
+      "path": "/api/pricing/cycles",
+      "files": [
+        "src/services/pricing/pricingService.js"
+      ]
+    },
+    {
+      "path": "/api/pricing/plans",
+      "files": [
+        "src/services/pricing/pricingService.js"
+      ]
+    },
+    {
+      "path": "/api/pricing/quote",
+      "files": [
+        "src/services/pricing/pricingService.js"
+      ]
+    },
+    {
+      "path": "/api/public/about",
+      "files": [
+        "src/services/about/aboutService.js"
+      ]
+    },
+    {
+      "path": "/api/public/analytics/collect",
+      "files": [
+        "src/services/telemetry/trafficTracker.js"
+      ]
+    },
+    {
+      "path": "/api/public/articles",
+      "files": [
+        "src/layout/admin/views/AdminArticleLibrary.jsx"
+      ]
+    },
+    {
+      "path": "/api/public/comprehensive/library",
+      "files": [
+        "src/layout/admin/views/AdminComprehensive.jsx",
+        "src/services/admin/adminService.js"
+      ]
+    },
+    {
+      "path": "/api/public/flashcards/library",
+      "files": [
+        "src/services/learning/contentService.js",
+        "src/services/micro/microContentService.js"
+      ]
+    },
+    {
+      "path": "/api/public/intl-courses/library",
+      "files": [
+        "src/layout/admin/views/AdminIntlCourses.jsx",
+        "src/layout/dashboard/courses/InternationalCoursesLayer.jsx",
+        "src/services/admin/adminService.js"
+      ]
+    },
+    {
+      "path": "/api/public/micro/library",
+      "files": [
+        "src/layout/admin/views/AdminMicro.jsx",
+        "src/layout/dashboard/courses/InternationalCoursesLayer.jsx",
+        "src/services/admin/adminService.js",
+        "src/services/international/intlCoursesService.js",
+        "src/services/learning/contentService.js"
+      ]
+    },
+    {
+      "path": "/api/public/references/library",
+      "files": [
+        "src/layout/admin/views/AdminReferences.jsx",
+        "src/services/admin/adminService.js",
+        "src/services/international/intlCoursesService.js"
+      ]
+    },
+    {
+      "path": "/api/questions/:p/report",
+      "files": [
+        "src/services/coordinatedExams/coordinatedExamService.js"
+      ]
+    },
+    {
+      "path": "/api/sessions/:p",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ]
+    },
+    {
+      "path": "/api/sessions/:p/progress",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ]
+    },
+    {
+      "path": "/api/sessions/:p/submit",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ]
+    },
+    {
+      "path": "/api/users",
+      "files": [
+        "src/services/userStorage.js"
+      ]
+    },
+    {
+      "path": "/api/users/me",
+      "files": [
+        "src/App.jsx",
+        "src/services/userStorage.js"
+      ]
+    },
+    {
+      "path": "/api/users/test-bank/answers",
+      "files": [
+        "src/services/testBank/mockData.js"
+      ]
+    }
+  ],
+  "brokenCalls": [],
+  "documentedNotImplemented": [
+    {
+      "path": "/api/admin",
+      "files": [
+        "src/services/admin/adminService.js"
+      ]
+    },
+    {
+      "path": "/api/ai/attachments",
+      "files": [
+        "src/services/ai/aiService.js",
+        "src/services/ai/mockAI.js"
+      ]
+    },
+    {
+      "path": "/api/ai/chat",
+      "files": [
+        "src/services/ai/aiService.js",
+        "src/services/ai/mockAI.js"
+      ]
+    },
+    {
+      "path": "/api/ai/notes/rewrite",
+      "files": [
+        "src/services/notes/notesService.js"
+      ]
+    },
+    {
+      "path": "/api/analytics/behavior",
+      "files": [
+        "src/services/analytics/analyticsService.js"
+      ]
+    },
+    {
+      "path": "/api/analytics/diagnosis",
+      "files": [
+        "src/services/analytics/analyticsService.js"
+      ]
+    },
+    {
+      "path": "/api/analytics/exams",
+      "files": [
+        "src/services/analytics/analyticsService.js"
+      ]
+    },
+    {
+      "path": "/api/analytics/exams/:p",
+      "files": [
+        "src/services/analytics/analyticsService.js"
+      ]
+    },
+    {
+      "path": "/api/analytics/overview",
+      "files": [
+        "src/services/analytics/analyticsService.js"
+      ]
+    },
+    {
+      "path": "/api/analytics/questions",
+      "files": [
+        "src/services/analytics/analyticsService.js"
+      ]
+    },
+    {
+      "path": "/api/analytics/subjects",
+      "files": [
+        "src/services/analytics/analyticsService.js"
+      ]
+    },
+    {
+      "path": "/api/analytics/summary/week",
+      "files": [
+        "src/services/analytics/analyticsService.js"
+      ]
+    },
+    {
+      "path": "/api/analytics/topics",
+      "files": [
+        "src/services/analytics/analyticsService.js"
+      ]
+    },
+    {
+      "path": "/api/analytics/trend",
+      "files": [
+        "src/services/analytics/analyticsService.js"
+      ]
+    },
+    {
+      "path": "/api/articles",
+      "files": [
+        "src/services/articles/articlesService.js"
+      ]
+    },
+    {
+      "path": "/api/articles/:p",
+      "files": [
+        "src/services/articles/articlesService.js"
+      ]
+    },
+    {
+      "path": "/api/articles/:p/highlights",
+      "files": [
+        "src/services/articles/userState.js"
+      ]
+    },
+    {
+      "path": "/api/articles/:p/related",
+      "files": [
+        "src/services/articles/articlesService.js"
+      ]
+    },
+    {
+      "path": "/api/articles/:p/state",
+      "files": [
+        "src/services/articles/userState.js"
+      ]
+    },
+    {
+      "path": "/api/articles/categories",
+      "files": [
+        "src/services/articles/articlesService.js"
+      ]
+    },
+    {
+      "path": "/api/articles/suggest",
+      "files": [
+        "src/services/articles/articlesService.js"
+      ]
+    },
+    {
+      "path": "/api/auth/google",
+      "files": [
+        "src/services/userStorage.js"
+      ]
+    },
+    {
+      "path": "/api/bank/bookmarks/:p/toggle",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ]
+    },
+    {
+      "path": "/api/bank/filters",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ]
+    },
+    {
+      "path": "/api/bank/filters/:p",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ]
+    },
+    {
+      "path": "/api/bank/history",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ]
+    },
+    {
+      "path": "/api/bank/overview",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ]
+    },
+    {
+      "path": "/api/bank/performance",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ]
+    },
+    {
+      "path": "/api/bank/questions/:p",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ]
+    },
+    {
+      "path": "/api/bank/questions/:p/attempts",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ]
+    },
+    {
+      "path": "/api/bank/questions/:p/report",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ]
+    },
+    {
+      "path": "/api/bank/questions/search",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ]
+    },
+    {
+      "path": "/api/bank/questions/stats",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ]
+    },
+    {
+      "path": "/api/bank/review/:p/toggle",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ]
+    },
+    {
+      "path": "/api/bank/sessions",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ]
+    },
+    {
+      "path": "/api/exam-builder/availability",
+      "files": [
+        "src/services/examBuilder/examBuilderService.js"
+      ]
+    },
+    {
+      "path": "/api/exam-builder/catalog",
+      "files": [
+        "src/services/examBuilder/examBuilderService.js"
+      ]
+    },
+    {
+      "path": "/api/exam-builder/next-config",
+      "files": [
+        "src/services/examBuilder/examBuilderService.js"
+      ]
+    },
+    {
+      "path": "/api/exam-builder/plan",
+      "files": [
+        "src/services/examBuilder/examBuilderService.js"
+      ]
+    },
+    {
+      "path": "/api/exam-builder/related-topics",
+      "files": [
+        "src/services/examBuilder/examBuilderService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/cards",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/cards/:p",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/cards/:p/archive",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/cards/:p/bookmark",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/cards/:p/bury",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/cards/:p/suspend",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/decks",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/decks/:p",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/decks/:p/share",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/events",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/import",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/library",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/library/:p/add",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/library/:p/remove",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/overview",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/review/:p/rate",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/review/queue",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/settings",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/shares/redeem",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/flashcards/stats",
+      "files": [
+        "src/services/flashcards/flashcardService.js"
+      ]
+    },
+    {
+      "path": "/api/green-path",
+      "files": [
+        "src/services/greenPath/greenPathConfig.js"
+      ]
+    },
+    {
+      "path": "/api/green-path/calendar",
+      "files": [
+        "src/services/greenPath/greenPathRepository.js"
+      ]
+    },
+    {
+      "path": "/api/green-path/deadlines",
+      "files": [
+        "src/services/greenPath/greenPathRepository.js"
+      ]
+    },
+    {
+      "path": "/api/green-path/performance",
+      "files": [
+        "src/services/greenPath/greenPathRepository.js"
+      ]
+    },
+    {
+      "path": "/api/green-path/profile",
+      "files": [
+        "src/services/greenPath/greenPathRepository.js"
+      ]
+    },
+    {
+      "path": "/api/green-path/recalculate",
+      "files": [
+        "src/services/greenPath/greenPathRepository.js"
+      ]
+    },
+    {
+      "path": "/api/green-path/recommendations",
+      "files": [
+        "src/services/greenPath/greenPathRepository.js"
+      ]
+    },
+    {
+      "path": "/api/green-path/roadmap",
+      "files": [
+        "src/services/greenPath/greenPathRepository.js"
+      ]
+    },
+    {
+      "path": "/api/green-path/study-sessions",
+      "files": [
+        "src/services/greenPath/greenPathRepository.js"
+      ]
+    },
+    {
+      "path": "/api/green-path/tasks/:p",
+      "files": [
+        "src/services/greenPath/greenPathRepository.js"
+      ]
+    },
+    {
+      "path": "/api/green-path/today",
+      "files": [
+        "src/services/greenPath/greenPathRepository.js"
+      ]
+    },
+    {
+      "path": "/api/group/groups",
+      "files": [
+        "src/services/group/groupService.js"
+      ]
+    },
+    {
+      "path": "/api/group/groups/:p",
+      "files": [
+        "src/services/group/groupService.js"
+      ]
+    },
+    {
+      "path": "/api/group/groups/:p/code",
+      "files": [
+        "src/services/group/groupService.js"
+      ]
+    },
+    {
+      "path": "/api/group/groups/:p/join",
+      "files": [
+        "src/services/group/groupService.js"
+      ]
+    },
+    {
+      "path": "/api/group/groups/:p/members/:p",
+      "files": [
+        "src/services/group/groupService.js"
+      ]
+    },
+    {
+      "path": "/api/group/tiers",
+      "files": [
+        "src/services/group/groupService.js"
+      ]
+    },
+    {
+      "path": "/api/hearts/series",
+      "files": [
+        "src/services/hearts/heartSeries.js"
+      ]
+    },
+    {
+      "path": "/api/intl/attempts",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/intl/attempts/:p",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/intl/attempts/:p/answers",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/intl/attempts/:p/submit",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/intl/bookmarks/:p",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/intl/collections",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/intl/collections/:p",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/intl/collections/:p/questions",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/intl/collections/:p/questions/:p",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/intl/custom-exams/preview",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/intl/events",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/intl/exams",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/intl/exams/:p",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/intl/mistakes",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/intl/overview",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/intl/questions",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/intl/review/due",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/intl/teach-me/:p",
+      "files": [
+        "src/services/international/internationalService.js"
+      ]
+    },
+    {
+      "path": "/api/league/achievements",
+      "files": [
+        "src/services/league/leagueService.js"
+      ]
+    },
+    {
+      "path": "/api/league/battles/:p/join",
+      "files": [
+        "src/services/league/leagueService.js"
+      ]
+    },
+    {
+      "path": "/api/league/challenges",
+      "files": [
+        "src/services/league/leagueService.js"
+      ]
+    },
+    {
+      "path": "/api/league/challenges/:p/claim",
+      "files": [
+        "src/services/league/leagueService.js"
+      ]
+    },
+    {
+      "path": "/api/league/duels",
+      "files": [
+        "src/services/league/leagueService.js"
+      ]
+    },
+    {
+      "path": "/api/league/events",
+      "files": [
+        "src/services/league/leagueService.js"
+      ]
+    },
+    {
+      "path": "/api/league/friends/notifications",
+      "files": [
+        "src/layout/dashboard/NotificationsSection.jsx",
+        "src/services/league/leagueService.js"
+      ]
+    },
+    {
+      "path": "/api/league/leaderboard",
+      "files": [
+        "src/services/league/leagueService.js"
+      ]
+    },
+    {
+      "path": "/api/league/notifications",
+      "files": [
+        "src/layout/dashboard/NotificationsSection.jsx",
+        "src/services/league/leagueService.js"
+      ]
+    },
+    {
+      "path": "/api/league/overview",
+      "files": [
+        "src/services/league/leagueService.js"
+      ]
+    },
+    {
+      "path": "/api/league/profile-details",
+      "files": [
+        "src/services/league/leagueService.js"
+      ]
+    },
+    {
+      "path": "/api/me/collections",
+      "files": [
+        "src/services/articles/userState.js"
+      ]
+    },
+    {
+      "path": "/api/me/recommendations",
+      "files": [
+        "src/services/articles/articlesService.js"
+      ]
+    },
+    {
+      "path": "/api/notes",
+      "files": [
+        "src/services/notes/notesService.js"
+      ]
+    },
+    {
+      "path": "/api/notes/:p",
+      "files": [
+        "src/services/notes/notesService.js"
+      ]
+    },
+    {
+      "path": "/api/notes/:p/checklist/:p/toggle",
+      "files": [
+        "src/services/notes/notesService.js"
+      ]
+    },
+    {
+      "path": "/api/notes/:p/pin",
+      "files": [
+        "src/services/notes/notesService.js"
+      ]
+    },
+    {
+      "path": "/api/pricing/capabilities",
+      "files": [
+        "src/services/pricing/pricingService.js"
+      ]
+    },
+    {
+      "path": "/api/pricing/cycles",
+      "files": [
+        "src/services/pricing/pricingService.js"
+      ]
+    },
+    {
+      "path": "/api/pricing/plans",
+      "files": [
+        "src/services/pricing/pricingService.js"
+      ]
+    },
+    {
+      "path": "/api/pricing/quote",
+      "files": [
+        "src/services/pricing/pricingService.js"
+      ]
+    },
+    {
+      "path": "/api/public/about",
+      "files": [
+        "src/services/about/aboutService.js"
+      ]
+    },
+    {
+      "path": "/api/sessions/:p",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ]
+    },
+    {
+      "path": "/api/sessions/:p/progress",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ]
+    },
+    {
+      "path": "/api/sessions/:p/submit",
+      "files": [
+        "src/services/testBank/testBankService.js"
+      ]
+    },
+    {
+      "path": "/api/users",
+      "files": [
+        "src/services/userStorage.js"
+      ]
+    }
+  ]
+}

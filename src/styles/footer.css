@@ -1,0 +1,135 @@
+.site-footer {
+  border-top: 1px solid rgb(var(--line-rgb) / 0.04);
+  background: var(--background);
+}
+
+.site-footer__inner {
+  display: grid;
+  grid-template-columns: 1fr 0.9fr 0.85fr 0.95fr;
+  gap: 46px;
+  padding-top: 38px;
+  padding-bottom: 70px;
+  direction: rtl;
+}
+
+.site-footer__brand,
+.site-footer__column,
+.site-footer__social,
+.site-footer__about {
+  min-width: 0;
+}
+
+.site-footer__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.site-footer__brand .brand {
+  gap: 7px;
+}
+
+.site-footer__brand .brand__mark {
+  width: 55px;
+  height: 55px;
+}
+
+.site-footer__brand .brand__word {
+  font-size: 2.65rem;
+}
+
+.site-footer__brand small {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 0.62rem;
+}
+
+.site-footer__column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 13px;
+}
+
+.site-footer__column h2 {
+  margin: 0 0 7px;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: 1.55rem;
+  font-weight: 700;
+}
+
+.site-footer__column a {
+  color: var(--white);
+  font-size: 1.15rem;
+  font-weight: 400;
+  line-height: 1.35;
+  transition: color 180ms ease;
+}
+
+.site-footer__column a:hover {
+  color: var(--blue-bright);
+}
+
+.site-footer__social {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 13px;
+}
+
+.site-footer__social h2 {
+  margin: 0 0 7px;
+  font-family: 'Doran', 'Vazir', Tahoma, sans-serif;
+  font-size: 1.55rem;
+  font-weight: 700;
+}
+
+.site-footer__social-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-width: 190px;
+}
+
+.site-footer__social-link {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid rgb(var(--line-rgb) / 0.12);
+  border-radius: 14px;
+  background: rgb(var(--wash-rgb) / 0.08);
+  color: var(--white);
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+
+.site-footer__social-link:hover {
+  transform: translateY(-3px);
+  border-color: var(--blue-bright);
+  background: rgb(var(--wash-rgb) / 0.16);
+}
+
+/* نشانه‌های فضاهای مجازی همه تصویرند (webp/svg) و تک‌فام سفید ذخیره شده‌اند؛
+   همین فیلترِ آیکون‌های سایت آن‌ها را با تم برمی‌گرداند: سفید در تیره، تیره در روشن. */
+.site-footer__social-link img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  filter: var(--icon-filter);
+}
+
+.site-footer__about {
+  width: 100%;
+  max-width: 310px;
+  margin-top: 18px;
+  color: var(--muted);
+  font-size: 0.95rem;
+  font-weight: 400;
+  line-height: 2;
+  text-align: right;
+}
+
+.site-footer__about p {
+  margin: 0;
+}
+

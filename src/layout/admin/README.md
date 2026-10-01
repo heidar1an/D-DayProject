@@ -400,8 +400,34 @@ src/layout/admin/
   `GET /api/admin/comprehensive[/:id]` و `PUT /api/admin/comprehensive/:id` —
   ساخت/حذف ندارد چون درس‌ها ثابت‌اند. انتشار با فیلد `status` روی همان PUT است و
   نسخهٔ منتشرشده از `GET /api/public/comprehensive/library` به `ContentService`
-  می‌رسد (کش ۱۵ ثانیه؛ بی‌سرور، رجیستری ثابت). مجوزها: `comprehensive.read /
-  update / publish` (نقش «نویسنده» هم هر سه را دارد).
+  می‌رسد. مجوزها: `comprehensive.read / update / publish` (نقش «نویسنده» هم هر سه را دارد).
+- **«تست‌های این بخش» هر واحد — انتخاب از بانک تست:** هر واحد فیلد
+  `testBank {subjectId, topicPaths[], pinnedQuestionIds[]}` دارد. دکمهٔ «انتخاب از
+  بانک تست» در ویرایشگر واحد، `BankPicker` را باز می‌کند که از
+  `GET /api/admin/comprehensive/test-bank` (پیش از `/:id` ثبت شده — تطبیق مسیر فقط
+  تعداد سگمنت + `:param` است) فهرست سؤال‌های منتشرشده را با فیلتر درس/سطح/مسیر مبحث
+  می‌گیرد. **سؤال‌ها سمت سرور حل می‌شوند:** `publishedComprehensiveCourses()` اول
+  سؤال‌های سنجاق‌شده را می‌آورد و اگر خالی بود با فیلتر **AND** درس و مسیر مبحث
+  (سقف ۳۰) پر می‌کند؛ خروجی با شکل چهارگزینه‌ای لایه یکی است (`options[{id,label}]`،
+  `answer` = شناسهٔ گزینه، `explanation` از `explanation.summary`). کاربر در مرحلهٔ
+  «تست» با «زدن تست‌های بخش» وارد اتاق `UnitBankSession` می‌شود: یک سؤال در قاب،
+  نقشهٔ سؤال‌ها، ثبت پاسخ با تحلیل بلافاصله و سرتیتر خودِ بخش. پاسخ‌ها در state محلی
+  می‌مانند و نشست نمی‌کنند. **این اتاق یک لایهٔ مستقل است** و دکمه هیچ شاخهٔ جایگزینی
+  ندارد: اگر برای واحد سؤالی از بانک انتخاب نشده باشد، همان اتاق با سؤال‌های دست‌نویس
+  خودِ واحد (`learning.practice` + `labelQuiz`) پر می‌شود و چیپ
+  `.unit-bank-session__source` منبع را اعلام می‌کند («بانک تست تپش · فقط سؤال‌های همین
+  بخش» یا «سؤال‌های همین واحد · فقط همین بخش») — نه پرش به مرحلهٔ تمرین.
+- **پاپ‌آپ تبریک تکمیل واحد:** هر واحد `celebration {title, message, image}` دارد؛
+  تصویر از `MediaPicker` (کتابخانهٔ رسانه) انتخاب می‌شود و در لحظهٔ تکمیل واحد
+  (`goNext` با نبود مرحلهٔ بعد) یک‌بار نمایش داده می‌شود. بدون تصویر، نشان تیک
+  پیش‌فرض می‌آید.
+- **شناسهٔ پایدار:** رکورد بی‌شناسه (سؤال/واحد تازه) شناسهٔ خود را **از جایگاه**
+  می‌گیرد (`<unitId>-mcq-1`، `<moduleId>-unit-1`) نه از شناسهٔ تصادفی — وگرنه هر
+  ذخیرهٔ پنل شناسه‌ها را عوض می‌کرد و پیشرفت کاربر گم می‌شد.
+- **کش:** `ContentService.getCourse(id, { force: true })` در ورود به هر درس،
+  کتابخانهٔ منتشرشده را تازه می‌خواند؛ `refreshLibrary()` هم شمارندهٔ «تعداد درسنامه»
+  روی شبکهٔ درس‌ها را بازشماری می‌کند (وگرنه مقدار زمان import یخ می‌زد و ویرایش تازهٔ
+  پنل دیده نمی‌شد).
 - **رابط، آینهٔ «مراجع تپش» است:** نوار بالا (بازگشت + انتخاب درس + جست‌وجو/وضعیت +
   شمارنده‌ها + ذخیره + انتشار) و دو ستونِ **درخت درس/مبحث/واحد** (`ad-ref__tree`) |
   **ویرایشگر گرهٔ انتخابی** (`ad-ref__editor`). همهٔ کلاس‌ها همان `ad-ref__*` هستند
@@ -909,6 +935,7 @@ PORT=4173
 | `categories` | `categories.json` | `id, label, accent` |
 | `pages` | `pages.json` | رجیستری ۱۵ لایهٔ تپش — `id, title, slug, group, icon, route, description, contentHtml, cover, status, seo{}, publishedAt, createdAt, updatedAt` |
 | `microCourses` | `microCourses.json` | درسنامهٔ کامل در یک رکورد — `id, subjectId, title, englishTitle, kicker, description, accent, estimatedTime, difficulty, checkpointInterval, status, publishedAt, topics[{id,title,description,accent,published,units[{id,title,learningObjective,estimatedTime,difficulty,checkpointInterval,testBank{subjectId,topicPaths[],relatedTopicPaths[]},finalAssessment{questionCount},concepts[],pages[{id,order,title,learningObjective,estimatedTime,difficulty,importance,examFrequency,keywords[],concepts[],content,blocks[]}],checkpoints[{id,afterPage,questionCount,required,scopePages[],pinnedQuestionIds[],questions[]}]}]}], createdAt, updatedAt, createdBy, updatedBy` |
+| `comprehensiveCourses` | `comprehensiveCourses.json` | درسنامهٔ جامع — هر درس یک رکورد: `id, title, subtitle, description, modules[{id,order,title,description,unitCount,tests,progress,status,lastActivity}], unitsByModule{<moduleId>:[{id,moduleId,order,title,description,estimatedTime,sectionCount,tests,objectives[],prerequisites[],status,progress,mastery,lastActivity,steps[],testBank{subjectId,topicPaths[][],pinnedQuestionIds[]},celebration{title,message,image},learning{activate{tests[]},microLessons[],visualize{title,instruction,structures[],layers[]},practice[],labelQuiz}}]}, status, origin, publishedAt, createdAt, updatedAt, createdBy, updatedBy` |
 | `media` | `media.json` | `id, filename, originalName, mimeType, size, url, altText, createdAt, uploadedBy` |
 | `banners` | `banners.json` | `id, title, subtitle, image, buttonText, buttonUrl, isActive, sortOrder, startDate, endDate` |
 | `activity` | `activity.json` | `id, userId, userName, action, entityType, entityId, entityLabel, metadata, ip, userAgent, createdAt` |
@@ -1017,6 +1044,9 @@ POST   /api/admin/publishing/send        { channelIds, content, dryRun }
 GET    /api/admin/publishing/log         ?channelId&status&page&perPage
 
 POST   /api/public/analytics/collect     تلمری مرورگر (تنها مسیر عمومی غیر-GET)
+POST   /api/public/feedback              ثبت بازخورد/گزارش کاربر سایت (محدود نرخ؛ هویت: سشن سروری → هویت کلاینتی → مهمان)
+GET    /api/public/feedback/replies      پاسخ‌های مدیر به گزارش‌های همین کاربر (لایهٔ «اعلان‌ها»)؛ ?userId= وقتی کوکی سشن نیست
+POST   /api/public/feedback/replies/read علامت‌زدن پاسخ‌ها به‌عنوان خوانده‌شده { userId }
 ```
 
 **یادداشت‌ها:** هر یادداشت به `authorId` نویسنده‌اش گره خورده و فهرست هر مدیر فقط
@@ -1026,6 +1056,43 @@ POST   /api/public/analytics/collect     تلمری مرورگر (تنها مس�
 **آپلود:** `POST /api/admin/media` با بدنهٔ JSON شامل `originalName`, `mimeType`,
 `data` (base64). دلیل انتخاب JSON به‌جای multipart: بدون افزودن هیچ وابستگی‌ای
 (مثل multer/busboy) کار می‌کند و اعتبارسنجی کامل سمت سرور انجام می‌شود.
+
+**بازخورد و گزارش‌های کاربران** (`feedbackStore.js` → `database/content/feedback.json`،
+مجوزهای `feedback.read` / `feedback.manage`):
+
+```
+GET    /api/admin/feedback               همهٔ گزارش‌ها؛ گزارش‌های آزمون هماهنگ با پیشوند exam: ادغام و پاسخ‌ها ضمیمه می‌شوند
+POST   /api/admin/feedback/:id/reply     { text } — پاسخ مدیر؛ در اعلان‌های کاربر نمایش داده می‌شود
+POST   /api/admin/feedback/:id/status    { status: 'open' | 'resolved' }
+DELETE /api/admin/feedback/:id           گزارش و پاسخ‌هایش
+```
+
+منبع هر گزارش دقیق و اجباری است (`support` فرم پشتیبانی · `comprehensive` درسنامه جامع ·
+`micro` میکرو درسنامه · `test-bank` بانک تست · `coordinated-exam` آزمون‌های هماهنگ ·
+`question-lab` آزمون‌های بین‌الملل · `intl-courses` دوره‌های بین‌الملل). نمای
+`views/AdminFeedback.jsx` دو سطحی است، مثل لایهٔ «صفحات»:
+
+۱. **شبکهٔ کارت‌های مربعی** — یک کارت برای هر منبع، با آیکون، توضیح و شمارندهٔ
+   پیام‌های رسیده و «در انتظار بررسی». منبع ناشناخته با شناسهٔ خام خودش کارت جدا
+   می‌گیرد؛ کادر عمومی «سایر منابع» وجود ندارد.
+۲. **جدول نامه‌ها** — با کلیک روی هر کارت، فهرست گزارش‌ها و پاسخ‌های همان منبع با
+   ساختار جدول استاندارد پنل باز می‌شود (فرستنده، موضوع و متن، پاسخ‌ها، زمان،
+   وضعیت، عملیات). پاسخ، تغییر وضعیت و حذف از همان جدول انجام می‌شود. منبع
+   انتخاب‌شده در hash می‌ماند (`#admin/feedback/<source>`) تا رفرش و دکمهٔ بازگشت
+   آن را از دست ندهند؛ اعتبارسنجی تب با `FEEDBACK_SOURCE_IDS` انجام می‌شود.
+
+**هویت فرستنده** سه لایه دارد و به همین ترتیب اولویت می‌گیرد: سشن واقعی سرور
+(`tapesh_user_session`) → هویت سبکِ کلاینتی که سایت با هر گزارش می‌فرستد
+(`userRefOf`: `id ?? phone ?? username` از `tapesh:current-user`) → شناسهٔ پایدار
+مهمان (`tapesh:feedback-guest`، فقط در مرورگر خود کاربر). بدون لایهٔ آخر، گزارش
+مهمان با `userId: null` ثبت می‌شد و پاسخ مدیر هیچ‌وقت به «اعلان‌ها»ی کسی نمی‌رسید.
+`GET /api/admin/feedback` علاوه بر این، نام/نام کاربری/شمارهٔ خالی‌مانده را از
+`users.json` تکمیل می‌کند (`enrichSender`).
+
+سمت کاربر همهٔ سطوح گزارش از `services/feedback/userFeedback.js` (`sendFeedback`)
+عبور می‌کنند — تنها نقطهٔ تماس سایت با مسیر عمومی بازخورد. گزارش‌های «آزمون‌های
+هماهنگ» سرورمحورند و در `examReports.json` می‌نشینند؛ بقیه در
+`database/content/feedback.json`.
 
 ---
 
@@ -1041,11 +1108,26 @@ POST   /api/public/analytics/collect     تلمری مرورگر (تنها مس�
 | نقش | دسترسی |
 |---|---|
 | `super-admin` | همهٔ دسترسی‌ها |
-| `admin` | همه‌چیز جز حذف کاربر و بخش‌های حساس تحلیل (کاربران، سئو، امنیت، درآمد) |
+| `admin` | همه‌چیز جز `users.delete`، `users.superadmin.manage`، `settings.security.manage` و بخش‌های حساس تحلیل (کاربران، امنیت، درآمد، هشدارها) |
 | `editor` | ایجاد/ویرایش/انتشار مقاله، بارگذاری رسانه، ویرایش صفحه، یادداشت‌های خودش، ارسال به کانال‌ها (بدون مدیریت کانال)، فقط `analytics.read` |
 
 نمونهٔ Permissionها: `articles.create`, `articles.publish`, `media.upload`,
 `users.delete`, `settings.update`, `logs.read`, `notes.update`
+
+**مرزهای حساس (PHASE 3):** داشتن یک دسترسی، به‌صورت ضمنی یعنی داشتن دسترسی
+حساس‌ترِ دیگری نیست:
+
+- `users.create` / `users.update` ⇒ **نه** ساخت یا تغییر «مدیر کل».
+  برای آن `users.superadmin.manage` لازم است — شامل عوض‌کردن رمز یک مدیر کل
+  (وگرنه تصاحب حساب).
+- `settings.update` ⇒ **نه** تغییر تنظیمات امنیتی و سقف‌های بارگذاری.
+  برای آن `settings.security.manage` لازم است.
+- `analytics.export` ⇒ **نه** خروجی گرفتن از هر بخش. مجوز خودِ بخش هم لازم است.
+- `publishing.send` ⇒ **نه** خواندن/نوشتن توکن ربات (`publishing.channels.manage`).
+- `media.content.*` ⇒ **نه** خواندن یا نوشتن اعتبار اکانت‌ها (`media.platforms.manage`).
+
+مسیرهایی که مجوز صریح ندارند و در فهرست «فقط ورود لازم است» نیستند،
+**deny-by-default** رد می‌شوند (`AUTHENTICATED_ONLY_PATHS` در `adminApi.js`).
 
 **دسترسی‌های مرکز تحلیل:** `analytics.read`, `analytics.users.read`,
 `analytics.seo.read`, `analytics.security.read`, `analytics.revenue.read`,
@@ -1059,9 +1141,14 @@ POST   /api/public/analytics/collect     تلمری مرورگر (تنها مس�
 عوض کند.
 
 **قواعد محافظتی در سرور:**
-- آخرین مدیر کل فعال را نمی‌توان حذف، غیرفعال یا تنزل داد.
+- آخرین مدیر کل **فعال** را نمی‌توان حذف، غیرفعال یا تنزل داد.
+- کسی نمی‌تواند نقش حساب خودش را از مسیر `PUT /api/admin/users/:id` عوض کند.
 - کاربر نمی‌تواند حساب خودش را حذف کند.
+- تغییر رمز/نقش/غیرفعال‌سازی/حذف، نشست‌های بازِ همان حساب را باطل می‌کند.
 - دسته‌بندی‌ای که روی مقاله‌ای استفاده شده حذف نمی‌شود.
+
+**تست‌های این لایه:** `npm run admin:rbac:test` (۶۳ سنجه) و
+`npm run admin:security:test` (۶۰ سنجه) — یا هر دو با `npm run admin:test`.
 
 ---
 

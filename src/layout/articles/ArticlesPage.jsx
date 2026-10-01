@@ -20,7 +20,6 @@ import {
   BookmarkIcon,
   ChevronIcon,
   SearchIcon,
-  faCompact,
   faPercent,
   toFa,
   usePageMeta,
@@ -105,8 +104,6 @@ function FeaturedBoard({ hero, sideArticles }) {
           <span className="ap-feature__meta">
             <AuthorChip article={hero} />
             <span className="ap-feature__meta-item">{toFa(hero.readingTime)} دقیقه مطالعه</span>
-            <span className="ap-feature__meta-item" aria-hidden="true">·</span>
-            <span className="ap-feature__meta-item">{faCompact(hero.views)} بازدید</span>
             <span className="ap-card__arrow" aria-hidden="true">←</span>
           </span>
         </div>

@@ -1,0 +1,78 @@
+html {
+  min-width: 320px;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 320px;
+  margin: 0;
+  background:
+    radial-gradient(circle at 50% 13%, rgba(46, 75, 117, 0.11), transparent 28rem),
+    var(--background);
+  color: var(--white);
+  direction: rtl;
+}
+
+body,
+button,
+a {
+  font-family: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+.app {
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/*
+ * لایه‌هایی که صحنهٔ چسبان دارند (محصولات، دربارهٔ تپش) این کلاس را می‌گیرند.
+ *
+ * چرا: `overflow: hidden` روی `.app` آن را به ظرفِ اسکرول تبدیل می‌کند و
+ * `position: sticky` درونش دیگر نسبت به ویوپورت کار نمی‌کند — چون ظرفی که
+ * باید در آن بچسبد، خودش اسکرول نمی‌خورد. `clip` هم اسکرولِ افقی را می‌بُرد
+ * (همان کاری که `hidden` می‌کرد) و هم scroll container نمی‌سازد، پس چسبندگی
+ * زنده می‌ماند.
+ */
+.app--scroll {
+  overflow-x: clip;
+  overflow-y: visible;
+}
+
+[data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 30px, 0);
+  will-change: opacity, transform;
+  transition:
+    opacity 720ms ease,
+    transform 820ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: 250ms;
+}
+
+[data-reveal='header'] {
+  transform: translate3d(0, -18px, 0);
+}
+
+[data-reveal='hero'] {
+  transition-delay: 330ms;
+}
+
+[data-reveal].is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+

@@ -16,6 +16,8 @@
 
 import { randomBytes } from 'node:crypto';
 
+import { EXAM_STATUS_BY_CODE } from './apiContract/errorModel.js';
+
 import {
   USER_SESSION_COOKIE,
   createUserSession,
@@ -44,16 +46,8 @@ import {
 
 export const EXAM_CSRF_HEADER = 'x-tapesh-exam';
 
-const STATUS_BY_CODE = {
-  VALIDATION_ERROR: 400,
-  UNAUTHENTICATED: 401,
-  FORBIDDEN: 403,
-  NOT_FOUND: 404,
-  CONFLICT: 409,
-  PAYLOAD_TOO_LARGE: 413,
-  RATE_LIMITED: 429,
-  INTERNAL_ERROR: 500,
-};
+/* مدل خطای متمرکز (فاز ۷) — مقادیر عیناً همان جدول قبلی‌اند. */
+const STATUS_BY_CODE = EXAM_STATUS_BY_CODE;
 
 /* نگاشت خطای بیزینسی examStore → وضعیت HTTP و پیام فارسی */
 const BUSINESS_ERRORS = {
@@ -119,23 +113,27 @@ function sendError(response, error) {
   });
 }
 
+/* مثل `adminApi.readBody`: بایت‌ها جمع می‌شوند و یک‌جا رمزگشایی می‌شوند تا نویسهٔ
+   چندبایتی فارسی که وسط دو بستهٔ شبکه می‌افتد به U+FFFD تبدیل نشود. */
 function readBody(request) {
   return new Promise((resolvePromise, rejectPromise) => {
-    let raw = '';
+    const chunks = [];
     let size = 0;
 
     request.on('data', (chunk) => {
-      size += chunk.length;
+      const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+      size += buffer.length;
       if (size > MAX_BODY_BYTES) {
         request.destroy();
         rejectPromise(Object.assign(new Error('حجم درخواست بیش از حد مجاز است'), { code: 'PAYLOAD_TOO_LARGE' }));
         return;
       }
-      raw += chunk;
+      chunks.push(buffer);
     });
 
     request.on('end', () => {
-      if (!raw) return resolvePromise({});
+      if (!chunks.length) return resolvePromise({});
+      const raw = Buffer.concat(chunks).toString('utf8');
       try {
         const parsed = JSON.parse(raw);
         resolvePromise(parsed && typeof parsed === 'object' ? parsed : {});

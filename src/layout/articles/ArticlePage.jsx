@@ -6,7 +6,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   getArticleBySlug,
   getRelatedArticles,
-  getArticlesByAuthor,
   categoryAccent,
   categoryLabel,
   getAuthorById,
@@ -689,7 +688,6 @@ export default function ArticlePage({ slug }) {
   if (!article) return <ArticleSkeleton />;
 
   const author = getAuthorById(article.author);
-  const authorArticles = author ? getArticlesByAuthor(author.id, { excludeSlug: article.slug }).slice(0, 2) : [];
   const bookmarked = Boolean(userEntry?.bookmarked);
   const currentProgress = userEntry?.progress ?? 0;
 
@@ -822,62 +820,11 @@ export default function ArticlePage({ slug }) {
             <div className="ap-share-inline">
               <ShareRow title={article.title} />
             </div>
-
-            {author && (
-              <section className="ap-author" aria-label="درباره نویسنده">
-                <span className={`ap-author__avatar ap-author__avatar--${author.accent}`} aria-hidden="true">
-                  {author.initials}
-                </span>
-                <div>
-                  <strong>{author.name}</strong>
-                  <span className="ap-author__role">{author.role}</span>
-                  <p>{author.bio}</p>
-                  {authorArticles.length > 0 && (
-                    <div className="ap-author__more">
-                      <span>از همین نویسنده:</span>
-                      {authorArticles.map((item) => (
-                        <a href={`#articles/${item.slug}`} key={item.slug}>
-                          {item.title}
-                        </a>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </section>
-            )}
-
-            <aside className="ap-learning">
-              <h3>می‌خواهی این موضوع را عمیق‌تر یاد بگیری؟</h3>
-              <p>
-                {article.learning
-                  ? `این مقاله بخشی از مسیر «${article.learning.topic}» در تپش است.`
-                  : 'همین مسیر در درسنامه‌ها و بانک تست تپش ادامه دارد.'}
-              </p>
-              <div className="ap-learning__links">
-                <a href="#courses">
-                  <span>{article.learning?.lessonTitle ?? 'درسنامه‌های جامع تپش'}</span>
-                  <span className="ap-learning__hint" aria-hidden="true">←</span>
-                </a>
-                {article.learning?.questions > 0 && (
-                  <a href="#courses">
-                    <span>{toFa(article.learning.questions)} تست مرتبط</span>
-                    <span className="ap-learning__hint" aria-hidden="true">←</span>
-                  </a>
-                )}
-                {article.learning?.flashcards > 0 && (
-                  <a href="#courses">
-                    <span>{toFa(article.learning.flashcards)} فلش‌کارت مرتبط</span>
-                    <span className="ap-learning__hint" aria-hidden="true">←</span>
-                  </a>
-                )}
-              </div>
-            </aside>
           </div>
 
           <aside className="ap-article__aside">
             <div className="ap-article__aside-sticky">
               <TableOfContents items={tocItems} activeId={activeHeading} onJump={jumpToHeading} variant="desktop" />
-              <ShareRow title={article.title} />
             </div>
           </aside>
         </div>

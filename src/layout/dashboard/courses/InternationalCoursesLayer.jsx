@@ -21,6 +21,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import './internationalCourses.css';
 import { LAYER_IDS, useLayerRoute } from '../dashboardRoute';
 import { createNote } from '../../../services/notes/notesService';
+import { FEEDBACK_SOURCES, sendFeedback } from '../../../services/feedback/userFeedback';
 import { catalogFilters, loadIntlCatalog, staticCatalog } from '../../../services/international/intlCoursesService';
 
 const FA_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
@@ -748,6 +749,26 @@ function LessonInfo({ course, lesson, userId }) {
 /* سرصفحهٔ دوره — کادر اطلاعات (هشتک‌ها، عنوان، ناشر، کنش‌ها).
    طبق بازخورد کاربر این کادر **بالای ویدیوهای دوره** می‌نشیند. */
 function CourseInfoHead({ course, liked, onToggleLike, onOpenProvider }) {
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportText, setReportText] = useState('');
+  const [reportState, setReportState] = useState('idle'); /* idle | sent | error */
+
+  const submitReport = async () => {
+    if (!reportText.trim() || reportState === 'sending') return;
+    setReportState('sending');
+
+    const sent = await sendFeedback({
+      source: FEEDBACK_SOURCES.intlCourses,
+      subject: `گزارش دورهٔ «${course.title}»`,
+      category: 'گزارش اشکال',
+      message: reportText.trim(),
+      meta: { courseId: course.id, provider: course.provider ?? null },
+    });
+
+    setReportState(sent ? 'sent' : 'error');
+    if (sent) setReportText('');
+  };
+
   return (
     <header className="intl-course-detail__head">
       <div className="intl-course-detail__tags">
@@ -767,12 +788,54 @@ function CourseInfoHead({ course, liked, onToggleLike, onOpenProvider }) {
             <Icon name="heart" className="h-4 w-4" />
             <span>{liked ? 'پسندیده شد' : 'پسندیدن'}</span>
           </button>
-          <button type="button">
+          <button type="button" onClick={() => setReportOpen(true)}>
             <Icon name="flag" className="h-4 w-4" />
             <span>گزارش</span>
           </button>
         </div>
       </div>
+
+      {/* گزارش ایراد این دوره — به سرور می‌رود و در پنل با منبع «دوره‌های بین‌الملل» می‌نشیند */}
+      {reportOpen && (
+        <div className="intl-fade fixed inset-0 z-50 grid place-items-center bg-black/70 p-4" role="dialog" aria-modal="true" aria-label="گزارش ایراد دوره" onClick={() => setReportOpen(false)}>
+          <div className="intl-pop w-[min(24rem,100%)] rounded-[2rem] border border-white/10 bg-[var(--surface-soft)] p-6" onClick={(event) => event.stopPropagation()}>
+            {reportState === 'sent' ? (
+              <div className="py-4 text-center">
+                <strong className="block [font-family:'Doran','Vazir',Tahoma,sans-serif]">گزارشت ثبت شد</strong>
+                <p className="mt-1.5 text-sm leading-6 text-[var(--faint)]">تیم محتوای تپش بررسی می‌کند؛ پاسخ را در اعلان‌ها می‌بینی.</p>
+                <button type="button" onClick={() => { setReportOpen(false); setReportState('idle'); }} className="mt-5 cursor-pointer rounded-xl bg-white/8 px-5 py-2 text-sm transition-colors hover:bg-white/12">
+                  بستن
+                </button>
+              </div>
+            ) : (
+              <>
+                <h3 className="flex items-center gap-2 text-base [font-family:'Doran','Vazir',Tahoma,sans-serif]">
+                  <Icon name="flag" className="h-4.5 w-4.5 text-[var(--gold-ink)]" />
+                  گزارش ایراد دوره
+                </h3>
+                <p className="mt-1.5 text-xs text-[var(--faint)]">دورهٔ «{course.title}»</p>
+                <textarea
+                  value={reportText}
+                  onChange={(event) => setReportText(event.target.value)}
+                  rows={4}
+                  aria-label="متن گزارش"
+                  placeholder="چه ایرادی دیدی؟ ویدیو، زیرنویس، متن یا منبع…"
+                  className="mt-4 w-full rounded-xl border border-white/10 bg-transparent p-3 text-sm outline-none"
+                />
+                {reportState === 'error' && <p className="mt-2 text-xs text-[var(--red-ink)]">ثبت نشد؛ دوباره تلاش کن.</p>}
+                <div className="mt-4 flex gap-2">
+                  <button type="button" onClick={submitReport} disabled={!reportText.trim()} className="flex-1 cursor-pointer rounded-xl bg-[var(--purple-bright)] px-4 py-2.5 text-sm font-bold transition-transform hover:-translate-y-0.5 disabled:cursor-default disabled:opacity-50">
+                    ارسال گزارش
+                  </button>
+                  <button type="button" onClick={() => setReportOpen(false)} className="cursor-pointer rounded-xl bg-white/8 px-4 py-2.5 text-sm transition-colors hover:bg-white/12">
+                    انصراف
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </header>
   );
 }
