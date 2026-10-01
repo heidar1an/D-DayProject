@@ -27,6 +27,7 @@ import { fileURLToPath } from 'node:url';
 
 import { contentDir, logActivity, readCollection, readSettings, writeCollection } from './contentStore.js';
 import { readUsers } from './usersStore.js';
+import { safePathname } from './observability.js';
 
 const projectRoot = resolve(fileURLToPath(import.meta.url), '..', '..');
 
@@ -216,22 +217,27 @@ export function clearEvents() {
  */
 
 const REQUEST_LIMIT = 3000;
+const REQUEST_WINDOW_MS = 5 * 60_000;
 const requestLog = [];
 const serverStartedAt = Date.now();
 const serverErrors = [];
 const SERVER_ERROR_LIMIT = 200;
+let latestRequestDropAt = 0;
 
 export function recordApiRequest({ path = '/', method = 'GET', status = 200, durationMs = 0, error = null }) {
   const entry = {
     ts: Date.now(),
-    path: str(path, 200),
+    path: safePathname(str(path, 200)),
     method: str(method, 10),
     status: Number(status) || 0,
     durationMs: Math.max(0, Math.round(Number(durationMs) || 0)),
   };
 
   requestLog.push(entry);
-  if (requestLog.length > REQUEST_LIMIT) requestLog.splice(0, requestLog.length - REQUEST_LIMIT);
+  if (requestLog.length > REQUEST_LIMIT) {
+    const removed = requestLog.splice(0, requestLog.length - REQUEST_LIMIT);
+    latestRequestDropAt = removed.at(-1)?.ts ?? entry.ts;
+  }
 
   if (entry.status >= 500) {
     serverErrors.unshift({ ...entry, message: str(error?.message, 300), code: str(error?.code, 40) });
@@ -302,6 +308,27 @@ export function requestMetrics() {
   }
 
   const lastMinute = requestLog.filter((item) => item.ts >= now - 60_000);
+  const windowFrom = now - REQUEST_WINDOW_MS;
+  const windowRequests = requestLog.filter((item) => item.ts >= windowFrom);
+  const windowByStatus = { '1xx': 0, '2xx': 0, '3xx': 0, '4xx': 0, '5xx': 0, other: 0 };
+  const windowPaths = new Map();
+  let adminAuthFailures = 0;
+  let adminAuthRateLimited = 0;
+
+  for (const item of windowRequests) {
+    const statusClass = `${Math.floor(item.status / 100)}xx`;
+    windowByStatus[statusClass in windowByStatus ? statusClass : 'other'] += 1;
+    const pathItem = windowPaths.get(item.path) ?? { count: 0, errors: 0 };
+    pathItem.count += 1;
+    if (item.status >= 400) pathItem.errors += 1;
+    windowPaths.set(item.path, pathItem);
+    if (item.path === '/api/admin/auth/login' && item.status === 401) adminAuthFailures += 1;
+    if (item.path === '/api/admin/auth/login' && item.status === 429) adminAuthRateLimited += 1;
+  }
+
+  const windowErrors = windowRequests.filter((item) => item.status >= 400).slice(-12).reverse().map((item) => ({
+    t: new Date(item.ts).toISOString(), method: item.method, path: item.path, status: item.status,
+  }));
 
   return {
     total,
@@ -317,6 +344,22 @@ export function requestMetrics() {
     failing,
     minutes,
     rpm: lastMinute.length,
+    window: {
+      durationMs: REQUEST_WINDOW_MS,
+      observedMs: Math.max(0, Math.min(REQUEST_WINDOW_MS, now - serverStartedAt)),
+      total: windowRequests.length,
+      errors: windowByStatus['4xx'] + windowByStatus['5xx'],
+      byStatusClass: windowByStatus,
+      authFailures: adminAuthFailures,
+      authRateLimited: adminAuthRateLimited,
+      authScope: 'admin-login-only',
+      complete: !latestRequestDropAt || latestRequestDropAt < windowFrom,
+      topPaths: [...windowPaths.entries()]
+        .sort((a, b) => b[1].count - a[1].count)
+        .slice(0, 10)
+        .map(([path, item]) => ({ path, count: item.count, errors: item.errors })),
+      recentErrors: windowErrors,
+    },
     serverErrors: serverErrors.slice(0, 40),
     uptimeSeconds: Math.round(process.uptime()),
     startedAt: new Date(serverStartedAt).toISOString(),

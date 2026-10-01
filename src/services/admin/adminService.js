@@ -127,6 +127,7 @@ export const auth = {
 
 export const getStats = (options) => get('/stats', options);
 export const getMeta = () => get('/meta');
+export const getGuardianStatus = (options) => get('/guardian/status', options);
 
 /* ──────────────────────────────── مقالات ──────────────────────────────── */
 

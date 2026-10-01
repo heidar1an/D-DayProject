@@ -162,6 +162,40 @@ test('۱۱. مسیر حساس پیش از ذخیره در متریک حذف می
   assert.equal(metrics.snapshot().topPaths[0].path, `/api/users/${REDACTED}`);
 });
 
+test('۱۱الف. پنجرهٔ پنج‌دقیقه‌ای وضعیت‌ها و خطاهای ورود را از درخواست‌های همان پروسه می‌شمارد', () => {
+  let clock = 100_000;
+  const metrics = createMetrics({ now: () => clock });
+  metrics.record({ method: 'POST', path: '/api/admin/auth/login', status: 401, durationMs: 4 });
+  clock += 20_000;
+  metrics.record({ method: 'POST', path: '/api/users/login', status: 429, durationMs: 3 });
+  clock += 20_000;
+  metrics.record({ method: 'GET', path: '/api/private', status: 500, durationMs: 15 });
+
+  const { window } = metrics.snapshot();
+  assert.equal(window.total, 3);
+  assert.equal(window.authFailures, 1);
+  assert.equal(window.authRateLimited, 1);
+  assert.equal(window.byStatusClass['5xx'], 1);
+  assert.equal(window.complete, true);
+  assert.equal(window.observedMs, 40_000);
+});
+
+test('۱۱ب. سقف پنجره، ناقص بودن نمونه را آشکار می‌کند و بعد از افق زمانی پاک می‌شود', () => {
+  let clock = 1;
+  const metrics = createMetrics({ maxWindowRequests: 2, windowMs: 100, now: () => clock });
+  metrics.record({ path: '/one', status: 200 });
+  clock = 2;
+  metrics.record({ path: '/two', status: 200 });
+  clock = 3;
+  metrics.record({ path: '/three', status: 200 });
+
+  assert.equal(metrics.snapshot().window.complete, false);
+  clock = 104;
+  const expired = metrics.snapshot().window;
+  assert.equal(expired.complete, true);
+  assert.equal(expired.total, 0);
+});
+
 /* ────────────────────── ۱۲. توکن متریک (write-only) ────────────────────── */
 
 test('۱۲. توکن متریک فقط از محیط می‌آید و مقایسه‌اش ثابت‌زمان است', () => {

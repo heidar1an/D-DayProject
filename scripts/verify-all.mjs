@@ -87,6 +87,7 @@ const STEPS = [
   { id: 'api:test', args: ['--test', 'database/apiContract.test.mjs'] },
   { id: 'api:input:test', args: ['--test', 'database/inputGate.test.mjs'] },
   { id: 'obs:test', args: ['--test', 'database/observability.test.mjs'] },
+  { id: 'guardian:test', args: ['--test', 'database/guardian.test.mjs'] },
   { id: 'router:test', args: ['scripts/router-test.mjs'] },
   { id: 'content:atomic:test', args: ['--test', 'database/contentStoreAtomicWrite.test.mjs'] },
   { id: 'content:hotpath:test', args: ['--test', 'database/contentStoreHotPath.test.mjs'] },
@@ -108,8 +109,7 @@ const STEPS = [
   /* build **قبل** از سنجش بودجه و SEO — وگرنه روی artifact کهنه سنجیده می‌شود */
   { id: 'build:check', args: ['scripts/reproducible-build-check.mjs'] },
   { id: 'perf:bundle', args: ['scripts/bundle-budget.mjs', '--check'] },
-  /* نقشهٔ سایت و robots پس از build ساخته می‌شوند (build پوشهٔ dist را پاک می‌کند) */
-  { id: 'seo:generate', args: ['scripts/generate-sitemap.mjs'] },
+  /* seo:check باید artifact تولیدشده توسط خود build را ببیند؛ generator دستی اجرا نمی‌شود. */
   { id: 'seo:check', args: ['scripts/seo-validate.mjs'] },
   { id: 'api:contract:check', args: ['scripts/api-contract.mjs', '--check'] },
   { id: 'route:contracts:fresh', args: ['scripts/generate-route-contracts.mjs', '--check'] },

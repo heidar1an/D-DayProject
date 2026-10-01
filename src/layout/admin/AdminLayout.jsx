@@ -8,6 +8,11 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import './admin.css';
+import './analytics/analytics.css';
+import './media/media.css';
+import './planning/planning.css';
+
 import logoMark from '../../../images/pictures/600ppi/logo-mark.webp';
 import { auth, getMeta } from '../../services/admin/adminService';
 import ThemeToggle from '../ThemeToggle';
@@ -33,18 +38,20 @@ import AdminProfile from './views/AdminProfile';
 import AnalyticsCenter from './analytics/AnalyticsCenter';
 import MediaCenter, { MEDIA_TAB_IDS } from './media/MediaCenter';
 import PlanningCenter, { PLANNING_TAB_IDS } from './planning/PlanningCenter';
+import GuardianCenter from './GuardianCenter';
 import {
   Button, Spinner, ToastProvider, faDate, toFa, useToast,
 } from './adminShared';
 import {
   IconAnalytics, IconBroadcast, IconChevron, IconDashboard, IconFeedback, IconLog,
   IconLogout, IconMedia, IconMenu, IconNote, IconPage, IconPlanning, IconSend,
-  IconSettings, IconUser,
+  IconSettings, IconShield, IconUser,
 } from './adminIcons';
 
 const SECTIONS = [
   { id: 'dashboard', label: 'داشبورد', icon: IconDashboard, permission: null },
   { id: 'analytics', label: 'مرکز تحلیل', icon: IconAnalytics, permission: 'analytics.read' },
+  { id: 'guardian', label: 'نگهبان تپش', icon: IconShield, permission: 'analytics.security.read' },
   { id: 'media-center', label: 'مدیریت رسانه و فضای مجازی', icon: IconBroadcast, permission: 'media.read' },
   { id: 'planning', label: 'برنامه‌ریزی و مدیریت', icon: IconPlanning, permission: null },
   { id: 'pages', label: 'صفحات', icon: IconPage, permission: 'pages.read' },
@@ -243,6 +250,8 @@ export function AdminShell({ admin, onExit, onLogout }) {
             onTabChange={(tab) => navigate('analytics', { tab })}
           />
         );
+      case 'guardian':
+        return <GuardianCenter />;
       case 'media-center':
         return (
           <MediaCenter

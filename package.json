@@ -58,6 +58,7 @@
     "api:input:test": "node --test database/inputGate.test.mjs",
     "router:test": "node scripts/router-test.mjs",
     "obs:test": "node --test database/observability.test.mjs",
+    "guardian:test": "node --test database/guardian.test.mjs",
     "smoke:test": "node scripts/server-smoke.mjs",
     "e2e:api": "node scripts/e2e-api-flows.mjs",
     "repo:hygiene": "node scripts/repo-hygiene.mjs"

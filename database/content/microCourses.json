@@ -1162,14 +1162,12 @@
               },
               {
                 "id": "cp3",
-                "afterPage": "p12",
+                "afterPage": "p10",
                 "questionCount": 3,
                 "required": false,
                 "scopePages": [
                   "p09",
-                  "p10",
-                  "p11",
-                  "p12"
+                  "p10"
                 ],
                 "pinnedQuestionIds": [],
                 "questions": []

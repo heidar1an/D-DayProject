@@ -33,6 +33,8 @@
  *  ۲۸) ۴۰۳ «ربات ادمین نیست» است نه «توکن باطل» (ترجمهٔ درست خطای دسترسی)
  *  ۲۹) تلگرام: «کانال دیده می‌شود» با «ربات اجازهٔ ارسال دارد» یکی نیست
  *  ۳۰) میکرو درسنامه: فهرست/جزئیات، انتخاب از بانک تست، ساخت، انتشار و تحویل عمومی
+ *  ۳۱) Guardian: فقط‌خواندنی، بدون نشت IP/UA/شناسه در پاسخ
+ *  ۳۲) Guardian: دسترسی امنیتی برای نقش غیرمجاز رد می‌شود
  */
 
 import assert from 'node:assert/strict';
@@ -102,6 +104,21 @@ const token = setCookie.match(/tapesh_admin_session=([^;]+)/)?.[1] ?? '';
 const csrf = login.payload.data?.csrfToken ?? '';
 const cookies = { tapesh_admin_session: token };
 
+/* Guardian فقط‌خواندنی — permission مرزی و DTO بدون دادهٔ هویتی */
+const guardianStatus = await call('GET', '/api/admin/guardian/status', { cookies });
+const guardianJson = JSON.stringify(guardianStatus.payload.data ?? {});
+check('۳۱. Guardian برای مدیر کل گزارش فقط‌خواندنی می‌دهد', guardianStatus.status === 200
+  && guardianStatus.payload.data?.schemaVersion === 1
+  && guardianStatus.payload.data?.scope?.automatedBlocking === false);
+check('۳۱. Guardian پاسخ را به IP/UA/شناسهٔ ورود آلوده نمی‌کند',
+  !guardianJson.includes('"ip":')
+  && !guardianJson.includes('"userAgent":')
+  && !guardianJson.includes('"username":')
+  && !guardianJson.includes('"token":')
+  && !guardianJson.includes('"csrfToken":')
+  && !guardianJson.includes('"password":')
+  && !guardianJson.includes('09123456789'));
+
 /* ۲) رمز نادرست */
 const badLogin = await call('POST', '/api/admin/auth/login', {
   body: { username: '0135', password: 'wrong-password' },
@@ -168,6 +185,8 @@ const editorLogin = await call('POST', '/api/admin/auth/login', {
 });
 const editorToken = (editorLogin.headers.get('set-cookie') ?? '').match(/tapesh_admin_session=([^;]+)/)?.[1] ?? '';
 const editorCsrf = editorLogin.payload.data?.csrfToken ?? '';
+const editorGuardian = await call('GET', '/api/admin/guardian/status', { cookies: { tapesh_admin_session: editorToken } });
+check('۳۲. دسترسی Guardian برای نویسنده بسته است', editorGuardian.status === 403);
 
 const forbidden = await call('DELETE', `/api/admin/articles/${article.id}`, {
   cookies: { tapesh_admin_session: editorToken },

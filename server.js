@@ -26,7 +26,7 @@ import {
   accessLogEnabled,
   accessLogLine,
   checkReadiness,
-  createMetrics,
+  runtimeMetrics,
   isMetricsAuthorized,
   metricsTokenFromEnv,
   newRequestId,
@@ -47,7 +47,7 @@ const dataDir = resolve(rootDir, 'database');
  *   • `/metrics` فقط با `TAPESH_METRICS_TOKEN` وجود دارد. بدون توکن، مسیر ۴۰۴
  *     می‌دهد تا وجودش هم لو نرود.
  */
-const metrics = createMetrics();
+const metrics = runtimeMetrics;
 const accessLogOn = accessLogEnabled();
 const metricsToken = metricsTokenFromEnv();
 

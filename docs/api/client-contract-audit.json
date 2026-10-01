@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-01T10:29:24.386Z",
-  "scannedFiles": 425,
-  "serverRoutes": 229,
+  "generatedAt": "2026-10-01T19:43:00.955Z",
+  "scannedFiles": 427,
+  "serverRoutes": 230,
   "used": [
     {
       "path": "/api/public/articles",

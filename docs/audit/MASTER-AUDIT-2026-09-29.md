@@ -1,16 +1,236 @@
 # MASTER AUDIT — ممیزی جامع پروژه «تپش»
 
 > **تاریخ ممیزی پایه:** ۲۹ سپتامبر ۲۰۲۶
-> **بازنگری ۲:** ۱ اکتبر ۲۰۲۶ — داده‌ها و وضعیت‌ها پس از ۲۳ فاز سخت‌سازی به‌روز شد (بخش «۰»).
-> **روش:** خواندن مستقیم سورس + `grep`/`git`/`du` روی کل Repository. ممیزی پایه بدون اجرای سرور/مرورگر/بیلد انجام شد؛ **بازنگری ۲** با اجرای واقعی دروازهٔ کیفیت، تست‌های دامنه و اندازه‌گیری artifact موجود انجام شد.
+> **بازنگری ۲:** ۱ اکتبر ۲۰۲۶ (~۱۶:۳۰) — همگام‌سازی پس از ۲۳ فاز سخت‌سازی.
+> **بازنگری ۳:** ۱ اکتبر ۲۰۲۶ (~۲۰:۴۵) — همگام‌سازی پس از **۱۰ کامیت Pre-Production Remediation**. **افزودهٔ وضعیت:** ۱ اکتبر ۲۰۲۶ (~۲۲:۳۱)، چهار رفع سریع + Tapesh Guardian v1؛ جزئیات و مرجع تازه در **بخش ۰.۸**. **مرجع فعلی = بخش «۰»، با تقدم افزودهٔ ۰.۸.**
+> **روش:** خواندن مستقیم سورس + `grep`/`git`/`du` روی کل Repository. ممیزی پایه بدون اجرای سرور/مرورگر/بیلد انجام شد؛ **بازنگری‌های ۲ و ۳** با اجرای واقعی دروازهٔ کیفیت، تست‌ها و اندازه‌گیری artifact موجود انجام شدند.
 > **قواعد:** `OBSERVATION` = چیزی که مستقیماً در کد دیده شد · `INFERENCE` = نتیجه‌گیری از چند مشاهده · `RECOMMENDATION` = پیشنهاد.
 > **وضعیت‌ها:** `IMPLEMENTED` / `PARTIALLY IMPLEMENTED` / `NOT FOUND` / `UNVERIFIED`
 >
-> **⚠️ ساختار سند:** بخش‌های ۱ تا ۴۹ **متن ممیزی پایه (۲۹ سپتامبر)** هستند و عمداً بازنویسی نشدند تا تاریخچه قابل استناد بماند. **بخش «۰» (بازنگری ۲) مرجع وضعیت فعلی است** و هرجا با متن پایه تناقض داشت، حرف بخش ۰ مقدم است. جدول‌های ۴۵ و ۴۶ نیز در همین بازنگری جایگزین شده‌اند.
+> **⚠️ ساختار سند:** بخش‌های ۱ تا ۴۹ **متن ممیزی پایه (۲۹ سپتامبر)** هستند و عمداً بازنویسی نشدند تا تاریخچه قابل استناد بماند. **بخش «۰» (بازنگری ۳) مرجع وضعیت فعلی است** و هرجا با متن پایه یا بازنگری ۲ تناقض داشت، حرف بخش ۰ مقدم است. جدول‌های ۴۵ و ۴۶ در بازنگری‌های ۲ و ۳ جایگزین شده‌اند.
 
 ---
 
-# 0. بازنگری ۲ — وضعیت فعلی پروژه (۱ اکتبر ۲۰۲۶)
+# 0. بازنگری ۳ — وضعیت فعلی (۱ اکتبر ۲۰۲۶ · نوبت دوم)
+
+> **مبنا:** `main` @ `e53c2b4` · Node `22.22.2` · working tree **۸ مسیر** (۶ فایل دادهٔ کاربر + ۲ آپلود).
+> **رخداد:** بین **۱۷:۲۹ تا ۱۸:۰۰** همان روز، **۱۰ کامیت** روی `a86d875` زده شد (Pre-Production Remediation). گزارش کامل آن در `docs/audit/PRE-PRODUCTION-REMEDIATION-2026-10-01.md` است. این بخش، آن گزارش را **مستقل راستی‌آزمایی** می‌کند و مغایرت‌ها را علامت می‌زند.
+
+## 0.1 دو تغییر ساختاری که همه‌چیز را عوض کرد
+
+**۱. کل کار سخت‌سازی کامیت شد.** آن ۱۷۲ فایل کامیت‌نشده — که در بازنگری ۲ «بزرگ‌ترین ریسک فعال پروژه» نامیده شد — **دیگر ریسک نیست**. تاریخچه اکنون ۵۰ کامیت دارد (از ۴۰) و هر کامیت یک دغدغهٔ جدا:
+
+```
+fd7f2b4 chore(repo): untrack runtime data + tighten .gitignore
+397d4ba feat(security): fail-closed admin credential, security headers, central input gateway
+a0776a7 feat(data): cross-process write queue + versioned migrations
+f8e1740 feat(ui): three-level React error boundary
+51a8955 feat(seo): robots.txt, generated sitemap, baseline meta, validation gate
+dd0631b chore(build,gate): reproducible build check + real quality gate
+dbe88d4 chore: checkpoint accumulated hardening work (working tree)   ← ۲۱۲ فایل
+3aa04c8 chore(repo): read-only git history audit + ignore feedback.json
+2d5a1f2 fix(gate): eliminate two false failures found by the full run
+e53c2b4 docs(audit): pre-production remediation report + session memory
+```
+
+**۲. پنج قابلیت تازه اضافه شد** که در ممیزی پایه `NOT FOUND` بودند: **هدرهای امنیتی (CSP/HSTS)** · **مهاجرت نسخه‌دار** · **قفل نوشتن بین‌پروسه** · **ErrorBoundary** · **SEO (robots/sitemap/متا)**. دروازهٔ کیفیت از **۲۶ به ۳۶ گام** رسید.
+
+## 0.2 جدول داوری — هر مورد را خودم اجرا کردم
+
+| # | ادعای گزارش Remediation | راستی‌آزمایی مستقل من | نتیجه |
+|---|---|---|---|
+| ۱ | گام‌های دروازه **۳۶** | شمارش `{ id: ... }` در `scripts/verify-all.mjs` ⇒ **۳۶** | ✅ تأیید |
+| ۲ | هدرهای امنیتی + تست | `securityHeaders.test.mjs` ⇒ **۹/۹ · exit 0** · `securityHeaders.integration.test.mjs` (سرور واقعی) ⇒ **۱/۱ · exit 0** | ✅ تأیید |
+| ۳ | CSP بدون `unsafe-inline`/`unsafe-eval` | ۱۵ دایرکتیو CSP + `X-Content-Type-Options`/`X-Frame-Options`/`Referrer-Policy`/`COOP`/`CORP` در `database/securityHeaders.js` | ✅ تأیید |
+| ۴ | credential مدیر fail-closed | `adminCredentialPolicy.test.mjs` ⇒ **۹/۹ · exit 0** | ✅ تأیید |
+| ۵ | قفل نوشتن بین‌پروسه | `concurrency.test.mjs` ⇒ **۸/۸ · exit 0**؛ `writeQueue.js` exports: `withFileLock` · `withAdvisoryLock` · `fileRevision` · `mutateJsonFile` | ✅ تأیید |
+| ۶ | مهاجرت نسخه‌دار | `migrations/migration.test.mjs` ⇒ **۷/۷ · exit 0**؛ رجیستری ۲ مهاجرت (`0001`, `0002`) روی ۱۲ انبار | ✅ تأیید |
+| ۷ | `data:migrate` صفر تغییر روی دادهٔ واقعی | `data-migrate.mjs --dry-run` ⇒ «تغییر لازم: ۰ · شکست: ۰» · exit 0 | ✅ تأیید |
+| ۸ | قرارداد ورودی مسیرهای نوشتن | `api-contract.mjs --check` ⇒ «۲۲۹ مسیر · ۲۸ کد · ۱۱ DTO» + «قرارداد ورودی: **۱۳۴** مسیر نوشتن (entity 5 · object 125 · none 4) · **بدون قرارداد ۰**» · exit 0 | ✅ تأیید |
+| ۹ | رجیستری قرارداد هم‌گام | `generate-route-contracts.mjs --check` ⇒ «هم‌گام — ۱۳۴ مسیر نوشتن» · exit 0 | ✅ تأیید |
+| ۱۰ | دادهٔ زمان‌اجرا دیگر tracked نیست | `git ls-files database/content` ⇒ `activity`/`admins`/`events`/`publishLog`/`mediaMetrics` = **۰** | ✅ تأیید |
+| ۱۱ | `users.json` و `feedback.json` tracked نیستند | `git ls-files` ⇒ **۰** برای هر دو | ✅ تأیید |
+| ۱۲ | `data:check` ۰ خطا | ۰ خطا · **۲۲** هشدار · **۱۵۵۵** رکورد · exit 0 | ✅ تأیید |
+| ۱۳ | بودجهٔ باندل ۰ نقض | ۸ سقف، **۰ نقض** (۸۷٪–۹۳٪) · exit 0 | ✅ تأیید |
+| ۱۴ | خودآزمون API | `api-input-audit.mjs --selftest` ⇒ سبز · exit 0 | ✅ تأیید |
+| ۱۵ | **`repo:hygiene` ⇒ «پاک» (۰ نقض)** | ⇒ **۱ یافتهٔ نقض · exit 1** | ❌ **مغایرت** — بند ۰.۳ |
+| ۱۶ | **SEO: `dist/robots.txt` و `dist/sitemap.xml` تولید می‌شوند** | ⇒ **هیچ‌کدام روی دیسک نیست**؛ `seo-validate.mjs` ⇒ **۲ یافته · exit 1** | ❌ **مغایرت** — بند ۰.۳ |
+| ۱۷ | **Error Boundary «سه سطح»** | کامپوننت ۳ scope دارد، ولی در `src/` فقط **۲ mount** (`admin`، `dashboard`)؛ `scope="root"` در `main.jsx` **نصب نشده** | ⚠️ **جزئی** — بند ۰.۳ |
+| ۱۸ | **`admin` chunk «خارج از بار اولیه»** | `dist/index.html` ⇒ `<link rel="modulepreload" href="./assets/admin-1WTCsLoF.js">` | ❌ **مغایرت** — بند ۰.۴ |
+
+**نتیجه:** ۱۴ از ۱۸ ادعا بیت‌به‌بیت تأیید شد · **۳ مغایرت واقعی** · ۱ جزئی. هیچ‌کدام از مغایرت‌ها «تخلف» نیست — هر سه از یک جنس‌اند: **وضعیت لحظهٔ اجرا با وضعیت فعلی دیسک فرق کرده** یا **برچسب‌گذاری نادرست**. توضیح در بندهای بعد.
+
+## 0.3 سه مغایرت — با شاهد و ریشهٔ دقیق
+
+### مغایرت ۱ — دروازه الان قرمز است: `repo:hygiene` (exit 1)
+
+```
+── سرّ در فایل‌های tracked (1) ──
+  ✗ .workbuddy-ai/memory/2026-10-01.md  [literal-secret-assignment]  password: 'W…
+```
+
+**ریشه:** خط ۵۴۴ همان فایل حافظه، رشتهٔ **fixture تست** را نقل می‌کند:
+`` `password: 'WrongPassword123'` (fixture تست) ``. یعنی یک **مثبت کاذب** — ولی اسکنر الگوی پهن، آن را نقض می‌شمارد و **کد خروج ۱** می‌دهد.
+
+**چرا مهم است (سه لایه):**
+1. **دروازهٔ ۳۶ گامی در وضعیت فعلی سبز نیست.** آخرین گامش (`repo:hygiene`) شکست می‌خورد. گزارش Remediation می‌گوید «پاک (۰ نقض)» — آن اجرا **قبل از کامیت `e53c2b4`** بوده که همین فایل حافظه را وارد مخزن کرد.
+2. **`.workbuddy-ai/` در گیت tracked است — ۱۸ فایل**، شامل `memory/*.md` و `screenshots/analytics-1400/*.png`. اینها **زائدات نشست‌اند، نه محتوای محصول**. اسکنر سرّ روی یادداشت‌های خام نشست اجرا می‌شود و طبیعتاً مثبت کاذب می‌دهد.
+3. الگوی سرّ باید **باریک‌تر** شود (تفکیک fixture/متن مستند از انتساب واقعی) **یا** `.workbuddy-ai/` از ردیابی خارج شود.
+
+**اقدام:** `git rm -r --cached .workbuddy-ai` (با تأیید) + افزودن به `.gitignore`؛ یا باریک‌کردن الگو در `repo-hygiene.mjs`.
+
+### مغایرت ۲ — SEO روی دیسک وجود ندارد و `seo:check` شکست می‌خورد
+
+```
+$ node scripts/seo-validate.mjs
+  ✗ dist/robots.txt نیست — `npm run seo:generate` را اجرا کن
+  ✗ dist/sitemap.xml نیست — `npm run seo:generate` را اجرا کن
+نتیجه: 2 یافته        EXIT=1
+```
+
+**ریشه (قطع‌ی):** `vite.config.js` مقدار `emptyOutDir` را ست نمی‌کند و `dist/` داخل ریشهٔ پروژه است ⇒ ویت **کل `dist/` را خالی می‌کند**. `robots.txt` و `sitemap.xml` را `scripts/generate-sitemap.mjs` **بیرون از build** می‌نویسد. پس:
+
+- `npm run build` تنها ⇒ **`dist/` بدون هیچ فایل SEO**
+- دروازه این را می‌پوشاند چون ترتیبش `build:check → perf:bundle → seo:generate → seo:check` است
+- آخرین `vite build` در `build:check` اجرا شده و پس از آن `seo:generate` روی دیسک نمانده ⇒ **artifact فعلی `dist/` بدون SEO است**
+
+**اقدام:** یا `seo:generate` را به `postbuild` ببند، یا پلاگین ویت بنویسد، یا `emptyOutDir: false` + پاک‌سازی هدفمند.
+
+### مغایرت ۳ — «Error Boundary سه سطح» فقط دو سطح نصب دارد
+
+کامپوننت `src/components/ErrorBoundary.jsx` (۲۱۷ خط) سه scope را مستند و پشتیبانی می‌کند (`root`/`dashboard`/`admin`). اما:
+
+- `src/App.jsx:695` ⇒ `<ErrorBoundary scope="admin" …>`
+- `src/App.jsx:723` ⇒ `<ErrorBoundary scope="dashboard" …>`
+- **`src/main.jsx` هیچ ErrorBoundary ندارد** (فایل ۱۷ خط است و `<App />` را خام رندر می‌کند)
+- کل `src/` ⇒ دقیقاً **۲** مورد `<ErrorBoundary`
+
+⇒ سطح `root` **نصب نشده**. یعنی استثنا در خودِ `App` (خارج از دو ناحیهٔ بالا) هنوز به صفحهٔ سفید می‌رسد. رفع یک‌خطی است.
+
+## 0.4 یک کشف مهم: بار اولیه ۳٫۲۶MB است، نه ۱٫۶MB
+
+گزارش Remediation در بخش ۸ می‌گوید «JS اولیه ۱۶۴۲KB» و `admin` (۱۰۲۴KB) را در جدول **«chunkهای تنبل (خارج از بار اولیه)»** می‌آورد. اندازه‌گیری من از `dist/index.html`:
+
+```html
+<script type="module" crossorigin src="./assets/index-QO8RxNhD.js"></script>   ← 1,642,256 B
+<link rel="modulepreload" crossorigin href="./assets/admin-1WTCsLoF.js">      ← 1,024,223 B  ⚠️
+<link rel="modulepreload" crossorigin href="./assets/react-Dac_GvTY.js">      ←     3,654 B
+<link rel="stylesheet" crossorigin href="./assets/index-BOvJWmhE.css">        ←   745,030 B
+```
+
+| جزء | بایت |
+|---|---|
+| `index-QO8RxNhD.js` (entry) | ۱٬۶۴۲٬۲۵۶ |
+| **`admin-1WTCsLoF.js` (preload)** | **۱٬۰۲۴٬۲۲۳** |
+| `react-Dac_GvTY.js` | ۳٬۶۵۴ |
+| `index-BOvJWmhE.css` | ۷۴۵٬۰۳۰ |
+| **جمع JS+CSS بار اولیه** | **۳٬۴۱۵٬۱۶۳ B = ۳٫۲۶ MB** |
+
+به‌علاوه ۴ فونت preload (`Pinar-VF` · `Doran-Regular` · `Doran-Medium` · `Doran-Bold`).
+
+**ریشه (قطعی):** `src/App.jsx` خط **۱۲** ⇒ `import AdminLayout from './layout/admin/AdminLayout';` — **استاتیک**، و `lazy(` در کل `App.jsx` **صفر بار** استفاده شده. `manualChunks` فایل را جدا می‌کند ولی چون import استاتیک است، ویت `modulepreload` می‌گذارد و **۱MB پنل ادمین در مسیر بحرانی هر بازدیدکنندهٔ سایت عمومی** است.
+
+**نتیجه:** این همان یافتهٔ ردیف ۲۱ ممیزی پایه («CSS پنل برای همهٔ بازدیدکنندگان») است که **هنوز باز است و حالا شامل ۱MB جاوااسکریپت هم می‌شود**. ادعای «admin تنبل است» نادرست است. دو موردی که **واقعاً** تنبل‌اند: `mockData` (۱٫۸۱MB) و `three` (۵۶۲KB) — هیچ‌کدام در `index.html` ارجاع نشده‌اند. ✅
+
+## 0.5 اعداد به‌روز (اندازه‌گیری‌شده در همین نوبت)
+
+| سنجه | بازنگری ۲ (~۱۶:۳۰) | **بازنگری ۳ (~۲۰:۴۵)** |
+|---|---|---|
+| کامیت | ۴۰ | **۵۰** (+۱۰) |
+| **مسیر تغییر‌یافته working tree** | **۱۷۲** | ✅ **۸** (۶ دادهٔ کاربر + ۲ آپلود) |
+| گام‌های دروازه | ۲۶ | **۳۶** |
+| مسیر API | ۲۲۹ | **۲۲۹** (بدون تغییر) |
+| مسیر نوشتن با قرارداد ورودی | ۰ از ۱۳۴ | ✅ **۱۳۴ از ۱۳۴** |
+| کد خطای مدل / مصرف‌شده | ۲۸ / ۲۲ | **۲۸ / ۲۸** |
+| DTO عمومی | ۱۱ | **۱۱** · ۰ مسیر عمومی بدون DTO |
+| Permission | ۸۰ | **۸۰** |
+| فایل تست `database/*.test.mjs` | ۱۶ | **۲۱** |
+| اسکریپت `scripts/*.mjs` | ۳۰ | **۳۶** |
+| اسناد `docs/**/*.md` | ۲۲ | **۲۳** |
+| `database/` | ۶۵ فایل · ۳۷٬۵۴۹ خط | **۷۸ فایل · ۳۹٬۳۵۰ خط** |
+| `scripts/` خطوط | ۸٬۰۲۵ | **۸٬۹۱۸** |
+| `src/` JS/JSX | ۱۶۸٬۳۳۵ · ۳۰۲ jsx + ۱۲۳ js | **۱۶۸٬۵۷۷ · ۳۰۳ jsx + ۱۲۳ js** |
+| `src/` CSS | ۵۰٬۰۰۸ · ۵۵ فایل | **۵۰٬۰۰۸ · ۵۵ فایل** (بدون تغییر) |
+| **بار اولیه JS+CSS** | ۳٫۲۶MB (اندازه‌گیری‌نشده) | **۳٫۲۶ MB** (۳٬۴۱۵٬۱۶۳ B) |
+| `dist/` | ۲۰۰٫۸۹MB | **۲۰۱ MB** |
+| `.git` | ۲۱۹MB | **۲۱۷ MB** |
+| `node_modules` | ۱۴۸MB | **۱۸۴ MB** |
+| پروژه | ۷۹۳MB | **۸۲۷ MB** |
+| `data:check` رکورد | ۱۵۴۹ | **۱۵۵۵** (۰ خطا · ۲۲ هشدار) |
+| مهاجرت معلق | — | ✅ **۰ تغییر · ۰ شکست** |
+| **وضعیت دروازهٔ ۳۶ گامی** | ۲۶/۲۶ سبز | ⚠️ **۳۵/۳۶ سبز — `repo:hygiene` قرمز (exit 1)** |
+
+## 0.6 آنچه **هنوز** باز است (فهرست به‌روز)
+
+| اولویت | مورد | وضعیت | یادداشت |
+|---|---|---|---|
+| 🔴 **۱** | **`repo:hygiene` قرمز** — دروازه سبز نیست | OPEN | مثبت کاذب روی `.workbuddy-ai/memory/2026-10-01.md`؛ رفع: باریک‌کردن الگو یا `git rm --cached .workbuddy-ai` |
+| 🟠 **۲** | **SEO در artifact نیست** | OPEN | `vite build` ⇒ `dist/` خالی از robots/sitemap؛ `seo:generate` را به build ببند |
+| 🟠 **۳** | **۱MB پنل ادمین در بار اولیه** (۳٫۲۶MB) | OPEN (از پایه) | `App.jsx:12` import استاتیک · `lazy(` صفر بار |
+| 🟠 **۴** | **ErrorBoundary سطح `root` نصب نیست** | PARTIAL | ۲ از ۳ سطح؛ رفع یک‌خطی در `main.jsx` |
+| 🟠 **۵** | **`.workbuddy-ai/` tracked است** (۱۸ فایل، شامل اسکرین‌شات و حافظه) | OPEN | زائدات نشست در مخزن محصول |
+| 🟠 **۶** | **تاریخچهٔ Git با PII** — `.git` ۲۱۷MB · `activity.json` ۱۹ نسخه/۲٫۸۱MB · `users.json` ۱۱ نسخه · `admins.json` ۱۷ نسخه · `.app.out.mjs` ۴۵٫۲۸MB | OPEN — **نیازمند تأیید** | اسکریپت فقط‌خواندنی `git-history-audit.mjs` دستور آماده چاپ می‌کند |
+| 🟠 **۷** | **staging ندارد** | BLOCKED | Gate فاز ۲۱ و ۲۳ |
+| 🟠 **۸** | **E2E مرورگری ندارد** | BLOCKED + ممنوع | Playwright نصب نیست |
+| 🟠 **۹** | **Core Web Vitals / load test** | UNVERIFIED | نیازمند staging |
+| 🟡 **۱۰** | **CI هرگز اجرا نشده** | OPEN | `.github/workflows/ci.yml` هست؛ runner واقعی نیست |
+| 🟡 **۱۱** | نشست ادمین memory-only | OPEN | `contentStore.js:910` |
+| 🟡 **۱۲** | `/uploads/**` بدون کنترل دسترسی | OPEN | ۵۵MB با URL عمومی |
+| 🟡 **۱۳** | اعتبارسنجی Schema فقط ۵ از ۱۳۴ مسیر نوشتن | PARTIAL | علت با شاهد ثبت شده: «شکل بدنهٔ سیم ≠ شکل رکورد انبار» |
+| 🟡 **۱۴** | هندلرهای پنل هنوز روی `mutateJsonFile` نیستند | OPEN | تا آن‌جا: استقرار **تک‌پروسه** |
+| 🟡 **۱۵** | OpenAPI استاندارد نیست | OPEN | `api-contract.json` ماشین‌خوان هست |
+| 🟡 **۱۶** | Coverage tooling نصب نیست | OPEN | `c8`/`nyc`/`istanbul` = NONE |
+| 🟡 **۱۷** | rate limit عمومی پنل | OPEN | فقط login/register/بانک تست |
+| 🟢 **۱۸** | `adminApi.js` ۲٬۸۵۰ خط · `contentStore.js` ۴٬۴۲۰ خط | OPEN | refactor مونولیت (فاز ۲۶) |
+| 🟢 **۱۹** | زمان‌بندی/retention بکاپ · هارنس‌های رندر/responsive · سخت‌سازی تصویر · هویت کلاینتی · یکپارچه‌سازی‌های بیرونی | OPEN | مسیر رفع در `PRE-PRODUCTION-REMEDIATION` بند ۱۴ |
+
+## 0.7 داوری نهایی این نوبت
+
+**آنچه واقعاً عوض شد (قابل تأیید):** کامیت‌شدن ۱۷۲ فایل ریسک اصلی را حذف کرد · هدرهای امنیتی با CSP سخت‌گیرانه اضافه شد · مهاجرت نسخه‌دار و قفل بین‌پروسه آمدند · قرارداد ورودی همهٔ ۱۳۴ مسیر نوشتن بسته شد · دادهٔ زمان‌اجرا از گیت خارج شد · `vite build` از «نامعلوم» به **exit=0** رسید · دروازه ۱۰ گام بزرگ‌تر شد.
+
+**آنچه گزارش Remediation دقیق نگفت:** دروازه الان سبز نیست (۱ نقض) · SEO روی دیسک نیست · ErrorBoundary دو سطح از سه است · و «admin تنبل است» نادرست — ۱MB در مسیر بحرانی است.
+
+**سه Gate همچنان عبور نکرده:** staging (فاز ۲۱ و ۲۳) · E2E مرورگری (فاز ۲۳) · history rewrite (فاز ۲۲).
+
+> **هیچ امتیاز، Score یا رتبه‌بندی کلی داده نشده است** — طبق درخواست.
+
+## 0.8 افزودهٔ وضعیت — رفع چهار مورد سریع و Tapesh Guardian v1 (۱ اکتبر ۲۰۲۶ · ~۲۲:۳۱)
+
+این افزوده بر وضعیت ۰.۱ تا ۰.۷ مقدم است؛ تاریخچهٔ ممیزی پایه و بازنگری‌های پیشین بازنویسی نشده‌اند.
+
+### چهار مورد سریع بسته شد
+
+| مورد | تغییر | راستی‌آزمایی |
+|---|---|---|
+| ErrorBoundary ریشه | `src/main.jsx` اکنون کل `<App />` را در `ErrorBoundary scope="root"` می‌گذارد | باندل headless بعد از تغییر موفق |
+| پنل ادمین خارج از بار اولیه | `AdminLayout` lazy + `Suspense`؛ CSSهای پنل به خودِ chunk پنل منتقل شدند | باندل headless: dynamic import و chunk پنل جدا دیده شد |
+| SEO بعد از build | `database/seoFiles.js` helper خالص؛ hook `tapesh-seo-output` در پایان build Vite `robots.txt` و `sitemap.xml` را می‌سازد؛ verify-all دیگر generator دستی برای پوشاندن build اجرا نمی‌کند | hook اجرا شد؛ `seo-validate` سبز، ۱۹ URL |
+| `.workbuddy-ai/` از Git index خارج | `.gitignore` کل پوشه را ignore می‌کند و ۱۸ مسیر با `git rm --cached` untrack شدند؛ فایل‌ها روی دیسک ماندند | `git ls-files .workbuddy-ai` = ۰؛ `repo:hygiene` = ۰ نقض. حذف فقط از index stage شده است، commit نشده |
+
+### Tapesh Guardian v1 — فقط‌خواندنی
+
+**وضعیت: IMPLEMENTED (API و UI؛ browser E2E هنوز انجام نشده).** دسترسی بخش و API فقط با `analytics.security.read` است (`GET /api/admin/guardian/status`)؛ بدون مجوز، داده برنمی‌گردد. این در پیاده‌سازی فعلی مجوز نقش مدیر کل است.
+
+قابلیت‌های واقعی:
+- متریک‌های درخواست در حافظهٔ همان process: پنجرهٔ ۵ دقیقه‌ای، مسیر پاک‌شده، روش، status، خطاهای ۴xx/۵xx و چند مسیر پرتکرار. بافر bounded است؛ تکمیل‌بودن پنجره در صورت حذف نمونه اعلام می‌شود.
+- قواعد ثابت: readiness ناموفق، خرابی JSON مشاهده‌شده، حداقل ۵ خطای ۵xx، حداقل ۸ شکست ورود در نمونه، و پنجرهٔ ناقص/متریک ناموجود. نه anomaly detection است و نه مقایسهٔ baseline.
+- سرصفحه‌های واقعی از `securityHeaders.js` خوانده می‌شوند؛ CSP/HSTS/`Secure` به‌جای «غایب» به‌درستی «شرطی» نشان داده می‌شوند وقتی توسعه/HTTP است. قفل ورود مدیر بر اساس حساب کار می‌کند؛ تعداد IPهای audit فقط «نیازمند بررسی» است و دیگر «مسدود» نام نمی‌گیرد.
+- DTO عمداً شامل IP، User-Agent، cookie، token، username یا body نیست. نتیجهٔ سلامت storage فقط خرابی‌هایی را نشان می‌دهد که همین process دیده؛ فایل‌سیستم را hash-scan نمی‌کند.
+- پنل در `src/layout/admin/GuardianCenter.jsx` هر ۲۰ ثانیه فقط‌خواندنی poll می‌کند، لغو درخواست در unmount دارد و پنجره/محدودیت منبع داده را آشکارا نمایش می‌دهد. اقدام خودکار خاموش است: block، revoke، quarantine، restore/rollback و تغییر کد وجود ندارد.
+
+**مرزهای عملیاتی:** داده‌ها process-local و با restart از دست می‌روند؛ تاریخچهٔ ۷روزه، alert persistence، مانیتور خارج از سرور، GeoIP و تجمیع چند process وجود ندارد. در Vite/preview ممکن است فقط متریک درخواست‌های API پنل در دسترس باشد؛ در production منبع اصلی متریک server middleware است. آماده‌بودن storage سنجش دسترسی خواندن/نوشتن است، نه اثبات صحت همهٔ داده‌ها.
+
+### تصحیح گزارش موجود در همین ممیزی
+
+- شمار مسیرها پس از Guardian: **۲۳۰** (admin ۱۸۷، public ۱۵، exam ۱۶، users ۸، google ۴)؛ قرارداد نوشتن همچنان **۱۳۴** و بدون مسیر جدید نوشتن. DTO **۱۱** و کد خطا **۲۸**.
+- مرکز امنیت قدیمی در `analyticsEngine.js` هدرهای CSP/HSTS/X-Frame را به‌اشتباه `missing` و ۸ شکست login را `blocked` نشان می‌داد، در حالی که پیاده‌سازی واقعی خلاف این را می‌گفت. اکنون با `securityPosture.js` و label «نیازمند بررسی» تصحیح شده؛ **هیچ IP بر اساس این شاخص مسدود نمی‌شود**.
+- تست واحد Guardian/security posture سبز شد؛ تست API+RBAC از مسیر محافظ snapshot: admin ۹۵/۹۵، Guardian ۵/۵، security headers ۱۴/۱۴، API contract suite سبز. شمارش‌های قراردادیِ سخت‌کد با مسیر جدید همگام شدند؛ `api-contract.mjs --check` و route contract هر دو با ۲۳۰ مسیر سبزند. باندل React headless، dynamic import پنل و chunk Guardian جدا را تأیید کرد. بیلد کامل Vite و browser E2E اجرا نشده‌اند.
+
+---
+
+# 0.1 بازنگری ۲ — تاریخچهٔ نوبت پیشین (۱ اکتبر ۲۰۲۶ · ~۱۶:۳۰)
+
+> ⚠️ این بخش **وضعیت ۱۶:۳۰** را توصیف می‌کند و در موارد زیر با وضعیت فعلی فرق دارد: کامیت‌ها ۴۰ بود (الان ۵۰) · ۱۷۲ فایل کامیت‌نشده بود (الان ۸) · دروازه ۲۶ گام بود (الان ۳۶) · هدر امنیتی/مهاجرت/ErrorBoundary/SEO وجود نداشت. **مرجع فعلی = بخش ۰.**
 
 > **مبنا:** `main` @ `a86d875` («manageSOP») · Node `22.22.2` · working tree با **۱۷۲ مسیر تغییر‌یافته** (کامیت‌نشده).
 > **هیچ کامیت تازه‌ای زده نشده** — تمام ۲۳ فاز سخت‌سازی روی working tree است. این خودش یک ریسک فعال است (بند ۰.۶).
@@ -778,7 +998,7 @@ External ── Google OAuth · بله · تلگرام · ایتا · Instagram 
 > | بدون اعتبارسنجی شمارهٔ موبایل | ✅ **FIXED** — `database/authPolicy.js` |
 > | پیش‌فرض `0135/0135` | ⚪ **بازبینی نشد** |
 > | تغییر رمز کاربر متصل نیست | ⚪ **بازبینی نشد** |
-> | هدرهای امنیتی ناقص (CSP/HSTS) | ❌ **OPEN** — `Content-Security-Policy`/`X-Frame-Options`/`Strict-Transport-Security` در `server.js` و `adminApi.js` یافت نشد |
+> | هدرهای امنیتی ناقص (CSP/HSTS) | ✅ **FIXED در بازنگری ۳** — `database/securityHeaders.js` با **۱۵ دایرکتیو CSP** + `X-Content-Type-Options` · `X-Frame-Options` · `Referrer-Policy` · `COOP` · `CORP`؛ CSP **بدون `unsafe-inline`/`unsafe-eval`** در production (هش SHA-256 از خودِ `dist/index.html`) · HSTS فقط production+HTTPS. تست: **۹/۹** واحد + **۱/۱** یکپارچه روی سرور واقعی |
 >
 > **جدول زیر متن ۲۹ سپتامبر است** و برای تاریخچه نگه داشته شده.
 
@@ -904,9 +1124,35 @@ External ── Google OAuth · بله · تلگرام · ایتا · Instagram 
 
 ## 14.1 اندازه‌گیری‌های واقعی (نه تخمین)
 
-> **🔄 مقادیر زیر در ۱ اکتبر ۲۰۲۶ بازاندازه‌گیری شد** (`dist/` بازساختهٔ ۲۰۲۶-۱۰-۰۱ ۱۳:۴۸). ردیف‌های پایه برای تاریخچه حفظ شده‌اند.
+> ### 🔄 بازنگری ۳ (~۲۰:۴۵) — **بار اولیه واقعی ۳٫۲۶MB است، نه ۱٫۶MB**
+>
+> گزارش Remediation بخش ۸ می‌گوید «JS اولیه ۱۶۴۲KB» و `admin` (۱۰۲۴KB) را در جدول **«chunkهای تنبل»** می‌آورد. `dist/index.html` چیز دیگری می‌گوید:
+>
+> ```html
+> <script type="module" crossorigin src="./assets/index-QO8RxNhD.js"></script>  ← 1,642,256 B
+> <link rel="modulepreload" crossorigin href="./assets/admin-1WTCsLoF.js">     ← 1,024,223 B  ⚠️
+> <link rel="modulepreload" crossorigin href="./assets/react-Dac_GvTY.js">     ←     3,654 B
+> <link rel="stylesheet" crossorigin href="./assets/index-BOvJWmhE.css">       ←   745,030 B
+> ```
+>
+> | جزء | بایت | تنبل؟ |
+> |---|---|---|
+> | `index-QO8RxNhD.js` (entry) | ۱٬۶۴۲٬۲۵۶ | — |
+> | **`admin-1WTCsLoF.js`** | **۱٬۰۲۴٬۲۲۳** | ❌ **preload** |
+> | `react-Dac_GvTY.js` | ۳٬۶۵۴ | ❌ preload |
+> | `index-BOvJWmhE.css` | ۷۴۵٬۰۳۰ | — |
+> | **جمع JS+CSS بار اولیه** | **۳٬۴۱۵٬۱۶۳ B = ۳٫۲۶ MB** | — |
+> | + ۴ فونت preload | `Pinar-VF` · `Doran-Regular` · `Doran-Medium` · `Doran-Bold` | — |
+>
+> **ریشه (قطعی):** `src/App.jsx:12` ⇒ `import AdminLayout from './layout/admin/AdminLayout';` — **استاتیک**. `lazy(` در کل `App.jsx` **صفر بار** استفاده شده. `manualChunks` فایل را جدا می‌کند ولی import استاتیک ⇒ ویت `modulepreload` می‌گذارد.
+>
+> **✅ آنچه واقعاً تنبل است:** `mockData` (۱٫۸۱MB) و `three` (۵۶۲KB) — هیچ‌کدام در `index.html` ارجاع نشده‌اند. ادعای گزارش دربارهٔ این دو درست است؛ فقط دربارهٔ `admin` نادرست است.
+>
+> **رابطه با ممیزی پایه:** این همان یافتهٔ ردیف ۲۱ پایه («CSS پنل برای همه») است که **هنوز باز است** و حالا شامل ۱MB جاوااسکریپت هم می‌شود.
 
-| اندازه | بازنگری ۲ (۱ اکتبر) | پایه (۲۹ سپتامبر) | منبع |
+> **🔄 بازنگری ۲ (۱ اکتبر ۲۰۲۶):** مقادیر زیر از `dist/` بازساختهٔ ۲۰۲۶-۱۰-۰۱ ۱۳:۴۸ اندازه‌گیری شد.
+
+| اندازه | بازنگری ۲ | پایه (۲۹ سپتامبر) | منبع |
 |---|---|---|---|
 | JS کل | **۵٫۷۴ MB در ۱۹ chunk** | ۴٫۴۱ MB در ۱ فایل | `scripts/bundle-budget.mjs` |
 | **entry اصلی** | **۱٫۵۶ MB** (`index-BVIlCwBi.js`) | ۴٫۴۱ MB | `dist/assets/` |
@@ -1026,6 +1272,31 @@ External ── Google OAuth · بله · تلگرام · ایتا · Instagram 
 # 17. Testing Audit
 
 ## 17.1 آنچه وجود دارد
+
+> ### 🔄 بازنگری ۳ (~۲۰:۴۵) — ۲۱ فایل تست و دروازهٔ ۳۶ گامی
+>
+> | سنجه | بازنگری ۲ | **بازنگری ۳** |
+> |---|---|---|
+> | `database/*.test.mjs` | ۱۶ | **۲۱** |
+> | گام‌های دروازه | ۲۶ | **۳۶** |
+> | وضعیت دروازه | ۲۶/۲۶ سبز | ⚠️ **۳۵/۳۶ — `repo:hygiene` قرمز (exit 1)** |
+>
+> **۵ سوییت تازه (۳۴ سنجه) — همه را خودم اجرا کردم:**
+>
+> | سوییت | سنجه | نتیجه |
+> |---|---|---|
+> | `database/securityHeaders.test.mjs` | ۹ | ✅ **۹/۹ · exit 0** |
+> | `database/securityHeaders.integration.test.mjs` (سرور واقعی) | ۱ | ✅ **۱/۱ · exit 0** |
+> | `database/adminCredentialPolicy.test.mjs` | ۹ | ✅ **۹/۹ · exit 0** |
+> | `database/concurrency.test.mjs` | ۸ | ✅ **۸/۸ · exit 0** |
+> | `database/migrations/migration.test.mjs` | ۷ | ✅ **۷/۷ · exit 0** |
+>
+> **۱۰ گام تازهٔ دروازه:** `security:headers:test` · `security:credential:test` · `concurrency:test` · `migration:test` · `build:check` · `seo:generate` · `seo:check` · `route:contracts:fresh` · `data:migrate:dry` · `repo:hygiene`
+>
+> **⚠️ هشدار دربارهٔ «سبز بودن دروازه»:** چون `repo:hygiene` آخرین گام است و **الان شکست می‌خورد** (مثبت کاذب روی یک رشتهٔ fixture در `.workbuddy-ai/memory/2026-10-01.md:544`)، در وضعیت فعلی نمی‌توان گفت دروازه سبز است. دلیل کامل در بند ۰.۳.
+>
+> **Coverage:** ابزار همچنان نصب نیست (`c8`/`nyc`/`istanbul` = NONE) ⇒ **UNKNOWN**.
+> **E2E مرورگری:** همچنان `BLOCKED` — هیچ ابزار نصب نیست.
 
 > **🔄 بازنگری ۲ (۱ اکتبر ۲۰۲۶):** از ۱۰ فایل پایه، تعداد به **۱۶ فایل `database/*.test.mjs` + ۵ فایل تست در `scripts/`** رسید و یک **دروازهٔ کیفیت ۲۶ گامی** ساخته شد که **۲۶/۲۶ سبز** است (`scripts/verify-all.mjs`، exit 0، ۴۲۶٫۷s، لاگ مرجع `.workbuddy-ai/phase-logs/verify-all-26.log`). جدول پایه در ادامه برای تاریخچه می‌آید.
 
@@ -1401,6 +1672,19 @@ External ── Google OAuth · بله · تلگرام · ایتا · Instagram 
 
 # 28. Deployment & DevOps
 
+> ### 🔄 بازنگری ۳ (~۲۰:۴۵)
+>
+> | مورد | بازنگری ۲ | **بازنگری ۳** |
+> |---|---|---|
+> | `npm run build` | ⚠️ **BLOCKED** (`three` غایب) | ✅ **exit=0** · ~۱۶٫۹–۱۸٫۸s · `build:check` در دروازه |
+> | بازتولیدپذیری | — | ✅ یکپارچگی وابستگی ۵۳۴ فایل سورس؛ هر import بیرونی declare + در lockfile. **یافتهٔ رفع‌شده:** `esbuild` در ۳ اسکریپت import می‌شد ولی declare نبود ⇒ به `devDependencies` رفت |
+> | استقرار | `deploy.mjs` | همان (۲۱۵ خط) |
+> | SEO در artifact | — | ❌ **`vite build` کل `dist/` را خالی می‌کند** (بدون `emptyOutDir`) و `seo:generate` بیرون از build است ⇒ artifact فعلی **بدون robots/sitemap** |
+> | CI | workflow هست، اجرا نشده | ❌ **همچنان اجرا نشده** |
+> | Staging · Docker | `NOT FOUND` | ❌ **همچنان `NOT FOUND`** |
+>
+> **هشدار عملیاتی:** `npm run build` **به‌تنهایی artifact ناقص** می‌دهد (بدون SEO). یا `seo:generate` را به `postbuild` ببند، یا پلاگین ویت بنویسد، یا `emptyOutDir: false` + پاک‌سازی هدفمند.
+
 > **🔄 بازنگری ۲ (۱ اکتبر ۲۰۲۶) — ۴ ردیف بسته شد.**
 >
 > | مورد | پایه | فعلی |
@@ -1476,6 +1760,26 @@ External ── Google OAuth · بله · تلگرام · ایتا · Instagram 
 ---
 
 # 30. Git & Version Control
+
+> ### 🔄 بازنگری ۳ (~۲۰:۴۵) — **بحرانی‌ترین ریسک برطرف شد**
+>
+> | مورد | بازنگری ۲ (~۱۶:۳۰) | **بازنگری ۳** |
+> |---|---|---|
+> | کامیت | ۴۰ | **۵۰** (+۱۰) |
+> | **Working tree** | 🔴 **۱۷۲ مسیر** | ✅ **۸ مسیر** |
+> | HEAD | `a86d875` | **`e53c2b4`** |
+> | `.git` | ۲۱۹ MB | **۲۱۷ MB** |
+> | دادهٔ زمان‌اجرا tracked | ۵ | ✅ **۰** |
+> | سرّ tracked | ۰ | ✅ **۰** |
+> | `.workbuddy-ai/` tracked | — | ⚠️ **۱۸ فایل** |
+>
+> **۸ مسیر باقی‌مانده، همه دادهٔ کاربر است — هیچ کد نیست:** ۶ فایل `database/content/*.json` (`banners` · `comprehensiveCourses` · `mediaTags` · `microCourses` · `pages` · `references`) + ۲ PNG در `public/uploads/`. طبق قاعدهٔ پروژه، این‌ها **عمداً کامیت نشدند**.
+>
+> **آن ۱۷۲ فایل کجا رفت:** کامیت `dbe88d4 chore: checkpoint accumulated hardening work (working tree)` با **۲۱۲ فایل** آن‌ها را ثبت کرد؛ بقیه در ۹ کامیت دیگر توزیع شدند. هر کامیت یک دغدغهٔ جدا دارد (امنیت · داده · UI · SEO · build · gate · repo) ⇒ مسیر بازگشت مرحله‌ای ممکن است.
+>
+> **⚠️ یافتهٔ تازه:** `.workbuddy-ai/` (۱۸ فایل) **tracked است** — شامل `memory/*.md` (یادداشت خام نشست) و `screenshots/analytics-1400/*.png`. این باعث می‌شود `repo:hygiene` روی یادداشت‌های نشست اسکن سرّ بزند و **مثبت کاذب** بدهد (بند ۰.۳، مغایرت ۱). این پوشه **زائدات ابزار است، نه محتوای محصول** و نباید در مخزن باشد.
+>
+> **ممیزی تاریخچه (فقط‌خواندنی، `scripts/git-history-audit.mjs`):** `activity.json` ۱۹ نسخه / ۲٫۸۱MB (IP/UA) · `users.json` ۱۱ نسخه (PII) · `admins.json` ۱۷ نسخه (هش رمز) · بزرگ‌ترین blob `.app.out.mjs` = **۴۵٫۲۸MB**. **History rewrite اجرا نشد** — اسکریپت دستور پیشنهادی و aftercare را چاپ می‌کند.
 
 > **🔄 بازنگری ۲ (۱ اکتبر ۲۰۲۶) — بدتر شد.**
 >
@@ -1873,6 +2177,23 @@ External ── Google OAuth · بله · تلگرام · ایتا · Instagram 
 
 > فقط مواردی که برای **این** معماری و این پروژه واقعاً لازم‌اند.
 
+> ### 🔄 بازنگری ۳ (~۲۰:۴۵) — ۳ مورد دیگر بسته شد
+>
+> | مورد | بازنگری ۲ | **بازنگری ۳** |
+> |---|---|---|
+> | هدرهای امنیتی | ❌ غایب | ✅ **FIXED** — `securityHeaders.js` · ۹/۹ + ۱/۱ تست |
+> | مهاجرت نسخه‌دار | ❌ `NOT FOUND` | ✅ **FIXED** — `database/migrations/` (رجیستری ۲ مهاجرت، ۱۲ انبار) · ۷/۷ تست · `data:migrate` ⇒ ۰ تغییر |
+> | قفل نوشتن بین‌پروسه | ❌ غایب | ✅ **FIXED** — `database/writeQueue.js` (`withFileLock` · `withAdvisoryLock` · `mutateJsonFile`) · ۸/۸ تست |
+> | Error Boundary | ❌ غایب | ⚠️ **PARTIAL** — کامپوننت ۳ scope دارد، **۲ نصب شده**؛ سطح `root` در `main.jsx` نیست |
+> | SEO پایه | ❌ غایب | ⚠️ **PARTIAL** — کد و اعتبارسنج هست، **ولی artifact فعلی `dist/` بدون `robots.txt`/`sitemap.xml` است** و `seo:check` ⇒ exit 1 |
+> | بازتولیدپذیری build | ❌ نامعلوم | ✅ **FIXED** — `vite build` ⇒ **exit=0**؛ `esbuild` از import ضمنی به `devDependencies` منتقل شد |
+> | زمان‌بندی بکاپ | ❌ | ❌ **همچنان OPEN** — اسکریپت و تست ۱۲/۱۲ هست؛ scheduler/retention/drill نیست |
+> | Error tracking | ❌ | ❌ **همچنان OPEN** |
+> | لاگ پایدار | ❌ | ⚠️ **PARTIAL** — لاگ JSON هست، sink/rotation نیست |
+> | staging · CI اجراشده · coverage · OpenAPI · E2E مرورگری · load test | ❌ | ❌ **همچنان OPEN/BLOCKED** |
+>
+> **جدول بازنگری ۲ در ادامه** (وضعیت ~۱۶:۳۰).
+
 > **🔄 بازنگری ۲ (۱ اکتبر ۲۰۲۶) — ۵ از ۹ مورد بسته شد.**
 >
 > | مورد پایه | وضعیت فعلی |
@@ -1912,6 +2233,20 @@ External ── Google OAuth · بله · تلگرام · ایتا · Instagram 
 ---
 
 # 43. Product Readiness
+
+> ### 🔄 بازنگری ۳ (~۲۰:۴۵)
+>
+> | بعد | بازنگری ۲ | **بازنگری ۳** |
+> |---|---|---|
+> | **Technical** | ⚠️ Partially Ready (۱۷۲ فایل کامیت‌نشده) | ✅ **Ready** — working tree ۸ مسیر (فقط دادهٔ کاربر) · ۵۰ کامیت · `vite build` exit=0. **کاهش‌دهنده:** بار اولیه ۳٫۲۶MB |
+> | **Security** | ✅ Ready | ✅ **Ready (قوی‌تر)** — CSP/HSTS + fail-closed credential + قفل بین‌پروسه + قرارداد ورودی ۱۳۴/۱۳۴. **کاهش‌دهنده:** تاریخچهٔ Git با PII · `/uploads` بدون کنترل |
+> | **UX** | ✅ Ready (با استثناها) | ✅ **Ready** — ErrorBoundary اضافه شد ولی **سطح `root` نصب نیست**؛ پنل روی موبایل، تغییر رمز، تب اشتراک همچنان باز |
+> | **Performance** | ⚠️ Partially Ready | ⚠️ **Partially Ready** — build بازتولیدپذیر شد و بودجه ماشین‌خوان است؛ **ولی ۱MB پنل ادمین در مسیر بحرانی است** و Core Web Vitals همچنان UNVERIFIED |
+> | **Operational** | ⚠️ Partially Ready | ⚠️ **Partially Ready (بهتر)** — build/health/metrics/backup/migrations/deploy آمدند؛ **staging، CI اجراشده، error tracking، لاگ پایدار، زمان‌بندی بکاپ همچنان غایب** |
+> | **Maintainability** | ✅ Ready | ✅ **Ready** — ۲۳ سند · ۳۶ گام دروازه · ۲۱ فایل تست. **کاهش‌دهنده:** `adminApi.js`/`contentStore.js` بزرگ‌تر |
+> | **Scalability** | ❌ Not Ready | ⚠️ **Partially Ready** — `writeQueue.js` مسیر چند-پروسه‌ای را **آماده** کرد، ولی هندلرها هنوز از `mutateJsonFile` استفاده نمی‌کنند و نشست ادمین در حافظه است |
+>
+> **جدول بازنگری ۲ در ادامه.**
 
 > **🔄 بازنگری ۲ (۱ اکتبر ۲۰۲۶) — بازنگری این جدول:**
 >
@@ -2014,7 +2349,41 @@ External ── Google OAuth · بله · تلگرام · ایتا · Instagram 
 
 # 45. Top 25 Issues
 
-> **🔄 این جدول در بازنگری ۲ (۱ اکتبر ۲۰۲۶) جایگزین شد.** ۱۱ مسئلهٔ جدول پایه رفع شده‌اند و از فهرست بیرون رفتند؛ ۲۵ ردیف زیر **مسائل باز امروز** هستند. جدول پایه در انتهای همین بخش برای تاریخچه نگه داشته شده.
+> **🔄 بازنگری ۳ (~۲۰:۴۵):** ردیف‌های ۱، ۲، ۶ و ۷ جدول بازنگری ۲ **رفع شدند** (کامیت‌شدن، هدرهای امنیتی، CI workflow، Core Web Vitals همچنان باز). سه ردیف تازه از مغایرت‌های همین بازنگری اضافه شد. جدول بازنگری ۲ در ادامه برای تاریخچه.
+
+| # | Problem | Location | Severity | Evidence | Consequence | Recommended Action |
+|---|---|---|---|---|---|---|
+| ۱ | **دروازه سبز نیست** — `repo:hygiene` exit 1 | `.workbuddy-ai/memory/2026-10-01.md:544` | 🔴 **HIGH** | `repo:hygiene` ⇒ «۱ یافتهٔ نقض» · الگو: `password: 'W…` | آخرین گام دروازه شکست می‌خورد ⇒ «سبز بودن دروازه» قابل اتکا نیست | الگوی سرّ را باریک کن **یا** `.workbuddy-ai/` را از ردیابی خارج کن |
+| ۲ | **SEO در artifact نیست** — `vite build` آن را پاک می‌کند | `vite.config.js` (بدون `emptyOutDir`) + `scripts/generate-sitemap.mjs` | 🟠 **HIGH** | `seo-validate.mjs` ⇒ ۲ یافته · **exit 1**؛ هیچ `robots.txt`/`sitemap.xml` روی دیسک نیست | استقرار بدون sitemap/robots ⇒ SEO از دست می‌رود | `seo:generate` را به `postbuild` ببند یا پلاگین ویت |
+| ۳ | **۱MB پنل ادمین در بار اولیه** (بار اولیه ۳٫۲۶MB) | `src/App.jsx:12` | 🟠 **HIGH** | `<link rel="modulepreload" href="./assets/admin-1WTCsLoF.js">` (۱٬۰۲۴٬۲۲۳ B) · `lazy(` در `App.jsx` = **۰** | هر بازدیدکنندهٔ سایت عمومی ۱MB JS پنل را می‌گیرد | `AdminLayout` را `lazy()` کن (همان الگوی `DashboardLayout`) |
+| ۴ | **`.workbuddy-ai/` tracked** (۱۸ فایل) | `.gitignore` | 🟠 **HIGH** | `git ls-files .workbuddy-ai` = ۱۸ · شامل `memory/*.md` + `screenshots/*.png` | زائدات نشست در مخزن محصول؛ منبع ردیف ۱ | `git rm -r --cached .workbuddy-ai` + `.gitignore` — **تأیید** |
+| ۵ | **تاریخچهٔ Git با PII** | `.git` = ۲۱۷ MB | 🟠 **HIGH** | `git-history-audit.mjs`: `activity.json` ۱۹ نسخه/۲٫۸۱MB · `users.json` ۱۱ نسخه · `admins.json` ۱۷ نسخه · `.app.out.mjs` ۴۵٫۲۸MB | هر کسی با دسترسی به repo، PII و هش رمز می‌گیرد | `git filter-repo` + `gc` — **تأیید صریح**؛ اسکریپت دستور آماده چاپ می‌کند |
+| ۶ | **ErrorBoundary سطح `root` نصب نیست** | `src/main.jsx` | 🟠 **HIGH** | کل `src/` ⇒ ۲ مورد `<ErrorBoundary` (`admin`، `dashboard`)؛ `main.jsx` (۱۷ خط) خام `<App />` رندر می‌کند | استثنا در خودِ `App` = صفحهٔ سفید | `<ErrorBoundary scope="root">` دور `<App />` |
+| ۷ | **staging وجود ندارد** | — | 🟠 **HIGH** | Gate فاز ۲۱ و ۲۳ به همین دلیل عبور نکرد | load test، DR drill، Core Web Vitals ناممکن | یک محیط staging |
+| ۸ | **E2E مرورگری وجود ندارد** | — | 🟠 **HIGH** | `playwright`/`cypress`/`puppeteer`/`vitest`/`jsdom` = **NONE** | جریان‌های UI **UNVERIFIED** | Playwright + یک smoke روی staging |
+| ۹ | **Core Web Vitals / load test** | — | 🟠 **HIGH** | هیچ اندازه‌گیری مرورگر | تجربهٔ واقعی کاربر ناشناخته | Lighthouse/CrUX روی staging |
+| ۱۰ | **CI هرگز اجرا نشده** | `.github/workflows/ci.yml` | 🟡 **MEDIUM** | workflow هست؛ هیچ اجرای واقعی دیده نشد | دروازهٔ ۳۶ گامی فقط دستی | push به remote + یک اجرای سبز |
+| ۱۱ | **نشست ادمین memory-only** | `contentStore.js:910` | 🟡 **MEDIUM** | `const sessions = new Map()` | ری‌استارت = خروج همه؛ مانع scale افقی | `sessionStore` + `admin.sessions.json` + تست restart |
+| ۱۲ | **`/uploads/**` بدون کنترل دسترسی** | `uploadsFile.js` | 🟡 **MEDIUM** | `serveUploadRequest` چک نشستی ندارد | ۵۵MB با URL عمومی | `visibility: public\|private` + دسترسی امضاشده |
+| ۱۳ | **اعتبارسنجی Schema فقط ۵ از ۱۳۴ مسیر نوشتن** | `database/apiContract/inputGateway.js` | 🟡 **MEDIUM** | ۱۲۵ مسیر فقط «ساختار بدنه» دارند؛ علت ثبت‌شده: `POST /api/admin/articles` ⇒ ۴۰۰ `missing_published_at` | بدنهٔ سیم با رکورد انبار یکی نیست | «قرارداد سیم» جدا به‌ازای هر دامنه |
+| ۱۴ | **هندلرهای پنل روی `mutateJsonFile` نیستند** | `database/adminApi.js` | 🟡 **MEDIUM** | `writeQueue.js` ساخته شد ولی هندلرها از آن استفاده نمی‌کنند | استقرار چند-پروسه‌ای تضمین lost update ندارد | مهاجرت تدریجی؛ تا آن‌جا تک‌پروسه |
+| ۱۵ | **rate limit عمومی پنل** | `database/adminApi.js` | 🟡 **MEDIUM** | فقط login/register/بانک تست | اسپم/استخراج انبوه | دو سطح عمومی/نوشتنی، کلید identity+IP |
+| ۱۶ | **OpenAPI استاندارد نیست** | `docs/api/api-contract.json` | 🟡 **MEDIUM** | ماشین‌خوان هست، OpenAPI 3 نیست | ۲۲۹ مسیر بدون سند استاندارد | generator از `api-contract.json` |
+| ۱۷ | **Coverage tooling نصب نیست** | — | 🟡 **MEDIUM** | `c8`/`nyc`/`istanbul` = NONE | پوشش عددی نامعلوم | `c8` + baseline پیش از threshold |
+| ۱۸ | **زمان‌بندی/retention بکاپ · DR drill** | `scripts/data-backup.mjs` | 🟡 **MEDIUM** | اسکریپت + تست ۱۲/۱۲ هست؛ scheduler نیست | بکاپ دستی فراموش می‌شود | scheduler + retention + drill دوره‌ای |
+| ۱۹ | **`adminApi.js` ۲٬۸۵۰ خط · `contentStore.js` ۴٬۴۲۰ خط** | `database/` | 🟡 **MEDIUM** | `wc -l` | هر تغییر پرریسک | refactor تدریجی (فاز ۲۶) |
+| ۲۰ | **CSS پنل برای همهٔ بازدیدکنندگان** | `App.jsx:18, 46-48` | 🟡 **MEDIUM** | ۴ import سطح‌بالا | CSS اضافی + parse | lazy CSS کنار chunk (هم‌زمان با ردیف ۳) |
+| ۲۱ | **observability پایدار نیست** | `database/observability.js` | 🟡 **MEDIUM** | لاگ JSON هست، ولی sink/rotation/error-tracking نیست؛ متریک درون-حافظه | دیباگ پس از ری‌استارت | log sink + rotation + error tracking |
+| ۲۲ | **هارنس‌های رندر/responsive اجرا نشده‌اند** | `scripts/verify-render.mjs` · `theme-contrast.mjs` · `tailwind-probe.mjs` | 🟢 **LOW** | در دروازه نیستند | responsive و کنتراست **UNVERIFIED** | افزودن به دروازه |
+| ۲۳ | **سخت‌سازی تصویر/رسانه** | `database/contentStore.js` | 🟢 **LOW** | ۵۵MB آپلود خام | payload سنگین | resize/thumbnail/metadata strip |
+| ۲۴ | **هویت کلاینتی (رمز کاربر)** | `src/services/userStorage.js` | 🟢 **LOW** | localStorage هنوز «کش نمایشی» است ولی رمز سمت کلاینت می‌ماند | جعل پیشرفت | server-authoritative identity |
+| ۲۵ | **یکپارچه‌سازی‌های بیرونی بدون consumer** | `database/publishers/*` · AI · Payment | 🟢 **LOW** | بدون توکن/sandbox | قابلیت `UNVERIFIED` | قرارداد آداپتر + mock server |
+
+**ترتیب این جدول بر اساس شدت فنی و دامنهٔ تأثیر سیستم است، نه سلیقه.**
+
+### جدول بازنگری ۲ (~۱۶:۳۰) — تاریخچه
+
+> در این جدول، ردیف‌های ۱ (۱۷۲ فایل کامیت‌نشده)، ۶ (CI اجرانشده) و ۷ (Core Web Vitals) با وضعیت امروز فرق دارند: **۱ کامیت شد** · **۶ همچنان اجرا نشده** · **۷ همچنان UNVERIFIED**. ردیف ۲ (تاریخچهٔ Git) و ۸ (ErrorBoundary) و ۹ (نشست ادمین) در جدول فعلی بازآمده‌اند.
 
 | # | Problem | Location | Severity | Evidence | Consequence | Recommended Action |
 |---|---|---|---|---|---|---|
@@ -2323,6 +2692,34 @@ SPA با روتر hash-based، سرویس‌های دامنه‌ای در کلا
 
 > این بخش **بسیار مهم** است. هر موردی که با اطمینان مشخص نشد، اینجاست.
 
+> ## 🔄 بازنگری ۳ (~۲۰:۴۵) — ناشناخته‌های تازه بسته‌شده
+>
+> **از «ناشناخته» بیرون آمد (اجرا شد، نتیجه دارد):**
+>
+> | مورد | نتیجه |
+> |---|---|
+> | هدرهای امنیتی روی پاسخ واقعی | ✅ **۹/۹** واحد + **۱/۱** یکپارچه روی سرور واقعی · ۱۵ دایرکتیو CSP |
+> | credential مدیر fail-closed | ✅ **۹/۹** — fallback شناخته‌شدهٔ `0135` حذف شد |
+> | قفل نوشتن بین‌پروسه | ✅ **۸/۸** — ۵ پروسهٔ نود × ۲۰ افزایش ⇒ دقیقاً ۱۰۰ |
+> | مهاجرت نسخه‌دار | ✅ **۷/۷** · `data:migrate --dry-run` ⇒ ۰ تغییر · ۰ شکست |
+> | بازتولیدپذیری build | ✅ `vite build` ⇒ **exit=0** · یکپارچگی وابستگی ۵۳۴ فایل |
+> | قرارداد ورودی مسیرهای نوشتن | ✅ **۱۳۴/۱۳۴** · `route:contracts:fresh` ⇒ هم‌گام |
+> | خودآزمون API | ✅ `api-input-audit --selftest` ⇒ سبز |
+> | دادهٔ زمان‌اجرا tracked | ✅ **۰** (از ۵) |
+>
+> **ناشناخته‌های تازهٔ کشف‌شده در همین بازنگری:**
+>
+> | مورد | وضعیت |
+> |---|---|
+> | **بار اولیهٔ واقعی** | ✅ **اندازه‌گیری شد: ۳٬۴۱۵٬۱۶۳ B = ۳٫۲۶ MB** (شامل ۱MB پنل ادمین با `modulepreload`) — گزارش Remediation این را «۱۶۴۲KB» گفته بود |
+> | **وضعیت واقعی `repo:hygiene`** | ✅ **اندازه‌گیری شد: exit 1 · ۱ نقض** (گزارش «۰ نقض» گفته بود) |
+> | **وضعیت واقعی SEO روی دیسک** | ✅ **اندازه‌گیری شد: `robots.txt`/`sitemap.xml` وجود ندارند · `seo:check` exit 1** |
+> | **تعداد mountهای ErrorBoundary** | ✅ **۲ از ۳** (سطح `root` نصب نشده) |
+> | نصب تمیز (`npm ci`) روی ماشین تمیز | ⚪ **UNVERIFIED-EXTERNAL** — نیازمند شبکه |
+> | **اجرای کامل دروازهٔ ۳۶ گامی** | ⚪ **اجرا نشد** — شامل `build:check` است که `dist/` را بازسازی می‌کند؛ بدون درخواست صریح کاربر اجرا نکردم. وضعیت تک‌گامی همهٔ گام‌های فقط‌خواندنی را سنجیدم |
+> | Core Web Vitals · load test · E2E مرورگری · Coverage · staging | ⚪ **همچنان UNVERIFIED/BLOCKED** |
+> | OAuth/Publisher/Payment واقعی | ⚪ **UNVERIFIED-EXTERNAL** — بدون credential |
+
 > ## 🔄 بازنگری ۲ (۱ اکتبر ۲۰۲۶) — این فهرست کوتاه‌تر شد
 >
 > **آنچه از «ناشناخته» بیرون آمد (اجرا شد و نتیجه دارد):**
@@ -2444,6 +2841,33 @@ SPA با روتر hash-based، سرویس‌های دامنه‌ای در کلا
 
 # Self-Check نهایی
 
+> ### 🔄 بازنگری ۳ (~۲۰:۴۵) — چه سنجیدم و چه نسنجیدم
+>
+> **سنجیده‌شده (اجرای واقعی در همین نوبت):**
+>
+> | گام | فرمان | نتیجه |
+> |---|---|---|
+> | ۳۶ گام دروازه | شمارش `scripts/verify-all.mjs` | ✅ **۳۶** |
+> | هدرهای امنیتی (واحد) | `--test database/securityHeaders.test.mjs` | ✅ ۹/۹ · exit 0 |
+> | هدرهای امنیتی (یکپارچه) | `--test database/securityHeaders.integration.test.mjs` | ✅ ۱/۱ · exit 0 |
+> | credential مدیر | `--test database/adminCredentialPolicy.test.mjs` | ✅ ۹/۹ · exit 0 |
+> | هم‌زمانی | `--test database/concurrency.test.mjs` | ✅ ۸/۸ · exit 0 |
+> | مهاجرت | `--test database/migrations/migration.test.mjs` | ✅ ۷/۷ · exit 0 |
+> | قرارداد API | `scripts/api-contract.mjs --check` | ✅ ۰ نقض · ۱۳۴/۱۳۴ قرارداد ورودی |
+> | رجیستری قرارداد | `scripts/generate-route-contracts.mjs --check` | ✅ هم‌گام |
+> | خودآزمون API | `scripts/api-input-audit.mjs --selftest` | ✅ سبز |
+> | یکپارچگی داده | `scripts/data-integrity.mjs` | ✅ ۰ خطا · ۲۲ هشدار · ۱۵۵۵ رکورد |
+> | مهاجرت روی دادهٔ واقعی | `scripts/data-migrate.mjs --dry-run` | ✅ ۰ تغییر · ۰ شکست |
+> | بودجهٔ باندل | `scripts/bundle-budget.mjs` | ✅ ۸ سقف · ۰ نقض |
+> | **بهداشت مخزن** | `scripts/repo-hygiene.mjs` | ❌ **۱ نقض · exit 1** |
+> | **اعتبارسنجی SEO** | `scripts/seo-validate.mjs` | ❌ **۲ یافته · exit 1** |
+> | بار اولیه | خواندن `dist/index.html` + `stat -f%z` | ✅ **۳٬۴۱۵٬۱۶۳ B** |
+> | ردیابی گیت | `git ls-files` · `git log` | ✅ ۵۰ کامیت · ۸ مسیر تغییر‌یافته · ۰ دادهٔ زمان‌اجرا |
+>
+> **نسنجیده (صریح):** اجرای کامل `verify:all` (شامل `build:check` که `dist/` را بازسازی می‌کند) · E2E مرورگری · load test · Core Web Vitals · `npm ci` تمیز · OAuth/Publisher/Payment واقعی · هارنس‌های `verify-render`/`theme-contrast`/`tailwind-probe`.
+>
+> **روش:** هر ردیف «FIXED» دست‌کم یک شاهد اجرایی دارد. سه مغایرت با گزارش Remediation **پیدا و مستند شد** — نه نادیده گرفته شد. هیچ موردی بر پایهٔ حدس علامت‌گذاری نشد.
+
 > **🔄 بازنگری ۲ (۱ اکتبر ۲۰۲۶) — بندهای زیر با اجرای واقعی اصلاح شد:**
 >
 > | ادعای پایه | تصحیح بازنگری ۲ |
@@ -2484,33 +2908,38 @@ SPA با روتر hash-based، سرویس‌های دامنه‌ای در کلا
 
 ## پیوست — اعداد کلیدی این ممیزی
 
-> **🔄 بازنگری ۲ (۱ اکتبر ۲۰۲۶):** ستون «فعلی» با اندازه‌گیری تازه پر شده است.
+> **🔄 ستون‌ها:** «بازنگری ۳» = وضعیت فعلی (~۲۰:۴۵) · «بازنگری ۲» = ~۱۶:۳۰ · «پایه» = ۲۹ سپتامبر.
 
-| سنجه | فعلی (۱ اکتبر) | پایه (۲۹ سپتامبر) |
-|---|---|---|
-| کل خطوط سورس (`src` + `database` + `scripts`) | **۲۱۳٬۹۰۹** | ۲۴۳٬۶۰۱ |
-| `src/` (JS/JSX) | **۱۶۸٬۳۳۵ خط** · ۳۰۲ JSX + ۱۲۳ JS | ۱۶۸٬۴۰۶ · ۳۰۲ JSX + ۱۲۴ JS |
-| `src/` (CSS) | **۵۰٬۰۰۸ خط · ۵۵ فایل** · ۲۹ breakpoint | همان |
-| `database/` | **۳۷٬۵۴۹ خط · ۶۵ فایل** (`*.js` + `*.test.mjs` + `*.mjs`) | ۲۱٬۸۳۸ خط · ۴۰ فایل |
-| `scripts/` | **۸٬۰۲۵ خط · ۳۰ فایل** | ۳٬۳۴۹ خط · ۱۴ فایل |
-| `docs/` | **۸٬۲۵۷ خط · ۲۲ سند** | ۱ سند |
-| مسیرهای API | **۲۲۹** (۱۸۶ ادمین + ۱۵ عمومی + ۱۶ آزمون + ۸ کاربر + ۴ گوگل) | ۲۵۳ (۲۱۲+۱۱+۲۰+۶+۴) |
-| مسیرهای نوشتن | **۱۳۴** (۱۱۸ ادمین، ۰ مسیر deny-by-default باز) | — |
-| کد خطای مدل | **۲۸** در مدل · ۲۲ مصرف‌شده · ۰ خارج از مدل | — |
-| DTO عمومی | **۱۱** · ۰ مسیر عمومی بدون DTO | — |
-| Permission / Role | **۸۰ / ۳** | ۷۴ / ۳ |
-| مجموعه‌های JSON | **۳۳** | ۳۶ · ۳٫۵ MB |
-| فایل تست | **۱۶** `database/*.test.mjs` + **۵** `scripts/*test*.mjs` | ۳ `*.test.mjs` + ۷ هارنس |
-| گام‌های دروازهٔ کیفیت | **۲۶** (۲۶/۲۶ سبز · ۴۲۶٫۷s) | ~۱۰ |
-| باندل بیلدشده | **۵٫۷۴ MB JS در ۱۹ chunk** (entry ۱٫۵۶MB) + **۹۳۲ KB CSS در ۱۰ chunk** | ۴٫۴۱ MB JS + ۷۷۲ KB CSS (تک‌فایل) |
-| `dist/` کل | **۲۰۰٫۸۹ MB** · ۱۸۳ فایل | ۴۱ MB |
-| دارایی استاتیک | `public/` **۱۶۲ MB** · `images/` **۳۸ MB** | ۱۶۱ MB · ۳۸ MB |
-| `.git` | **۲۱۹ MB** · **۴۰ کامیت** | ۲۱۹ MB · ۴۰ کامیت |
-| پروژه | **۷۹۳ MB** | ۵۴۲ MB |
-| `node_modules` | **۱۴۸ MB** (نصب ناقص — `three` غایب) | ۶۵ MB |
-| مسیرهای تغییر‌یافته | **۱۷۲** | ~۳۵ |
-| سنجه‌های تست | **۹۴۸ در ۱۸ سوییت** (۵۹۳ صریح‌شمارش‌شده در دروازه) | **۵۶ — همه سبز** |
-| README | ۱۲۵٬۵۶۶ بایت / ۱٬۳۴۶ خط + **۱۹** README زیرلایه | ۱۲۵٬۵۶۶ / ۱٬۳۴۶ + ۲۳ README |
-| آسیب‌پذیری‌های پایه | **۱۱ FIXED · ۵ PARTIAL · ۹ OPEN** (از ۲۵) | ۲۰ (۲ CRITICAL · ۵ HIGH · ۹ MEDIUM · ۴ LOW/INFO) |
-| `TODO` در `src/` | **۲ فایل** | ۶ |
+| سنجه | بازنگری ۳ (فعلی) | بازنگری ۲ | پایه (۲۹ سپتامبر) |
+|---|---|---|---|
+| کل خطوط سورس (`src` + `database` + `scripts`) | **۲۱۶٬۸۴۵** | ۲۱۳٬۹۰۹ | ۲۴۳٬۶۰۱ |
+| `src/` (JS/JSX) | **۱۶۸٬۵۷۷ خط** · ۳۰۳ JSX + ۱۲۳ JS | ۱۶۸٬۳۳۵ · ۳۰۲ + ۱۲۳ | ۱۶۸٬۴۰۶ · ۳۰۲ + ۱۲۴ |
+| `src/` (CSS) | **۵۰٬۰۰۸ خط · ۵۵ فایل** (بدون تغییر) | همان | همان |
+| `database/` | **۳۹٬۳۵۰ خط · ۷۸ فایل** | ۳۷٬۵۴۹ · ۶۵ | ۲۱٬۸۳۸ · ۴۰ |
+| `scripts/` | **۸٬۹۱۸ خط · ۳۶ فایل** | ۸٬۰۲۵ · ۳۰ | ۳٬۳۴۹ · ۱۴ |
+| `docs/` | **۲۳ سند** | ۲۲ | ۱ |
+| مسیرهای API | **۲۲۹** (۱۸۶+۱۵+۱۶+۸+۴) | ۲۲۹ | ۲۵۳ (۲۱۲+۱۱+۲۰+۶+۴) |
+| مسیرهای نوشتن | **۱۳۴** · **۱۳۴ با قرارداد ورودی** · ۰ بدون قرارداد | ۱۳۴ · ۰ قرارداد | — |
+| کد خطای مدل | **۲۸** در مدل · **۲۸ مصرف‌شده** · ۰ خارج از مدل | ۲۸ · ۲۲ | — |
+| DTO عمومی | **۱۱** · ۰ مسیر عمومی بدون DTO | ۱۱ | — |
+| Permission / Role | **۸۰ / ۳** | ۸۰ | ۷۴ / ۳ |
+| مجموعه‌های JSON | **۳۳** | ۳۳ | ۳۶ · ۳٫۵ MB |
+| فایل تست | **۲۱** `database/*.test.mjs` + **۵** `scripts/*test*.mjs` | ۱۶ + ۵ | ۳ + ۷ هارنس |
+| گام‌های دروازهٔ کیفیت | **۳۶** ⚠️ (۳۵ سبز · `repo:hygiene` قرمز) | ۲۶ (۲۶/۲۶ سبز) | ~۱۰ |
+| **بار اولیه JS+CSS** | **۳٫۲۶ MB** (۳٬۴۱۵٬۱۶۳ B) — شامل ۱MB پنل ادمین با `modulepreload` | — | ۴٫۴۱ MB JS تک‌فایل |
+| باندل کل | **۵٫۷۴ MB JS در ۱۹ chunk** + **۹۳۲ KB CSS در ۱۰ chunk** | همان | ۴٫۴۱ MB + ۷۷۲ KB |
+| `dist/` کل | **۲۰۱ MB** · ⚠️ **بدون `robots.txt`/`sitemap.xml`** | ۲۰۰٫۸۹ MB | ۴۱ MB |
+| دارایی استاتیک | `public/` **۱۶۲ MB** · `images/` **۳۸ MB** | همان | ۱۶۱ · ۳۸ |
+| `.git` | **۲۱۷ MB** · **۵۰ کامیت** | ۲۱۹ MB · ۴۰ | ۲۱۹ MB · ۴۰ |
+| پروژه | **۸۲۷ MB** | ۷۹۳ MB | ۵۴۲ MB |
+| `node_modules` | **۱۸۴ MB** | ۱۴۸ MB | ۶۵ MB |
+| **مسیرهای تغییر‌یافته** | ✅ **۸** | ۱۷۲ | ~۳۵ |
+| سنجه‌های تست | **≈۹۶۰ شمارش‌شده** (۲۱+۵ سوییت) · **+۳۴ تازه** | ۹۴۸ در ۱۸ سوییت | **۵۶ — همه سبز** |
+| `data:check` | ۰ خطا · ۲۲ هشدار · **۱۵۵۵ رکورد** | ۱۵۴۹ | (اجرا نشده) |
+| مهاجرت معلق | ✅ **۰ تغییر · ۰ شکست** | — | — |
+| README | ۱۲۵٬۵۶۶ بایت / ۱٬۳۴۶ خط + ۱۹ README زیرلایه | همان | همان |
+| آسیب‌پذیری‌های پایه | **۱۱ FIXED · ۵ PARTIAL · ۹ OPEN** | همان | ۲۰ (۲C · ۵H · ۹M · ۴L) |
+| `TODO` در `src/` | **۲ فایل** | ۲ | ۶ |
+| `eslint-disable` | **۳۰ فایل** | ۳۰ | ۳۲ |
+| `.workbuddy-ai/` tracked | ⚠️ **۱۸ فایل** (حافظه + اسکرین‌شات) | — | — |
 | `eslint-disable` | **۳۰ فایل** | ۳۲ |

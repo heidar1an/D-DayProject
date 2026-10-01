@@ -542,7 +542,7 @@
             "labelQuiz": {
               "id": "bone-label-acromion",
               "prompt": "کدام نقطه «آکرومیون» را نشان می‌دهد؟",
-              "answer": "acromion",
+              "answer": "radial-head",
               "conceptId": "acromion",
               "explanation": "آکرومیون ادامه لترال خار کتف است و سقف استخوانی شانه را می‌سازد."
             }
@@ -3903,9 +3903,9 @@
     "status": "published",
     "origin": "tapesh",
     "createdAt": "2026-09-25T12:09:42.398Z",
-    "updatedAt": "2026-09-25T12:17:06.352Z",
+    "updatedAt": "2026-09-28T13:00:32.903Z",
     "createdBy": "seed",
-    "updatedBy": "smoke",
+    "updatedBy": "adm-5e246f08",
     "publishedAt": "2026-09-25T12:09:42.398Z"
   }
 ]

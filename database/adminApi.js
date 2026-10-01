@@ -17,6 +17,10 @@
  *   - خطاها هرگز stack trace برنمی‌گردانند.
  */
 
+import os from 'node:os';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import {
   PERMISSIONS,
   ROLES,
@@ -94,6 +98,7 @@ import {
   publishedTestBankQuestions,
   readSettings,
   saveCategory,
+  storageCorruptionReport,
   saveIntlUpload,
   searchTestBankQuestions,
   testBankRevision,
@@ -165,6 +170,9 @@ import {
   trafficSection,
   usersSection,
 } from './analyticsEngine.js';
+import { checkReadiness, runtimeMetrics } from './observability.js';
+import { securityPosture } from './securityPosture.js';
+import { buildGuardianStatus } from './guardian.js';
 
 import {
   aiSection,
@@ -321,6 +329,19 @@ export const SESSION_COOKIE = 'tapesh_admin_session';
 export const CSRF_HEADER = 'x-tapesh-csrf';
 
 const MAX_BODY_BYTES = 12 * 1024 * 1024; /* سقف کلی؛ سقف واقعی فایل از settings خوانده می‌شود */
+const API_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const API_DIST_DIR = resolve(API_ROOT, 'dist');
+const API_DATA_DIR = resolve(API_ROOT, 'database');
+
+function guardianSystemSnapshot() {
+  const cpuCount = os.cpus()?.length || 1;
+  const load1 = os.loadavg()?.[0];
+  return {
+    cpuLoadPercent: Number.isFinite(load1) ? Math.max(0, Math.round((load1 / cpuCount) * 1000) / 10) : null,
+    processRssBytes: process.memoryUsage().rss,
+    diskUsedPercent: null,
+  };
+}
 
 /*
  * مدل خطای متمرکز (فاز ۷) — `database/apiContract/errorModel.js`.
@@ -650,6 +671,31 @@ const ROUTES = [
     categories: listCategories(),
     settings: readSettings(),
   })],
+
+  /* Tapesh Guardian v1: فقط مدیر دارای analytics.security.read، بدون فرمان تغییردهنده. */
+  ['GET', '/api/admin/guardian/status', 'analytics.security.read', async (ctx) => {
+    const runtimeSnapshot = runtimeMetrics.snapshot();
+    const apiSnapshot = requestMetrics();
+    /* در Vite/preview متریک سراسری server.js اجرا نمی‌شود؛ آنجا فقط API پنل را گزارش می‌کنیم. */
+    const useAdminApiWindow = runtimeSnapshot.requests.total === 0 && apiSnapshot.total > 0;
+    const metrics = useAdminApiWindow
+      ? { startedAt: apiSnapshot.startedAt, uptimeSeconds: apiSnapshot.uptimeSeconds, window: apiSnapshot.window }
+      : runtimeSnapshot;
+    const report = buildGuardianStatus({
+      metrics,
+      readiness: checkReadiness({ distDir: API_DIST_DIR, dataDir: API_DATA_DIR }),
+      storage: storageCorruptionReport(),
+      headers: securityPosture({
+        production: process.env.NODE_ENV === 'production',
+        https: isSecureRequest(ctx.request),
+        insecureCookie: process.env.TAPESH_INSECURE_COOKIE === '1',
+      }),
+      system: guardianSystemSnapshot(),
+      sourceMode: useAdminApiWindow ? 'نمونهٔ API پنل در همین پروسه (بدون مسیرهای کاربر/آزمون)' : 'درخواست‌های HTTP ثبت‌شده در همین پروسه',
+    });
+
+    return report;
+  }],
 
   /* مقالات */
   ['GET', '/api/admin/articles', 'articles.read', async (ctx) => listArticles({

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import professor from '../images/pictures/images (1).jpeg';
 import friendsDoctorsIllustration from '../images/pictures/Asset 3.webp';
 import tapeshCollage from '../images/pictures/Asset 7.webp';
@@ -9,13 +9,11 @@ import { CATALOG_COURSES, CatalogCourseCard, CatalogIcon } from './layout/dashbo
 import ArticlesPage from './layout/articles/ArticlesPage';
 import ArticlePage from './layout/articles/ArticlePage';
 import ReadingListPage from './layout/articles/ReadingListPage';
-import AdminLayout from './layout/admin/AdminLayout';
 import PricingPage from './layout/pricing/PricingPage';
 import ProductsPage from './layout/products/ProductsPage';
 import AboutPage from './layout/about/AboutPage';
 import GroupPage from './layout/group/GroupPage';
 import { ArticleCover } from './layout/articles/articlesShared';
-import './layout/admin/admin.css';
 
 import { getAppRoute, getArticleSlug, getAuthMode, getRouteState, getRouteUrl, useOnlineStatus, useReturnToAnchor } from './router/appRoute.js';
 import { AuthPage } from './layout/auth/AuthPage.jsx';
@@ -43,9 +41,8 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { clearStoredUser, fetchCurrentUser, saveProfile } from './services/userStorage';
 import { identify, startTracking, trackLogin, trackLogout, trackSignup } from './services/telemetry/trafficTracker';
 import './layout/dashboard/dashboard.css';
-import './layout/admin/analytics/analytics.css';
-import './layout/admin/media/media.css';
-import './layout/admin/planning/planning.css';
+
+const AdminLayout = lazy(() => import('./layout/admin/AdminLayout'));
 
 export { FOOTER_PRODUCT_LINKS, FOOTER_SECTION_LINKS, FOOTER_SOCIAL_LINKS, homePromoCards } from './layout/site/siteData.js';
 export { AuthPage } from './layout/auth/AuthPage.jsx';
@@ -693,7 +690,27 @@ function App() {
      */
     return (
       <ErrorBoundary scope="admin" resetKey="admin" onExit={closeAdmin} exitLabel="خروج از پنل">
-        <AdminLayout onExit={closeAdmin} />
+        <Suspense
+          fallback={(
+            <div
+              role="status"
+              aria-live="polite"
+              dir="rtl"
+              style={{
+                minHeight: '100vh',
+                display: 'grid',
+                placeItems: 'center',
+                background: 'var(--background, #181818)',
+                color: 'var(--white, #fff)',
+                fontFamily: "'Pinar', 'Vazir', Tahoma, sans-serif",
+              }}
+            >
+              در حال بارگذاری پنل مدیریت…
+            </div>
+          )}
+        >
+          <AdminLayout onExit={closeAdmin} />
+        </Suspense>
       </ErrorBoundary>
     );
   }

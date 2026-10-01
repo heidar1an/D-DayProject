@@ -207,7 +207,8 @@ export function SecuritySection({ data }) {
   const rateLimit = data.rateLimit ?? {};
   const audit = data.audit ?? {};
 
-  const missingHeaders = headers.filter((header) => header.status !== 'active');
+  const missingHeaders = headers.filter((header) => header.status === 'missing');
+  const conditionalHeaders = headers.filter((header) => header.status === 'conditional');
 
   return (
     <div className="an-section">
@@ -218,13 +219,13 @@ export function SecuritySection({ data }) {
       />
 
       <div className="an-split an-split--narrow">
-        <Panel title="امتیاز امنیت" description="بر پایهٔ بررسی‌های واقعی سرور">
-          <ScoreCard
-            score={data.score ?? 0}
-            label="از ۱۰۰"
-            tone={data.score >= 85 ? 'good' : data.score >= 65 ? 'warn' : 'critical'}
-            caption={`${toFa(data.scoreBreakdown?.active ?? 0)} از ${toFa(data.scoreBreakdown?.total ?? 0)} بررسی فعال`}
-          />
+        <Panel title="وضعیت کنترل‌های قابل‌بررسی" description="امتیاز کلی امنیت محاسبه نمی‌شود تا دادهٔ ناقص به‌صورت نمرهٔ قطعی نمایش داده نشود.">
+          <div className="an-kpi-grid an-kpi-grid--tight">
+            <MiniStat label="فعال" value={faNumber(data.scoreBreakdown?.active ?? 0)} tone="good" />
+            <MiniStat label="شرطی با محیط" value={faNumber(data.scoreBreakdown?.conditional ?? 0)} tone={conditionalHeaders.length ? 'warn' : 'neutral'} />
+            <MiniStat label="غایب" value={faNumber(data.scoreBreakdown?.missing ?? 0)} tone={missingHeaders.length ? 'critical' : 'good'} />
+          </div>
+          <Notice tone="info">این شمارش فقط وضعیت چند کنترل شناخته‌شده را نشان می‌دهد؛ جایگزین ممیزی امنیتی یا اثبات «امنیت ۱۰۰٪» نیست.</Notice>
         </Panel>
 
         <Panel title="سنجه‌های امنیتی" className="an-span-2">
@@ -244,7 +245,7 @@ export function SecuritySection({ data }) {
                 <span className="an-checks__dot" aria-hidden="true" />
                 <strong>{header.label}</strong>
                 <span className="an-checks__detail">{header.value ?? header.hint}</span>
-                <span className="an-checks__state">{header.status === 'active' ? 'فعال' : 'غایب'}</span>
+                <span className="an-checks__state">{{ active: 'فعال', conditional: 'مشروط', missing: 'غایب' }[header.status] ?? 'نامشخص'}</span>
               </li>
             ))}
           </ul>
@@ -259,11 +260,11 @@ export function SecuritySection({ data }) {
         <Panel title="سخت‌سازی" description="کنترل‌های امنیتی پیاده‌شده در کد">
           <ul className="an-checks an-checks--plain">
             {hardening.map((item) => (
-              <li key={item.label} className={item.status === 'active' ? 'is-healthy' : 'is-warn'}>
-                <span className="an-checks__dot" aria-hidden="true" />
-                <strong>{item.label}</strong>
-                <span className="an-checks__state">{item.status === 'active' ? 'فعال' : 'ندارد'}</span>
-              </li>
+                <li key={item.label} className={item.status === 'active' ? 'is-healthy' : 'is-warn'}>
+                  <span className="an-checks__dot" aria-hidden="true" />
+                  <strong>{item.label}</strong>
+                  <span className="an-checks__state">{{ active: 'فعال', conditional: 'مشروط', missing: 'ندارد' }[item.status] ?? 'نامشخص'}</span>
+                </li>
             ))}
           </ul>
         </Panel>
@@ -280,15 +281,15 @@ export function SecuritySection({ data }) {
           />
         </Panel>
 
-        <Panel title="IPهای مشکوک" description="ورودهای ناموفق مکرر">
+        <Panel title="IPهای دارای تلاش ناموفق" description="تکرار خطای ورود فقط نیازمند بررسی است؛ این گزارش IP را مسدود نمی‌کند.">
           <HBarList
             rows={(data.suspicious ?? []).map((item) => ({
               key: item.ip,
-              label: `${item.ip}${item.blocked ? ' (مسدود)' : ''}`,
+              label: `${item.ip}${item.reviewRecommended ? ' (نیازمند بررسی)' : ''}`,
               value: item.count,
-              color: item.blocked ? 'var(--ad-red)' : 'var(--ad-gold)',
+              color: item.reviewRecommended ? 'var(--ad-red)' : 'var(--ad-gold)',
             }))}
-            emptyLabel="IP مشکوکی دیده نشده"
+            emptyLabel="تلاش ناموفقی در audit log ثبت نشده"
           />
         </Panel>
 

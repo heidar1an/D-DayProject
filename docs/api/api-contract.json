@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-10-01T06:52:27.890Z",
+  "generatedAt": "2026-10-01T19:42:29.721Z",
   "phase": "07",
   "counts": {
-    "total": 229,
+    "total": 230,
     "byApi": {
-      "admin": 186,
+      "admin": 187,
       "public": 15,
       "exam": 16,
       "users": 8,
       "google": 4
     },
     "writes": 134,
-    "errorCodesInModel": 27,
-    "errorCodesUsed": 21,
+    "errorCodesInModel": 28,
+    "errorCodesUsed": 22,
     "publicDtos": 11
   },
   "bodyLimits": {
@@ -58,6 +58,13 @@
   ],
   "unknownErrorCodes": [],
   "publicRoutesWithoutDto": [],
+  "writeRoutesWithoutInputContract": [],
+  "inputContracts": {
+    "total": 134,
+    "entity": 5,
+    "object": 125,
+    "none": 4
+  },
   "adminDenyByDefault": [],
   "violations": [],
   "routes": [
@@ -124,6 +131,17 @@
       "csrf": "no",
       "permission": null,
       "permissionMode": "authenticated-only",
+      "bodyLimit": null,
+      "dto": null
+    },
+    {
+      "api": "admin",
+      "method": "GET",
+      "path": "/api/admin/guardian/status",
+      "auth": "session",
+      "csrf": "no",
+      "permission": "analytics.security.read",
+      "permissionMode": "permission",
       "bodyLimit": null,
       "dto": null
     },

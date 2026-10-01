@@ -23,6 +23,7 @@ import {
   isHttpsRequest,
   staticSecurityHeaders,
 } from './securityHeaders.js';
+import { securityPosture } from './securityPosture.js';
 
 /** پاسخ جعلی حداقلی — فقط آن‌قدر که ماژول لازم دارد. */
 function fakeResponse() {
@@ -108,6 +109,21 @@ test('HSTS: روی HTTP محلی هرگز، روی HTTPS production بله', () 
   const devHttps = fakeResponse();
   applySecurityHeaders(devHttps, { headers: { 'x-forwarded-proto': 'https' }, socket: {} }, { dev: true, scriptHashes: [], hsts: true });
   assert.equal(devHttps.getHeader('Strict-Transport-Security'), undefined, 'در dev حتی روی https هم HSTS ممنوع است');
+});
+
+test('securityPosture با وضعیت واقعی هم‌خوان است و HSTS توسعه را غایب جا نمی‌زند', () => {
+  const productionHttps = securityPosture({ production: true, https: true, insecureCookie: false });
+  const developmentHttp = securityPosture({ production: false, https: false, insecureCookie: false });
+  const productionHttp = securityPosture({ production: true, https: false, insecureCookie: false });
+  const statusOf = (rows, key) => rows.find((item) => item.key === key)?.status;
+
+  assert.equal(statusOf(productionHttps, 'csp'), 'active');
+  assert.equal(statusOf(productionHttps, 'hsts'), 'active');
+  assert.equal(statusOf(productionHttps, 'x-frame-options'), 'active');
+  assert.equal(productionHttps.find((item) => item.key === 'referrer-policy').value, 'strict-origin-when-cross-origin');
+  assert.equal(statusOf(productionHttp, 'hsts'), 'conditional', 'روی HTTP، HSTS عمداً ارسال نمی‌شود');
+  assert.equal(statusOf(developmentHttp, 'csp'), 'conditional', 'سیاست توسعه به‌عمد از production ضعیف‌تر است');
+  assert.equal(statusOf(developmentHttp, 'cookie-secure'), 'conditional');
 });
 
 test('applySecurityHeaders: همهٔ هدرهای لازم روی پاسخ می‌نشیند', () => {

@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
+import ErrorBoundary from './components/ErrorBoundary';
 import './styles.css';
 import favicon from '../images/pictures/600ppi/Asset 6.webp';
 
@@ -12,6 +13,8 @@ document.head.appendChild(faviconLink);
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <App />
+    <ErrorBoundary scope="root" resetKey="app">
+      <App />
+    </ErrorBoundary>
   </StrictMode>,
 );

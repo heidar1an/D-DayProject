@@ -26,6 +26,7 @@ import {
   staticContent,
   systemMetrics,
 } from './analyticsStore.js';
+import { securityPosture } from './securityPosture.js';
 
 export const DAY_MS = 86_400_000;
 
@@ -1213,26 +1214,26 @@ export function securitySection(context, { secure = false } = {}) {
     'auth.password-changed', 'admin.created', 'admin.deleted', 'admin.updated', 'settings.updated',
   ].includes(entry.action));
 
+  /* شمارش IP فقط نشانهٔ بازبینی است؛ قفل موجود بر اساس نام کاربری است، نه IP. */
   const suspicious = Object.entries(byKey(failedLogins, (entry) => entry.ip || 'ناشناس'))
-    .map(([ip, count]) => ({ ip, count, blocked: count >= 8 }))
+    .map(([ip, count]) => ({ ip, count, reviewRecommended: count >= 3 }))
     .sort((a, b) => b.count - a.count)
     .slice(0, 10);
 
-  const headers = [
-    { key: 'nosniff', label: 'X-Content-Type-Options', value: 'nosniff', status: 'active', hint: 'روی همهٔ پاسخ‌های API تنظیم می‌شود.' },
-    { key: 'referrer', label: 'Referrer-Policy', value: 'same-origin', status: 'active', hint: 'روی همهٔ مسیرهای API تنظیم می‌شود.' },
-    { key: 'cache', label: 'Cache-Control', value: 'no-store', status: 'active', hint: 'جلوگیری از کش دادهٔ پنل.' },
-    { key: 'cookie-httponly', label: 'Cookie HttpOnly', value: 'HttpOnly', status: 'active', hint: 'کوکی نشست پنل.' },
-    { key: 'cookie-samesite', label: 'Cookie SameSite', value: 'Strict', status: 'active', hint: 'ضد CSRF.' },
-    { key: 'cookie-secure', label: 'Cookie Secure', value: secure ? 'Secure' : '—', status: secure ? 'active' : 'missing', hint: secure ? 'فعال روی HTTPS.' : 'در پروداکشن روی HTTPS فعال می‌شود.' },
-    { key: 'csrf', label: 'CSRF Token', value: 'x-tapesh-csrf', status: 'active', hint: 'هدر اجباری روی درخواست‌های تغییردهنده.' },
-    { key: 'csp', label: 'Content-Security-Policy', value: '', status: 'missing', hint: 'هنوز تنظیم نشده است — پیشنهاد می‌شود.' },
-    { key: 'hsts', label: 'Strict-Transport-Security', value: '', status: 'missing', hint: 'روی HTTPS باید تنظیم شود.' },
-    { key: 'frame', label: 'X-Frame-Options', value: '', status: 'missing', hint: 'ضد Clickjacking — پیشنهاد می‌شود.' },
-  ];
+  const headers = securityPosture({
+    production: process.env.NODE_ENV === 'production',
+    https: secure,
+    insecureCookie: process.env.TAPESH_INSECURE_COOKIE === '1',
+  }).map((header) => ({
+    ...header,
+    hint: header.status === 'conditional'
+      ? 'رفتار وابسته به محیط/HTTPS است و به‌تنهایی نشانهٔ نبود کنترل نیست.'
+      : header.status === 'active' ? 'در پیکربندی فعلی فعال است.' : 'در پیکربندی فعلی غایب است.',
+  }));
 
   const active = headers.filter((header) => header.status === 'active').length;
-  const score = Math.round((active / headers.length) * 100);
+  const conditional = headers.filter((header) => header.status === 'conditional').length;
+  const missing = headers.filter((header) => header.status === 'missing').length;
   const rateLimit = rateLimitStats();
 
   const severityOf = (action) => {
@@ -1243,15 +1244,16 @@ export function securitySection(context, { secure = false } = {}) {
 
   return {
     range: context.resolved,
-    score,
-    scoreBreakdown: { active, total: headers.length },
+    /* امتیاز کلی امنیت نداریم؛ وضعیت کنترل‌های مشخص جداگانه گزارش می‌شود. */
+    score: null,
+    scoreBreakdown: { active, conditional, missing, total: headers.length },
     kpis: [
-      kpi({ key: 'logins', label: 'ورود موفق', value: successfulLogins.length, previous: null, hint: 'رویداد auth.login در بازه.' }),
-      kpi({ key: 'failed', label: 'ورود ناموفق', value: failedLogins.length, previous: null, direction: 'lower', status: failedLogins.length >= 20 ? 'critical' : failedLogins.length >= 5 ? 'warn' : 'good', hint: 'رویداد auth.login-failed.' }),
+      kpi({ key: 'logins', label: 'ورود موفق مدیران', value: successfulLogins.length, previous: null, hint: 'رویداد auth.login در audit log؛ ورود کاربران سایت منبع جداگانه‌ای ندارد.' }),
+      kpi({ key: 'failed', label: 'ورود ناموفق مدیران', value: failedLogins.length, previous: null, direction: 'lower', status: failedLogins.length >= 20 ? 'critical' : failedLogins.length >= 5 ? 'warn' : 'good', hint: 'رویداد auth.login-failed پنل مدیر؛ شکست ورود کاربران سایت در این گزارش نیست.' }),
       kpi({ key: 'sensitive', label: 'تغییرات حساس', value: sensitive.length, previous: null, direction: 'lower', hint: 'تغییر رمز، سطح دسترسی و ساخت/حذف مدیر.' }),
       kpi({ key: 'unauthorized', label: 'دسترسی غیرمجاز', value: context.requests.byStatus['4xx'] ?? 0, previous: null, direction: 'lower', hint: 'پاسخ‌های ۴xx سرور (احتمال تلاش دسترسی نامعتبر).' }),
       kpi({ key: 'rateLimit', label: 'نقض محدودیت نرخ', value: rateLimit.violations, previous: null, direction: 'lower', status: rateLimit.violations >= 20 ? 'warn' : 'good', hint: `نقض محدودیت ${rateLimit.limit} درخواست در ${rateLimit.windowSeconds} ثانیه روی endpoint تلمتری.` }),
-      kpi({ key: 'suspiciousIps', label: 'IP مشکوک', value: suspicious.filter((item) => item.count >= 3).length, previous: null, direction: 'lower', hint: 'IP با بیش از ۳ ورود ناموفق.' }),
+      kpi({ key: 'suspiciousIps', label: 'IP با خطای ورود تکراری', value: suspicious.filter((item) => item.count >= 3).length, previous: null, direction: 'lower', hint: '۳ یا بیشتر خطای ورود مدیر از یک IP؛ هیچ IP بر اساس این شمارش مسدود نمی‌شود.' }),
     ],
     headers,
     suspicious,
@@ -1273,17 +1275,17 @@ export function securitySection(context, { secure = false } = {}) {
       })),
     },
     hardening: [
-      { label: 'رمز با scrypt + salt', status: 'active' },
-      { label: 'محافظت از Brute Force (قفل موقت)', status: 'active' },
+      { label: 'رمز مدیر با scrypt + salt', status: 'active' },
+      { label: 'قفل موقت ورود مدیر بر اساس حساب', status: 'active' },
+      { label: 'Rate limit ثبت‌نام/ورود کاربران', status: 'active' },
       { label: 'پاک‌سازی HTML (ضد XSS)', status: 'active' },
-      { label: 'RBAC روی هر مسیر', status: 'active' },
-      { label: 'پوشاندن اطلاعات حساس در UI', status: 'active' },
-      { label: 'Content-Security-Policy', status: 'missing' },
-      { label: 'HSTS', status: 'missing' },
-      { label: 'محدودیت نرخ روی endpoint تلمتری', status: 'active' },
-      { label: 'محدودیت نرخ روی مسیرهای پنل', status: 'missing' },
+      { label: 'RBAC روی مسیرهای پنل', status: 'active' },
+      { label: 'Content-Security-Policy', status: headers.find((header) => header.key === 'csp')?.status ?? 'unknown' },
+      { label: 'HSTS (فقط production + HTTPS)', status: headers.find((header) => header.key === 'hsts')?.status ?? 'unknown' },
+      { label: 'X-Frame-Options', status: headers.find((header) => header.key === 'x-frame-options')?.status ?? 'unknown' },
+      { label: 'Rate limit عمومی روی همهٔ مسیرهای Admin API', status: 'missing' },
     ],
-    note: 'اطلاعات حساس (رمز، توکن، شمارهٔ کامل) هرگز در این پنل نمایش داده نمی‌شود؛ شمارهٔ تماس کاربران پوشانده می‌شود.',
+    note: 'این گزارش فقط ورود ناموفق مدیران را از audit log می‌سنجد. IP و User-Agent در جزئیات audit برای مدیران دارای مجوز امنیتی ذخیره/نمایش داده می‌شوند؛ رمزها، توکن‌ها و شمارهٔ کامل کاربران برگردانده نمی‌شوند.',
   };
 }
 

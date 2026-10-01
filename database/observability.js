@@ -91,19 +91,37 @@ export function accessLogEnabled(env = process.env) {
  * حافظه محدود است: تعداد کلیدهای مسیر و تعداد خطاهای نگه‌داشته‌شده سقف دارند،
  * پس ترافیک اسکنری (مسیرهای یکتا و بی‌شمار) نمی‌تواند سرور را از حافظه ببرد.
  */
-export function createMetrics({ maxPaths = 200, maxRecentErrors = 50, now = () => Date.now() } = {}) {
+export function createMetrics({
+  maxPaths = 200,
+  maxRecentErrors = 50,
+  maxWindowRequests = 5_000,
+  windowMs = 5 * 60_000,
+  now = () => Date.now(),
+} = {}) {
   const startedAt = now();
   const byStatusClass = { '1xx': 0, '2xx': 0, '3xx': 0, '4xx': 0, '5xx': 0, other: 0 };
   const byMethod = new Map();
   const byPath = new Map();
   const recentErrors = [];
+  /* فقط method/path/status/time؛ هرگز IP، User-Agent، cookie یا body نمی‌گیرد. */
+  const windowRequests = [];
 
   let total = 0;
   let durationSum = 0;
   let durationMax = 0;
   let droppedPathKeys = 0;
+  let latestWindowDropAt = 0;
+
+  function pruneWindow(at) {
+    const cutoff = at - windowMs;
+    while (windowRequests.length && windowRequests[0].ts < cutoff) windowRequests.shift();
+    if (latestWindowDropAt && latestWindowDropAt < cutoff) latestWindowDropAt = 0;
+  }
 
   function record(entry = {}) {
+    const timestamp = now();
+    pruneWindow(timestamp);
+
     const status = Number(entry.status) || 0;
     const method = String(entry.method ?? 'GET').toUpperCase();
     const path = safePathname(entry.path);
@@ -124,8 +142,14 @@ export function createMetrics({ maxPaths = 200, maxRecentErrors = 50, now = () =
     durationSum += ms;
     if (ms > durationMax) durationMax = ms;
 
+    if (windowRequests.length >= maxWindowRequests) {
+      const dropped = windowRequests.shift();
+      latestWindowDropAt = dropped?.ts ?? timestamp;
+    }
+    windowRequests.push({ ts: timestamp, method, path, status, ms });
+
     if (status >= 400) {
-      const error = { t: new Date(now()).toISOString(), method, path, status };
+      const error = { t: new Date(timestamp).toISOString(), method, path, status };
       if (entry.errorCode) error.errorCode = String(entry.errorCode);
       recentErrors.push(error);
       if (recentErrors.length > maxRecentErrors) {
@@ -135,9 +159,37 @@ export function createMetrics({ maxPaths = 200, maxRecentErrors = 50, now = () =
   }
 
   function snapshot() {
+    const snapshotAt = now();
+    pruneWindow(snapshotAt);
+    const windowStatus = { '1xx': 0, '2xx': 0, '3xx': 0, '4xx': 0, '5xx': 0, other: 0 };
+    const windowPaths = new Map();
+    let authFailures = 0;
+    let authRateLimited = 0;
+
+    for (const item of windowRequests) {
+      windowStatus[statusClassOf(item.status)] += 1;
+      const pathEntry = windowPaths.get(item.path) ?? { count: 0, errors: 0 };
+      pathEntry.count += 1;
+      if (item.status >= 400) pathEntry.errors += 1;
+      windowPaths.set(item.path, pathEntry);
+
+      const authPath = item.path === '/api/users/login' || item.path === '/api/admin/auth/login';
+      if (authPath && item.status === 401) authFailures += 1;
+      if (authPath && item.status === 429) authRateLimited += 1;
+    }
+
+    const windowStart = Math.max(startedAt, snapshotAt - windowMs);
+    const windowErrors = windowRequests.filter((item) => item.status >= 400);
+    const latestWindowErrors = windowErrors.slice(-20).reverse().map((item) => ({
+      t: new Date(item.ts).toISOString(),
+      method: item.method,
+      path: item.path,
+      status: item.status,
+    }));
+
     return {
       startedAt: new Date(startedAt).toISOString(),
-      uptimeSeconds: Math.max(0, Math.round((now() - startedAt) / 1000)),
+      uptimeSeconds: Math.max(0, Math.round((snapshotAt - startedAt) / 1000)),
       requests: {
         total,
         errors: byStatusClass['4xx'] + byStatusClass['5xx'],
@@ -154,6 +206,23 @@ export function createMetrics({ maxPaths = 200, maxRecentErrors = 50, now = () =
         .map(([path, entry]) => ({ path, count: entry.count })),
       droppedPathKeys,
       recentErrors: recentErrors.slice(),
+      window: {
+        durationMs: windowMs,
+        observedMs: Math.max(0, snapshotAt - windowStart),
+        from: new Date(windowStart).toISOString(),
+        to: new Date(snapshotAt).toISOString(),
+        total: windowRequests.length,
+        errors: windowStatus['4xx'] + windowStatus['5xx'],
+        byStatusClass: windowStatus,
+        authFailures,
+        authRateLimited,
+        complete: !latestWindowDropAt || latestWindowDropAt < snapshotAt - windowMs,
+        topPaths: [...windowPaths.entries()]
+          .sort((a, b) => b[1].count - a[1].count)
+          .slice(0, 10)
+          .map(([path, entry]) => ({ path, count: entry.count, errors: entry.errors })),
+        recentErrors: latestWindowErrors,
+      },
     };
   }
 
@@ -167,14 +236,19 @@ export function createMetrics({ maxPaths = 200, maxRecentErrors = 50, now = () =
     byMethod.clear();
     byPath.clear();
     recentErrors.length = 0;
+    windowRequests.length = 0;
     total = 0;
     durationSum = 0;
     durationMax = 0;
     droppedPathKeys = 0;
+    latestWindowDropAt = 0;
   }
 
   return { record, snapshot, reset };
 }
+
+/* یک سنجهٔ مشترک برای سرور Node و API پنل؛ فقط در حافظهٔ همین پروسه. */
+export const runtimeMetrics = createMetrics();
 
 /* ─────────────────────────── توکن متریک (write-only) ─────────────────────────── */
 

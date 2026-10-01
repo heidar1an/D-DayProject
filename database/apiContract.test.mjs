@@ -319,7 +319,7 @@ test('۲۴. موجودی مسیر با شمارش واقعی سورس می‌خ�
   const report = JSON.parse(result.stdout);
 
   assert.equal(report.counts.total, report.routes.length);
-  assert.deepEqual(report.counts.byApi, { admin: 186, public: 15, exam: 16, users: 8, google: 4 });
+  assert.deepEqual(report.counts.byApi, { admin: 187, public: 15, exam: 16, users: 8, google: 4 });
   assert.equal(report.counts.writes, report.routes.filter((route) => route.method !== 'GET').length);
   assert.deepEqual(report.unknownErrorCodes, []);
   assert.deepEqual(report.publicRoutesWithoutDto, []);
@@ -354,7 +354,7 @@ test('۲۷. ابزار ممیزی ورودی پس از استخراج پارسر
   const result = spawnSyncNode(['scripts/api-input-audit.mjs', '--json']);
   assert.equal(result.status, 0);
   const report = JSON.parse(result.stdout);
-  assert.equal(report.total, 185, 'شمارش مسیرهای ادمین نباید عوض شده باشد');
+  assert.equal(report.total, 186, 'یک مسیر read-only Guardian به API ادمین اضافه شده است');
   assert.equal(report.routes.filter((route) => route.needsReview).length, 0);
   const selfTest = spawnSyncNode(['scripts/api-input-audit.mjs', '--selftest']);
   assert.equal(selfTest.status, 0, selfTest.stdout);
@@ -365,7 +365,7 @@ test('۲۷.۱. سازگاری Client ↔ API: هیچ تماس شبکه‌ای ب
   assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
   const report = JSON.parse(result.stdout);
 
-  assert.equal(report.serverRoutes, 229);
+  assert.equal(report.serverRoutes, 230);
   assert.deepEqual(report.brokenCalls, [], 'تماس واقعی به مسیر ناموجود');
   assert.ok(report.used.length > 0, 'باید حداقل یک تماس واقعی پیدا شود');
   for (const entry of report.used) {

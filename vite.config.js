@@ -6,6 +6,8 @@ import usersApiPlugin from './database/apiPlugin.js';
 import contentApiPlugin from './database/adminApiPlugin.js';
 import examApiPlugin from './database/examApiPlugin.js';
 import tailwindcss from '@tailwindcss/vite';
+import { DEFAULT_SITE_URL } from './database/seo.js';
+import { generateSeoFiles } from './database/seoFiles.js';
 
 /*
  * `.env` را دستی داخل `process.env` می‌نویسیم.
@@ -30,6 +32,30 @@ const googleReady = Boolean(
     String(process.env.GOOGLE_CLIENT_SECRET ?? '').trim(),
 );
 
+/* خروجی‌های SEO را پس از هر build بنویس؛ خود Vite پیش از build dist را پاک می‌کند. */
+function seoOutputPlugin() {
+  let resolvedConfig;
+
+  return {
+    name: 'tapesh-seo-output',
+    apply: 'build',
+    configResolved(config) {
+      resolvedConfig = config;
+    },
+    closeBundle() {
+      const result = generateSeoFiles({
+        rootDir: resolvedConfig.root,
+        outDir: resolve(resolvedConfig.root, resolvedConfig.build.outDir),
+      });
+
+      console.log(`  SEO: robots.txt و sitemap.xml در ${result.outputDir} ساخته شد`);
+      if (result.siteUrl === DEFAULT_SITE_URL) {
+        console.warn('  SEO: PUBLIC_SITE_URL تنظیم نشده — دامنهٔ پیش‌فرض توسعه استفاده شد.');
+      }
+    },
+  };
+}
+
 console.log(
   googleReady
     ? '  ورود با گوگل: فعال'
@@ -37,7 +63,7 @@ console.log(
 );
 
 export default defineConfig({
-  plugins: [react(), usersApiPlugin(), contentApiPlugin(), examApiPlugin(), tailwindcss()],
+  plugins: [react(), usersApiPlugin(), contentApiPlugin(), examApiPlugin(), tailwindcss(), seoOutputPlugin()],
   base: './',
   build: {
     rollupOptions: {
