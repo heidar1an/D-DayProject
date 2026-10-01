@@ -18,9 +18,46 @@ database/content/examAudit.json
 database/content/examReports.json
 database/content/examAudit-*.json
 
+# ── دادهٔ زمان‌اجرا — نوشتنی در هر درخواست، نه محتوای پروژه (PHASE 19/20) ──
+# `activity.json` هم IP و User-Agent نگه می‌دارد (PII) و `admins.json` هش رمز
+# مدیران را؛ هر دو در تاریخچهٔ گیت هستند و باید از ردیابی خارج شوند.
+# توجه: این خطوط فقط ردیابی **فایل‌های تازه** را می‌بندند. سه فایل زیر
+# از قبل tracked هستند و برای خارج‌کردنشان `git rm --cached` لازم است
+# (با تأیید صریح، چون ایندکس را تغییر می‌دهد).
+database/content/activity.json
+database/content/admins.json
+database/content/events.json
+database/content/publishLog.json
+database/content/mediaMetrics.json
+
+# ── لاگ اجرای دروازهٔ کیفیت (خروجی کامل گام‌های ناموفق) ──
+.workbuddy-ai/verify-logs/
+
 # ── زوائد بررسی (probe / bundle) — هرگز commit نشوند ──
 # هارنس واقعی (`scripts/verify-render.mjs`) خروجی موقتش را در
 # `node_modules/.cache/tapesh-verify/` می‌سازد و خودش پاک می‌کند.
 # هر `*.out.mjs` یا `.probe*` در ریشهٔ پروژه، باقی‌ماندهٔ اجرای دستی است.
 .probe*
 *.out.mjs
+
+# ── مهاجرت داده (فاز ۱۲) — دفتر اجرا و پشتیبان، نه محتوای پروژه ──
+database/migrations/applied.json
+database/migrations/audit.jsonl
+database/migrations/backups/
+
+# ── قفل بین‌پروسه‌ای نوشتن (فاز ۳) — دایرکتوری خالی و گذرا ──
+*.lock/
+
+# ── سشن ادمین فایل‌محور (فاز ۵) — توکن و IP/UA، هرگز در گیت ──
+database/admin.sessions.json
+database/admin.sessions.json.tmp
+
+# ── زوائد ابزار و پشتیبان دستی — نه محتوای پروژه ──
+*.bak
+*.orig
+*.rej
+.workbuddy-ai/*.log
+.workbuddy-ai/phase-logs/
+.workbuddy-ai/audits/
+.workbuddy-ai/backups/
+.workbuddy-ai/phase6-*/
