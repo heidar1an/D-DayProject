@@ -1,28 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
-
-import blueRobot from '../images/pictures/ChatGPT Image ۲۷ مرداد ۱۴۰۵، ۱۷_۲۰_۲۷.png';
-import greenTest from '../images/pictures/ChatGPT Image ۲۷ مرداد ۱۴۰۵، ۱۷_۱۵_۳۴.png';
-import purpleBook from '../images/pictures/ChatGPT Image ۲۷ مرداد ۱۴۰۵، ۱۷_۰۹_۵۰.png';
+import { useEffect, useState } from 'react';
 import professor from '../images/pictures/images (1).jpeg';
-import brownTest from '../images/pictures/01.png';
-import heartbeatMark from '../images/pictures/600ppi/logo-mark.webp';
 import friendsDoctorsIllustration from '../images/pictures/Asset 3.webp';
-import baleSocialIcon from '../images/icons/Asset 13.webp';
-import eitaaSocialIcon from '../images/icons/eitaa.svg';
-import telegramSocialIcon from '../images/icons/Asset 11.webp';
-import instagramSocialIcon from '../images/icons/Asset 14.webp';
-import youtubeSocialIcon from '../images/icons/youtube.svg';
 import tapeshCollage from '../images/pictures/Asset 7.webp';
-import trophyIcon from '../images/icons/trophy.png';
-import aiIcon from '../images/icons/ai-technology.png';
-import checklistIcon from '../images/icons/checklist.png';
-import distanceIcon from '../images/icons/distance.png';
 import OfflinePage from './layout/OfflinePage';
 import SecondaryRegistrationLayout from './layout/SecondaryRegistrationLayout';
-import ThemeToggle from './layout/ThemeToggle';
-import DashboardLayout, { COURSE_LAYERS } from './layout/dashboard/DashboardLayout';
+import DashboardLayout from './layout/dashboard/DashboardLayout';
 import { CATALOG_COURSES, CatalogCourseCard, CatalogIcon } from './layout/dashboard/CoursesSection';
-import { dashboardRouteHash, LAYER_IDS, OVERLAY_IDS } from './layout/dashboard/dashboardRoute';
 import ArticlesPage from './layout/articles/ArticlesPage';
 import ArticlePage from './layout/articles/ArticlePage';
 import ReadingListPage from './layout/articles/ReadingListPage';
@@ -32,8 +15,14 @@ import ProductsPage from './layout/products/ProductsPage';
 import AboutPage from './layout/about/AboutPage';
 import GroupPage from './layout/group/GroupPage';
 import { ArticleCover } from './layout/articles/articlesShared';
-import { avatarSrc } from './layout/dashboard/setting/avatar/avatarOptions';
 import './layout/admin/admin.css';
+
+import { getAppRoute, getArticleSlug, getAuthMode, getRouteState, getRouteUrl, useOnlineStatus, useReturnToAnchor } from './router/appRoute.js';
+import { AuthPage } from './layout/auth/AuthPage.jsx';
+import { courseDashboardHash } from './router/routeHashes.js';
+import { MotionStrip, SiteFooter, SiteHeader } from './layout/site/SiteChrome.jsx';
+import { benefitRows, faqItems, homeArticles, homePromoCards, tapeshFeatures } from './layout/site/siteData.js';
+import { ArrowLeftIcon } from './layout/site/siteIcons.jsx';
 
 /* صفحه‌ای که برای مسیر داخلی مقالات رندر می‌شود؛ خود hash کاملاً پایدار می‌ماند */
 function ArticlesRoute({ articleSlug }) {
@@ -47,1067 +36,21 @@ function ArticlesRoute({ articleSlug }) {
 
   return <ArticlePage key={articleSlug} slug={articleSlug} />;
 }
-import { getLatestArticles } from './services/articles/articlesService';
-import {
-  clearGoogleReturn,
-  clearStoredUser,
-  consumeGoogleHandoff,
-  getDisplayName,
-  getGoogleAuthStatus,
-  getStoredUser,
-  loginUser,
-  readGoogleReturn,
-  saveUserRecord,
-  startGoogleAuth,
-} from './services/userStorage';
+
+import TapeshEasterEgg from './components/easter-egg/TapeshEasterEgg';
+/* مرز خطا (فاز ۶) — سه سطح: ریشه (main.jsx)، داشبورد، پنل مدیریت */
+import ErrorBoundary from './components/ErrorBoundary';
+import { clearStoredUser, fetchCurrentUser, saveProfile } from './services/userStorage';
 import { identify, startTracking, trackLogin, trackLogout, trackSignup } from './services/telemetry/trafficTracker';
-import { GROUP_PAGE_HASH } from './services/group/groupService';
 import './layout/dashboard/dashboard.css';
 import './layout/admin/analytics/analytics.css';
 import './layout/admin/media/media.css';
 import './layout/admin/planning/planning.css';
 
-const authHighlights = [
-  {
-    title: 'خودتو برای علوم پایه آماده کن',
-    description: 'در کوتاه‌ترین زمان و با کیفیت بالا خودتو برای علوم پایه آماده کن؛ بهترین دوره‌ها منتظر تو هستند.',
-    image: brownTest,
-    accent: 'copper',
-  },
-  {
-    title: 'یادگیری نوین دروس پزشکی',
-    description: 'با استفاده از جدیدترین متدهای یادگیری و با یک رابط گرافیکی جذاب، دیگه درس خوندن سخت نخواهد بود.',
-    image: purpleBook,
-    accent: 'lavender',
-  },
-  {
-    title: 'درساتو از یک حرفه‌ای بپرس',
-    description: 'جایی رو متوجه نشدی؟ با چند کلیک اطلاعات پزشکیت رو بروز کن؛ دستیار هوشمند کنار توست.',
-    image: blueRobot,
-    accent: 'sky',
-  },
-  {
-    title: 'با بهترین‌ها رقابت کن',
-    description: 'با همکلاسی‌هات و دانشجوهای سراسر کشور رقابت کن؛ به همراه آزمون‌های تالیفی.',
-    image: greenTest,
-    accent: 'mint',
-  },
-];
+export { FOOTER_PRODUCT_LINKS, FOOTER_SECTION_LINKS, FOOTER_SOCIAL_LINKS, homePromoCards } from './layout/site/siteData.js';
+export { AuthPage } from './layout/auth/AuthPage.jsx';
 
-const authAnimatedPhrases = [
-  { text: 'درسنامه های جامع داره', accent: 'blue' },
-  { text: 'روان توضیح میده', accent: 'green' },
-  { text: 'مطالب رو سریع جمع میکنه', accent: 'brown' },
-  { text: 'بانک تست کاملی داره', accent: 'purple' },
-];
 
-/*
- * پیام‌های بازگشت از گوگل. کدها را سرور در آدرس می‌گذارد (`database/googleAuth.js`)
- * و هر کدام باید کاربر را به «کار درست» بفرستد، نه به یک پیام مبهم — همان قاعدهٔ
- * ترجمهٔ خطای انتشار: اول متنِ سرویس، بعد کد وضعیت.
- */
-const GOOGLE_RETURN_MESSAGES = {
-  unconfigured:
-    'ورود با گوگل روی این سرور فعال نشده است (GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET).',
-  offline: 'سرور ورود با گوگل در دسترس نیست؛ اتصال خود را بررسی کنید.',
-  cancelled: 'ورود با گوگل لغو شد.',
-  state: 'نشست ورود با گوگل منقضی شد؛ یک‌بار دیگر تلاش کنید.',
-  failed: 'ورود با گوگل انجام نشد؛ یک‌بار دیگر تلاش کنید.',
-};
-
-const benefitRows = [
-  [
-    {
-      title: 'یادگیری نوین دروس پزشکی',
-      description: 'با استفاده از جدیدترین متدهای یادگیری و یک رابط گرافیکی جذاب، دیگه درس خوندن سخت نخواهد بود.',
-      accent: 'lavender',
-      size: 'wide',
-    },
-    {
-      title: 'درساتو از یک حرفه‌ای بپرس',
-      description: 'جایی در مورد چیزی سوال داشتی؟ با چند کلیک اطلاعات پزشکی‌تو بروز کن؛ دستیار هوشمند کنار توست.',
-      accent: 'sky',
-      size: 'regular',
-    },
-  ],
-  [
-    {
-      title: 'با بهترین‌ها رقابت کن',
-      description: 'با همکلاسی‌هات و دانشجوهای سراسر کشور رقابت کن؛ به همراه آزمون‌های آنلاین.',
-      accent: 'mint',
-      size: 'regular',
-    },
-    {
-      title: 'خودتو برای علوم پایه آماده کن',
-      description: 'در کوتاه‌ترین زمان و با کیفیت بالا خودتو برای علوم پایه آماده کن؛ بهترین دوره‌ها منتظر تو هستند.',
-      accent: 'copper',
-      size: 'wide',
-    },
-  ],
-];
-
-const tapeshFeatures = [
-  {
-    title: 'با بهترین‌ها رقابت کن',
-    icon: trophyIcon,
-    accent: 'green',
-  },
-  {
-    title: 'با یک دستیار هوشمند درس بخون',
-    icon: aiIcon,
-    accent: 'blue',
-  },
-  {
-    title: 'از بانک تست استفاده کن',
-    icon: checklistIcon,
-    accent: 'brown',
-  },
-  {
-    title: 'با مسیر سبز یادبگیر',
-    icon: distanceIcon,
-    accent: 'purple',
-  },
-];
-
-/* سه مقالهٔ آخر، مستقیم از لایه دادهٔ مقالات — همان منبع صفحهٔ مقالات */
-const homeArticles = getLatestArticles(3);
-
-const faqItems = [
-  {
-    question: 'تپش برای چه دانشجویانی مناسب است؟',
-    answer: 'تپش برای دانشجویان علوم پزشکی طراحی شده است؛ از شروع ترم و یادگیری مفهومی تا جمع‌بندی و آمادگی آزمون.',
-  },
-  {
-    question: 'دوره مسیر سبز چیست؟',
-    answer: 'مسیر سبز، یک برنامه جامع مرحله به مرحله برای ساختن عادت مطالعه، یادگیری هدفمند، رنک دانشگاه شدن و پیشرفت پیوسته در دروس پزشکی است.',
-  },
-  {
-    question: 'محتوای آموزشی تپش شامل چه چیزهایی است؟',
-    answer: 'درسنامه‌های جامع، خلاصه نکات، بانک تست، آزمون‌های آنلاین و ابزارهای هوشمند یادگیری در تپش قرار دارند.',
-  },
-  {
-    question: 'تپش چگونه به من کمک می‌کند نقاط ضعفم را پیدا کنم؟',
-    answer: 'با تحلیل پاسخ‌ها، آزمون‌های هدفمند و مرور مباحث، بخش‌هایی که نیاز به تمرین بیشتری دارند برای شما مشخص می‌شوند.',
-  },
-  {
-    question: 'آیا محتوای تپش به درد امتحانات دانشگاه می‌خورد؟',
-    answer: 'بله؛ محتوای تپش برای مطالعه طول ترم، امتحانات دانشگاه و آمادگی آزمون‌های علوم پزشکی قابل استفاده است.',
-  },
-  {
-    question: 'چگونه اشتراک تپش را تهیه کنم؟',
-    answer: 'از بخش محصولات، دوره موردنظر خود را انتخاب کنید و پس از ورود یا ثبت‌نام، مراحل تهیه اشتراک را ادامه دهید.',
-  },
-];
-
-/*
- * نوار چرخانِ انتهای فوتر — چهار کادرِ دسته‌بندی. هر کدام به بخش واقعیِ خودش
- * می‌رسد، نه به یک لنگرِ تزئینی (تلهٔ ۱۰): سه مقصد لایهٔ داشبوردند و از
- * `dashboardRouteHash` + `LAYER_IDS` ساخته می‌شوند؛ «علوم پایه» تنها مقصدِ
- * غیرداشبوردی است و به صفحهٔ مستقلِ محصولات می‌رود (همان نگاشتی که فوترِ قبلی داشت).
- */
-const motionItems = [
-  { title: 'دستیار', accent: 'blue', href: dashboardRouteHash({ section: 'other', layer: LAYER_IDS.ai }) },
-  { title: 'علوم پایه', accent: 'brown', href: '#products' },
-  { title: 'بانک تست', accent: 'green', href: dashboardRouteHash({ section: 'tests', layer: LAYER_IDS.testBank }) },
-  { title: 'درسنامه جامع', accent: 'purple', href: dashboardRouteHash({ section: 'courses', layer: LAYER_IDS.comprehensive }) },
-];
-
-function Brand() {
-  return (
-    <a className="brand" href="#top" aria-label="بازگشت به ابتدای صفحه">
-      <span className="brand__mark">
-        <img src={heartbeatMark} alt="" />
-      </span>
-      <span className="brand__word">تپش</span>
-    </a>
-  );
-}
-
-function ArrowIcon() {
-  return (
-    <span className="arrow-icon" aria-hidden="true">
-      <svg viewBox="0 0 48 48" focusable="false">
-        <path d="M10 38 38 10M19 10h19v19" />
-      </svg>
-    </span>
-  );
-}
-
-function ArrowLeftIcon() {
-  return <span aria-hidden="true">←</span>;
-}
-
-function HeaderUserIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      width="20"
-      height="20"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <circle cx="12" cy="8" r="4" />
-      <path d="M6 21v-1a6 6 0 0 1 12 0v1" />
-    </svg>
-  );
-}
-
-function GoogleIcon() {
-  return (
-    <svg className="google-icon" viewBox="0 0 24 24" aria-hidden="true">
-      <path
-        fill="var(--blue-ink)"
-        d="M21.35 12.27c0-.79-.07-1.55-.2-2.27H12v4.3h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.7 2.91-4.2 2.91-7.42Z"
-      />
-      <path
-        fill="var(--green-ink)"
-        d="M12 21.75c2.63 0 4.84-.87 6.45-2.36l-3.14-2.45c-.87.58-1.98.92-3.31.92-2.55 0-4.7-1.72-5.47-4.03H3.28v2.53A9.74 9.74 0 0 0 12 21.75Z"
-      />
-      <path
-        fill="var(--gold-ink)"
-        d="M6.53 13.83A5.85 5.85 0 0 1 6.22 12c0-.64.11-1.26.31-1.83V7.64H3.28A9.75 9.75 0 0 0 2.25 12c0 1.57.38 3.05 1.03 4.36l3.25-2.53Z"
-      />
-      <path
-        fill="var(--red-ink)"
-        d="M12 6.14c1.43 0 2.71.49 3.72 1.45l2.79-2.79C16.84 3.23 14.63 2.25 12 2.25a9.74 9.74 0 0 0-8.72 5.39l3.25 2.53C7.3 7.86 9.45 6.14 12 6.14Z"
-      />
-    </svg>
-  );
-}
-
-function MotionStrip() {
-  const trackRef = useRef(null);
-  const sequenceRef = useRef(null);
-  const loopWidthRef = useRef(0);
-  const offsetRef = useRef(0);
-  const velocityRef = useRef(0);
-  const targetVelocityRef = useRef(1);
-  const completedLoopsRef = useRef(0);
-  const finishedRef = useRef(false);
-  const stoppingRef = useRef(false);
-
-  useEffect(() => {
-    const track = trackRef.current;
-    const sequence = sequenceRef.current;
-    if (!track || !sequence) return undefined;
-
-    const measureLoop = () => {
-      const trackStyles = window.getComputedStyle(track);
-      const sequenceGap = parseFloat(trackStyles.columnGap || trackStyles.gap) || 0;
-
-      loopWidthRef.current = sequence.getBoundingClientRect().width + sequenceGap;
-    };
-
-    measureLoop();
-    const resizeObserver =
-      'ResizeObserver' in window ? new ResizeObserver(measureLoop) : null;
-
-    resizeObserver?.observe(sequence);
-    document.fonts?.ready.then(measureLoop);
-    window.addEventListener('resize', measureLoop);
-
-    let animationFrame = 0;
-    let lastTime = performance.now();
-    const loopDuration = 24000;
-    const totalLoops = 12;
-
-    const animate = (time) => {
-      const delta = Math.min(time - lastTime, 50);
-      lastTime = time;
-
-      if (!finishedRef.current && loopWidthRef.current > 0) {
-        const loopWidth = loopWidthRef.current;
-        const targetSpeed = targetVelocityRef.current * (loopWidth / loopDuration);
-        const easing = 1 - Math.exp(-delta / (stoppingRef.current ? 900 : 420));
-
-        velocityRef.current += (targetSpeed - velocityRef.current) * easing;
-        offsetRef.current -= velocityRef.current * delta;
-
-        if (offsetRef.current <= -loopWidth) {
-          offsetRef.current += loopWidth;
-          completedLoopsRef.current += 1;
-
-          if (completedLoopsRef.current >= totalLoops) {
-            completedLoopsRef.current = totalLoops;
-            stoppingRef.current = true;
-            targetVelocityRef.current = 0;
-          }
-        }
-
-        if (stoppingRef.current && Math.abs(velocityRef.current) < 0.0001) {
-          velocityRef.current = 0;
-          finishedRef.current = true;
-        }
-
-        track.style.transform = `translate3d(${offsetRef.current}px, 0, 0)`;
-      }
-
-      animationFrame = requestAnimationFrame(animate);
-    };
-
-    animationFrame = requestAnimationFrame(animate);
-
-    return () => {
-      cancelAnimationFrame(animationFrame);
-      resizeObserver?.disconnect();
-      window.removeEventListener('resize', measureLoop);
-    };
-  }, []);
-
-  const pauseMotion = () => {
-    if (!finishedRef.current) targetVelocityRef.current = 0;
-  };
-
-  const resumeMotion = () => {
-    if (!finishedRef.current && !stoppingRef.current) targetVelocityRef.current = 1;
-  };
-
-  return (
-    <div
-      className="motion-strip"
-      aria-label="دسته‌بندی‌های تپش"
-      onPointerEnter={pauseMotion}
-      onPointerLeave={resumeMotion}
-    >
-      <div className="motion-track" ref={trackRef}>
-        {[0, 1, 2, 3, 4].map((sequenceIndex) => {
-          /*
-           * پنج نسخهٔ یکسان برای بی‌درز شدن چرخش تکرار می‌شوند؛ فقط نسخهٔ اول
-           * «واقعی» است. چهار نسخهٔ تکراری از درخت دسترس‌پذیری و ترتیب تب بیرون
-           * می‌مانند (aria-hidden + tabIndex=-1) وگرنه فوتر بیست وقفهٔ تبی می‌ساخت
-           * در حالی که کاربر فقط چهار مقصد می‌بیند. کلیک روی نسخه‌های تکراری
-           * دست‌نخورده کار می‌کند.
-           */
-          const isClone = sequenceIndex > 0;
-
-          return (
-            <div
-              className="motion-sequence"
-              ref={sequenceIndex === 0 ? sequenceRef : undefined}
-              key={sequenceIndex}
-              aria-hidden={isClone || undefined}
-            >
-              {motionItems.map((item) => (
-                <a
-                  className={`motion-pill motion-pill--${item.accent}`}
-                  href={item.href}
-                  tabIndex={isClone ? -1 : undefined}
-                  key={`${sequenceIndex}-${item.title}`}
-                >
-                  {item.title}
-                </a>
-              ))}
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-/* هدر سایت — یک نسخه واحد برای صفحه اصلی و صفحه مقالات */
-function SiteHeader({ menuOpen, onMenuOpenChange, userData, onOpenDashboard, onOpenAuth }) {
-  const closeMenu = () => onMenuOpenChange(false);
-
-  return (
-    <header className="site-header" data-reveal="header">
-      <Brand />
-
-      <button
-        className={`menu-toggle ${menuOpen ? 'is-open' : ''}`}
-        type="button"
-        aria-label={menuOpen ? 'بستن منو' : 'باز کردن منو'}
-        aria-expanded={menuOpen}
-        onClick={() => onMenuOpenChange(!menuOpen)}
-      >
-        <span />
-        <span />
-        <span />
-      </button>
-
-      <nav className={`site-nav ${menuOpen ? 'is-open' : ''}`} aria-label="ناوبری اصلی">
-        <a className="site-nav__link site-nav__link--products" href="#products" onClick={closeMenu}>
-          محصولات
-        </a>
-        <a className="site-nav__link site-nav__link--pricing" href="#pricing" onClick={closeMenu}>
-          تعرفه‌ها
-        </a>
-        <a className="site-nav__link site-nav__link--about" href="#about" onClick={closeMenu}>
-          درباره ما
-        </a>
-        {/* مقالات یک مسیر مستقل است (`#articles`) — مثل سه لینک دیگر، فقط hash
-            عوض می‌شود و روتر خودش صفحه را بالا می‌آورد. */}
-        <a className="site-nav__link site-nav__link--articles" href="#articles" onClick={closeMenu}>
-          مقالات
-        </a>
-      </nav>
-
-      <div className="site-header__actions">
-        <ThemeToggle />
-
-        {userData ? (
-          <button
-            className="auth-link auth-link--user"
-            type="button"
-            aria-label={`ورود به داشبورد ${getDisplayName(userData)}`}
-            onClick={onOpenDashboard}
-          >
-            <span className="auth-link__avatar">
-              {avatarSrc(userData.profile?.avatar) ? (
-                <img src={avatarSrc(userData.profile?.avatar)} alt="" />
-              ) : (
-                <HeaderUserIcon />
-              )}
-            </span>
-            <span className="auth-link__name">{getDisplayName(userData)}</span>
-          </button>
-        ) : (
-          <a className="auth-link auth-link--login" href="#auth" onClick={onOpenAuth}>
-            ورود / ثبت نام
-          </a>
-        )}
-      </div>
-    </header>
-  );
-}
-
-/* فوتر سایت — مشترک بین صفحهٔ اصلی و بقیهٔ لایه‌های عمومی */
-function SiteFooter() {
-  return (
-    <footer className="site-footer" id="footer" data-reveal>
-      <div className="site-footer__inner section-shell">
-        <div className="site-footer__brand">
-          <Brand />
-          <small>نسخه ۱.۵.۵.۲۷</small>
-          <div className="site-footer__about">
-            <p>
-              والا ما اومدیم دور هم یک چایی بخوریم گفتیم ی پلتفرم نزنیم بچه‌های
-              پزشکی رو دور هم جمع کنیم؟ اینجوری شد که بار نیسان سر از اینجا در
-              آوردیم. اگه بازم این حوالی راهت خورد بیا پیش خودمون ی چایی مهمون ما باش!
-            </p>
-          </div>
-        </div>
-
-        <nav className="site-footer__column" aria-label="محصولات">
-          <h2>محصولات</h2>
-          {FOOTER_PRODUCT_LINKS.map((link) => (
-            <a key={link.title} href={link.href}>
-              {link.title}
-            </a>
-          ))}
-        </nav>
-
-        <nav className="site-footer__column" aria-label="سایر بخش‌ها">
-          <h2>سایر بخش‌ها</h2>
-          {FOOTER_SECTION_LINKS.map((link) => (
-            <a key={link.title} href={link.href}>
-              {link.title}
-            </a>
-          ))}
-        </nav>
-
-        <nav className="site-footer__social" aria-label="فضاهای مجازی تپش">
-          <h2>ما را دنبال کنید</h2>
-          <div className="site-footer__social-links">
-            {FOOTER_SOCIAL_LINKS.map((item) => (
-              <a
-                key={item.id}
-                className={`site-footer__social-link site-footer__social-link--${item.id}`}
-                href={item.href}
-                target="_blank"
-                rel="noreferrer"
-                aria-label={item.label}
-                title={item.label}
-              >
-                <img src={item.image} alt="" />
-              </a>
-            ))}
-          </div>
-        </nav>
-      </div>
-    </footer>
-  );
-}
-
-function useAuthTypewriter(phrases, enabled) {
-  const [phraseIndex, setPhraseIndex] = useState(0);
-  const [displayedPhrase, setDisplayedPhrase] = useState('');
-  const [phase, setPhase] = useState('typing');
-
-  useEffect(() => {
-    if (!enabled) {
-      setPhraseIndex(0);
-      setDisplayedPhrase('');
-      setPhase('typing');
-      return undefined;
-    }
-
-    const phraseCharacters = Array.from(phrases[phraseIndex].text);
-    let timer;
-
-    if (phase === 'typing') {
-      if (displayedPhrase.length < phraseCharacters.length) {
-        timer = window.setTimeout(() => {
-          setDisplayedPhrase(
-            phraseCharacters.slice(0, displayedPhrase.length + 1).join(''),
-          );
-        }, 140);
-      } else {
-        setPhase('holding');
-      }
-    }
-
-    if (phase === 'holding') {
-      timer = window.setTimeout(() => setPhase('deleting'), 10000);
-    }
-
-    if (phase === 'deleting') {
-      if (displayedPhrase.length > 0) {
-        timer = window.setTimeout(() => {
-          setDisplayedPhrase(
-            phraseCharacters.slice(0, displayedPhrase.length - 1).join(''),
-          );
-        }, 90);
-      } else {
-        timer = window.setTimeout(() => {
-          setPhraseIndex((currentIndex) => (currentIndex + 1) % phrases.length);
-          setPhase('typing');
-        }, 2000);
-      }
-    }
-
-    return () => window.clearTimeout(timer);
-  }, [displayedPhrase, enabled, phase, phraseIndex, phrases]);
-
-  return { displayedPhrase, phraseIndex };
-}
-
-/*
- * `export` عمدی است — مثل `SignupPromptModal` و `AdminShell`: صفحهٔ ورود پشت
- * state (`authOpen`) قفل است و در رندر سرور به آن نمی‌رسیم، پس هارنس
- * `scripts/verify-render.mjs` باید بتواند همین کامپوننت را مستقیم رندر کند.
- */
-export function AuthPage({ onBack, onLoginSuccess, onRegisterSuccess }) {
-  const [mode, setMode] = useState('login');
-  const [isEntered, setIsEntered] = useState(false);
-  const [isFormSwitching, setIsFormSwitching] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState({});
-  /* وضعیت گوگل: `null` یعنی هنوز از سرور نپرسیده‌ایم — با `false` اشتباه نشود */
-  const [googleStatus, setGoogleStatus] = useState(null);
-  const [googleNotice, setGoogleNotice] = useState('');
-  const [isGooglePending, setIsGooglePending] = useState(false);
-  const modeSwitchTimerRef = useRef(null);
-  const isRegistering = mode === 'register';
-  const {
-    displayedPhrase: animatedPhrase,
-    phraseIndex: animatedPhraseIndex,
-  } = useAuthTypewriter(authAnimatedPhrases, !isRegistering);
-
-  const clearFieldError = (fieldName) => {
-    setFieldErrors((currentErrors) => {
-      if (!currentErrors[fieldName]) return currentErrors;
-
-      const nextErrors = { ...currentErrors };
-      delete nextErrors[fieldName];
-      return nextErrors;
-    });
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    const form = event.currentTarget;
-    const formData = new FormData(form);
-    const phoneInput = form.querySelector('#auth-phone');
-    const passwordInput = form.querySelector('#auth-password');
-    const confirmationInput = form.querySelector('#auth-password-confirm');
-    const requiredFields = isRegistering
-      ? ['phone', 'password', 'password-confirm']
-      : ['phone', 'password'];
-    const nextErrors = {};
-
-    [phoneInput, passwordInput, confirmationInput].forEach((input) => {
-      input?.setCustomValidity('');
-    });
-
-    requiredFields.forEach((fieldName) => {
-      const value = String(formData.get(fieldName) || '').trim();
-
-      if (!value) {
-        nextErrors[fieldName] = 'لطفا این بخش را پر کنید.';
-      }
-    });
-
-    setFieldErrors(nextErrors);
-
-    if (Object.keys(nextErrors).length > 0) {
-      const firstInvalidField = form.querySelector(
-        `[name="${Object.keys(nextErrors)[0]}"]`,
-      );
-      requestAnimationFrame(() => firstInvalidField?.focus({ preventScroll: true }));
-      return;
-    }
-
-    const normalizeDigits = (value) =>
-      value
-        .replace(/[۰-۹]/g, (digit) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit)))
-        .replace(/[٠-٩]/g, (digit) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)));
-    const phone = normalizeDigits(String(formData.get('phone') || '').trim());
-    const password = String(formData.get('password') || '');
-    const confirmation = String(formData.get('password-confirm') || '');
-
-    if (isRegistering && password !== confirmation) {
-      confirmationInput?.setCustomValidity('رمز عبور و تکرار آن یکسان نیستند.');
-      confirmationInput?.reportValidity();
-      return;
-    }
-
-    if (isRegistering) {
-      const user = await saveUserRecord({ phone, password });
-      onRegisterSuccess?.(user);
-      return;
-    }
-
-    const user = await loginUser({ phone, password });
-    if (!user) {
-      setFieldErrors({ password: 'شماره تلفن یا رمز عبور نادرست است.' });
-      passwordInput?.focus({ preventScroll: true });
-      return;
-    }
-
-    onLoginSuccess?.(user);
-  };
-
-  const switchMode = () => {
-    if (isFormSwitching) return;
-
-    setFieldErrors({});
-    setIsFormSwitching(true);
-    window.clearTimeout(modeSwitchTimerRef.current);
-    modeSwitchTimerRef.current = window.setTimeout(() => {
-      setMode((currentMode) => (currentMode === 'login' ? 'register' : 'login'));
-      requestAnimationFrame(() => setIsFormSwitching(false));
-    }, 240);
-  };
-
-  useEffect(() => {
-    let secondFrame = 0;
-    const firstFrame = requestAnimationFrame(() => {
-      secondFrame = requestAnimationFrame(() => setIsEntered(true));
-    });
-
-    return () => {
-      cancelAnimationFrame(firstFrame);
-      cancelAnimationFrame(secondFrame);
-    };
-  }, []);
-
-  useEffect(() => {
-    return () => window.clearTimeout(modeSwitchTimerRef.current);
-  }, []);
-
-  /*
-   * callbackها در ref می‌مانند چون `deps` این افکت عمداً خالی است:
-   * `onLoginSuccess`/`onRegisterSuccess` در App توابع inline تازه‌اند و اگر در
-   * deps بیایند، هر رندر یک‌بار دیگر اجرا می‌شد؛ `setGoogleStatus` هم شیء تازه
-   * می‌سازد ⇒ حلقهٔ بی‌پایان fetch (همان تلهٔ `useAsync(loader, deps)` در README).
-   */
-  const authCallbacksRef = useRef({ onLoginSuccess, onRegisterSuccess });
-
-  useEffect(() => {
-    authCallbacksRef.current = { onLoginSuccess, onRegisterSuccess };
-  });
-
-  /*
-   * ورود با گوگل — دو کار در زمان mount:
-   *   ۱. پرسیدن وضعیت پیکربندی سرور، تا دکمه چیزی را که نیست ادعا نکند.
-   *   ۲. اگر با `?google=…` برگشتیم: نشانه را از آدرس پاک کنیم (تا رفرش جریان را
-   *      تکرار نکند) و کاربرِ «دست‌دادن» را تحویل بگیریم.
-   *
-   * پروفایل ناقص ⇒ همان مسیر ثبت‌نام (آنبوردینگ)؛ حساب کامل ⇒ ورود مستقیم.
-   * یعنی کاربر گوگلیِ تازه هم «ثبت نام اولیه» را همان‌جا تمام می‌کند.
-   *
-   * ⚠️ گاردِ `googleBootRef` یک‌بارمصرف است، نه فلگ `active`: پروژه زیر
-   * `StrictMode` اجرا می‌شود و افکت در توسعه دو بار اجرا می‌شود
-   * (mount → cleanup → mount). با فلگ `active`، ادامهٔ async اجرای اول دور
-   * ریخته می‌شد و اجرای دوم — چون اجرای اول پارامتر آدرس را پاک کرده بود —
-   * `returned = null` می‌دید؛ یعنی «دست‌دادن» هیچ‌وقت تحویل نمی‌شد و کاربر
-   * بی‌هیچ خطایی روی `#auth` می‌ماند.
-   */
-  const googleBootRef = useRef(false);
-
-  useEffect(() => {
-    if (googleBootRef.current) return;
-    googleBootRef.current = true;
-
-    const returned = readGoogleReturn();
-    if (returned) clearGoogleReturn();
-
-    const boot = async () => {
-      const status = await getGoogleAuthStatus();
-      setGoogleStatus(status);
-
-      if (!returned) return;
-
-      if (returned !== 'handoff') {
-        setGoogleNotice(GOOGLE_RETURN_MESSAGES[returned] ?? GOOGLE_RETURN_MESSAGES.failed);
-        return;
-      }
-
-      setIsGooglePending(true);
-      const user = await consumeGoogleHandoff();
-      setIsGooglePending(false);
-
-      if (!user) {
-        setGoogleNotice(GOOGLE_RETURN_MESSAGES.failed);
-        return;
-      }
-
-      if (user.profile?.username) authCallbacksRef.current.onLoginSuccess?.(user);
-      else authCallbacksRef.current.onRegisterSuccess?.(user);
-    };
-
-    boot();
-  }, []);
-
-  const handleGoogleAuth = () => {
-    if (isGooglePending) return;
-
-    /* پیکربندی‌نشده را همین‌جا می‌گوییم؛ رفتن به سرور و برگشتن فقط وقت می‌برد */
-    if (googleStatus && !googleStatus.configured) {
-      setGoogleNotice(GOOGLE_RETURN_MESSAGES.unconfigured);
-      return;
-    }
-
-    setIsGooglePending(true);
-    startGoogleAuth();
-  };
-
-  const googleNote =
-    googleNotice ||
-    (googleStatus && !googleStatus.configured
-      ? googleStatus.reachable
-        ? GOOGLE_RETURN_MESSAGES.unconfigured
-        : GOOGLE_RETURN_MESSAGES.offline
-      : '');
-
-  const isGoogleReady = googleStatus?.configured !== false;
-
-  return (
-    <main className="auth-page" dir="rtl">
-      <div className={`auth-page__shell ${isEntered ? 'is-visible' : ''}`}>
-        <section className="auth-highlights" aria-label="مزایای تپش">
-          {authHighlights.map((card) => (
-            <article className={`auth-highlight auth-highlight--${card.accent}`} key={card.title}>
-              <img className="auth-highlight__image" src={card.image} alt="" />
-              <div className="auth-highlight__copy">
-                <h2>{card.title}</h2>
-                <p>{card.description}</p>
-              </div>
-            </article>
-          ))}
-        </section>
-
-        <section className="auth-panel" aria-labelledby="auth-title">
-          <button
-            className="auth-panel__logo-button"
-            type="button"
-            aria-label="بازگشت به صفحه اصلی"
-            onClick={onBack}
-          >
-            <img src={heartbeatMark} alt="تپش" />
-          </button>
-
-          <h1
-            id="auth-title"
-            className={`auth-panel__title ${
-              isRegistering ? 'auth-panel__title--register' : 'auth-panel__title--login'
-            } ${isFormSwitching ? 'is-switching' : ''}`}
-          >
-            {isRegistering ? (
-              <>
-                ثبت نام در <span>تپش</span>
-              </>
-            ) : (
-              <>
-                من عضو تپش هستم
-                <br />
-                چون{' '}
-                <span
-                  className={`auth-animated-phrase auth-animated-phrase--${authAnimatedPhrases[animatedPhraseIndex].accent}`}
-                  aria-live="polite"
-                >
-                  {animatedPhrase}
-                  <span className="auth-typewriter__cursor" aria-hidden="true" />
-                </span>
-              </>
-            )}
-          </h1>
-
-          <form
-            className={`auth-form ${isFormSwitching ? 'is-switching' : ''}`}
-            onSubmit={handleSubmit}
-            noValidate
-          >
-            <div className="auth-form__fields">
-              <label htmlFor="auth-phone">شماره تلفن</label>
-              <input
-                id="auth-phone"
-                name="phone"
-                className={fieldErrors.phone ? 'is-error' : ''}
-                type="tel"
-                inputMode="tel"
-                placeholder="مثلا: ۰۹۱۲۳۴۵۶۷۸۹"
-                autoComplete="tel"
-                aria-invalid={Boolean(fieldErrors.phone)}
-                aria-describedby={fieldErrors.phone ? 'auth-phone-error' : undefined}
-                onChange={() => clearFieldError('phone')}
-                required
-              />
-              {fieldErrors.phone && (
-                <span className="auth-form__error" id="auth-phone-error" role="alert">
-                  {fieldErrors.phone}
-                </span>
-              )}
-
-              <label htmlFor="auth-password">رمز عبور</label>
-              <input
-                id="auth-password"
-                name="password"
-                className={fieldErrors.password ? 'is-error' : ''}
-                type="password"
-                placeholder="رمز عبور"
-                autoComplete={isRegistering ? 'new-password' : 'current-password'}
-                aria-invalid={Boolean(fieldErrors.password)}
-                aria-describedby={fieldErrors.password ? 'auth-password-error' : undefined}
-                onChange={() => clearFieldError('password')}
-                required
-              />
-              {fieldErrors.password && (
-                <span className="auth-form__error" id="auth-password-error" role="alert">
-                  {fieldErrors.password}
-                </span>
-              )}
-
-              {isRegistering && (
-                <>
-                  <label htmlFor="auth-password-confirm">تکرار رمز عبور</label>
-                  <input
-                    id="auth-password-confirm"
-                    name="password-confirm"
-                    className={fieldErrors['password-confirm'] ? 'is-error' : ''}
-                    type="password"
-                    placeholder="تکرار رمز عبور"
-                    autoComplete="new-password"
-                    aria-invalid={Boolean(fieldErrors['password-confirm'])}
-                    aria-describedby={
-                      fieldErrors['password-confirm']
-                        ? 'auth-password-confirm-error'
-                        : undefined
-                    }
-                    onChange={() => clearFieldError('password-confirm')}
-                    required
-                  />
-                  {fieldErrors['password-confirm'] && (
-                    <span
-                      className="auth-form__error"
-                      id="auth-password-confirm-error"
-                      role="alert"
-                    >
-                      {fieldErrors['password-confirm']}
-                    </span>
-                  )}
-                </>
-              )}
-
-              {!isRegistering && (
-                <button className="auth-form__forgot" type="button">
-                  فراموشی رمز / ارسال پیامک
-                </button>
-              )}
-            </div>
-
-            <div className="auth-form__actions">
-              <button className="auth-form__submit" type="submit">
-                {isRegistering ? 'ثبت نام' : 'ورود'}
-              </button>
-
-              {/*
-                یک دکمه برای هر دو حالت ورود و ثبت‌نام: گوگل خودش می‌فهمد حساب
-                هست یا نه (`prompt=select_account`)، پس جدا کردنشان فقط دو
-                دکمهٔ بی‌تفاوت می‌ساخت.
-              */}
-              <button
-                className={`auth-form__google${isGoogleReady ? '' : ' is-unavailable'}`}
-                type="button"
-                onClick={handleGoogleAuth}
-                disabled={isGooglePending}
-                aria-busy={isGooglePending}
-              >
-                <GoogleIcon />
-                <span>
-                  {isGooglePending ? 'در حال ورود با گوگل…' : 'ورود / ثبت نام با گوگل'}
-                </span>
-              </button>
-
-              {googleNote && (
-                <p className="auth-form__google-note" role="status">
-                  {googleNote}
-                </p>
-              )}
-
-              <button className="auth-form__switch" type="button" onClick={switchMode}>
-                {isRegistering ? 'ورود' : 'ثبت نام'}
-              </button>
-            </div>
-          </form>
-        </section>
-      </div>
-    </main>
-  );
-}
-
-/*
- * لنگرهای داخلی لایهٔ تعرفه‌ها. نگاشت صریح است، نه حدس پیشوندی — چون پیشوند
- * `#pr-` با هیچ مسیر دیگری شریک نیست ولی تکیه بر پیشوند همان تلهٔ تأییدشدهٔ
- * پروژه است (دو آیتم هم‌زمان فعال می‌شوند). هر لنگر تازه باید این‌جا اضافه شود.
- */
-const PRICING_HASHES = new Set(['#pricing', '#pr-products', '#pr-plans', '#pr-compare']);
-/* صفحهٔ محصولات یک مسیر تک‌لنگر است: `#products` */
-const PRODUCTS_HASHES = new Set(['#products']);
-/* صفحهٔ «دربارهٔ تپش» هم مسیر تک‌لنگر است: `#about` */
-const ABOUT_HASHES = new Set(['#about']);
-/*
- * صفحهٔ اشتراک گروهی: `#group`. لینک دعوت هم از همین مسیر می‌آید
- * (`#group?join=CODE`) و کد را در query می‌آورد تا فرمِ پیوستن خودش پُر شود —
- * پس برخلاف سه لایهٔ دیگر، تطبیق **دقیق** کافی نیست و پیشوند هم لازم است.
- * هیچ مسیر دیگری با `#group` شروع نمی‌شود، پس پیشوند امن است.
- * ⚠️ خودِ مسیر از سرویس گروه می‌آید (`GROUP_PAGE_HASH`) تا کارتِ صفحهٔ اصلی،
- * CTA پلن گروهی در تعرفه‌ها و این روتر هر سه یک رشته را بخوانند.
- */
-const GROUP_HASH = GROUP_PAGE_HASH;
-/* مقصد واحد Green Path — از شناسهٔ روتر ساخته می‌شود تا لینک عمومی و داشبورد جدا نشوند. */
-const GREEN_PATH_DASHBOARD_HASH = dashboardRouteHash({ layer: LAYER_IDS.greenPath });
-
-/*
- * مقصد هر یک از پنج کارتِ دورهٔ صفحهٔ اصلی. از همان نگاشت داشبورد (`COURSE_LAYERS`)
- * ساخته می‌شود؛ اگر روزی مقصد یک دوره عوض شود، کارت صفحهٔ اصلی و کارت داشبورد با هم
- * عوض می‌شوند. رشتهٔ دستی این‌جا نوشته نمی‌شود (تلهٔ ۱۰ فایل README).
- */
-function courseDashboardHash(courseId) {
-  const layerId = COURSE_LAYERS[courseId];
-  return layerId ? dashboardRouteHash({ layer: layerId }) : null;
-}
-
-/*
- * ── مقصدهای فوتر ──
- *
- * هر عنوانِ فوتر به لایهٔ واقعیِ خودش می‌رسد، نه به یک لنگرِ بی‌ربط (تلهٔ ۱۰).
- * آدرس‌ها از `dashboardRouteHash` + `LAYER_IDS` ساخته می‌شوند، پس با تغییر نام یک
- * لایه هیچ لینکی بی‌صدا از کار نمی‌افتد. تنها مقصد غیرِداشبوردی «مقالات» است که
- * مسیر مستقل خودش را دارد و «علوم پایه» که به صفحهٔ محصولات می‌رود.
- *
- * چرا `export`: مثل `homePromoCards`، هارنس از همین دو جدول می‌سنجد که هر مقصد
- * یک لایهٔ واقعی است — چیزی که در HTML به‌تنهایی قابل اثبات نیست.
- */
-export const FOOTER_PRODUCT_LINKS = [
-  { title: 'درسنامه جامع', href: dashboardRouteHash({ section: 'courses', layer: LAYER_IDS.comprehensive }) },
-  { title: 'میکرو درسنامه', href: dashboardRouteHash({ section: 'courses', layer: LAYER_IDS.micro }) },
-  { title: 'بانک تست', href: dashboardRouteHash({ section: 'tests', layer: LAYER_IDS.testBank }) },
-  { title: 'دستیار هوشمند', href: dashboardRouteHash({ section: 'other', layer: LAYER_IDS.ai }) },
-  { title: 'مسیر سبز', href: GREEN_PATH_DASHBOARD_HASH },
-];
-
-export const FOOTER_SECTION_LINKS = [
-  { title: 'ویکی تپش', href: dashboardRouteHash({ section: 'other', layer: LAYER_IDS.wiki }) },
-  { title: 'شبکه دانش', href: dashboardRouteHash({ section: 'other', layer: LAYER_IDS.knowledge }) },
-  { title: 'مقالات', href: '#articles' },
-  /* پشتیبانی یک تبِ پنل تنظیمات است، نه لایه؛ مقصدش همان مسیر واقعی است */
-  { title: 'پشتیبانی', href: dashboardRouteHash({ overlay: OVERLAY_IDS.settings, tab: 'support' }) },
-];
-
-/*
- * پنج فضای مجازی تپش. نشانهٔ هر کدام یک تصویر تک‌فام است — دو تای اولِ قبلی
- * (ایتا با حرف «e» و یوتیوب با مثلث) نشانهٔ تایپی بودند و کنار سه نشانهٔ تصویریِ
- * دیگر ناهمگون می‌شدند؛ جایشان لوگوی واقعی و هم‌اندازهٔ همان‌ها نشست.
- * رنگشان از `filter: var(--icon-filter)` می‌آید (سفید در تم تیره، تیره در تم روشن).
- */
-const FOOTER_SOCIAL_LINKS = [
-  { id: 'bale', label: 'بله', href: 'https://ble.ir/tapesh_production', image: baleSocialIcon },
-  { id: 'eitaa', label: 'ایتا', href: 'https://eitaa.com/tapesh_production', image: eitaaSocialIcon },
-  { id: 'telegram', label: 'تلگرام', href: 'https://t.me/tapesh_production', image: telegramSocialIcon },
-  { id: 'instagram', label: 'اینستاگرام', href: 'https://www.instagram.com/tapesh_production/', image: instagramSocialIcon },
-  { id: 'youtube', label: 'یوتیوب', href: 'https://www.youtube.com/@tapesh_production', image: youtubeSocialIcon },
-];
-
-/*
- * ── کادرهای تبلیغی محصولات سرصفحه ──
- *
- * چهار محصولی که کاربر باید از همان صفحهٔ اصلی ببیند. هر کادر سه چیز دارد:
- * یک برچسبِ کوتاهِ رده (`eyebrow`)، نام محصول (`title`) و یک جملهٔ توضیح. نشانهٔ
- * گرافیکی هر کادر از `CatalogIcon` می‌آید — همان مجموعه‌ای که کارت‌های کاتالوگ هم
- * از آن لوگو می‌گیرند، پس شکل آیکون‌ها یک تعریف دارد و دو مصرف.
- *
- * مقصد هر کادر یک لایهٔ واقعیِ داشبورد است، نه لنگرِ تزیینیِ صفحه (تلهٔ ۱۰):
- * آدرس‌ها از `dashboardRouteHash` + `LAYER_IDS` ساخته می‌شوند، پس با تغییر نام
- * یک لایه هیچ‌کدام از کارت‌ها بی‌صدا از کار نمی‌افتند.
- *
- * چرا `export`: دکمهٔ کادرها `<button>` است و مقصدش در HTML نمی‌نشیند، پس تنها
- * راهِ سنجیدنِ «هر چهار کادر به یک لایهٔ واقعی می‌روند» خواندن خودِ همین داده در
- * هارنس است — همان دلیلی که `SignupPromptModal` هم `export` شد.
- */
-export const homePromoCards = [
-  {
-    id: 'test-bank',
-    eyebrow: 'تمرین',
-    title: 'بانک تست علوم پایه',
-    accent: '#5b8cc7',
-    description: 'تست‌های طبقه‌بندی‌شده با پاسخ تشریحی؛ بعد از هر آزمون، تحلیل می‌گوید کجا وقت کم آوردی.',
-    href: dashboardRouteHash({ section: 'tests', layer: LAYER_IDS.testBank }),
-  },
-  {
-    id: 'tapesh-ai',
-    eyebrow: 'دستیار',
-    title: 'تپش هوشمند',
-    accent: '#937fcd',
-    description: 'سؤالت را همان‌جا که گیر کرده‌ای بپرس؛ پاسخ متناسب با همان مبحثی که در آن هستی.',
-    href: dashboardRouteHash({ section: 'other', layer: LAYER_IDS.ai }),
-  },
-  {
-    id: 'wiki',
-    eyebrow: 'مرجع',
-    title: 'ویکی تپش',
-    accent: '#b99a86',
-    description: 'مقالات مرجعِ پیوسته به هم؛ از یک مفهوم شروع کن و تا مثال بالینی و تست‌های همان مبحث برو.',
-    href: dashboardRouteHash({ section: 'other', layer: LAYER_IDS.wiki }),
-  },
-  {
-    id: 'knowledge',
-    eyebrow: 'ارتباط',
-    title: 'شبکه دانش',
-    accent: '#77b787',
-    description: 'هر مفهوم به درس‌ها، مقالات و تست‌های مرتبط وصل است؛ ببین یک موضوع کجای نقشه می‌نشیند.',
-    href: dashboardRouteHash({ section: 'other', layer: LAYER_IDS.knowledge }),
-  },
-];
-
-/*
- * پاپ‌آپ «اول ثبت‌نام کن» — دیگر به هیچ کارتی وصل نیست.
- *
- * چرا باقی مانده: کارت‌های دورهٔ هیرو گاردِ ثبت‌نام ندارند و همه مستقیم وارد
- * لایهٔ دوره می‌شوند، پس این پاپ‌آپ در جریان عادی سایت باز نمی‌شود. کامپوننت
- * حذف نشد چون تنها جایی است که «مسیر ثبت‌نام» را قدم‌به‌قدم توضیح می‌دهد و
- * هارنس مستقیم رندرش می‌کند؛ اگر روزی مسیرِ پولی/قفل‌شده‌ای اضافه شد، از همین
- * استفاده می‌کند. Escape و کلیک روی پرده می‌بندند (قرارداد مودال‌های پروژه).
- *
- * چرا `export`: این پاپ‌آپ پشت state است و در رندر سرور (بدون کلیک) هرگز باز
- * نمی‌شود، پس تنها راهِ سنجیدنِ محتوایش رندر مستقیم خودش است — همان کاری که
- * برای `AdminShell` انجام شد.
- */
 export function SignupPromptModal({ course, onClose, onConfirm }) {
   useEffect(() => {
     if (!course) return undefined;
@@ -1192,172 +135,14 @@ export function SignupPromptModal({ course, onClose, onConfirm }) {
   );
 }
 
-function getAppRoute() {
-  if (typeof window === 'undefined') return 'home';
-
-  const { hash } = window.location;
-
-  /* اولویت با hash است تا ناوبری داخل سشن (مثل داشبورد → مقالات)، state قدیمی را باطل کند */
-  /* داشبورد مسیر داخلی خودش را در query همان hash نگه می‌دارد: #dashboard?s=tests&l=test-bank */
-  if (hash === '#dashboard' || hash.startsWith('#dashboard?') || hash.startsWith('#dashboard/')) {
-    return 'dashboard';
-  }
-  if (hash === '#onboarding') return 'onboarding';
-  if (hash === '#auth') return 'auth';
-  if (PRICING_HASHES.has(hash)) return 'pricing';
-  if (PRODUCTS_HASHES.has(hash)) return 'products';
-  if (ABOUT_HASHES.has(hash)) return 'about';
-  if (hash === GROUP_HASH || hash.startsWith(`${GROUP_HASH}?`)) return 'group';
-  if (hash === '#articles' || hash.startsWith('#articles/')) return 'articles';
-  if (hash === '#admin' || hash.startsWith('#admin/')) return 'admin';
-
-  const state = window.history.state ?? {};
-
-  if (state.tapeshRoute === 'dashboard' || state.tapeshDashboard === true) {
-    return 'dashboard';
-  }
-
-  if (state.tapeshRoute === 'onboarding' || state.tapeshOnboarding === true) {
-    return 'onboarding';
-  }
-
-  if (state.tapeshRoute === 'auth' || state.tapeshAuth === true) {
-    return 'auth';
-  }
-
-  if (state.tapeshRoute === 'pricing' || state.tapeshPricing === true) {
-    return 'pricing';
-  }
-
-  if (state.tapeshRoute === 'products' || state.tapeshProducts === true) {
-    return 'products';
-  }
-
-  if (state.tapeshRoute === 'about' || state.tapeshAbout === true) {
-    return 'about';
-  }
-
-  if (state.tapeshRoute === 'group' || state.tapeshGroup === true) {
-    return 'group';
-  }
-
-  if (state.tapeshRoute === 'articles' || state.tapeshArticles === true) {
-    return 'articles';
-  }
-
-  return 'home';
-}
-
-/* مسیر داخلی مقالات از hash؛ مثلا:
-   #articles/stress-heart-rate → stress-heart-rate
-   #articles/saved             → لیست مطالعه
-   #articles/category/physiology → دسته‌بندی */
-function getArticleSlug() {
-  if (typeof window === 'undefined') return null;
-
-  const match = window.location.hash.match(/^#articles\/([a-z0-9-]+(?:\/[a-z0-9-]+)*)$/);
-  return match ? match[1] : null;
-}
-
-function getRouteUrl(route) {
-  if (typeof window === 'undefined' || route === 'home') {
-    return typeof window === 'undefined'
-      ? ''
-      : `${window.location.pathname}${window.location.search}`;
-  }
-
-  /* هنگام نرمال‌سازی لینک مستقیم، اسلاگ مقاله در hash حفظ شود */
-  if (route === 'articles' && window.location.hash.startsWith('#articles')) {
-    return `${window.location.pathname}${window.location.search}${window.location.hash}`;
-  }
-
-  /* مسیر داخلی داشبورد (بخش/لایه) هم در لینک مستقیم و رفرش حفظ می‌شود */
-  if (route === 'dashboard' && window.location.hash.startsWith('#dashboard?')) {
-    return `${window.location.pathname}${window.location.search}${window.location.hash}`;
-  }
-
-  /*
-   * لینک دعوت اشتراک گروهی (`#group?join=CODE`) هم باید در نرمال‌سازی آدرس
-   * زنده بماند؛ وگرنه کاربر تازه‌وارد، کد را از دست می‌دهد و فرم خالی می‌ماند.
-   */
-  if (route === 'group' && window.location.hash.startsWith(`${GROUP_HASH}?`)) {
-    return `${window.location.pathname}${window.location.search}${window.location.hash}`;
-  }
-
-  return `${window.location.pathname}${window.location.search}#${route}`;
-}
-
-function getRouteState(route, previousState = {}) {
-  return {
-    ...previousState,
-    tapeshRoute: route,
-    tapeshAuth: route === 'auth',
-    tapeshOnboarding: route === 'onboarding',
-    tapeshDashboard: route === 'dashboard',
-    tapeshArticles: route === 'articles',
-    tapeshPricing: route === 'pricing',
-    tapeshProducts: route === 'products',
-    tapeshAbout: route === 'about',
-    tapeshGroup: route === 'group',
-  };
-}
-
-/*
- * بازگشت از یک لایهٔ مستقل به صفحهٔ اصلی: اگر مقصد یک لنگر بود (مثلاً فوتر)،
- * همان بخش در صفحهٔ اصلی پیدا و به آن اسکرول می‌شود. چرا دو فریم صبر: لایه‌ای
- * که بسته شده هنوز دارد unmount می‌شود و اندازهٔ سند تا رندرِ بعدی درست نیست.
- */
-function useReturnToAnchor(isOpen) {
-  const wasOpenRef = useRef(false);
-
-  useEffect(() => {
-    if (wasOpenRef.current && !isOpen) {
-      const hash = window.location.hash;
-
-      if (hash && hash !== '#top') {
-        const target = document.getElementById(decodeURIComponent(hash.slice(1)));
-
-        if (target) {
-          requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-              target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            });
-          });
-        }
-      }
-    }
-
-    wasOpenRef.current = isOpen;
-  }, [isOpen]);
-}
-
-function useOnlineStatus() {
-  const [isOnline, setIsOnline] = useState(
-    () => typeof navigator === 'undefined' || navigator.onLine,
-  );
-
-  useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
-
-  return isOnline;
-}
-
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
   const [authOpen, setAuthOpen] = useState(
     () => getAppRoute() === 'auth',
   );
+  /* فرمِ بازشده در صفحهٔ ورود/ثبت‌نام: از آدرس می‌آید و با هر CTA عوض می‌شود */
+  const [authMode, setAuthMode] = useState(() => getAuthMode());
   const [onboardingOpen, setOnboardingOpen] = useState(
     () => getAppRoute() === 'onboarding',
   );
@@ -1390,7 +175,13 @@ function App() {
   const [articleSlug, setArticleSlug] = useState(() =>
     getAppRoute() === 'articles' ? getArticleSlug() : null,
   );
-  const [userData, setUserData] = useState(() => getStoredUser());
+  /*
+   * `userData` فقط از سرور می‌آید. `tapesh:current-user` در localStorage یک کش
+   * نمایشی است، نه مدرک هویت: اگر سرور جواب ندهد یا بگوید وارد نیستی، کاربر
+   * «واردنشده» می‌ماند. (پیش‌تر مقدار اولیهٔ این state از localStorage خوانده
+   * می‌شد و یک رکورد جعلی محلی، کاربر را وارد می‌کرد.)
+   */
+  const [userData, setUserData] = useState(null);
   const [pendingDashboardHash, setPendingDashboardHash] = useState(null);
   const isOnline = useOnlineStatus();
 
@@ -1403,20 +194,54 @@ function App() {
     startTracking();
   }, []);
 
+  /*
+   * تأیید سشن با سرور در اولین بارگذاری — تنها منبع حقیقت احراز هویت.
+   * «سرور در دسترس نیست» با «وارد نشده‌ام» قاطی نمی‌شود، ولی هیچ‌کدام ورود
+   * نمی‌سازند؛ در هر دو حالت کاربر واردنشده می‌ماند.
+   */
+  useEffect(() => {
+    let active = true;
+
+    fetchCurrentUser().then((result) => {
+      if (!active) return;
+
+      if (result.status === 'authenticated') {
+        setUserData(result.user);
+        return;
+      }
+
+      if (result.status === 'unauthenticated') {
+        clearStoredUser();
+        setUserData(null);
+      }
+    });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   /* هویت کاربر با ورود/خروج عوض می‌شود؛ فقط شبه‌نام یک‌طرفه به سرور می‌رود */
   useEffect(() => {
     identify(userData);
   }, [userData]);
 
   const closeMenu = () => setMenuOpen(false);
-  const openAuth = (event) => {
+  const openAuth = (event, mode = 'login') => {
     /* رویداد اختیاری است: مسیرهایی مثل کادرهای تبلیغی محصولات بدون کلیک هم به ورود می‌فرستند */
     event?.preventDefault();
     closeMenu();
+    /*
+     * `#auth/register` فرم ثبت‌نام را باز می‌کند و `#auth` فرم ورود. هر دو یک
+     * مسیر (`auth`) اند، پس منطق مسیرها دست‌نخورده می‌ماند و فقط حالتِ فرم
+     * از آدرس می‌آید.
+     */
+    const authHash = mode === 'register' ? '#auth/register' : '#auth';
+    setAuthMode(mode);
     window.history.pushState(
       getRouteState('auth'),
       '',
-      getRouteUrl('auth'),
+      `${window.location.pathname}${window.location.search}${authHash}`,
     );
     setAuthOpen(true);
     setOnboardingOpen(false);
@@ -1481,6 +306,7 @@ function App() {
       previousRoute = route;
 
       setAuthOpen(route === 'auth');
+      if (route === 'auth') setAuthMode(getAuthMode());
       setOnboardingOpen(route === 'onboarding');
       setDashboardOpen(route === 'dashboard');
       setArticlesOpen(route === 'articles');
@@ -1750,13 +576,15 @@ function App() {
   };
 
   const finishOnboarding = async (profile) => {
-    const updatedUser = await saveUserRecord({
-      phone: userData?.phone,
-      profile,
-    });
+    /*
+     * پروفایل با سشن سرور ذخیره می‌شود (`PATCH /api/users/me`)، نه با شمارهٔ
+     * تلفن. اگر ذخیره نشد، کاربر همان‌طور که هست (واردشده) ادامه می‌دهد —
+     * خرابی ذخیرهٔ پروفایل هرگز هویت را عوض نمی‌کند.
+     */
+    const updatedUser = await saveProfile({ profile });
     const destination = pendingDashboardHash;
     setPendingDashboardHash(null);
-    openDashboard(updatedUser, { hash: destination });
+    openDashboard(updatedUser ?? userData, { hash: destination });
   };
 
   /* خروج از حساب: فقط سشن پاک می‌شود تا حساب کاربر برای ورود بعدی باقی بماند */
@@ -1817,6 +645,26 @@ function App() {
     openDashboard(userData, { replaceHistory: false, hash: href });
   };
 
+  /*
+   * CTAهای «از الان شروع کنید» صفحهٔ اصلی و لینک‌های ستون «محصولات» فوتر.
+   * قاعدهٔ واحد: کاربرِ **ثبت‌نام‌نکرده** به فرم ثبت‌نام می‌رود و مقصدش در
+   * `pendingDashboardHash` می‌ماند تا پس از ثبت‌نام و تکمیل پروفایل دقیقاً روی
+   * همان لایه فرود بیاید؛ کاربرِ **ثبت‌نام‌شده** مستقیم به مقصد خودش می‌رود —
+   * لایهٔ همان محصول، و اگر مقصدی تعیین نشده باشد، خودِ داشبورد.
+   */
+  const startFromLanding = (event, href = null) => {
+    event?.preventDefault();
+    closeMenu();
+
+    if (!userData) {
+      if (href) setPendingDashboardHash(href);
+      openAuth(event, 'register');
+      return;
+    }
+
+    openDashboard(userData, { replaceHistory: false, hash: href });
+  };
+
   /* بازگشت از پنل مدیریت به سایت؛ نشست مدیر دست‌نخورده می‌ماند */
   const closeAdmin = () => {
     window.history.replaceState(getRouteState('home'), '', getRouteUrl('home'));
@@ -1839,7 +687,15 @@ function App() {
 
   /* پنل مدیریت: پیش از همهٔ مسیرها بررسی می‌شود چون خودش نشست و ورود مستقل دارد */
   if (adminOpen) {
-    return <AdminLayout onExit={closeAdmin} />;
+    /*
+     * مرز خطای مستقل پنل (فاز ۶): خطای یک صفحهٔ پنل نباید کاربر را در صفحهٔ
+     * سفید زندانی کند. «بازگشت» همان `closeAdmin` است، پس راه خروج همیشه هست.
+     */
+    return (
+      <ErrorBoundary scope="admin" resetKey="admin" onExit={closeAdmin} exitLabel="خروج از پنل">
+        <AdminLayout onExit={closeAdmin} />
+      </ErrorBoundary>
+    );
   }
 
   if (onboardingOpen) {
@@ -1859,18 +715,35 @@ function App() {
    * «ورود / ثبت نام» را نشان می‌دهد چون `userData` دست‌نخورده می‌ماند.
    */
   if (dashboardOpen) {
+    /*
+     * مرز خطای مستقل داشبورد (فاز ۶): یک لایهٔ عمیق (مثلاً موتور ۳بعدی آناتومی)
+     * اگر بترکد، فقط همین بخش خطا نشان می‌دهد و هدر/فوتر سایت سالم می‌ماند.
+     */
     return (
-      <DashboardLayout
-        userData={userData}
-        onUserDataChange={setUserData}
-        onLogout={handleLogout}
-      />
+      <ErrorBoundary
+        scope="dashboard"
+        resetKey="dashboard"
+        /* خروج بدون logout: فقط برگشت به صفحهٔ اصلی — حساب کاربر دست‌نخورده می‌ماند */
+        onExit={() => {
+          window.history.replaceState(getRouteState('home'), '', getRouteUrl('home'));
+          setDashboardOpen(false);
+        }}
+        exitLabel="بازگشت به سایت"
+      >
+        <DashboardLayout
+          userData={userData}
+          onUserDataChange={setUserData}
+          onLogout={handleLogout}
+        />
+      </ErrorBoundary>
     );
   }
 
   if (authOpen) {
     return (
       <AuthPage
+        key={authMode}
+        initialMode={authMode}
         onBack={closeAuth}
         onLoginSuccess={(user) => {
           trackLogin();
@@ -1900,7 +773,7 @@ function App() {
 
         <PricingPage hasAccount={Boolean(userData)} onStart={enterTapesh} />
 
-        <SiteFooter />
+        <SiteFooter onProductLink={startFromLanding} />
       </div>
     );
   }
@@ -1922,7 +795,7 @@ function App() {
           onStart={enterTapesh}
         />
 
-        <SiteFooter />
+        <SiteFooter onProductLink={startFromLanding} />
       </div>
     );
   }
@@ -1944,7 +817,7 @@ function App() {
           onOpenProduct={openProduct}
         />
 
-        <SiteFooter />
+        <SiteFooter onProductLink={startFromLanding} />
       </div>
     );
   }
@@ -1962,7 +835,7 @@ function App() {
 
         <GroupPage userData={userData} onStart={enterTapesh} />
 
-        <SiteFooter />
+        <SiteFooter onProductLink={startFromLanding} />
       </div>
     );
   }
@@ -1980,7 +853,7 @@ function App() {
 
         {articleSlug ? <ArticlesRoute articleSlug={articleSlug} /> : <ArticlesPage />}
 
-        <SiteFooter />
+        <SiteFooter onProductLink={startFromLanding} />
       </div>
     );
   }
@@ -2006,7 +879,15 @@ function App() {
               دروس پزشکی، آمادگی برای علوم پایه، جمع‌بندی هوشمند و خیلی چیزهای
               دیگر منتظر شما هستند.
             </p>
-            <a className="button button--primary" href="#products">
+            {/*
+             * CTA هیرو ⇒ صفحهٔ ثبت‌نام (`#auth/register`). قبلاً لنگرِ `#products`
+             * بود که روی صفحهٔ اصلی هیچ عنصری با آن شناسه وجود ندارد (تلهٔ ۱۰).
+             */}
+            <a
+              className="button button--primary"
+              href="#auth/register"
+              onClick={(event) => openAuth(event, 'register')}
+            >
               از الان شروع کنید
             </a>
           </div>
@@ -2177,7 +1058,11 @@ function App() {
                   </div>
                 ))}
               </div>
-              <a className="button button--blue" href="#products">
+              <a
+                className="button button--blue"
+                href="#auth/register"
+                onClick={(event) => startFromLanding(event)}
+              >
                 از الان شروع کنید
               </a>
             </div>
@@ -2256,11 +1141,27 @@ function App() {
         </section>
       </main>
 
-      <SiteFooter />
+      <SiteFooter onProductLink={startFromLanding} />
 
       <MotionStrip />
     </div>
   );
 }
 
-export default App;
+/*
+ * ریشهٔ اپ.
+ *
+ * `App` همان درختِ مسیرهاست و دست‌نخورده می‌ماند؛ پوستهٔ ایستر اگ فقط یک
+ * خواهرِ آن است. این‌طوری activation در همهٔ مسیرها (صفحهٔ اصلی، مقالات،
+ * تعرفه‌ها، محصولات، و کلِ لایهٔ داشبورد) کار می‌کند بدون آنکه یک خط به
+ * منطقِ routing اضافه شود. خودِ پوسته وقتی بسته است `null` برمی‌گرداند،
+ * پس هیچ گره‌ای به DOM اضافه نمی‌کند.
+ */
+export default function TapeshApp() {
+  return (
+    <>
+      <App />
+      <TapeshEasterEgg />
+    </>
+  );
+}
