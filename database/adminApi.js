@@ -117,6 +117,20 @@ import {
   writeSettings,
 } from './contentStore.js';
 
+/*
+ * لایهٔ قرارداد API (فاز ۷):
+ *   `ADMIN_STATUS_BY_CODE` مرجع یگانهٔ نگاشت خطا→وضعیت است.
+ *   `guardPublicOutput` گارد نشت فیلد حساس در مرز خروجی عمومی است.
+ *   `assertInputValid` دروازهٔ **ورودی** است — همان قرارداد خطا
+ *   (`VALIDATION_ERROR` + `fields`) که `fail()` و `ADMIN_STATUS_BY_CODE`
+ *   از قبل برای آن وضعیت ۴۰۰ تعریف کرده‌اند. سیم‌کشی فعلاً فقط روی
+ *   مسیرهای یادداشت است (نمونهٔ اثباتی بند ۱ فاز ۱۲)؛ نه به‌صورت سراسری.
+ */
+import { ADMIN_STATUS_BY_CODE } from './apiContract/errorModel.js';
+import { guardPublicOutput } from './apiContract/dtos.js';
+import { assertInputValid } from './apiContract/input.js';
+import { enforceInputContract } from './apiContract/inputGateway.js';
+
 /* فهرست مجاز و سقف بارگذاری ویدیو/زیرنویس — از همان کاتالوگی که پنل می‌خواند */
 import {
   INTL_DEFAULT_MAX_VIDEO_MB,
@@ -256,31 +270,65 @@ import {
   updateContent,
 } from './mediaStore.js';
 
+import {
+  addFeedback,
+  addReply,
+  allowFeedback,
+  listFeedback,
+  listRepliesForUser,
+  markRepliesRead,
+  removeFeedback,
+  removeRepliesForTarget,
+  repliesByTarget,
+  setFeedbackStatus,
+} from './feedbackStore.js';
+
+import {
+  listQuestionReports,
+  removeQuestionReport,
+  setQuestionReportStatus,
+} from './examStore.js';
+
+import { USER_SESSION_COOKIE, getUserSession } from './userSessions.js';
+import { findUserById } from './usersStore.js';
+
+/*
+ * تکمیل هویت فرستنده از سوابق کاربران سایت.
+ *
+ * بعضی گزارش‌ها (مثل گزارش ایراد سؤال «آزمون‌های هماهنگ») فقط `userId` دارند و
+ * نام/نام کاربری روی خودشان نیست؛ و بعضی گزارش‌های قدیمی‌تر قبل از فرستادن هویت
+ * از سمت کلاینت ثبت شده‌اند. اینجا از `users.json` نگاه می‌کنیم تا پنل به‌جای
+ * «کاربر تپش» نام و نام کاربری واقعی را نشان بدهد.
+ */
+function enrichSender(item) {
+  if (!item?.userId || (item.userName && item.userUsername)) return item;
+
+  const user = findUserById(item.userId);
+  if (!user) return item;
+
+  const profile = user.profile ?? {};
+  const fullName = [profile.firstName, profile.lastName].filter(Boolean).join(' ').trim();
+
+  return {
+    ...item,
+    userName: item.userName || fullName || profile.username || user.phone || null,
+    userUsername: item.userUsername || profile.username || null,
+    userPhone: item.userPhone || user.phone || null,
+  };
+}
+
 export const SESSION_COOKIE = 'tapesh_admin_session';
 export const CSRF_HEADER = 'x-tapesh-csrf';
 
-const STATUS_BY_CODE = {
-  VALIDATION_ERROR: 400,
-  INVALID_CREDENTIALS: 401,
-  UNAUTHENTICATED: 401,
-  FORBIDDEN: 403,
-  NOT_FOUND: 404,
-  CONFLICT: 409,
-  UNSUPPORTED_MEDIA_TYPE: 415,
-  PAYLOAD_TOO_LARGE: 413,
-  RATE_LIMITED: 429,
-  /* انتشار در کانال‌ها — خطای سرویس بیرونی، نه خطای درخواست کاربر */
-  PUBLISH_NO_TOKEN: 409,
-  PUBLISH_UNAUTHORIZED: 502,
-  /* ۴۰۳ یعنی «دسترسی ندارد» (ربات ادمین نیست) — نه توکن باطل */
-  PUBLISH_FORBIDDEN: 502,
-  PUBLISH_UNREACHABLE: 502,
-  PUBLISH_TIMEOUT: 504,
-  PUBLISH_FAILED: 502,
-  INTERNAL_ERROR: 500,
-};
-
 const MAX_BODY_BYTES = 12 * 1024 * 1024; /* سقف کلی؛ سقف واقعی فایل از settings خوانده می‌شود */
+
+/*
+ * مدل خطای متمرکز (فاز ۷) — `database/apiContract/errorModel.js`.
+ * مقادیر **عیناً** همان جدول محلی قبلی‌اند؛ فقط مرجع یکی شد تا افزودن کد
+ * تازه یا تغییر وضعیت در یک نقطه انجام شود. (شاهد: تست `apiContract.test.mjs`)
+ */
+const STATUS_BY_CODE = ADMIN_STATUS_BY_CODE;
+
 
 function fail(code, message, fields) {
   throw Object.assign(new Error(message), { code, fields });
@@ -320,23 +368,35 @@ function sendError(response, error) {
   });
 }
 
+/*
+ * بدنهٔ درخواست را به‌صورت **بایت** جمع می‌کنیم و تنها در پایان یک‌جا به UTF-8
+ * رمزگشایی می‌کنیم.
+ *
+ * چرا: `raw += chunk` روی Buffer، هر بستهٔ شبکه را جداگانه `toString('utf8')`
+ * می‌کند و هر نویسهٔ چندبایتی فارسی که وسط دو بسته بیفتد به U+FFFD (�) تبدیل
+ * می‌شود. بدنهٔ درسنامهٔ جامع حدود ۲۰۰ کیلوبایت است و در چند بسته می‌رسد، پس
+ * هر ذخیرهٔ پنل چند نویسه از متن را خراب می‌کرد — بی‌صدا و بدون هیچ خطایی.
+ * سقف حجم هم با شمارش بایت درست می‌ماند (نه شمارش نویسه).
+ */
 function readBody(request, limit = MAX_BODY_BYTES) {
   return new Promise((resolvePromise, rejectPromise) => {
-    let raw = '';
+    const chunks = [];
     let size = 0;
 
     request.on('data', (chunk) => {
-      size += chunk.length;
+      const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+      size += buffer.length;
       if (size > limit) {
         request.destroy();
         rejectPromise(Object.assign(new Error('حجم درخواست بیش از حد مجاز است'), { code: 'PAYLOAD_TOO_LARGE' }));
         return;
       }
-      raw += chunk;
+      chunks.push(buffer);
     });
 
     request.on('end', () => {
-      if (!raw) return resolvePromise({});
+      if (!chunks.length) return resolvePromise({});
+      const raw = Buffer.concat(chunks).toString('utf8');
       try {
         const parsed = JSON.parse(raw);
         resolvePromise(parsed && typeof parsed === 'object' ? parsed : {});
@@ -440,7 +500,28 @@ const ANALYTICS_ROUTES = [
   ['ai', 'analytics.read', aiSection],
 ];
 
-const ANALYTICS_SECTION_MAP = Object.fromEntries(ANALYTICS_ROUTES.map(([name, , handler]) => [name, handler]));
+/*
+ * مسیرهایی که «مجوز خاصی نمی‌خواهند» — فقط ورود لازم است.
+ *
+ * چرا یک فهرست صریح: پیش از این، هر Route با `permission = null` بی‌صدا از
+ * مجوزدهی رد می‌شد. یعنی افزودن یک Route حساس تازه با `null` آن را به
+ * «فقط ورود کافی است» تبدیل می‌کرد — بی‌آنکه کسی متوجه شود. با این فهرست،
+ * `null` یعنی «بسته» مگر اینکه صریحاً اینجا اعلام شده باشد (deny-by-default).
+ */
+const AUTHENTICATED_ONLY_PATHS = new Set([
+  '/api/admin/auth/login',
+  '/api/admin/auth/logout',
+  '/api/admin/auth/me',
+  '/api/admin/auth/password',
+  '/api/admin/meta',
+]);
+
+/*
+ * کلیدهای تنظیماتی که تغییرشان «امنیت» را عوض می‌کند: پنجرهٔ نشست، سقف تلاش
+ * ورود، مدت قفل، و سقف حجم بارگذاری. `settings.update` عمومی برای اینها کافی
+ * نیست؛ وگرنه کسی که فقط تنظیمات سایت را می‌نویسد می‌تواند قفل ورود را باز کند.
+ */
+const PRIVILEGED_SETTINGS_KEYS = ['security', 'media'];
 
 /* یک context برای هر درخواست — خواندن فایل‌ها تکرار نمی‌شود */
 function analyticsContext(ctx) {
@@ -539,6 +620,8 @@ const ROUTES = [
     const result = changeOwnPassword(ctx.admin.id, {
       currentPassword: ctx.body.currentPassword,
       nextPassword: ctx.body.nextPassword,
+      /* نشست فعلی زنده می‌ماند؛ بقیهٔ نشست‌های همین حساب باطل می‌شوند */
+      keepToken: parseCookies(ctx.request)[SESSION_COOKIE] ?? '',
     });
 
     if (result.error === 'invalid-credentials') fail('INVALID_CREDENTIALS', 'رمز عبور فعلی نادرست است');
@@ -779,6 +862,16 @@ const ROUTES = [
     status: ctx.query.get('status') ?? 'all',
     page: ctx.query.get('page') ?? 1,
     perPage: ctx.query.get('perPage') ?? 20,
+  })],
+
+  /* انتخاب از بانک تست برای «تست‌های این بخش» هر واحد — پیش از `:id` می‌آید
+     تا مسیر ثابت با پارامتر درس اشتباه گرفته نشود. */
+  ['GET', '/api/admin/comprehensive/test-bank', 'comprehensive.read', async (ctx) => searchTestBankQuestions({
+    search: ctx.query.get('search') ?? '',
+    subjectId: ctx.query.get('subjectId') ?? '',
+    topicPath: ctx.query.get('topicPath') ?? '',
+    difficulty: ctx.query.get('difficulty') ?? 'all',
+    limit: ctx.query.get('limit') ?? 60,
   })],
 
   ['GET', '/api/admin/comprehensive/:id', 'comprehensive.read', async (ctx) => {
@@ -1132,7 +1225,14 @@ const ROUTES = [
     return { deleted: banner.id };
   }],
 
-  /* مدیران */
+  /*
+   * مدیران پنل.
+   *
+   * مجوز Route فقط «اجازهٔ ورود به این عملیات» است؛ **سطح نقش** را خودِ لایهٔ
+   * دامنه تعیین می‌کند. مثلاً `users.create` اجازهٔ ساخت «مدیر» می‌دهد ولی برای
+   * ساخت «مدیر کل» مجوز جداگانهٔ `users.superadmin.manage` لازم است. فیلد
+   * `permissions` از Client هرگز خوانده نمی‌شود؛ مجوزها فقط از `ROLES` می‌آیند.
+   */
   ['GET', '/api/admin/users', 'users.read', async (ctx) => listAdmins({
     search: ctx.query.get('search') ?? '',
     role: ctx.query.get('role') ?? 'all',
@@ -1155,18 +1255,22 @@ const ROUTES = [
     if (!admin) fail('NOT_FOUND', 'کاربر پیدا نشد');
     logActivity({
       admin: ctx.admin, action: 'admin.updated', entityType: 'admin',
-      entityId: admin.id, entityLabel: admin.username, metadata: { role: admin.role },
+      entityId: admin.id, entityLabel: admin.username,
+      /* فقط اینکه رمز عوض شد یا نه — نه مقدار و نه طولش */
+      metadata: { role: admin.role, passwordChanged: Boolean(ctx.body?.password), revokedSessions: admin.revokedSessions ?? 0 },
       ip: clientIp(ctx.request),
     });
     return { admin };
   }],
 
   ['DELETE', '/api/admin/users/:id', 'users.delete', async (ctx) => {
-    const admin = deleteAdmin(ctx.params.id, ctx.admin.id);
+    const admin = deleteAdmin(ctx.params.id, ctx.admin);
     if (!admin) fail('NOT_FOUND', 'کاربر پیدا نشد');
     logActivity({
       admin: ctx.admin, action: 'admin.deleted', entityType: 'admin',
-      entityId: admin.id, entityLabel: admin.username, ip: clientIp(ctx.request),
+      entityId: admin.id, entityLabel: admin.username,
+      metadata: { role: admin.role, revokedSessions: admin.revokedSessions ?? 0 },
+      ip: clientIp(ctx.request),
     });
     return { deleted: admin.id };
   }],
@@ -1186,6 +1290,10 @@ const ROUTES = [
   }],
 
   ['POST', '/api/admin/notes', 'notes.create', async (ctx) => {
+    /* دروازهٔ ورودی — `patch` چون `id`/`authorId`/`createdAt` سمت سرور ساخته
+       می‌شوند و در بدنهٔ درخواست نیستند. فقط فیلدهای **ارسال‌شده** سنجیده
+       می‌شوند: نوع، enum و نبود کلید ناشناخته. قرارداد خطا عوض نمی‌شود. */
+    assertInputValid('note', ctx.body, { mode: 'patch' });
     const note = createNote(ctx.body, ctx.admin);
     logActivity({
       admin: ctx.admin, action: 'note.created', entityType: 'note',
@@ -1197,6 +1305,7 @@ const ROUTES = [
   }],
 
   ['PUT', '/api/admin/notes/:id', 'notes.update', async (ctx) => {
+    assertInputValid('note', ctx.body, { mode: 'patch' });
     const note = updateNote(ctx.params.id, ctx.body, ctx.admin);
     if (!note) fail('NOT_FOUND', 'یادداشت پیدا نشد');
     logActivity({
@@ -1236,9 +1345,25 @@ const ROUTES = [
 
   ['PUT', '/api/admin/settings', 'settings.update', async (ctx) => {
     const before = readSettings();
-    const settings = writeSettings(ctx.body);
+    const patch = ctx.body ?? {};
 
-    const changedKeys = Object.keys(ctx.body ?? {}).filter(
+    /*
+     * تنظیمات امنیتی و سقف‌های بارگذاری، مجوز جدا می‌خواهند.
+     *
+     * فقط «تغییر واقعی» سنجیده می‌شود نه «حضور کلید در بدنه»: پنل کل سند تنظیمات
+     * را یک‌جا می‌فرستد، پس اگر صرفِ حضور `security` کافی بود، یک مدیر معمولی
+     * نمی‌توانست حتی نام سایت را هم ذخیره کند. فرستادن مقدار یکسان، تغییر نیست.
+     */
+    const changesPrivileged = PRIVILEGED_SETTINGS_KEYS.some(
+      (key) => key in patch && JSON.stringify(patch[key]) !== JSON.stringify(before[key]),
+    );
+    if (changesPrivileged && !hasPermission(ctx.admin, 'settings.security.manage')) {
+      fail('FORBIDDEN', 'تغییر تنظیمات امنیتی و سقف‌های بارگذاری مجوز جداگانه می‌خواهد');
+    }
+
+    const settings = writeSettings(patch);
+
+    const changedKeys = Object.keys(patch).filter(
       (key) => JSON.stringify(before[key]) !== JSON.stringify(settings[key]),
     );
 
@@ -1259,6 +1384,96 @@ const ROUTES = [
     page: ctx.query.get('page') ?? 1,
     perPage: ctx.query.get('perPage') ?? 15,
   })],
+
+  /* ─────────── بازخورد و گزارش‌های کاربران (پیشنهاد/انتقاد/گزارش ایراد) ───────────
+   *
+   * منبع هر آیتم (`source`) دقیق است تا پنل بداند گزارش از کجا آمده:
+   *   support · test-bank · coordinated-exam · comprehensive · micro ·
+   *   question-lab · intl-courses
+   * گزارش‌های ایراد سؤال آزمون‌های هماهنگ در examStore می‌نشینند و همین‌جا با
+   * پیشوند `exam:` ادغام می‌شوند تا تغییر وضعیت و حذف‌شان به همان انبار برگردد.
+   * پاسخ‌های مدیر برای همهٔ منابع در feedbackStore می‌نشیند (کلید: شناسهٔ نمایشی).
+   */
+
+  ['GET', '/api/admin/feedback', 'feedback.read', async () => {
+    const examItems = listQuestionReports().map((report) => ({
+      id: `exam:${report.id}`,
+      source: 'coordinated-exam',
+      subject: report.reason,
+      category: 'گزارش ایراد سؤال',
+      message: report.note ?? '',
+      userId: report.userId,
+      /* نشست ناشناس آزمونک (anon-…) نام ندارد؛ صریح «مهمان» نشان داده می‌شود */
+      userName: report.userId?.startsWith('anon-') ? 'مهمان' : null,
+      userUsername: null,
+      userPhone: null,
+      meta: { questionId: report.questionId, examId: report.examId, attemptId: report.attemptId },
+      createdAt: report.createdAt,
+      status: report.status,
+    }));
+
+    const replies = repliesByTarget();
+    const items = [...listFeedback(), ...examItems]
+      /* منابع قدیمی ذخیره‌شده هم به نام تازه نگاشت می‌شوند */
+      .map((item) => enrichSender({
+        ...item,
+        source: item.source === 'exam' ? 'coordinated-exam' : item.source,
+        replies: replies[item.id] ?? [],
+      }))
+      .sort((a, b) => b.createdAt - a.createdAt);
+
+    return { items };
+  }],
+
+  /* پاسخ مدیر به یک گزارش — همان پاسخ در اعلان‌های کاربر دیده می‌شود */
+  ['POST', '/api/admin/feedback/:id/reply', 'feedback.manage', async (ctx) => {
+    const id = ctx.params.id;
+    let subject = '';
+    let source = '';
+    let userId = null;
+
+    if (id.startsWith('exam:')) {
+      const report = listQuestionReports().find((row) => `exam:${row.id}` === id);
+      if (!report) fail('NOT_FOUND', 'گزارش پیدا نشد');
+      subject = report.reason;
+      source = 'coordinated-exam';
+      userId = report.userId;
+    } else {
+      const item = listFeedback().find((row) => row.id === id);
+      if (!item) fail('NOT_FOUND', 'گزارش پیدا نشد');
+      subject = item.subject;
+      source = item.source;
+      userId = item.userId;
+    }
+
+    const reply = addReply({ targetId: id, subject, source, userId, text: ctx.body?.text, admin: ctx.admin });
+    if (!reply) fail('VALIDATION_ERROR', 'متن پاسخ خالی است');
+    return { reply };
+  }],
+
+  ['POST', '/api/admin/feedback/:id/status', 'feedback.manage', async (ctx) => {
+    const status = ctx.body?.status === 'resolved' ? 'resolved' : 'open';
+
+    if (ctx.params.id.startsWith('exam:')) {
+      const report = setQuestionReportStatus(ctx.params.id.slice(5), status);
+      if (!report) fail('NOT_FOUND', 'گزارش پیدا نشد');
+      return { ok: true };
+    }
+
+    const item = setFeedbackStatus(ctx.params.id, status);
+    if (!item) fail('NOT_FOUND', 'گزارش پیدا نشد');
+    return { item };
+  }],
+
+  ['DELETE', '/api/admin/feedback/:id', 'feedback.manage', async (ctx) => {
+    const removed = ctx.params.id.startsWith('exam:')
+      ? removeQuestionReport(ctx.params.id.slice(5))
+      : removeFeedback(ctx.params.id);
+    if (!removed) fail('NOT_FOUND', 'گزارش پیدا نشد');
+    /* پاسخ‌های همان گزارش هم پاک می‌شوند تا در اعلان‌های کاربر یتیم نمانند */
+    removeRepliesForTarget(ctx.params.id);
+    return { ok: true };
+  }],
 
   /* ─────────────────── انتشار در کانال‌های پیام‌رسان ───────────────────
    *
@@ -2208,10 +2423,12 @@ const ROUTES = [
 
   /* ───────────────────────── مرکز تحلیل ───────────────────────── */
 
-  /* منابع داده — شفاف‌ترین بخش: کدام منبع وصل است و کدام نه */
+  /* منابع داده — شفاف‌ترین بخش: کدام منبع وصل است و کدام نه.
+     `permissions` همان آرایهٔ کاتالوگ است (قرارداد `/meta`)، نه شیء ساخته‌شده
+     از پخش‌کردن آرایه که کلیدهای عددی می‌ساخت. */
   ['GET', '/api/admin/analytics/sources', 'analytics.read', async () => ({
     sources: dataSources(),
-    permissions: { ...PERMISSIONS },
+    permissions: PERMISSIONS,
   })],
 
   /* Monitoring API — برای ابزارهای مانیتورینگ بیرونی */
@@ -2242,14 +2459,34 @@ const ROUTES = [
     },
   ]),
 
-  /* دادهٔ خروجی (Export) — یک پاسخ تخت برای CSV/Excel سمت کلاینت */
+  /*
+   * دادهٔ خروجی (Export) — یک پاسخ تخت برای CSV/Excel سمت کلاینت.
+   *
+   * `analytics.export` فقط یعنی «اجازهٔ گرفتن خروجی»، نه «اجازهٔ دیدن هر بخش».
+   * پیش از این، بخش خواسته‌شده هیچ مجوزی چک نمی‌کرد؛ یعنی نقشی که
+   * `analytics.users.read` نداشت می‌توانست همان دادهٔ کاربران را از
+   * `?section=users` بیرون بکشد. اکنون مجوز خودِ بخش هم لازم است.
+   */
   ['GET', '/api/admin/analytics/export', 'analytics.export', async (ctx) => {
     const context = analyticsContext(ctx);
     const section = String(ctx.query.get('section') ?? 'traffic');
-    const handler = ANALYTICS_SECTION_MAP[section];
-    if (!handler) fail('VALIDATION_ERROR', 'بخش خروجی نامعتبر است');
+    const entry = ANALYTICS_ROUTES.find(([name]) => name === section);
+    if (!entry) fail('VALIDATION_ERROR', 'بخش خروجی نامعتبر است');
 
-    const data = await handler(context, { secure: isSecureRequest(ctx.request) });
+    if (!hasPermission(ctx.admin, entry[1])) {
+      fail('FORBIDDEN', 'برای خروجی‌گرفتن از این بخش دسترسی ندارید');
+    }
+
+    const data = await entry[2](context, { secure: isSecureRequest(ctx.request) });
+
+    /* خروجی دادهٔ حساس، خودش رویداد حساس است و باید قابل ردیابی باشد */
+    logActivity({
+      admin: ctx.admin, action: 'analytics.exported', entityType: 'analytics',
+      entityId: section, entityLabel: `خروجی بخش ${section}`,
+      metadata: { section, range: context.resolved },
+      ip: clientIp(ctx.request),
+    });
+
     return { section, range: context.resolved, data };
   }],
 
@@ -2407,13 +2644,71 @@ export async function handleApi(request, response) {
         return true;
       }
 
+      /* بازخورد و گزارش کاربران سایت — فرم پشتیبانی، گزارش ایراد سؤال و…
+         بدون احراز هویت ادمین؛ هویت کاربر سایت (اگر نشست داشته باشد) ضمیمه می‌شود. */
+      if (pathname === '/api/public/feedback') {
+        if (request.method !== 'POST') fail('VALIDATION_ERROR', 'این مسیر فقط POST می‌پذیرد');
+
+        const gate = allowFeedback(clientIp(request));
+        if (!gate.allowed) {
+          fail('RATE_LIMITED', `درخواست بیش از حد مجاز؛ ${gate.retryAfter} ثانیه دیگر تلاش کنید`);
+        }
+
+        const body = await readBody(request, 64 * 1024);
+        const session = getUserSession(parseCookies(request)[USER_SESSION_COOKIE]);
+        /* اولویت هویت: سشن واقعی کاربر → هویت سبک کلاینتی → سشن مهمان */
+        const clientUser = body?.user && typeof body.user === 'object' ? body.user : null;
+        const identity = session?.user && !session.user.anonymous
+          ? session.user
+          : (clientUser ?? session?.user ?? null);
+
+        const result = addFeedback({ ...body, user: identity });
+        if (result.error) fail('VALIDATION_ERROR', 'متن گزارش خالی است');
+
+        ok(response, { item: result.item }, 201);
+        return true;
+      }
+
+      /*
+       * پاسخ‌های مدیر به گزارش‌های همین کاربر — ورودی لایهٔ «اعلان‌ها»ی سایت.
+       * هویت: سشن کاربر سایت، وگرنه شناسهٔ سبکِ کلاینتی (`userId`) که همان
+       * شناسهٔ تولیدشده در مرورگر خود کاربر است و فقط پاسخ‌های خودش را برمی‌گرداند.
+       */
+      if (pathname === '/api/public/feedback/replies' || pathname === '/api/public/feedback/replies/read') {
+        const isRead = pathname.endsWith('/read');
+        const session = getUserSession(parseCookies(request)[USER_SESSION_COOKIE]);
+
+        let userId = session?.user?.id ?? null;
+        if (!userId && isRead) {
+          if (request.method !== 'POST') fail('VALIDATION_ERROR', 'این مسیر فقط POST می‌پذیرد');
+          const body = await readBody(request, 8 * 1024);
+          userId = body?.userId ?? null;
+        } else if (!userId) {
+          userId = url.searchParams.get('userId');
+        }
+
+        if (!userId) fail('UNAUTHENTICATED', 'برای دیدن پاسخ‌ها باید وارد شوید');
+        userId = String(userId).slice(0, 64);
+
+        if (isRead) {
+          if (request.method !== 'POST') fail('VALIDATION_ERROR', 'این مسیر فقط POST می‌پذیرد');
+          ok(response, { marked: markRepliesRead(userId) });
+          return true;
+        }
+
+        if (request.method !== 'GET') fail('VALIDATION_ERROR', 'این مسیر فقط GET می‌پذیرد');
+        ok(response, { items: listRepliesForUser(userId) });
+        return true;
+      }
+
       for (const [pattern, handler] of PUBLIC_ROUTES) {
         const params = matchRoute(pathname, pattern);
         if (!params) continue;
         if (request.method !== 'GET') fail('NOT_FOUND', 'مسیر پیدا نشد');
 
         const data = await handler({ params, query: url.searchParams, body: {}, request, response });
-        ok(response, data);
+        /* گارد نشت (فاز ۷): روی دادهٔ سالم بی‌اثر است؛ فقط در نشت واقعی پرتاب می‌کند */
+        ok(response, guardPublicOutput(`GET ${pattern}`, data));
         return true;
       }
       fail('NOT_FOUND', 'مسیر پیدا نشد');
@@ -2504,11 +2799,27 @@ export async function handleApi(request, response) {
       }
     }
 
+    /*
+     * deny-by-default: مسیری که مجوز صریح ندارد و در فهرست «فقط ورود لازم است»
+     * هم نیست، بسته است. اگر کسی Route حساسی را با `null` اضافه کند، همین‌جا
+     * رد می‌شود — نه اینکه بی‌صدا برای هر مدیر واردشده باز شود.
+     */
+    if (!permission && !AUTHENTICATED_ONLY_PATHS.has(pattern)) {
+      fail('FORBIDDEN', 'این مسیر مجوز مشخصی ندارد');
+    }
+
     if (permission && !hasPermission(active.admin, permission)) {
       fail('FORBIDDEN', 'برای این عملیات دسترسی ندارید');
     }
 
     const body = MUTATING.has(request.method) ? await readBody(request) : {};
+
+    /*
+     * دروازهٔ قرارداد ورودی (فاز ۴) — **پیش از** منطق کسب‌وکار و در یک نقطهٔ
+     * مرکزی. مسیر نوشتن بدون قرارداد اینجا رد می‌شود (fail-closed)، نه اینکه
+     * بی‌صدا اجرا شود. قرارداد خطا همان `VALIDATION_ERROR` موجود است.
+     */
+    enforceInputContract(request.method, pattern, body);
 
     const data = await handler({
       params,

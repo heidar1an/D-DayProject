@@ -23,11 +23,13 @@
  */
 
 import { randomBytes, randomUUID, scryptSync, timingSafeEqual } from 'node:crypto';
-import { createWriteStream, existsSync, mkdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from 'node:fs';
+import { createWriteStream, existsSync, mkdirSync, readFileSync, renameSync, statSync, unlinkSync, writeFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { buildExcerpt, htmlToText, sanitizeHtml } from './sanitizeHtml.js';
+import { assertAdminCredentialUsable } from './adminCredentialPolicy.js';
 /*
  * سه ماژول دادهٔ خالص پروژه که seed، «انتخاب از بانک تست» و تبدیل متن را تغذیه می‌کنند.
  * هیچ‌کدام وابستگی بیرونی ندارند (فقط دادهٔ ثابت و توابع خالص‌اند)، پس شرط «سرور بدون
@@ -37,11 +39,13 @@ import { MICRO_COURSE_SOURCES, MICRO_SUBJECT_OPTIONS } from '../src/data/micro/r
 import { blocksToHtml } from '../src/data/micro/blocksToHtml.js';
 import {
   DIFFICULTIES as TEST_BANK_DIFFICULTIES,
-  QUESTIONS as TEST_BANK_QUESTIONS,
   QUESTION_TYPES as TEST_BANK_TYPES,
   SUBJECTS as TEST_BANK_SUBJECTS,
   TRACKS as TEST_BANK_TRACKS,
 } from '../src/services/testBank/mockData.js';
+/* بانک کامل (با کلید پاسخ) — فایل سرورمحور. از mockData نمی‌آید چون آن ماژول
+   در Bundle مرورگر می‌رود و کلید پاسخ نباید آنجا باشد (PHASE 2). */
+import { TEST_BANK_SEED_QUESTIONS as TEST_BANK_QUESTIONS } from './testBankSeed.mjs';
 import { CARD_IMAGE_MIME_EXTENSIONS, TAPESH_CARDS, TAPESH_DECKS } from '../src/services/flashcards/mockData.js';
 import { REFERENCE_CATALOG, REFERENCE_CONTENTS, referenceBlocksToHtml } from '../src/services/references/referenceCatalog.js';
 /* کاتالوگ خالص دوره‌های بین‌الملل — دادهٔ ثابت بدون تصویر (نود نمی‌تواند تصویر import کند) */
@@ -75,7 +79,10 @@ export { sanitizeHtml };
 
 export const PERMISSIONS = [
   'articles.create', 'articles.read', 'articles.update', 'articles.delete', 'articles.publish',
-  'categories.create', 'categories.update', 'categories.delete',
+  /* `categories.read` از قبل در نقش «نویسنده» استفاده می‌شد ولی در این فهرست
+     نبود؛ نتیجه‌اش این بود که `super-admin` (که همهٔ این فهرست را می‌گیرد) از
+     نویسنده کم‌دسترسی‌تر می‌شد. اکنون اعلام‌شده تا فهرست، مرجع کامل باشد. */
+  'categories.create', 'categories.read', 'categories.update', 'categories.delete',
   'pages.create', 'pages.read', 'pages.update', 'pages.delete',
   /* کتابخانهٔ فلش‌کارت تپش — ساخت/ویرایش دک و کارت، انتشار در کتابخانهٔ عمومی */
   'flashcards.create', 'flashcards.read', 'flashcards.update', 'flashcards.delete', 'flashcards.publish',
@@ -94,18 +101,36 @@ export const PERMISSIONS = [
   'intl.read', 'intl.create', 'intl.update', 'intl.delete', 'intl.publish', 'intl.upload',
   'media.upload', 'media.read', 'media.delete',
   'banners.create', 'banners.update', 'banners.delete',
-  'users.create', 'users.read', 'users.update', 'users.delete',
+  /*
+   * مدیران پنل.
+   *
+   * `users.superadmin.manage` عمداً از `users.create`/`users.update` جدا است:
+   * داشتن مجوز «ساخت کاربر» نباید به‌صورت ضمنی یعنی «ساخت مدیر کل». هر عملیاتی
+   * که سطح اعتماد یک حساب را به `super-admin` می‌برد یا از آن پایین می‌آورد —
+   * و همچنین دست‌زدن به حسابِ یک مدیر کل (از جمله عوض‌کردن رمزش) — این مجوز را
+   * می‌خواهد.
+   */
+  'users.create', 'users.read', 'users.update', 'users.delete', 'users.superadmin.manage',
   'settings.read', 'settings.update',
+  /*
+   * تنظیمات امنیتی و سقف‌های بارگذاری — جدا از `settings.update` عمومی.
+   * `security.sessionHours` / `maxLoginAttempts` / `lockMinutes` و سقف حجم فایل،
+   * خودِ مکانیزم‌های حفاظتی‌اند؛ کسی که فقط تنظیمات سایت را می‌نویسد نباید
+   * بتواند قفلِ تلاش ورود را باز کند یا پنجرهٔ نشست را بی‌نهایت کند.
+   */
+  'settings.security.manage',
   'logs.read',
+  /* بازخورد و گزارش‌های کاربران — دیدن گزارش هر منبع و مدیریت وضعیت/حذف */
+  'feedback.read', 'feedback.manage',
   'notes.create', 'notes.read', 'notes.update', 'notes.delete',
   /* انتشار در کانال‌ها — مدیریت کانال و توکن جدا از حق ارسال است */
   'publishing.read', 'publishing.send', 'publishing.channels.manage',
   /*
-   * مرکز رسانه و فضای مجازی — هفت مجوز مستقل.
+   * مرکز رسانه و فضای مجازی — شش مجوز مستقل (ورود به مرکز با `media.read` است
+   * که بالاتر، همراه کتابخانهٔ رسانه، اعلام شده).
    * تفکیک عمدی است: کسی که محتوا می‌نویسد با کسی که تأیید می‌کند و کسی که
    * توکن اپلیکیشن‌ها را می‌بیند یکی نیست.
    */
-  'media.read',              /* ورود به مرکز، داشبورد، تحلیل، کتابخانه و گزارش */
   'media.content.manage',    /* ساخت/ویرایش/حذف محتوا و کمپین */
   'media.content.review',    /* تأیید یا درخواست اصلاح در گردش کار */
   'media.content.publish',   /* زمان‌بندی، انتشار و تلاش دوباره */
@@ -129,6 +154,21 @@ export const PERMISSIONS = [
  */
 export const SENSITIVE_ANALYTICS = ['analytics.users.read', 'analytics.revenue.read', 'analytics.security.read', 'analytics.alerts.manage'];
 
+/*
+ * مجوزهایی که نقش `admin` نباید داشته باشد، حتی با اینکه در `PERMISSIONS` هست.
+ *
+ * قاعدهٔ بنیادین: داشتن دسترسی به یک قابلیت، به‌صورت ضمنی یعنی داشتن دسترسی به
+ * قابلیت حساس‌ترِ دیگر نیست. این فهرست جاهایی است که آن قاعده می‌شکست.
+ */
+export const ADMIN_DENIED_PERMISSIONS = [
+  /* حذف کاربر پنل — از قبل هم بسته بود */
+  'users.delete',
+  /* ارتقا/تنزل «مدیر کل» — وگرنه `users.create` یعنی ساخت مدیر کل */
+  'users.superadmin.manage',
+  /* تنظیمات امنیتی — وگرنه `settings.update` یعنی بازکردن قفل ورود */
+  'settings.security.manage',
+];
+
 export const ROLES = {
   'super-admin': {
     id: 'super-admin',
@@ -139,9 +179,9 @@ export const ROLES = {
   admin: {
     id: 'admin',
     label: 'مدیر',
-    description: 'مدیریت محتوا و کاربران + تحلیل عمومی؛ بدون دادهٔ مالی و امنیتی',
+    description: 'مدیریت محتوا و کاربران + تحلیل عمومی؛ بدون دادهٔ مالی، امنیتی و بدون ارتقا به مدیر کل',
     permissions: PERMISSIONS.filter(
-      (permission) => permission !== 'users.delete' && !SENSITIVE_ANALYTICS.includes(permission),
+      (permission) => !ADMIN_DENIED_PERMISSIONS.includes(permission) && !SENSITIVE_ANALYTICS.includes(permission),
     ),
   },
   editor: {
@@ -161,8 +201,9 @@ export const ROLES = {
       'media.upload', 'media.read', 'media.delete',
       'notes.create', 'notes.read', 'notes.update', 'notes.delete',
       'publishing.read', 'publishing.send',
-      /* مرکز رسانه: می‌نویسد و منتشر می‌کند، ولی تأیید و کلید API دستش نیست */
-      'media.read', 'media.content.manage', 'media.content.publish', 'media.ops.manage',
+      /* مرکز رسانه: می‌نویسد و منتشر می‌کند، ولی تأیید و کلید API دستش نیست.
+         `media.read` اینجا تکرار نمی‌شود — بالاتر، همراه کتابخانهٔ رسانه، آمده. */
+      'media.content.manage', 'media.content.publish', 'media.ops.manage',
       'analytics.read',
     ],
   },
@@ -249,30 +290,186 @@ const files = {
   ...Object.fromEntries(COLLECTIONS.map((name) => [name, resolve(contentDir, `${name}.json`)])),
 };
 
+/** نگاشت معکوس «مسیر فایل → نام مجموعه» — ناظر مسیر نوشتن به آن نیاز دارد. */
+const collectionOfFile = new Map(
+  Object.entries(files).map(([name, path]) => [path, name]),
+);
+
 function ensureDir(path) {
   if (!existsSync(path)) mkdirSync(path, { recursive: true });
 }
 
+/*
+ * ساخت فایل در صورت نبودن.
+ *
+ * ⚠️ `fallback` می‌تواند یک **thunk** باشد و `ensureStore` همهٔ seedها را همین‌طور
+ * پاس می‌دهد. دلیلش یک باگ کارایی اندازه‌گیری‌شده است: پیش از این
+ * `ensureFile(files.admins, seedAdmins())` نوشته می‌شد و آرگومان **همیشه** ارزیابی
+ * می‌شد — یعنی `scryptSync` داخل `seedAdmins` (~۴۰ms) و ساخت همهٔ seedهای بزرگ،
+ * در **هر** `readCollection`/`writeCollection`/`readSettings` تکرار می‌شد، حتی وقتی
+ * فایل از قبل موجود بود و نتیجه دور ریخته می‌شد. با thunk، مسیر داغ (فایل موجود)
+ * هیچ seedی نمی‌سازد.
+ */
 function ensureFile(path, fallback) {
   ensureDir(dirname(path));
-  if (!existsSync(path)) {
-    writeFileSync(path, JSON.stringify(fallback, null, 2), 'utf8');
+  if (existsSync(path)) return;
+  const value = typeof fallback === 'function' ? fallback() : fallback;
+  writeFileSync(path, JSON.stringify(value, null, 2), 'utf8');
+}
+
+/* ───────────────── تشخیص «خرابی» از «نبودن» ─────────────────
+ * پیش از این `readJson` هر خطایی را می‌بلعید و `fallback` (یعنی `[]`) برمی‌گرداند.
+ * پیامدش یک مسیر از دست‌رفتن دادهٔ خاموش بود: فایل JSON خراب (نیم‌نوشته، خالی،
+ * دست‌کاری‌شده) به‌صورت «مجموعهٔ خالی» خوانده می‌شد و اولین `writeCollection`
+ * آن را با `[]` **بازنویسی** می‌کرد — یعنی خرابی موقت به نابودی دائمی تبدیل می‌شد.
+ *
+ * رفتار تازه:
+ *   • خواندن: خرابی **بلند اعلام** می‌شود (یک‌بار در هر فایل) و در حالت پیش‌فرض
+ *     `fallback` برمی‌گردد تا سرویس degraded بماند؛ با `TAPESH_STORAGE_CORRUPT_MODE=throw`
+ *     به‌جای degraded، fail-closed می‌شود.
+ *   • نوشتن: روی فایل خراب **هرگز** نوشته نمی‌شود (`STORAGE_CORRUPT` پرتاب می‌شود).
+ *     این گارد قابل خاموش‌کردن نیست؛ تنها راه ادامه، تعمیر دستی فایل است.
+ */
+const corruptFiles = new Set();
+
+function corruptMode() {
+  return String(process.env.TAPESH_STORAGE_CORRUPT_MODE ?? '').trim().toLowerCase();
+}
+
+function parseFile(path) {
+  let raw;
+  try {
+    raw = readFileSync(path, 'utf8');
+  } catch (error) {
+    return { ok: false, error };
   }
+  try {
+    return { ok: true, value: JSON.parse(raw) };
+  } catch (error) {
+    return { ok: false, error };
+  }
+}
+
+function noteCorruption(path, error) {
+  if (corruptFiles.has(path)) return;
+  corruptFiles.add(path);
+  console.error(
+    '[contentStore] فایل دادهٔ خراب (JSON نامعتبر) — نوشتن روی آن تا تعمیر دستی متوقف است:',
+    path,
+    '—',
+    error?.message ?? 'خطای ناشناخته',
+  );
+}
+
+/** گزارش خرابی‌های دیده‌شده در این پروسه (برای تست و پایش). */
+export function storageCorruptionReport() {
+  return { corrupt: corruptFiles.size, files: [...corruptFiles] };
+}
+
+function corruptError() {
+  return Object.assign(new Error('فایل دادهٔ این مجموعه JSON معتبر نیست'), { code: 'STORAGE_CORRUPT' });
+}
+
+/** نوشتن روی فایل خراب ممنوع است؛ وگرنه خرابی موقت دائمی می‌شود. */
+function assertNotCorrupt(file) {
+  if (!existsSync(file)) return;
+  const result = parseFile(file);
+  if (result.ok) return;
+  noteCorruption(file, result.error);
+  throw corruptError();
 }
 
 function readJson(path, fallback) {
   ensureFile(path, fallback);
-  try {
-    const parsed = JSON.parse(readFileSync(path, 'utf8'));
-    return parsed ?? fallback;
-  } catch {
-    return fallback;
-  }
+  const result = parseFile(path);
+  if (result.ok) return result.value ?? fallback;
+  noteCorruption(path, result.error);
+  if (corruptMode() === 'throw') throw corruptError();
+  return fallback;
+}
+
+/*
+ * تنها دروازهٔ نوشتن روی دیسک در این ماژول.
+ *
+ * ⚠️ **همهٔ** نوشتن‌ها از اینجا می‌گذرند — چه مسیر CRUD
+ * (`writeCollection` / `writeSettings`) و چه توابع یک‌بارهٔ همگام‌سازی
+ * (`syncArticles` · `syncReferences` · `syncFlashcardDecks` ·
+ * `syncMicroCourses` · `syncIntlCatalog`). پس ناظر **فقط یک نقطهٔ تزریق**
+ * دارد و پوشش کامل است، بدون گزارش تکراری.
+ */
+/*
+ * نوشتن اتمیک: `tmp` → `rename`.
+ *
+ * همان الگویی که `usersStore` · `examStore` · `userSessions` · `feedbackStore`
+ * از قبل دارند؛ `contentStore` تنها انبار محتوایی بود که فایل را **در جای خود**
+ * بازنویسی می‌کرد. با `rename`، خواننده هرگز نسخهٔ نیم‌نوشته نمی‌بیند و اگر
+ * پروسه وسط نوشتن بمیرد یا دیسک پر شود، نسخهٔ سالم قبلی سر جایش می‌ماند.
+ *
+ * قالب خروجی عوض نمی‌شود (`JSON.stringify(value, null, 2)`، بدون newline پایانی)
+ * و مجوز فایل‌های `database/content/*.json` همیشه `0644` است، پس `rename` آن را
+ * تغییر نمی‌دهد. `rename` روی همان فایل‌سیستم ⇒ همان دایرکتوری ⇒ اتمیک.
+ */
+function writeJsonAtomic(file, value) {
+  assertNotCorrupt(file);
+  ensureDir(dirname(file));
+  const tmp = `${file}.tmp`;
+  writeFileSync(tmp, JSON.stringify(value, null, 2), 'utf8');
+  renameSync(tmp, file);
+  corruptFiles.delete(file);
 }
 
 function writeJson(path, value) {
   ensureFile(path, Array.isArray(value) ? [] : {});
-  writeFileSync(path, JSON.stringify(value, null, 2), 'utf8');
+  writeJsonAtomic(path, value);
+  observeWrite(collectionOfFile.get(path) ?? null, value);
+}
+
+/* ───────────────────── ناظر مسیر نوشتن (فاز ۶ — مرحلهٔ ۸) ─────────────────────
+ *
+ * نقطهٔ تزریق **یکی** است: `writeJson` (تنها دروازهٔ نوشتن روی دیسک). پس هر
+ * چیزی که در `database/content/` نوشته می‌شود — از مسیر CRUD پنل و از توابع
+ * یک‌بارهٔ همگام‌سازی — سنجیده می‌شود. پوشش: ۳۳ مجموعهٔ `COLLECTIONS` + `settings`.
+ *
+ * ⚠️ ناظر **دروازه نیست**:
+ *   - استثنا پرتاب نمی‌کند      → خروجی تابع تغییر نمی‌کند
+ *   - داده را تغییر نمی‌دهد      → `value` همان ارجاع قبلی می‌ماند
+ *   - نوشتن را رد نمی‌کند        → رفتار endpointها ذره‌ای عوض نمی‌شود
+ * تبدیل آن به دروازه (رد کردن نوشتن نامعتبر) یک تصمیم محصولی است و تا تأیید
+ * صریح کاربر انجام نمی‌شود.
+ *
+ * ⚠️ پیش‌فرض **خاموش** است: با خاموش بودن، ماژول مدل حتی یک بار هم بارگذاری
+ * نمی‌شود. روشن‌کردن: `TAPESH_MODEL_OBSERVE=1` (و برای لاگ: `TAPESH_MODEL_OBSERVE_LOG=1`).
+ *
+ * ⚠️ بارگذاری **تنبل و همگام** است، نه `import` ثابت و نه `import()` دینامیک:
+ *   • `import` ثابت ~۱٫۵ ثانیه به هر بارگذاری این ماژول اضافه می‌کند، حتی وقتی
+ *     کسی ناظر را نخواسته (اندازه‌گیری‌شده: models ۱۵۳۷ms، contentStore ۳۵۸۸ms).
+ *   • `import()` دینامیک نوشتنِ اولِ بعد از روشن‌شدن را از دست می‌دهد.
+ * اگر نسخهٔ نود `require(esm)` را پشتیبانی نکند، ناظر **بی‌صدا خاموش** می‌ماند
+ * و نوشتن دست‌نخورده کار می‌کند — شکست نمی‌دهد.
+ */
+let writeObserver;
+let writeObserverResolved = false;
+
+function observeWrite(collection, container) {
+  if (process.env.TAPESH_MODEL_OBSERVE !== '1') return;
+  /* فایل ناشناخته (بیرون از `files`) — چیزی برای تطبیق Schema نیست. */
+  if (!collection) return;
+
+  if (!writeObserverResolved) {
+    writeObserverResolved = true;
+    try {
+      writeObserver = createRequire(import.meta.url)('./models/observe.js').observeWrite;
+    } catch {
+      writeObserver = null;
+    }
+  }
+  if (!writeObserver) return;
+
+  try {
+    writeObserver(collection, container);
+  } catch {
+    /* شکست ناظر هرگز نباید نوشتن را بشکند. */
+  }
 }
 
 /* ─────────────────────────────── seed اولیه ─────────────────────────────── */
@@ -380,9 +577,16 @@ function verifyPassword(password, stored) {
 }
 
 function seedAdmins() {
-  /* هرگز رمز واقعی در سورس هارد‌کد نمی‌شود؛ مقدار اولیه از env می‌آید. */
+  /*
+   * هرگز رمز واقعی در سورس هارد‌کد نمی‌شود؛ مقدار اولیه از env می‌آید.
+   *
+   * فاز ۹ (fail-closed): پیش از این `process.env.TAPESH_ADMIN_PASSWORD || '0135'`
+   * بود، یعنی استقرار بدون `.env` با رمز شناخته‌شدهٔ `0135` بالا می‌آمد. حالا
+   * تصمیم در `adminCredentialPolicy` گرفته می‌شود: در production بدون رمز صریح
+   * (یا با رمز ضعیف) **خطا پرتاب می‌شود** و هیچ seedی نوشته نمی‌شود.
+   */
+  const decision = assertAdminCredentialUsable();
   const username = process.env.TAPESH_ADMIN_USERNAME || '0135';
-  const password = process.env.TAPESH_ADMIN_PASSWORD || '0135';
 
   return [
     {
@@ -390,10 +594,10 @@ function seedAdmins() {
       username,
       name: process.env.TAPESH_ADMIN_NAME || 'مدیر تپش',
       email: process.env.TAPESH_ADMIN_EMAIL || '',
-      passwordHash: hashPassword(password),
+      passwordHash: hashPassword(decision.password),
       role: 'super-admin',
       isActive: true,
-      mustChangePassword: !process.env.TAPESH_ADMIN_PASSWORD,
+      mustChangePassword: decision.mustChangePassword,
       createdAt: nowIso(),
       updatedAt: nowIso(),
       lastLoginAt: null,
@@ -576,14 +780,14 @@ function ensureStore() {
   ensureDir(contentDir);
   ensureDir(uploadsDir);
 
-  ensureFile(files.admins, seedAdmins());
-  ensureFile(files.articles, seedArticles());
+  ensureFile(files.admins, seedAdmins);
+  ensureFile(files.articles, seedArticles);
   /* دوازده مقالهٔ ثابتِ بخش «مقالات تپش» که کاربران می‌خوانند، اینجا رکورد پنل می‌شوند */
   syncArticles();
   ensureFile(files.categories, SEED_CATEGORIES);
-  ensureFile(files.pages, seedPages());
-  ensureFile(files.flashcardDecks, seedFlashcardDecks());
-  ensureFile(files.testBankQuestions, TEST_BANK_QUESTIONS.map((question) => ({
+  ensureFile(files.pages, seedPages);
+  ensureFile(files.flashcardDecks, seedFlashcardDecks);
+  ensureFile(files.testBankQuestions, () => TEST_BANK_QUESTIONS.map((question) => ({
     ...question, status: 'published', difficulty: 'medium',
     stats: { solves: 0, correctPercent: 0, optionPercents: question.options.map(() => 0), avgTimeSec: 0, difficultyIndex: 0 },
   })));
@@ -591,21 +795,21 @@ function ensureStore() {
   ensureFile(files.testBankHeartRewards, []);
   /* مجموعه‌های ثابت تپش که هنوز رکورد پنل ندارند، اینجا به رکورد تبدیل می‌شوند */
   syncFlashcardDecks();
-  ensureFile(files.microCourses, seedMicroCourses());
+  ensureFile(files.microCourses, seedMicroCourses);
   /* پروژه‌های موجود فقط فیزیولوژی را داشتند؛ درس‌های غایب رجیستری اینجا اضافه می‌شوند */
   syncMicroCourses();
   /* مراجع کاتالوگ ثابت تپش یک‌بار به رکورد پنل تبدیل می‌شوند */
-  ensureFile(files.references, seedReferences());
+  ensureFile(files.references, seedReferences);
   /* رکوردهای دور اول بدون مبحث، اینجا به مدل تازه (بخش → مبحث) مهاجرت می‌کنند */
   syncReferences();
   /* درسنامهٔ جامع دست‌نویس (آناتومی) یک‌بار به رکورد پنل تبدیل می‌شود */
-  ensureFile(files.comprehensiveCourses, seedComprehensiveCourses());
+  ensureFile(files.comprehensiveCourses, seedComprehensiveCourses);
   /* منابع و دوره‌های بین‌الملل — دورهٔ ثابتِ غایب اینجا رکورد می‌گیرد */
-  ensureFile(files.intlProviders, seedIntlProviders());
-  ensureFile(files.intlCourses, seedIntlCourses());
+  ensureFile(files.intlProviders, seedIntlProviders);
+  ensureFile(files.intlCourses, seedIntlCourses);
   syncIntlCatalog();
   ensureFile(files.media, []);
-  ensureFile(files.banners, seedBanners());
+  ensureFile(files.banners, seedBanners);
   ensureFile(files.activity, []);
   ensureFile(files.notes, []);
   ensureFile(files.publishChannels, []);
@@ -714,6 +918,20 @@ export function publicAdmin(admin) {
 const sessions = new Map();
 const loginAttempts = new Map();
 
+/*
+ * هش ساختگی برای یکسان‌کردن زمان پاسخ ورود.
+ *
+ * بدون این: حساب ناموجود یا غیرفعال بدون اجرای `scrypt` برمی‌گردد ولی حساب
+ * موجود با رمز اشتباه یک `scrypt` کامل هزینه می‌دهد. اختلاف چند ده میلی‌ثانیه‌ای
+ * قابل اندازه‌گیری است و attacker با زمان‌سنجی می‌فهمد کدام نام کاربری وجود دارد.
+ * تنبل ساخته می‌شود تا هزینهٔ راه‌اندازی سرور را بالا نبرد.
+ */
+let timingDecoyHash = '';
+function timingDecoyHashValue() {
+  if (!timingDecoyHash) timingDecoyHash = hashPassword(randomBytes(16).toString('hex'));
+  return timingDecoyHash;
+}
+
 export function findAdminByUsername(username) {
   const target = normalizeSearch(username);
   return readCollection('admins').find((admin) => normalizeSearch(admin.username) === target) ?? null;
@@ -730,9 +948,16 @@ export function authenticate({ username, password }) {
   }
 
   const admin = findAdminByUsername(username);
+  const usable = Boolean(admin && admin.isActive);
+
+  /*
+   * مسیر «حساب ناموجود/غیرفعال» هم یک `scrypt` کامل اجرا می‌کند (روی هش ساختگی)
+   * تا زمان پاسخ با مسیر «رمز اشتباه» یکی باشد. نتیجه همیشه false است.
+   */
+  const passwordMatches = verifyPassword(password, usable ? admin.passwordHash : timingDecoyHashValue());
 
   /* پیام خطای یکسان برای کاربر ناموجود و رمز اشتباه — جلوگیری از user enumeration */
-  if (!admin || !admin.isActive || !verifyPassword(password, admin.passwordHash)) {
+  if (!usable || !passwordMatches) {
     const count = attempt.count + 1;
     const limit = Number(settings.security?.maxLoginAttempts) || 8;
     loginAttempts.set(key, {
@@ -795,6 +1020,29 @@ export function getSession(token) {
 
 export function destroySession(token) {
   if (token) sessions.delete(token);
+}
+
+/*
+ * باطل‌کردن همهٔ نشست‌های یک مدیر — برای رویدادهای امنیتی.
+ *
+ * چرا لازم است، در حالی که `getSession` هر بار رکورد تازهٔ مدیر را می‌خواند:
+ * خواندن تازه فقط نقش/فعال‌بودن را بلافاصله اعمال می‌کند، ولی **توکن نشست** را
+ * باطل نمی‌کند. اگر رمز عوض شود یا حساب حذف شود، توکن دزدیده‌شده تا پایان TTL
+ * (پیش‌فرض ۱۲ ساعت) زنده می‌ماند. این تابع آن پنجره را می‌بندد.
+ *
+ * `keepToken` برای وقتی است که خودِ مدیر رمز خودش را عوض می‌کند و نمی‌خواهیم
+ * از پنل بیرون بیفتد؛ فقط نشست‌های *دیگر* همان حساب باطل می‌شوند.
+ */
+export function destroySessionsForAdmin(adminId, { keepToken = '' } = {}) {
+  if (!adminId) return 0;
+  let removed = 0;
+  sessions.forEach((session, token) => {
+    if (session.adminId !== adminId) return;
+    if (keepToken && token === keepToken) return;
+    sessions.delete(token);
+    removed += 1;
+  });
+  return removed;
 }
 
 export function clearExpiredSessions() {
@@ -1879,7 +2127,10 @@ function comprehensiveQuestion(question, index, prefix) {
   const answer = String(question?.answer ?? '').trim();
 
   return {
-    id: String(question?.id ?? '').trim().slice(0, 80) || makeId(prefix),
+    /* شناسهٔ سؤالِ بی‌شناسه از جایگاهش ساخته می‌شود، نه تصادفی: هر ذخیرهٔ پنل
+       نباید شناسه‌ها را عوض کند، وگرنه پیشرفت کاربر روی همان سؤال گم می‌شود و
+       به‌نظر می‌رسد ویرایش‌های پنل «اثر نکرده». */
+    id: String(question?.id ?? '').trim().slice(0, 80) || `${prefix}-${index + 1}`,
     type: 'mcq',
     question: String(question?.question ?? '').slice(0, 1200),
     options,
@@ -1924,8 +2175,42 @@ function comprehensiveStructure(structure, index, unitId) {
   };
 }
 
+/* مسیرهای مبحث واحد — همان شکل میکرو (`[['قلب','دریچه']]`) */
+const comprehensiveTopicPaths = (value, max = 12) => (Array.isArray(value) ? value : [])
+  .map((path) => (Array.isArray(path) ? path : String(path ?? '').split('›')))
+  .map((parts) => parts.map((part) => String(part ?? '').trim().slice(0, 60)).filter(Boolean))
+  .filter((parts) => parts.length)
+  .slice(0, max);
+
+/*
+ * «تست‌های این بخش» هر واحد: انتخاب دستی از بانک تست (`pinnedQuestionIds`) و/یا
+ * فیلتر درس و مسیر مبحث. بدون هیچ‌کدام، بخش تست واحد خالی می‌ماند و لایه روی
+ * تست‌های دست‌نویس خودِ واحد برمی‌گردد.
+ */
+function comprehensiveTestBank(input) {
+  return {
+    subjectId: String(input?.subjectId ?? '').trim().slice(0, 60),
+    topicPaths: comprehensiveTopicPaths(input?.topicPaths),
+    pinnedQuestionIds: (Array.isArray(input?.pinnedQuestionIds) ? input.pinnedQuestionIds : [])
+      .slice(0, 60)
+      .map((questionId) => String(questionId ?? '').trim().slice(0, 60))
+      .filter(Boolean),
+  };
+}
+
+/* پاپ‌آپ تبریک واحد — عنوان، پیام و تصویر (آدرس کتابخانهٔ رسانه) */
+function comprehensiveCelebration(input) {
+  return {
+    title: String(input?.title ?? '').slice(0, 160),
+    message: String(input?.message ?? '').slice(0, 400),
+    image: String(input?.image ?? '').slice(0, 600),
+  };
+}
+
 function comprehensiveUnitPayload(unit, index, moduleId) {
-  const id = String(unit?.id ?? '').trim().slice(0, 80) || makeId('cunit');
+  /* شناسهٔ پایدار از مبحث + جایگاه؛ شناسهٔ تصادفی در هر ذخیره عوض می‌شد و
+     پیشرفت/تیک مراحل کاربر را روی واحد تازه می‌نشاند. */
+  const id = String(unit?.id ?? '').trim().slice(0, 80) || `${moduleId}-unit-${index + 1}`;
   const learning = unit?.learning ?? {};
   const activate = learning.activate ?? {};
   const visualize = learning.visualize ?? {};
@@ -1948,6 +2233,8 @@ function comprehensiveUnitPayload(unit, index, moduleId) {
     mastery: Math.min(100, Math.max(0, Math.round(Number(unit?.mastery) || 0))),
     lastActivity: String(unit?.lastActivity ?? '').slice(0, 80),
     steps: Array.isArray(unit?.steps) ? unit.steps.slice(0, 8) : ['activate', 'learn', 'visualize', 'practice', 'test'],
+    testBank: comprehensiveTestBank(unit?.testBank),
+    celebration: comprehensiveCelebration(unit?.celebration),
     learning: {
       activate: {
         tests: (Array.isArray(activate.tests) ? activate.tests : [])
@@ -1971,7 +2258,7 @@ function comprehensiveUnitPayload(unit, index, moduleId) {
       ...(learning.labelQuiz
         ? {
           labelQuiz: {
-            id: String(learning.labelQuiz.id ?? '').trim().slice(0, 80) || makeId('lq'),
+            id: String(learning.labelQuiz.id ?? '').trim().slice(0, 80) || `${id}-label-quiz`,
             prompt: String(learning.labelQuiz.prompt ?? '').slice(0, 600),
             answer: String(learning.labelQuiz.answer ?? '').slice(0, 80),
             ...(learning.labelQuiz.conceptId
@@ -2088,8 +2375,51 @@ export function updateComprehensiveCourse(id, input, admin) {
  * قرارداد عمومی درسنامه جامع — فقط منتشرشده‌ها، با همان کلیدهایی که
  * `ContentService` لایهٔ یادگیری از آن می‌خواند (id، title، subtitle،
  * modules، unitsByModule). فرادادهٔ پنل به کاربران درز نمی‌کند.
+ *
+ * «تست‌های این بخش» هر واحد همین‌جا از بانک تست حل می‌شود تا لایهٔ یادگیری
+ * بدون هیچ درخواست دیگری سؤال‌های همان بخش را داشته باشد: اول سؤال‌های
+ * سنجاق‌شده، بعد فیلتر درس/مسیر مبحث. خروجی با شکل سؤال چهارگزینه‌ای لایه
+ * یکی است (options با id).
+ *
+ * PHASE 2 — این مسیر هم عمومی است، پس **کلید پاسخ و تحلیل اینجا نمی‌آید**.
+ * پیش‌تر فیلد کلید (id گزینهٔ درست) و متن تحلیل همراه سؤال می‌رفت؛ یعنی همان
+ * نشتِ مسیر بانک تست از در دیگری. اکنون `id` همان شناسهٔ سؤال بانک است و کلاینت
+ * درستی پاسخ را از `/api/users/test-bank/answers` می‌گیرد (بازگشایی کنترل‌شده).
  */
+function comprehensiveBankQuestion(question) {
+  const options = (Array.isArray(question?.options) ? question.options : [])
+    .map((label, index) => ({ id: `opt-${index + 1}`, label: String(label ?? '').slice(0, 400) }));
+
+  return {
+    id: String(question?.id ?? ''),
+    type: 'mcq',
+    question: String(question?.stem ?? '').slice(0, 1200),
+    options,
+    ...(question?.difficulty ? { difficulty: String(question.difficulty).slice(0, 30) } : {}),
+    ...(Array.isArray(question?.topicPath)
+      ? { topicPath: question.topicPath.slice(0, 6).map((part) => String(part).slice(0, 80)) } : {}),
+  };
+}
+
+function comprehensiveUnitQuestions(testBank, bank) {
+  const pinned = testBank?.pinnedQuestionIds ?? [];
+  const picked = pinned.map((questionId) => bank.find((question) => question.id === questionId)).filter(Boolean);
+  if (picked.length) return picked.map(comprehensiveBankQuestion);
+
+  const subjectId = testBank?.subjectId ?? '';
+  const paths = (testBank?.topicPaths ?? []).map((path) => path.join(' › '));
+  if (!subjectId && !paths.length) return [];
+
+  return bank
+    .filter((question) => (!subjectId || question.subject === subjectId)
+      && (!paths.length || paths.some((path) => question.topicPath.join(' › ').includes(path))))
+    .slice(0, 30)
+    .map(comprehensiveBankQuestion);
+}
+
 export function publishedComprehensiveCourses() {
+  const bank = publishedTestBankQuestionsInternal();
+
   return readCollection('comprehensiveCourses')
     .filter((course) => course.status === 'published')
     .map((course) => ({
@@ -2098,7 +2428,25 @@ export function publishedComprehensiveCourses() {
       subtitle: course.subtitle,
       description: course.description,
       modules: course.modules,
-      unitsByModule: course.unitsByModule,
+      unitsByModule: Object.fromEntries(
+        Object.entries(course.unitsByModule ?? {}).map(([moduleId, units]) => [
+          moduleId,
+          (units ?? []).map((unit) => ({
+            ...unit,
+            testBank: {
+              subjectId: unit.testBank?.subjectId ?? '',
+              topicPaths: unit.testBank?.topicPaths ?? [],
+              pinnedQuestionIds: unit.testBank?.pinnedQuestionIds ?? [],
+              questions: comprehensiveUnitQuestions(unit.testBank, bank),
+            },
+            celebration: {
+              title: unit.celebration?.title ?? '',
+              message: unit.celebration?.message ?? '',
+              image: unit.celebration?.image ?? '',
+            },
+          })),
+        ]),
+      ),
     }));
 }
 
@@ -2922,16 +3270,88 @@ export function publishedMicroCourses() {
  * شود، فقط بدنهٔ همین تابع به کوئری تبدیل می‌شود.
  */
 const TEST_BANK_STATUSES = ['draft', 'published', 'archived'];
-const publicTestBankQuestion = ({ examDay, ...question }) => ({
-  ...question,
-  source: question.source === 'comprehensive' ? 'official' : question.source,
-  difficulty: question.stats?.solves > 0 ? difficultyFromPercent(question.stats.correctPercent) : question.difficulty,
-});
+
+/*
+ * ── مرز سریال‌سازی سؤال (PHASE 2) — «سؤال عمومی ≠ سؤال درونی» ──
+ *
+ * پیش از این یک تابع (`publicTestBankQuestion`) هم پنل مدیریت و هم endpoint عمومی
+ * را تغذیه می‌کرد و کل رکورد را spread می‌کرد؛ نتیجه: `GET /api/public/test-bank/questions`
+ * تمام بانک منتشرشده را **با کلید پاسخ و تحلیل** تحویل می‌داد.
+ *
+ * اکنون سه شکل صریح وجود دارد و هیچ‌کدام جای دیگری را نمی‌گیرد:
+ *
+ *   • `testBankQuestionForAdmin`      — رکورد کامل، فقط برای مسیرهای ادمین (فرم ویرایش
+ *                                        به `correctAnswer` نیاز دارد).
+ *   • `publicTestBankQuestion`        — **فهرست سفید**. هرچه در فهرست نیست بیرون نمی‌رود،
+ *                                        پس افزودن فیلد تازه به رکورد خودکار عمومی نمی‌شود.
+ *   • `testBankQuestionInternal`      — کلید پاسخ، فقط برای تصحیح سمت سرور.
+ *
+ * سه فیلدی که پیش‌تر از مسیر عمومی نشت می‌کردند:
+ *   correctAnswer          → کلید پاسخ
+ *   explanation            → تحلیل؛ متنش («گزینهٔ B صحیح است زیرا…») خودش کلید را لو می‌دهد
+ *   stats.optionPercents   → توزیع گزینه‌ها؛ گزینهٔ پرتکرار عملاً کلید است
+ */
+const PUBLIC_TEST_BANK_FIELDS = [
+  'id', 'subject', 'track', 'source', 'type', 'difficulty', 'year', 'examMonth',
+  'topicPath', 'tags', 'conceptIds', 'stem', 'figure', 'options', 'createdAt', 'updatedAt',
+];
+
+/* آمار عمومی = محبوبیت + سختی. بدون توزیع گزینه‌ها و شاخص کلید. */
+function publicTestBankStats(stats) {
+  if (!stats || typeof stats !== 'object') return { solves: 0, correctPercent: 0, avgTimeSec: 0 };
+  return {
+    solves: Number(stats.solves) || 0,
+    correctPercent: Number(stats.correctPercent) || 0,
+    avgTimeSec: Number(stats.avgTimeSec) || 0,
+  };
+}
+
+export function publicTestBankQuestion(question) {
+  if (!question) return null;
+  const shaped = {};
+  for (const field of PUBLIC_TEST_BANK_FIELDS) {
+    if (question[field] !== undefined) shaped[field] = question[field];
+  }
+  shaped.source = question.source === 'comprehensive' ? 'official' : question.source;
+  shaped.difficulty = question.stats?.solves > 0
+    ? difficultyFromPercent(question.stats.correctPercent)
+    : question.difficulty;
+  shaped.stats = publicTestBankStats(question.stats);
+  return shaped;
+}
+
+/* شکل پنل مدیریت — همان رکورد کامل (فرم ویرایش کلید پاسخ را لازم دارد) */
+function testBankQuestionForAdmin({ examDay, ...question }) {
+  return {
+    ...question,
+    source: question.source === 'comprehensive' ? 'official' : question.source,
+    difficulty: question.stats?.solves > 0 ? difficultyFromPercent(question.stats.correctPercent) : question.difficulty,
+  };
+}
+
+/* فقط سرور — برای تصحیح. هرگز serialize به کلاینت نمی‌شود. */
+function testBankQuestionInternal(question) {
+  return testBankQuestionForAdmin(question);
+}
 
 export function publishedTestBankQuestions() {
   return readCollection('testBankQuestions')
     .filter((question) => question.status === 'published')
     .map(({ status, createdBy, updatedBy, ...question }) => publicTestBankQuestion(question));
+}
+
+/* بانک منتشرشده **با** کلید — مصرف‌کننده‌ها: تصحیح سروری و مسیرهای ادمین */
+function publishedTestBankQuestionsInternal() {
+  return readCollection('testBankQuestions')
+    .filter((question) => question.status === 'published')
+    .map(({ status, createdBy, updatedBy, ...question }) => testBankQuestionInternal(question));
+}
+
+/* نگاشت id → سؤال درونی منتشرشده؛ پایهٔ تصحیح و بازگشایی کنترل‌شده */
+function publishedTestBankIndex() {
+  const index = new Map();
+  for (const question of publishedTestBankQuestionsInternal()) index.set(question.id, question);
+  return index;
 }
 
 export function testBankRevision() {
@@ -2947,53 +3367,191 @@ export function listTestBankQuestions({ search = '', subject = 'all', track = 'a
     && (track === 'all' || question.track === track)
     && (!query || normalizeSearch(`${question.stem} ${question.id} ${question.topicPath.join(' ')}`).includes(query)));
   return {
-    ...paginate(scoped.filter((question) => subject === 'all' || question.subject === subject).map(publicTestBankQuestion), { page, perPage }),
+    ...paginate(scoped.filter((question) => subject === 'all' || question.subject === subject).map(testBankQuestionForAdmin), { page, perPage }),
     subjects: TEST_BANK_SUBJECTS.map(({ id, name }) => ({ id, name, count: scoped.filter((question) => question.subject === id).length })),
   };
 }
 
 export function getTestBankQuestion(id) {
   const question = readCollection('testBankQuestions').find((item) => item.id === id);
-  return question ? publicTestBankQuestion(question) : null;
+  return question ? testBankQuestionForAdmin(question) : null;
 }
 
+/*
+ * ── ثبت پاسخ + تصحیح + پاداش (PHASE 2) ──
+ *
+ * قاعدهٔ مرز اعتماد:
+ *     کلاینت می‌گوید:    «گزینهٔ ۲ را انتخاب کردم»
+ *     سرور تعیین می‌کند:  «گزینهٔ ۲ درست است»
+ *     سرور تصمیم می‌گیرد: «پاداش = ۱ قلب»
+ *
+ * سه سخت‌گیری نسبت به نسخهٔ پیشین:
+ *
+ *   ۱. **ضد mass-assignment.** `isCorrect`، `reward`، `score`، `hearts` یا هر فیلد
+ *      نتیجه‌ای در بدنهٔ کلاینت خوانده نمی‌شود؛ فقط `questionId`/`selected`/`timeSpent`/
+ *      `answeredAt` و از میان این‌ها فقط دو مورد اول در تصمیم اثر دارند.
+ *
+ *   ۲. **کلید پاداش از ساعت سرور می‌آید.** پیش‌تر `attemptKey` از `answeredAt`
+ *      کلاینت ساخته می‌شد؛ یعنی مهاجم با تغییر آن می‌توانست برای یک پاسخ درست،
+ *      کلید تازه بسازد. اکنون کلید = `questionId:<شمارهٔ روز سرور>` ⇒ Replay همان
+ *      پاسخ در همان روز هیچ پاداشی تولید نمی‌کند، مستقل از ورودی کلاینت.
+ *
+ *   ۳. **بازگشایی کنترل‌شده.** `correctAnswer` و `explanation` فقط برای همان سؤالی
+ *      برمی‌گردد که در همین درخواست پاسخ گرفته — نه کل بانک. (کلید هرگز در payload
+ *      سؤال نمی‌آید؛ فقط پس از پاسخ.)
+ *
+ * پاداش به «رویداد واقعی قابل شناسایی» گره خورده: (کاربر، سؤال، روز سرور). پس
+ * تعداد قلب قابل کسب از یک سؤال در روز حداکثر یکی است.
+ */
+const TEST_BANK_MAX_ANSWERS = 1000;
+const HEART_REWARD_WINDOW_MS = 24 * 60 * 60 * 1000;
+
 export function recordTestBankAnswers(userId, answers) {
+  const list = Array.isArray(answers) ? answers.slice(0, TEST_BANK_MAX_ANSWERS) : [];
   const votes = readCollection('testBankAnswers');
   const questions = readCollection('testBankQuestions');
   const rewards = readCollection('testBankHeartRewards');
+  const byId = new Map(questions.map((question) => [question.id, question]));
   const awardedQuestionIds = [];
+  const results = [];
   const changed = new Set();
-  for (const entry of answers.slice(0, 1000)) {
-    const question = questions.find((item) => item.id === entry?.questionId && item.status === 'published');
-    const selected = Number(entry?.selected);
-    if (!question || entry?.selected == null || !Number.isInteger(selected) || selected < 0 || selected >= question.options.length) continue;
+  const now = Date.now();
+  const rewardBucket = Math.floor(now / HEART_REWARD_WINDOW_MS);
+
+  for (const entry of list) {
+    const questionId = typeof entry?.questionId === 'string' ? entry.questionId : '';
+    const question = byId.get(questionId);
+    if (!question || question.status !== 'published' || !Array.isArray(question.options)) continue;
+
+    /*
+     * اعتبارسنجی سخت‌گیرانه: فقط عدد صحیح در بازهٔ گزینه‌ها.
+     * `Number()` تنها کافی نیست — `Number([0])` و `Number('')` هم عدد می‌دهند و
+     * آرایه/رشته/شیء از در اعتبارسنجی رد می‌شدند (PHASE 2، سنجهٔ ۱۶).
+     */
+    const selected = entry?.selected;
+    if (typeof selected !== 'number' || !Number.isInteger(selected)
+      || selected < 0 || selected >= question.options.length) continue;
+
+    const correct = selected === question.correctAnswer;
+
+    /* بازگشایی کنترل‌شده — فقط پس از پاسخ، فقط برای همین سؤال */
+    results.push({
+      questionId: question.id,
+      selected,
+      correct,
+      correctAnswer: question.correctAnswer,
+      explanation: question.explanation ?? null,
+    });
+
     const index = votes.findIndex((vote) => vote.userId === userId && vote.questionId === question.id);
     const vote = {
       userId, questionId: question.id, selected,
       timeSpent: Math.min(3600, Math.max(0, Number(entry.timeSpent) || 0)),
-      answeredAt: Math.min(Date.now(), Math.max(0, Number(entry.answeredAt) || 0)),
+      answeredAt: Math.min(now, Math.max(0, Number(entry.answeredAt) || 0)),
     };
     if (index === -1) votes.push(vote);
     else if ((votes[index].answeredAt ?? 0) <= vote.answeredAt) votes[index] = vote;
     else continue;
     changed.add(question.id);
-    if (selected === question.correctAnswer) {
-      const now = Date.now();
-      const attemptKey = `${question.id}:${entry.answeredAt ?? ''}`;
-      const previous = rewards.filter((reward) => reward.userId === userId && reward.questionId === question.id);
-      if (!previous.some((reward) => reward.attemptKey === attemptKey
-        || now - reward.awardedAt < 24 * 60 * 60 * 1000)) {
+
+    if (correct) {
+      const attemptKey = `${question.id}:${rewardBucket}`;
+      if (!rewards.some((reward) => reward.userId === userId && reward.attemptKey === attemptKey)) {
         rewards.push({ userId, questionId: question.id, attemptKey, awardedAt: now });
         awardedQuestionIds.push(question.id);
       }
     }
   }
-  if (!changed.size) return { awardedQuestionIds };
+
+  if (!changed.size) return { awardedQuestionIds, results };
   for (const question of questions) if (changed.has(question.id)) refreshTestBankStats(question, votes);
   writeCollection('testBankAnswers', votes);
   writeCollection('testBankQuestions', questions);
   if (awardedQuestionIds.length) writeCollection('testBankHeartRewards', rewards);
-  return { awardedQuestionIds };
+
+  /*
+   * توزیع گزینه‌ها هم بخشی از بازگشایی است: گزینهٔ پرتکرار عملاً کلید را لو
+   * می‌دهد، پس در payload سؤال نمی‌آید و فقط همراه پاسخ برمی‌گردد.
+   */
+  return {
+    awardedQuestionIds,
+    results: results.map((entry) => ({
+      ...entry,
+      optionPercents: byId.get(entry.questionId)?.stats?.optionPercents ?? null,
+    })),
+  };
+}
+
+/*
+ * ── تصحیح authoritative یک تلاش آزمونک (PHASE 2) ──
+ *
+ * پیش از این، نمره در کلاینت از `question.correctAnswer` ساخته می‌شد. اکنون کلید
+ * در کلاینت نیست، پس نمره باید اینجا ساخته شود: سرور با کلید خودش تصحیح می‌کند و
+ * همان شکل `result` را برمی‌گرداند که UI از قبل می‌شناخت.
+ *
+ * نکتهٔ صداقتی (در گزارش مستند شده): `questionIds` را کلاینت می‌فرستد، پس می‌تواند
+ * سؤالی را از بدنه حذف کند. اثرش فقط روی کارنامهٔ تمرینی خودِ کاربر است (هیچ رتبه،
+ * گواهی یا قلب دیگری به آن گره نخورده — پاداش مسیر مستقل و سرورمحور دارد).
+ * برای آزمون‌های رسمی، همان معماری سختِ `examStore.js` برجاست که سؤال‌ها را
+ * سرور فریز می‌کند.
+ */
+const TEST_BANK_MAX_GRADE_QUESTIONS = 500;
+
+export function gradeTestBankAttempt({ questionIds, answers, negativeMarking } = {}) {
+  const index = publishedTestBankIndex();
+  const ids = (Array.isArray(questionIds) ? questionIds : [])
+    .filter((id) => typeof id === 'string' && index.has(id))
+    .slice(0, TEST_BANK_MAX_GRADE_QUESTIONS);
+
+  const negative = Math.min(1, Math.max(-1, Number(negativeMarking) || 0));
+  const answerMap = answers && typeof answers === 'object' ? answers : {};
+
+  let correct = 0;
+  let wrong = 0;
+  let timeSum = 0;
+  let answered = 0;
+  const wrongIds = [];
+  const unansweredIds = [];
+
+  for (const id of ids) {
+    const question = index.get(id);
+    const raw = answerMap[id];
+    /* فقط عدد صحیح؛ آرایه/رشته/شیء نامعتبر است (همان سخت‌گیری مسیر ثبت پاسخ) */
+    const selected = typeof raw?.selected === 'number' && Number.isInteger(raw.selected) ? raw.selected : null;
+    const valid = selected !== null && selected >= 0 && selected < question.options.length;
+
+    if (!valid) {
+      unansweredIds.push(id);
+      continue;
+    }
+
+    answered += 1;
+    timeSum += Math.min(3600, Math.max(0, Number(raw?.timeSpent) || 0));
+    if (selected === question.correctAnswer) correct += 1;
+    else {
+      wrong += 1;
+      wrongIds.push(id);
+    }
+  }
+
+  const total = ids.length;
+  const score = Math.max(0, correct + wrong * negative);
+  const percentage = Math.max(0, Math.min(100, Math.round((score / Math.max(total, 1)) * 1000) / 10));
+
+  return {
+    total,
+    answered,
+    correct,
+    wrong,
+    unanswered: total - answered,
+    score: Math.round(score * 100) / 100,
+    maxScore: total,
+    negativeMarking: negative,
+    percentage,
+    avgTimeSec: answered ? Math.round(timeSum / answered) : 0,
+    wrongIds,
+    unansweredIds,
+  };
 }
 
 export function getUserHeartRewards(userId) {
@@ -3120,7 +3678,7 @@ export function searchTestBankQuestions({
   const path = microText(topicPath, 120);
   const size = microInt(limit, 40, 1, 100);
 
-  const matched = publishedTestBankQuestions().filter((question) => {
+  const matched = publishedTestBankQuestionsInternal().filter((question) => {
     if (subjectId && question.subject !== subjectId) return false;
     if (difficulty !== 'all' && question.difficulty !== difficulty) return false;
     if (path && !question.topicPath.join(' › ').includes(path)) return false;
@@ -3563,6 +4121,21 @@ export function listAdmins({ search = '', role = 'all', page = 1, perPage = 10 }
   return { ...result, items: result.items.map(publicAdmin) };
 }
 
+/*
+ * ── قاعدهٔ ارتقا/تنزل نقش ──
+ *
+ * «نقش» یعنی سطح اعتماد. هیچ مسیر CRUD کاربری نباید به‌صورت ضمنی سطح اعتماد را
+ * عوض کند. این گارد سه جا صدا زده می‌شود: ساخت کاربر، ویرایش کاربر، حذف کاربر.
+ *
+ * تصمیم همیشه server-side است؛ Client فقط `role` را پیشنهاد می‌دهد و اگر مجوزش
+ * را نداشته باشد، همان پیشنهاد رد می‌شود. فیلد `permissions` از Client هرگز خوانده
+ * نمی‌شود — مجوزها فقط از `ROLES` می‌آیند.
+ */
+function assertCanTouchSuperAdmin(actor, message) {
+  if (hasPermission(actor, 'users.superadmin.manage')) return;
+  throw Object.assign(new Error(message), { code: 'FORBIDDEN' });
+}
+
 export function createAdmin(input, actor = null) {
   const username = String(input.username ?? '').trim();
   const password = String(input.password ?? '');
@@ -3571,6 +4144,11 @@ export function createAdmin(input, actor = null) {
   if (password.length < 4) throw Object.assign(new Error('رمز عبور حداقل ۴ کاراکتر باشد'), { code: 'VALIDATION_ERROR' });
   if (findAdminByUsername(username)) throw Object.assign(new Error('این نام کاربری قبلاً ثبت شده است'), { code: 'CONFLICT' });
   if (!ROLES[input.role]) throw Object.assign(new Error('نقش نامعتبر است'), { code: 'VALIDATION_ERROR' });
+
+  /* ساخت «مدیر کل» مجوز صریح می‌خواهد — `users.create` کافی نیست */
+  if (input.role === 'super-admin') {
+    assertCanTouchSuperAdmin(actor, 'ساخت «مدیر کل» مجوز جداگانه می‌خواهد');
+  }
 
   const admins = readCollection('admins');
   const created = nowIso();
@@ -3601,15 +4179,38 @@ export function updateAdmin(id, input, actor = null) {
   if (index === -1) return null;
 
   const current = admins[index];
+  const previousRole = current.role;
+  const wasActive = current.isActive !== false;
+  const nextRole = input.role ?? current.role;
+  const isSelf = Boolean(actor?.id) && actor.id === current.id;
 
   if (input.role && !ROLES[input.role]) {
     throw Object.assign(new Error('نقش نامعتبر است'), { code: 'VALIDATION_ERROR' });
   }
 
+  /*
+   * خودارتقایی بسته است — برای همه، از جمله مدیر کل.
+   * دلیل: نقش یعنی سطح اعتماد؛ کسی که سطح اعتماد خودش را بالا می‌برد، کنترل
+   * بیرونی را دور می‌زند. تغییر نقش خود باید توسط مدیر دیگری انجام شود.
+   */
+  if (isSelf && nextRole !== previousRole) {
+    throw Object.assign(new Error('نقش حساب خودتان را از این مسیر نمی‌توانید تغییر دهید'), { code: 'FORBIDDEN' });
+  }
+
+  /*
+   * هر دست‌کاری روی یک «مدیر کل» — یا تبدیل کسی به «مدیر کل» — مجوز صریح
+   * می‌خواهد. این شامل عوض‌کردن رمز عبور مدیر کل هم می‌شود؛ وگرنه یک مدیر
+   * معمولی می‌توانست رمز مدیر کل را عوض کند و به‌جای او وارد شود.
+   */
+  const touchesSuperAdmin = previousRole === 'super-admin' || nextRole === 'super-admin';
+  if (touchesSuperAdmin) {
+    assertCanTouchSuperAdmin(actor, 'دست‌زدن به حساب «مدیر کل» مجوز جداگانه می‌خواهد');
+  }
+
   /* آخرین مدیر کل فعال نباید غیرفعال یا تنزل داده شود */
   const losingSuperAdmin =
-    current.role === 'super-admin' &&
-    ((input.role && input.role !== 'super-admin') || input.isActive === false);
+    previousRole === 'super-admin' &&
+    (nextRole !== 'super-admin' || input.isActive === false);
 
   if (losingSuperAdmin) {
     const activeSuperAdmins = admins.filter(
@@ -3620,7 +4221,8 @@ export function updateAdmin(id, input, actor = null) {
     }
   }
 
-  if (input.password) {
+  const passwordChanged = Boolean(input.password);
+  if (passwordChanged) {
     if (String(input.password).length < 4) {
       throw Object.assign(new Error('رمز عبور حداقل ۴ کاراکتر باشد'), { code: 'VALIDATION_ERROR' });
     }
@@ -3632,17 +4234,28 @@ export function updateAdmin(id, input, actor = null) {
     ...current,
     name: String(input.name ?? current.name).trim() || current.name,
     email: String(input.email ?? current.email).trim().slice(0, 160),
-    role: input.role ?? current.role,
+    role: nextRole,
     isActive: input.isActive ?? current.isActive,
     updatedAt: nowIso(),
     updatedBy: actor?.id ?? 'system',
   };
 
   writeCollection('admins', admins);
-  return publicAdmin(admins[index]);
+
+  /*
+   * رویدادهای امنیتی، نشست‌های بازِ همان حساب را می‌بندند:
+   * رمز عوض شده ⇒ هر نشست دیگری احتمالاً مالِ دارندهٔ رمز قدیمی است.
+   * نقش عوض شده ⇒ مجوز قبلی نباید تا پایان TTL زنده بماند.
+   * حساب غیرفعال شده ⇒ همان لحظه قطع شود، نه در درخواست بعدی.
+   */
+  const revokedSessions = (passwordChanged || nextRole !== previousRole || (wasActive && admins[index].isActive === false))
+    ? destroySessionsForAdmin(id)
+    : 0;
+
+  return { ...publicAdmin(admins[index]), revokedSessions };
 }
 
-export function changeOwnPassword(id, { currentPassword, nextPassword }) {
+export function changeOwnPassword(id, { currentPassword, nextPassword, keepToken = '' } = {}) {
   const admins = readCollection('admins');
   const index = admins.findIndex((admin) => admin.id === id);
   if (index === -1) return { error: 'not-found' };
@@ -3663,11 +4276,20 @@ export function changeOwnPassword(id, { currentPassword, nextPassword }) {
   };
 
   writeCollection('admins', admins);
-  return { admin: publicAdmin(admins[index]) };
+
+  /*
+   * اگر رمز به‌خاطر لو رفتن عوض شده، نشست مهاجم نباید زنده بماند. نشست فعلی
+   * حفظ می‌شود تا خودِ مدیر بی‌دلیل بیرون نیفتد.
+   */
+  const revokedSessions = destroySessionsForAdmin(id, { keepToken });
+
+  return { admin: publicAdmin(admins[index]), revokedSessions };
 }
 
-export function deleteAdmin(id, actorId) {
-  if (id === actorId) {
+export function deleteAdmin(id, actor = null) {
+  const actorId = actor?.id ?? null;
+
+  if (actorId && id === actorId) {
     throw Object.assign(new Error('حساب خودتان را نمی‌توانید حذف کنید'), { code: 'CONFLICT' });
   }
 
@@ -3675,16 +4297,30 @@ export function deleteAdmin(id, actorId) {
   const target = admins.find((admin) => admin.id === id);
   if (!target) return null;
 
-  const remainingSuperAdmins = admins.filter(
-    (admin) => admin.role === 'super-admin' && admin.id !== id,
+  /* حذف «مدیر کل» مجوز صریح می‌خواهد */
+  if (target.role === 'super-admin') {
+    assertCanTouchSuperAdmin(actor, 'حذف «مدیر کل» مجوز جداگانه می‌خواهد');
+  }
+
+  /*
+   * invariant: دست‌کم یک مدیر کلِ **فعال** باید بماند.
+   * شمارش فقط مدیرهای کل فعال را می‌شمارد؛ اگر تنها مدیر کل باقی‌مانده غیرفعال
+   * باشد، حذف مدیر کل فعال یعنی سیستم بدون حساب مدیریتی می‌ماند.
+   */
+  const remainingActiveSuperAdmins = admins.filter(
+    (admin) => admin.role === 'super-admin' && admin.isActive && admin.id !== id,
   ).length;
 
-  if (target.role === 'super-admin' && remainingSuperAdmins === 0) {
-    throw Object.assign(new Error('حداقل یک مدیر کل باید باقی بماند'), { code: 'CONFLICT' });
+  if (target.role === 'super-admin' && target.isActive && remainingActiveSuperAdmins === 0) {
+    throw Object.assign(new Error('حداقل یک مدیر کل فعال باید باقی بماند'), { code: 'CONFLICT' });
   }
 
   writeCollection('admins', admins.filter((admin) => admin.id !== id));
-  return publicAdmin(target);
+
+  /* نشست‌های حساب حذف‌شده همان لحظه باطل می‌شوند */
+  const revokedSessions = destroySessionsForAdmin(id);
+
+  return { ...publicAdmin(target), revokedSessions };
 }
 
 /* ─────────────────────────────── گزارش‌ها ─────────────────────────────── */

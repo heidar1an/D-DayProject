@@ -9,7 +9,7 @@
  */
 
 import { createServer } from 'node:http';
-import { createReadStream, existsSync, statSync } from 'node:fs';
+import { createReadStream, existsSync, readFileSync, statSync } from 'node:fs';
 import { extname, join, resolve, sep } from 'node:path';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -19,9 +19,80 @@ import { handleExamApi } from './database/examApi.js';
 import { handleGoogleAuthApi } from './database/googleAuth.js';
 import { handleUsersApi } from './database/usersApi.js';
 import { serveUploadRequest } from './database/uploadsFile.js';
+import { applySecurityHeaders, inlineScriptHashes } from './database/securityHeaders.js';
+import { assertAdminCredentialUsable, isProduction } from './database/adminCredentialPolicy.js';
+import { injectBaselineMeta, siteUrlFromEnv } from './database/seo.js';
+import {
+  accessLogEnabled,
+  accessLogLine,
+  checkReadiness,
+  createMetrics,
+  isMetricsAuthorized,
+  metricsTokenFromEnv,
+  newRequestId,
+} from './database/observability.js';
 
 const rootDir = dirname(fileURLToPath(import.meta.url));
 const distDir = resolve(rootDir, 'dist');
+const dataDir = resolve(rootDir, 'database');
+
+/*
+ * مشاهده‌پذیری (فاز ۱۰ پیشنهادی).
+ *
+ *   • لاگ دسترسی پیش‌فرض روشن است — چون شکاف ممیزی همین بود: درخواست‌های خواندن
+ *     هیچ‌جا ثبت نمی‌شدند. با `TAPESH_ACCESS_LOG=0` خاموش می‌شود.
+ *   • متریک درون-حافظه است (همان محدودیتِ ثبت‌شدهٔ rate limit و نشست‌ها): با چند
+ *     پروسه، هر پروسه سهم خودش را می‌بیند. برای تجمیع واقعی به ذخیره‌گاه مشترک
+ *     نیاز است؛ اینجا ادعای بیشتر از این نمی‌شود.
+ *   • `/metrics` فقط با `TAPESH_METRICS_TOKEN` وجود دارد. بدون توکن، مسیر ۴۰۴
+ *     می‌دهد تا وجودش هم لو نرود.
+ */
+const metrics = createMetrics();
+const accessLogOn = accessLogEnabled();
+const metricsToken = metricsTokenFromEnv();
+
+/*
+ * هدرهای امنیتی (فاز ۸).
+ *
+ * هش اسکریپت inline از **همان فایل HTMLی** محاسبه می‌شود که سرو می‌شود؛ پس اگر
+ * متن اسکریپت ضد‌پرش تم عوض شود، CSP خودکار هم‌گام می‌شود و نمی‌شکند.
+ */
+const DEV = !isProduction();
+const indexHtmlPath = join(distDir, 'index.html');
+let inlineHashes = [];
+let indexHtmlCache = null;
+try {
+  indexHtmlCache = readFileSync(indexHtmlPath, 'utf8');
+  inlineHashes = inlineScriptHashes(indexHtmlCache);
+} catch {
+  /* dist هنوز ساخته نشده — CSP بدون هش اسکریپت inline اجرا می‌شود (dev) */
+}
+
+const SITE_URL = siteUrlFromEnv();
+const SECURITY_OPTIONS = { dev: DEV, scriptHashes: inlineHashes, hsts: true };
+
+/** صفحهٔ SPA با متای تزریق‌شده (canonical / og / JSON-LD). */
+function serveIndexHtml(response, request) {
+  const html = injectBaselineMeta(indexHtmlCache ?? '<!doctype html><html lang="fa" dir="rtl"><head></head><body><div id="root"></div></body></html>', {
+    siteUrl: SITE_URL,
+  });
+  response.statusCode = 200;
+  response.setHeader('Content-Type', 'text/html; charset=utf-8');
+  response.setHeader('Cache-Control', 'no-cache');
+  response.setHeader('Content-Length', String(Buffer.byteLength(html)));
+  if (request?.method === 'HEAD') {
+    response.end();
+    return;
+  }
+  response.end(html);
+}
+
+function sendJson(response, status, payload) {
+  response.statusCode = status;
+  response.setHeader('Content-Type', 'application/json; charset=utf-8');
+  response.setHeader('Cache-Control', 'no-store');
+  response.end(JSON.stringify(payload));
+}
 
 /*
  * همان دلیل `vite.config.js`: نود خودش `.env` را نمی‌خواند، پس متغیرهای
@@ -127,7 +198,98 @@ function tryServe(response, filePath, request = null) {
 }
 
 const server = createServer(async (request, response) => {
+  const startedAt = process.hrtime.bigint();
+  const requestId = newRequestId();
+
+  /*
+   * `pathname` پیش از try فقط «مسیر پیش‌فرض لاگ» است. مقدار واقعی داخل try
+   * حساب می‌شود تا مسیر بدشکل (`/%ZZ`) همان‌طور که پیش‌تر بود به catch بیرونی
+   * برسد و ۵۰۰ بدهد — نه اینکه استثنا از هندلر بیرون بزند و پروسه را ببرد.
+   */
+  let pathname = '/';
+
+  response.setHeader('X-Request-Id', requestId);
+
+  /*
+   * هدرهای امنیتی (فاز ۸) — روی **همهٔ** پاسخ‌ها، از جمله فایل‌های آپلودی.
+   * چرا روی آپلود هم: یک SVG آپلودی می‌تواند اسکریپت داشته باشد؛ CSP همراه
+   * پاسخ، اجرای آن را در مرورگر می‌بندد.
+   */
+  applySecurityHeaders(response, request, SECURITY_OPTIONS);
+
+  /* یک بار ثبت در پایان پاسخ؛ برای پاسخ‌های جریانی (فایل) هم کار می‌کند */
+  response.on('finish', () => {
+    const durationMs = Number(process.hrtime.bigint() - startedAt) / 1e6;
+
+    metrics.record({
+      method: request.method,
+      path: pathname,
+      status: response.statusCode,
+      durationMs,
+    });
+
+    if (accessLogOn) {
+      console.log(
+        accessLogLine({
+          requestId,
+          method: request.method,
+          path: pathname,
+          status: response.statusCode,
+          durationMs,
+        }),
+      );
+    }
+  });
+
   try {
+    pathname = decodeURIComponent(new URL(request.url ?? '/', 'http://localhost').pathname);
+
+    /*
+     * سلامت/آمادگی/متریک — پیش از هندلرهای API.
+     *
+     * چرا پیش از آن‌ها: این‌ها نباید به سشن، کوکی، CSRF یا نوشتن روی دیسک
+     * وابسته باشند، و باید حتی وقتی داده خراب است هم جواب بدهند. `/healthz`
+     * عمداً هیچ چیزی را نمی‌سنجد (liveness) و `/readyz` سنجش‌ها را جدا گزارش
+     * می‌کند تا معلوم باشد کدام بخش آماده نیست.
+     */
+    if (pathname === '/healthz' || pathname === '/readyz' || pathname === '/metrics' || pathname === '/api/health') {
+      if (request.method !== 'GET' && request.method !== 'HEAD') {
+        sendJson(response, 405, { success: false, error: { code: 'METHOD_NOT_ALLOWED', message: 'متد پشتیبانی نمی‌شود' } });
+        return;
+      }
+
+      if (pathname === '/healthz') {
+        sendJson(response, 200, { status: 'ok', uptimeSeconds: metrics.snapshot().uptimeSeconds });
+        return;
+      }
+
+      /*
+       * نام عمومی سلامت برای load balancer و پایش بیرونی.
+       * عمداً همان liveness است (بدون سنجش وابستگی) تا حتی با دادهٔ خراب هم
+       * ۲۰۰ بدهد؛ سنجش وابستگی‌ها کار `/readyz` است. پاسخ هیچ مسیر داخلی،
+       * نسخهٔ دقیق، stack یا secret ندارد.
+       */
+      if (pathname === '/api/health') {
+        sendJson(response, 200, { status: 'ok', uptimeSeconds: metrics.snapshot().uptimeSeconds });
+        return;
+      }
+
+      if (pathname === '/readyz') {
+        const report = checkReadiness({ distDir, dataDir });
+        sendJson(response, report.ready ? 200 : 503, report);
+        return;
+      }
+
+      /* نبودِ توکن یا توکن نادرست ⇒ ۴۰۴ (نه ۴۰۳) تا وجود مسیر لو نرود */
+      if (!metricsToken || !isMetricsAuthorized(request.headers.authorization, metricsToken)) {
+        sendJson(response, 404, { success: false, error: { code: 'NOT_FOUND', message: 'مسیر پیدا نشد' } });
+        return;
+      }
+
+      sendJson(response, 200, metrics.snapshot());
+      return;
+    }
+
     const handled = await handleApi(request, response);
     if (handled) return;
 
@@ -143,14 +305,16 @@ const server = createServer(async (request, response) => {
     const handledGoogleAuth = await handleGoogleAuthApi(request, response);
     if (handledGoogleAuth) return;
 
-    const url = new URL(request.url ?? '/', 'http://localhost');
-    const pathname = decodeURIComponent(url.pathname);
-
     if (request.method !== 'GET' && request.method !== 'HEAD') {
       response.statusCode = 405;
       response.setHeader('Content-Type', 'application/json; charset=utf-8');
       response.end(JSON.stringify({ success: false, error: { code: 'NOT_FOUND', message: 'متد پشتیبانی نمی‌شود' } }));
       return;
+    }
+
+    /* نقشهٔ سایت و robots — در dist ساخته می‌شوند (`scripts/generate-sitemap.mjs`) */
+    if (pathname === '/robots.txt' || pathname === '/sitemap.xml') {
+      if (tryServe(response, resolve(distDir, `.${pathname}`), request)) return;
     }
 
     /* فایل‌های آپلودی پنل — همان ماژولی که سرور توسعه استفاده می‌کند */
@@ -160,10 +324,12 @@ const server = createServer(async (request, response) => {
     const assetPath = resolve(distDir, `.${pathname}`);
     if (isInside(distDir, assetPath) && tryServe(response, assetPath, request)) return;
 
-    /* SPA fallback: مسیرهای بدون پسوند به index.html */
+    /* SPA fallback: مسیرهای بدون پسوند به index.html (با متای تزریق‌شده) */
     if (!extname(pathname)) {
-      const indexPath = join(distDir, 'index.html');
-      if (tryServe(response, indexPath, request)) return;
+      if (indexHtmlCache || existsSync(indexHtmlPath)) {
+        serveIndexHtml(response, request);
+        return;
+      }
     }
 
     response.statusCode = 404;
@@ -178,6 +344,37 @@ const server = createServer(async (request, response) => {
     response.end(JSON.stringify({ success: false, error: { code: 'INTERNAL_ERROR', message: 'خطای سرور' } }));
   }
 });
+
+/*
+ * گارد راه‌اندازی credential مدیر (فاز ۹).
+ *
+ * اگر هیچ مدیری روی دیسک نباشد، seed باید اجرا شود. در production، seed بدون
+ * `TAPESH_ADMIN_PASSWORD` صریح **ممنوع** است؛ پس همان اول می‌ایستیم — نه اینکه
+ * سرور با رمز پیش‌فرض شناخته‌شده بالا بیاید.
+ */
+const adminsFile = resolve(dataDir, 'content', 'admins.json');
+
+function hasUsableAdmin() {
+  if (!existsSync(adminsFile)) return false;
+  try {
+    const parsed = JSON.parse(readFileSync(adminsFile, 'utf8'));
+    return Array.isArray(parsed) && parsed.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+if (!hasUsableAdmin()) {
+  try {
+    const decision = assertAdminCredentialUsable();
+    if (DEV && decision.mustChangePassword) {
+      console.warn('⚠️ توسعه: رمز مدیر از TAPESH_ADMIN_PASSWORD نیامده؛ رمز محلی موقت فعال است.');
+    }
+  } catch (error) {
+    console.error(`✗ راه‌اندازی متوقف شد — ${error.message}`);
+    process.exit(1);
+  }
+}
 
 server.listen(PORT, HOST, () => {
   console.log(`تپش روی http://localhost:${PORT} بالا آمد — پنل مدیریت: /#admin`);
