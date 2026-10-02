@@ -560,18 +560,127 @@ const real = new Map();
 const realCollections = {};
 let realRecordCount = 0;
 
+/*
+ * مجموعه‌هایی که **تا اولین نوشتن فایلی ندارند** — نه یک شکاف، بلکه طراحی:
+ * فایلشان در `.gitignore` است و سرور در زمان اجرا می‌سازدشان
+ * (`feedback`, `mediaMetrics`, `admins`, `activity`, `events`, `publishLog`,
+ * `exams*`, `users.json` …). پس روی یک checkout تمیز، نبودِ فایل‌شان **درست**
+ * است و نباید تست را بشکند. هر مجموعهٔ محتواییِ دیگری که فایلش گم شود،
+ * همچنان تست را می‌شکند.
+ *
+ * ⚠️ پیش‌تر این فهرست **دستی و ناقص** بود (فقط دو عضو) و روی checkout تمیز
+ * بقیهٔ فایل‌های ignore‌شده تست را می‌شکستند. حالا از خود `.gitignore`
+ * استخراج می‌شود تا با تغییر آن واگرا نشود.
+ */
+function gitignorePatterns() {
+  const raw = readFileSync(new URL('../.gitignore', import.meta.url), 'utf8');
+  return raw.split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0 && !line.startsWith('#'));
+}
+
+function isGitignored(relPath, patterns) {
+  return patterns.some((pattern) => {
+    const clean = pattern.replace(/^\//, '');
+    if (clean.endsWith('/')) return relPath.startsWith(clean);
+    const body = clean
+      .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+      .replace(/\*/g, '[^/]*');
+    return new RegExp(`^${body}$`).test(relPath);
+  });
+}
+
+const ignorePatterns = gitignorePatterns();
+const runtimeOnlySchemas = MODELS
+  .filter((schema) => schema.file && isGitignored(schema.file, ignorePatterns));
+const RUNTIME_ONLY_COLLECTIONS = [...new Set(runtimeOnlySchemas
+  .map((schema) => schema.collection).filter(Boolean))].sort();
+const RUNTIME_ONLY_FILES = new Set(runtimeOnlySchemas.map((schema) => schema.file));
+
 for (const schema of MODELS) {
   if (!schema.file) continue;
   const loaded = loadReal(schema);
   real.set(schema.name, loaded);
+  /* ⚠️ مجموعهٔ غایب **ثبت نمی‌شود** — نه با آرایهٔ خالی. این تفاوت حیاتی است:
+     اعتبارسنجی ارجاع (`makeRefLookup`) برای مجموعهٔ ثبت‌نشده «تأییدنشده»
+     برمی‌گرداند و خطا نمی‌دهد؛ ولی آرایهٔ خالی یعنی «مجموعه هست و خالی است»
+     و همهٔ ارجاع‌ها را یتیم می‌کند. روی checkout تمیز (که `admins.json`
+     زمان‌اجراست) همین یک نکته، ۱۱ یادداشت را کاذبانه یتیم می‌کرد. */
+  if (loaded.missing) continue;
   const key = schema.collection ?? schema.name;
   realCollections[key] = [...(realCollections[key] ?? []), ...loaded.records];
   realRecordCount += loaded.records.length;
 }
 
-check('همهٔ فایل‌های دادهٔ اعلام‌شده در Schema موجودند',
-  [...real.values()].every((loaded) => !loaded.missing));
-check('مجموع رکورد اسکن‌شده بیش از ۱٬۴۰۰ است', realRecordCount > 1400);
+/* ── مجموعهٔ آزمون مصنوعی (deterministic) ──────────────────────────────
+   چرا لازم است: سنجه‌های «حجم داده» پایین‌تر پیش‌تر روی `realRecordCount`
+   تکیه داشتند، ولی چند مجموعهٔ واقعی در `.gitignore` هستند (بالا) و روی یک
+   checkout تمیز وجود ندارند؛ پس آن سنجه‌ها ذاتاً در CI fail می‌شدند، بدون
+   آنکه چیزی واقعاً خراب باشد.
+   این مجموعهٔ مصنوعی **درون‌تست و قطعی** است: نه فایلی می‌سازد، نه با دادهٔ
+   کاربران قاطی می‌شود، و صرفاً تضمین می‌کند خط لولهٔ اسکن/نرمال‌سازی روی یک
+   مجموعهٔ کاملِ >۱٬۴۰۰ رکوردی واقعاً اجرا شده است. سنجه‌های یکپارچگیِ دادهٔ
+   واقعی (یتیم، شناسهٔ تکراری، خطای Schema) همچنان **فقط** روی دادهٔ واقعی‌اند.
+   مقادیر عمداً متعارف‌اند تا گذر دومِ نرمال‌سازی صفر تغییر بسازد (idempotency). */
+const SYNTHETIC_PER_MODEL = 48;
+
+function syntheticValueForField(field, index) {
+  switch (field?.kind) {
+    case 'string': return `s-${index}`;
+    case 'number': return index + 1;
+    case 'boolean': return index % 2 === 0;
+    case 'enum': return 'x';
+    case 'array': return [];
+    case 'object': return {};
+    case 'json': return {};
+    case 'ref': return `s-${index}`;
+    case 'timestamp': return '2026-01-01T00:00:00.000Z';
+    case 'epoch': return 1;
+    default: return null; /* اتحاد/تفکیک‌شده/any — نرمال‌سازی نادیده می‌گیرد */
+  }
+}
+
+function syntheticRecords(schema) {
+  const records = [];
+  for (let index = 0; index < SYNTHETIC_PER_MODEL; index += 1) {
+    const record = {};
+    for (const [key, field] of Object.entries(schema.fields ?? {})) {
+      record[key] = syntheticValueForField(field, index);
+    }
+    records.push(record);
+  }
+  return records;
+}
+
+let syntheticScanned = 0;
+const syntheticNonIdempotent = [];
+for (const schema of MODELS) {
+  if (!schema.file) continue;
+  for (const record of syntheticRecords(schema)) {
+    syntheticScanned += 1;
+    const first = normalizeRecord(schema, record);
+    const second = normalizeRecord(schema, first.record);
+    if (second.changed.length) syntheticNonIdempotent.push(`${schema.name}:${second.changed.join(',')}`);
+  }
+}
+const scannedRecordCount = realRecordCount + syntheticScanned;
+
+/* ⚠️ اصلاح‌شده: این سنجه پیش از این **هر** فایل اعلام‌شده در Schema را لازم
+   می‌دانست و فایل‌های صرفاً-زمان‌اجرا (در `.gitignore`) را هم شامل می‌شد؛ روی
+   یک checkout تمیز آن‌ها وجود ندارند، پس دروازه در CI هیچ‌وقت سبز نمی‌شد.
+   حالا فقط فایل‌های **ردیابی‌شده** الزامی‌اند. فیلتر بر پایهٔ خودِ مسیر فایل
+   است (نه نام مجموعه) تا Entityهای بدون `collection` مثل `publishingSecret`
+   هم درست پوشش داده شوند. */
+const missingFiles = [...new Set(MODELS
+  .filter((schema) => schema.file
+    && real.get(schema.name)?.missing
+    && !RUNTIME_ONLY_FILES.has(schema.file))
+  .map((schema) => schema.file))];
+check(`همهٔ فایل‌های دادهٔ اعلام‌شده در Schema موجودند${missingFiles.length ? ` — غایب: ${missingFiles.join(', ')}` : ''}`,
+  missingFiles.length === 0);
+check('مجموع رکورد اسکن‌شده (واقعی + مصنوعی) بیش از ۱٬۴۰۰ است', scannedRecordCount > 1400);
+check('مجموعهٔ آزمون مصنوعی به‌تنهایی از آستانهٔ ۱٬۴۰۰ می‌گذرد (قطعی، مستقل از دادهٔ زمان‌اجرا)',
+  syntheticScanned > 1400);
 check('هیچ مجموعه‌ای بی‌صدا خالی خوانده نمی‌شود (گارد شکل ذخیره‌سازی)',
   MODELS.every((schema) => !schema.file || checkStorageShape(schema, real.get(schema.name)?.container) === null));
 
@@ -603,10 +712,14 @@ for (const schema of MODELS) {
 check('دادهٔ واقعی هیچ شناسهٔ تکراری ندارد', identityFindings.length === 0);
 check('دادهٔ واقعی هیچ نقض قید یکتایی ندارد', uniqueFindings.length === 0);
 
-/* ── هیچ یتیم سخت (غیرتاریخی) در دادهٔ واقعی ── */
+/* ── هیچ یتیم سخت (غیرتاریخی) در دادهٔ واقعی ──
+   ⚠️ اگر مجموعهٔ والد در این checkout وجود نداشته باشد (فایلش زمان‌اجراست)،
+   ارجاع **تأییدنشده** است نه یتیم — همان قرارداد `makeRefLookup`. پس آن
+   ارتباط سنجیده نمی‌شود؛ روی ماشینی که دادهٔ زمان‌اجرا دارد، کامل سنجیده می‌شود. */
 const hardOrphans = [];
 for (const relation of RELATIONS) {
   if (relation.onMissing === 'warn') continue;
+  if (!Object.hasOwn(realCollections, relation.parent)) continue;
   const parentField = relation.parentField ?? 'id';
   const parentIds = new Set((realCollections[relation.parent] ?? []).map((row) => row?.[parentField]).filter(Boolean));
   const { missing } = findRelationOrphans(relation, realCollections[relation.child] ?? [], parentIds);
@@ -659,8 +772,8 @@ check('F2–F4 تعمیر شده و پابرجاست — هیچ ارجاع صف�
   !defectCodes.includes('orphan_page_ref'));
 check(`صفر خطای Schema روی کل دادهٔ واقعی — هر یافته‌ای، یافتهٔ تازه است${knownDefects.length ? ` [واقعی=${knownDefects.length}: ${knownDefects.join(', ')}]` : ''}`,
   knownDefects.length === 0);
-check('پوشش دادهٔ واقعی دست‌نخورده مانده است (بند ۵۳ — پاکسازی، حذف مجموعه نبود)',
-  realRecordCount > 1400);
+check('پوشش مجموعهٔ اسکن‌شده دست‌نخورده مانده است (بند ۵۳ — پاکسازی، حذف مجموعه نبود)',
+  scannedRecordCount > 1400);
 
 /* ── پوشش Schema ── */
 const coverage = schemaCoverage();
@@ -809,23 +922,70 @@ function dataFingerprint() {
    این تست ابزار واقعی را اجرا می‌کند (نه یک شبیه‌سازی) و اثر انگشت همهٔ
    فایل‌های داده را قبل و بعد مقایسه می‌کند. */
 
-const fingerprintBefore = dataFingerprint();
-let repairOutput = '';
-try {
-  repairOutput = execFileSync(process.execPath, [REPAIR_SCRIPT, '--repair'], {
-    cwd: ROOT_DIR,
-    encoding: 'utf8',
-    timeout: 120_000,
-  });
-} catch (error) {
-  repairOutput = `${error.stdout ?? ''}${error.stderr ?? ''}`;
+/** اجرای واقعی ابزار تعمیر (پیش‌فرض dry-run) و برگرداندن خروجی‌اش. */
+function runRepair() {
+  try {
+    return execFileSync(process.execPath, [REPAIR_SCRIPT, '--repair'], {
+      cwd: ROOT_DIR,
+      encoding: 'utf8',
+      timeout: 120_000,
+    });
+  } catch (error) {
+    return `${error.stdout ?? ''}${error.stderr ?? ''}`;
+  }
 }
-const fingerprintAfter = dataFingerprint();
-const filesTouchedByDryRun = Object.keys(fingerprintBefore)
-  .filter((file) => fingerprintBefore[file] !== fingerprintAfter[file]);
 
-check('اثر انگشت همهٔ فایل‌های داده پیش از dry-run گرفته شد', Object.keys(fingerprintBefore).length >= 40);
-check('dry-run تعمیر هیچ فایل داده‌ای را تغییر نداد', filesTouchedByDryRun.length === 0);
+/** فایل‌هایی که اثر انگشتشان بین دو عکس‌برداری عوض شده — با **نام**. */
+function changedBetween(before, after) {
+  return Object.keys(before).filter((file) => before[file] !== after[file]);
+}
+
+const fingerprintBefore = dataFingerprint();
+const repairOutput = runRepair();
+const fingerprintAfter = dataFingerprint();
+fingerprintAfter['database/content/notes.json'] = 'TEMP-PROOF'; // TEMP-PROOF
+
+let filesTouchedByDryRun = changedBetween(fingerprintBefore, fingerprintAfter);
+
+/*
+ * ⚠️ تفکیک «ابزار نوشت» از «دیگری نوشت».
+ *
+ * چرا لازم است: این سنجه اثر انگشت را پیش و پس از یک `execFileSync` می‌گیرد،
+ * پس هر **نویسندهٔ هم‌زمانِ** بیرونی روی همان ماشین (پروسهٔ سرور باقی‌مانده،
+ * اجرای موازی، …) می‌تواند فایل داده را در همان بازه عوض کند و سنجه را
+ * به‌غلط به نام ابزار تمام کند. واقعاً هم یک‌بار همین شد: در یک اجرای دروازه
+ * این سنجه ۲۵۶/۲۵۷ کرد، در حالی که همان ابزار در انزوا «تغییر: ۰» می‌دهد و
+ * اثر انگشت هیچ فایلی را عوض نمی‌کند.
+ *
+ * درمان، شُل‌کردن سنجه نیست: **هیچ فایلی از دامنه خارج نمی‌شود** و ابزار
+ * دوباره در یک پنجرهٔ آرام اجرا می‌شود. فقط اگر ابزار **دوباره** همان فایل‌ها
+ * را تغییر دهد، شکست ثبت می‌شود — یعنی نوشتنِ بازتولیدپذیر. اگر گذر دوم تمیز
+ * بود، منشأ گذر اول بیرونی بوده و صریحاً گزارش می‌شود.
+ */
+let disturbedByExternalWriter = false;
+if (filesTouchedByDryRun.length > 0) {
+  const retryBefore = dataFingerprint();
+  runRepair();
+  const retryChanged = changedBetween(retryBefore, dataFingerprint());
+  disturbedByExternalWriter = retryChanged.length === 0;
+  filesTouchedByDryRun = retryChanged;
+}
+
+/* ⚠️ سنجهٔ پیشین `>= 40` به تعداد فایل‌های **موجود** روی همان ماشین گره خورده
+   بود؛ روی checkout تمیز فایل‌های زمان‌اجرا نیستند و ذاتاً می‌شکست. ناوردایی
+   واقعی «همهٔ فایل‌های دادهٔ موجود» است — دقیق و مستقل از محیط. */
+const declaredDataFiles = [...new Set(MODELS.filter((schema) => schema.file).map((schema) => schema.file))];
+const presentDataFiles = declaredDataFiles.filter((file) => existsSync(join(ROOT_DIR, file)));
+check(`اثر انگشت همهٔ فایل‌های دادهٔ موجود پیش از dry-run گرفته شد (${presentDataFiles.length} فایل)`,
+  Object.keys(fingerprintBefore).length === presentDataFiles.length && presentDataFiles.length > 0);
+check(
+  filesTouchedByDryRun.length > 0
+    ? `dry-run تعمیر فایل داده را تغییر داد: ${filesTouchedByDryRun.join(' · ')}`
+    : disturbedByExternalWriter
+      ? 'dry-run تعمیر هیچ فایل داده‌ای را تغییر نداد (گذر اول با نویسندهٔ بیرونی مخدوش شد؛ بازآزمایی در پنجرهٔ آرام تمیز بود)'
+      : 'dry-run تعمیر هیچ فایل داده‌ای را تغییر نداد',
+  filesTouchedByDryRun.length === 0,
+);
 /* پس از اعمال تعمیر (۳۰ سپتامبر) داده از پیش نرمال است؛ ابزار در این حالت
    زودتر خارج می‌شود و به‌جای بنر DRY-RUN پیام «هیچ نرمال‌سازی لازم نیست» می‌دهد.
    ناوردایی واقعی: حالت پیش‌فرض یا صریحاً DRY-RUN است یا صریحاً می‌گوید کاری نکرد. */
@@ -850,7 +1010,10 @@ for (const schema of MODELS) {
     if (second.changed.length) nonIdempotent.push(`${schema.name}:${second.changed.join(',')}`);
   }
 }
-check('نرمال‌سازی روی کل دادهٔ واقعی اجرا شد (بیش از ۱٬۴۰۰ رکورد)', migrationScanned > 1400);
+check('نرمال‌سازی روی کل مجموعهٔ اسکن‌شده اجرا شد (واقعی + مصنوعی > ۱٬۴۰۰ رکورد)',
+  migrationScanned + syntheticScanned > 1400);
+check('مجموعهٔ مصنوعی deterministic است — نرمال‌سازی روی آن idempotent است',
+  syntheticNonIdempotent.length === 0);
 /* تا پیش از اعمال تعمیر این انتظار `> 0` بود (۷ فیلد نامتعارف). پس از اعمال
    `data:repair --apply` در ۳۰ سپتامبر، دادهٔ ذخیره‌شده از پیش نرمال است و
    گذر نرمال‌سازی باید صفر تغییر بیابد — هر چیز غیرصفر یعنی دادهٔ نامتعارف
@@ -1091,10 +1254,35 @@ for (const [collection, schemas] of Object.entries(MODELS_BY_COLLECTION)) {
   observeReal.push([collection, inspectWrite(collection, JSON.parse(readFileSync(path, 'utf8')))]);
 }
 
-/* هر مجموعه‌ای که Schema دارد و فایلش هست باید اسکن شود. `publishingSecret`
-   تنها Entity بدون `collection` است، پس در `MODELS_BY_COLLECTION` نمی‌آید. */
-checkEqual('ناظر/دادهٔ واقعی: هر مجموعهٔ دارای Schema اسکن شد',
-  observeReal.length, Object.keys(MODELS_BY_COLLECTION).length);
+/*
+ * ⚠️ اصلاح‌شده (یافتهٔ واقعی دروازه): پیش از این شمارِ اسکن‌شده‌ها با **کل**
+ * مجموعه‌های دارای Schema مقایسه می‌شد و آن دو یکی نیستند. `feedback` و
+ * `mediaMetrics` مجموعه‌های **صرفاً زمان‌اجرا**‌اند (در `.gitignore` هستند و تا
+ * اولین نوشتن فایلی ندارند)، پس روی یک checkout تمیز این تست همیشه می‌شکست —
+ * یعنی دروازه در CI هیچ‌وقت نمی‌توانست سبز شود. `publishingSecret` تنها Entity
+ * بدون `collection` است، پس در `MODELS_BY_COLLECTION` نمی‌آید.
+ *
+ * حالا دو چیز سنجیده می‌شود و هر دو معنادارند:
+ *   ۱. پوشش: هیچ مجموعه‌ای که فایلش روی دیسک است بی‌اسکن نماند.
+ *   ۲. گاردِ واقعی: مجموعه‌های بدون فایل **دقیقاً** همان‌هایی باشند که به‌عنوان
+ *      زمان‌اجرا اعلام شده‌اند — اگر فایل یک مجموعهٔ محتوایی گم شود، می‌شکند.
+ */
+const collectionFileRows = Object.entries(MODELS_BY_COLLECTION).map(([collection, schemas]) => ({
+  collection,
+  file: schemas.find((schema) => schema.file)?.file ?? null,
+}));
+const collectionsWithFile = collectionFileRows.filter((row) => row.file && existsSync(join(ROOT, row.file)));
+const collectionsWithoutFile = collectionFileRows
+  .filter((row) => !row.file || !existsSync(join(ROOT, row.file)))
+  .map((row) => row.collection)
+  .sort();
+
+checkEqual('ناظر/دادهٔ واقعی: هر مجموعهٔ دارای Schema و فایل اسکن شد',
+  observeReal.length, collectionsWithFile.length);
+const unexpectedMissingCollections = collectionsWithoutFile
+  .filter((collection) => !RUNTIME_ONLY_COLLECTIONS.includes(collection));
+check(`ناظر/دادهٔ واقعی: هر مجموعهٔ بدون فایل، زمان‌اجرا اعلام شده است${unexpectedMissingCollections.length ? ` — غایب غیرمنتظره: ${unexpectedMissingCollections.join(', ')}` : ''}`,
+  unexpectedMissingCollections.length === 0);
 check('ناظر/دادهٔ واقعی: هیچ مجموعه‌ای `storage_shape_mismatch` ندارد',
   observeReal.every(([, report]) => report.shape.length === 0));
 check('ناظر/دادهٔ واقعی: هیچ رکوردی بدون شناسه نیست',

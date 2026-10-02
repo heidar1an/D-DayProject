@@ -4315,6 +4315,26 @@ export function deleteAdmin(id, actor = null) {
     throw Object.assign(new Error('حداقل یک مدیر کل فعال باید باقی بماند'), { code: 'CONFLICT' });
   }
 
+  /*
+   * ⚠️ شکافِ رفع‌شده: `notes.authorId` یک رابطهٔ **الزامی** به `admins` است، ولی
+   * حذف مدیر یادداشت‌هایش را چک نمی‌کرد. نتیجه‌اش یادداشت‌های یتیم بود — دقیقاً
+   * همان چیزی که `data:check` با ۱۱ خطای `not_found`/`orphan` گزارش کرد
+   * (`notes.authorId → admins.id`). یادداشت‌ها به نویسنده گره خورده‌اند
+   * (`listNotes` فقط یادداشت‌های خودِ مدیر را برمی‌گرداند)، پس با رفتن نویسنده
+   * رکوردها **دست‌نیافتنی** می‌شوند و در انبار باقی می‌مانند.
+   *
+   * الگوی رفع همان `deleteCategory` است (بند ۳۴ — یک قاعده، یک جا): مرجعِ در
+   * استفاده ⇒ **بلاک**، نه حذف آبشاری. حذف آبشاری اینجا یعنی نابودی خاموش
+   * یادداشت‌های کاری مدیر بدون هیچ هشداری.
+   */
+  const ownedNotes = readCollection('notes').filter((note) => note.authorId === id).length;
+  if (ownedNotes > 0) {
+    throw Object.assign(
+      new Error(`این مدیر ${ownedNotes} یادداشت دارد؛ پیش از حذف، یادداشت‌هایش را منتقل یا پاک کنید`),
+      { code: 'CONFLICT' },
+    );
+  }
+
   writeCollection('admins', admins.filter((admin) => admin.id !== id));
 
   /* نشست‌های حساب حذف‌شده همان لحظه باطل می‌شوند */
@@ -4428,4 +4448,11 @@ export function publicSettings() {
   };
 }
 
-export { ensureStore, contentDir, uploadsDir };
+/*
+ * `COLLECTIONS` صادر می‌شود تا ابزارهای بیرونی بتوانند «آیا این نام، مجموعهٔ
+ * قابل‌خواندن است؟» را از **خودِ منبع حقیقت** بپرسند، نه با حدس از نام فایل.
+ * شاهدِ نیاز واقعی: `scripts/persistence-benchmark.mjs` هر `*.json` داخل
+ * `database/content/` را مجموعه می‌شمرد و `readCollection` را با نام‌های
+ * غیرمجموعه (`examQuestions`، `settings`، …) صدا می‌زد ⇒ `unknown-collection`.
+ */
+export { ensureStore, contentDir, uploadsDir, COLLECTIONS };

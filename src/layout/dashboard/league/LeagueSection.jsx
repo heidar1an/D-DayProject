@@ -25,6 +25,7 @@ import Challenges from './Challenges';
 import Leaderboard, { LeaderRow, PodiumCard } from './Leaderboard';
 import LeagueAchievements from './LeagueAchievements';
 import LeagueProfile from './LeagueProfile';
+import SocialProfileDialog, { SOCIAL_PEOPLE, toSocialPerson } from '../SocialProfileDialog';
 import {
   HeartReward,
   Icon,
@@ -316,6 +317,7 @@ export default function LeagueSection({ userData }) {
   const [activeView, setActiveView] = useState('overview');
   const [hearts, setHearts] = useState(null);
   const [toasts, setToasts] = useState([]);
+  const [selectedProfile, setSelectedProfile] = useState(null);
 
   useEffect(() => {
     trackEvent('league_view');
@@ -338,6 +340,8 @@ export default function LeagueSection({ userData }) {
     setActiveView(viewId);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  const openMemberProfile = (entry) => setSelectedProfile(toSocialPerson(entry));
 
   const me = overview?.me
     ? { ...overview.me, hearts: hearts ?? overview.me.hearts, tier: overview.tier, tierProgress: overview.tierProgress }
@@ -386,7 +390,7 @@ export default function LeagueSection({ userData }) {
           {/* محتوای زیربخش */}
           <div key={activeView}>
             {activeView === 'overview' && <Overview overview={overview} hearts={hearts} onOpenView={openView} />}
-            {activeView === 'board' && <Leaderboard me={me} />}
+            {activeView === 'board' && <Leaderboard me={me} onOpenProfile={openMemberProfile} />}
             {activeView === 'challenges' && <Challenges me={me} onEarnHearts={handleEarnHearts} />}
             {activeView === 'achievements' && <LeagueAchievements />}
             {activeView === 'profile' && (
@@ -394,6 +398,19 @@ export default function LeagueSection({ userData }) {
             )}
           </div>
         </div>
+      )}
+
+      {selectedProfile && (
+        <SocialProfileDialog
+          type="profile"
+          people={[]}
+          person={selectedProfile}
+          userData={userData}
+          userId={userData?.id || 'current'}
+          defaultFollowing={SOCIAL_PEOPLE.slice(2, 5)}
+          onClose={() => setSelectedProfile(null)}
+          onOpenPerson={setSelectedProfile}
+        />
       )}
 
       {/* توست‌های قلب */}

@@ -79,12 +79,36 @@ export const adminSchema = {
 
 /* ─────────────────────────────── کاربر سایت ─────────────────────────────── */
 
+/*
+ * ⚠️ این شش فیلد در نسخهٔ اولِ Schema جا افتاده بودند و `data:check` آن‌ها را
+ * به‌درستی `unknown_field` گرفت (۲۱ خطا روی `database/users.json`).
+ *
+ * شاهد هر کدام، همان جایی است که واقعاً نوشته می‌شوند — نه حدس:
+ *   • `email`           → `EditProfile.jsx` (`initialForm.email` از `profile.email`)
+ *   • `grade`           → `EditProfile.jsx` (انتخاب دوره: «دوره علوم پایه» …)
+ *   • `gender`          → `EditProfile.jsx`
+ *   • `birthDate`       → `EditProfile.jsx` — تاریخ **شمسی** ذخیره می‌شود، پس رشته
+ *                          است نه timestamp (`parseBirthDate` روی آن کار می‌کند)
+ *   • `avatar`          → `avatarOptions.js`: فقط **شناسهٔ دو رقمی** `01`–`35` ذخیره
+ *                          می‌شود (یا رشتهٔ خالی)، نه مسیر فایل
+ *   • `favoriteCourses` → رکوردهای موجود در `users.json`؛ کاتالوگ دوره‌های نشان‌شده
+ *
+ * چرا این‌ها روی `profile` می‌نشینند و نه روی رکورد کاربر: `profile` فقط دادهٔ
+ * نمایشی/قابل‌ویرایش کاربر است و جدا از هویت و اعتبارنامه نگه داشته می‌شود —
+ * همان قراردادی که بالای همین Schema نوشته شده.
+ */
 const userProfileSchema = obj({
   firstName: str({ max: 80 }),
   lastName: str({ max: 80 }),
   username: str({ max: 64 }),
   university: str({ max: 160 }),
   term: str({ max: 16 }),
+  email: str({ max: 320 }),
+  grade: str({ max: 80 }),
+  gender: str({ max: 20 }),
+  birthDate: str({ max: 20 }),
+  avatar: str({ max: 8 }),
+  favoriteCourses: arr(str({ max: 120 }), { max: 200, unique: true }),
   motivations: arr(enumOf(USER_MOTIVATIONS, { name: 'USER_MOTIVATIONS' }), { max: 12, unique: true }),
   referralSources: arr(enumOf(USER_REFERRAL_SOURCES, { name: 'USER_REFERRAL_SOURCES' }), { max: 12, unique: true }),
 });

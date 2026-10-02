@@ -221,11 +221,11 @@ export function Modal({ open, onClose, title, children, wide = false }) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[70] grid place-items-center p-4" role="dialog" aria-modal="true" aria-label={title}>
+    <div className="fixed inset-0 z-[70] grid place-items-center p-4" role="dialog" aria-modal="true" aria-label={title || 'پنجرهٔ گفتگو'}>
       <button type="button" aria-label="بستن" className="absolute inset-0 cursor-default bg-black/75 backdrop-blur-sm" onClick={onClose} />
       <div className={`nt-modal relative max-h-[88vh] w-full overflow-y-auto rounded-[2rem] border border-white/10 bg-[var(--surface)] p-6 shadow-[0_32px_80px_-24px_rgb(var(--shadow-rgb) / 0.9)] md:p-8 ${wide ? 'max-w-2xl' : 'max-w-lg'}`}>
         <header className="mb-5 flex items-center justify-between gap-3">
-          <h2 className="text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]">{title}</h2>
+          {title && <h2 className="text-lg [font-family:'Doran','Vazir',Tahoma,sans-serif]">{title}</h2>}
           <button
             type="button"
             onClick={onClose}

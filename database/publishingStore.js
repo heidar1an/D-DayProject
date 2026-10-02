@@ -18,7 +18,7 @@
  * پس می‌توان کل مسیر را بدون هیچ اعتباری ساخت و دید.
  */
 
-import { chmodSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { chmodSync, existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -83,13 +83,23 @@ function readSecrets() {
 }
 
 function writeSecrets(secrets) {
-  writeFileSync(secretsFile, JSON.stringify(secrets, null, 2), 'utf8');
+  /*
+   * نوشتن اتمیک (tmp → rename) — فاز ۶ (آمادگی چند‌پروسه‌ای).
+   *
+   * پیش از این مستقیم روی فایل نهایی نوشته می‌شد. اگر پروسه در میانهٔ نوشتن
+   * می‌مرد، فایل توکن‌ها **نیمه‌نوشته** می‌ماند؛ `readSecrets` هم JSON خراب را
+   * بی‌صدا به «هیچ توکنی» تبدیل می‌کند ⇒ از دست رفتن خاموش همهٔ توکن‌های ربات.
+   * همین الگو در `contentStore.writeJson` و `writeQueue` استفاده می‌شود.
+   */
+  const tmp = `${secretsFile}.${process.pid}.tmp`;
+  writeFileSync(tmp, JSON.stringify(secrets, null, 2), 'utf8');
   /* فقط صاحب فایل بخواند/بنویسد — توکن ربات اینجاست */
   try {
-    chmodSync(secretsFile, 0o600);
+    chmodSync(tmp, 0o600);
   } catch {
     /* روی برخی فایل‌سیستم‌ها chmod معنا ندارد؛ ذخیره انجام شده است */
   }
+  renameSync(tmp, secretsFile);
 }
 
 function storedToken(channelId) {

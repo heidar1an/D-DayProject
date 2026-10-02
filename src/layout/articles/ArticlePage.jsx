@@ -26,7 +26,6 @@ import {
   BookmarkIcon,
   ChevronIcon,
   CopyIcon,
-  FocusIcon,
   HighlighterIcon,
   LinkIcon,
   NoteIcon,
@@ -443,7 +442,6 @@ export default function ArticlePage({ slug }) {
   const [article, setArticle] = useState(null); // null: در حال بارگذاری، undefined: پیدا نشد
   const [related, setRelated] = useState(null);
   const [activeHeading, setActiveHeading] = useState(null);
-  const [focusMode, setFocusMode] = useState(false);
   const contentRef = useRef(null);
 
   /* ادامه مطالعه */
@@ -554,14 +552,6 @@ export default function ArticlePage({ slug }) {
 
     return () => window.removeEventListener('scroll', requestUpdate);
   }, [article, tocItems]);
-
-  /* حالت فوکوس: پنهان‌کردن عناصر غیرمطالعه */
-  useEffect(() => {
-    if (!focusMode) return undefined;
-
-    document.body.classList.add('ap-reading-mode');
-    return () => document.body.classList.remove('ap-reading-mode');
-  }, [focusMode]);
 
   /* Popover انتخاب متن */
   useEffect(() => {
@@ -692,7 +682,7 @@ export default function ArticlePage({ slug }) {
   const currentProgress = userEntry?.progress ?? 0;
 
   return (
-    <main className={`ap-article ap-layer-reveal${focusMode ? ' ap-article--focus' : ''}`} key={slug}>
+    <main className="ap-article ap-layer-reveal" key={slug}>
       <ReadingProgress onRatioChange={handleProgress} />
 
       <article className="ap-stagger">
@@ -737,15 +727,6 @@ export default function ArticlePage({ slug }) {
             >
               <BookmarkIcon filled={bookmarked} />
               {bookmarked ? 'ذخیره شد' : 'ذخیره'}
-            </button>
-            <button
-              type="button"
-              className={`ap-tool-button${focusMode ? ' is-active' : ''}`}
-              aria-pressed={focusMode}
-              onClick={() => setFocusMode((value) => !value)}
-            >
-              <FocusIcon />
-              {focusMode ? 'خروج از حالت مطالعه' : 'حالت مطالعه'}
             </button>
             {currentProgress > 0.02 && (
               <span className="ap-tool-progress" aria-label={`پیشرفت مطالعه ${faPercent(currentProgress)}`}>
@@ -841,13 +822,7 @@ export default function ArticlePage({ slug }) {
         )}
       </article>
 
-      {focusMode && (
-        <button type="button" className="ap-focus-exit" onClick={() => setFocusMode(false)}>
-          خروج از حالت مطالعه
-        </button>
-      )}
-
-      {resumeOffer && !focusMode && (
+      {resumeOffer && (
         <div className="ap-resume" role="status">
           <span>ادامه مطالعه از {faPercent(resumeOffer.progress)}</span>
           <button type="button" onClick={jumpToSavedPosition}>

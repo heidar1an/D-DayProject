@@ -239,14 +239,28 @@ export const SYSTEM_ACTOR_ID = 'system';
 
 /* ─────────────────────────── کاربر سایت ─────────────────────────── */
 
-/** `usersStore.js` → `EMPTY_PROFILE.motivations` مقادیر واقعی */
+/*
+ * ⚠️ منبع حقیقت این دو Enum، **فرم ثبت‌نام مرحلهٔ دوم** است، نه فهرست دستی:
+ * `src/layout/SecondaryRegistrationLayout.jsx` → `motivationOptions` / `referralOptions`.
+ *
+ * چرا اصلاح شد (یافتهٔ واقعی `data:check`): فهرست قبلی از یک نسخهٔ قدیمیِ UI نوشته
+ * شده بود و با گزینه‌های واقعی فرم هم‌خوان نبود. نتیجه‌اش یک نقص خاموش بود:
+ * کاربر می‌توانست گزینه‌ای را در فرم انتخاب کند که **مدل داده آن را رد می‌کرد**
+ * (`enum` در `data:check`) — یعنی ذخیرهٔ پروفایل کاربر با دادهٔ نامعتبر.
+ * مقادیر واقعیِ موجود در `database/users.json` شاهدِ همین ناهم‌خوانی بودند:
+ * `experience`/`learning` در motivations و `rubika`/`internet` در referralSources.
+ *
+ * قاعدهٔ نگه‌داشت: هر گزینهٔ تازه در فرم باید **همان‌جا** اینجا هم بیاید.
+ */
 export const USER_MOTIVATIONS = [
-  'income', 'helping-people', 'knowledge', 'prestige', 'family', 'curiosity',
+  'learning', 'income', 'no-goal', 'friends',
+  'helping-people', 'personal-interest', 'family-job', 'experience',
 ];
 
-/** `usersStore.js` → `EMPTY_PROFILE.referralSources` مقادیر واقعی */
+/** `SecondaryRegistrationLayout.jsx` → `referralOptions` مقادیر واقعی */
 export const USER_REFERRAL_SOURCES = [
-  'friends', 'telegram', 'instagram', 'google', 'university', 'other',
+  'telegram', 'internet', 'friends', 'university',
+  'bale', 'instagram', 'rubika', 'artificial-intelligence',
 ];
 
 /* ─────────────────────────── شکل Enum ─────────────────────────── */

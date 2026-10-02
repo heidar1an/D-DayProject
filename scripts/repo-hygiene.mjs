@@ -9,6 +9,13 @@
  *   ۱. سرّ در فایل‌های tracked (الگوهای پرخطر، نه هر رشتهٔ شبیه کلید).
  *   ۲. فایل tracked با حجم بیش از سقف (پیش‌فرض ۲ مگابایت).
  *   ۳. دادهٔ زمان‌اجرا که نباید tracked باشد (فهرست صریح، نه حدس).
+ *   ۴. زائد آزمون در پوشهٔ **سروشدهٔ** `public/uploads/` (پیشوند رزرو `e2e-`).
+ *
+ * بررسی ۴ از یک کوری واقعی می‌آید: آزمون امنیت آپلود فایل موقش را داخل همان
+ * پوشه می‌سازد (چون تابع تصمیم‌گیرنده فقط داخل آن را می‌بیند) و اگر اجرایی
+ * نیمه‌کاره بمیرد، فایل در پوشه‌ای می‌ماند که **سرو می‌شود** — یعنی یک فایل
+ * قابل‌دریافت در محصول. پیش‌تر ۶ مورد همین‌طور انبار شده بود و هیچ دروازه‌ای
+ * ندید، چون این ابزار فقط فایل‌های tracked را می‌نگرد.
  *
  * اجرا:  node scripts/repo-hygiene.mjs [--json] [--max-mb=2]
  * کد خروج: ۰ سالم · ۱ یافتهٔ نقض · ۲ خطای اجرا
@@ -16,8 +23,8 @@
  * این اسکریپت را می‌توان در pre-commit یا CI سوار کرد.
  */
 import { execFileSync } from 'node:child_process';
-import { readFileSync, statSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 
 const ROOT = resolve(import.meta.dirname, '..');
 const argv = process.argv.slice(2);
@@ -85,7 +92,26 @@ const SECRET_SCAN_SKIP = [
   /^src\/layout\/auth\/AuthPage\.jsx$/,
 ];
 
-const findings = { secrets: [], largeFiles: [], largeAssets: [], runtimeData: [] };
+const findings = { secrets: [], largeFiles: [], largeAssets: [], runtimeData: [], leftoverUploads: [] };
+
+/*
+ * پیشوندی که آزمون امنیت آپلود برای فایل‌های موقش رزرو کرده
+ * (`database/uploadsSecurity.test.mjs` → `unique()`). هر فایلی با این پیشوند
+ * در پوشهٔ سروشده، **قطعاً** زائد آزمون است — نه آپلود واقعی محصول.
+ */
+const TEST_ARTIFACT_PREFIX = 'e2e-';
+const UPLOADS_DIR = resolve(ROOT, 'public', 'uploads');
+
+for (const name of readdirSync(UPLOADS_DIR)) {
+  if (!name.startsWith(TEST_ARTIFACT_PREFIX)) continue;
+  let bytes = 0;
+  try {
+    bytes = statSync(join(UPLOADS_DIR, name)).size;
+  } catch {
+    continue;
+  }
+  findings.leftoverUploads.push({ file: `public/uploads/${name}`, bytes });
+}
 
 /*
  * تفکیک «دارایی دودویی» از «فایل متنی/سورس» — فاز ۲۲ ممیزی، اصلاح‌شده در فاز ۲.
@@ -137,8 +163,10 @@ for (const rel of tracked) {
 /*
  * تفکیک «نقض» از «هشدار».
  *
- * نقض (کد خروج ۱): سرّ در فایل tracked · دادهٔ زمان‌اجرا tracked.
- *   این دو **دستهٔ ناخواسته**اند: هیچ‌کدام نباید در مخزن باشد.
+ * نقض (کد خروج ۱): سرّ در فایل tracked · دادهٔ زمان‌اجرا tracked · زائد آزمون در
+ *   پوشهٔ سروشده. این‌ها **دستهٔ ناخواسته**اند: هیچ‌کدام نباید در محصول باشد.
+ *   تفاوت «دادهٔ زمان‌اجرا» و «زائد آزمون» فقط این است که اولی در گیت است و
+ *   دومی روی دیسک و سرو می‌شود؛ هر دو ناخواسته‌اند.
  *
  * هشدار (کد خروج ۰): فایل حجیم — چه دارایی دودویی، چه سورس.
  *   «حجم» به‌تنهایی یک فایل را ناخواسته نمی‌کند. مدل‌های GLB آناتومی و
@@ -149,7 +177,8 @@ for (const rel of tracked) {
  * مصنوعات تولیدشده (dist، *.out.mjs، .probe*) جداگانه پوشش دارند: در
  * `.gitignore` هستند، پس اصلاً نمی‌توانند tracked شوند.
  */
-const violations = findings.secrets.length + findings.runtimeData.length;
+const violations =
+  findings.secrets.length + findings.runtimeData.length + findings.leftoverUploads.length;
 const warnings = findings.largeFiles.length + findings.largeAssets.length;
 
 if (asJson) {
@@ -188,6 +217,14 @@ if (findings.largeAssets.length) {
 console.log(`\n── دادهٔ زمان‌اجرا که نباید tracked باشد (${findings.runtimeData.length}) ──`);
 if (!findings.runtimeData.length) console.log('  ✓ یافته‌ای نبود');
 for (const r of findings.runtimeData) console.log(`  ✗ ${r.file}  ${(r.bytes / 1024).toFixed(0)}KB`);
+
+console.log(`\n── زائد آزمون در پوشهٔ سروشدهٔ public/uploads (${findings.leftoverUploads.length}) ──`);
+if (!findings.leftoverUploads.length) console.log('  ✓ یافته‌ای نبود');
+for (const l of findings.leftoverUploads) console.log(`  ✗ ${l.file}  ${l.bytes}B`);
+if (findings.leftoverUploads.length) {
+  console.log('  این‌ها با پیشوند رزروشدهٔ آزمون ساخته شده‌اند و از اجرایی نیمه‌کاره مانده‌اند.');
+  console.log('  پوشه سرو می‌شود، پس هر مورد یک فایل قابل‌دریافت در محصول است. پاکشان کنید.');
+}
 
 console.log(`\n${violations ? `${violations} یافتهٔ نقض` : 'پاک'}`);
 process.exit(violations ? 1 : 0);

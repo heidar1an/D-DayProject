@@ -11,7 +11,7 @@
  *   • `/healthz` ⇒ ۲۰۰ و `status: 'ok'` (liveness، نباید به داده وابسته باشد)
  *   • `/api/health` ⇒ همان liveness روی مسیر عمومی استاندارد؛ بدون احراز هویت،
  *     بدون افشای مسیر/نسخه/stack، و `POST` روی آن ۴۰۵ می‌دهد
- *   • `/readyz`  ⇒ ۲۰۰ با گزارش `checks` (data-writable · build-artifact · model-registry)
+ *   • `/readyz`  ⇒ ۲۰۰ با گزارش `checks` (data-writable · uploads-writable · build-artifact · model-registry)
  *   • `/metrics` ⇒ بدون توکن و با توکن غلط **۴۰۴** (نه ۴۰۳)؛ با توکن درست ۲۰۰
  *   • `/api/users/me` و `/api/admin/summary` بدون احراز هویت ⇒ ۴۰۱
  *   • `X-Request-Id` روی هر پاسخ
@@ -68,8 +68,21 @@ let serverLog = '';
 child.stdout.on('data', (chunk) => { serverLog += chunk; });
 child.stderr.on('data', (chunk) => { serverLog += chunk; });
 
+/*
+ * پنجرهٔ آمادگی.
+ *
+ * ⚠️ چرا از ۱۰ ثانیه به ۳۰ ثانیه رفت (یافتهٔ واقعی دروازه): `server.js` کل لایهٔ
+ * داده را در سطح ماژول import می‌کند (`adminApi` → `contentStore` → رجیستری مدل)،
+ * پس راه‌اندازی روی همین ماشین **~۸ ثانیه** طول می‌کشد. پنجرهٔ قبلی
+ * (۴۰ × ۲۵۰ms = ۱۰ ثانیه) دقیقاً روی همین مرز بود و تست را **متناوب** می‌کرد.
+ * ۳۰ ثانیه یعنی «سرور بالا نیامد» دیگر یک شکست معنادار است، نه باختِ مسابقهٔ
+ * ثانیه‌شماری. (کندیِ خودِ راه‌اندازی جداگانه ثبت شده؛ این تغییر آن را پنهان
+ * نمی‌کند — فقط تست را از یک سنجهٔ نوسانی به یک سنجهٔ پایدار تبدیل می‌کند.)
+ */
+const READY_ATTEMPTS = 120; /* ۱۲۰ × ۲۵۰ms = ۳۰ ثانیه */
+
 async function waitForUp() {
-  for (let attempt = 0; attempt < 40; attempt += 1) {
+  for (let attempt = 0; attempt < READY_ATTEMPTS; attempt += 1) {
     const res = await probe('/healthz');
     if (res.status === 200) return true;
     await sleep(250);
@@ -130,6 +143,15 @@ try {
   check('لاگ دسترسی: خط JSON با reqId ثبت شده', /"reqId"/.test(serverLog));
 } catch (error) {
   check('اجرای smoke بدون استثنا', false, error.message);
+
+  /*
+   * ⚠️ خروجی سرور پیش از این **بلعیده** می‌شد: شکست فقط «server did not start»
+   * می‌گفت و هیچ‌کس نمی‌فهمید چرا (خطای راه‌اندازی؟ گارد credential مدیر؟
+   * پورت اشغال؟ import کند؟). حالا لاگ واقعی سرور چاپ می‌شود.
+   */
+  console.error('── خروجی سرور ──');
+  console.error(serverLog.trim() || '(سرور هیچ خروجی‌ای نداد)');
+  console.error('─────────────────');
 } finally {
   child.kill('SIGTERM');
   await new Promise((r) => { child.once('exit', r); setTimeout(r, 2000); });

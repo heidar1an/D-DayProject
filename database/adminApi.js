@@ -199,6 +199,13 @@ import {
   updateChannel,
 } from './publishingStore.js';
 
+/*
+ * وضعیت مدارشکن سرویس‌های انتشار (فاز ۱۰ — گزارش سلامت).
+ * فقط **خواندنی** است: هیچ‌وقت خودش چیزی را مسدود یا آزاد نمی‌کند؛ پنل از همین
+ * می‌فهمد چرا یک پلتفرم «سریع شکست می‌دهد» و آیا باید صبر کند.
+ */
+import { PLATFORM_IDS, platformCircuitStatus } from './publishers/index.js';
+
 import {
   accountSeries,
   approveContent,
@@ -332,6 +339,8 @@ const MAX_BODY_BYTES = 12 * 1024 * 1024; /* سقف کلی؛ سقف واقعی ف
 const API_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const API_DIST_DIR = resolve(API_ROOT, 'dist');
 const API_DATA_DIR = resolve(API_ROOT, 'database');
+/* همان مسیر نوشتنی دومی که `server.js` هم می‌سنجد — پنل باید همان را ببیند */
+const API_UPLOADS_DIR = resolve(API_ROOT, 'public', 'uploads');
 
 function guardianSystemSnapshot() {
   const cpuCount = os.cpus()?.length || 1;
@@ -683,7 +692,7 @@ const ROUTES = [
       : runtimeSnapshot;
     const report = buildGuardianStatus({
       metrics,
-      readiness: checkReadiness({ distDir: API_DIST_DIR, dataDir: API_DATA_DIR }),
+      readiness: checkReadiness({ distDir: API_DIST_DIR, dataDir: API_DATA_DIR, uploadsDir: API_UPLOADS_DIR }),
       storage: storageCorruptionReport(),
       headers: securityPosture({
         production: process.env.NODE_ENV === 'production',
@@ -1542,6 +1551,12 @@ const ROUTES = [
     ...listChannels(),
     stats: publishingStats(),
     config: publishingConfig(),
+    /*
+     * وضعیت مدارشکن هر پلتفرم — فقط برای نمایش. `open: false` یعنی سرویس سالم
+     * است؛ `open: true` یعنی پس از چند شکست گذرا موقتاً کنار گذاشته شده و
+     * `retryAfterMs` می‌گوید چقدر تا کاوش بعدی مانده.
+     */
+    circuits: Object.fromEntries(PLATFORM_IDS.map((id) => [id, platformCircuitStatus(id)])),
   })],
 
   ['POST', '/api/admin/publishing/channels', 'publishing.channels.manage', async (ctx) => {

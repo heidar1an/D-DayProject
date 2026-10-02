@@ -22,9 +22,13 @@ import {
   accessLogEnabled,
   accessLogLine,
   checkReadiness,
+  createErrorReporter,
   createMetrics,
+  errorTrackerFromEnv,
   isMetricsAuthorized,
   metricsTokenFromEnv,
+  redactContext,
+  redactText,
   safePathname,
 } from './observability.js';
 
@@ -236,6 +240,43 @@ test('۱۵. پوشهٔ دادهٔ نانوشتنی ⇒ آماده نیست (آم
   assert.equal(report.checks.find((check) => check.name === 'data-writable').ok, false);
 });
 
+/*
+ * فاز ۳ — مسیر نوشتن آپلودها.
+ * `public/uploads` دومین مسیر نوشتنی پروداکشن است. اگر readiness آن را نبیند،
+ * پاد می‌تواند «آماده» اعلام شود در حالی که هر آپلود کاربر با خطای دسترسی
+ * می‌شکند. این سنجه‌ها همان شکاف را می‌بندند.
+ */
+test('۱۵.۱. با uploadsDir، سنجهٔ uploads-writable به گزارش اضافه می‌شود', () => {
+  const report = checkReadiness({
+    distDir: resolve(ROOT, 'dist'),
+    dataDir: resolve(ROOT, 'database'),
+    uploadsDir: resolve(ROOT, 'public', 'uploads'),
+  });
+
+  assert.equal(report.ready, true);
+  assert.deepEqual(report.checks.map((check) => check.name), [
+    'data-writable', 'uploads-writable', 'build-artifact', 'model-registry',
+  ]);
+  assert.equal(report.checks.find((check) => check.name === 'uploads-writable').ok, true);
+  assert.equal(report.checks.find((check) => check.name === 'uploads-writable').detail, 'public/uploads/');
+});
+
+test('۱۵.۲. پوشهٔ آپلود نانوشتنی ⇒ آماده نیست', () => {
+  const report = checkReadiness({
+    distDir: resolve(ROOT, 'dist'),
+    dataDir: resolve(ROOT, 'database'),
+    uploadsDir: '/proc/self/nope-uploads',
+  });
+
+  assert.equal(report.ready, false);
+  assert.equal(report.checks.find((check) => check.name === 'uploads-writable').ok, false);
+});
+
+test('۱۵.۳. بدون uploadsDir، گزارش دقیقاً همان سه سنجهٔ قبلی می‌ماند (سازگاری)', () => {
+  const report = checkReadiness({ distDir: resolve(ROOT, 'dist'), dataDir: resolve(ROOT, 'database') });
+  assert.deepEqual(report.checks.map((check) => check.name), ['data-writable', 'build-artifact', 'model-registry']);
+});
+
 /* ─────────────────── ۱۶. سرور واقعی: سلامت/آمادگی/متریک/لاگ ─────────────────── */
 
 function freePort() {
@@ -307,12 +348,14 @@ test('۱۶. سرور واقعی: healthz/readyz/metrics و لاگ بدون نش�
   assert.equal(health.headers.get('x-request-id')?.length > 0, true, 'X-Request-Id باید ست شود');
   assert.equal((await health.json()).status, 'ok');
 
-  /* readiness */
+  /* readiness — سرور واقعی باید مسیر نوشتن آپلودها را هم ببیند (فاز ۳) */
   const ready = await fetch(`${baseUrl}/readyz`);
   assert.equal(ready.status, 200);
   const readyBody = await ready.json();
   assert.equal(readyBody.ready, true);
-  assert.deepEqual(readyBody.checks.map((check) => check.name), ['data-writable', 'build-artifact', 'model-registry']);
+  assert.deepEqual(readyBody.checks.map((check) => check.name), [
+    'data-writable', 'uploads-writable', 'build-artifact', 'model-registry',
+  ]);
 
   /* متد نادرست روی مسیر سلامت */
   const wrongMethod = await fetch(`${baseUrl}/healthz`, { method: 'POST' });
@@ -396,4 +439,90 @@ test('۱۷. سورس ماژول هرگز هدر یا کوکی را لاگ نمی
 
   /* شاهد: query فقط در `safePathname` بریده می‌شود — تنها یک محل */
   assert.equal(source.split("split('?')").length - 1, 1);
+});
+
+/* ───────── ۱۸. ردیابی خطا: بدون DSN یک no-op کامل است ───────── */
+
+test('۱۸. بدون DSN هیچ درخواستی فرستاده نمی‌شود و capture مقدار false می‌دهد', async () => {
+  assert.equal(errorTrackerFromEnv({}), null);
+
+  const sent = [];
+  const reporter = createErrorReporter({
+    env: {},
+    transport: async (...args) => { sent.push(args); return { ok: true }; },
+  });
+
+  assert.equal(reporter.enabled, false);
+  assert.equal(await reporter.capture(new Error('boom'), { route: '/x' }), false);
+  assert.equal(sent.length, 0, 'بدون DSN نباید هیچ ارسالی رخ دهد');
+});
+
+/* ───────── ۱۹. ردیابی خطا: PII پیش از ارسال حذف می‌شود ───────── */
+
+test('۱۹. با DSN، پیام/پشته/زمینه پاک‌سازی می‌شوند و کلید حساس حذف می‌شود', async () => {
+  const dsn = 'https://errors.example.test/api/1/store';
+  const reporter = createErrorReporter({
+    env: { TAPESH_ERROR_DSN: dsn, TAPESH_ENV: 'test', TAPESH_RELEASE: 'abc123' },
+    transport: async (url, init) => { reporter.__sent = { url, init }; return { ok: true }; },
+  });
+
+  assert.equal(reporter.enabled, true);
+
+  const error = new Error('ورود user@example.test با شمارهٔ 09123456789 شکست خورد');
+  error.stack = 'Error: token A'.concat('a'.repeat(40), ' leaked');
+
+  const ok = await reporter.capture(error, {
+    requestId: 'req-1',
+    path: '/api/users/me',
+    authorization: 'Bearer super-secret',
+    password: 'hunter2',
+    count: 3,
+  });
+
+  assert.equal(ok, true);
+
+  const payload = JSON.parse(reporter.__sent.init.body);
+  const asText = JSON.stringify(payload);
+
+  assert.equal(asText.includes('user@example.test'), false, 'ایمیل باید حذف شود');
+  assert.equal(asText.includes('09123456789'), false, 'تلفن باید حذف شود');
+  assert.equal(asText.includes('super-secret'), false, 'authorization نباید ارسال شود');
+  assert.equal(asText.includes('hunter2'), false, 'password نباید ارسال شود');
+
+  /* زمینهٔ سالم باید بماند — حذف بیش‌از‌حد هم اطلاعات را از بین نمی‌برد */
+  assert.equal(payload.context.requestId, 'req-1');
+  assert.equal(payload.context.path, '/api/users/me');
+  assert.equal(payload.context.count, 3);
+  assert.equal('authorization' in payload.context, false);
+  assert.equal('password' in payload.context, false);
+  assert.equal(payload.environment, 'test');
+  assert.equal(payload.release, 'abc123');
+});
+
+/* ───────── ۲۰. ردیابی خطا: خطای خودِ ارسال سرریز نمی‌کند ───────── */
+
+test('۲۰. خطای حمل‌ونقل بی‌صدا بلعیده می‌شود و false برمی‌گردد', async () => {
+  const reporter = createErrorReporter({
+    env: { TAPESH_ERROR_DSN: 'https://errors.example.test/api/1/store' },
+    transport: async () => { throw new Error('network down'); },
+  });
+
+  assert.equal(await reporter.capture(new Error('x'), {}), false);
+});
+
+/* ───────── ۲۱. پاک‌سازی متن و زمینه (قفل واحد) ───────── */
+
+test('۲۱. redactText و redactContext فقط یک سطح را پاک می‌کنند', () => {
+  assert.equal(redactText('mail a@b.co tel 09123456789'), 'mail [redacted] tel [redacted]');
+  assert.equal(redactText(''), '');
+
+  /* استثنای عمدی: تاریخ (۸ رقم) نباید قربانی شود، چون تلفن نیست */
+  assert.equal(redactText('deploy at 2026-10-02 failed'), 'deploy at 2026-10-02 failed');
+
+  const safe = redactContext({ ok: 'fine', nested: { deep: 'secret' }, token: 'x', empty: null });
+  assert.equal(safe.ok, 'fine');
+  assert.equal(safe.nested, REDACTED, 'شیء تودرتو نباید باز شود');
+  assert.equal('token' in safe, false);
+  assert.equal('empty' in safe, false);
+  assert.deepEqual(redactContext(null), {});
 });

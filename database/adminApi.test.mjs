@@ -377,6 +377,25 @@ check(
     && channelsWithToken.payload.data?.channels?.some((row) => row.id === testChannel.id && row.hasToken === true),
 );
 
+/*
+ * وضعیت مدارشکن (فاز ۱۰ — گزارش سلامت): پنل باید بتواند ببیند کدام پلتفرم
+ * «سریع شکست می‌دهد». این سنجه فقط **وجود و شکل** را می‌سنجد — نه بازبودن مدار،
+ * چون در این اجرا هیچ شکستی عمداً تولید نشده است.
+ */
+const circuits = channelsWithToken.payload.data?.circuits;
+check(
+  '۲۰.۱. وضعیت مدارشکن هر پلتفرم در پاسخ کانال‌ها هست',
+  Boolean(circuits)
+    && ['bale', 'telegram', 'eitaa', 'instagram'].every((id) => circuits[id]
+      && typeof circuits[id].open === 'boolean'
+      && typeof circuits[id].failures === 'number'
+      && typeof circuits[id].retryAfterMs === 'number'),
+);
+check(
+  '۲۰.۲. مدارشکن تازه (بدون شکست) بسته گزارش می‌شود',
+  ['bale', 'telegram', 'eitaa', 'instagram'].every((id) => circuits[id].open === false && circuits[id].failures === 0),
+);
+
 /* پاک‌کردن توکن، تا ارسال بعدی قطعاً آزمایشی و بدون شبکه بماند */
 const tokenCleared = await call('POST', `/api/admin/publishing/channels/${testChannel.id}/token`, {
   cookies,

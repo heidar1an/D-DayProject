@@ -2,14 +2,19 @@
 #
 # چرا وجود دارد: ممیزی فاز ۲۱ (۲۱.۲) نشان داد هیچ CI/CD و staging وجود ندارد و
 # کل مسیر production دستی است. این workflow حداقلِ لازم را خودکار می‌کند:
-# نصب با lockfile → دروازهٔ کامل ۲۴ گامه → build → بازرسی امنیت وابستگی‌ها.
+# نصب با lockfile → دروازهٔ کامل → build → آزمون بار → E2E مرورگری → بازرسی
+# امنیت وابستگی‌ها و بهداشت مخزن.
+#
+# ⚠️ «CI تنظیم شده» با «CI اجرا شده» یکی نیست. این فایل تا وقتی روی یک runner
+# واقعی گیت‌هاب اجرا نشود، وضعیتش **UNVERIFIED-EXTERNAL** است — نه «سبز».
 #
 # آنچه این فایل **انجام نمی‌دهد** (و در READINESS-MATRIX ثبت شده):
 #   • استقرار روی staging یا production — نیازمند میزبان، secret و تأیید مالک پروژه است.
 #   • هیچ secretی در این فایل نیست؛ همهٔ مقادیر از `env` یا پیش‌فرض‌های خود کد می‌آیند.
 #
 # نکتهٔ اجرایی: `scripts/verify-all.mjs` خودش `data:check` را به‌عنوان گام اول
-# اجرا می‌کند، پس اجرای دوبارهٔ آن اینجا لازم نیست.
+# اجرا می‌کند، پس اجرای دوبارهٔ آن اینجا لازم نیست. همین‌طور `e2e:browser` هم
+# داخل خودِ دروازه هست (و اگر مرورگر نباشد کد ۳ = «نامعین» می‌دهد، نه «سبز»).
 
 name: CI
 
@@ -29,18 +34,18 @@ concurrency:
 
 jobs:
   verify:
-    name: دروازهٔ کیفیت (۲۴ گام)
+    name: دروازهٔ کیفیت (۳۹ گام)
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Node 22
+      - name: Node (نسخهٔ pin‌شدهٔ پروژه)
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version-file: '.nvmrc'
           cache: npm
 
       - name: نصب با lockfile
@@ -73,10 +78,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Node 22
+      - name: Node (نسخهٔ pin‌شدهٔ پروژه)
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version-file: '.nvmrc'
           cache: npm
 
       - name: نصب با lockfile
@@ -91,6 +96,9 @@ jobs:
       - name: بودجهٔ باندل و دارایی‌ها (نقض ⇒ شکست)
         run: node scripts/bundle-budget.mjs --check
 
+      - name: artifactهای SEO روی خروجی واقعی build
+        run: node scripts/seo-validate.mjs
+
       - name: بارگذاری artifact
         uses: actions/upload-artifact@v4
         with:
@@ -98,8 +106,102 @@ jobs:
           path: dist/
           retention-days: 7
 
+  load:
+    name: آزمون بار (healthz · readyz · صفحهٔ اصلی · مرزهای احراز هویت)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: build
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node (نسخهٔ pin‌شدهٔ پروژه)
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+
+      - name: نصب با lockfile
+        run: npm ci
+
+      - name: دریافت artifact ساخت
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: اجرای سرور واقعی و هارنس بار
+        env:
+          TAPESH_ADMIN_PASSWORD: ci-load-passphrase-2026
+          TAPESH_METRICS_TOKEN: ci-load-token
+          TAPESH_ACCESS_LOG: '1'
+          PORT: '4173'
+        run: |
+          node server.js > server-load.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID 2>/dev/null' EXIT
+
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:4173/healthz > /dev/null; then break; fi
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:4173/healthz > /dev/null
+
+          LOAD_TEST_BASE_URL=http://127.0.0.1:4173 \
+            node scripts/load-test.mjs --check --json --concurrency=10 --duration=5 \
+            | tee load-report.json
+
+      - name: بارگذاری گزارش بار و لاگ سرور
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: load-report
+          path: |
+            load-report.json
+            server-load.log
+          if-no-files-found: ignore
+          retention-days: 7
+
+  e2e-browser:
+    name: E2E مرورگری (CDP — بدون وابستگی نصب‌شدنی)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: build
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node (نسخهٔ pin‌شدهٔ پروژه)
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+
+      - name: نصب با lockfile
+        run: npm ci
+
+      - name: دریافت artifact ساخت
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: E2E مرورگری
+        run: node scripts/browser-e2e.mjs --json --require-browser
+
+      - name: بارگذاری گزارش E2E
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-e2e-report
+          path: docs/audit/browser-e2e.json
+          if-no-files-found: ignore
+          retention-days: 7
+
   audit:
-    name: بازرسی امنیت وابستگی‌ها
+    name: بازرسی امنیت وابستگی‌ها و بهداشت مخزن
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -107,10 +209,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Node 22
+      - name: Node (نسخهٔ pin‌شدهٔ پروژه)
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version-file: '.nvmrc'
           cache: npm
 
       - name: نصب با lockfile
@@ -119,6 +221,18 @@ jobs:
       - name: npm audit (سطح high)
         run: npm audit --audit-level=high
 
+      # ⚠️ پیش‌تر این گام `continue-on-error: true` داشت و همین یک خط، شکست
+      # بهداشت مخزن (سرّ لو‌رفته یا فایل حجیم) را در CI پنهان می‌کرد. حالا
+      # نتیجهٔ واقعی گام گزارش می‌شود.
       - name: بهداشت مخزن (سرّ و فایل حجیم)
         run: node scripts/repo-hygiene.mjs
-        continue-on-error: true
+
+      - name: بارگذاری گزارش بهداشت در صورت شکست
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: repo-hygiene-report
+          path: |
+            .workbuddy-ai/verify-logs/
+          if-no-files-found: ignore
+          retention-days: 7

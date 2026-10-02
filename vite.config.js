@@ -71,11 +71,6 @@ export default defineConfig({
         manualChunks: {
           react: ['react', 'react-dom'],
           three: ['three'],
-          admin: [
-            './src/layout/admin/AdminLayout.jsx',
-            './src/layout/admin/analytics/AnalyticsCenter.jsx',
-            './src/layout/admin/media/MediaCenter.jsx',
-          ],
         },
       },
     },

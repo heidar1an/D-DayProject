@@ -1,0 +1,1039 @@
+{
+  "generatedAt": "2026-10-02T10:30:33.550Z",
+  "mode": "local",
+  "base": "local-server",
+  "browser": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+  "flows": [
+    {
+      "id": "F1",
+      "title": "صفحهٔ اصلی و مسیریابی هش‌محور",
+      "status": "passed",
+      "ms": 2726,
+      "error": null
+    },
+    {
+      "id": "F2",
+      "title": "اعتبارسنجی فرم ثبت‌نام",
+      "status": "passed",
+      "ms": 1028,
+      "error": null
+    },
+    {
+      "id": "F3",
+      "title": "ثبت‌نام کاربر واقعی",
+      "status": "passed",
+      "ms": 1570,
+      "error": null
+    },
+    {
+      "id": "F4",
+      "title": "خروج و ورود مجدد کاربر",
+      "status": "passed",
+      "ms": 2209,
+      "error": null
+    },
+    {
+      "id": "F5",
+      "title": "مشاهده و ویرایش پروفایل",
+      "status": "passed",
+      "ms": 3350,
+      "error": null
+    },
+    {
+      "id": "F6",
+      "title": "جریان یادگیری — لایه‌های داشبورد",
+      "status": "passed",
+      "ms": 6577,
+      "error": null
+    },
+    {
+      "id": "F7",
+      "title": "جریان آزمون — بانک تست",
+      "status": "passed",
+      "ms": 2690,
+      "error": null
+    },
+    {
+      "id": "F8",
+      "title": "پنل مدیریت — دسترسی غیرمجاز",
+      "status": "passed",
+      "ms": 634,
+      "error": null
+    },
+    {
+      "id": "F9",
+      "title": "ورود مدیر و CRUD واقعی",
+      "status": "passed",
+      "ms": 6795,
+      "error": null
+    },
+    {
+      "id": "F10",
+      "title": "نشست نامعتبر و رفتار پس از ابطال",
+      "status": "passed",
+      "ms": 1889,
+      "error": null
+    },
+    {
+      "id": "F11",
+      "title": "حالت خطا و مرزهای شکست",
+      "status": "passed",
+      "ms": 1027,
+      "error": null
+    }
+  ],
+  "checks": [
+    {
+      "flow": {
+        "id": "F1",
+        "title": "صفحهٔ اصلی و مسیریابی هش‌محور",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 2726
+      },
+      "name": "صفحهٔ اصلی رندر شد (#root محتوا دارد)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "flow": {
+        "id": "F1",
+        "title": "صفحهٔ اصلی و مسیریابی هش‌محور",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 2726
+      },
+      "name": "عنوان صفحه خالی نیست",
+      "ok": true,
+      "detail": "تپش | یادگیری پزشکی ساده‌تر"
+    },
+    {
+      "flow": {
+        "id": "F1",
+        "title": "صفحهٔ اصلی و مسیریابی هش‌محور",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 2726
+      },
+      "name": "مسیر #pricing رندر شد",
+      "ok": true,
+      "detail": "root=true"
+    },
+    {
+      "flow": {
+        "id": "F1",
+        "title": "صفحهٔ اصلی و مسیریابی هش‌محور",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 2726
+      },
+      "name": "مسیر #pricing محتوای متناظر دارد",
+      "ok": true,
+      "detail": "«تعرفه» در متن صفحه"
+    },
+    {
+      "flow": {
+        "id": "F1",
+        "title": "صفحهٔ اصلی و مسیریابی هش‌محور",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 2726
+      },
+      "name": "مسیر #products رندر شد",
+      "ok": true,
+      "detail": "root=true"
+    },
+    {
+      "flow": {
+        "id": "F1",
+        "title": "صفحهٔ اصلی و مسیریابی هش‌محور",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 2726
+      },
+      "name": "مسیر #products محتوای متناظر دارد",
+      "ok": true,
+      "detail": "«محصول» در متن صفحه"
+    },
+    {
+      "flow": {
+        "id": "F1",
+        "title": "صفحهٔ اصلی و مسیریابی هش‌محور",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 2726
+      },
+      "name": "مسیر #about رندر شد",
+      "ok": true,
+      "detail": "root=true"
+    },
+    {
+      "flow": {
+        "id": "F1",
+        "title": "صفحهٔ اصلی و مسیریابی هش‌محور",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 2726
+      },
+      "name": "مسیر #about محتوای متناظر دارد",
+      "ok": true,
+      "detail": "«درباره» در متن صفحه"
+    },
+    {
+      "flow": {
+        "id": "F1",
+        "title": "صفحهٔ اصلی و مسیریابی هش‌محور",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 2726
+      },
+      "name": "مسیر #articles رندر شد",
+      "ok": true,
+      "detail": "root=true"
+    },
+    {
+      "flow": {
+        "id": "F1",
+        "title": "صفحهٔ اصلی و مسیریابی هش‌محور",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 2726
+      },
+      "name": "مسیر #articles محتوای متناظر دارد",
+      "ok": true,
+      "detail": "«مقاله» در متن صفحه"
+    },
+    {
+      "flow": {
+        "id": "F1",
+        "title": "صفحهٔ اصلی و مسیریابی هش‌محور",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 2726
+      },
+      "name": "مسیر #auth رندر شد",
+      "ok": true,
+      "detail": "root=true"
+    },
+    {
+      "flow": {
+        "id": "F1",
+        "title": "صفحهٔ اصلی و مسیریابی هش‌محور",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 2726
+      },
+      "name": "مسیر #auth محتوای متناظر دارد",
+      "ok": true,
+      "detail": "«ورود» در متن صفحه"
+    },
+    {
+      "flow": {
+        "id": "F1",
+        "title": "صفحهٔ اصلی و مسیریابی هش‌محور",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 2726
+      },
+      "name": "مسیر ناشناخته ⇒ بازگشت به صفحهٔ اصلی (بدون صفحهٔ سفید)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "flow": {
+        "id": "F2",
+        "title": "اعتبارسنجی فرم ثبت‌نام",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 1028
+      },
+      "name": "فیلد شمارهٔ تلفن در فرم ثبت‌نام وجود دارد",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "flow": {
+        "id": "F2",
+        "title": "اعتبارسنجی فرم ثبت‌نام",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 1028
+      },
+      "name": "فیلد رمز عبور وجود دارد",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "flow": {
+        "id": "F2",
+        "title": "اعتبارسنجی فرم ثبت‌نام",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 1028
+      },
+      "name": "تایپ واقعی در فیلد شماره نشست (Input.insertText)",
+      "ok": true,
+      "detail": "value=123"
+    },
+    {
+      "flow": {
+        "id": "F2",
+        "title": "اعتبارسنجی فرم ثبت‌نام",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 1028
+      },
+      "name": "ورودی نامعتبر ⇒ پیام خطا نمایش داده شد",
+      "ok": true,
+      "detail": "لطفا این بخش را پر کنید."
+    },
+    {
+      "flow": {
+        "id": "F2",
+        "title": "اعتبارسنجی فرم ثبت‌نام",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 1028
+      },
+      "name": "ورودی نامعتبر ⇒ هیچ درخواست موفقی ثبت نشد",
+      "ok": true,
+      "detail": "بدون نشست"
+    },
+    {
+      "flow": {
+        "id": "F3",
+        "title": "ثبت‌نام کاربر واقعی",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 1570
+      },
+      "name": "تیک رضایت‌نامه زده شد",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "flow": {
+        "id": "F3",
+        "title": "ثبت‌نام کاربر واقعی",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 1570
+      },
+      "name": "ثبت‌نام با شمارهٔ معتبر ⇒ نشست کاربر برقرار شد (/api/users/me = 200)",
+      "ok": true,
+      "detail": "http=200 hash=#onboarding alert=—"
+    },
+    {
+      "flow": {
+        "id": "F3",
+        "title": "ثبت‌نام کاربر واقعی",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 1570
+      },
+      "name": "ثبت‌نام ⇒ کاربر به داشبورد/آموزش هدایت شد",
+      "ok": true,
+      "detail": "hash=#onboarding"
+    },
+    {
+      "flow": {
+        "id": "F3",
+        "title": "ثبت‌نام کاربر واقعی",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 1570
+      },
+      "name": "ثبت‌نام ⇒ بدنهٔ /api/users/me همان شمارهٔ آزمون است",
+      "ok": true,
+      "detail": "phone=09990014407"
+    },
+    {
+      "flow": {
+        "id": "F4",
+        "title": "خروج و ورود مجدد کاربر",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 2209
+      },
+      "name": "پیش از خروج: نشست کاربر برقرار است",
+      "ok": true,
+      "detail": "http=200"
+    },
+    {
+      "flow": {
+        "id": "F4",
+        "title": "خروج و ورود مجدد کاربر",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 2209
+      },
+      "name": "خروج از UI ⇒ نشست کاربر باطل شد (/api/users/me = 401)",
+      "ok": true,
+      "detail": "http=401"
+    },
+    {
+      "flow": {
+        "id": "F4",
+        "title": "خروج و ورود مجدد کاربر",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 2209
+      },
+      "name": "ورود مجدد با اعتبارنامهٔ ثبت‌شده ⇒ ۲۰۰",
+      "ok": true,
+      "detail": "http=200"
+    },
+    {
+      "flow": {
+        "id": "F5",
+        "title": "مشاهده و ویرایش پروفایل",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 3350
+      },
+      "name": "فرم ویرایش پروفایل رندر شد",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "flow": {
+        "id": "F5",
+        "title": "مشاهده و ویرایش پروفایل",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 3350
+      },
+      "name": "نام در فیلد پروفایل تایپ شد",
+      "ok": true,
+      "detail": "value=آزمون-001440"
+    },
+    {
+      "flow": {
+        "id": "F5",
+        "title": "مشاهده و ویرایش پروفایل",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 3350
+      },
+      "name": "دانشگاه از فهرست combobox انتخاب شد",
+      "ok": true,
+      "detail": "انتخاب‌شده=دانشگاه علوم پزشکی آبادان"
+    },
+    {
+      "flow": {
+        "id": "F5",
+        "title": "مشاهده و ویرایش پروفایل",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 3350
+      },
+      "name": "فیلدهای اجباری خالی فرم پر شدند (2 فیلد)",
+      "ok": true,
+      "detail": "edit-profile-first-name, edit-profile-last-name, edit-profile-phone, edit-profile-username"
+    },
+    {
+      "flow": {
+        "id": "F5",
+        "title": "مشاهده و ویرایش پروفایل",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 3350
+      },
+      "name": "پیش از ارسال، هیچ فیلد نامعتبری در فرم نیست",
+      "ok": true,
+      "detail": "invalid=0"
+    },
+    {
+      "flow": {
+        "id": "F5",
+        "title": "مشاهده و ویرایش پروفایل",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 3350
+      },
+      "name": "ویرایش پروفایل ⇒ درخواست PATCH /api/users/me واقعاً به سرور رفت",
+      "ok": true,
+      "detail": "PATCH http://127.0.0.1:62161/api/users/me"
+    },
+    {
+      "flow": {
+        "id": "F5",
+        "title": "مشاهده و ویرایش پروفایل",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 3350
+      },
+      "name": "ویرایش پروفایل ⇒ سرور ۲۰۰ برگرداند",
+      "ok": true,
+      "detail": "status=200"
+    },
+    {
+      "flow": {
+        "id": "F5",
+        "title": "مشاهده و ویرایش پروفایل",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 3350
+      },
+      "name": "ویرایش پروفایل روی سرور ثبت شد (GET /api/users/me)",
+      "ok": true,
+      "detail": "http=200 user.profile.firstName=آزمون-001440"
+    },
+    {
+      "flow": {
+        "id": "F5",
+        "title": "مشاهده و ویرایش پروفایل",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 3350
+      },
+      "name": "ویرایش پروفایل پس از رفرش کامل در UI دیده می‌شود",
+      "ok": true,
+      "detail": "value=آزمون-001440 · {\"hash\":\"#dashboard?o=settings&t=profile\",\"dashboard\":true,\"onAuth\":false,\"field\":\"آزمون-001440\",\"body\":\"تپش داشبورد دوره‌ها تست سایر بخش‌ها لیگ ۲۵:۰۰ تنظیمات ویرایش پروفایل اشتراک تراکنش ها امنیت راهنما و پشتیبان ویرایش پروف\"}"
+    },
+    {
+      "flow": {
+        "id": "F6",
+        "title": "جریان یادگیری — لایه‌های داشبورد",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 6577
+      },
+      "name": "پوستهٔ داشبورد (`.dashboard`) رندر شد",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "flow": {
+        "id": "F6",
+        "title": "جریان یادگیری — لایه‌های داشبورد",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 6577
+      },
+      "name": "لایهٔ داشبورد #dashboard?s=courses&l=my-courses رندر شد (دوره‌های من)",
+      "ok": true,
+      "detail": "dashboard=true onAuth=false"
+    },
+    {
+      "flow": {
+        "id": "F6",
+        "title": "جریان یادگیری — لایه‌های داشبورد",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 6577
+      },
+      "name": "لایهٔ داشبورد #dashboard?s=courses&l=green-path رندر شد (مسیر سبز)",
+      "ok": true,
+      "detail": "dashboard=true onAuth=false"
+    },
+    {
+      "flow": {
+        "id": "F6",
+        "title": "جریان یادگیری — لایه‌های داشبورد",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 6577
+      },
+      "name": "لایهٔ داشبورد #dashboard?s=flashcards رندر شد (فلش‌کارت)",
+      "ok": true,
+      "detail": "dashboard=true onAuth=false"
+    },
+    {
+      "flow": {
+        "id": "F6",
+        "title": "جریان یادگیری — لایه‌های داشبورد",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 6577
+      },
+      "name": "لایهٔ داشبورد #dashboard?s=notes رندر شد (یادداشت)",
+      "ok": true,
+      "detail": "dashboard=true onAuth=false"
+    },
+    {
+      "flow": {
+        "id": "F6",
+        "title": "جریان یادگیری — لایه‌های داشبورد",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 6577
+      },
+      "name": "لایهٔ داشبورد #dashboard?s=league رندر شد (لیگ)",
+      "ok": true,
+      "detail": "dashboard=true onAuth=false"
+    },
+    {
+      "flow": {
+        "id": "F6",
+        "title": "جریان یادگیری — لایه‌های داشبورد",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 6577
+      },
+      "name": "لایهٔ داشبورد #dashboard?s=pomodoro رندر شد (پومودورو)",
+      "ok": true,
+      "detail": "dashboard=true onAuth=false"
+    },
+    {
+      "flow": {
+        "id": "F6",
+        "title": "جریان یادگیری — لایه‌های داشبورد",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 6577
+      },
+      "name": "لایهٔ داشبورد #dashboard?s=other رندر شد (سایر)",
+      "ok": true,
+      "detail": "dashboard=true onAuth=false"
+    },
+    {
+      "flow": {
+        "id": "F7",
+        "title": "جریان آزمون — بانک تست",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 2690
+      },
+      "name": "لایهٔ بانک تست داخل پوستهٔ داشبورد رندر شد",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "flow": {
+        "id": "F7",
+        "title": "جریان آزمون — بانک تست",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 2690
+      },
+      "name": "لایهٔ بانک تست محتوای خود را نشان داد",
+      "ok": true,
+      "detail": "طول متن=1013"
+    },
+    {
+      "flow": {
+        "id": "F7",
+        "title": "جریان آزمون — بانک تست",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 2690
+      },
+      "name": "کنترل شروع آزمون/تمرین در بانک تست وجود دارد",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "flow": {
+        "id": "F7",
+        "title": "جریان آزمون — بانک تست",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 2690
+      },
+      "name": "لایهٔ آزمون‌های هماهنگ داخل پوستهٔ داشبورد رندر شد",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "flow": {
+        "id": "F8",
+        "title": "پنل مدیریت — دسترسی غیرمجاز",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 634
+      },
+      "name": "بدون نشست ⇒ فرم ورود پنل نمایش داده می‌شود",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "flow": {
+        "id": "F8",
+        "title": "پنل مدیریت — دسترسی غیرمجاز",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 634
+      },
+      "name": "بدون نشست ⇒ پوستهٔ پنل (سایدبار) نمایش داده نمی‌شود",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "flow": {
+        "id": "F8",
+        "title": "پنل مدیریت — دسترسی غیرمجاز",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 634
+      },
+      "name": "بدون نشست ⇒ /api/admin/auth/me = 401",
+      "ok": true,
+      "detail": "http=401"
+    },
+    {
+      "flow": {
+        "id": "F9",
+        "title": "ورود مدیر و CRUD واقعی",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 6795
+      },
+      "name": "فرم ورود مدیر دو فیلد دارد (نام کاربری + رمز)",
+      "ok": true,
+      "detail": "count=2"
+    },
+    {
+      "flow": {
+        "id": "F9",
+        "title": "ورود مدیر و CRUD واقعی",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 6795
+      },
+      "name": "ورود مدیر ⇒ پوستهٔ پنل رندر شد",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "flow": {
+        "id": "F9",
+        "title": "ورود مدیر و CRUD واقعی",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 6795
+      },
+      "name": "ورود مدیر ⇒ /api/admin/auth/me = 200",
+      "ok": true,
+      "detail": "http=200"
+    },
+    {
+      "flow": {
+        "id": "F9",
+        "title": "ورود مدیر و CRUD واقعی",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 6795
+      },
+      "name": "عنوان یادداشت در مودال تایپ شد",
+      "ok": true,
+      "detail": "value=یادداشت E2E 001440"
+    },
+    {
+      "flow": {
+        "id": "F9",
+        "title": "ورود مدیر و CRUD واقعی",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 6795
+      },
+      "name": "CRUD ⇒ درخواست POST /api/admin/notes واقعاً به سرور رفت",
+      "ok": true,
+      "detail": "POST http://127.0.0.1:62161/api/admin/notes"
+    },
+    {
+      "flow": {
+        "id": "F9",
+        "title": "ورود مدیر و CRUD واقعی",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 6795
+      },
+      "name": "CRUD ⇒ سرور ۲۰۰/۲۰۱ برگرداند",
+      "ok": true,
+      "detail": "status=200"
+    },
+    {
+      "flow": {
+        "id": "F9",
+        "title": "ورود مدیر و CRUD واقعی",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 6795
+      },
+      "name": "CRUD ⇒ مودال پس از ذخیره بسته شد",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "flow": {
+        "id": "F9",
+        "title": "ورود مدیر و CRUD واقعی",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 6795
+      },
+      "name": "CRUD: یادداشت ساخته‌شده در سرور ثبت شد",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "flow": {
+        "id": "F9",
+        "title": "ورود مدیر و CRUD واقعی",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 6795
+      },
+      "name": "CRUD: یادداشت پس از رفرش کامل در UI دیده می‌شود",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "flow": {
+        "id": "F10",
+        "title": "نشست نامعتبر و رفتار پس از ابطال",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 1889
+      },
+      "name": "ابطال نشست مدیر ⇒ بازگشت به فرم ورود (بدون دسترسی به پنل)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "flow": {
+        "id": "F10",
+        "title": "نشست نامعتبر و رفتار پس از ابطال",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 1889
+      },
+      "name": "ابطال نشست مدیر ⇒ /api/admin/auth/me = 401",
+      "ok": true,
+      "detail": "http=401"
+    },
+    {
+      "flow": {
+        "id": "F10",
+        "title": "نشست نامعتبر و رفتار پس از ابطال",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 0,
+        "error": null,
+        "ms": 1889
+      },
+      "name": "نشست نامعتبر کاربر ⇒ /api/users/me = 401",
+      "ok": true,
+      "detail": "http=401"
+    },
+    {
+      "flow": {
+        "id": "F11",
+        "title": "حالت خطا و مرزهای شکست",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 1,
+        "error": null,
+        "ms": 1027
+      },
+      "name": "دارایی ناموجود ⇒ ۴۰۴ (نه صفحهٔ HTML)",
+      "ok": true,
+      "detail": "http=404"
+    },
+    {
+      "flow": {
+        "id": "F11",
+        "title": "حالت خطا و مرزهای شکست",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 1,
+        "error": null,
+        "ms": 1027
+      },
+      "name": "مسیر ناشناختهٔ SPA ⇒ ۲۰۰ با پوستهٔ اپ",
+      "ok": true,
+      "detail": "http=200 root=true"
+    },
+    {
+      "flow": {
+        "id": "F11",
+        "title": "حالت خطا و مرزهای شکست",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 1,
+        "error": null,
+        "ms": 1027
+      },
+      "name": "/healthz از داخل مرورگر ⇒ ۲۰۰",
+      "ok": true,
+      "detail": "http=200"
+    },
+    {
+      "flow": {
+        "id": "F11",
+        "title": "حالت خطا و مرزهای شکست",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 1,
+        "error": null,
+        "ms": 1027
+      },
+      "name": "هارنس استثنای مدیریت‌نشده را ثبت می‌کند (سنجش خودِ سنجه)",
+      "ok": true,
+      "detail": "قبل=0 بعد=1"
+    },
+    {
+      "flow": {
+        "id": "F11",
+        "title": "حالت خطا و مرزهای شکست",
+        "status": "passed",
+        "failed": 0,
+        "skipped": 1,
+        "error": null,
+        "ms": 1027
+      },
+      "name": "مرز خطای React (ErrorBoundary) با تزریق خطای واقعی",
+      "ok": null,
+      "detail": "SKIP — نیازمند دست‌کاری runtime اپ است؛ در این هارنس عمداً انجام نشد (اجرای کنونی: نبود استثنای مدیریت‌نشده سنجیده می‌شود)"
+    },
+    {
+      "flow": null,
+      "name": "کل اجرا: هیچ استثنای مدیریت‌نشده‌ای در صفحه رخ نداد",
+      "ok": true,
+      "detail": "پاک"
+    },
+    {
+      "flow": null,
+      "name": "کل اجرا: هیچ خطای کنسولی ثبت نشد",
+      "ok": true,
+      "detail": "پاک"
+    }
+  ],
+  "notes": [
+    {
+      "flow": "F9",
+      "text": "مودال یادداشت با کلیک سطح-DOM باز شد (ورودی واقعی کروم بی‌اثر ماند) — اثبات جریان از لاگ شبکه می‌آید"
+    }
+  ],
+  "clickFallbacks": 2,
+  "totals": {
+    "passed": 67,
+    "failed": 0,
+    "skipped": 1,
+    "flows": 11,
+    "flowsFailed": 0
+  },
+  "uncaught": [],
+  "consoleErrors": []
+}

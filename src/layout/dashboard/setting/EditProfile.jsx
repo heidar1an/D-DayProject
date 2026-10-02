@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { saveProfile } from '../../../services/userStorage';
 import { UNIVERSITIES } from '../../../services/league/mockData';
@@ -268,6 +268,35 @@ export default function EditProfile({ userData, onUserDataChange, onLogout }) {
   const [birthParts, setBirthParts] = useState(
     parseBirthDate(initialForm.birthDate) ?? { year: currentPersianDate.year - 20, month: 1, day: 1 },
   );
+
+  /*
+   * همگام‌سازی با ورود دیرهنگام `userData`.
+   *
+   * باگ واقعی (کشف‌شده با E2E مرورگری، جریان F5): با رفرش کامل روی
+   * `#dashboard?o=settings&t=profile`، این کامپوننت **پیش از** رسیدن پاسخ
+   * `/api/users/me` سوار می‌شود. `useState(initialForm)` فقط یک بار مقدار می‌گیرد،
+   * پس فرم برای کاربرِ واردشده خالی می‌ماند و پروفایلش را نشان نمی‌دهد.
+   *
+   * این اثر وقتی `userData` می‌رسد یک بار فرم را از دادهٔ تازه پر می‌کند؛ ولی اگر
+   * کاربر در همین فاصله چیزی تایپ کرده باشد، مقدارش دست‌نخورده می‌ماند.
+   */
+  const syncedUserRef = useRef(userData);
+  /* مقادیر لحظهٔ سوارشدن — مرجع تشخیص «دست‌نخورده بودن» فرم */
+  const mountFormRef = useRef(initialForm);
+  useEffect(() => {
+    if (!userData || syncedUserRef.current === userData) return;
+    syncedUserRef.current = userData;
+
+    const touched = Object.entries(form).some(
+      ([key, value]) => String(value ?? '') !== String(mountFormRef.current[key] ?? ''),
+    );
+    if (touched) return;
+
+    mountFormRef.current = initialForm;
+    setForm(initialForm);
+    setUniversityQuery(initialForm.university);
+  }, [userData, form, initialForm]);
+
   const matchingUniversities = universityOptions.filter((name) =>
     normalizeSearch(name).includes(normalizeSearch(universityQuery)),
   );

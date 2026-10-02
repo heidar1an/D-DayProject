@@ -1,0 +1,93 @@
+# docker-compose.staging.yml — محیط staging تپش
+#
+# چرا این شکل: پروژه یک پروسهٔ نود بدون وابستگی بیرونی است و دادهٔ آن JSON روی
+# دیسک. پس staging = یک سرویس + دو volume پایدار + healthcheck. هیچ دیتابیس،
+# cache یا صف جدا لازم نیست و اضافه‌کردنشان معماری واقعی را جعل می‌کرد.
+#
+# اجرا:
+#   cp .env.example .env.staging      # مقادیر staging را پر کنید (نه credential واقعی production)
+#   docker compose -f docker-compose.staging.yml --env-file .env.staging up -d --build
+#   docker compose -f docker-compose.staging.yml ps
+#   docker compose -f docker-compose.staging.yml logs -f tapesh
+#
+# ⚠️ در محیط فعلی **اجرا نشده** (docker در دسترس نیست) ⇒ IMPLEMENTED-BUT-UNVERIFIED.
+#
+# ⚠️ هیچ credential واقعی در این فایل نیست. همه از `--env-file` می‌آید و
+#    `.env.staging` باید در `.gitignore` باشد (الگوی `.env` پوشش می‌دهد).
+
+services:
+  tapesh:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: tapesh:staging
+    container_name: tapesh-staging
+    restart: unless-stopped
+
+    ports:
+      - '${STAGING_PORT:-4173}:4173'
+
+    environment:
+      NODE_ENV: production
+      TAPESH_ENV: staging
+      PORT: '4173'
+      HOST: 0.0.0.0
+
+      # دامنهٔ staging — از env-file، نه hard-code
+      PUBLIC_SITE_URL: ${PUBLIC_SITE_URL:-}
+      TAPESH_ALLOWED_HOSTS: ${TAPESH_ALLOWED_HOSTS:-}
+
+      # مشاهده‌پذیری
+      TAPESH_ACCESS_LOG: ${TAPESH_ACCESS_LOG:-1}
+      TAPESH_METRICS_TOKEN: ${TAPESH_METRICS_TOKEN:-}
+      # لاگ پایدار روی دیسک — داخل volume، وگرنه با هر ری‌استارت پاک می‌شود.
+      # بدون این متغیر، لاگ فقط به stdout می‌رود (رفتار پیش‌فرض دست‌نخورده).
+      TAPESH_LOG_FILE: ${TAPESH_LOG_FILE:-/app/logs/access.log}
+      TAPESH_LOG_MAX_BYTES: ${TAPESH_LOG_MAX_BYTES:-10485760}
+      TAPESH_LOG_KEEP: ${TAPESH_LOG_KEEP:-5}
+
+      # ردیابی خطای بیرونی — خالی ⇒ no-op کامل (هیچ درخواست شبکه‌ای)
+      TAPESH_ERROR_DSN: ${TAPESH_ERROR_DSN:-}
+      TAPESH_RELEASE: ${TAPESH_RELEASE:-}
+
+      # seed اولین اجرای مدیر (فقط اگر admins.json خالی باشد)
+      TAPESH_ADMIN_USERNAME: ${TAPESH_ADMIN_USERNAME:-}
+      TAPESH_ADMIN_PASSWORD: ${TAPESH_ADMIN_PASSWORD:-}
+      TAPESH_ADMIN_NAME: ${TAPESH_ADMIN_NAME:-}
+
+      # ورود با گوگل (اختیاری)
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+
+      # انتشار (اختیاری — توکن‌های واقعی از پنل در secrets.json می‌نشینند)
+      PUBLISH_DRY_RUN: ${PUBLISH_DRY_RUN:-1}
+      PUBLISH_TIMEOUT_MS: ${PUBLISH_TIMEOUT_MS:-15000}
+
+    volumes:
+      # دادهٔ JSON — باید بین deployها بماند
+      - tapesh-data:/app/database
+      # آپلودهای کاربر — باید بماند
+      - tapesh-uploads:/app/public/uploads
+      # لاگ دسترسی پایدار — تا شاهد حادثه پس از ری‌استارت کانتینر بماند
+      - tapesh-logs:/app/logs
+
+    healthcheck:
+      test: ['CMD', 'node', '-e', "fetch('http://127.0.0.1:4173/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+    # خاموشی نرم: سرور SIGTERM را می‌گیرد و درخواست‌های در جریان را تمام می‌کند
+    stop_grace_period: 20s
+
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '5'
+
+volumes:
+  tapesh-data:
+  tapesh-uploads:
+  tapesh-logs:

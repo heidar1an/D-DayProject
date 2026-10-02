@@ -1211,7 +1211,7 @@
   font-size: 0.68rem;
 }
 
-/* تولبار مقاله: ذخیره، حالت مطالعه، پیشرفت */
+/* تولبار مقاله: ذخیره و پیشرفت مطالعه */
 .ap-article__toolbar {
   display: flex;
   align-items: center;
@@ -2047,47 +2047,6 @@
   aspect-ratio: 16 / 10;
 }
 
-/* ── حالت مطالعه (Focus) ── */
-body.ap-reading-mode .site-header,
-body.ap-reading-mode .site-footer,
-body.ap-reading-mode .ap-related,
-body.ap-reading-mode .ap-article__aside,
-body.ap-reading-mode .ap-back {
-  display: none !important;
-}
-
-.ap-article--focus .ap-article__layout {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-.ap-article--focus .ap-article__content {
-  grid-column: 1;
-  margin-inline: auto;
-}
-
-.ap-focus-exit {
-  position: fixed;
-  bottom: 22px;
-  inset-inline-start: 22px;
-  z-index: 56;
-  padding: 11px 20px;
-  border: 1px solid rgb(var(--line-rgb) / 0.16);
-  border-radius: 999px;
-  background: rgb(var(--scrim-rgb) / 0.9);
-  color: var(--white);
-  font-family: inherit;
-  font-size: 0.86rem;
-  font-weight: 500;
-  cursor: pointer;
-  backdrop-filter: blur(6px);
-  transition: border-color 180ms ease, transform 180ms ease;
-}
-
-.ap-focus-exit:hover {
-  border-color: rgba(91, 140, 199, 0.5);
-  transform: translateY(-2px);
-}
-
 /* ── ادامه مطالعه ── */
 .ap-resume {
   position: fixed;
@@ -2620,10 +2579,6 @@ body.ap-reading-mode .ap-back {
     max-width: calc(100vw - 32px);
   }
 
-  .ap-focus-exit {
-    inset-inline-start: 16px;
-    bottom: 16px;
-  }
 }
 
 /* ── کاهش حرکت ── */

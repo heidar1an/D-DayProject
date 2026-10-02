@@ -14,12 +14,10 @@ const DAY = 24 * 60 * 60 * 1000;
 /* ترتیب هفتهٔ شمسی — شنبه ستون اول است و در RTL از راست شروع می‌شود */
 const WEEKDAY_LABELS = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
 
-const dateFormatter = new Intl.DateTimeFormat(PERSIAN_LOCALE, { day: 'numeric', month: 'long' });
 const fullDateFormatter = new Intl.DateTimeFormat(PERSIAN_LOCALE, {
   weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
 });
 const monthFormatter = new Intl.DateTimeFormat(PERSIAN_LOCALE, { month: 'long', year: 'numeric' });
-const weekdayFormatter = new Intl.DateTimeFormat(PERSIAN_LOCALE, { weekday: 'long' });
 const dayFormatter = new Intl.DateTimeFormat(PERSIAN_LOCALE, { day: 'numeric' });
 /* ارقام لاتین برای محاسبهٔ ماه شمسی (نمایش همان ارقام فارسی است) */
 const persianDayNumber = new Intl.DateTimeFormat(PERSIAN_LATIN, { day: 'numeric' });
@@ -78,6 +76,54 @@ function ReviewIcon({ name, className }) {
   );
 }
 
+function ReviewModal({ open, onClose, title, children, wide = false }) {
+  const [visible, setVisible] = useState(open);
+  const [closing, setClosing] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setVisible(true);
+      setClosing(false);
+      return undefined;
+    }
+    if (!visible) return undefined;
+    setClosing(true);
+    const timer = window.setTimeout(() => {
+      setVisible(false);
+      setClosing(false);
+    }, 220);
+    return () => window.clearTimeout(timer);
+  }, [open, visible]);
+
+  useEffect(() => {
+    if (!visible || closing) return undefined;
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') onClose?.();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [closing, onClose, visible]);
+
+  if (!visible) return null;
+
+  return (
+    <div className={`review-modal ${closing ? 'is-closing' : ''}`} role="dialog" aria-modal="true" aria-label={title}>
+      <button type="button" className="review-modal__backdrop" aria-label="بستن پنجره" onClick={onClose} />
+      <div className={`review-modal__panel ${wide ? 'review-modal__panel--wide' : ''}`}>
+        <header className="review-modal__header">
+          <h2>{title}</h2>
+          <button type="button" className="review-modal__close" onClick={onClose} aria-label="بستن">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+              <path d="m6 6 12 12M18 6 6 18" />
+            </svg>
+          </button>
+        </header>
+        {children}
+      </div>
+    </div>
+  );
+}
+
 const STAGE_MINUTES = { 1: 20, 2: 16, 3: 12, 4: 10, 5: 8 };
 const PLAN_START_MINUTES = 8 * 60;
 const PLAN_BREAK_MINUTES = 5;
@@ -87,21 +133,6 @@ function formatClock(totalMinutes) {
   const hours = String(Math.floor(normalized / 60)).padStart(2, '0');
   const minutes = String(normalized % 60).padStart(2, '0');
   return toFa(`${hours}:${minutes}`);
-}
-
-const FILTERS = [
-  { id: 'all', label: 'همه' },
-  { id: 'today', label: 'موعد امروز' },
-  { id: 'upcoming', label: 'پیش رو' },
-  { id: 'mastered', label: 'تثبیت‌شده' },
-];
-
-function timingCopy(timing, dueAt) {
-  if (timing.state === 'mastered') return 'چرخه کامل شده';
-  if (timing.state === 'today') return 'موعد مرور امروز';
-  if (timing.state === 'overdue') return `${toFa(timing.days)} روز عقب‌افتاده`;
-  if (timing.days === 1) return 'فردا';
-  return `${toFa(timing.days)} روز دیگر · ${dateFormatter.format(new Date(dueAt))}`;
 }
 
 function startOfDay(value = Date.now()) {
@@ -154,75 +185,6 @@ function stageCopy(stage) {
   return `${current.label} با فاصله ${toFa(current.intervalDays)} روزه`;
 }
 
-function StageRail({ currentStage, mastered }) {
-  return (
-    <div className="review-stage-rail" aria-label={mastered ? 'چرخه G5 کامل شده' : `مرحله G${currentStage}`}>
-      {G5_STAGES.map((stage) => {
-        const isDone = mastered || stage.stage < currentStage;
-        const isCurrent = !mastered && stage.stage === currentStage;
-        return (
-          <div className={`review-stage ${isDone ? 'is-done' : ''} ${isCurrent ? 'is-current' : ''}`} key={stage.id}>
-            <span>{isDone ? '✓' : stage.id}</span>
-            <small>{toFa(stage.intervalDays)} روز</small>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function ReviewCard({ item, onComplete, onRestart, onRemove, onOpenLearning }) {
-  const timing = ReviewNotebookService.getTiming(item);
-  const activity = REVIEW_ACTIVITY_TYPES[item.activityType] || REVIEW_ACTIVITY_TYPES.other;
-  const mastered = item.status === 'mastered';
-
-  return (
-    <article className={`review-item review-item--${timing.state}`} style={{ '--review-accent': activity.color }}>
-      <header className="review-item__header">
-        <div>
-          <span className="review-item__type">{activity.label}</span>
-          <h3>{item.title}</h3>
-          <p>{[item.subject, item.description].filter(Boolean).join(' · ') || 'مبحث شخصی'}</p>
-        </div>
-        <span className={`review-item__due review-item__due--${timing.state}`}>
-          {timingCopy(timing, item.dueAt)}
-        </span>
-      </header>
-
-      <StageRail currentStage={item.stage} mastered={mastered} />
-
-      <footer className="review-item__footer">
-        <small>
-          {mastered
-            ? `در ${dateFormatter.format(new Date(item.completedAt))} تثبیت شد`
-            : `${G5_STAGES[item.stage - 1].label} · فاصله ${toFa(G5_STAGES[item.stage - 1].intervalDays)} روز`}
-        </small>
-        <div>
-          {item.sourceType === 'course-unit' && !mastered && (
-            <button type="button" className="review-button review-button--ghost" onClick={onOpenLearning}>
-              رفتن به درسنامه
-            </button>
-          )}
-          {!mastered && (
-            <button type="button" className="review-button review-button--soft" onClick={() => onRestart(item.id)}>
-              هنوز یادم نیست
-            </button>
-          )}
-          {!mastered ? (
-            <button type="button" className="review-button review-button--primary" onClick={() => onComplete(item.id)}>
-              مرور شد؛ مرحله بعد
-            </button>
-          ) : (
-            <button type="button" className="review-button review-button--ghost" onClick={() => onRemove(item.id)}>
-              حذف از دفترچه
-            </button>
-          )}
-        </div>
-      </footer>
-    </article>
-  );
-}
-
 function DailyTask({ item, index, isOverdue, startsAt, endsAt, duration, onComplete, onRestart, onOpenLearning }) {
   const activity = REVIEW_ACTIVITY_TYPES[item.activityType] || REVIEW_ACTIVITY_TYPES.other;
   const timing = ReviewNotebookService.getTiming(item);
@@ -262,10 +224,9 @@ function DailyTask({ item, index, isOverdue, startsAt, endsAt, duration, onCompl
   );
 }
 
-export default function ReviewNotebook({ userData, onOpenLearning }) {
+export default function ReviewNotebook({ userData, onOpenLearning, onBack }) {
   const userId = userData?.id ?? userData?.phone ?? 'guest';
   const [items, setItems] = useState(() => ReviewNotebookService.getAll(userId));
-  const [filter, setFilter] = useState('all');
   const [isAdding, setIsAdding] = useState(false);
   const [showStages, setShowStages] = useState(false);
   const [form, setForm] = useState({ title: '', subject: '', activityType: 'learning' });
@@ -282,31 +243,13 @@ export default function ReviewNotebook({ userData, onOpenLearning }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
-  const counts = useMemo(() => items.reduce((result, item) => {
-    const timing = ReviewNotebookService.getTiming(item);
-    result.all += 1;
-    if (timing.state === 'today' || timing.state === 'overdue') result.today += 1;
-    if (timing.state === 'upcoming') result.upcoming += 1;
-    if (timing.state === 'mastered') result.mastered += 1;
-    return result;
-  }, { all: 0, today: 0, upcoming: 0, mastered: 0 }), [items]);
-
-  const visibleItems = useMemo(() => items.filter((item) => {
-    if (filter === 'all') return true;
-    const timing = ReviewNotebookService.getTiming(item);
-    if (filter === 'today') return timing.state === 'today' || timing.state === 'overdue';
-    return timing.state === filter;
-  }), [filter, items]);
-
   /* ── شبکهٔ مربعی ماه شمسی (سبک گوگل‌کلندر): از شنبهٔ قبلِ اول ماه تا تکمیل هفتهٔ آخر ── */
   const monthLength = useMemo(() => persianMonthLength(monthStart), [monthStart]);
   const monthEnd = addDays(monthStart, monthLength);
   const calendarDays = useMemo(() => {
     const gridStart = startOfPersianWeek(monthStart);
-    const leading = Math.round((startOfDay(monthStart) - gridStart) / DAY);
-    const total = Math.ceil((leading + monthLength) / 7) * 7;
-    return Array.from({ length: total }, (_, index) => addDays(gridStart, index));
-  }, [monthLength, monthStart]);
+    return Array.from({ length: 42 }, (_, index) => addDays(gridStart, index));
+  }, [monthStart]);
 
   const activeItems = useMemo(() => items.filter((item) => item.status !== 'mastered'), [items]);
   const overdueItems = useMemo(
@@ -432,7 +375,26 @@ export default function ReviewNotebook({ userData, onOpenLearning }) {
 
   return (
     <main className="review-notebook dash-stagger" dir="rtl">
-      {/* ── سرتیتر: هم‌سبک هیرو «درسنامهٔ جامع» — خط کوچک + خط بزرگ گرادیانی ── */}
+      <div className="review-topbar dash-stagger">
+        <button className="review-topbar__back" type="button" onClick={onBack}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M9 6l6 6-6 6" />
+          </svg>
+          بازگشت به داشبورد
+        </button>
+        <button
+          type="button"
+          onClick={() => setIsAdding(true)}
+          className="review-topbar__cta flex cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm transition-colors hover:border-[#5b8cc7]/50 hover:bg-[#5b8cc7]/12 [font-family:'Doran','Vazir',Tahoma,sans-serif]"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 text-[var(--blue-soft-ink)]" aria-hidden="true">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          ساخت مبحث
+        </button>
+      </div>
+
+      {/* ── سرتیترِ وسط‌چین، هم‌سبک لایه‌های داشبورد ── */}
       <header className="review-hero">
         <div className="review-hero__content">
           <h1 className="review-hero__title">
@@ -442,45 +404,8 @@ export default function ReviewNotebook({ userData, onOpenLearning }) {
           <p className="review-hero__subtitle">
             برنامه هر روز دقیقاً مشخص می‌کند کدام مبحث را در کدام مرحله G مرور کنی.
           </p>
-          <button
-            type="button"
-            className="review-help"
-            aria-expanded={showStages}
-            aria-controls="review-stages-help"
-            aria-label="مراحل مرور G چطور کار می‌کند؟"
-            title="مراحل مرور G چطور کار می‌کند؟"
-            onClick={() => setShowStages((value) => !value)}
-          >
-            <ReviewIcon name="help" className="review-help__icon" />
-          </button>
         </div>
-        <aside className="review-today-tile" aria-label="تقویم روز">
-          <small>{weekdayFormatter.format(new Date(today))}</small>
-          <strong>{dayFormatter.format(new Date(today))}</strong>
-          <span>{monthFormatter.format(new Date(today))}</span>
-        </aside>
       </header>
-
-      {showStages && (
-        <section className="review-stages-help" id="review-stages-help" aria-label="مراحل مرور G">
-          <header>
-            <strong>مراحل مرور G چطور کار می‌کند؟</strong>
-            <span>
-              هر مبحثی که یاد می‌گیری وارد G1 می‌شود؛ با هر مرور موفق فاصله دو برابر می‌شود تا در G5 تثبیت شود.
-              مجموع چرخه: ۳۱ روز.
-            </span>
-          </header>
-          <div className="review-stages-help__rail">
-            {G5_STAGES.map((stage, index) => (
-              <div className="review-stages-help__stage" key={stage.id}>
-                <span>{stage.id}</span>
-                <strong>{toFa(stage.intervalDays)} روز بعد</strong>
-                <small>{index === G5_STAGES.length - 1 ? 'تثبیت نهایی' : stage.label}</small>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
 
       <section className="review-chips" aria-label="خلاصه برنامه امروز">
         {summaryChips.map((chip) => (
@@ -497,16 +422,29 @@ export default function ReviewNotebook({ userData, onOpenLearning }) {
         ))}
       </section>
 
-      <section className="review-calendar" aria-label="تقویم مرور شمسی">
+      <div className="review-dashboard-grid">
+        <section className="review-calendar" aria-label="تقویم مرور شمسی">
         <header className="review-calendar__header">
           <div>
-            <small>تقویم مرور</small>
             <h2>{monthFormatter.format(new Date(monthStart))}</h2>
           </div>
-          <div className="review-calendar__nav">
-            <button type="button" onClick={() => moveMonth(-1)} aria-label="ماه قبل">→</button>
-            <button type="button" className="review-calendar__today" onClick={goToToday}>امروز</button>
-            <button type="button" onClick={() => moveMonth(1)} aria-label="ماه بعد">←</button>
+          <div className="review-calendar__tools">
+            <button
+              type="button"
+              className="review-help"
+              aria-expanded={showStages}
+              aria-controls="review-g5-explainer"
+              aria-label="فلسفه مرور فاصله‌دار ۵G چیست؟"
+              title="فلسفه مرور فاصله‌دار ۵G چیست؟"
+              onClick={() => setShowStages((value) => !value)}
+            >
+              <ReviewIcon name="help" className="review-help__icon" />
+            </button>
+            <div className="review-calendar__nav">
+              <button type="button" onClick={() => moveMonth(-1)} aria-label="ماه قبل">→</button>
+              <button type="button" className="review-calendar__today" onClick={goToToday}>امروز</button>
+              <button type="button" onClick={() => moveMonth(1)} aria-label="ماه بعد">←</button>
+            </div>
           </div>
         </header>
 
@@ -537,10 +475,10 @@ export default function ReviewNotebook({ userData, onOpenLearning }) {
         </div>
       </section>
 
-      <section className="daily-plan" aria-labelledby="daily-plan-title">
+      <div className="review-dashboard-grid__main">
+        <section className="daily-plan" aria-labelledby="daily-plan-title">
         <header className="daily-plan__header">
           <div>
-            <small>{isTodaySelected ? 'برنامه امروز' : 'برنامه روز انتخاب‌شده'}</small>
             <h2 id="daily-plan-title">{fullDateFormatter.format(new Date(selectedDate))}</h2>
             <p>{isTodaySelected
               ? (overdueItems.length ? 'ابتدا عقب‌افتاده‌ها، سپس موعدِ امروز؛ ساعت‌ها از همین لحظه شروع می‌شوند.' : 'زمان‌بندی پیشنهادی امروز از همین ساعت شروع می‌شود.')
@@ -579,18 +517,53 @@ export default function ReviewNotebook({ userData, onOpenLearning }) {
         </div>
       </section>
 
-      <div className="review-library-heading">
-        <div>
-          <small>مدیریت دفترچه</small>
-          <h2>همه مباحث و مسیرهای مرور</h2>
-        </div>
-        <button type="button" className="review-add-button" onClick={() => setIsAdding((value) => !value)}>
-          <span aria-hidden="true">＋</span>
-          افزودن مبحث
-        </button>
+      </div>
       </div>
 
-      {isAdding && (
+      <ReviewModal
+        open={showStages}
+        onClose={() => setShowStages(false)}
+        title="فلسفه مرور فاصله‌دار ۵G"
+        wide
+      >
+        <div id="review-g5-explainer" className="review-g5-explainer space-y-5">
+          <p className="text-sm leading-8 text-[var(--muted)]">
+            یادگیری فقط دیدن و دوباره‌خواندن نیست؛ باید بتوانی مطلب را زمانی که دیگر جلوی چشمت نیست به یاد بیاوری.
+            مرور فاصله‌دار، یادآوری را درست پیش از کم‌رنگ‌شدن حافظه تکرار می‌کند تا مسیر بازیابی اطلاعات با تمرین تقویت شود.
+          </p>
+          <div className="review-g5-explainer__principles">
+            <section>
+              <h3>اول به‌یاد بیاور، بعد بررسی کن</h3>
+              <p>پیش از بازکردن درس یا پاسخ، چند لحظه تلاش کن نکته‌ها را از حافظه بازسازی کنی. سپس پاسخ را بررسی کن و فقط بخش‌های فراموش‌شده یا نادقیق را اصلاح کن.</p>
+            </section>
+            <section>
+              <h3>تکرارها را فاصله‌دار کن</h3>
+              <p>فشرده‌خوانی ممکن است حس آشنایی ایجاد کند، اما یادآوری پس از گذشت زمان نشان می‌دهد چه چیزی واقعاً در حافظه مانده است. فاصله‌ها تدریجی بیشتر می‌شوند تا مطلب چند بار و در زمان‌های جداگانه بازیابی شود.</p>
+            </section>
+          </div>
+          <section>
+            <h3 className="mb-3 text-sm text-white [font-family:'Doran','Vazir',Tahoma,sans-serif]">پنج گام چرخه در دفترچه مرور</h3>
+            <p className="mb-3 text-xs leading-7 text-[var(--faint)]">
+              در این چرخه، فاصلهٔ هر مرور بعدی دو برابر می‌شود: ۱، ۲، ۴، ۸ و ۱۶ روز. اگر مرورها سرِ موعد انجام شوند، نوبت‌ها به‌ترتیب در روزهای ۱، ۳، ۷، ۱۵ و ۳۱ پس از یادگیری قرار می‌گیرند.
+            </p>
+            <div className="review-g5-explainer__stages">
+              {G5_STAGES.map((stage, index) => (
+                <div className="review-g5-explainer__stage" key={stage.id}>
+                  <strong>{stage.id}</strong>
+                  <span>{stage.label}</span>
+                  <small>{index === 0 ? 'یک روز پس از یادگیری' : `${toFa(stage.intervalDays)} روز پس از مرور قبلی`}</small>
+                </div>
+              ))}
+            </div>
+          </section>
+          <p className="review-g5-explainer__note">
+            هر بار که مرور را انجام دادی، مرحله بعدی با فاصله بیشتر در تقویم ثبت می‌شود؛ مرور موفق G5 چرخه را کامل می‌کند.
+            اگر مطلب را به یاد نیاوردی، «نیاز به شروع دوباره» چرخه را به G1 برمی‌گرداند. این برنامه یک راهنمای منظم برای تمرین یادآوری است، نه تضمین حفظ دائمی؛ مرور با تمرکز و اصلاح خطاها همچنان مهم است.
+          </p>
+        </div>
+      </ReviewModal>
+
+      <ReviewModal open={isAdding} onClose={() => setIsAdding(false)} title="ساخت مبحث">
         <form className="review-add-form" onSubmit={handleAdd}>
           <label>
             <span>عنوان مبحث</span>
@@ -608,44 +581,7 @@ export default function ReviewNotebook({ userData, onOpenLearning }) {
           </label>
           <button type="submit" className="review-button review-button--primary">شروع چرخه G1</button>
         </form>
-      )}
-
-      <section className="review-notebook__toolbar">
-        <div className="review-filters" role="tablist" aria-label="فیلتر مرورها">
-          {FILTERS.map((item) => (
-            <button
-              type="button"
-              role="tab"
-              aria-selected={filter === item.id}
-              className={filter === item.id ? 'is-active' : ''}
-              onClick={() => setFilter(item.id)}
-              key={item.id}
-            >
-              {item.label}<span>{toFa(counts[item.id])}</span>
-            </button>
-          ))}
-        </div>
-        <p>{counts.today ? `${toFa(counts.today)} مرور موعددار یا عقب‌افتاده` : 'مرور عقب‌افتاده‌ای نداری'}</p>
-      </section>
-
-      <section className="review-list" aria-live="polite">
-        {visibleItems.length ? visibleItems.map((item) => (
-          <ReviewCard
-            item={item}
-            key={item.id}
-            onComplete={completeReview}
-            onRestart={restartReview}
-            onRemove={(itemId) => { ReviewNotebookService.remove(userId, itemId); refresh(); }}
-            onOpenLearning={onOpenLearning}
-          />
-        )) : (
-          <div className="review-empty">
-            <span aria-hidden="true">✓</span>
-            <h2>{filter === 'today' ? 'مرور امروز تمام شد' : 'هنوز مبحثی اینجا نیست'}</h2>
-            <p>{filter === 'today' ? 'با خیال راحت سراغ یادگیری بعدی برو.' : 'با تکمیل یک واحد یادگیری یا افزودن دستی، چرخه G1 آغاز می‌شود.'}</p>
-          </div>
-        )}
-      </section>
+      </ReviewModal>
     </main>
   );
 }

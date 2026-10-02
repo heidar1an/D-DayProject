@@ -32,6 +32,9 @@ import telegram from './telegram.js';
 import eitaa from './eitaa.js';
 import instagram from './instagram.js';
 
+/* تاب‌آوری: مدارشکن مشترک پروسه + اجرای محافظت‌شده (فاز ۱۰) */
+import { guardedCall, publisherBreaker } from './resilience.js';
+
 /* ───────────────────────── آداپتور بله (پوشش) ───────────────────────── */
 
 function friendlyBaleError(error) {
@@ -188,6 +191,19 @@ export function platformNeedsAppKeys(id) {
 
 /* ───────────────────────── عملیات واحد روی هر پلتفرم ───────────────────────── */
 
+/*
+ * تاب‌آوری (فاز ۱۰): همهٔ فراخوانی‌های بیرونی از `guardedCall` می‌گذرند.
+ *
+ *   • `send`  → تلاش مجدد **خاموش** به‌صورت پیش‌فرض (مهلت‌تمام‌شدن مبهم است و
+ *     تکرار خودکار می‌تواند پیام تکراری بسازد). فقط با `options.retry` روشن می‌شود.
+ *   • `verify`/`metrics` → خواندنی و بی‌اثر، پس تلاش مجدد روشن است.
+ *
+ * نکتهٔ صادقانه: `adapter.verify` خطاهای شبکه را **درون خودش** می‌گیرد و به شکل
+ * «بررسی ناموفق» برمی‌گرداند (نه throw). پس مدارشکن روی `verify` معمولاً باز
+ * نمی‌شود — و این درست است: «توکن باطل» پاسخ قطعی است، نه خرابی گذرای سرویس.
+ * مدارشکن واقعاً روی `send` و `metrics` اثر دارد، که همان مسیر پرهزینه است.
+ */
+
 export async function verifyPlatform({ platform, token, target, appId = '' }) {
   const adapter = adapterById(platform);
   if (!adapter) {
@@ -211,7 +227,10 @@ export async function verifyPlatform({ platform, token, target, appId = '' }) {
     };
   }
 
-  return adapter.verify({ token, target, appId });
+  return guardedCall(`verify:${platform}`, {
+    run: () => adapter.verify({ token, target, appId }),
+    retry: { attempts: 2 },
+  });
 }
 
 export function planPlatform({ platform, text, media }) {
@@ -231,18 +250,39 @@ export async function sendPlatform({ platform, token, target, text, media, optio
   if (!adapter) {
     throw Object.assign(new Error('پلتفرم پشتیبانی نمی‌شود'), { code: 'VALIDATION_ERROR' });
   }
-  return adapter.send({ token, target, text, media, options });
+
+  /*
+   * ارسال «حداکثر یک‌بار» است: `attempts: 1` یعنی هیچ تکرار خودکاری.
+   * دلیل: اگر پاسخ در مهلت نرسد، نمی‌دانیم پیام رفته یا نه؛ تکرار خودکار
+   * می‌تواند پست تکراری بسازد. فراخوان می‌تواند عمداً `options.retry = true`
+   * بدهد (مثلاً برای کانالی که تکرارش بی‌خطر است).
+   */
+  return guardedCall(`send:${platform}`, {
+    run: () => adapter.send({ token, target, text, media, options }),
+    retry: { attempts: options?.retry === true ? 2 : 1 },
+  });
 }
 
 export async function platformMetrics({ platform, token, target }) {
   const adapter = adapterById(platform);
   if (!adapter?.metrics) return null;
   try {
-    return await adapter.metrics({ token, target });
+    return await guardedCall(`metrics:${platform}`, {
+      run: () => adapter.metrics({ token, target }),
+      retry: { attempts: 2 },
+    });
   } catch {
     /* شکست خواندن سنجه نباید چیزی را بشکند؛ فقط «داده‌ای نیست» */
     return null;
   }
+}
+
+/*
+ * وضعیت مدارشکن هر پلتفرم — برای گزارش سلامت/عیب‌یابی پنل.
+ * عمداً خواندنی است و هیچ‌وقت خودش چیزی را مسدود نمی‌کند.
+ */
+export function platformCircuitStatus(platform) {
+  return publisherBreaker.snapshot(`send:${platform}`);
 }
 
 /*

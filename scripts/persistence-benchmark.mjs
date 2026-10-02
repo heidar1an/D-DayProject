@@ -27,6 +27,9 @@ import { dirname, join, relative, resolve } from 'node:path';
 import { performance } from 'node:perf_hooks';
 import { fileURLToPath } from 'node:url';
 
+/* تنها منبع حقیقت «کدام فایل، مجموعه است» — همان رجیستری مدل که دروازه می‌سنجد. */
+import { COLLECTION_FILES } from '../database/models/index.js';
+
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..');
 const CONTENT_DIR = join(ROOT, 'database', 'content');
@@ -125,10 +128,28 @@ rmSync(writeDir, { recursive: true, force: true });
 /* ───────────────────── ۳) خواندن end-to-end از contentStore ───────────────────── */
 
 const store = await import('../database/contentStore.js');
+
+/*
+ * نگاشت «مسیر فایل → نام مجموعه» از **رجیستری مدل** می‌آید، نه از نام فایل.
+ *
+ * ⚠️ چرا اصلاح شد (یافتهٔ واقعی دروازه): نسخهٔ قبلی هر `*.json` داخل
+ * `database/content/` را یک مجموعهٔ انبار می‌شمرد و بعد `readCollection` را با
+ * همان نام صدا می‌زد. ولی همهٔ فایل‌های آنجا مجموعهٔ قابل‌خواندن نیستند
+ * (`settings` · `examQuestions` · `examAttempts` · `examAudit` · `examReports` ·
+ * `exams`)؛ `readCollection` عمداً `unknown-collection` پرتاب می‌کند و چون این
+ * حلقه محافظ نداشت، **کل گام `data:benchmark` با exit 1 می‌مرد** — بدون هیچ
+ * خروجی بنچمارکی.
+ *
+ * دو منبع حقیقت با هم تلاقی می‌کنند تا نامِ غلط ساختاراً ناممکن شود:
+ *   • `COLLECTION_FILES` (رجیستری مدل) می‌گوید هر مجموعه در کدام فایل است.
+ *   • `COLLECTIONS` (خودِ `contentStore`) می‌گوید `readCollection` چه نامی را
+ *     می‌پذیرد. `users`/`users.sessions`/`settings`/`feedback`/`exams*` مجموعهٔ
+ *     `COLLECTIONS` نیستند و از این بنچمارک بیرون می‌مانند.
+ */
 const collectionByFile = new Map(
-  readdirSync(CONTENT_DIR)
-    .filter((name) => name.endsWith('.json'))
-    .map((name) => [join('database', 'content', name), name.replace(/\.json$/, '')]),
+  Object.entries(COLLECTION_FILES)
+    .filter(([collection]) => store.COLLECTIONS.includes(collection))
+    .map(([collection, file]) => [file, collection]),
 );
 
 const readResults = [];

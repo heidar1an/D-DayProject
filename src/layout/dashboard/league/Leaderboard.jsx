@@ -34,13 +34,15 @@ const METRICS = [
 
 const ME_UNIVERSITY = 'دانشگاه علوم پزشکی قم';
 
-export function PodiumCard({ entry, place, metric }) {
+export function PodiumCard({ entry, place, metric, onOpenProfile }) {
   const isCenter = place === 1;
   const value = metric ? entry[metric.id] : entry.hearts;
 
   return (
-    <div
-      className={`lg-podium__step flex flex-1 flex-col items-center gap-2 rounded-[1.75rem] border px-3 pb-4 pt-5 text-center ${
+    <button
+      type="button"
+      onClick={() => onOpenProfile?.(entry)}
+      className={`lg-podium__step flex flex-1 flex-col items-center gap-2 rounded-[1.75rem] border px-3 pb-4 pt-5 text-center transition-colors ${onOpenProfile ? 'cursor-pointer hover:border-[#937fcd]/50 hover:bg-white/[0.05]' : 'cursor-default'} ${
         isCenter ? 'border-[#e0b45c]/40 bg-[#e0b45c]/[0.07]' : 'border-white/8 bg-white/[0.03]'
       } ${isCenter ? 'md:-translate-y-3 md:pt-7' : ''}`}
       style={{ animationDelay: `${place * 90}ms` }}
@@ -61,20 +63,23 @@ export function PodiumCard({ entry, place, metric }) {
         )}
         {faNum(value)}
       </span>
-    </div>
+    </button>
   );
 }
 
-export function LeaderRow({ entry, metric }) {
+export function LeaderRow({ entry, metric, onOpenProfile }) {
   const value = metric ? entry[metric.id] : entry.hearts;
   return (
-    <li
-      className={`flex items-center gap-3 rounded-2xl border px-4 py-3 transition-colors ${
+    <li>
+      <button
+        type="button"
+        onClick={() => onOpenProfile?.(entry)}
+        className={`flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-right transition-colors ${onOpenProfile ? 'cursor-pointer hover:border-[#937fcd]/40 hover:bg-white/[0.04]' : 'cursor-default'} ${
         entry.isYou
           ? 'border-[#e26d6d]/40 bg-[#e26d6d]/[0.08]'
           : 'border-white/6 bg-[var(--surface-soft)] hover:bg-[var(--surface-soft)]'
       }`}
-    >
+      >
       <RankChip rank={entry.rank} />
       <UserAvatar avatar={avatarOf(entry)} size={40} isYou={entry.isYou} />
       <span className="min-w-0 flex-1">
@@ -94,6 +99,7 @@ export function LeaderRow({ entry, metric }) {
         )}
         {faNum(value)}
       </span>
+      </button>
     </li>
   );
 }
@@ -113,7 +119,7 @@ function LeaderboardSkeleton() {
   );
 }
 
-export default function Leaderboard({ me }) {
+export default function Leaderboard({ me, userData, onOpenProfile }) {
   const [scope, setScope] = useState('university');
   const [metric, setMetric] = useState('total');
   const [data, setData] = useState(null);
@@ -222,9 +228,9 @@ export default function Leaderboard({ me }) {
         <>
           {hasPodium && (
             <div className="mb-5 flex items-end gap-3">
-              <PodiumCard entry={podiumEntries[1]} place={2} />
-              <PodiumCard entry={podiumEntries[0]} place={1} />
-              <PodiumCard entry={podiumEntries[2]} place={3} />
+              <PodiumCard entry={podiumEntries[1]} place={2} onOpenProfile={onOpenProfile && (() => onOpenProfile(podiumEntries[1]))} />
+              <PodiumCard entry={podiumEntries[0]} place={1} onOpenProfile={onOpenProfile && (() => onOpenProfile(podiumEntries[0]))} />
+              <PodiumCard entry={podiumEntries[2]} place={3} onOpenProfile={onOpenProfile && (() => onOpenProfile(podiumEntries[2]))} />
             </div>
           )}
 
@@ -238,7 +244,7 @@ export default function Leaderboard({ me }) {
 
           <ul className="space-y-2.5">
             {listEntries.map((entry) => (
-              <LeaderRow key={entry.id ?? entry.rank} entry={entry} metric={scope === 'universities' ? activeMetric : null} />
+              <LeaderRow key={entry.id ?? entry.rank} entry={entry} metric={scope === 'universities' ? activeMetric : null} onOpenProfile={scope === 'universities' ? undefined : onOpenProfile && (() => onOpenProfile(entry))} />
             ))}
           </ul>
 

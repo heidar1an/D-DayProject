@@ -252,6 +252,7 @@ export default function DashboardLayout({ userData, onUserDataChange, onLogout }
     'review-notebook': (
       <ReviewNotebook
         userData={userData}
+        onBack={() => handleSectionChange('dashboard')}
         onOpenLearning={() =>
           openLayer(LAYER_IDS.comprehensive, null, { section: 'courses' })
         }

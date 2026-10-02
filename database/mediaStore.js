@@ -30,7 +30,7 @@
  *      پلتفرم می‌آید. جای خالی `null` می‌ماند، نه صفر.
  */
 
-import { chmodSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { chmodSync, existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -257,12 +257,19 @@ function readSecrets() {
 }
 
 function writeSecrets(secrets) {
-  writeFileSync(secretsFile, JSON.stringify(secrets, null, 2), 'utf8');
+  /*
+   * نوشتن اتمیک (tmp → rename) — فاز ۶ (آمادگی چند‌پروسه‌ای). توضیح کامل در
+   * `publishingStore.writeSecrets`؛ همان ریسک اینجا هم بود: مرگ پروسه در میانهٔ
+   * نوشتن ⇒ فایل نیمه‌نوشته ⇒ `readSecrets` بی‌صدا همهٔ credentialها را از دست می‌داد.
+   */
+  const tmp = `${secretsFile}.${process.pid}.tmp`;
+  writeFileSync(tmp, JSON.stringify(secrets, null, 2), 'utf8');
   try {
-    chmodSync(secretsFile, 0o600);
+    chmodSync(tmp, 0o600);
   } catch {
     /* روی برخی فایل‌سیستم‌ها chmod معنا ندارد؛ ذخیره انجام شده است */
   }
+  renameSync(tmp, secretsFile);
 }
 
 function storedCredentials(accountId) {

@@ -87,12 +87,15 @@ const STEPS = [
   { id: 'api:test', args: ['--test', 'database/apiContract.test.mjs'] },
   { id: 'api:input:test', args: ['--test', 'database/inputGate.test.mjs'] },
   { id: 'obs:test', args: ['--test', 'database/observability.test.mjs'] },
+  { id: 'log:test', args: ['--test', 'database/logRotation.test.mjs'] },
   { id: 'guardian:test', args: ['--test', 'database/guardian.test.mjs'] },
   { id: 'router:test', args: ['scripts/router-test.mjs'] },
   { id: 'content:atomic:test', args: ['--test', 'database/contentStoreAtomicWrite.test.mjs'] },
   { id: 'content:hotpath:test', args: ['--test', 'database/contentStoreHotPath.test.mjs'] },
   { id: 'storage:test', args: ['--test', 'database/storageCorruption.test.mjs'] },
+  { id: 'uploads:security:test', args: ['--test', 'database/uploadsSecurity.test.mjs'] },
   { id: 'publish:guard:test', args: ['--test', 'database/publisherUrlGuard.test.mjs'] },
+  { id: 'publish:resilience:test', args: ['--test', 'database/publisherResilience.test.mjs'] },
   /*
    * گام‌های افزودهٔ Pre-Production Remediation (فازهای ۳، ۴، ۸، ۹، ۱۲، ۲۲، ۲۸).
    * هر کدام یک سازوکار تازه را می‌سنجد، نه یک تست تشریفاتی:
@@ -117,6 +120,27 @@ const STEPS = [
   { id: 'audit:api:selftest', args: ['scripts/api-input-audit.mjs', '--selftest'] },
   { id: 'smoke:test', args: ['scripts/server-smoke.mjs'] },
   { id: 'e2e:api', args: ['scripts/e2e-api-flows.mjs'] },
+  /*
+   * گام‌های Production Readiness (فازهای ۸ و ۱۲ و ۱).
+   *
+   *   • api:openapi:check  — قرارداد API با OpenAPI تولیدشده هم‌گام است؟ (drift)
+   *   • audit:validation   — سرشماری مسیرهای نوشتنی که اعتبارسنجی مدل دارند
+   *   • e2e:browser        — جریان‌های واقعی مرورگری (CDP)
+   *
+   * ⚠️ `e2e:browser` وقتی مرورگر کروم/کرومیوم روی ماشین نباشد کد ۳ («نامعین»)
+   * می‌دهد — و این دروازه کد ۳ را شکست نمی‌شمارد، ولی در گزارش با ⚠ فهرست
+   * می‌کند. یعنی «اجرا نشد» هیچ‌وقت سبز نشان داده نمی‌شود.
+   */
+  { id: 'api:openapi:check', args: ['scripts/openapi-generate.mjs', '--check'] },
+  { id: 'audit:validation', args: ['scripts/validation-coverage.mjs'] },
+  { id: 'e2e:browser', args: ['scripts/browser-e2e.mjs'] },
+  /*
+   * آزمون بار روی سرور محلی (خودش سرور را بالا می‌آورد و پایین می‌آورد).
+   * چرا در دروازه: هارنس باری که فقط در CI اجرا شود، روی ماشین توسعه کهنه
+   * می‌شود. آستانه‌ها سخت‌گیرانه‌اند (نرخ موفقیت ≥ ۰.۹۹، p95 ≤ ۱۵۰۰ms، صفر 5xx)
+   * و هیچ‌وقت برای سبز شدن شل نمی‌شوند. نبودِ artifact بیلد ⇒ exit 3 (نامعین).
+   */
+  { id: 'perf:load:local', args: ['scripts/load-test-local.mjs'] },
   { id: 'repo:hygiene', args: ['scripts/repo-hygiene.mjs'] },
 ];
 

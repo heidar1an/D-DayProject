@@ -1,0 +1,48 @@
+# .dockerignore — زمینهٔ build را کوچک و قابل‌پیش‌بینی نگه می‌دارد.
+#
+# چرا مهم است: بدون این، `docker build` کل `.git` (چند صد مگابایت تاریخچه) و
+# `node_modules` میزبان را می‌فرستد؛ هم کند می‌شود، هم می‌تواند دادهٔ زمان‌اجرا
+# (users.json، admins.json، secrets) را داخل ایمیج بکشاند.
+
+# کنترل نسخه و ابزار
+.git
+.github
+.workbuddy-ai
+.claude
+
+# وابستگی‌ها و artifactهای میزبان
+node_modules
+dist
+*.out.mjs
+.probe*
+
+# پروژهٔ یونیتی (بزرگ و بی‌ربط به build کلاینت)
+Z-Anatomy-Beta
+
+# دادهٔ زمان‌اجرا و اسرار — هرگز داخل ایمیج نروند
+database/users.json
+database/users.json.bak-avatar
+database/users.sessions.json
+database/admin.sessions.json
+database/*.secrets.json
+database/content/activity.json
+database/content/admins.json
+database/content/events.json
+database/content/publishLog.json
+database/content/mediaMetrics.json
+database/content/feedback.json
+database/content/exams.json
+database/content/exam*.json
+database/migrations/applied.json
+database/migrations/audit.jsonl
+database/migrations/backups
+
+# آپلودهای میزبان (با volume می‌آیند، نه با ایمیج)
+public/uploads
+
+# پشتیبان/موقت
+*.bak
+*.orig
+*.rej
+.DS_Store
+.env

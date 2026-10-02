@@ -8,7 +8,7 @@
       "چرخهٔ قلبی"
     ],
     "type": "memorization",
-    "difficulty": "medium",
+    "difficulty": "easy",
     "year": 1384,
     "source": "official",
     "tags": [
@@ -44,16 +44,16 @@
       ]
     },
     "stats": {
-      "solves": 0,
-      "correctPercent": 0,
+      "solves": 2,
+      "correctPercent": 100,
       "optionPercents": [
-        0,
+        100,
         0,
         0,
         0
       ],
       "avgTimeSec": 0,
-      "difficultyIndex": 0
+      "difficultyIndex": 1
     },
     "createdAt": "2025-11-02",
     "updatedAt": "2026-09-24T12:02:56.944Z",

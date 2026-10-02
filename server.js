@@ -25,16 +25,21 @@ import { injectBaselineMeta, siteUrlFromEnv } from './database/seo.js';
 import {
   accessLogEnabled,
   accessLogLine,
+  appendLogLine,
+  captureError,
   checkReadiness,
   runtimeMetrics,
   isMetricsAuthorized,
   metricsTokenFromEnv,
   newRequestId,
+  safePathname,
 } from './database/observability.js';
 
 const rootDir = dirname(fileURLToPath(import.meta.url));
 const distDir = resolve(rootDir, 'dist');
 const dataDir = resolve(rootDir, 'database');
+/* دومین مسیر نوشتنی پروداکشن — readiness باید آن را هم ببیند (فاز ۳) */
+const uploadsDir = resolve(rootDir, 'public', 'uploads');
 
 /*
  * مشاهده‌پذیری (فاز ۱۰ پیشنهادی).
@@ -229,15 +234,18 @@ const server = createServer(async (request, response) => {
     });
 
     if (accessLogOn) {
-      console.log(
-        accessLogLine({
-          requestId,
-          method: request.method,
-          path: pathname,
-          status: response.statusCode,
-          durationMs,
-        }),
-      );
+      const line = accessLogLine({
+        requestId,
+        method: request.method,
+        path: pathname,
+        status: response.statusCode,
+        durationMs,
+      });
+
+      console.log(line);
+      /* اگر `TAPESH_LOG_FILE` تنظیم شده باشد، همان خط (با همان حذف PII) روی
+         دیسک هم می‌نشیند تا شاهد حادثه پس از ری‌استارت از دست نرود. */
+      appendLogLine(line);
     }
   });
 
@@ -275,7 +283,7 @@ const server = createServer(async (request, response) => {
       }
 
       if (pathname === '/readyz') {
-        const report = checkReadiness({ distDir, dataDir });
+        const report = checkReadiness({ distDir, dataDir, uploadsDir });
         sendJson(response, report.ready ? 200 : 503, report);
         return;
       }
@@ -337,6 +345,12 @@ const server = createServer(async (request, response) => {
     response.end('404 — پیدا نشد');
   } catch (error) {
     console.error('[tapesh-server]', error);
+    /*
+     * ردیابی خطای آمادهٔ اتصال (فاز ۹). بدون `TAPESH_ERROR_DSN` یک no-op است؛
+     * با DSN، همان خطا با زمینهٔ کمینه (requestId/روش/مسیر امن) فرستاده می‌شود.
+     * `void` تا هرگز روی مسیر پاسخ تأخیر/خطا نگذارد.
+     */
+    void captureError(error, { requestId, method: request.method, path: safePathname(pathname) });
     if (!response.headersSent) {
       response.statusCode = 500;
       response.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -390,3 +404,42 @@ server.listen(PORT, HOST, () => {
       : 'ورود با گوگل: غیرفعال — GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET را در .env بگذارید',
   );
 });
+
+/*
+ * خاموشی نرم (فاز ۳ آماده‌سازی استقرار).
+ *
+ * چرا لازم است: orchestrator (systemd/Docker/K8s) با `SIGTERM` خبر می‌دهد و بعد
+ * از مهلت کوتاهی `SIGKILL` می‌زند. بدون هندلر، درخواست‌های در جریان وسط پاسخ
+ * قطع می‌شدند و نوشتن‌های JSON (که اتمیک‌اند ولی در میانهٔ مسیر handler) نیمه
+ * می‌ماندند. رفتار درست: دیگر اتصال تازه نپذیر، اتصال‌های **بی‌استفاده** را ببند،
+ * بگذار درخواست‌های در جریان تمام شوند، بعد خارج شو.
+ *
+ * `closeIdleConnections` عمدی است: `socket.end()` روی اتصال‌های keep-alive
+ * درخواست در جریان را هم می‌بُرد. در نبود آن API (نسخه‌های قدیمی‌تر) فقط مهلت
+ * باقی می‌ماند — رفتار degrade، نه شکست.
+ */
+const SHUTDOWN_GRACE_MS = Number(process.env.TAPESH_SHUTDOWN_GRACE_MS) || 10000;
+let shuttingDown = false;
+
+function shutdown(signal) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  console.log(`[tapesh-server] ${signal} دریافت شد — خاموشی نرم آغاز شد`);
+
+  server.close(() => {
+    console.log('[tapesh-server] همهٔ اتصال‌ها بسته شد — خروج');
+    process.exit(0);
+  });
+
+  if (typeof server.closeIdleConnections === 'function') server.closeIdleConnections();
+
+  const timer = setTimeout(() => {
+    console.warn(`[tapesh-server] مهلت ${SHUTDOWN_GRACE_MS}ms تمام شد — بستن اجباری`);
+    if (typeof server.closeAllConnections === 'function') server.closeAllConnections();
+    process.exit(0);
+  }, SHUTDOWN_GRACE_MS);
+  timer.unref();
+}
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));

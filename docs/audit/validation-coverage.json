@@ -1,0 +1,29 @@
+{
+  "generatedAt": "2026-10-02T10:52:52.308Z",
+  "phase": "08-validation-coverage",
+  "totals": {
+    "writeRoutes": 134,
+    "entityValidated": 5,
+    "structuralOnly": 125,
+    "intentionallyBodyFree": 4,
+    "withoutContract": 0
+  },
+  "byKind": {
+    "object": 125,
+    "entity": 5,
+    "none": 4
+  },
+  "intentionallyBodyFree": [
+    "POST /api/admin/media/demo/clear",
+    "POST /api/admin/media/demo/seed",
+    "POST /api/admin/media/notifications/read-all",
+    "POST /api/admin/media/notifications/refresh"
+  ],
+  "missing": [],
+  "note": [
+    "entity = اعتبارسنجی کامل با Schema مدل دامنه (assertInputValid).",
+    "object = فقط «بدنه یک شیء سادهٔ JSON است»؛ شکل دقیق در هندلر سنجیده می‌شود.",
+    "none   = بدنهٔ JSON ندارد (آپلود جریانی / عملیات بدون payload).",
+    "مسیر خواندن (GET/HEAD) در این شمارش نیست — قرارداد ورودی ندارند."
+  ]
+}

@@ -3,6 +3,9 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=22.0.0 <23"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -47,7 +50,9 @@
     "content:atomic:test": "node --test database/contentStoreAtomicWrite.test.mjs",
     "content:hotpath:test": "node --test database/contentStoreHotPath.test.mjs",
     "storage:test": "node --test database/storageCorruption.test.mjs",
+    "uploads:security:test": "node --test database/uploadsSecurity.test.mjs",
     "publish:guard:test": "node --test database/publisherUrlGuard.test.mjs",
+    "publish:resilience:test": "node --test database/publisherResilience.test.mjs",
     "backup:restore:test": "node scripts/backup-restore-test.mjs",
     "audit:api": "node scripts/api-input-audit.mjs",
     "audit:api:selftest": "node scripts/api-input-audit.mjs --selftest",
@@ -58,9 +63,21 @@
     "api:input:test": "node --test database/inputGate.test.mjs",
     "router:test": "node scripts/router-test.mjs",
     "obs:test": "node --test database/observability.test.mjs",
+    "log:test": "node --test database/logRotation.test.mjs",
     "guardian:test": "node --test database/guardian.test.mjs",
     "smoke:test": "node scripts/server-smoke.mjs",
     "e2e:api": "node scripts/e2e-api-flows.mjs",
+    "e2e:browser": "node scripts/browser-e2e.mjs",
+    "e2e:browser:headed": "node scripts/browser-e2e.mjs --headed",
+    "e2e:browser:json": "node scripts/browser-e2e.mjs --json",
+    "perf:load": "node scripts/load-test.mjs",
+    "perf:load:local": "node scripts/load-test-local.mjs",
+    "perf:load:check": "node scripts/load-test.mjs --check",
+    "perf:startup": "node scripts/startup-benchmark.mjs",
+    "api:openapi": "node scripts/openapi-generate.mjs",
+    "api:openapi:check": "node scripts/openapi-generate.mjs --check",
+    "audit:validation": "node scripts/validation-coverage.mjs",
+    "audit:secrets": "node scripts/secret-history-audit.mjs",
     "repo:hygiene": "node scripts/repo-hygiene.mjs"
   },
   "dependencies": {
