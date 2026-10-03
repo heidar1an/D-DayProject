@@ -6,9 +6,15 @@
  */
 import { DEFAULT_PLANNING_CONFIG, TASK_STATES } from './greenPathConfig';
 import { createGreenPathMockRepository } from './greenPathRepository';
+import { createGreenPathV1Repository } from './greenPathV1';
 import { previewReschedule } from './schedulingEngine';
 
-let repository = createGreenPathMockRepository();
+/*
+ * Repository پیش‌فرض: v1-سوار بر mock. دادهٔ سرور به‌صورت لایهٔ افزودنی
+ * (`serverGreenPath`) می‌آید و وقتی v1 سرو نمی‌شود (`reason: not_v1`) رفتار
+ * کاملاً legacy حفظ می‌شود — هیچ کامپوننتی به‌تنهایی نمی‌شکند.
+ */
+let repository = createGreenPathV1Repository({ fallback: createGreenPathMockRepository() });
 
 const resolveUserId = (userRef) => String(typeof userRef === 'string' ? userRef : userRef?.id ?? userRef?.phone ?? 'guest');
 

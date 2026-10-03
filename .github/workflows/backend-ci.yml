@@ -1,0 +1,124 @@
+# Backend CI — فاز ۱ (foundation لاراول)
+#
+# ⚠️ UNVERIFIED-EXTERNAL: تا وقتی روی runner واقعی گیت‌هاب اجرا نشود، «سبز»
+#    تلقی نمی‌شود — همان قاعدهٔ ci.yml فرانت‌اند.
+#
+# این workflow مستقل است و ci.yml فرانت‌اند/نود را دست نمی‌زند؛ فقط برای
+# تغییرات backend/ اجرا می‌شود.
+
+name: Backend CI
+
+on:
+  push:
+    branches: ['main']
+    paths: ['backend/**', '.github/workflows/backend-ci.yml']
+  pull_request:
+    branches: ['main']
+    paths: ['backend/**', '.github/workflows/backend-ci.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: Pint + tests (PostgreSQL & Redis)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: tapesh
+          POSTGRES_USER: tapesh
+          POSTGRES_PASSWORD: ci-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U tapesh"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+      redis:
+        image: redis:8-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: PHP (مطابق نسخهٔ توسعهٔ محلی)
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          coverage: none
+
+      - name: نصب با lockfile
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: آماده‌سازی environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate --force
+
+      - name: بررسی سبک کد (Pint)
+        run: vendor/bin/pint --test
+
+      - name: migration check روی PostgreSQL واقعی
+        run: |
+          php artisan migrate --force
+          php artisan migrate:rollback --force
+          php artisan migrate --force
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_DATABASE: tapesh
+          DB_USERNAME: tapesh
+          DB_PASSWORD: ci-password
+
+      - name: اجرای تست‌ها روی SQLite (سریع، پیش‌فرض phpunit.xml)
+        run: php artisan test
+
+      # ⚠️ اجرای دوم روی PostgreSQL **اجباری** است.
+      #
+      # چرا: phpunit.xml عمداً `DB_CONNECTION=sqlite` را قفل می‌کند، و SQLite چند
+      # کلاس باگ را پنهان می‌کند — نوع ستون `uuid`، ترتیب `primary key` نسبت به
+      # FK، abort شدن تراکنش پس از هر خطا، و تایم‌زون `timestamptz`.
+      # در ۲۰۲۶-۱۰-۰۳ همین اجرا ۴ باگ PG-only بیرون داد که روی SQLite سبز بودند.
+      # برای تأیید محلی همین مسیر: `backend/scripts/verify-on-pg.sh`.
+      - name: اجرای تست‌ها روی PostgreSQL + Redis
+        run: php artisan test
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_DATABASE: tapesh
+          DB_USERNAME: tapesh
+          DB_PASSWORD: ci-password
+          # کش پایدار شمارنده‌های rate limit را بین تست‌ها نشت می‌دهد و صدها تست
+          # را ۴۲۹ می‌کند — بدون هیچ باگ محصولی. پس `array` می‌ماند.
+          CACHE_STORE: array
+          REDIS_CLIENT: predis
+          REDIS_HOST: 127.0.0.1
+          REDIS_PORT: 6379
+          TAPESH_TEST_PGSQL_HOST: 127.0.0.1
+          TAPESH_TEST_PGSQL_PORT: 5432
+          TAPESH_TEST_PGSQL_DB: tapesh
+          TAPESH_TEST_PGSQL_USER: tapesh
+          TAPESH_TEST_PGSQL_PASSWORD: ci-password
+          TAPESH_TEST_REDIS: '1'

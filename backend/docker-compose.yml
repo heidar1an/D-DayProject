@@ -1,0 +1,88 @@
+# docker-compose.yml — محیط اجرای backend (PHP/Laravel + PostgreSQL + Redis)
+#
+# ⚠️ در محیط توسعهٔ فعلی اجرا نشده (docker در دسترس نیست) — IMPLEMENTED-BUT-UNVERIFIED.
+#
+# اجرا:
+#   cd backend
+#   cp .env.example .env        # APP_KEY را با key:generate و DB_PASSWORD را واقعی کنید
+#   docker compose up -d --build
+#   docker compose ps
+#   docker compose logs -f
+#
+# ⚠️ هیچ credential واقعی داخل این فایل نیست؛ مقادیر interpolate از .env (gitignored)
+#    خوانده می‌شود و DB_PASSWORD باید ست شده باشد.
+
+services:
+  app:
+    build: .
+    image: tapesh-backend:phase1
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DB_HOST: postgres
+      REDIS_HOST: redis
+    volumes:
+      - storage-data:/var/www/html/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - '${APP_PORT:-8080}:8080'
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./public:/var/www/html/public:ro
+    depends_on:
+      - app
+
+  worker:
+    build: .
+    image: tapesh-backend:phase1
+    restart: unless-stopped
+    command: ['php', 'artisan', 'queue:work', '--tries=3', '--backoff=5']
+    env_file: .env
+    environment:
+      DB_HOST: postgres
+      REDIS_HOST: redis
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-tapesh}
+      POSTGRES_USER: ${DB_USERNAME:-tapesh}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set in .env}
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USERNAME:-tapesh} -d ${DB_DATABASE:-tapesh}']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:8-alpine
+    restart: unless-stopped
+    command: ['redis-server', '--save', '60', '1']
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pg-data:
+  redis-data:
+  storage-data:

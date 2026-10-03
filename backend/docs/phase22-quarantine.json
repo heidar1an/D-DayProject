@@ -1,0 +1,62 @@
+[
+    {
+        "entity": "article",
+        "legacyId": "art-f0adafce",
+        "reason": "body_not_html_string"
+    },
+    {
+        "entity": "article",
+        "legacyId": "art-a7b6b90d",
+        "reason": "body_not_html_string"
+    },
+    {
+        "entity": "article",
+        "legacyId": "art-54c9194e",
+        "reason": "body_not_html_string"
+    },
+    {
+        "entity": "article",
+        "legacyId": "art-67917a64",
+        "reason": "body_not_html_string"
+    },
+    {
+        "entity": "article",
+        "legacyId": "art-3ee46e67",
+        "reason": "body_not_html_string"
+    },
+    {
+        "entity": "article",
+        "legacyId": "art-6c173cc1",
+        "reason": "body_not_html_string"
+    },
+    {
+        "entity": "article",
+        "legacyId": "art-461b814c",
+        "reason": "body_not_html_string"
+    },
+    {
+        "entity": "article",
+        "legacyId": "art-79570a7b",
+        "reason": "body_not_html_string"
+    },
+    {
+        "entity": "article",
+        "legacyId": "art-0d726e66",
+        "reason": "body_not_html_string"
+    },
+    {
+        "entity": "article",
+        "legacyId": "art-efb80f77",
+        "reason": "body_not_html_string"
+    },
+    {
+        "entity": "article",
+        "legacyId": "art-8fa989b9",
+        "reason": "body_not_html_string"
+    },
+    {
+        "entity": "article",
+        "legacyId": "art-fd96970e",
+        "reason": "body_not_html_string"
+    }
+]

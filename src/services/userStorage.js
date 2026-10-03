@@ -7,8 +7,9 @@
  *
  * `tapesh:current-user` فقط یک **کش نمایشی** است (پیش‌پرکردن پروفایل، تلمتری،
  * نام نمایشی). هیچ تصمیمی دربارهٔ «وارد بودن» از آن گرفته نمی‌شود. منبع حقیقت
- * همیشه سشن سرور است و تنها راه فهمیدنش `fetchCurrentUser()` (endpoint
- * `GET /api/users/me`) است.
+ * همیشه سشن سرور است و تنها راه فهمیدنش `fetchCurrentUser()` است که ابتدا
+ * `GET /api/v1/me` (Laravel) و در نبودش `GET /api/users/me` (سرور Node فعلی)
+ * را می‌پرسد.
  *
  * پیش‌تر اگر API جواب نمی‌داد، `loginUser`/`saveUserRecord` از `tapesh:users`
  * داخل localStorage یک «کاربر محلی» می‌ساختند و کاربر را وارد می‌کردند —
@@ -130,7 +131,93 @@ async function readError(response) {
  * «در دسترس نبودن سرور» با «وارد نشدن» یکی گرفته نمی‌شود، ولی هیچ‌کدام ورود
  * نمی‌سازند.
  */
+const API_V1_BASE = '/api/v1';
+
+/*
+ * نگاشت پاسخ v1 به شکل کش فعلی.
+ *
+ * v1 (Laravel) با نام‌های snake_case می‌آید (`first_name`, `avatar_key`,
+ * `referrals`) ولی کل UI امروز روی `profile.firstName/lastName/avatar/
+ * referralSources` سوار است. تا وقتی بقیهٔ فرانت به v1 مهاجرت نکرده، این تابع
+ * تنها جایی است که تفاوت نام‌ها را جبران می‌کند — هیچ کامپوننتی عوض نمی‌شود.
+ */
+function toLegacyCacheShape(user) {
+  const profile = user?.profile ?? {};
+  const university = profile.university;
+
+  return {
+    id: user?.id ?? null,
+    phone: user?.phone ?? '',
+    createdAt: user?.created_at ?? null,
+    updatedAt: profile.updated_at ?? user?.created_at ?? null,
+    profile: {
+      firstName: profile.first_name ?? '',
+      lastName: profile.last_name ?? '',
+      username: profile.username ?? '',
+      university: university?.name ?? '',
+      universityId: profile.university_id ?? null,
+      term: profile.term ?? '',
+      grade: profile.grade ?? '',
+      gender: profile.gender ?? '',
+      birthDate: profile.birth_date_jalali ?? '',
+      avatar: profile.avatar_key ?? '',
+      motivations: profile.motivations ?? [],
+      referralSources: profile.referrals ?? [],
+    },
+  };
+}
+
+/*
+ * خواندن کاربر جاری از v1 (Laravel):
+ *   200 → `{ data: { user }, requestId }`
+ *   401 → `{ error: { code: 'UNAUTHENTICATED' } }`
+ *
+ * خروجی `null` یعنی «v1 روی این سرور حاکم نیست» و باید به مسیر قدیمی برگشت.
+ * چرا این تفکیک حیاتی است: تا وقتی Laravel روی همین دامنه سرو نشده، مسیر
+ * `/api/v1/me` به SPA fallback می‌خورد و **۲۰۰ با HTML** برمی‌گرداند؛ اگر آن را
+ * «وارد نیستم» تفسیر کنیم، کاربرِ واقعاً واردشده بی‌صدا از حساب بیرون می‌افتد.
+ * پس فقط پاسخی معتبر است که JSON باشد و شکل v1 را داشته باشد.
+ */
+async function fetchCurrentUserV1() {
+  let response;
+
+  try {
+    response = await fetch(`${API_V1_BASE}/me`, {
+      method: 'GET',
+      credentials: 'same-origin',
+      headers: { Accept: 'application/json' },
+    });
+  } catch {
+    return null;
+  }
+
+  if (response.status === 401) return { status: 'unauthenticated', user: null };
+  if (response.status === 404 || response.status === 405) return null;
+  if (!response.ok) return { status: 'unavailable', user: null };
+
+  if (!(response.headers.get('content-type') || '').includes('application/json')) return null;
+
+  let data;
+  try {
+    data = await response.json();
+  } catch {
+    return null;
+  }
+
+  const user = data?.data?.user;
+  if (!user) return null;
+
+  return { status: 'authenticated', user: storeUser(toLegacyCacheShape(user)) };
+}
+
+/*
+ * v1 اول، و اگر v1 روی این سرور سرو نمی‌شد، مسیر قدیمی (`/api/users/me`).
+ * این پل موقت تا cutover است؛ آن‌وقت شاخهٔ قدیمی حذف می‌شود.
+ */
 export async function fetchCurrentUser() {
+  const viaV1 = await fetchCurrentUserV1();
+  if (viaV1) return viaV1;
+
   try {
     const response = await fetch(`${API_BASE}/me`, {
       method: 'GET',

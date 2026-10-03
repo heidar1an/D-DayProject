@@ -59,6 +59,7 @@
     "api:contract": "node scripts/api-contract.mjs",
     "api:contract:check": "node scripts/api-contract.mjs --check",
     "api:client": "node scripts/client-contract-audit.mjs",
+    "v1:contract:check": "node scripts/v1-frontend-contract.mjs",
     "api:test": "node --test database/apiContract.test.mjs",
     "api:input:test": "node --test database/inputGate.test.mjs",
     "router:test": "node scripts/router-test.mjs",

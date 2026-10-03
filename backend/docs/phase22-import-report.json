@@ -1,0 +1,64 @@
+{
+    "phase": 22,
+    "kind": "import-report",
+    "mode": "apply",
+    "generatedAt": "2026-10-03T19:25:24+00:00",
+    "connection": "sqlite",
+    "database": "\/tmp\/tapesh-rehearsal.sqlite",
+    "batchSize": 100,
+    "totals": {
+        "written": 15,
+        "quarantined": 12
+    },
+    "entities": [
+        {
+            "entity": "user",
+            "domain": "Auth",
+            "table": "users",
+            "status": "imported",
+            "records": 1,
+            "mapped": 1,
+            "quarantined": 0,
+            "written": 1
+        },
+        {
+            "entity": "admin",
+            "domain": "Admin",
+            "table": "admins",
+            "status": "imported",
+            "records": 1,
+            "mapped": 1,
+            "quarantined": 0,
+            "written": 1
+        },
+        {
+            "entity": "category",
+            "domain": "Articles",
+            "table": "article_categories",
+            "status": "imported",
+            "records": 10,
+            "mapped": 10,
+            "quarantined": 0,
+            "written": 10
+        },
+        {
+            "entity": "article",
+            "domain": "Articles",
+            "table": "articles",
+            "status": "imported",
+            "records": 15,
+            "mapped": 3,
+            "quarantined": 12,
+            "written": 3
+        }
+    ],
+    "notMappedDomains": [
+        "References",
+        "Flashcards",
+        "International",
+        "QuestionBank",
+        "Exam",
+        "Feedback",
+        "Media"
+    ]
+}

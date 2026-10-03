@@ -1,0 +1,253 @@
+{
+    "phase": 22,
+    "kind": "legacy-laravel-parity",
+    "generatedAt": "2026-10-03T19:25:24+00:00",
+    "connection": "sqlite",
+    "database": "\/tmp\/tapesh-rehearsal.sqlite",
+    "inventoryGeneratedAt": "2026-10-03T19:15:09.749Z",
+    "totals": {
+        "domains": 18,
+        "inParity": 5,
+        "notMigrated": 12,
+        "excludedByPolicy": 1,
+        "tableMissing": 0
+    },
+    "domains": [
+        {
+            "domain": "Admin",
+            "entity": "admin",
+            "table": "admins",
+            "legacy": 1,
+            "laravel": 1,
+            "delta": 0,
+            "parity": true,
+            "policy": null,
+            "status": "parity"
+        },
+        {
+            "domain": "Auth",
+            "entity": "user",
+            "table": "users",
+            "legacy": 1,
+            "laravel": 1,
+            "delta": 0,
+            "parity": true,
+            "policy": null,
+            "status": "parity"
+        },
+        {
+            "domain": "Auth",
+            "entity": "session",
+            "table": "auth_sessions",
+            "legacy": 63,
+            "laravel": 0,
+            "delta": -63,
+            "parity": false,
+            "policy": "re-login",
+            "status": "excluded_by_policy"
+        },
+        {
+            "domain": "Media",
+            "entity": "mediaAsset",
+            "table": "media",
+            "legacy": 24,
+            "laravel": 0,
+            "delta": -24,
+            "parity": false,
+            "policy": null,
+            "status": "not_migrated"
+        },
+        {
+            "domain": "Feedback",
+            "entity": "feedback",
+            "table": "feedback",
+            "legacy": 1,
+            "laravel": 0,
+            "delta": -1,
+            "parity": false,
+            "policy": null,
+            "status": "not_migrated"
+        },
+        {
+            "domain": "Feedback",
+            "entity": "feedbackReply",
+            "table": "feedback_replies",
+            "legacy": 1,
+            "laravel": 0,
+            "delta": -1,
+            "parity": false,
+            "policy": null,
+            "status": "not_migrated"
+        },
+        {
+            "domain": "Articles",
+            "entity": "category",
+            "table": "article_categories",
+            "legacy": 10,
+            "laravel": 10,
+            "delta": 0,
+            "parity": true,
+            "policy": null,
+            "status": "parity"
+        },
+        {
+            "domain": "Articles",
+            "entity": "article",
+            "table": "articles",
+            "legacy": 15,
+            "laravel": 3,
+            "delta": -12,
+            "parity": false,
+            "policy": null,
+            "status": "not_migrated"
+        },
+        {
+            "domain": "References",
+            "entity": "reference",
+            "table": "references",
+            "legacy": 3,
+            "laravel": 0,
+            "delta": -3,
+            "parity": false,
+            "policy": null,
+            "status": "not_migrated"
+        },
+        {
+            "domain": "Flashcards",
+            "entity": "flashcardDeck",
+            "table": "flashcard_decks",
+            "legacy": 11,
+            "laravel": 0,
+            "delta": -11,
+            "parity": false,
+            "policy": null,
+            "status": "not_migrated"
+        },
+        {
+            "domain": "International",
+            "entity": "intlProvider",
+            "table": "international_providers",
+            "legacy": 13,
+            "laravel": 0,
+            "delta": -13,
+            "parity": false,
+            "policy": null,
+            "status": "not_migrated"
+        },
+        {
+            "domain": "International",
+            "entity": "intlCourse",
+            "table": "international_courses",
+            "legacy": 7,
+            "laravel": 0,
+            "delta": -7,
+            "parity": false,
+            "policy": null,
+            "status": "not_migrated"
+        },
+        {
+            "domain": "QuestionBank",
+            "entity": "testBankQuestion",
+            "table": "questions",
+            "legacy": 59,
+            "laravel": 0,
+            "delta": -59,
+            "parity": false,
+            "policy": null,
+            "status": "not_migrated"
+        },
+        {
+            "domain": "QuestionBank",
+            "entity": "testBankAnswer",
+            "table": "question_keys",
+            "legacy": 9,
+            "laravel": 0,
+            "delta": -9,
+            "parity": false,
+            "policy": null,
+            "status": "not_migrated"
+        },
+        {
+            "domain": "Exam",
+            "entity": "exam",
+            "table": "exams",
+            "legacy": 6,
+            "laravel": 0,
+            "delta": -6,
+            "parity": false,
+            "policy": null,
+            "status": "not_migrated"
+        },
+        {
+            "domain": "Exam",
+            "entity": "examQuestion",
+            "table": "exam_questions",
+            "legacy": 119,
+            "laravel": 0,
+            "delta": -119,
+            "parity": false,
+            "policy": null,
+            "status": "not_migrated"
+        },
+        {
+            "domain": "Exam",
+            "entity": "examAttempt",
+            "table": "exam_attempts",
+            "legacy": 0,
+            "laravel": 0,
+            "delta": 0,
+            "parity": true,
+            "policy": null,
+            "status": "parity"
+        },
+        {
+            "domain": "Exam",
+            "entity": "examReport",
+            "table": "exam_results",
+            "legacy": 0,
+            "laravel": 0,
+            "delta": 0,
+            "parity": true,
+            "policy": null,
+            "status": "parity"
+        }
+    ],
+    "orphanChecks": [
+        {
+            "table": "articles",
+            "column": "category_id",
+            "parent": "article_categories",
+            "orphans": 0
+        },
+        {
+            "table": "exam_questions",
+            "column": "exam_id",
+            "parent": "exams",
+            "orphans": 0
+        },
+        {
+            "table": "exam_attempts",
+            "column": "user_id",
+            "parent": "users",
+            "orphans": 0
+        },
+        {
+            "table": "exam_results",
+            "column": "exam_id",
+            "parent": "exams",
+            "orphans": 0
+        },
+        {
+            "table": "flashcard_decks",
+            "column": "owner_user_id",
+            "parent": "users",
+            "orphans": 0
+        },
+        {
+            "table": "feedback_replies",
+            "column": "feedback_id",
+            "parent": "feedback",
+            "orphans": 0
+        }
+    ]
+}
